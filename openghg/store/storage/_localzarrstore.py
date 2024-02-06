@@ -23,8 +23,13 @@ StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
 
 class LocalZarrStore(Store):
-    """A zarr store on the local filesystem. This is used by Datasource to handle the
-    storage of data on the local filesystem and different versions of data.
+    """A zarr based data store on the local filesystem.
+    This is used by Datasource to handle the storage of versioned data.
+
+    Args:
+        bucket: path to object store bucket
+        datasource_uuid: Datasource UUID
+        mode: Opening mode for store, "rw" for read-write, "r" for read-only
     """
 
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
@@ -55,7 +60,7 @@ class LocalZarrStore(Store):
         Raises a ZarrStoreError if the version does not exist.
 
         Args:
-            version: Version to check
+            version: Data version
         Returns:
             str: Lowercase version
         """
@@ -71,11 +76,13 @@ class LocalZarrStore(Store):
             None
         """
         if self._mode == "r":
-            raise PermissionError("Cannot write to a read-only zarr store")
+            raise PermissionError("Cannot modify a read-only zarr store")
 
     def keys(self, version: str) -> Iterator[str]:
         """Keys of data stored in the zarr store.
 
+        Args:
+            version: Data version
         Returns:
             Generator: Generator object
         """
@@ -95,6 +102,8 @@ class LocalZarrStore(Store):
     def store_key(self, version: str) -> str:
         """Return the key of this zarr Store
 
+        Args:
+            version: Data version
         Returns:
             str: Key of zarr store
         """
@@ -106,6 +115,8 @@ class LocalZarrStore(Store):
     def store_path(self, version: str) -> Path:
         """Return the path of this zarr Store
 
+        Args:
+            version: Data version
         Returns:
             Path: Path of zarr store
         """
@@ -115,7 +126,7 @@ class LocalZarrStore(Store):
         """Check if a version exists in the current store
 
         Args:
-            version: Version e.g. v0, v1
+            version: Data version
         Returns:
             bool: True if version exists
         """
@@ -132,12 +143,11 @@ class LocalZarrStore(Store):
         """Add an xr.Dataset to the zarr store.
 
         Args:
-            key: Key to add data under
-            version: Version of data to add
+            version: Data version
             dataset: xr.Dataset to add
-            compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
-            Defaults to using the Blosc compressor with ztd compression level 5
-            filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            compressor: Compression for zarr encoding
+            filters: Filters for zarr encoding
+            append_dim: Dimension to append to
         Returns:
             None
         """
@@ -177,7 +187,7 @@ class LocalZarrStore(Store):
         Please use copy_to_memorystore for that otherwise data may be lost.
 
         Args:
-            version: Version of data to get
+            version: Data version
         Returns:
             xr.Dataset: Dataset from the store
         """
@@ -194,7 +204,7 @@ class LocalZarrStore(Store):
         Note that this will delete the data from the store on the local filesystem.
 
         Args:
-            version: Version of data
+            version: Data version
         Returns:
             Dataset: Dataset popped from the store
         """
@@ -217,9 +227,9 @@ class LocalZarrStore(Store):
         Note that this function should be used if the store is to be modified.
 
         Args:
-            version: Version of data to copy
+            version: Data version
         Returns:
-            Dict: In-memory copy of compressed data
+            dict: In-memory copy of compressed data
         """
         version = self._check_version(version)
         store = self._stores[version]
@@ -231,7 +241,7 @@ class LocalZarrStore(Store):
         """Delete a version from the store
 
         Args:
-            version: Version to delete
+            version: Data version
         Returns:
             None
         """
@@ -264,11 +274,10 @@ class LocalZarrStore(Store):
         use the append function.
 
         Args:
-            key: Key of data in store
-            version: Version of data
-            dataset: xr.Dataset to add
-            compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
-            filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            version: Data version
+            dataset: Dataset to add
+            compressor: Compression for zarr encoding
+            filters: Filters for zarr encoding
         Returns:
             None
         """
@@ -296,7 +305,7 @@ class LocalZarrStore(Store):
         Returns the chunking scheme of the stored data if there is a mismatch.
 
         Args:
-            version: Version of data to compare against
+            version: Data version
             dataset: Incoming dataset
         Returns:
             dict: Chunking scheme
@@ -336,7 +345,7 @@ class LocalZarrStore(Store):
         e.g. author_1 for a differing author value.
 
         Args:
-            version: Version of data to compare against
+            version: Data version
             dataset: Incoming dataset
         Returns:
             dict: Dictionary of compared and updated attributes
