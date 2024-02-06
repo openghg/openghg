@@ -219,25 +219,11 @@ class Datasource:
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
-        # We'll try and read the chunk sizes of the incoming data,
-        # this does only assume we've chunked along the time dimension
-        # TODO - This can raise errors with open_mfdataset is used for a whole year of files with footprints
-        # add some tests during the populate stage
-        # Test this
-        # try:
-        #     time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
-        # except (KeyError, IndexError):
-        #     time_chunksize = "auto"
-
-        # We'll sort and drop duplicates here
         if sort and drop_duplicates:
-            logger.info("Dropping duplicates and sorting by time variable in add_timed_data.")
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
         elif sort:
-            logger.info("Sorting by time variable in add_timed_data.")
             data = data.sortby(time_coord)
         elif drop_duplicates:
-            logger.info("Dropping duplicates in add_timed_data.")
             data = data.drop_duplicates(time_coord, keep="first")
 
         # We'll only do a concat if we actually have overlapping data
@@ -343,20 +329,6 @@ class Datasource:
                     f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
                     f"To update current data in object store use `if_exists` input (see options in documentation)"
                 )
-
-        # Do we need to sort?
-        # Could we do this more cleanly when adding and put
-        # the data into a new zarr store and if it's before the current data
-        # just create a new larger empty zarr store, add the earlier data
-        # and then add back in the old data? Would that be more efficient?
-        # if not already_sorted:
-        #     logger.info("Sorting data by time coordinate in add_timed_data.")
-        #     memory_store = self._store.copy_to_memorystore(version=version_str)
-        #     existing = xr.open_zarr(store=memory_store, consolidated=True)
-        #     # Need to check what chunking
-        #     existing = existing.sortby(time_coord)
-        #     # existing = existing.chunk(chunks={"time": time_chunksize}).sortby(time_coord)
-        #     self._store.update(version=version_str, dataset=existing)
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
