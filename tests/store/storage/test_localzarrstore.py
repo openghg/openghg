@@ -8,14 +8,6 @@ from openghg.store.storage import LocalZarrStore
 from openghg.types import ZarrStoreError
 from helpers import get_footprint_datapath
 
-# @pytest.fixture(scope="module")
-# def store():
-#     bucket = get_writable_bucket(name="user")
-#     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-#     store = LocalZarrStore(bucket=bucket, datasource_uuid="123", mode="rw")
-#         with xr.open_dataset(datapath) as ds:
-#             return ds
-
 
 @pytest.fixture()
 def store():
@@ -23,6 +15,23 @@ def store():
     local_store = LocalZarrStore(bucket=bucket, datasource_uuid="test-local-store-123", mode="rw")
     yield local_store
     local_store.delete_all()
+
+
+def test_localzarrstore_not_writable():
+    bucket = get_writable_bucket(name="user")
+    local_store = LocalZarrStore(bucket=bucket, datasource_uuid="test-local-store-123", mode="r")
+
+    with pytest.raises(PermissionError):
+        local_store.add(version="v0", dataset=xr.Dataset())
+
+    with pytest.raises(PermissionError):
+        local_store.update(version="v0", dataset=xr.Dataset())
+
+    with pytest.raises(PermissionError):
+        local_store.delete_version(version="v0")
+
+    with pytest.raises(PermissionError):
+        local_store.delete_all()
 
 
 def test_localzarrstore_add_retrieve(store):
@@ -34,6 +43,52 @@ def test_localzarrstore_add_retrieve(store):
         assert ds.equals(retrieved)
 
     assert store.version_exists(version="v0")
+
+
+def test_dataset_retrieved_single_dataset_identical(store):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds)
+
+        retrieved = store.get(version="v0")
+        assert ds.identical(retrieved)
+
+
+def test_localzarrstore_add_successive_dates_append():
+    bucket = get_writable_bucket(name="user")
+    store = LocalZarrStore(bucket=bucket, datasource_uuid="888-888", mode="rw")
+
+    file_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+    with xr.open_dataset(file_a) as ds, xr.open_dataset(file_b) as ds2:
+        store.add(version="v0", dataset=ds)
+        store.add(version="v0", dataset=ds2)
+
+        assert store.version_exists(version="v0")
+
+        concat = xr.concat([ds, ds2], dim="time")
+        retrieved = store.get(version="v0").compute()
+
+        assert retrieved.equals(concat)
+        for var in retrieved.data_vars:
+            assert not np.sum(np.isnan(retrieved[var]))
+
+
+@pytest.mark.xfail(reason="Attributes of Datasets appended to zarr store may currently be overwritten")
+def test_localzarrstore_add_files_identical(store):
+    file_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+    with xr.open_dataset(file_a) as ds, xr.open_dataset(file_b) as ds2:
+        store.add(version="v0", dataset=ds)
+        store.add(version="v0", dataset=ds2)
+
+        assert store.version_exists(version="v0")
+
+        concat = xr.concat([ds, ds2], dim="time")
+        retrieved = store.get(version="v0").compute()
+
+        assert retrieved.attrs == concat.attrs
+        assert retrieved.identical(concat)
 
 
 def test_copy_to_memory_store(store):
@@ -61,22 +116,24 @@ def test_update(store):
         assert ds.equals(ds_loaded)
 
 
-def test_bytes_stored(store):
-    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    with xr.open_dataset(datapath) as ds:
-        store.add(version="v0", dataset=ds, compressor=None)
-        assert store.bytes_stored() == 446038
-
-
 def test_bytes_stored_compression(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     original_size = datapath.stat().st_size
+
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds, compressor=None)
+        uncompressed_bytes = store.bytes_stored()
+        assert store.bytes_stored() == 444382
+
+    store.delete_all()
+
     compressor = numcodecs.Blosc(cname="zstd", clevel=5, shuffle=numcodecs.Blosc.SHUFFLE)
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds, compressor=compressor)
-        assert store.bytes_stored() == 294552
-
-        assert store.bytes_stored() < original_size
+        compressed_bytes = store.bytes_stored()
+        assert compressed_bytes == 292896
+        assert compressed_bytes < original_size
+        assert compressed_bytes < uncompressed_bytes
 
 
 def test_delete_version(store):
@@ -91,7 +148,7 @@ def test_delete_version(store):
 
     assert not path.exists()
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ZarrStoreError):
         store.delete_version(version="v0")
 
 
@@ -111,6 +168,18 @@ def test_delete_all(store):
     store.delete_all()
 
     assert not parent.exists()
+
+
+def test_pop_dataset(store):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds)
+
+        retrieved = store.pop(version="v0")
+        assert ds.equals(retrieved)
+
+        assert not store.version_exists(version="v0")
+        assert not store
 
 
 def test_match_chunking(store):
@@ -164,7 +233,7 @@ def test_match_chunking(store):
     # Let's check that the chunks in the store are correct
     chunked_dataset = store.get(version="v0")
 
-    assert dict(chunked_dataset.chunks) == {'time': (16, 16, 16, 16, 16, 16, 16, 9)}
+    assert dict(chunked_dataset.chunks) == {"time": (16, 16, 16, 16, 16, 16, 16, 9)}
 
     # Now try it with two datasets with the same chunking, should return an empty dictionary
     store.delete_all()
@@ -177,15 +246,6 @@ def test_match_chunking(store):
     chunking = store.match_chunking(version="v0", dataset=data_b_chunked)
 
     assert not chunking
-
-
-def test_dataset_retrieved_identical(store):
-    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    with xr.open_dataset(datapath) as ds:
-        store.add(version="v0", dataset=ds)
-
-        retrieved = store.get(version="v0")
-        assert ds.identical(retrieved)
 
 
 def test_copy_actually_copies(store):

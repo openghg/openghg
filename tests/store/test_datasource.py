@@ -12,7 +12,7 @@ from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
-from openghg.types import ObjectStoreError
+from openghg.types import ObjectStoreError, ZarrStoreError
 from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -475,7 +475,7 @@ def test_data_version_deletion(data, bucket):
 
     assert "v0" not in d._data_keys
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ZarrStoreError):
         d._store.keys(version="v0")
 
 
@@ -643,7 +643,7 @@ def test_bytes_stored(data, bucket):
 
     d.save()
 
-    assert d.bytes_stored() == 9897
+    assert d.bytes_stored() == 9609
 
     d = Datasource(bucket=bucket)
 

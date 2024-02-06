@@ -20,11 +20,6 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def delete(self, key: str, version: str) -> None:
-        """Remove data from the zarr store"""
-        pass
-
-    @abstractmethod
     def delete_version(self, version: str) -> None:
         """Delete a version from the store"""
         pass
