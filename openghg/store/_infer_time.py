@@ -45,7 +45,7 @@ def infer_date_range(
 
     if filepath is not None:
         filepath = Path(filepath)
-    
+
     null_freq = (None, None)
 
     # Find frequency from period, if specified
