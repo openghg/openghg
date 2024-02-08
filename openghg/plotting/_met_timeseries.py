@@ -40,7 +40,8 @@ def plot_met_timeseries(
         title = "Met Variables"
 
     if variables is None:
-        variables = list(data.data.keys())
+        print(list(data.data.keys()))
+        variables = list(data.data.data_vars)
     else:
         for v in variables:
             if v not in list(data.data.keys()):
@@ -67,7 +68,7 @@ def plot_met_timeseries(
     for nvar, v in enumerate(variables):
         units = data.data[v].attrs["units"]
 
-        layouts[f"yaxis{nvar+1}"] = {"title": units}
+        layouts[f"yaxis{nvar + 1}"] = {"title": units}
 
         fig.add_trace(
             go.Scatter(
@@ -88,7 +89,7 @@ def plot_met_timeseries(
             col=1,
         )
 
-    layouts[f"xaxis{nvar+1}"] = {"title": "time"}
+    layouts[f"xaxis{nvar + 1}"] = {"title": "time"}
     layouts["title"] = {"text": f"Met variables for {site}", "font": {"size": 24}}
     fig.update_layout(layouts)
 
