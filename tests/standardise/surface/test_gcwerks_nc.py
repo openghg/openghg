@@ -15,6 +15,10 @@ mpl_logger.setLevel(logging.WARNING)
 # decide if any new tests are needed to test .nc-specific bits
 # rewrite existing tests to make sense for .nc
 
+# other tests could be:
+# expected metadata test
+# a wrong inlet, perhaps?
+
 @pytest.fixture(scope="session")
 def thd_data():
     thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
@@ -104,23 +108,32 @@ def test_thd_cf_compliance(thd_data):
     meas_data = thd_data["ch4_10m"]["data"]
     assert check_cf_compliance(dataset=meas_data)
 
-    # expected_metadata = {
-    #     "instrument": "gcmd",
-    #     "site": "thd",
-    #     "network": "agage",
-    #     "species": "ch4",
-    #     "units": "ppb",
-    #     "scale": "Tohoku",
-    #     "inlet": "10m",
-    # }
+def test_expected_metadata_thd_ch4():
+    ch4_path = get_surface_datapath(filename='AGAGE-combined_THD_ch4.nc', source_format="GC_nc")
+    
+    data = parse_gcwerks_nc(data_filepath=ch4_path,
+                            site='THD',
+                            network='agage',
+                            instrument='combined')
+    
+    metadata = data['ch4_10m']['metadata']
 
-    # metadata = res["ch4_10m"]["metadata"]
+    expected_metadata = {'data_type':'surface',
+                         'instrument':'combined',
+                         'site':'THD',
+                         'network':'agage',
+                         'sampling_period':'multiple',
+                         'units':'ppb',
+                         'calibration_scale':'TU-87',
+                         'inlet':'10m',
+                         'species':'ch4',
+                         'inlet_height_magl':'10',
+                         'data_owner':'Ray Weiss',
+                         'data_owner_email':'rfweiss@ucsd.edu',
+                         'station_longitude':-124.151,
+                         'station_latitude':41.0541,
+                         'station_height_masl': 107.0,
+                         'station_long_name':'Trinidad Head, California'}
 
-    # assert metadata == expected_metadata
+    assert metadata == expected_metadata
 
-    # data = res["ch4_10m"]["data"]
-
-    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
-    # assert data["ch4"][0] == pytest.approx(1818.62)
-    # assert data["ch4"][-1] == pytest.approx(1840.432)
