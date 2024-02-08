@@ -4,15 +4,19 @@ import logging
 
 from typing import List, Union, Optional, Dict
 
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from pandas import Timestamp
 
 import os
 import glob
 
+import numpy as np
 import xarray as xr
+from xarray import Dataset
 from openghg.dataobjects import METData
 from openghg.util import to_lowercase
+from pandas.tseries.offsets import MonthEnd
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)
@@ -59,6 +63,7 @@ class METStore(BaseStore):
         site: str,
         network: str,
         years: Optional[Union[str, List[str]]] = None,
+        months: Optional[Union[str, List[str]]] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         variables: Optional[List[str]] = None,
@@ -85,54 +90,78 @@ class METStore(BaseStore):
             raise AttributeError("You must pass either the argument years or both start_date and end_date")
 
         if years is None:
-            start_date = Timestamp(start_date)
-            end_date = Timestamp(end_date)
+            start_date_search = Timestamp(start_date)
+            end_date_search = Timestamp(end_date)
         else:
             if not isinstance(years, list):
                 years = [years]
             else:
                 years = sorted(years)
 
-            start_date = Timestamp(f"{years[0]}-1-1")
-            end_date = Timestamp(f"{years[-1]}-12-31")
+            if months is None:
+                start_date_search = Timestamp(f"{years[0]}-1-1")
+                end_date_search = Timestamp(f"{years[-1]}-12-31")
+            else:
+                if not isinstance(months, list):
+                    months = [months]
+                else:
+                    months = sorted(months)
+
+                start_date_search = Timestamp(f"{years[0]}-{months[0]}-1")
+                end_date_search = Timestamp(f"{years[-1]}-{months[-1]}-1") + MonthEnd(0)
+
+        print(start_date_search, end_date_search)
+        print("!")
 
         # store = METStore.load()
 
         logger.info("Retrieving")
 
         # check the local store
-        result = self.search(site=site, network=network, start_date=start_date, end_date=end_date)
+        result = self.search(
+            site=site, network=network, start_date=start_date_search, end_date=end_date_search
+        )
 
         # If not found in the local store, retrieve from the Copernicus store and save
         if result is None:
-            result = retrieve_met(
+            results = retrieve_met(
                 site=site,
                 network=network,
                 start_date=start_date,
                 end_date=end_date,
+                years=years,
+                months=months,
                 save_path=save_path,
                 variables=variables,
             )
 
             logger.info("Storing")
 
-            metadata = {
-                "site": site,
-                "network": network,
-                "variables": result.metadata["variable"],
-                "product_type": result.metadata["product_type"],
-                "format": result.metadata["format"],
-                "pressure_level": result.metadata["pressure_level"],
-                "area": result.metadata["area"],
-                "start_date": str(start_date),
-                "end_date": str(end_date),
-            }
-            result = METData(data=result.data, metadata=metadata)
-            self._store(result)
+            for it in results:
+
+                metadata = {
+                    "site": site,
+                    "network": network,
+                    "variables": it.metadata["variable"],
+                    "product_type": it.metadata["product_type"],
+                    "format": it.metadata["format"],
+                    "pressure_level": it.metadata["pressure_level"],
+                    "area": it.metadata["area"],
+                    "start_date": str(start_date),
+                    "end_date": str(end_date),
+                    "month": it.metadata["month"],
+                    "year": it.metadata["year"],
+                }
+
+                it = METData(data=it.data, metadata=metadata)
+                self._store(it)
         else:
             logger.info("File already exists in the local store")
 
         return result
+
+    # def schema
+    # def validate data
 
     def populate(self, store_path: Optional[str] = None) -> None:
         """
@@ -144,7 +173,7 @@ class METStore(BaseStore):
         default_store_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
         store_path = default_store_path if store_path is None else store_path
 
-        files = glob.glob(os.path.join(store_path, "Met_*.nc"))
+        files = sorted(glob.glob(os.path.join(store_path, "Met_*.nc")))
 
         min_keys = len(self.required_keys)
 
@@ -163,7 +192,6 @@ class METStore(BaseStore):
             required_metadata = {
                 k.lower(): to_lowercase(v) for k, v in dataset.attrs.items() if k in self.required_keys
             }
-
             if len(required_metadata) < min_keys:
                 logger.warn(
                     f"The metadata for file {file} doesn't contain enough information, we need: {self.required_keys}"
@@ -171,6 +199,8 @@ class METStore(BaseStore):
                 continue
 
             metadata = dict((key, str(dataset.attrs[key])) for key in list(dataset.attrs.keys()))
+
+            METStore.validate_data(dataset)
 
             data = METData(data=dataset, metadata=metadata)
             self._store(met_data=data)
@@ -205,14 +235,30 @@ class METStore(BaseStore):
             for uuid in self._datasource_uuids_dict
         )
 
+        met_objects = []
         for datasource in datasources:
             if datasource.search_metadata(site=site, network=network, find_all=True):
                 if datasource.in_daterange(start_date=start_date, end_date=end_date):
+                    # print(datasource.metadata())
                     data = next(iter(datasource.data().values()))
+                    # print(datasource.metadata())
+                    # print(data)
 
-                    return METData(data=data, metadata=datasource.metadata())
+                    met_objects.append(METData(data=data, metadata=datasource.metadata()))
 
-        return None
+        if len(met_objects) == 1:
+            return met_objects[0]
+        elif len(met_objects) > 1:
+            try:
+                data = xr.concat([d.data for d in met_objects], dim="time")
+                data.attrs["end_date"] = met_objects[-1].data.attrs["end_date"]
+            except Exception as e:
+                print(f"there was error {e} when concatenating data across the requested months")
+            metadata = met_objects[0].metadata.copy()
+            metadata["end_date"] = met_objects[-1].metadata["end_date"]
+            return METData(data=data, metadata=metadata)
+        else:
+            return None
 
     # def store_data(
     #     self,
@@ -310,7 +356,11 @@ class METStore(BaseStore):
         datasource.add_data(metadata=metadata, data=met_data.data, data_type="met")
         datasource.save(bucket=self._bucket)
 
-        date_str = f"{metadata['start_date']}_{metadata['end_date']}"
+        if "year" in metadata.keys() and "month" in metadata.keys():
+            date_str = f"{metadata['year']}{metadata['month']}"
+        else:
+            # this is just a quick fix - all files downloaded should already have year and month in there
+            date_str = f"{metadata['start_date'][:4]}{metadata['start_date'][5:7]}"
 
         name = "_".join((metadata["site"], metadata["network"], date_str))
         self._datasource_uuids_dict[datasource.uuid()] = name
@@ -323,6 +373,14 @@ class METStore(BaseStore):
         # Write this updated object back to the object store
         self.save()
 
+    def datasources(self) -> List[str]:
+        """Return the list of Datasources UUIDs associated with this object
+
+        Returns:
+            list: List of Datasource UUIDs
+        """
+        return list(self._datasource_uuids_dict.keys())
+
     def see_datasources(self) -> Dict[str, str]:
         """Return the list of Datasources UUIDs associated with this object
         Equivalent to datasources in Base, but edited to work around typechecking
@@ -331,3 +389,23 @@ class METStore(BaseStore):
             list: List of Datasource UUIDs
         """
         return self._datasource_uuids_dict
+
+    @staticmethod
+    def schema() -> DataSchema:
+
+        # Internal data types of data variables and coordinates
+        dtypes = {
+            "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
+            "lon": np.floating,
+            "time": np.datetime64,
+        }
+
+        expected_dims = ["latitude", "longitude", "level", "time"]
+
+        data_format = DataSchema(dims=expected_dims, dtypes=dtypes)
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        data_schema = METStore.schema()
+        data_schema.validate_data(data)

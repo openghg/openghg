@@ -5,6 +5,7 @@ from typing import List, Optional, Union, Tuple
 import os
 import pandas as pd
 import xarray as xr
+from pandas.tseries.offsets import MonthEnd
 
 from openghg.dataobjects import METData
 
@@ -27,12 +28,13 @@ def retrieve_met(
     site: str,
     network: str,
     years: Optional[Union[str, List[str]]] = None,
+    months: Optional[Union[str, List[str]]] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     variables: Optional[List[str]] = None,
     save_path: Optional[str] = None,
-) -> METData:
-    """Retrieve METData data. Downloads monthly met files.
+) -> List[METData]:
+    """Retrieve METData data. Downloads single file with the whole time period.
 
     This function currently on retrieves data from the "reanalysis-era5-pressure-levels"
     dataset but may be modified for other datasets in the future.
@@ -91,14 +93,29 @@ def retrieve_met(
         else:
             years = sorted(years)
 
-        download_list = pd.period_range(start=str(years[0]), end=str(int(years[-1]) + 1), freq="M")[:-1]
-        start_d = pd.Timestamp(download_list[0])
-        end_d = pd.Timestamp(download_list[-1])
+        if months is None:
+            download_list = pd.period_range(start=str(years[0]), end=str(int(years[-1]) + 1), freq="M")[:-1]
+            start_d = pd.to_datetime(download_list[0])
+            end_d = pd.to_datetime(download_list[-1])
+        else:
+            if not isinstance(months, list):
+                months = [months]
+            else:
+                months = sorted(months)
+
+            download_list = pd.period_range(
+                start=f"{years[0]}/{months[0]}", end=f"{int(years[-1]) + 1}/{months[-1]}", freq="M"
+            )[:-1]
+        start_d = pd.Timestamp(download_list.to_timestamp()[0])
+        end_d = pd.Timestamp(download_list.to_timestamp()[-1])
 
     if start_date is not None and end_date is not None:
         download_list = pd.period_range(start=start_date, end=end_date, freq="M")
-        start_d = pd.Timestamp(start_date)
-        end_d = pd.Timestamp(end_date)
+        start_d = pd.to_datetime(start_date)
+        end_d = pd.to_datetime(end_date)
+
+        years = list(set([str(download_date).split("-")[0] for download_date in download_list]))
+        months = list(set([str(download_date).split("-")[1] for download_date in download_list]))
 
     cds_client = cdsapi.Client()
     dataset_name = "reanalysis-era5-pressure-levels"
@@ -110,8 +127,6 @@ def retrieve_met(
 
     logger.info(f"Retrieving to {save_path}")
 
-    years = list(set([str(download_date).split("-")[0] for download_date in download_list]))
-    months = list(set([str(download_date).split("-")[1] for download_date in download_list]))
     request = {
         "product_type": "reanalysis",
         "format": "netcdf",
@@ -146,26 +161,33 @@ def retrieve_met(
         )
     )
 
-    metadata = {
-        "product_type": request["product_type"],
-        "format": request["format"],
-        "variable": request["variable"],
-        "pressure_level": request["pressure_level"],
-        "area": request["area"],
-        "site": site,
-        "network": network,
-        "start_date": str(start_d),
-        "end_date": str(end_d),
-    }
+    met_objects = []
 
-    # resaving with attributes
-    dataset.attrs.update(metadata)
-    dataset.to_netcdf(
-        os.path.join(
-            save_path,
-            f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}.nc",
+    for year, month in set(zip(dataset["time.year"].values, dataset["time.month"].values)):
+        metadata = {
+            "product_type": request["product_type"],
+            "format": request["format"],
+            "variable": request["variable"],
+            "pressure_level": request["pressure_level"],
+            "area": request["area"],
+            "site": site,
+            "network": network,
+            "start_date": pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d"),
+            "end_date": pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0),
+            "month": month,
+            "year": year,
+        }
+
+        # resaving with attributes
+        dataset.attrs.update(metadata)
+        dataset.to_netcdf(
+            os.path.join(
+                save_path,
+                f"Met_{site}_{network}_{year}{month}.nc",
+            )
         )
-    )
+
+        met_objects.append(METData(data=dataset, metadata=metadata))
     # remove temp file
     os.remove(
         os.path.join(
@@ -173,7 +195,7 @@ def retrieve_met(
         )
     )
 
-    return METData(data=dataset, metadata=metadata)
+    return met_objects
 
     # Retrieve metadata from Copernicus about the dataset, this includes
     # the location of the data netCDF file.
