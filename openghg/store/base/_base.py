@@ -187,7 +187,8 @@ class BaseStore:
                     - "combine" - replace and insert new data into current timeseries
                 new_version: Create a new version for the data and save current
                     data to a previous version.
-                compressor: Compressor to be used by zarr store
+                compressor: Compression for zarr encoding
+                filters: Filters for zarr encoding
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
@@ -238,6 +239,7 @@ class BaseStore:
                     if_exists=if_exists,
                     data_type=data_type,
                     compressor=compressor,
+                    filters=filters,
                 )
 
                 # Save Datasource to object store

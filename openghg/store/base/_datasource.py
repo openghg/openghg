@@ -120,6 +120,7 @@ class Datasource:
         new_version: bool = True,
         if_exists: str = "auto",
         compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -138,6 +139,8 @@ class Datasource:
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
+            compressor: Compression for zarr encoding
+            filters: Filters for zarr encoding
         Returns:
             None
         """
@@ -158,6 +161,7 @@ class Datasource:
                 new_version=new_version,
                 if_exists=if_exists,
                 compressor=compressor,
+                filters=filters,
             )
         else:
             raise NotImplementedError()
@@ -188,8 +192,8 @@ class Datasource:
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
-            compressor: Compressor to use when adding data to the zarr store
-            filters: Filters to apply to data when adding to the zarr store
+            compressor: Compression for zarr encoding
+            filters: Filters for zarr encoding
         Returns:
             None
         """
@@ -253,9 +257,11 @@ class Datasource:
                 logger.info("Updating store to include new added data only.")
 
                 if new_version:
-                    self._store.add(version=version_str, dataset=data)
+                    self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
                 else:
-                    self._store.update(version=version_str, dataset=data)
+                    self._store.update(
+                        version=version_str, dataset=data, compressor=compressor, filters=filters
+                    )
                 # Only save the current daterange string for this version
                 date_keys = [new_daterange_str]
             elif if_exists == "combine":
@@ -314,11 +320,15 @@ class Datasource:
                     self._store.add(
                         version=version_str,
                         dataset=combined,
+                        compressor=compressor,
+                        filters=filters,
                     )
                 else:
                     self._store.update(
                         version=version_str,
                         dataset=combined,
+                        compressor=compressor,
+                        filters=filters,
                     )
 
                 date_keys = [combined_daterange]
