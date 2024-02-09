@@ -8,7 +8,7 @@ The main repository for OpenGHG can be found on `GitHub <https://github.com/open
 Setting up your computer
 =========================
 
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.9, so please make sure you have both installed before continuing
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.8, so please make sure you have both installed before continuing
 further.
 
 Clone OpenGHG

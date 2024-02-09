@@ -19,9 +19,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def scsn06_data():
-    filepath = get_surface_datapath(
-        filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", source_format="NOAA"
-    )
+    filepath = get_surface_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
@@ -32,9 +30,7 @@ def scsn06_data():
 
 def test_read_obspack_2020():
     '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"'''
-    filepath = get_surface_datapath(
-        filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
-    )
+    filepath = get_surface_datapath(filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
@@ -166,7 +162,6 @@ def test_read_file_site_filepath_read(scsn06_data):
     for key, value in expected_attrs.items():
         assert attrs[key] == value
 
-
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filepath_cf_compliance(scsn06_data):
@@ -176,6 +171,7 @@ def test_noaa_site_filepath_cf_compliance(scsn06_data):
 
 
 def test_read_raw_file():
+
     filepath = get_surface_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     data = parse_noaa(
@@ -202,9 +198,8 @@ def test_read_raw_file():
 
 
 def test_read_incorrect_site_raises():
-    filepath = get_surface_datapath(
-        filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", source_format="NOAA"
-    )
+
+    filepath = get_surface_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     with pytest.raises(ValueError):
         data = parse_noaa(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")

@@ -1,5 +1,5 @@
 import numpy as np
-from openghg.standardise import summary_site_codes, summary_source_formats
+from openghg.standardise import summary_source_formats, summary_site_codes
 
 
 def test_summarise_format():
@@ -24,14 +24,12 @@ def test_summarise_site():
     summary_df = summary_site_codes()
 
     # Check subset of columns in DataFrame
-    expected_columns = [
-        "Network",
-        "Long name",
-        "Latitude",
-        "Longitude",
-        "Station height (masl)",
-        "Inlet heights",
-    ]
+    expected_columns = ["Network",
+                        "Long name",
+                        "Latitude",
+                        "Longitude",
+                        "Station height (masl)",
+                        "Inlet heights"]
 
     for col in expected_columns:
         assert col in summary_df
@@ -44,3 +42,4 @@ def test_summarise_site():
     selection_all = summary_df.loc[site_code]
     selection = selection_all[selection_all["Network"] == network]
     assert selection["Long name"].values == expected_long_name
+

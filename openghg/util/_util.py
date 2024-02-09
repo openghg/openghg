@@ -1,7 +1,6 @@
 """ Utility functions that are used by multiple modules
 
 """
-
 from collections.abc import Iterable
 from typing import Any, Dict, Iterator, Optional, Tuple
 import logging

@@ -31,7 +31,7 @@ def parse_eurocom(
     """
     from openghg.standardise.meta import assign_attributes, get_attributes
     from openghg.util import load_internal_json, read_header, format_inlet
-    from pandas import read_csv
+    from pandas import Timestamp, read_csv
 
     data_filepath = Path(data_filepath)
 
@@ -57,6 +57,9 @@ def parse_eurocom(
     n_skip = len(header) - 1
     species = "co2"
 
+    def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
+        return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
+
     datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
     use_cols = [
         "Day",
@@ -71,6 +74,11 @@ def parse_eurocom(
     ]
 
     dtypes = {
+        "Day": int,
+        "Month": int,
+        "Year": int,
+        "Hour": int,
+        "Minute": int,
         species.lower(): float,
         "Stdev": float,
         "SamplingHeight": float,
@@ -81,7 +89,7 @@ def parse_eurocom(
         data_filepath,
         skiprows=n_skip,
         parse_dates=datetime_columns,
-        date_format="%Y %m %d %H %M",
+        date_parser=date_parser,
         index_col="time",
         sep=";",
         usecols=use_cols,

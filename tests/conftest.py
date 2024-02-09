@@ -1,10 +1,12 @@
 import os
 import sys
+import pytest
+from helpers import temporary_store_paths, clear_test_stores
 from typing import Iterator
 from unittest.mock import patch
 
-import pytest
-from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
+from helpers import get_info_datapath
+
 
 # Added for import of openghg from testing directory
 sys.path.insert(0, os.path.abspath("."))

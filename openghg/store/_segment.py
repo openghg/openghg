@@ -1,7 +1,6 @@
 """ Segment the data into Datasources
 
 """
-
 from typing import Dict
 import logging
 

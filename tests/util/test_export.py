@@ -84,7 +84,7 @@ def test_export_to_dashboard():
                                 "inlet": "100m",
                                 "latitude": 52.123,
                                 "longitude": 52.123,
-                                "species": "co2",
+                                "species": "co2"
                             },
                         }
                     }

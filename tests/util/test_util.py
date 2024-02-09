@@ -4,13 +4,13 @@ import pytest
 from openghg.types import InvalidSiteError
 from openghg.util import (
     read_header,
-    read_local_config,
     running_in_cloud,
     running_locally,
     running_on_hub,
     site_code_finder,
     to_lowercase,
     verify_site,
+    read_local_config,
 )
 
 

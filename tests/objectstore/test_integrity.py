@@ -1,10 +1,11 @@
 import pytest
-from helpers import clear_test_stores, get_emissions_datapath, get_footprint_datapath
-from openghg.objectstore import delete_object, get_writable_bucket, integrity_check
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import integrity_check
 from openghg.standardise import standardise_flux, standardise_footprint
-from openghg.store.base import Datasource
+from openghg.objectstore import get_writable_bucket, delete_object
 from openghg.types import ObjectStoreError
+from helpers import get_footprint_datapath, get_emissions_datapath, clear_test_stores
+from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
 
 
 @pytest.fixture(autouse=True)

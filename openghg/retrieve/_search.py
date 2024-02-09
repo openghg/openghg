@@ -2,7 +2,6 @@
     the object store
 
 """
-
 import logging
 from typing import Any, Dict, List, Optional, Union
 from openghg.objectstore.metastore import open_metastore

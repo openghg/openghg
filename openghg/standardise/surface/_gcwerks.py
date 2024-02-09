@@ -234,7 +234,7 @@ def _read_data(
     """
     from pandas import Series
     from pandas import Timedelta as pd_Timedelta
-    from pandas import read_csv
+    from pandas import read_csv, to_datetime
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -242,16 +242,15 @@ def _read_data(
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        data_filepath,
-        skiprows=4,
-        sep=r"\s+",
-        parse_dates={"Datetime": [1, 2, 3, 4, 5]},
-        date_format="%Y %m %d %H %M",
-        index_col="Datetime",
+        data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"], parse_dates=[[1, 2, 3, 4, 5]]
     )
+
+    data.index = to_datetime(data.index, format="%Y %m %d %H %M")
 
     if data.empty:
         raise ValueError("Cannot process empty file.")
+
+    data.index.name = "Datetime"
 
     # This metadata will be added to when species are split and attributes are written
     metadata: Dict[str, str] = {
@@ -358,7 +357,13 @@ def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
         tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
         precision data
     """
+    from datetime import datetime
+
     from pandas import read_csv
+
+    # Function for parsing datetime
+    def prec_date_parser(date: str) -> datetime:
+        return datetime.strptime(date, "%y%m%d")
 
     # Read precision species
     precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
@@ -371,10 +376,11 @@ def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
         header=None,
         sep=r"\s+",
         index_col=0,
-        parse_dates={"Datetime": [0]},
-        date_format="%y%m%d",
+        parse_dates=[0],
+        date_parser=prec_date_parser,
     )
 
+    precision.index.name = "Datetime"
     # Drop any duplicates from the index
     precision = precision.loc[~precision.index.duplicated(keep="first")]
 

@@ -2,7 +2,6 @@
     into the data requested by the user
 
 """
-
 from typing import Dict, List, Optional, Union
 
 import numpy as np

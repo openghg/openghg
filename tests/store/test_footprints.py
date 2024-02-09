@@ -1,9 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
-from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
+from openghg.standardise import standardise_footprint, standardise_from_binary_data
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -32,13 +32,7 @@ def test_read_footprint_co2_from_data(mocker):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    result = standardise_from_binary_data(
-        store="user",
-        data_type="footprints",
-        binary_data=binary_data,
-        metadata=metadata,
-        file_metadata=file_metadata,
-    )
+    result = standardise_from_binary_data(store="user", data_type="footprints", binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
@@ -121,17 +115,16 @@ def test_read_footprint_high_spatial_resolution():
     """
     site = "TMB"
     domain = "EUROPE"
-    standardise_footprint(
-        store="user",
-        filepath=get_footprint_datapath("footprint_test.nc"),
-        site=site,
-        network="LGHG",
-        inlet="10m",
-        domain=domain,
-        model="test_model",
-        period="monthly",
-        high_spatial_resolution=True,
-    )
+    standardise_footprint(store="user",
+                          filepath=get_footprint_datapath("footprint_test.nc"),
+                          site=site,
+                          network="LGHG",
+                          inlet="10m",
+                          domain=domain,
+                          model="test_model",
+                          period="monthly",
+                          high_spatial_resolution=True,
+                          )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -279,8 +272,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    standardise_footprint(
-        store="user",
+    standardise_footprint(store="user",
         filepath=datapath,
         site=site,
         model=model,

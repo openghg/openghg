@@ -1,8 +1,8 @@
-import logging
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
+import logging
 import xarray as xr
+
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -494,34 +494,49 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, get_site_info, load_internal_json, read_header
-    from pandas import read_csv
+    from openghg.util import clean_string, read_header, get_site_info, load_internal_json
+    from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
 
     column_names = header[-1][14:].split()
 
+    def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
+        return Timestamp(year, month, day, hour, minute, second)
+
+    date_parsing = {
+        "time": [
+            "sample_year",
+            "sample_month",
+            "sample_day",
+            "sample_hour",
+            "sample_minute",
+            "sample_seconds",
+        ]
+    }
+
+    data_types = {
+        "sample_year": int,
+        "sample_month": int,
+        "sample_day": int,
+        "sample_hour": int,
+        "sample_minute": int,
+        "sample_seconds": int,
+    }
+
     # Number of header lines to skip
     n_skip = len(header)
-
-    date_cols = [
-        "sample_year",
-        "sample_month",
-        "sample_day",
-        "sample_hour",
-        "sample_minute",
-        "sample_seconds",
-    ]
 
     data = read_csv(
         data_filepath,
         skiprows=n_skip,
         names=column_names,
         sep=r"\s+",
-        skipinitialspace=True,
-        parse_dates={"time": date_cols},
-        date_format="%Y %m %d %H %M %S",
+        dtype=data_types,
+        parse_dates=date_parsing,
+        date_parser=date_parser,
         index_col="time",
+        skipinitialspace=True,
     )
 
     # Drop duplicates
@@ -554,12 +569,18 @@ def _read_raw_data(
 
     species = species.upper()
 
-    # add 0/1 variable for second part of analysis flag
-    data[species + "_selection_flag"] = (data["analysis_flag"].str[1] != ".").apply(int)
+    flag = []
+    selection_flag = []
+    for flag_str in data.analysis_flag:
+        flag.append(flag_str[0] == ".")
+        selection_flag.append(int(flag_str[1] != "."))
 
-    # filter data by first part of analysis flag
-    flag = data["analysis_flag"].str[0] == "."
-    data = data[flag]
+    combined_data = {}
+
+    data[species + "_status_flag"] = flag
+    data[species + "_selection_flag"] = selection_flag
+
+    data = data[data[species + "_status_flag"]]
 
     data = data[
         [
@@ -602,12 +623,10 @@ def _read_raw_data(
     metadata["data_type"] = "surface"
     metadata["source_format"] = "noaa"
 
-    combined_data = {
-        species.lower(): {
-            "metadata": metadata,
-            "data": data,
-            "attributes": site_attributes,
-        }
+    combined_data[species.lower()] = {
+        "metadata": metadata,
+        "data": data,
+        "attributes": site_attributes,
     }
 
     return combined_data

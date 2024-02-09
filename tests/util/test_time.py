@@ -86,6 +86,7 @@ def test_daterange_overlap():
 
 
 def test_closest_daterange():
+
     dateranges = [
         "2012-01-01-00:00:00+00:00_2014-01-01-00:00:00+00:00",
         "2014-01-02-00:00:00+00:00_2015-01-01-00:00:00+00:00",
@@ -219,6 +220,7 @@ def test_combining_big_daterange():
 
 
 def test_split_daterange_str():
+
     start_true = Timestamp("2001-01-01-00:00:00", tz="UTC")
     end_true = Timestamp("2001-03-01-00:00:00", tz="UTC")
 
@@ -332,9 +334,7 @@ def test_check_date():
 
     assert check_date(date=date_str) == date_str
     assert check_date(date="this") == "NA"
-
-    # "1001" is interpreted as a date string, not an integer, so it is successfully parsed to pd.Timestamp to Jan 1st, 1001
-    #  assert check_date(date="1001") == "NA"
+    assert check_date(date="1001") == "NA"
 
     unix_timestamp_ms = 1636043284779
 

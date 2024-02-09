@@ -118,7 +118,7 @@ def _read_data_large_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import read_csv
+    from pandas import read_csv, to_datetime
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
@@ -175,11 +175,12 @@ def _read_data_large_header(
         header=len_header - 1,
         sep=";",
         parse_dates={"time": [2, 3, 4, 5, 6]},
-        date_format="%Y %m %d %H %M",
         index_col="time",
         na_values=["-9.990", "-999.990"],
         dtype=dtypes,
     )
+
+    df.index = to_datetime(df.index, format="%Y %m %d %H %M")
 
     # Lowercase all the column titles
     df.columns = [str(c).lower() for c in df.columns]
@@ -292,7 +293,7 @@ def _read_data_small_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import read_csv
+    from pandas import Timestamp, read_csv
 
     # Read some metadata from the filename
     split_filename = data_filepath.name.split(".")
@@ -311,7 +312,10 @@ def _read_data_small_header(
     header = read_header(filepath=data_filepath)
     n_skip = len(header) - 1
 
-    datetime_columns = ["Year", "Month", "Day", "Hour", "Minute"]
+    def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
+        return Timestamp(year, month, day, hour, minute)
+
+    datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
 
     use_cols = [
         "Year",
@@ -325,6 +329,11 @@ def _read_data_small_header(
     ]
 
     dtypes = {
+        "Day": int,
+        "Month": int,
+        "Year": int,
+        "Hour": int,
+        "Minute": int,
         species_fname.lower(): float,
         "Stdev": float,
         "SamplingHeight": float,
@@ -334,13 +343,13 @@ def _read_data_small_header(
     data = read_csv(
         data_filepath,
         skiprows=n_skip,
+        parse_dates=datetime_columns,
+        index_col="time",
         sep=" ",
         usecols=use_cols,
         dtype=dtypes,
         na_values="-999.99",
-        parse_dates={"time": datetime_columns},
-        date_format="%Y %m %d %H %M",
-        index_col="time",
+        date_parser=date_parser,
     )
 
     data = data[data[species_fname.lower()] >= 0.0]

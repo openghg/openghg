@@ -1,6 +1,6 @@
 import logging
-
 import pytest
+
 from openghg.standardise.meta import get_attributes
 
 # flake8: noqa
@@ -11,27 +11,22 @@ mpl_logger.setLevel(logging.WARNING)
 
 def make_dummy_dataset(species_name: str):
     """Make simple Dataset with correct variable name for the species"""
-    import numpy as np
     import xarray as xr
+    import numpy as np
 
-    ds = xr.Dataset(
-        {species_name: ("time", np.arange(0, 2, 1))},
-        coords={"time": np.array(["2020-01-01", "2020-02-01"], dtype="datetime64[ns]")},
-    )
+    ds = xr.Dataset({species_name: ("time", np.arange(0, 2, 1))},
+                    coords={"time": np.array(["2020-01-01", "2020-02-01"], dtype="datetime64[ns]")})
 
     return ds
 
-
-@pytest.mark.parametrize(
-    "species,name,long_name,units",
-    [
-        ("carbon dioxide", "co2", "mole_fraction_of_carbon_dioxide_in_air", "1e-6"),
-        ("CFC-11", "cfc11", "mole_fraction_of_cfc11_in_air", "1e-12"),
-        ("Rn", "rn", "radioactivity_concentration_of_222Rn_in_air", "mBq m$^{-3}$"),
-        ("c2f6", "c2f6", "mole_fraction_of_hexafluoroethane_in_air", "1e-12"),
-        ("SF5CF3", "sf5cf3", "sf5cf3", "unknown"),
-        ("CFC-323", "cfc323", "cfc323", "unknown"),
-    ],
+@pytest.mark.parametrize("species,name,long_name,units",
+    [("carbon dioxide", "co2", "mole_fraction_of_carbon_dioxide_in_air", "1e-6"),
+     ("CFC-11", "cfc11", "mole_fraction_of_cfc11_in_air", "1e-12"),
+     ("Rn", "rn", "radioactivity_concentration_of_222Rn_in_air", "mBq m$^{-3}$"),
+     ("c2f6", "c2f6", "mole_fraction_of_hexafluoroethane_in_air", "1e-12"),
+     ("SF5CF3", "sf5cf3", "sf5cf3", "unknown"),
+     ("CFC-323", "cfc323", "cfc323", "unknown")
+    ]
 )
 def test_species_attributes(species, name, long_name, units):
     """Test correct species attributes are created for various synonyms
