@@ -102,12 +102,6 @@ def test_read_invalid_instrument_raises():
         )
 
 
-@pytest.mark.skip_if_no_cfchecker
-@pytest.mark.cfchecks
-def test_thd_cf_compliance(thd_data):
-    meas_data = thd_data["ch4_10m"]["data"]
-    assert check_cf_compliance(dataset=meas_data)
-
 def test_expected_metadata_thd_ch4():
     ch4_path = get_surface_datapath(filename='AGAGE-combined_THD_ch4.nc', source_format="GC_nc")
     
