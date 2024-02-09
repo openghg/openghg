@@ -178,15 +178,17 @@ def retrieve_met(
             }
 
             # resaving with attributes
-            dataset.attrs.update(metadata)
-            dataset.to_netcdf(
+            data_monthly = dataset.sel(time=(dataset.time.dt.year == year) & (dataset.time.dt.month == month))
+
+            data_monthly.attrs.update(metadata)
+            data_monthly.to_netcdf(
                 os.path.join(
                     save_path,
                     f"Met_{site}_{network}_{year}{month}.nc",
                 )
             )
 
-            met_objects.append(METData(data=dataset, metadata=metadata))
+            met_objects.append(METData(data=data_monthly, metadata=metadata))
     # remove temp file
     os.remove(
         os.path.join(
