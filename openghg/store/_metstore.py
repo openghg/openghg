@@ -8,7 +8,6 @@ from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from pandas import Timestamp
 from openghg.util import get_start_and_end_date
-from openghg.retrieve.met import retrieve_met
 
 import os
 import glob
@@ -84,6 +83,7 @@ class METStore(BaseStore):
         Returns:
             METData: METData object holding data and metadata
         """
+        from openghg.retrieve.met import retrieve_met
 
         # check right date
         if years is None and (start_date is None or end_date is None):
