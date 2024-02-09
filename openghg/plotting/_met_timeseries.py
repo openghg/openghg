@@ -52,9 +52,9 @@ def plot_met_timeseries(
     # measure_pressure = get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
 
     if start_date is not None or end_date is not None:
-        start_date = Timestamp(data.data.time.values[0]) if start_date is None else start_date
-        end_date = Timestamp(data.data.time.values[-1]) if start_date is None else end_date
-        dataset = data.data.sel(time=slice(Timestamp(start_date), Timestamp(end_date)))
+        start_date = Timestamp(data.data.time.values[0]) if start_date is None else Timestamp(start_date)
+        end_date = Timestamp(data.data.time.values[-1]) if start_date is None else Timestamp(end_date)
+        dataset = data.data.sel(time=slice(start_date, end_date))
         if len(dataset.time) == 0:
             raise ValueError("The dates that you passed are not contained in this met data!")
     else:
