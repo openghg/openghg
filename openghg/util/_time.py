@@ -4,6 +4,10 @@ from typing import Dict, List, Optional, Tuple, Union
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
 
+from pandas import to_datetime
+from pandas.tseries.offsets import MonthEnd
+
+
 __all__ = [
     "timestamp_tzaware",
     "timestamp_now",
@@ -858,3 +862,44 @@ def in_daterange(
     end_b = timestamp_tzaware(end_b)
 
     return bool((start_a <= end_b) and (end_a >= start_b))
+
+
+def get_start_and_end_date(
+    years: Union[str, List[str], int, List[int]],
+    months: Optional[Union[str, List[str], int, List[int]]] = None,
+) -> Tuple[str, str]:
+    """
+    Get the start date and end date for a set of years and months
+
+    Args:
+        years: Year(s) to include
+        months: month(s) to include.
+    Returns:
+        (start_date, end_date)
+
+    """
+
+    if not isinstance(years, list):
+        years = [int(years)]
+    elif isinstance(years, list) and isinstance(years[0], str):
+        years = [int(year) for year in years]
+
+    years_list = sorted(years)
+
+    if months is None:
+        start_date = f"{years_list[0]}/01/01"
+        end_date = f"{years_list[-1]}/12/31"
+
+    else:
+        if not isinstance(months, list):
+            months = [int(months)]
+        elif isinstance(months, list) and isinstance(months[0], str):
+            months = [int(month) for month in months]
+
+        months_list = sorted(months)
+
+        start_date = f"{years_list[0]}/{months_list[0]}/01"
+        end_date_ts = to_datetime(f"{years_list[-1]}/{months_list[-1]}/01") + MonthEnd(0)
+        end_date = f"{end_date_ts.year}/{end_date_ts.month}/{end_date_ts.day}"
+
+    return (start_date, end_date)
