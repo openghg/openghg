@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+
+### Fixed
+- Added check's if the new paths provided by user are present in the object store and raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
+
 ## [0.7.0] - 2023-12-15
 
 ### Added
