@@ -1,21 +1,21 @@
 from pathlib import Path
-import pytest
 
+import pytest
 from helpers import (
+    get_column_datapath,
     get_emissions_datapath,
     get_footprint_datapath,
-    get_column_datapath,
     get_surface_datapath,
 )
+from openghg.retrieve import get_obs_surface, search
 from openghg.standardise import (
+    standardise_column,
     standardise_flux,
     standardise_footprint,
-    standardise_column,
     standardise_surface,
 )
-from openghg.util import compress
 from openghg.types import AttrMismatchError, ObjectStoreError
-from openghg.retrieve import search, get_obs_surface
+from openghg.util import compress
 
 
 def test_standardise_to_read_only_store():
@@ -317,6 +317,24 @@ def test_standardise_flux():
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results
+
+
+def test_standardise_flux_intem():
+    test_datapath = get_emissions_datapath("ch4_intem.nc")
+
+    proc_results = standardise_flux(
+        filepath=test_datapath,
+        species="ch4",
+        source="total",
+        source_format="intem",
+        domain="europe",
+        high_time_resolution=False,
+        overwrite=True,
+        store="user",
+    )
+
+    print(proc_results)
+    assert "ch4_total_europe" in proc_results
 
 
 def test_standardise_flux_additional_keywords():

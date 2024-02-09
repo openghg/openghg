@@ -5,10 +5,11 @@ channels:
   - defaults
   - anaconda
 dependencies:
-  - python>=3.8
+  - python>=3.9
   - addict
   - dask
   - h5netcdf
+  - filelock
   - matplotlib
   - msgpack-python
   - netcdf4
@@ -17,7 +18,7 @@ dependencies:
   - numpy
   - nc-time-axis
   - openghg_defs
-  - pandas<2.0
+  - pandas>=2.0
   - pip
   - plotly
   - pyvis

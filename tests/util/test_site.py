@@ -1,7 +1,8 @@
-from openghg.util import sites_in_network
 from pathlib import Path
+
 import pytest
 from helpers import get_info_datapath
+from openghg.util import sites_in_network
 
 
 def test_site_info_file_mock():
@@ -30,8 +31,8 @@ def test_site_info_file_mock():
         ("ICOS", "MHD"),
         ("icos", "MHD"),
         ("DECC", "TAC"),
-        ("nonetwork", None)
-    ]
+        ("nonetwork", None),
+    ],
 )
 def test_sites_in_network(network, expected_site):
     """

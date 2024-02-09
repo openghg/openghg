@@ -6,17 +6,26 @@ This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
 
+.. _what-is-object-store:
+
+What is Object Store?
+-------------------------------
+
+Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ~/.config/openghg/openghg.conf.
+
+
 .. _using-the-tutorial-object-store:
 
 Using the tutorial object store
 -------------------------------
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
-``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
-``OPENGHG_TUT_STORE`` environment variable for this session and won't
-affect your use of OpenGHG outside of this tutorial.
+An object store is a folder with a fixed structure within which openghg 
+can read and write data. To avoid adding the example data we use in this 
+tutorial to your normal object store, we need to tell OpenGHG to use a 
+separate sandboxed object store that we'll call the tutorial store. To do 
+this we use the ``use_tutorial_store`` function from ``openghg.tutorial``. 
+This sets the ``OPENGHG_TUT_STORE`` environment variable for this session and 
+won't affect your use of OpenGHG outside of this tutorial.
 
 .. code:: ipython3
 
@@ -61,6 +70,20 @@ For instance, the Tacolneston site in the UK (site code “TAC”) has four entr
 .. ipython:: python
 
     summary[summary["Site code"] == "TAC"]
+
+
+Let's see what data is available for a given source.
+First, we'll list all source formats.
+
+.. ipython:: python
+
+    summary["Source format"].unique()
+
+Now we'll find all data with source format ``"CRDS"``.
+
+.. ipython:: python
+
+    summary[summary["Source format"] == "CRDS"]
 
 DECC network
 ~~~~~~~~~~~~
@@ -203,8 +226,7 @@ file
 Note on Datasources
 ^^^^^^^^^^^^^^^^^^^
 
-Datasources are objects that are stored in the object store (++add link
-to object store notes++) that hold the data and metadata associated with
+Datasources are objects that are stored in the `object store <https://docs.openghg.org/api/devapi_objectstore.html>`_ that hold the data and metadata associated with
 each measurement we upload to the platform.
 
 For example, if we upload a file that contains readings for three gas
@@ -224,7 +246,8 @@ Searching the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can search the object store by property using the
-``search_surface(...)`` function.
+``search_surface(...)`` function. This function retrieves metadata from the
+data in the object store.
 
 For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the ``species`` keyword:

@@ -8,7 +8,7 @@ pytest-cov
 pytest-mock
 requests-mock
 # For mypy
-mypy==1.4.0
+mypy==1.7.1
 types-paramiko
 types-PyYAML
 types-requests
