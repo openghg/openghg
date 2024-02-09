@@ -414,7 +414,7 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     return pressure_levels
 
 
-def _create_dummy_dataset(request: dict, dataset_savepath: str) -> xr.Dataset:
+def _create_dummy_dataset(request: dict, dataset_savepath: str) -> bool:
 
     date_time_combinations = product(request["year"], request["month"], request["day"], request["time"])
 
