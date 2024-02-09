@@ -92,7 +92,6 @@ def retrieve_met(
             "vorticity",
         ]
 
-        print(variables)
         assert np.all(
             [var in valid_variables for var in variables]
         ), f"One of more of the variables passed does not exist in ERA5 data. The problematic variables are {set(variables) - set(valid_variables)}"
@@ -145,10 +144,10 @@ def retrieve_met(
     )
 
     # use this to create a file in the expected format and test the whole pipelne without requesting
-    # request_status = _create_dummy_dataset(request,dataset_savepath)
+    request_status = _create_dummy_dataset(request, dataset_savepath)
 
     # retrieve from copernicus and save requested data to a temp file
-    request_status = launch_cds_request(request, dataset_savepath)
+    # request_status = launch_cds_request(request, dataset_savepath)
 
     if not request_status:
         return []
@@ -162,33 +161,36 @@ def retrieve_met(
 
     met_objects = []
 
-    for year, month in set(zip(dataset["time.year"].values, dataset["time.month"].values)):
-        metadata = {
-            "product_type": request["product_type"],
-            "format": request["format"],
-            "variable": request["variable"],
-            "pressure_level": request["pressure_level"],
-            "area": request["area"],
-            "site": site,
-            "network": network,
-            "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
-            "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
-            "month": int(month),
-            "year": int(year),
-        }
-
-        for k in metadata:
-            print(k, type(metadata[k]))
-        # resaving with attributes
-        dataset.attrs.update(metadata)
-        dataset.to_netcdf(
-            os.path.join(
-                save_path,
-                f"Met_{site}_{network}_{year}{month}.nc",
+    for year in np.unique(dataset.time.dt.year.values):
+        for month in np.unique(dataset.time.dt.month.values):
+            dataset_monthly = dataset.sel(
+                time=(dataset.time.dt.year == year) & (dataset.time.dt.month == month)
             )
-        )
 
-        met_objects.append(METData(data=dataset, metadata=metadata))
+            metadata = {
+                "product_type": request["product_type"],
+                "format": request["format"],
+                "variable": request["variable"],
+                "pressure_level": request["pressure_level"],
+                "area": request["area"],
+                "site": site,
+                "network": network,
+                "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
+                "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
+                "month": int(month),
+                "year": int(year),
+            }
+
+            # resaving with attributes
+            dataset_monthly.attrs.update(metadata)
+            dataset_monthly.to_netcdf(
+                os.path.join(
+                    save_path,
+                    f"Met_{site}_{network}_{year}{month}.nc",
+                )
+            )
+
+            met_objects.append(METData(data=dataset, metadata=metadata))
     # remove temp file
     os.remove(
         os.path.join(
@@ -446,7 +448,6 @@ def _create_dummy_dataset(request: dict, dataset_savepath: str) -> bool:
     dummy_dataset = xr.Dataset({"u": (dims, data)}, coords=coords, attrs=attrs)
     try:
         dummy_dataset.to_netcdf(dataset_savepath)
-        print(dataset_savepath, "saved")
         return True
     except PermissionError:
         logger.error(f"Permission denied for folder {dataset_savepath}")
