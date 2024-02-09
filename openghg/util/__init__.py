@@ -1,7 +1,6 @@
 """
     Utility functions for OpenGHG
 """
-
 from ._cli import cli
 from ._domain import (
     get_domain_info,

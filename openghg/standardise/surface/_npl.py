@@ -1,10 +1,11 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
 from openghg.util import clean_string, load_internal_json
-from pandas import read_csv
+from pandas import NaT, read_csv
 
 
 def parse_npl(
@@ -37,7 +38,7 @@ def parse_npl(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.util import format_inlet, get_site_info, synonyms
+    from openghg.util import get_site_info, format_inlet, synonyms
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -53,7 +54,14 @@ def parse_npl(
     site_data = get_site_info()
     site_info = site_data[site_upper][network_upper]
 
-    data = read_csv(data_filepath, parse_dates={"time": [0]}, index_col=0, date_format="%d/%m/%Y %H:%M")
+    # mypy doesn't like NaT or NaNs - look into this
+    def parser(date: str):  # type: ignore
+        try:
+            return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
+        except ValueError:
+            return NaT
+
+    data = read_csv(data_filepath, index_col=0, date_parser=parser)
 
     # Drop the NaT/NaNs
     data = data.loc[data.index.dropna()]
@@ -62,6 +70,7 @@ def parse_npl(
     rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
 
     data = data.rename(columns=rename_dict)
+    data.index.name = "time"
 
     try:
         site_inlet_values = site_info["height"]

@@ -1,8 +1,8 @@
 import pytest
 from helpers import get_surface_datapath
-from openghg.objectstore import get_bucket
 from openghg.retrieve import search
 from openghg.standardise import standardise_surface
+from openghg.objectstore import get_bucket
 from openghg.store import ObsSurface
 
 

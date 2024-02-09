@@ -37,9 +37,7 @@ Column data
 Emissions / flux
 ^^^^^^^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.emissions.parse_openghg
-
-.. autofunction:: openghg.standardise.emissions.parse_intem
+.. autofunction:: openghg.standardise.column.parse_openghg
 
 
 Metadata

@@ -1,7 +1,6 @@
 """ Helper functions to provide datapaths etc used in the tutorial notebooks
 
 """
-
 import contextlib
 import os
 import shutil

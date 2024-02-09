@@ -148,8 +148,7 @@ class DataManager:
         to_delete: Union[str, List, None] = None,
     ) -> None:
         """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
-        To delete metadata pass in a list of keys to delete.
+        the associated metadata. If you want to delete some metadata
 
         Args:
             uuid: UUID(s) of Datasources to be updated.
@@ -273,6 +272,6 @@ def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
     if store not in writable_stores:
         raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
 
-    res = search(data_type=data_type, store=store, **kwargs)
+    res = search(data_type=data_type, **kwargs)
     metadata = res.metadata
     return DataManager(metadata=metadata, store=store)

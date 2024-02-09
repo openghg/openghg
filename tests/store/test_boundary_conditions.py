@@ -1,10 +1,10 @@
-import numpy as np
 from helpers import get_bc_datapath
 from openghg.retrieve import search
-from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
+from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
+import numpy as np
 
 
 def test_read_data_monthly(mocker):
@@ -27,13 +27,9 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    proc_results = standardise_from_binary_data(
-        data_type="boundary_conditions",
-        store="user",
-        binary_data=binary_data,
-        metadata=metadata,
-        file_metadata=file_metadata,
-    )
+    proc_results = standardise_from_binary_data(data_type="boundary_conditions", store="user",
+                                                binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
+                                                )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
     assert proc_results["ch4_mozart_europe"]["new"] is True
@@ -50,7 +46,7 @@ def test_read_file_monthly():
         domain="EUROPE",
         period="monthly",
         overwrite=True,
-    )
+        )
 
     assert "ch4_mozart_europe" in proc_results
 
@@ -97,13 +93,12 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    standardise_bc(
-        store="user",
-        filepath=test_datapath,
-        species=species,
-        bc_input=bc_input,
-        domain=domain,
-    )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -159,13 +154,12 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    standardise_bc(
-        store="user",
-        filepath=test_datapath,
-        species=species,
-        bc_input=bc_input,
-        domain=domain,
-    )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"

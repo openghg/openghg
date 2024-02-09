@@ -34,7 +34,6 @@ def test_read_file(npl_data):
 
     # TODO: Add metadata / attribute checks?
 
-
 @pytest.mark.cfchecks
 def test_npl_cf_compliance(npl_data):
     co2_data = npl_data["co2"]["data"]

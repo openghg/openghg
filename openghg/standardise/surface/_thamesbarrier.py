@@ -53,7 +53,7 @@ def parse_tmb(
 
     data_filepath = Path(data_filepath)
 
-    data = pd_read_csv(data_filepath, parse_dates={"time": [0]}, index_col=0)
+    data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
     # Drop NaNs from the data
     data = data.dropna(axis="rows", how="all")
     # Drop a column if it's all NaNs
@@ -64,6 +64,7 @@ def parse_tmb(
         rename_dict["Methane"] = "CH4"
 
     data = data.rename(columns=rename_dict)
+    data.index.name = "time"
 
     site_upper = site.upper()
     network_upper = network.upper()

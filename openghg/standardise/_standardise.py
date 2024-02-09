@@ -455,7 +455,6 @@ def standardise_flux(
     source: str,
     domain: str,
     database: Optional[str] = None,
-    source_format: str = "openghg",
     database_version: Optional[str] = None,
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
@@ -471,7 +470,6 @@ def standardise_flux(
         filepath: Path of emissions file
         species: Species name
         source: Emissions source
-        source_format: Data format, for example openghg, intem
         domain: Emissions domain
         date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
@@ -500,7 +498,6 @@ def standardise_flux(
             "overwrite": overwrite,
             "chunks": chunks,
             "period": period,
-            "source_format": source_format,
         }
 
         optional_keywords = {"database": database, "database_version": database_version, "model": model}
@@ -533,7 +530,6 @@ def standardise_flux(
             continuous=continuous,
             chunks=chunks,
             overwrite=overwrite,
-            source_format=source_format,
         )
 
 

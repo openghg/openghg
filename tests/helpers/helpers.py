@@ -1,8 +1,8 @@
 """ Some helper functions for things we do in tests frequently
 """
 import shutil
-import tempfile
 from pathlib import Path
+import tempfile
 from typing import Dict, List, Union
 
 
@@ -122,9 +122,8 @@ def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
 
 
 def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
-    from pathlib import Path
-
     from openghg.objectstore import get_bucket
+    from pathlib import Path
 
     if not isinstance(key, list):
         key = [key]

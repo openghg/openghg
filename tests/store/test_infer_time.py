@@ -1,19 +1,18 @@
 import numpy as np
-import pytest
 import xarray as xr
+import pytest
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.util import timestamp_tzaware
 from pandas import Timedelta
 from xarray import DataArray
 
-# %% Infer period when one time point present
-
+#%% Infer period when one time point present
 
 @pytest.fixture(scope="module")
 def time_1_point():
     """Create data with one time point"""
     np_time = np.array(["2012-01-01"], dtype="datetime64[ns]")
-    time = DataArray(np_time, dims=("time"), coords={"time": np_time})
+    time = DataArray(np_time, dims=("time"), coords={"time":np_time})
 
     return time
 
@@ -51,15 +50,13 @@ def test_infer_period_from_input(time_1_point):
     assert end_date == timestamp_tzaware("2013-01-01") - Timedelta(seconds=1)
     assert period_str == "1 year"
 
-
-# %% Infer time period from data frequency
-
+#%% Infer time period from data frequency
 
 @pytest.fixture(scope="module")
 def time_monthly():
     """Create monthly time data"""
     np_time = np.array(["2012-02-01", "2012-03-01", "2012-04-01"], dtype="datetime64[ns]")
-    time = DataArray(np_time, dims=("time"), coords={"time": np_time})
+    time = DataArray(np_time, dims=("time"), coords={"time":np_time})
 
     return time
 
@@ -87,7 +84,7 @@ def test_infer_period_from_frequency_ignore_input(time_monthly):
 def time_varies():
     """Create data with no standard frequency"""
     np_time = np.array(["2012-02-01", "2012-03-31", "2012-05-21"], dtype="datetime64[ns]")
-    time = DataArray(np_time, dims=("time"), coords={"time": np_time})
+    time = DataArray(np_time, dims=("time"), coords={"time":np_time})
 
     return time
 
@@ -115,10 +112,10 @@ def test_update_zero_dim():
     This will also add "time" as the first dimension for all variables.
     """
 
-    ds = xr.Dataset(
-        {"x": np.array(1), "y": ("lat", np.array([1, 2, 3]))},
-        coords={"time": np.array(np.datetime64("2014-01-01")), "lat": np.array([10.0, 11.0, 12.0])},
-    )
+    ds = xr.Dataset({"x": np.array(1),
+                     "y": ("lat", np.array([1, 2, 3]))},
+                     coords={"time": np.array(np.datetime64("2014-01-01")),
+                             "lat": np.array([10., 11., 12.])})
 
     new_ds = update_zero_dim(ds, dim="time")
 
@@ -132,10 +129,10 @@ def test_update_zero_dim_no_change():
     If "time" coordinate of a Dataset is already 1-dimension, ensure nothing is updated.
     """
 
-    ds = xr.Dataset(
-        {"x": ("time", np.array([1])), "y": (("time", "lat"), np.array([[1, 2, 3]]))},
-        coords={"time": np.array([np.datetime64("2014-01-01")]), "lat": np.array([10.0, 11.0, 12.0])},
-    )
+    ds = xr.Dataset({"x": ("time", np.array([1])),
+                     "y": (("time", "lat"), np.array([[1, 2, 3]]))},
+                     coords={"time": np.array([np.datetime64("2014-01-01")]),
+                             "lat": np.array([10., 11., 12.])})
 
     new_ds = update_zero_dim(ds, dim="time")
 

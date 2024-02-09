@@ -100,7 +100,6 @@ def test_read_file_thd():
     assert meas_data["ch3ccl3"][0] == 41.537
     assert meas_data["ch3ccl3"][-1] == 34.649
 
-
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
@@ -124,9 +123,7 @@ def test_read_invalid_instrument_raises():
 
 def test_no_precisions_species_raises():
     cgo_path = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
-    missing_species_prec = get_surface_datapath(
-        filename="capegrim-medusa.18.precisions.broke.C", source_format="GC"
-    )
+    missing_species_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.broke.C", source_format="GC")
 
     with pytest.raises(ValueError):
         parse_gcwerks(
@@ -161,7 +158,6 @@ def test_read_thd_window_inlet():
     assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
     assert data["ch4"][0] == pytest.approx(1818.62)
     assert data["ch4"][-1] == pytest.approx(1840.432)
-
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks

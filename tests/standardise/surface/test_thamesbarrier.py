@@ -42,7 +42,6 @@ def test_read_file(tmb_data):
 
     # TODO: Add additional metadata / attribute checks?
 
-
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_tmb_cf_compliance(tmb_data):

@@ -8,8 +8,8 @@ import pandas as pd
 import pytest
 import xarray as xr
 from addict import Dict as aDict
-from helpers import get_footprint_datapath, get_surface_datapath
-from openghg.objectstore import delete_object, get_bucket, get_object_names
+from helpers import get_surface_datapath, get_footprint_datapath
+from openghg.objectstore import get_bucket, get_object_names, delete_object
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
@@ -491,7 +491,6 @@ def test_key_date_compare():
     with pytest.raises(ValueError):
         in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
 
-
 def test_integrity_check(data, bucket):
     d = Datasource()
 
@@ -516,7 +515,6 @@ def test_integrity_check(data, bucket):
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
 
-
 def test_datasource_compression(data, bucket):
     """Saving a Datasource with compression=True should
     result in a compressed netCDF file.
@@ -537,8 +535,8 @@ def test_datasource_compression(data, bucket):
     d2.add_data(metadata=metadata, data=data, data_type="surface")
     d2.save(bucket=bucket, compression=False)
 
-    key1 = next(iter((d1._data_keys["v1"]["keys"].values())))
-    key2 = next(iter((d2._data_keys["v1"]["keys"].values())))
+    key1 = next(iter((d1._data_keys['v1']['keys'].values())))
+    key2 = next(iter((d2._data_keys['v1']['keys'].values())))
     filepath1 = f"{bucket}/{key1}._data"
     filepath2 = f"{bucket}/{key2}._data"
 

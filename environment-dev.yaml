@@ -1,16 +1,13 @@
 name: openghg_dev_env
 channels:
-  - openghg
   - conda-forge
   - defaults
   - anaconda
 dependencies:
-  - python>=3.9
-  - conda-build
+  - python>=3.8
   - addict
   - dask
   - h5netcdf
-  - filelock
   - matplotlib
   - msgpack-python
   - netcdf4
@@ -19,7 +16,7 @@ dependencies:
   - numpy
   - nc-time-axis
   - openghg_defs
-  - pandas>=2.0
+  - pandas<2.0
   - pip
   - plotly
   - pyvis
@@ -28,8 +25,7 @@ dependencies:
   - scipy
   - tinydb
   - toml
-  - rich
-  - ipywidgets
+  - tqdm
   - xarray
   - rich
   - urllib3>=1.26.3
@@ -42,14 +38,14 @@ dependencies:
   - pytest-mock
   - requests-mock
   - pytest-tornasync
-  - mypy==1.7.1
+  - mypy==1.4.0
   - types-PyYAML
   - types-requests
   - types-toml
   - types-urllib3
   - cdsapi
-  - pandas-stubs
   - pip:
     - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
     - msgpack-types
     - icoscp
+    - pandas-stubs

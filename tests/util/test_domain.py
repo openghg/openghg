@@ -1,7 +1,12 @@
 import numpy as np
-import pytest
 import xarray as xr
-from openghg.util import convert_internal_longitude, convert_longitude, cut_data_extent, find_domain
+import pytest
+from openghg.util import (
+    convert_longitude,
+    convert_internal_longitude,
+    find_domain,
+    cut_data_extent,
+)
 from openghg.util._domain import _get_coord_data
 
 
@@ -11,10 +16,10 @@ def test_find_domain():
 
     latitude, longitude = find_domain(domain)
 
-    assert latitude[0] == 1.072900009155273438e01
-    assert latitude[-1] == 7.905699920654296875e01
-    assert longitude[0] == -9.790000152587890625e01
-    assert longitude[-1] == 3.938000106811523438e01
+    assert latitude[0] == 1.072900009155273438e+01
+    assert latitude[-1] == 7.905699920654296875e+01
+    assert longitude[0] == -9.790000152587890625e+01
+    assert longitude[-1] == 3.938000106811523438e+01
 
 
 def test_find_domain_missing():
@@ -32,7 +37,8 @@ def test_create_coord():
 
     coord_range = ["-10", "10"]
     increment = "0.1"
-    data = {"coordinate_range": coord_range, "coordinate_increment": increment}
+    data = {"coordinate_range": coord_range,
+            "coordinate_increment": increment}
 
     coordinate = _get_coord_data(coord, data, domain)
 
@@ -43,29 +49,23 @@ def test_create_coord():
     assert np.isclose(av_increment, float(increment))
 
 
-@pytest.mark.parametrize(
-    "lon_in,expected_lon_out",
-    [
-        (np.array([360.0]), np.array([0.0])),
-        (np.array([181.0]), np.array([-179.0])),
-        (np.array([-180.0, 0.0, 179.9]), np.array([-180.0, 0.0, 179.9])),
-        (np.arange(1, 361, 1), np.concatenate([np.arange(1, 180, 1), np.arange(-180, 1, 1)])),
-    ],
-)
+@pytest.mark.parametrize("lon_in,expected_lon_out",
+                         [(np.array([360.0]), np.array([0.0])),
+                          (np.array([181.0]), np.array([-179.0])),
+                          (np.array([-180.0, 0.0, 179.9]), np.array([-180.0, 0.0, 179.9])),
+                          (np.arange(1,361,1), np.concatenate([np.arange(1,180,1), np.arange(-180,1,1)])),
+                         ])
 def test_convert_longitude(lon_in, expected_lon_out):
     """Test expected longitude conversion for individual values and range."""
     lon_out = convert_longitude(lon_in)
     np.testing.assert_allclose(lon_out, expected_lon_out)
 
 
-@pytest.mark.parametrize(
-    "lon_start,lon_stop,expected_lon_start,expected_lon_stop",
-    [
-        (0, 360, -180, 180),
-        (-180, 180, -180, 180),
-    ],
-)
-def test_convert_internal_longitude_ds(lon_start, lon_stop, expected_lon_start, expected_lon_stop):
+@pytest.mark.parametrize("lon_start,lon_stop,expected_lon_start,expected_lon_stop",
+                         [(0, 360, -180, 180),
+                          (-180, 180, -180, 180),
+                         ])
+def test_convert_internal_longitude_ds(lon_start,lon_stop,expected_lon_start,expected_lon_stop):
     """
     Test longitude values can be converted and reordered within a Dataset
     """
@@ -76,13 +76,14 @@ def test_convert_internal_longitude_ds(lon_start, lon_stop, expected_lon_start, 
     # Create input Dataset
     input_lon = np.arange(lon_start, lon_stop, step)
     x = np.linspace(0, 10, len(input_lon))
-    data = xr.Dataset({"x": ("lon", x)}, coords={"lon": input_lon})
+    data = xr.Dataset({"x": ("lon", x)},
+                      coords={"lon": input_lon})
 
     # Define expected outputs (reordered by default)
     expected_lon = np.arange(expected_lon_start, expected_lon_stop, step)
 
-    start_expected_x = data["x"].sel({"lon": slice(180, 360)}).values
-    end_expected_x = data["x"].sel({"lon": slice(-180, 179)}).values
+    start_expected_x = data["x"].sel({"lon":slice(180, 360)}).values
+    end_expected_x = data["x"].sel({"lon":slice(-180, 179)}).values
     expected_x = np.concatenate([start_expected_x, end_expected_x])
 
     # Convert longitude for all data variables within Dataset
@@ -92,14 +93,11 @@ def test_convert_internal_longitude_ds(lon_start, lon_stop, expected_lon_start, 
     np.testing.assert_allclose(data["lon"].values, expected_lon)
 
 
-@pytest.mark.parametrize(
-    "lon_start,lon_stop,expected_lon_start,expected_lon_stop",
-    [
-        (0, 360, -180, 180),
-        (-180, 180, -180, 180),
-    ],
-)
-def test_convert_internal_longitude_da(lon_start, lon_stop, expected_lon_start, expected_lon_stop):
+@pytest.mark.parametrize("lon_start,lon_stop,expected_lon_start,expected_lon_stop",
+                         [(0, 360, -180, 180),
+                          (-180, 180, -180, 180),
+                         ])
+def test_convert_internal_longitude_da(lon_start,lon_stop,expected_lon_start,expected_lon_stop):
     """
     Test longitude values can be converted and reordered.
     Same as above but this time with a DataArray rather than a Dataset.
@@ -115,8 +113,8 @@ def test_convert_internal_longitude_da(lon_start, lon_stop, expected_lon_start, 
     # Define expected outputs (reordered by default)
     expected_lon = np.arange(expected_lon_start, expected_lon_stop, step)
 
-    start_expected_x = da.sel({"lon": slice(180, 360)}).values
-    end_expected_x = da.sel({"lon": slice(-180, 179)}).values
+    start_expected_x = da.sel({"lon":slice(180, 360)}).values
+    end_expected_x = da.sel({"lon":slice(-180, 179)}).values
     expected_x = np.concatenate([start_expected_x, end_expected_x])
 
     # Convert longitude within DataArray
@@ -138,7 +136,7 @@ def test_cut_data_extent():
     lon_in = np.arange(10, 20, step_lon_in)
 
     shape = (len(lat_in), len(lon_in))
-    da = xr.DataArray(np.zeros(shape), coords={"lat": lat_in, "lon": lon_in})
+    da = xr.DataArray(np.zeros(shape), coords={"lat":lat_in, "lon":lon_in})
 
     step = 1
     lat_out = np.arange(5, 7, step)

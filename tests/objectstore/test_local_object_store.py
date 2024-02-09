@@ -1,16 +1,13 @@
 # from pathlib import Path
 
-import tempfile
-
 import pytest
 from openghg.objectstore import (
-    get_bucket,
-    get_object_data_path,
-    get_object_lock_path,
     get_user_objectstore_path,
+    get_bucket,
     get_writable_bucket,
 )
 from openghg.types import ObjectStoreError
+import tempfile
 
 
 def test_get_bucket_tutorial_store_works(monkeypatch):
@@ -72,21 +69,3 @@ def test_get_bucket():
     tmpdir = tempfile.gettempdir()
     b = get_bucket()
     assert tmpdir in b
-
-
-def test_get_object_lock_path(tmp_path):
-    bucket = str(tmp_path)
-    key1 = "key1"
-    obj_path = tmp_path / (key1 + "._data")
-    obj_path.touch()
-
-    data_path = get_object_data_path(bucket, key1)
-    lock_path = get_object_lock_path(bucket, key1)
-
-    assert data_path.stem == lock_path.stem.split(".")[0]
-    assert data_path.suffix == lock_path.suffixes[0]
-    assert lock_path.suffixes[1] == ".lock"
-
-    # test getting lock even if file doesn't exist yet
-    key2 = "key2"
-    lock_path = get_object_lock_path(bucket, key2)

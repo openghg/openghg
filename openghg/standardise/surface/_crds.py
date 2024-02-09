@@ -143,6 +143,10 @@ def _read_data(
             index_col="time",
         )
 
+    # Drop any rows with NaNs
+    # This is now done before creating metadata
+    data = data.dropna(axis="rows", how="any")
+
     dupes = find_duplicate_timestamps(data=data)
 
     if dupes and not drop_duplicates:
@@ -208,7 +212,6 @@ def _read_data(
         gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
-        gas_data = gas_data.dropna(axis="rows", how="any")
 
         # Here we can convert the Dataframe to a Dataset and then write the attributes
         gas_data = gas_data.to_xarray()

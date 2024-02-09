@@ -2,7 +2,6 @@
 This module contains the user interface for adding
 data to the object store via transformations.
 """
-
 from __future__ import annotations
 
 from pathlib import Path
