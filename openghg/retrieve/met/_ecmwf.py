@@ -92,7 +92,6 @@ def retrieve_met(
             "vorticity",
         ]
 
-        print(variables)
         assert np.all(
             [var in valid_variables for var in variables]
         ), f"One of more of the variables passed does not exist in ERA5 data. The problematic variables are {set(variables) - set(valid_variables)}"
@@ -178,8 +177,6 @@ def retrieve_met(
                 "year": int(year),
             }
 
-            for k in metadata:
-                print(k, type(metadata[k]))
             # resaving with attributes
             dataset.attrs.update(metadata)
             dataset.to_netcdf(
