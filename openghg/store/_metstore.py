@@ -7,16 +7,18 @@ from typing import List, Union, Optional, Dict
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from pandas import Timestamp
+from openghg.util import get_start_and_end_date
+from openghg.retrieve.met import retrieve_met
 
 import os
 import glob
 
 import numpy as np
 import xarray as xr
+import pandas as pd
 from xarray import Dataset
 from openghg.dataobjects import METData
 from openghg.util import to_lowercase
-from pandas.tseries.offsets import MonthEnd
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)
@@ -82,48 +84,24 @@ class METStore(BaseStore):
         Returns:
             METData: METData object holding data and metadata
         """
-        from openghg.retrieve.met import retrieve_met
-        from pandas import Timestamp
 
         # check right date
         if years is None and (start_date is None or end_date is None):
             raise AttributeError("You must pass either the argument years or both start_date and end_date")
 
-        if years is None:
-            start_date_search = Timestamp(start_date)
-            end_date_search = Timestamp(end_date)
-        else:
-            if not isinstance(years, list):
-                years = [years]
-            else:
-                years = sorted(years)
+        if start_date is None and end_date is None and years is not None:
+            (start_date, end_date) = get_start_and_end_date(years=years, months=months)
 
-            if months is None:
-                start_date_search = Timestamp(f"{years[0]}-1-1")
-                end_date_search = Timestamp(f"{years[-1]}-12-31")
-            else:
-                if not isinstance(months, list):
-                    months = [months]
-                else:
-                    months = sorted(months)
-
-                start_date_search = Timestamp(f"{years[0]}-{months[0]}-1")
-                end_date_search = Timestamp(f"{years[-1]}-{months[-1]}-1") + MonthEnd(0)
-
-        print(start_date_search, end_date_search)
-        print("!")
-
-        # store = METStore.load()
+        start_date = pd.to_datetime(start_date)
+        end_date = pd.to_datetime(end_date)
 
         logger.info("Retrieving")
 
         # check the local store
-        result = self.search(
-            site=site, network=network, start_date=start_date_search, end_date=end_date_search
-        )
+        result_search = self.search(site=site, network=network, start_date=start_date, end_date=end_date)
 
         # If not found in the local store, retrieve from the Copernicus store and save
-        if result is None:
+        if result_search is None:
             results = retrieve_met(
                 site=site,
                 network=network,
@@ -134,6 +112,9 @@ class METStore(BaseStore):
                 save_path=save_path,
                 variables=variables,
             )
+
+            if not results:
+                return None
 
             logger.info("Storing")
 
@@ -155,10 +136,14 @@ class METStore(BaseStore):
 
                 it = METData(data=it.data, metadata=metadata)
                 self._store(it)
+
+            # once stored, search again to load
+            result_search = self.search(site=site, network=network, start_date=start_date, end_date=end_date)
+
         else:
             logger.info("File already exists in the local store")
 
-        return result
+        return result_search
 
     # def schema
     # def validate data
