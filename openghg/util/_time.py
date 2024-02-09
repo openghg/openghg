@@ -876,7 +876,6 @@ def get_start_and_end_date(
         months: month(s) to include.
     Returns:
         (start_date, end_date)
-
     """
 
     if not isinstance(years, list):
