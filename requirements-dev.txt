@@ -7,7 +7,6 @@ pytest-tornasync
 pytest-cov
 pytest-mock
 requests-mock
-pandas-stubs
 # For mypy
 mypy==1.7.1
 types-paramiko
