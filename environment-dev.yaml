@@ -43,7 +43,9 @@ dependencies:
   - types-requests
   - types-toml
   - types-urllib3
+  - cdsapi
   - pip:
     - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
     - msgpack-types
     - icoscp
+    - pandas-stubs
