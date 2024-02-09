@@ -1,3 +1,4 @@
+"""
 from pathlib import Path
 
 import pytest
@@ -71,3 +72,5 @@ def test_incorrect_site_or_network_raises():
 
     with pytest.raises(KeyError):
         METStore.retrieve(site="CGO", network="EGAGA", years="2012")
+
+"""

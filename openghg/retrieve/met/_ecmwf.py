@@ -162,33 +162,34 @@ def retrieve_met(
 
     met_objects = []
 
-    for year, month in set(zip(dataset["time.year"].values, dataset["time.month"].values)):
-        metadata = {
-            "product_type": request["product_type"],
-            "format": request["format"],
-            "variable": request["variable"],
-            "pressure_level": request["pressure_level"],
-            "area": request["area"],
-            "site": site,
-            "network": network,
-            "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
-            "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
-            "month": int(month),
-            "year": int(year),
-        }
+    for year in np.unique(dataset.time.dt.year.values):
+        for month in np.unique(dataset.time.dt.month.values):
+            metadata = {
+                "product_type": request["product_type"],
+                "format": request["format"],
+                "variable": request["variable"],
+                "pressure_level": request["pressure_level"],
+                "area": request["area"],
+                "site": site,
+                "network": network,
+                "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
+                "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
+                "month": int(month),
+                "year": int(year),
+            }
 
-        for k in metadata:
-            print(k, type(metadata[k]))
-        # resaving with attributes
-        dataset.attrs.update(metadata)
-        dataset.to_netcdf(
-            os.path.join(
-                save_path,
-                f"Met_{site}_{network}_{year}{month}.nc",
+            for k in metadata:
+                print(k, type(metadata[k]))
+            # resaving with attributes
+            dataset.attrs.update(metadata)
+            dataset.to_netcdf(
+                os.path.join(
+                    save_path,
+                    f"Met_{site}_{network}_{year}{month}.nc",
+                )
             )
-        )
 
-        met_objects.append(METData(data=dataset, metadata=metadata))
+            met_objects.append(METData(data=dataset, metadata=metadata))
     # remove temp file
     os.remove(
         os.path.join(
