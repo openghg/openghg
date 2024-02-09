@@ -8,8 +8,13 @@ import xarray as xr
 from pandas.tseries.offsets import MonthEnd
 
 from openghg.dataobjects import METData
+from openghg.util import get_start_and_end_date
+from itertools import product
+from datetime import datetime
 
 import logging
+
+import cdsapi
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -22,6 +27,21 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 __all__ = ["retrieve_met", "METData"]
+
+
+def launch_cds_request(request: dict, dataset_savepath: str) -> bool:
+    cds_client = cdsapi.Client()
+    dataset_name = "reanalysis-era5-pressure-levels"
+
+    try:
+        cds_client.retrieve(dataset_name, request, dataset_savepath)
+
+        return True
+
+    except Exception as e:
+        logger.warn(f"Retrieve process failed with error {e}")
+
+        return False
 
 
 def retrieve_met(
@@ -45,7 +65,6 @@ def retrieve_met(
     Returns:
         METData: METData object holding data and metadata
     """
-    import cdsapi
 
     # check right date
     if years is None and (start_date is None or end_date is None):
@@ -87,28 +106,6 @@ def retrieve_met(
     # Calculate the ERA5 pressure levels required
     ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
-    if years is not None:
-        if not isinstance(years, list):
-            years = [years]
-        else:
-            years = sorted(years)
-
-        if months is None:
-            download_list = pd.period_range(start=str(years[0]), end=str(int(years[-1]) + 1), freq="M")[:-1]
-            start_d = pd.to_datetime(download_list[0])
-            end_d = pd.to_datetime(download_list[-1])
-        else:
-            if not isinstance(months, list):
-                months = [months]
-            else:
-                months = sorted(months)
-
-            download_list = pd.period_range(
-                start=f"{years[0]}/{months[0]}", end=f"{int(years[-1]) + 1}/{months[-1]}", freq="M"
-            )[:-1]
-        start_d = pd.Timestamp(download_list.to_timestamp()[0])
-        end_d = pd.Timestamp(download_list.to_timestamp()[-1])
-
     if start_date is not None and end_date is not None:
         download_list = pd.period_range(start=start_date, end=end_date, freq="M")
         start_d = pd.to_datetime(start_date)
@@ -117,8 +114,11 @@ def retrieve_met(
         years = list(set([str(download_date).split("-")[0] for download_date in download_list]))
         months = list(set([str(download_date).split("-")[1] for download_date in download_list]))
 
-    cds_client = cdsapi.Client()
-    dataset_name = "reanalysis-era5-pressure-levels"
+    elif years is not None:
+        (start_date, end_date) = get_start_and_end_date(years=years, months=months)
+        start_d = pd.to_datetime(start_date)
+        end_d = pd.to_datetime(end_date)
+
     default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
     save_path = default_save_path if save_path is None else save_path
     assert os.path.isdir(
@@ -139,20 +139,19 @@ def retrieve_met(
         "area": ecmwf_area,
     }
 
-    print(request)
-    # retrieve from copernicus and save requested data to a temp file
-    try:
-        cds_client.retrieve(
-            dataset_name,
-            request,
-            os.path.join(
-                save_path,
-                f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}_temp.nc",
-            ),
-        )
+    dataset_savepath = os.path.join(
+        save_path,
+        f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}_temp.nc",
+    )
 
-    except Exception as e:
-        logger.warn(f"Retrieve process failed with error {e}")
+    # use this to create a file in the expected format and test the whole pipelne without requesting
+    # request_status = _create_dummy_dataset(request,dataset_savepath)
+
+    # retrieve from copernicus and save requested data to a temp file
+    request_status = launch_cds_request(request, dataset_savepath)
+
+    if not request_status:
+        return []
 
     dataset = xr.open_dataset(
         os.path.join(
@@ -172,12 +171,14 @@ def retrieve_met(
             "area": request["area"],
             "site": site,
             "network": network,
-            "start_date": pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d"),
-            "end_date": pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0),
-            "month": month,
-            "year": year,
+            "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
+            "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
+            "month": int(month),
+            "year": int(year),
         }
 
+        for k in metadata:
+            print(k, type(metadata[k]))
         # resaving with attributes
         dataset.attrs.update(metadata)
         dataset.to_netcdf(
@@ -411,3 +412,42 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     pressure_levels: List = desired_era5_pressure.astype(str).tolist()
 
     return pressure_levels
+
+
+def _create_dummy_dataset(request: dict, dataset_savepath: str) -> xr.Dataset:
+
+    date_time_combinations = product(request["year"], request["month"], request["day"], request["time"])
+
+    times = []
+    for year, month, day, time in date_time_combinations:
+        try:
+            times.append(datetime.strptime(f"{year}-{month}-{day} {time}", "%Y-%m-%d %H:%M"))
+        except ValueError:
+            continue
+
+    coords = {
+        "longitude": [request["area"][1], request["area"][3]],
+        "latitude": [request["area"][0], request["area"][1]],
+        "level": request["pressure_level"],
+        "time": times,
+    }
+    data = np.zeros((len(times), len(request["pressure_level"]), 2, 2))
+
+    dims = ("time", "level", "latitude", "longitude")
+
+    attrs = {
+        "product_type": "reanalysis",
+        "format": "netcdf",
+        "variable": ["u_component_of_wind"],
+        "pressure_level": request["pressure_level"],
+        "area": request["area"],
+    }
+
+    dummy_dataset = xr.Dataset({"u": (dims, data)}, coords=coords, attrs=attrs)
+    try:
+        dummy_dataset.to_netcdf(dataset_savepath)
+        print(dataset_savepath, "saved")
+        return True
+    except PermissionError:
+        logger.error(f"Permission denied for folder {dataset_savepath}")
+        return False
