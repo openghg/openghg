@@ -878,15 +878,14 @@ def get_start_and_end_date(
 
     if not isinstance(years, list):
         years = [int(years)]
-    else:
-        if type(years[0]) is str:
-            years = [int(year) for year in years]
+    elif isinstance(years, list) and isinstance(years[0], str):
+        years = [int(year) for year in years]
 
-    years = sorted(years)
+    years_list = sorted(years)
 
     if months is None:
-        start_date = f"{years[0]}/01/01"
-        end_date = f"{years[-1]}/12/31"
+        start_date = f"{years_list[0]}/01/01"
+        end_date = f"{years_list[-1]}/12/31"
 
     else:
         if not isinstance(months, list):
@@ -895,10 +894,10 @@ def get_start_and_end_date(
             if type(months[0]) is str:
                 months = [int(month) for month in months]
 
-        months = sorted(months)
+        months_list = sorted(months)
 
-        start_date = f"{years[0]}/{months[0]}/01"
-        end_date_ts = to_datetime(f"{years[-1]}/{months[-1]}/01") + MonthEnd(0)
+        start_date = f"{years_list[0]}/{months_list[0]}/01"
+        end_date_ts = to_datetime(f"{years_list[-1]}/{months_list[-1]}/01") + MonthEnd(0)
         end_date = f"{end_date_ts.year}/{end_date_ts.month}/{end_date_ts.day}"
 
     return (start_date, end_date)
