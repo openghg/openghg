@@ -23,3 +23,4 @@ tinydb
 toml
 urllib3 >= 1.26.3
 xarray
+cdsapi
