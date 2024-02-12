@@ -1,7 +1,8 @@
 from pathlib import Path
-
+import builtins
 import pytest
 import toml
+from unittest.mock import patch
 from openghg.types import ConfigFileError
 from openghg.util import check_config, create_config, read_local_config
 
@@ -88,3 +89,21 @@ def test_check_config(mocker, caplog, monkeypatch, tmpdir):
     check_config()
 
     assert " /tmp/mock_store does not exist but will be created." in caplog.text
+
+
+def test_create_config_duplicates(capsys):
+    """
+    Test simulates input values submitted after invoking the create_config method. It verifies if the value error is raised for duplicate store names and store paths.
+    """
+    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "Store1", "/path1", "r", "y", "Store1", "/path1", "r", "n"])):
+
+        with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
+            create_config(silent=False)
+
+    exception = exc_info.value
+    captured = capsys.readouterr()
+
+    assert "Some names match those of existing stores: ['Store1'], please update manually" in str(captured)
+    assert "Store1" in str(exception)
+    assert "/path1" in str(exception)
+    assert "existing store" in str(exception)
