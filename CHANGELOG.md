@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+### Fixed
+
+- Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
+
 
 ### Fixed
 - Added check's if the new paths provided by user are present in the object store and raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
