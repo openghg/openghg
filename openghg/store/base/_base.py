@@ -1,6 +1,7 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
+
 from __future__ import annotations
 import logging
 from pathlib import Path

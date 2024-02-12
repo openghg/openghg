@@ -247,11 +247,15 @@ def get_obs_surface_local(
     from openghg.retrieve import search_surface
     from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
     from pandas import Timedelta
+    from openghg.util import synonyms
 
     if running_on_hub():
         raise ValueError(
             "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
         )
+
+    if species is not None:
+        species = synonyms(species)
 
     data_type = "surface"
 
