@@ -107,7 +107,7 @@ def test_create_config_duplicates(monkeypatch, mocker, tmpdir, capsys):
 
     config = toml.loads(mock_config_path.read_text())
 
-    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n", "local_store", str("/path1"), "r", "n"])):
+    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"])):
         with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
             create_config(silent=False)
 
