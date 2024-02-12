@@ -1,6 +1,7 @@
 """
 Some functions for hashing data or strings for idendification of sources
 """
+
 import hashlib
 from pathlib import Path
 from typing import Dict

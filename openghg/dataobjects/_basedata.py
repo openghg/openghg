@@ -1,6 +1,7 @@
 """
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
+
 from dataclasses import dataclass
 from typing import Dict
 
