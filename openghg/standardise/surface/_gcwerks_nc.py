@@ -193,10 +193,9 @@ def _read_data(
     from numpy import floor
 
 
-    # Extract the species name from the filename. This is the bit after the final underscore but before the .nc
+    # Extract the species name from the filename, which has format {instrument}_{site}_{species}_{version}.nc as of Feb 2024 code retreat
 
-    species = str(data_filepath).split(sep='_')[-1]
-    species = species[:-3]
+    species = str(data_filepath).split(sep='_')[-2]
     species=define_species_label(species)[0]
 
     
