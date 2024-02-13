@@ -6,7 +6,7 @@ These tutorials cover the use of OpenGHG when installed locally. They'll help yo
 standardising measurement data, searching the object store and exploring the NOAA ObsPack.
 
 Adding data
-------------
+-----------
 
 .. toctree::
    :maxdepth: 1
@@ -34,7 +34,7 @@ Adding data
    local/Adding_data/Updating_existing_data
 
 Analysing data
----------------
+--------------
 
 .. toctree::
    :maxdepth: 1
@@ -47,7 +47,7 @@ Analysing data
    local/Analysing_data/Working_with_co2
 
 Exploring data
----------------
+--------------
 
 .. toctree::
    :maxdepth: 1

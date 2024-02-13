@@ -31,9 +31,9 @@ If data files are large or there will be many updates needed, it may not be desi
 
 1. "auto"
 
-  * if data does not overlap, retain current data and version. 
-  * if data does overlap and `if_exists="auto"`, raise `DataOverlap` error.
-  * if data does overlap and `if_exists="new"`, save current data and create a new version.
+    * if data does not overlap, retain current data and version. 
+    * if data does overlap and `if_exists="auto"`, raise `DataOverlap` error.
+    * if data does overlap and `if_exists="new"`, save current data and create a new version.
 
 2. "yes" (/"y") - Save the current data and create a new version for the new data.
 3. "no" (/"n") - Do not save the current data and replace with the new data.
@@ -345,7 +345,7 @@ This should include the same start, end date and latest_version as the previous 
 ^^^^^^^^^^
 
 If you're finished with the data in this tutorial you can cleanup the
-tutorial object store using the ``clear_tutorial_store`` function.
+tutorial object store using the ``clear_tutorial_store`` function again.
 
 .. code:: ipython3
 
