@@ -31,9 +31,9 @@ If data files are large or there will be many updates needed, it may not be desi
 
 1. "auto"
 
-  - if data does not overlap, retain current data and version. 
-  - if data does overlap and `if_exists="auto"`, raise `DataOverlap` error.
-  - if data does overlap and `if_exists="new"`, save current data and create a new version.
+  * if data does not overlap, retain current data and version. 
+  * if data does overlap and `if_exists="auto"`, raise `DataOverlap` error.
+  * if data does overlap and `if_exists="new"`, save current data and create a new version.
 
 2. "yes" (/"y") - Save the current data and create a new version for the new data.
 3. "no" (/"n") - Do not save the current data and replace with the new data.
@@ -44,15 +44,18 @@ Replacing "identical" data
 
 One check OpenGHG will make will be whether or not an exact copy of this file has been added previously. In this case this will not check within the object store explicitly, and the data will not be added. For the rare cases where this may not be the desired behaviour, the `force` flag using `True` or `False`can be used to bypass this check and attempt to add the data to the object store in the usual way. 
 
-Example
--------
+Example workflow
+----------------
+
+This section includes an example workflow of how these keywords can be used.
+The sections must be completed in order to produce the expected results.
 
 0. Using the tutorial object store
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
+For these sections, you should work in a sandboxed object
+store called the tutorial store to produce the expected results.
+To do this we use the
 ``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
 ``OPENGHG_TUT_STORE`` environment variable for this session and won't
 affect your use of OpenGHG outside of this tutorial.
@@ -60,11 +63,21 @@ affect your use of OpenGHG outside of this tutorial.
 .. code:: ipython3
 
     from openghg.tutorial import use_tutorial_store
-
+    
     use_tutorial_store()
 
+Since this workflow relies on using an empty object store, we also recommend
+running ``clear_tutorial_store`` as well before using this in case other tutorials
+have been run using this store.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+    clear_tutorial_store()
+
 1. Adding example data
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: ipython3
 
@@ -119,7 +132,7 @@ Selected output:
 Shows the start_date, end_date and latest_version of the data stored within the object store. The start and end dates cover the year of 2010: 2010-01-01 - 2010-12-31.
 
 2. Adding more data
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Add the data for the next year.
 
@@ -166,7 +179,7 @@ Selected output:
 The start and end dates now extend from 2010 the end of 2011: 2010-01-01 to 2011-12-31 and the latest_version is still the same.
 
 3. Updating with new data
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Update data, but only store the new data using flag:
  
@@ -217,7 +230,7 @@ Selected output:
 Look at the data, now only includes the new data from 2012 and latest_version has increased by 1.
 
 4. Replacing existing data with new data
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Update data but do not retain the previous data with flags:
 
@@ -267,7 +280,7 @@ Selected output:
 Now contains new data only but the version has not changed.
 
 5. Replacing the same data
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Replace the same data file
 
@@ -329,7 +342,7 @@ Selected output:
 This should include the same start, end date and latest_version as the previous search output.
 
 6. Cleanup
-----------
+^^^^^^^^^^
 
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
