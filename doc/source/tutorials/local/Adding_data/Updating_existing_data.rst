@@ -6,7 +6,7 @@ OpenGHG categorises data based on the supplied necessary keywords and stores the
 
 When adding data to the object store, two checks will be made against currently stored data:
 
-1. Whether data with the same set of distinct keywords
+1. Whether data has the same set of distinct keywords.
 2. Whether the time range for the data being added overlaps with the current time range for that data.
 
 If the data exists but the time range does not overlap, this data will be added, grouped with the previous data and associated with the same keywords.
@@ -18,7 +18,7 @@ Updating data
 
 To add updated data to the object store which does overlap on time with current data, when using the `standarise_*` functions the user can specify what action to perform in this case using the `if_exists` input. This provides the options:
 
-1. "auto" - combine with previous data if no overlapping data points, raise `DataOverlap` error otherwise.
+1. "auto" - combine with previous data if no overlapping data points, raise `DataOverlap` error otherwise (default).
 2. "new" - store the newly added data (only)
 3. *"combine" - combine the new and previous data and prefer the new data in the case where the time range overlaps. - to be implemented.*
 
@@ -104,6 +104,18 @@ Add the initial data
 
     data_search.retrieve().metadata
 
+Selected output:
+
+.. code:: ipython3
+
+    {
+    ...
+    'start_date': '2010-01-01 02:10:00+00:00',
+    'end_date': '2010-12-31 20:53:59+00:00',
+    'latest_version': 'v1',
+    ...
+    }
+
 Shows the start_date, end_date and latest_version of the data stored within the object store. The start and end dates cover the year of 2010: 2010-01-01 - 2010-12-31.
 
 2. Adding more data
@@ -138,6 +150,18 @@ Add the data for the next year.
 .. code:: ipython3
 
     data_search2.retrieve().metadata
+
+Selected output:
+
+.. code:: ipython3
+
+    {
+    ...
+    'start_date': '2010-01-01 02:10:00+00:00',
+    'end_date': '2011-12-31 22:30:59+00:00',
+    'latest_version': 'v1',
+    ...
+    }
 
 The start and end dates now extend from 2010 the end of 2011: 2010-01-01 to 2011-12-31 and the latest_version is still the same.
 
@@ -177,6 +201,18 @@ By default this will create a new version:
 
     data_search3.retrieve().metadata
 
+Selected output:
+
+.. code:: ipython3
+
+
+    {
+    ...
+    'start_date': '2012-01-01 02:11:00+00:00',
+    'end_date': '2012-12-31 12:38:59+00:00',
+    'latest_version': 'v2',
+    ...
+    }
 
 Look at the data, now only includes the new data from 2012 and latest_version has increased by 1.
 
@@ -216,6 +252,18 @@ Update data but do not retain the previous data with flags:
 
     data_search4.retrieve().metadata
 
+Selected output:
+
+.. code:: ipython3
+
+    {
+    ...
+    'start_date': '2013-01-01 02:19:00+00:00',
+    'end_date': '2013-12-29 16:14:59+00:00',
+    'latest_version': 'v2',
+    ...
+    }
+
 Now contains new data only but the version has not changed.
 
 5. Replacing the same data
@@ -236,7 +284,21 @@ Replace the same data file
     data_search5 = search_surface(site=site, species="cf4")
     data_search5.retrieve().metadata
 
-By default this will create a new version. To avoid this pass the `save_current=False` flag as well.
+Selected output:
+
+.. code:: ipython3
+
+    {
+    ...
+    'start_date': '2013-01-01 02:19:00+00:00',
+    'end_date': '2013-12-29 16:14:59+00:00',
+    'latest_version': 'v3',
+    ...
+    }
+
+By default this will create a new version.
+
+To avoid this pass the `save_current=False` flag as well.
 
 .. code:: ipython3
 
@@ -251,6 +313,18 @@ By default this will create a new version. To avoid this pass the `save_current=
 
     data_search6 = search_surface(site=site, species="cf4")
     data_search6.retrieve().metadata
+
+Selected output:
+
+.. code:: ipython3
+
+    {
+    ...
+    'start_date': '2013-01-01 02:19:00+00:00',
+    'end_date': '2013-12-29 16:14:59+00:00',
+    'latest_version': 'v3',
+    ...
+    }
 
 This should include the same start, end date and latest_version as the previous search output.
 
