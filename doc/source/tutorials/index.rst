@@ -28,6 +28,11 @@ Adding data
 
    local/Adding_data/Metadata_and_attributes
 
+.. toctree::
+   :maxdepth: 1
+
+   local/Adding_data/Updating_existing_data
+
 Analysing data
 ---------------
 
