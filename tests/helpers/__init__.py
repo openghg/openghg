@@ -1,5 +1,6 @@
 from .cfchecking import check_cf_compliance
 from .helpers import (
+    all_datasource_keys,
     call_function_packager,
     clear_test_stores,
     get_bc_datapath,
@@ -7,13 +8,12 @@ from .helpers import (
     get_flux_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
+    get_info_datapath,
     get_mobile_datapath,
     get_retrieval_datapath,
-    get_info_datapath,
     get_surface_datapath,
     glob_files,
     key_to_local_filepath,
-    all_datasource_keys,
     temporary_store_paths,
 )
 from .meta import (

@@ -36,6 +36,7 @@ class FluxTypes(Enum):
     """For standardising flux/emissions inputs"""
 
     OPENGHG = "OPENGHG"
+    INTEM = "INTEM"
 
 
 class FluxDatabases(Enum):
@@ -68,3 +69,4 @@ class DataTypes(Enum):
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
     OPENGHG = "OPENGHG"
+    INTEM = "INTEM"

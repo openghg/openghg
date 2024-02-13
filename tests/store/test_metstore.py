@@ -7,6 +7,7 @@ from requests_mock import ANY
 
 # from helpers import clear_test_store
 
+
 @pytest.fixture(scope="session")
 def mock_data():
     return Path(__file__).resolve(strict=True).parent.parent.joinpath("data/request_return.nc").read_bytes()

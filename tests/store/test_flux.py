@@ -1,15 +1,14 @@
+
 import pytest
-from helpers import get_flux_datapath
-from typing import Any, Union
+from helpers import clear_test_stores, get_flux_datapath
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
 from openghg.transform import transform_flux_data
 from openghg.util import hash_bytes
-from xarray import open_dataset
 from pandas import Timestamp
-
-from helpers import clear_test_stores
+from xarray import open_dataset
+from typing import Any, Union
 
 
 @pytest.fixture
@@ -43,10 +42,10 @@ def test_read_binary_data(mocker, clear_stores):
         data_type="flux",
         binary_data=binary_data,
         metadata=metadata,
-        file_metadata=file_metadata)
+        file_metadata=file_metadata,
+    )
 
-    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
-                                                        "new": True}}
+    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2", "new": True}}
 
     assert results == expected_results
 
@@ -142,6 +141,7 @@ def load_edgar():
         if database_version:
             kwargs["database_version"] = version.replace(".", "")
         return standardise_flux(store="user", **kwargs)
+
     return _load_edgar
 
 

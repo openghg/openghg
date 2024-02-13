@@ -3,8 +3,8 @@ from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_flux,
     search_eulerian,
+    search_flux,
     search_footprints,
     search_surface,
 )
