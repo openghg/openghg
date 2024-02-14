@@ -8,41 +8,23 @@ from openghg.standardise.surface import parse_gcwerks_nc
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-# TODO: 
-# Choose relevant data to load in and test
-# add to the data testing directory
-# decide if any of the tests below need removing 
-# decide if any new tests are needed to test .nc-specific bits
-# rewrite existing tests to make sense for .nc
-
-# other tests could be:
-# expected metadata test
-# a wrong inlet, perhaps?
 
 @pytest.fixture(scope="session")
 def thd_data():
     thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1.nc", source_format="GC_nc")
 
-    gas_data = parse_gcwerks_nc(
-        data_filepath=thd_path,
-        site="THD",
-        instrument="gcmd",
-        network="agage",
-    )
+    gas_data = parse_gcwerks_nc(data_filepath=thd_path, site="THD", instrument="gcmd", network="agage",)
 
     return gas_data
 
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="AGAGE-GCMS-MEDUSA_CGO_hcfc-133a_20240208v1.nc", source_format="GC_nc")
-
-    gas_data = parse_gcwerks_nc(
-        data_filepath=cgo_data,
-        site="cgo",
-        instrument="medusa",
-        network="agage",
+    cgo_data = get_surface_datapath(
+        filename="AGAGE-GCMS-MEDUSA_CGO_hcfc-133a_20240208v1.nc", source_format="GC_nc"
     )
+
+    gas_data = parse_gcwerks_nc(data_filepath=cgo_data, site="cgo", instrument="medusa", network="agage",)
 
     return gas_data
 
@@ -51,12 +33,12 @@ def test_read_file_capegrim(cgo_data):
     parsed_surface_metachecker(data=cgo_data)
 
     # Expect two labels, corresponding to the two heights found in process_gcwerks_parameters.json
-    expected_keys = ['hcfc133a_10m',
-                     'hcfc133a_70m']
+    expected_keys = ["hcfc133a_10m", "hcfc133a_70m"]
 
     sorted_keys = sorted(list(cgo_data.keys()))
 
     assert sorted_keys[:2] == expected_keys
+
 
 def test_read_file_thd():
     thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1.nc", source_format="GC_nc")
@@ -71,7 +53,7 @@ def test_read_file_thd():
 
     parsed_surface_metachecker(data=gas_data)
 
-    expected_key = ['cfc11_10m']
+    expected_key = ["cfc11_10m"]
 
     assert sorted(list(gas_data.keys())) == expected_key
 
@@ -82,6 +64,7 @@ def test_read_file_thd():
 
     assert meas_data["cfc11"][0].values.item() == 267.0292663574219
     assert meas_data["cfc11"][-1] == 218.2406005859375
+
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
@@ -95,39 +78,34 @@ def test_read_invalid_instrument_raises():
 
     with pytest.raises(ValueError):
         parse_gcwerks_nc(
-            data_filepath=thd_path,
-            site="THD",
-            instrument="fish",
-            network="agage",
+            data_filepath=thd_path, site="THD", instrument="fish", network="agage",
         )
 
 
 def test_expected_metadata_thd_ch4():
-    ch4_path = get_surface_datapath(filename='AGAGE-GCMD_THD_ch4_20240208v1.nc', source_format="GC_nc")
-    
-    data = parse_gcwerks_nc(data_filepath=ch4_path,
-                            site='THD',
-                            network='agage',
-                            instrument='gcmd')
-    
-    metadata = data['ch4_10m']['metadata']
+    ch4_path = get_surface_datapath(filename="AGAGE-GCMD_THD_ch4_20240208v1.nc", source_format="GC_nc")
 
-    expected_metadata = {'data_type':'surface',
-                         'instrument':'gcmd',
-                         'site':'THD',
-                         'network':'agage',
-                         'sampling_period':'1',
-                         'units':'ppb',
-                         'calibration_scale':'TU-87',
-                         'inlet':'10m',
-                         'species':'ch4',
-                         'inlet_height_magl':'10',
-                         'data_owner':'Ray Weiss',
-                         'data_owner_email':'rfweiss@ucsd.edu',
-                         'station_longitude':-124.151,
-                         'station_latitude':41.0541,
-                         'station_height_masl': 107.0,
-                         'station_long_name':'Trinidad Head, California'}
+    data = parse_gcwerks_nc(data_filepath=ch4_path, site="THD", network="agage", instrument="gcmd")
+
+    metadata = data["ch4_10m"]["metadata"]
+
+    expected_metadata = {
+        "data_type": "surface",
+        "instrument": "gcmd",
+        "site": "THD",
+        "network": "agage",
+        "sampling_period": "1",
+        "units": "ppb",
+        "calibration_scale": "TU-87",
+        "inlet": "10m",
+        "species": "ch4",
+        "inlet_height_magl": "10",
+        "data_owner": "Ray Weiss",
+        "data_owner_email": "rfweiss@ucsd.edu",
+        "station_longitude": -124.151,
+        "station_latitude": 41.0541,
+        "station_height_masl": 107.0,
+        "station_long_name": "Trinidad Head, California",
+    }
 
     assert metadata == expected_metadata
-
