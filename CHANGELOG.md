@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+## Added
+
+- Added `GCWerks_NC` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive [git repository](https://github.com/mrghg/agage-archive).
+
 ## [0.7.0] - 2023-12-15
 
 ### Added
