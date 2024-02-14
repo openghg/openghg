@@ -21,7 +21,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1.nc", source_format="GC_nc")
 
     gas_data = parse_gcwerks_nc(
         data_filepath=thd_path,
@@ -35,7 +35,7 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="AGAGE-GCMS-MEDUSA_CGO_hcfc-133a.nc", source_format="GC_nc")
+    cgo_data = get_surface_datapath(filename="AGAGE-GCMS-MEDUSA_CGO_hcfc-133a_20240208v1.nc", source_format="GC_nc")
 
     gas_data = parse_gcwerks_nc(
         data_filepath=cgo_data,
@@ -59,7 +59,7 @@ def test_read_file_capegrim(cgo_data):
     assert sorted_keys[:2] == expected_keys
 
 def test_read_file_thd():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1.nc", source_format="GC_nc")
 
     gas_data = parse_gcwerks_nc(
         data_filepath=thd_path,
@@ -91,7 +91,7 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1.nc", source_format="GC_nc")
 
     with pytest.raises(ValueError):
         parse_gcwerks_nc(
@@ -103,20 +103,20 @@ def test_read_invalid_instrument_raises():
 
 
 def test_expected_metadata_thd_ch4():
-    ch4_path = get_surface_datapath(filename='AGAGE-combined_THD_ch4.nc', source_format="GC_nc")
+    ch4_path = get_surface_datapath(filename='AGAGE-GCMD_THD_ch4_20240208v1.nc', source_format="GC_nc")
     
     data = parse_gcwerks_nc(data_filepath=ch4_path,
                             site='THD',
                             network='agage',
-                            instrument='combined')
+                            instrument='gcmd')
     
     metadata = data['ch4_10m']['metadata']
 
     expected_metadata = {'data_type':'surface',
-                         'instrument':'combined',
+                         'instrument':'gcmd',
                          'site':'THD',
                          'network':'agage',
-                         'sampling_period':'multiple',
+                         'sampling_period':'1',
                          'units':'ppb',
                          'calibration_scale':'TU-87',
                          'inlet':'10m',
