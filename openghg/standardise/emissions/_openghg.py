@@ -228,9 +228,11 @@ def parse_edgar(
 
         return regridded_data.rename_vars({flux_data_var: "flux"})
 
+    species_name = define_species_label(species, filepath)[0]
+
     return _parse_generic(
         filepath=filepath,
-        species=species,
+        species=species_name,
         source=source,
         domain=domain,
         raw_file_hook=raw_file_hook,
