@@ -310,8 +310,8 @@ Selected output:
 This now contains new data only from 2013 but the version has not changed
 (indicating the previous version data has not been retained).
 
-5. Replacing "idential" data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5. Replacing "identical" data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There may be circumstances (e.g. data corruption, testing) where it is necessary to
 replace "identical" data (i.e. the same original input file with the same details).
