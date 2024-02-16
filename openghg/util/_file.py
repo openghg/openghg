@@ -124,6 +124,21 @@ def load_emissions_database_parser(database: str) -> Callable:
     return fn
 
 
+def load_footprint_parser(source_format: str) -> Callable:
+    """Load a parsing object for the footprint data type.
+    Used with `openghg.standardise.footprint` sub-module
+
+    Args:
+        source_format: Name of data type e.g. OPENGHG, ACRG_ORG
+    Returns:
+        callable: parser function
+    """
+    footprint_st_module_name = "openghg.standardise.footprint"
+    fn = load_parser(data_name=source_format, module_name=footprint_st_module_name)
+
+    return fn
+
+
 def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 

@@ -5,6 +5,7 @@ from ._enum import (
     ObsTypes,
     EmissionsTypes,
     EmissionsDatabases,
+    FootprintTypes,
     DataTypes,
 )
 from ._errors import (
