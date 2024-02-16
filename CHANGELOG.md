@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+### Updated
+ - standardise_footprint was updated to allow a source_format input to be specified. This currently only support "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+
 ### Fixed
 
 - Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
