@@ -217,6 +217,12 @@ def parse_edgar(
             {"time": [pd.to_datetime(year)]}, axis=2
         )
 
+        # when regridding in EASTASIA, can generate a line of NaN values along 180 
+        # degrees E/W. Remove these, and replace with zeroes (shouldn't be any 
+        # emissions here anyway, at least for F-gases)
+
+        regridded_data[flux_data_var] = regridded_data[flux_data_var].fillna(0)
+
         # convert kg/m^2/s to mol/m^2/s
         kg_to_g = 1e3
         species_name = define_species_label(species, filepath)[0]
