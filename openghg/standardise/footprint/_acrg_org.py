@@ -22,9 +22,9 @@ def parse_acrg_org(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
-    high_spatial_resolution: Optional[bool] = False,
-    high_time_resolution: Optional[bool] = False,
-    short_lifetime: Optional[bool] = False,
+    high_spatial_resolution: bool = False,
+    high_time_resolution: bool = False,
+    short_lifetime: bool = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """
