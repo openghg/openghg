@@ -1,8 +1,7 @@
 from __future__ import annotations
 import logging
-from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from typing import Dict, Literal, Optional, Tuple, Union, Any, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -194,8 +193,9 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
+        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        source_format: str = "acrg_org",
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
         high_time_resolution: bool = False,
@@ -218,6 +218,9 @@ class Footprints(BaseStore):
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             continuous: Whether time stamps have to be continuous.
+            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+                Passing "auto" will ask xarray to calculate a chunk size.
+            source_format : Type of data being input e.g. acrg_org
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
             high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
@@ -228,12 +231,8 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        import xarray as xr
-        from openghg.store import (
-            infer_date_range,
-            update_zero_dim,
-        )
-        from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
+        from openghg.types import FootprintTypes
+        from openghg.util import clean_string, format_inlet, hash_file, load_footprint_parser
 
         filepath = Path(filepath)
 
@@ -253,6 +252,23 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
+        if species is not None:
+            species = clean_string(species)
+
+        if network is not None:
+            network = clean_string(network)
+
+        if metmodel is not None:
+            metmodel = clean_string(metmodel)
+
+        try:
+            source_format = FootprintTypes[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_footprint_parser(source_format=source_format)
+
         file_hash = hash_file(filepath=filepath)
         if file_hash in self._file_hashes and not overwrite:
             logger.warning(
@@ -260,108 +276,55 @@ class Footprints(BaseStore):
             )
             return {}
 
-        # Load this into memory
-        fp_data = xr.open_dataset(filepath, chunks=chunks)
+        # Define parameters to pass to the parser function
+        # TODO: Update this to match against inputs for parser function.
+        param = {
+            "filepath": filepath,
+            "site": site,
+            "domain": domain,
+            "model": model,
+            "inlet": inlet,
+            "metmodel": metmodel,
+            "species": species,
+            "network": network,
+            "high_time_resolution": high_time_resolution,
+            "high_spatial_resolution": high_spatial_resolution,
+            "short_lifetime": short_lifetime,
+            "period": period,
+            "continuous": continuous,
+            "chunks": chunks,
+        }
 
-        if species == "co2":
-            # Expect co2 data to have high time resolution
-            if not high_time_resolution:
-                logger.info("Updating high_time_resolution to True for co2 data")
-                high_time_resolution = True
+        input_parameters: dict[Any, Any] = param.copy()
 
-        if short_lifetime and not species:
-            raise ValueError(
-                "When indicating footprint is for short lived species, 'species' input must be included"
-            )
-        elif not short_lifetime and species:
-            lifetime = species_lifetime(species)
-            if lifetime is not None:
-                # TODO: May want to add a check on length of lifetime here
-                logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                short_lifetime = True
+        # # TODO: Decide if we want to include details below / switch any parameters to be optional.
+        # optional_keywords: dict[Any, Any] = {}
+
+        # signature = inspect.signature(parser_fn)
+        # fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+
+        # # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
+        # for param, param_value in optional_keywords.items():
+        #     if param in fn_accepted_parameters:
+        #         input_parameters[param] = param_value
+        #     else:
+        #         logger.warning(
+        #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+        #             f"This is not accepted by the current standardisation function: {parser_fn}"
+        #         )
+
+        footprint_data = parser_fn(**input_parameters)
 
         # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
-        Footprints.validate_data(
-            fp_data,
-            high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
-            short_lifetime=short_lifetime,
-        )
-
-        # Need to read the metadata from the footprints and then store it
-        # Do we need to chunk the footprints / will a Datasource store it correctly?
-        metadata: Dict[str, Union[str, float, List[float]]] = {}
-
-        metadata["data_type"] = "footprints"
-        metadata["site"] = site
-        metadata["domain"] = domain
-        metadata["model"] = model
-
-        # Include both inlet and height keywords for backwards compatability
-        metadata["inlet"] = inlet
-        metadata["height"] = inlet
-
-        if species is not None:
-            metadata["species"] = clean_string(species)
-
-        if network is not None:
-            metadata["network"] = clean_string(network)
-
-        if metmodel is not None:
-            metadata["metmodel"] = clean_string(metmodel)
-
-        # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in fp_data.coords:
-            fp_data = update_zero_dim(fp_data, dim="time")
-
-        fp_time = fp_data["time"]
-
-        start_date, end_date, period_str = infer_date_range(
-            fp_time, filepath=filepath, period=period, continuous=continuous
-        )
-
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-        metadata["time_period"] = period_str
-
-        metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
-
-        if high_spatial_resolution:
-            try:
-                metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
-                metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
-                metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
-                metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
-
-            except KeyError:
-                raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
-
-        metadata["high_time_resolution"] = high_time_resolution
-        metadata["high_spatial_resolution"] = high_spatial_resolution
-        metadata["short_lifetime"] = short_lifetime
-
-        metadata["heights"] = [float(h) for h in fp_data.height.values]
-        # Do we also need to save all the variables we have available in this footprints?
-        metadata["variables"] = list(fp_data.data_vars)
-
-        # if model_params is not None:
-        #     metadata["model_parameters"] = model_params
-
-        # Set the attributes of this Dataset
-        fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
-
-        # This might seem longwinded now but will help when we want to read
-        # more than one footprints at a time
-        # TODO - remove this once assign_attributes has been refactored
-        key = "_".join((site, domain, model, inlet))
-
-        footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        footprint_data[key]["data"] = fp_data
-        footprint_data[key]["metadata"] = metadata
+        for split_data in footprint_data.values():
+            fp_data = split_data["data"]
+            Footprints.validate_data(
+                fp_data,
+                high_spatial_resolution=high_spatial_resolution,
+                high_time_resolution=high_time_resolution,
+                short_lifetime=short_lifetime,
+            )
 
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
