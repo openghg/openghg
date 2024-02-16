@@ -355,6 +355,7 @@ def standardise_footprint(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    source_format: str = "acrg_org",
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
@@ -378,6 +379,7 @@ def standardise_footprint(
         metmodel: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
+        source_format: Format of the input data format, for example acrg_org
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
         continuous: Whether time stamps have to be continuous.
@@ -439,6 +441,7 @@ def standardise_footprint(
             metmodel=metmodel,
             species=species,
             network=network,
+            source_format=source_format,
             period=period,
             chunks=chunks,
             continuous=continuous,
