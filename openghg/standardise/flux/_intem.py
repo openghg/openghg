@@ -21,14 +21,14 @@ def parse_intem(
         filepath: Path to the INTEM emissions data file.
         species: Name of species
         source: Source of the emissions data
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+            To disable chunking pass in an empty dictionary.
         data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
         high_time_resolution: If this is a high resolution file.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
-            To disable chunking pass in an empty dictionary.
         continuous: Flag indicating whether the data is continuous or not
     Returns:
         Dict: Parsed emissions data in dictionary format.
