@@ -299,44 +299,6 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
-def test_standardise_footprint_different_chunking_schemes(caplog):
-    datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-    datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
-
-    site = "TAC"
-    network = "UKV"
-    height = "100m"
-    domain = "EUROPE"
-    model = "chunk_model"
-
-    standardise_footprint(
-        filepath=datapath_a,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        store="user",
-        chunks={"time": 2},
-    )
-
-    standardise_footprint(
-        filepath=datapath_b,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        store="user",
-        chunks={"time": 2, "lat": 5, "lon": 5},
-    )
-
-    search_results = search(data_type="footprints", model="chunk_model", store="user")
-    fp_data = search_results.retrieve_all()
-
-    assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}
-
-
 def test_standardise_flux():
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
@@ -409,3 +371,41 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
+
+
+def test_standardise_footprint_different_chunking_schemes(caplog):
+    datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    site = "TAC"
+    network = "UKV"
+    height = "100m"
+    domain = "EUROPE"
+    model = "chunk_model"
+
+    standardise_footprint(
+        filepath=datapath_a,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    standardise_footprint(
+        filepath=datapath_b,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2, "lat": 5, "lon": 5},
+    )
+
+    search_results = search(data_type="footprints", model="chunk_model", store="user")
+    fp_data = search_results.retrieve_all()
+
+    assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}
