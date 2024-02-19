@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -194,7 +194,7 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
@@ -206,7 +206,6 @@ class Footprints(BaseStore):
         force: bool = False,
         sort: bool = False,
         drop_duplicates: bool = False,
-        compression: bool = True,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> dict:
@@ -245,12 +244,11 @@ class Footprints(BaseStore):
             force: Force adding of data even if this is identical to data stored.
             sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
             drop_duplicates: Drop duplicate timestamps, keeping the first value
-            compression: Enable compression, we recommend enabling compression
             compressor: A custom compressor to use. If None, this will default to
-            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -326,6 +324,9 @@ class Footprints(BaseStore):
         else:
             xr_open_fn = xr.open_dataset
             filepath = filepath[0]
+
+        if chunks is None:
+            chunks = {}
 
         # This accepts both single and multiple files
         # Using open_mfdataset handles chunks different so we have this setup

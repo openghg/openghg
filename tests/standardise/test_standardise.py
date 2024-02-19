@@ -224,6 +224,7 @@ def test_local_obs_metadata_mismatch_fail():
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
     from helpers import clear_test_stores
+
     clear_test_stores()
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
@@ -296,6 +297,36 @@ def test_standardise_footprint():
 
     assert "error" not in results
     assert "tmb_europe_test_model_10m" in results
+
+
+from openghg.retrieve import search_footprints
+
+
+def test_standardise_footprints_chunk(caplog):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    site = "TAC"
+    network = "DECC"
+    height = "185m"
+    domain = "EUROPE"
+    model = "UKV-chunked"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    search_results = search_footprints(model="UKV-chunked", store="user")
+    fp_data = search_results.retrieve_all()
+
+    assert dict(fp_data.data.chunks) == {"time": (2, 1), "lat": (12,), "lon": (12,), "height": (20,)}
 
 
 def test_standardise_flux():

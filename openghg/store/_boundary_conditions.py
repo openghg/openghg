@@ -63,6 +63,7 @@ class BoundaryConditions(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -96,6 +97,9 @@ class BoundaryConditions(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+                To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -139,7 +143,10 @@ class BoundaryConditions(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
-        with open_dataset(filepath) as bc_data:
+        if chunks is None:
+            chunks = {}
+
+        with open_dataset(filepath).chunk(chunks) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them
             # to their native types here
             attrs = {}

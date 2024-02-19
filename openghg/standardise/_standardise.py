@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any
 from pandas import Timedelta
 import warnings
 
@@ -74,6 +74,7 @@ def standardise_surface(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -119,6 +120,9 @@ def standardise_surface(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data
     """
@@ -234,6 +238,7 @@ def standardise_surface(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -256,6 +261,7 @@ def standardise_column(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Read column observation file
 
@@ -296,6 +302,9 @@ def standardise_column(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -350,6 +359,7 @@ def standardise_column(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -368,6 +378,7 @@ def standardise_bc(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -399,6 +410,9 @@ def standardise_bc(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            To disable chunking pass an empty dictionary.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -444,6 +458,7 @@ def standardise_bc(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -458,7 +473,7 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
     store: Optional[str] = None,
@@ -488,7 +503,9 @@ def standardise_footprint(
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
-        chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
@@ -593,7 +610,7 @@ def standardise_flux(
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
     store: Optional[str] = None,
     if_exists: str = "auto",
@@ -616,6 +633,9 @@ def standardise_flux(
                Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
@@ -712,6 +732,7 @@ def standardise_eulerian(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -742,7 +763,9 @@ def standardise_eulerian(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data
     """
@@ -765,6 +788,7 @@ def standardise_eulerian(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -788,7 +812,6 @@ def standardise_from_binary_data(
         metadata: Metadata
         file_metadata: File metadata such as original filename
         **kwargs: data type specific arguments, see specific implementations in data classes.
-
     returns:
         Dictionary of result data.
     """

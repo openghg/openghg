@@ -41,6 +41,7 @@ class EulerianModel(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -68,6 +69,9 @@ class EulerianModel(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+                To disable chunking pass in an empty dictionary.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -110,7 +114,10 @@ class EulerianModel(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
-        with open_dataset(filepath) as em_data:
+        if chunks is None:
+            chunks = {}
+
+        with open_dataset(filepath).chunk(chunks) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
             check_coords = {
                 "time": ["time"],

@@ -3,7 +3,7 @@ import logging
 import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
@@ -66,7 +66,7 @@ class Flux(BaseStore):
         source_format: str = "openghg",
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -92,6 +92,9 @@ class Flux(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+                To disable chunking pass in an empty dictionary.
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -153,6 +156,9 @@ class Flux(BaseStore):
             return {}
 
         filepath = next(iter(unseen_hashes.values()))
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
