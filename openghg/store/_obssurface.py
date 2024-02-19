@@ -106,8 +106,8 @@ class ObsSurface(BaseStore):
         self,
         filepath: multiPathType,
         source_format: str,
-        network: str,
         site: str,
+        network: str,
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
@@ -123,6 +123,7 @@ class ObsSurface(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -133,6 +134,7 @@ class ObsSurface(BaseStore):
             source_format: Data format, for example CRDS, GCWERKS
             site: Site code/name
             network: Network name
+
             inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
                 If retrieve multiple files pass None, OpenGHG will attempt to
                 extract this from the file.
@@ -170,7 +172,10 @@ class ObsSurface(BaseStore):
                 `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None the a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+                To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -270,6 +275,9 @@ class ObsSurface(BaseStore):
 
         results: resultsType = defaultdict(dict)
 
+        if chunks is None:
+            chunks = {}
+
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -347,6 +355,11 @@ class ObsSurface(BaseStore):
 
             if not validated:
                 continue
+
+            # Ensure the data is chunked
+            if chunks:
+                for key, value in data.items():
+                    data[key]["data"] = value["data"].chunk(chunks)
 
             required_keys = (
                 "species",

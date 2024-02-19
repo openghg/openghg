@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from numpy import ndarray
 
@@ -41,6 +41,7 @@ class ObsColumn(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> dict:
         """Read column observation file
 
@@ -79,6 +80,9 @@ class ObsColumn(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None the a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+                To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -128,6 +132,9 @@ class ObsColumn(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
+        if chunks is None:
+            chunks = {}
+
         # Define parameters to pass to the parser function
         param = {
             "data_filepath": filepath,
@@ -139,6 +146,7 @@ class ObsColumn(BaseStore):
             "network": network,
             "instrument": instrument,
             "platform": platform,
+            "chunks": chunks,
         }
 
         obs_data = parser_fn(**param)
