@@ -81,7 +81,7 @@ class ObsColumn(BaseStore):
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
             chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None the a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
                 To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
