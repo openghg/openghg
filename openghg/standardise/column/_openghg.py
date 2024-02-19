@@ -49,7 +49,7 @@ def parse_openghg(
             - "site"
             Note: this will be superceded if site or satellite keywords are specified.
         chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
             To disable chunking pass in an empty dictionary.
         kwargs: Any additional attributes to be associated with the data.
     Returns:

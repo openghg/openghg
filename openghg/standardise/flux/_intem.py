@@ -22,7 +22,7 @@ def parse_intem(
         species: Name of species
         source: Source of the emissions data
         chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the <link to documentation>.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
             To disable chunking pass in an empty dictionary.
         data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
