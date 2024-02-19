@@ -532,6 +532,20 @@ class BaseStore:
         self._datasource_uuids.clear()
         self._file_hashes.clear()
 
+    def check_chunking(
+        self, filepaths: List[str], variable: str, chunks: Optional[Dict[str, int]] = None
+    ) -> Dict:
+        """Check the chunking of a dataset and return the chunk sizes
+
+        Args:
+            filepaths: List of filepaths
+            variable: Variable to check chunking for
+            chunks: Optional dictionary of chunk sizes
+        Returns:
+            dict: Dictionary of chunk sizes
+        """
+        raise NotImplementedError
+
 
 def get_data_class(data_type: str) -> type[BaseStore]:
     """Return data class corresponding to given data type.
