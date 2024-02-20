@@ -563,7 +563,7 @@ def test_footprints_chunking_schema():
         short_lifetime=False,
     )
 
-    assert checked_chunks == {"time": 480}
+    assert checked_chunks == {'lat': 12, 'lon': 12, 'time': 480}
 
     checked_chunks = f.check_chunks(
         filepaths=[file1, file2],

@@ -585,12 +585,13 @@ class BaseStore:
             fp_dtype_bytes = 8  # assume worst case: 64 bit
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
-        if chunks is None:
-            chunks = default_chunks
-        else:
-            chunks = dict(dim_sizes, **chunks)
+        specified_chunks = default_chunks if chunks is None else chunks
+        chunks = dict(dim_sizes, **specified_chunks)
 
         # So now we want to check the size of the chunks
+        # We need to add in the sizes of the other dimensions so we calculate
+        # the chunk size correctly
+        # TODO - should we check if the specified chunk size is greater than the dimension size?
         current_chunksize = int(fp_dtype_bytes * math.prod(chunks.values()))
 
         if current_chunksize > max_chunk_size:
