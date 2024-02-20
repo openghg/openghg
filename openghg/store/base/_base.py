@@ -586,7 +586,8 @@ class BaseStore:
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks
-        chunks = dict(dim_sizes, **specified_chunks)
+        # TODO - revisit this type hinting
+        chunks = dict(dim_sizes, **specified_chunks)  # type: ignore
 
         # So now we want to check the size of the chunks
         # We need to add in the sizes of the other dimensions so we calculate
