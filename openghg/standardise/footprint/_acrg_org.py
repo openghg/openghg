@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, Literal, List, Optional, Union
 import xarray as xr
 from xarray import Dataset
-from openghg.util import species_lifetime, timestamp_now
+from openghg.util import species_lifetime, timestamp_now, clean_string
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.footprint")
@@ -90,7 +90,7 @@ def parse_acrg_org(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    dv_attribute_updates = {}
+    dv_attribute_updates: Dict[str, Dict[str, str]] = {}
     variable_names = [
         "srr",
         "air_temperature",
@@ -123,7 +123,8 @@ def parse_acrg_org(
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
-    fp_data = fp_data.rename(**dv_rename)
+    # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
+    fp_data = fp_data.rename(**dv_rename)  # type: ignore
     # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
 
     fp_data = fp_data.drop_dims(dim_drop)
@@ -188,9 +189,9 @@ def parse_acrg_org(
         except KeyError:
             raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-    metadata["high_time_resolution"] = high_time_resolution
-    metadata["high_spatial_resolution"] = high_spatial_resolution
-    metadata["short_lifetime"] = short_lifetime
+    metadata["high_time_resolution"] = str(high_time_resolution)
+    metadata["high_spatial_resolution"] = str(high_spatial_resolution)
+    metadata["short_lifetime"] = str(short_lifetime)
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
