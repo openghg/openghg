@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -195,7 +195,7 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
@@ -314,8 +314,13 @@ class Footprints(BaseStore):
         if not filepath:
             return {}
 
-        if chunks is None:
-            chunks = {}
+        chunks = self.check_chunks(
+            filepaths=filepath,
+            chunks=chunks,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
+            short_lifetime=short_lifetime,
+        )
 
         # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
         if len(filepath) > 1:

@@ -1,6 +1,7 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
+from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
@@ -544,3 +545,43 @@ def test_passing_in_different_chunks_to_same_store_works():
 
     with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
         xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
+
+
+def test_footprints_chunking_schema():
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    bucket = get_writable_bucket(name="user")
+
+    f = Footprints(bucket=bucket)
+
+    # Start with no chunks passed
+    checked_chunks = f.check_chunks(
+        filepaths=[file1, file2],
+        high_spatial_resolution=False,
+        high_time_resolution=False,
+        short_lifetime=False,
+    )
+
+    assert checked_chunks == {"time": 480}
+
+    checked_chunks = f.check_chunks(
+        filepaths=[file1, file2],
+        chunks={"time": 4},
+        high_spatial_resolution=False,
+        high_time_resolution=False,
+        short_lifetime=False,
+    )
+
+    # If we set a chunk size then it should be used and we'll get back the sizes of the other chunks
+    assert checked_chunks == {"lat": 12, "lon": 12, "time": 4}
+
+    # Let's set a huge chunk size and make sure we get an error
+    with pytest.raises(ValueError):
+        f.check_chunks(
+            filepaths=[file1, file2],
+            chunks={"time": int(1e9)},
+            high_spatial_resolution=False,
+            high_time_resolution=False,
+            short_lifetime=False,
+        )

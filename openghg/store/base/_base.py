@@ -541,8 +541,9 @@ class BaseStore:
     def check_chunks(
         self,
         filepaths: Union[str, list[str]],
-        chunks: Dict[str, int],
+        chunks: Optional[Dict[str, int]] = None,
         max_chunk_size: int = 262144000,
+        **chunking_kwargs: Any,
     ) -> Dict[str, int]:
         """Check the chunk size of a variable in a dataset and return the chunk size
 
@@ -558,7 +559,7 @@ class BaseStore:
         if not isinstance(filepaths, list):
             filepaths = [filepaths]
 
-        default_schema = self.chunking_schema()
+        default_schema = self.chunking_schema(**chunking_kwargs)
         variable = default_schema.variable
         default_chunks = default_schema.chunks
         secondary_dimensions = default_schema.secondary_dims
@@ -585,7 +586,7 @@ class BaseStore:
             chunks = dict(dim_sizes, **chunks)
 
         # So now we want to check the size of the chunks
-        current_chunksize = fp_dtype_bytes * math.prod(chunks.values())
+        current_chunksize = int(fp_dtype_bytes * math.prod(chunks.values()))
 
         if current_chunksize > max_chunk_size:
             # Do we want to check the secondary dimensions really?
@@ -601,11 +602,11 @@ class BaseStore:
             )
 
         # Do we need to supply the chunks of the other dimensions?
+        # rechunk = {k: v for k, v in chunks.items() if v < dim_sizes[k]}
         # rechunk = {}
         # for k in dim_sizes:
         #     if chunks[k] < dim_sizes[k]:
         #         rechunk[k] = chunks.pop(k)
-
         return chunks
 
 
