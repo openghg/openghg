@@ -408,4 +408,5 @@ def test_standardise_footprint_different_chunking_schemes(caplog):
     search_results = search(data_type="footprints", model="chunk_model", store="user")
     fp_data = search_results.retrieve_all()
 
+    # Check that the chunking scheme is what was specified with the first standardise call
     assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}
