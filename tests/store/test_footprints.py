@@ -56,8 +56,8 @@ def test_read_footprint_co2_from_data(mocker):
 def test_read_footprint_standard(keyword, value):
     """
     Test standard footprint which should contain (at least)
-     - data variables: "fp"
-     - coordinates: "height", "lat", "lev", "lon", "time"
+     - data variables: "srr"
+     - coordinates: "height", "lat", "lon", "time"
     Check this for different variants of inlet and height inputs.
     """
     site = "TAC"
@@ -84,9 +84,9 @@ def test_read_footprint_standard(keyword, value):
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["height", "lat", "lon", "time"]
 
-    assert "fp" in footprint_data.data_vars
+    assert "srr" in footprint_data.data_vars
 
     expected_attrs = {
         "author": "OpenGHG Cloud",
@@ -147,8 +147,8 @@ def test_read_footprint_high_spatial_resolution():
     footprint_coords.sort()
     footprint_dims.sort()
 
-    assert footprint_coords == ["height", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
-    assert footprint_dims == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    assert footprint_coords == ["height", "lat", "lat_high", "lon", "lon_high", "time"]
+    assert footprint_dims == ["height", "index", "lat", "lat_high", "lon", "lon_high", "time"]
 
     assert (
         footprint_data.attrs["heights"]
@@ -177,12 +177,12 @@ def test_read_footprint_high_spatial_resolution():
     ).all()
 
     assert footprint_data.attrs["variables"] == [
-        "fp",
-        "temperature",
-        "pressure",
+        "srr",
+        "air_temperature",
+        "air_pressure",
         "wind_speed",
-        "wind_direction",
-        "PBLH",
+        "wind_from_direction",
+        "atmosphere_boundary_layer_thickness",
         "release_lon",
         "release_lat",
         "particle_locations_n",
@@ -232,10 +232,10 @@ def test_read_footprint_high_spatial_resolution():
 
     assert footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
     assert footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
-    assert footprint_data["pressure"].max().values == pytest.approx(1011.92)
+    assert footprint_data["air_pressure"].max().values == pytest.approx(1011.92)
     assert footprint_data["fp_low"].min().values == 0.0
     assert footprint_data["fp_high"].min().values == 0.0
-    assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
+    assert footprint_data["air_pressure"].min().values == pytest.approx(1011.92)
 
 
 @pytest.mark.parametrize(
@@ -301,9 +301,9 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["H_back", "height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["H_back", "height", "lat", "lon", "time"]
 
-    assert "fp" in footprint_data.data_vars
+    assert "srr" in footprint_data.data_vars
     assert "fp_HiTRes" in footprint_data.data_vars
 
     expected_attrs = {
@@ -366,9 +366,9 @@ def test_read_footprint_short_lived():
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["height", "lat", "lon", "time"]
 
-    assert "fp" in footprint_data.data_vars
+    assert "srr" in footprint_data.data_vars
     assert "mean_age_particles_n" in footprint_data.data_vars
     assert "mean_age_particles_e" in footprint_data.data_vars
     assert "mean_age_particles_s" in footprint_data.data_vars
@@ -405,7 +405,7 @@ def test_footprint_schema():
     data_schema = Footprints.schema()
 
     data_vars = data_schema.data_vars
-    assert "fp" in data_vars
+    assert "srr" in data_vars
     assert "particle_locations_n" in data_vars
     assert "particle_locations_e" in data_vars
     assert "particle_locations_s" in data_vars
@@ -423,7 +423,7 @@ def test_footprint_schema_spatial():
     data_schema = Footprints.schema(high_spatial_resolution=True)
 
     data_vars = data_schema.data_vars
-    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
+    assert "srr" not in data_vars  # "srr" not required (but can be present in file)
     assert "fp_low" in data_vars
     assert "fp_high" in data_vars
 
@@ -450,7 +450,7 @@ def test_footprint_schema_temporal():
     data_schema = Footprints.schema(high_time_resolution=True)
 
     data_vars = data_schema.data_vars
-    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
+    assert "srr" not in data_vars  # "srr" not required (but can be present in file)
     assert "fp_HiTRes" in data_vars
 
     assert "particle_locations_n" in data_vars
@@ -470,7 +470,7 @@ def test_footprint_schema_lifetime():
     data_schema = Footprints.schema(short_lifetime=True)
 
     data_vars = data_schema.data_vars
-    assert "fp" in data_vars
+    assert "srr" in data_vars
 
     assert "particle_locations_n" in data_vars
     assert "particle_locations_e" in data_vars
