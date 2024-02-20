@@ -82,11 +82,13 @@ def parse_acrg_org(
 
     attribute_rename = {"fp_output_units": "lpdm_native_output_units"}
 
-    dim_rename = {"lat": "latitude", "lon": "longitude"}
+    # # Removed for now - this renaming to match to PARIS would mean the dimension names
+    # # were inconsistent between data types/
+    # dim_rename = {"lat": "latitude", "lon": "longitude"}
 
     dim_drop = "lev"
 
-    dim_reorder = ("time", "height", "latitude", "longitude")
+    dim_reorder = ("time", "height", "lat", "lon")
 
     dv_attribute_updates = {}
     variable_names = [
@@ -122,7 +124,7 @@ def parse_acrg_org(
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
     fp_data = fp_data.rename(**dv_rename)
-    fp_data = fp_data.rename(**dim_rename)
+    # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
 
     fp_data = fp_data.drop_dims(dim_drop)
     fp_data = fp_data.transpose(*dim_reorder, ...)
@@ -171,10 +173,10 @@ def parse_acrg_org(
     metadata["end_date"] = str(end_date)
     metadata["time_period"] = period_str
 
-    metadata["max_longitude"] = round(float(fp_data["longitude"].max()), 5)
-    metadata["min_longitude"] = round(float(fp_data["longitude"].min()), 5)
-    metadata["max_latitude"] = round(float(fp_data["latitude"].max()), 5)
-    metadata["min_latitude"] = round(float(fp_data["latitude"].min()), 5)
+    metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
+    metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
+    metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
+    metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
 
     if high_spatial_resolution:
         try:

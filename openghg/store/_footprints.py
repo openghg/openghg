@@ -361,7 +361,7 @@ class Footprints(BaseStore):
 
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
-        By default, this will include "fp" variable but this will be superceded
+        By default, this will just include "srr" variable but this will be superceded
         if high_spatial_resolution or high_time_resolution are specified.
 
         Args:
@@ -377,29 +377,38 @@ class Footprints(BaseStore):
                 and include associated dimensions ("H_back").
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
+
+        Returns:
+            DataSchema object describing this format.
+
+        Note: In PARIS format the coordinate dimensions are ("latitude", "longitude") rather than ("lat", "lon")
+            but given that all other openghg internal formats are ("lat", "lon"), we are currently keeping all
+            footprint internal formats consistent with this.
         """
+
+        # # Note: In PARIS format the coordinate dimensions are ("latitude", "longitude") rather than ("lat", "lon")
+        # # but given that all other openghg internal formats are ("lat", "lon"), we are currently keeping the
+        # # footprint internal format consistent with this.
 
         # Names of data variables and associated dimensions (as a tuple)
         data_vars: Dict[str, Tuple[str, ...]] = {}
         # Internal data types of data variables and coordinates
         dtypes = {
-            "latitude": np.floating,  # Covers np.float16, np.float32, np.float64 types
-            "longitude": np.floating,
+            "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
+            "lon": np.floating,
             "time": np.datetime64,
         }
 
         if not high_time_resolution and not high_spatial_resolution:
             # Includes standard footprint variable
-            # data_vars["fp"] = ("time", "lat", "lon")
-            # dtypes["fp"] = np.floating
-            data_vars["srr"] = ("time", "latitude", "longitude")
+            data_vars["srr"] = ("time", "lat", "lon")
             dtypes["srr"] = np.floating
 
         if high_spatial_resolution:
             # Include options for high spatial resolution footprint
             # This includes footprint data on multiple resolutions
 
-            data_vars["fp_low"] = ("time", "latitude", "longitude")
+            data_vars["fp_low"] = ("time", "lat", "lon")
             data_vars["fp_high"] = ("time", "lat_high", "lon_high")
 
             dtypes["fp_low"] = np.floating
@@ -408,16 +417,16 @@ class Footprints(BaseStore):
         if high_time_resolution:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
-            data_vars["fp_HiTRes"] = ("time", "latitude", "longitude", "H_back")
+            data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
             dtypes["fp_HiTRes"] = np.floating
             dtypes["H_back"] = np.number  # float or integer
 
         # Includes particle location directions - one for each regional boundary
         if particle_locations:
-            data_vars["particle_locations_n"] = ("time", "longitude", "height")
-            data_vars["particle_locations_e"] = ("time", "latitude", "height")
-            data_vars["particle_locations_s"] = ("time", "longitude", "height")
-            data_vars["particle_locations_w"] = ("time", "latitude", "height")
+            data_vars["particle_locations_n"] = ("time", "lon", "height")
+            data_vars["particle_locations_e"] = ("time", "lat", "height")
+            data_vars["particle_locations_s"] = ("time", "lon", "height")
+            data_vars["particle_locations_w"] = ("time", "lat", "height")
 
             dtypes["height"] = np.floating
             dtypes["particle_locations_n"] = np.floating
@@ -432,10 +441,10 @@ class Footprints(BaseStore):
         # Include options for short lifetime footprints (short-lived species)
         # This includes additional particle ages (allow calculation of decay based on particle lifetimes)
         if short_lifetime:
-            data_vars["mean_age_particles_n"] = ("time", "longitude", "height")
-            data_vars["mean_age_particles_e"] = ("time", "latitude", "height")
-            data_vars["mean_age_particles_s"] = ("time", "longitude", "height")
-            data_vars["mean_age_particles_w"] = ("time", "latitude", "height")
+            data_vars["mean_age_particles_n"] = ("time", "lon", "height")
+            data_vars["mean_age_particles_e"] = ("time", "lat", "height")
+            data_vars["mean_age_particles_s"] = ("time", "lon", "height")
+            data_vars["mean_age_particles_w"] = ("time", "lat", "height")
 
             dtypes["mean_age_particles_n"] = np.floating
             dtypes["mean_age_particles_e"] = np.floating
