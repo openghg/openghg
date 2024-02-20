@@ -333,7 +333,7 @@ class LocalZarrStore(Store):
             logger.warning(msg)
 
             # For coordinates we haven't chunked over we'll use the full size
-            for k in dataset.coords:
+            for k in dataset.dims:
                 if k not in stored_actually_chunked:
                     stored_actually_chunked[k] = dataset.sizes[k]
 
