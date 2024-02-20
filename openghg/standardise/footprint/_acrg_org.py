@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, Literal, List, Optional, Union
 import xarray as xr
 from xarray import Dataset
-from openghg.util import species_lifetime, timestamp_now, clean_string
+from openghg.util import species_lifetime, timestamp_now
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.footprint")
