@@ -6,6 +6,7 @@ from typing import Any, Callable, DefaultDict, Dict, Literal, List, Optional, Tu
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.store.storage import ChunkingSchema
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -611,7 +612,7 @@ class Footprints(BaseStore):
         high_time_resolution: bool = False,
         high_spatial_resolution: bool = False,
         short_lifetime: bool = False,
-    ) -> Dict:
+    ) -> ChunkingSchema:
         """
         Get chunking schema for footprint data.
 
@@ -623,18 +624,18 @@ class Footprints(BaseStore):
             dict: Chunking schema for footprint data.
         """
         if high_spatial_resolution or short_lifetime:
-            logger.warning(
+            raise NotImplementedError(
                 "Chunking schema for footprints with high spatial resolution or short lifetime is not currently set."
             )
-            return {}
 
         # TODO - could these defaults be changed in the object store config maybe?
-        chunk_first = "time"
-        chunk_next = ["lat", "lon"]
-        time_chunk_size = 100 if high_time_resolution else 300
+        if high_time_resolution:
+            var = "fp_HiTRes"
+            time_chunk_size = 24
+            secondary_vars = ["lat", "lon", "H_back"]
+        else:
+            var = "fp"
+            time_chunk_size = 480
+            secondary_vars = ["lat", "lon"]
 
-        # TODO - not sure about the setup on the dictionary
-        # Better names for these keys
-        chunking_suggest = {"primary": {chunk_first: time_chunk_size}, "secondary": chunk_next}
-
-        return chunking_suggest
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)
