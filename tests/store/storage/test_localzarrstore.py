@@ -102,7 +102,7 @@ def test_copy_to_memory_store(store):
 
 
 def test_update(store):
-    fp_1 = get_footprint_datapath("TAC-100magl_UKV_EUROPE_201607.nc")
+    fp_1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     fp_2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
     with xr.open_dataset(fp_1) as ds:
@@ -200,12 +200,16 @@ def test_match_chunking(store):
 
     store.delete_all()
 
+    # Let's add some data and then try and add some data with different chunking
     chunks = {"time": 4}
-    data_a_chunked = data_a.chunk(chunks)
     store.add(version="v0", dataset=data_a)
+
+    data_a_chunked = data_a.chunk(chunks)
     chunking = store.match_chunking(version="v0", dataset=data_a_chunked)
 
-    assert not chunking
+    # As the data we originally put in wasn't chunked then we get the full size of the time coordinate
+    # which is 31 here
+    assert chunking == {'time': 31}
 
     # Now try it the other way round, add chunked data and then try to match it with unchunked data
     store.delete_all()
