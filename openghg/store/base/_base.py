@@ -559,7 +559,12 @@ class BaseStore:
         if not isinstance(filepaths, list):
             filepaths = [filepaths]
 
-        default_schema = self.chunking_schema(**chunking_kwargs)
+        try:
+            default_schema = self.chunking_schema(**chunking_kwargs)
+        except NotImplementedError:
+            logger.warn(f"No chunking schema found for {type(self).__name__}")
+            return {}
+
         variable = default_schema.variable
         default_chunks = default_schema.chunks
         secondary_dimensions = default_schema.secondary_dims
