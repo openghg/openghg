@@ -22,9 +22,9 @@ def parse_acrg_org(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
-    high_spatial_resolution: Optional[bool] = False,
-    high_time_resolution: Optional[bool] = False,
-    short_lifetime: Optional[bool] = False,
+    high_spatial_resolution: bool = False,
+    high_time_resolution: bool = False,
+    short_lifetime: bool = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """
@@ -189,9 +189,9 @@ def parse_acrg_org(
         except KeyError:
             raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-    metadata["high_time_resolution"] = str(high_time_resolution)
-    metadata["high_spatial_resolution"] = str(high_spatial_resolution)
-    metadata["short_lifetime"] = str(short_lifetime)
+    metadata["high_time_resolution"] = high_time_resolution
+    metadata["high_spatial_resolution"] = high_spatial_resolution
+    metadata["short_lifetime"] = short_lifetime
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
