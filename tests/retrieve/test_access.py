@@ -390,10 +390,10 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert footprint.time[0] == Timestamp("2020-08-01")
     assert footprint.time[-1] == Timestamp("2020-08-01")
 
-    assert metadata["max_longitude"] == pytest.approx(float(footprint["longitude"].max()))
-    assert metadata["min_longitude"] == pytest.approx(float(footprint["longitude"].min()))
-    assert metadata["max_latitude"] == pytest.approx(float(footprint["latitude"].max()))
-    assert metadata["min_latitude"] == pytest.approx(float(footprint["latitude"].min()))
+    assert metadata["max_longitude"] == pytest.approx(float(footprint["lon"].max()))
+    assert metadata["min_longitude"] == pytest.approx(float(footprint["lon"].min()))
+    assert metadata["max_latitude"] == pytest.approx(float(footprint["lat"].max()))
+    assert metadata["min_latitude"] == pytest.approx(float(footprint["lat"].min()))
     assert metadata["high_time_resolution"] == False
 
 
