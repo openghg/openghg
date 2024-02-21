@@ -46,7 +46,7 @@ on which data types are missing.
 
 import logging
 from rich.progress import track
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, Hashable, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
@@ -81,6 +81,70 @@ methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
+
+
+def _expand_on_key(d: dict, k: Hashable) -> list[dict]:
+    """Helper function for `expand_dict_list_values`.
+
+    The input dict `d` is not mutated by this function.
+
+    Args:
+        d: dictionary whose values we'd like to expand
+        k: key in d whose value is a list
+
+    Returns:
+        list of dictionaries with the same key-value pairs as `d`, except
+    for the key k: each returned dictionary has the key-value pair (k, x)
+    where x is an item in the list d[k]
+    """
+    if k not in d or not isinstance(d[k], list):
+         return [d]
+
+    v = d[k]
+    result = []
+    for x in v:
+        temp = d.copy()
+        temp[k] = x
+        result.append(temp)
+    return result
+
+
+def expand_dict_list_values(ld: list[dict]) -> list[dict]:
+    """If any values in the given dictionaries are lists, append a new dictionary for each item in that list.
+
+    This expansion is carried out over all combinations of items, if multiple values are lists.
+
+    For instance, if `ld = [{"a": 1, "b": [0, 1], "c": [0, 1]}]`, then the following list is returned:
+    [
+        {"a": 1, "b": 0, "c": 0},
+        {"a": 1, "b": 0, "c": 1},
+        {"a": 1, "b": 1, "c": 0},
+        {"a": 1, "b": 1, "c": 1},
+    ]
+
+    Note: the order of the keys may change. The input list of dictionaries is not mutated by this function.
+
+    Args:
+        ld: list of dictionaries
+
+    Returns:
+        list of dictionaries where no value of any dictionary is a list; each dictionary in the input list
+    is expanded into a list of dictionaries containing all combinations of items that were previous in
+    list values of that dict.
+    """
+    ld_copy = ld.copy()  # _expand procedure below mutates the input so copy original `ld`
+
+    def _expand(ld):
+        for d in ld:
+            for k, v in d.items():
+                if isinstance(v, list):
+                    ld.remove(d)
+                    ld.extend(_expand_on_key(d, k))
+                    _expand(ld)
+                    break
+    _expand(ld_copy)
+
+    return ld_copy
 
 
 class ModelScenario:
@@ -264,31 +328,45 @@ class ModelScenario:
         get_fn = get_functions[data_type]
         search_fn = search_functions.get(data_type)
 
+        original_keywords = keywords.copy()
+
         if isinstance(keywords, dict):
             keywords = [keywords]
 
+        keywords = expand_dict_list_values(keywords)
+
         data = None
-        num_checks = len(keywords)
-        for i, keyword_set in enumerate(keywords):
+        for keyword_set in keywords:
             try:
                 data = get_fn(**keyword_set)  # type:ignore
             except (SearchError, AttributeError):
-                num = i + 1
-                if num == num_checks:
-                    logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
-                    logger.warning(" Inputs -")
-                    for key, value in keyword_set.items():
-                        logger.info(f" {key}: {value}")
-                    if search_fn is not None:
-                        data_search = search_fn(**keyword_set)  # type:ignore
-                        logger.info("---- Search results ---")
-                        logger.info(f"Number of results returned: {len(data_search)}")
-                        logger.info(data_search.results)
-                    print("\n")
-                data = None
+                continue
             else:
                 logger.info(f"Adding {data_type} to model scenario")
                 break
+
+        if data is None:
+            logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
+            logger.warning(" Inputs -")
+
+            if isinstance(original_keywords, list):
+                for keyword_set in original_keywords:
+                    for key, value in keyword_set.items():
+                        logger.info(f" {key}: {value}")
+            else:
+                for key, value in original_keywords.items():
+                    logger.info(f" {key}: {value}")
+
+            if search_fn is not None:
+                n_search_results = 0
+                for keyword_set in keywords:
+                    data_search = search_fn(**keyword_set) # type:ignore
+                    n_search_results += len(data_search)
+
+                logger.info("---- Search results ---")
+                logger.info(f"Number of results returned: {n_search_results}")
+                logger.info(data_search.results)
+            print("\n")
 
         return data
 
@@ -392,37 +470,35 @@ class ModelScenario:
                 )
 
             if isinstance(fp_inlet, list):
-                fp_inlet_options = fp_inlet
+                fp_inlets = fp_inlet
             else:
-                fp_inlet_options = [fp_inlet]
+                fp_inlets = [fp_inlet]
 
-            fp_inlet_options = [format_inlet(value) for value in fp_inlet_options]
+            fp_inlets = [format_inlet(value) for value in fp_inlets]
 
-            footprint_keyword_options = []
-            for fp_inlet_option in fp_inlet_options:
-                footprint_keywords = {
-                    "site": site,
-                    "height": fp_inlet_option,
-                    "inlet": fp_inlet_option,
-                    "domain": domain,
-                    "model": model,
-                    # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "store": store,
-                }
+            footprint_keywords = {
+                "site": site,
+                "height": fp_inlets,
+                "inlet": fp_inlets,
+                "domain": domain,
+                "model": model,
+                # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
+                "start_date": start_date,
+                "end_date": end_date,
+                "store": store,
+            }
 
-                # Check whether general inert footprint should be extracted (suitable for long-lived species)
-                # or species specific footprint
-                #  - needed for short-lived species (includes additional parameters for age of particles)
-                #  - needed for carbon dioxide (include high time resolution footprint)
-                species_lifetime_value = species_lifetime(species)
-                if species_lifetime_value is not None or species == "co2":
-                    footprint_keywords["species"] = species
+            # Check whether general inert footprint should be extracted (suitable for long-lived species)
+            # or species specific footprint
+            #  - needed for short-lived species (includes additional parameters for age of particles)
+            #  - needed for carbon dioxide (include high time resolution footprint)
+            species_lifetime_value = species_lifetime(species)
+            if species_lifetime_value is not None or species == "co2":
+                footprint_keywords["species"] = species
 
-                footprint_keyword_options.append(footprint_keywords)
 
-            footprint = self._get_data(footprint_keyword_options, data_type="footprint")
+
+            footprint = self._get_data(footprint_keywords, data_type="footprint")
 
         self.footprint = footprint
 
