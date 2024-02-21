@@ -175,11 +175,12 @@ def test_pop_dataset(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
-        retrieved = store.pop(version="v0")
-        assert ds.equals(retrieved)
+        with pytest.raises(NotImplementedError):
+            store._pop(version="v0")
+        # assert ds.equals(retrieved)
 
-        assert not store.version_exists(version="v0")
-        assert not store
+        # assert not store.version_exists(version="v0")
+        # assert not store
 
 
 def test_match_chunking(store):

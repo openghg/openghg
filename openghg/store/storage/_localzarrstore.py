@@ -174,10 +174,7 @@ class LocalZarrStore(Store):
             )
 
     def get(self, version: str) -> xr.Dataset:
-        """Open the version of the dataset stored in the zarr store.
-        This should only be used when no data will be changed in the store
-        as changes to data in the store will result in errors with an open
-        dataset.
+        """Get the version of the dataset stored in the zarr store.
 
         Args:
             version: Data version
@@ -189,7 +186,7 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
         return ds
 
-    def pop(self, version: str) -> xr.Dataset:
+    def _pop(self, version: str) -> xr.Dataset:
         """Pop some data from the store. This copies the data in the version specified
         to a memory store, deletes the version and returns an xarray Dataset loaded from the
         memory store.
@@ -201,6 +198,7 @@ class LocalZarrStore(Store):
         Returns:
             Dataset: Dataset popped from the store
         """
+        raise NotImplementedError("This method will be updated to ensure data is backed up.")
         self._check_writable()
         version = self._check_version(version)
 

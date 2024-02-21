@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath
+from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores
 from openghg.retrieve import get_obs_surface, search
 from openghg.standardise import (
     standardise_column,
@@ -406,6 +406,8 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
 def test_standardise_footprint_different_chunking_schemes(caplog):
     datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    clear_test_stores()
 
     site = "TAC"
     network = "UKV"

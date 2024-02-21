@@ -688,7 +688,7 @@ class Datasource:
         return self._store._copy_to_memorystore(version=version)
 
     def get_data(self, version: str = "latest") -> xr.Dataset:
-        """
+        """Get the version of the dataset stored in the zarr store.
 
         Args:
             version: Version string, e.g. v0, v1
