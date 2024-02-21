@@ -181,40 +181,55 @@ This is useful for large files as it can reduce memory usage and speed up the pr
 In this example we'll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
 chunk the file into chunks of 48 time points.
 
-As a rule of thumb aim for chunk sizes of around 150 MB in size. An easy way to check the sizes of chunks is to calculate
-the product of the chunk sizes and the number of bytes per element.
+As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you're running
+the standardisation process on and how you'll be retrieving using the data from the object store.
 
 Let's perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable `fp_HiTRes` is has an extra `H_back` dimension we'll calculate the chunk sizes for this variable.
 
 .. code:: ipython3
 
-    import xarray as xr
+    In [1]: import xarray as xr
 
-    with xr.open_dataset(data_file_fp) as ds:
-      var_dtype = ds["fp_HiTRes"].dtype
-      var_dims = ds["fp_HiTRes"].dims
+    In [2]: with xr.open_dataset("TAC-185magl_UKV_co2_EUROPE_201501.nc") as ds:
+      ...:     var_dtype = ds.fp_HiTRes.dtype
+      ...:     var_dims = ds.fp_HiTRes.sizes
+      ...:
 
-    chunk_size = 24
+    In [3]: var_dims
+    Out[3]: Frozen({'lat': 293, 'lon': 391, 'time': 744, 'H_back': 25})
+
+    In [4]: var_dtype
+    Out[4]: dtype('float32')
+
+    In [5]: var_dtype.itemsize
+    Out[5]: 4
 
 
-
-
-
-
-
-
-
-
-
-    ds.close()
-
+Now we've got the sizes of the dimensions and the data type (32-bit floats so 4 bytes per value) of the variable we can calculate the size of the chunks in bytes.
 
 .. code:: ipython3
 
-    from openghg.standardise import standardise_footprint
+    In [5]: chunk_size = 24
 
-    chunks = {"time": 48}
-    standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", high_time_resolution=True, species="co2", chunks=chunks)
+    In [6]: chunk_bytes = chunk_size * var_dtype.itemsize * var_dims['lat'] * var_dims['lon'] * var_dims['H_back']
+
+    In [7]: chunk_MBs = chunk_bytes / (1024*1024)
+
+    In [7]: chunk_MBs
+    Out[7]: 262.2138977050781
+
+So we've got chunk sizes of 262 MB which seems sensible. Let's pass this to the standardisation function using the `chunks` argument.
+
+.. code:: ipython3
+
+    In [8]: from openghg.standardise import standardise_footprint
+
+    In [9]: chunks = {"time": 24}
+
+    In [10]: standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", species="co2", chunks=chunks)
+
+Try different chunk sizes to see what works best for your system.
+
 
 Flux / Emissions
 ^^^^^^^^^^^^^^^^
