@@ -220,8 +220,6 @@ class LocalZarrStore(Store):
         This preserves the compression and chunking of the data and the store
         can be opened as a single dataset.
 
-        Note that this function should be used if the store is to be modified.
-
         Args:
             version: Data version
         Returns:
