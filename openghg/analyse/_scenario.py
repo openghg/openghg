@@ -102,16 +102,21 @@ class ModelScenario:
         domain: Optional[str] = None,
         model: Optional[str] = None,
         metmodel: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
+        fp_inlet: Union[str, list, None] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
         bc_input: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        start_date: Union[str, Timestamp, None] = None,
+        end_date: Union[str, Timestamp, None] = None,
         obs: Optional[ObsData] = None,
         footprint: Optional[FootprintData] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        flux: Union[FluxData, Dict[str, FluxData], None] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Union[str, list[str], None] = None,
+        obs_store: Union[str, list[str], None] = None,
+        footprint_store: Union[str, list[str], None] = None,
+        flux_store: Union[str, list[str], None] = None,
+        bc_store: Union[str, list[str], None] = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
@@ -126,22 +131,27 @@ class ModelScenario:
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
-            site : Site code e.g. "TAC"
-            species : Species code e.g. "ch4"
-            inlet : Inlet value e.g. "10m"
+            site: Site code e.g. "TAC"
+            species: Species code e.g. "ch4"
+            inlet: Inlet value e.g. "10m"
             height: Alias for inlet.
-            network : Network name e.g. "AGAGE"
-            domain : Domain name e.g. "EUROPE"
-            model : Model name used in creation of footprint e.g. "NAME"
-            metmodel : Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet : Specify footprint release height options if this doesn't match to site value.
-            sources : Emissions sources
-            bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
-            start_date : Start of date range to use. Note for flux this may not be applied
-            end_date : End of date range to use. Note for flux this may not be applied
-            obs : Supply ObsData object directly (e.g. from get_obs...() functions)
-            footprint : Supply FootprintData object directly (e.g. from get_footprint() function)
-            flux : Supply FluxData object directly (e.g. from get_flux() function)
+            network: Network name e.g. "AGAGE"
+            domain: Domain name e.g. "EUROPE"
+            model: Model name used in creation of footprint e.g. "NAME"
+            metmodel: Name of met model used in creation of footprint e.g. "UKV"
+            fp_inlet: Specify footprint release height options if this doesn't match to site value.
+            sources: Emissions sources
+            bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams"
+            start_date: Start of date range to use. Note for flux this may not be applied
+            end_date: End of date range to use. Note for flux this may not be applied
+            obs: Supply ObsData object directly (e.g. from get_obs...() functions)
+            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
+            flux: Supply FluxData object directly (e.g. from get_flux() function)
+            store: name of object store to retrieve data from.
+            obs_store: name of object store to retrieve data surface from.
+            footprint_store: name of object store to retrieve footprint data from.
+            flux_store: name of object store to retrieve flux data from.
+            bc_store: name of object store to retrieve boundary conditions data from.
         Returns:
             None
 
@@ -169,6 +179,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             obs=obs,
+            store=obs_store,
         )
 
         # Make sure obs data is present, make sure inputs match to metadata
@@ -181,6 +192,7 @@ class ModelScenario:
             logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
+        footprint_store = store if footprint_store is None else footprint_store
         self.add_footprint(
             site=site,
             inlet=inlet,
@@ -193,9 +205,11 @@ class ModelScenario:
             end_date=end_date,
             species=species,
             footprint=footprint,
+            store=footprint_store,
         )
 
         # Add flux data (directly or through keywords)
+        flux_store = store if flux_store is None else flux_store
         self.add_flux(
             species=species,
             domain=domain,
@@ -204,9 +218,11 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             flux=flux,
+            store=flux_store,
         )
 
         # Add boundary conditions (directly or through keywords)
+        bc_store = store if bc_store is None else bc_store
         self.add_bc(
             species=species,
             bc_input=bc_input,
@@ -214,6 +230,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             bc=bc,
+            store=bc_store,
         )
 
         # Initialise attributes used for caching
@@ -284,6 +301,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         obs: Optional[ObsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -307,6 +325,7 @@ class ModelScenario:
                 "network": network,
                 "start_date": start_date,
                 "end_date": end_date,
+                "store": store,
             }
 
             obs = self._get_data(obs_keywords, data_type="obs_surface")
@@ -333,6 +352,7 @@ class ModelScenario:
         fp_inlet: Optional[Union[str, list]] = None,
         network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
@@ -388,6 +408,7 @@ class ModelScenario:
                     # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
                     "start_date": start_date,
                     "end_date": end_date,
+                    "store": store,
                 }
 
                 # Check whether general inert footprint should be extracted (suitable for long-lived species)
@@ -419,6 +440,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -443,7 +465,7 @@ class ModelScenario:
                 sources = [sources]
 
             for name in sources:
-                flux_keywords_1 = {"species": species, "source": name, "domain": domain}
+                flux_keywords_1 = {"species": species, "source": name, "domain": domain, "store": store}
 
                 # For CO2 we need additional emissions data before a start_date to
                 # match to high time resolution footprints.
@@ -511,6 +533,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
