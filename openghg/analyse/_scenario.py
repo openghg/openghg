@@ -45,24 +45,24 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, Hashable, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
-    get_obs_surface,
     get_bc,
     get_flux,
     get_footprint,
-    search_surface,
+    get_obs_surface,
     search_bc,
     search_flux,
     search_footprints,
+    search_surface,
 )
-from openghg.util import synonyms
 from openghg.types import SearchError
+from openghg.util import synonyms
 from pandas import Timestamp
+from rich.progress import track
 from xarray import DataArray, Dataset
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
@@ -76,11 +76,76 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
-methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
+MethodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
+
+
+def _expand_on_key(d: dict, k: Hashable) -> list[dict]:
+    """Helper function for `expand_dict_list_values`.
+
+    The input dict `d` is not mutated by this function.
+
+    Args:
+        d: dictionary whose values we'd like to expand
+        k: key in d whose value is a list
+
+    Returns:
+        list of dictionaries with the same key-value pairs as `d`, except
+    for the key k: each returned dictionary has the key-value pair (k, x)
+    where x is an item in the list d[k]
+    """
+    if k not in d or not isinstance(d[k], list):
+        return [d]
+
+    v = d[k]
+    result = []
+    for x in v:
+        temp = d.copy()
+        temp[k] = x
+        result.append(temp)
+    return result
+
+
+def expand_dict_list_values(ld: list[dict]) -> list[dict]:
+    """If any values in the given dictionaries are lists, append a new dictionary for each item in that list.
+
+    This expansion is carried out over all combinations of items, if multiple values are lists.
+
+    For instance, if `ld = [{"a": 1, "b": [0, 1], "c": [0, 1]}]`, then the following list is returned:
+    [
+        {"a": 1, "b": 0, "c": 0},
+        {"a": 1, "b": 0, "c": 1},
+        {"a": 1, "b": 1, "c": 0},
+        {"a": 1, "b": 1, "c": 1},
+    ]
+
+    Note: the order of the keys may change. The input list of dictionaries is not mutated by this function.
+
+    Args:
+        ld: list of dictionaries
+
+    Returns:
+        list of dictionaries where no value of any dictionary is a list; each dictionary in the input list
+    is expanded into a list of dictionaries containing all combinations of items that were previous in
+    list values of that dict.
+    """
+    ld_copy = ld.copy()  # _expand procedure below mutates the input so copy original `ld`
+
+    def _expand(ld):
+        for d in ld:
+            for k, v in d.items():
+                if isinstance(v, list):
+                    ld.remove(d)
+                    ld.extend(_expand_on_key(d, k))
+                    _expand(ld)
+                    break
+
+    _expand(ld_copy)
+
+    return ld_copy
 
 
 class ModelScenario:
@@ -102,16 +167,21 @@ class ModelScenario:
         domain: Optional[str] = None,
         model: Optional[str] = None,
         metmodel: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
+        fp_inlet: Union[str, list, None] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
         bc_input: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        start_date: Union[str, Timestamp, None] = None,
+        end_date: Union[str, Timestamp, None] = None,
         obs: Optional[ObsData] = None,
         footprint: Optional[FootprintData] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        flux: Union[FluxData, Dict[str, FluxData], None] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Union[str, list[str], None] = None,
+        obs_store: Union[str, list[str], None] = None,
+        footprint_store: Union[str, list[str], None] = None,
+        flux_store: Union[str, list[str], None] = None,
+        bc_store: Union[str, list[str], None] = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
@@ -126,22 +196,27 @@ class ModelScenario:
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
-            site : Site code e.g. "TAC"
-            species : Species code e.g. "ch4"
-            inlet : Inlet value e.g. "10m"
+            site: Site code e.g. "TAC"
+            species: Species code e.g. "ch4"
+            inlet: Inlet value e.g. "10m"
             height: Alias for inlet.
-            network : Network name e.g. "AGAGE"
-            domain : Domain name e.g. "EUROPE"
-            model : Model name used in creation of footprint e.g. "NAME"
-            metmodel : Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet : Specify footprint release height options if this doesn't match to site value.
-            sources : Emissions sources
-            bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
-            start_date : Start of date range to use. Note for flux this may not be applied
-            end_date : End of date range to use. Note for flux this may not be applied
-            obs : Supply ObsData object directly (e.g. from get_obs...() functions)
-            footprint : Supply FootprintData object directly (e.g. from get_footprint() function)
-            flux : Supply FluxData object directly (e.g. from get_flux() function)
+            network: Network name e.g. "AGAGE"
+            domain: Domain name e.g. "EUROPE"
+            model: Model name used in creation of footprint e.g. "NAME"
+            metmodel: Name of met model used in creation of footprint e.g. "UKV"
+            fp_inlet: Specify footprint release height options if this doesn't match to site value.
+            sources: Emissions sources
+            bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams"
+            start_date: Start of date range to use. Note for flux this may not be applied
+            end_date: End of date range to use. Note for flux this may not be applied
+            obs: Supply ObsData object directly (e.g. from get_obs...() functions)
+            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
+            flux: Supply FluxData object directly (e.g. from get_flux() function)
+            store: name of object store to retrieve data from.
+            obs_store: name of object store to retrieve data surface from.
+            footprint_store: name of object store to retrieve footprint data from.
+            flux_store: name of object store to retrieve flux data from.
+            bc_store: name of object store to retrieve boundary conditions data from.
         Returns:
             None
 
@@ -160,6 +235,7 @@ class ModelScenario:
             species = synonyms(species)
 
         # Add observation data (directly or through keywords)
+        obs_store = store if obs_store is None else obs_store
         self.add_obs(
             site=site,
             species=species,
@@ -169,6 +245,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             obs=obs,
+            store=obs_store,
         )
 
         # Make sure obs data is present, make sure inputs match to metadata
@@ -181,6 +258,7 @@ class ModelScenario:
             logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
+        footprint_store = store if footprint_store is None else footprint_store
         self.add_footprint(
             site=site,
             inlet=inlet,
@@ -193,9 +271,11 @@ class ModelScenario:
             end_date=end_date,
             species=species,
             footprint=footprint,
+            store=footprint_store,
         )
 
         # Add flux data (directly or through keywords)
+        flux_store = store if flux_store is None else flux_store
         self.add_flux(
             species=species,
             domain=domain,
@@ -204,9 +284,11 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             flux=flux,
+            store=flux_store,
         )
 
         # Add boundary conditions (directly or through keywords)
+        bc_store = store if bc_store is None else bc_store
         self.add_bc(
             species=species,
             bc_input=bc_input,
@@ -214,6 +296,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             bc=bc,
+            store=bc_store,
         )
 
         # Initialise attributes used for caching
@@ -246,31 +329,45 @@ class ModelScenario:
         get_fn = get_functions[data_type]
         search_fn = search_functions.get(data_type)
 
+        original_keywords = keywords.copy()
+
         if isinstance(keywords, dict):
             keywords = [keywords]
 
+        keywords = expand_dict_list_values(keywords)
+
         data = None
-        num_checks = len(keywords)
-        for i, keyword_set in enumerate(keywords):
+        for keyword_set in keywords:
             try:
                 data = get_fn(**keyword_set)  # type:ignore
             except (SearchError, AttributeError):
-                num = i + 1
-                if num == num_checks:
-                    logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
-                    logger.warning(" Inputs -")
-                    for key, value in keyword_set.items():
-                        logger.info(f" {key}: {value}")
-                    if search_fn is not None:
-                        data_search = search_fn(**keyword_set)  # type:ignore
-                        logger.info("---- Search results ---")
-                        logger.info(f"Number of results returned: {len(data_search)}")
-                        logger.info(data_search.results)
-                    print("\n")
-                data = None
+                continue
             else:
                 logger.info(f"Adding {data_type} to model scenario")
                 break
+
+        if data is None:
+            logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
+            logger.warning(" Inputs -")
+
+            if isinstance(original_keywords, list):
+                for keyword_set in original_keywords:
+                    for key, value in keyword_set.items():
+                        logger.info(f" {key}: {value}")
+            else:
+                for key, value in original_keywords.items():
+                    logger.info(f" {key}: {value}")
+
+            if search_fn is not None:
+                n_search_results = 0
+                for keyword_set in keywords:
+                    data_search = search_fn(**keyword_set)  # type:ignore
+                    n_search_results += len(data_search)
+
+                logger.info("---- Search results ---")
+                logger.info(f"Number of results returned: {n_search_results}")
+                logger.info(data_search.results)
+            print("\n")
 
         return data
 
@@ -284,6 +381,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         obs: Optional[ObsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -307,6 +405,7 @@ class ModelScenario:
                 "network": network,
                 "start_date": start_date,
                 "end_date": end_date,
+                "store": store,
             }
 
             obs = self._get_data(obs_keywords, data_type="obs_surface")
@@ -333,16 +432,12 @@ class ModelScenario:
         fp_inlet: Optional[Union[str, list]] = None,
         network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            species_lifetime,
-            extract_height_name,
-        )
+        from openghg.util import clean_string, extract_height_name, format_inlet, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, metmodel
@@ -371,36 +466,33 @@ class ModelScenario:
                 )
 
             if isinstance(fp_inlet, list):
-                fp_inlet_options = fp_inlet
+                fp_inlets = fp_inlet
             else:
-                fp_inlet_options = [fp_inlet]
+                fp_inlets = [fp_inlet]
 
-            fp_inlet_options = [format_inlet(value) for value in fp_inlet_options]
+            fp_inlets = [format_inlet(value) for value in fp_inlets]
 
-            footprint_keyword_options = []
-            for fp_inlet_option in fp_inlet_options:
-                footprint_keywords = {
-                    "site": site,
-                    "height": fp_inlet_option,
-                    "inlet": fp_inlet_option,
-                    "domain": domain,
-                    "model": model,
-                    # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
-                    "start_date": start_date,
-                    "end_date": end_date,
-                }
+            footprint_keywords = {
+                "site": site,
+                "height": fp_inlets,
+                "inlet": fp_inlets,
+                "domain": domain,
+                "model": model,
+                # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
+                "start_date": start_date,
+                "end_date": end_date,
+                "store": store,
+            }
 
-                # Check whether general inert footprint should be extracted (suitable for long-lived species)
-                # or species specific footprint
-                #  - needed for short-lived species (includes additional parameters for age of particles)
-                #  - needed for carbon dioxide (include high time resolution footprint)
-                species_lifetime_value = species_lifetime(species)
-                if species_lifetime_value is not None or species == "co2":
-                    footprint_keywords["species"] = species
+            # Check whether general inert footprint should be extracted (suitable for long-lived species)
+            # or species specific footprint
+            #  - needed for short-lived species (includes additional parameters for age of particles)
+            #  - needed for carbon dioxide (include high time resolution footprint)
+            species_lifetime_value = species_lifetime(species)
+            if species_lifetime_value is not None or species == "co2":
+                footprint_keywords["species"] = species
 
-                footprint_keyword_options.append(footprint_keywords)
-
-            footprint = self._get_data(footprint_keyword_options, data_type="footprint")
+            footprint = self._get_data(footprint_keywords, data_type="footprint")
 
         self.footprint = footprint
 
@@ -419,6 +511,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -443,7 +536,7 @@ class ModelScenario:
                 sources = [sources]
 
             for name in sources:
-                flux_keywords_1 = {"species": species, "source": name, "domain": domain}
+                flux_keywords_1 = {"species": species, "source": name, "domain": domain, "store": store}
 
                 # For CO2 we need additional emissions data before a start_date to
                 # match to high time resolution footprints.
@@ -511,6 +604,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
@@ -526,6 +620,7 @@ class ModelScenario:
                 "start_date": start_date,
                 "end_date": end_date,
                 "species": species,
+                "store": store,
             }
 
             bc = self._get_data(bc_keywords, data_type="boundary_conditions")
@@ -1715,7 +1810,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: MethodType = "ffill", tolerance: Optional[float] = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1751,7 +1846,7 @@ def combine_datasets(
 def match_dataset_dims(
     datasets: Sequence[Dataset],
     dims: Union[str, Sequence] = [],
-    method: methodType = "nearest",
+    method: MethodType = "nearest",
     tolerance: Union[float, Dict[str, float]] = 1e-5,
 ) -> List[Dataset]:
     """
@@ -1840,7 +1935,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     return resolution
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
+def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: MethodType = "ffill") -> Dataset:
     """
     Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency
