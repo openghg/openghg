@@ -170,6 +170,7 @@ class ModelScenario:
             species = synonyms(species)
 
         # Add observation data (directly or through keywords)
+        obs_store = store if obs_store is None else obs_store
         self.add_obs(
             site=site,
             species=species,
