@@ -179,9 +179,6 @@ class LocalZarrStore(Store):
         as changes to data in the store will result in errors with an open
         dataset.
 
-        Note that this function should not be used if the store is to be modified.
-        Please use copy_to_memorystore for that otherwise data may be lost.
-
         Args:
             version: Data version
         Returns:
@@ -215,10 +212,10 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=self._memory_store)
         return ds
 
-    def copy_to_memorystore(self, version: str) -> Dict:
+    def _copy_to_memorystore(self, version: str) -> Dict:
         """Copies the compressed data from the filesystem store to an in-memory store.
         This preserves the compression and chunking of the data and the store
-        can be opened as a single dataset.
+        can be opened as a single dataset. This may be useful for testing
 
         Args:
             version: Data version

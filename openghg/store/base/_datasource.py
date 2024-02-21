@@ -266,7 +266,7 @@ class Datasource:
             elif if_exists == "combine":
                 raise NotImplementedError("Combining data not yet implemented.")
                 # We'll copy the data into a temporary store and then combine the data
-                memory_store = self._store.copy_to_memorystore(version=self._latest_version)
+                memory_store = self._store._copy_to_memorystore(version=self._latest_version)
                 existing = xr.open_zarr(store=memory_store, consolidated=True)
 
                 logger.info("Combining overlapping data dateranges")
@@ -663,7 +663,7 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def copy_to_memorystore(self, version: str = "latest") -> Dict:
+    def _copy_to_memorystore(self, version: str = "latest") -> Dict:
         """Copy the compressed data for a version from the zarr store into memory.
         Most users should use get_data in place of this function as it offers a simpler
         way of retrieving data.
@@ -672,7 +672,7 @@ class Datasource:
         functionality.
 
         Example:
-            memory_store = datasource.copy_to_memorystore(version="v0")
+            memory_store = datasource._copy_to_memorystore(version="v0")
             with xr.open_zarr(memory_store, consolidated=True) as ds:
                 ...
 
@@ -685,12 +685,10 @@ class Datasource:
         if version == "latest":
             version = self._latest_version
 
-        return self._store.copy_to_memorystore(version=version)
+        return self._store._copy_to_memorystore(version=version)
 
     def get_data(self, version: str = "latest") -> xr.Dataset:
-        """Directly accessing a Datasource's data is no longer supported.
-        Use the copy_to_memorystore function. See its documentation for accessing data
-        stored by this Datasource.
+        """
 
         Args:
             version: Version string, e.g. v0, v1
