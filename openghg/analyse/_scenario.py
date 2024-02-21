@@ -45,24 +45,24 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
 from typing import Any, Dict, Hashable, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
-    get_obs_surface,
     get_bc,
     get_flux,
     get_footprint,
-    search_surface,
+    get_obs_surface,
     search_bc,
     search_flux,
     search_footprints,
+    search_surface,
 )
-from openghg.util import synonyms
 from openghg.types import SearchError
+from openghg.util import synonyms
 from pandas import Timestamp
+from rich.progress import track
 from xarray import DataArray, Dataset
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
@@ -76,7 +76,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
-methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
+MethodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -98,7 +98,7 @@ def _expand_on_key(d: dict, k: Hashable) -> list[dict]:
     where x is an item in the list d[k]
     """
     if k not in d or not isinstance(d[k], list):
-         return [d]
+        return [d]
 
     v = d[k]
     result = []
@@ -142,6 +142,7 @@ def expand_dict_list_values(ld: list[dict]) -> list[dict]:
                     ld.extend(_expand_on_key(d, k))
                     _expand(ld)
                     break
+
     _expand(ld_copy)
 
     return ld_copy
@@ -360,7 +361,7 @@ class ModelScenario:
             if search_fn is not None:
                 n_search_results = 0
                 for keyword_set in keywords:
-                    data_search = search_fn(**keyword_set) # type:ignore
+                    data_search = search_fn(**keyword_set)  # type:ignore
                     n_search_results += len(data_search)
 
                 logger.info("---- Search results ---")
@@ -436,12 +437,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            species_lifetime,
-            extract_height_name,
-        )
+        from openghg.util import clean_string, extract_height_name, format_inlet, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, metmodel
@@ -495,8 +491,6 @@ class ModelScenario:
             species_lifetime_value = species_lifetime(species)
             if species_lifetime_value is not None or species == "co2":
                 footprint_keywords["species"] = species
-
-
 
             footprint = self._get_data(footprint_keywords, data_type="footprint")
 
@@ -626,6 +620,7 @@ class ModelScenario:
                 "start_date": start_date,
                 "end_date": end_date,
                 "species": species,
+                "store": store,
             }
 
             bc = self._get_data(bc_keywords, data_type="boundary_conditions")
@@ -1815,7 +1810,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: MethodType = "ffill", tolerance: Optional[float] = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1851,7 +1846,7 @@ def combine_datasets(
 def match_dataset_dims(
     datasets: Sequence[Dataset],
     dims: Union[str, Sequence] = [],
-    method: methodType = "nearest",
+    method: MethodType = "nearest",
     tolerance: Union[float, Dict[str, float]] = 1e-5,
 ) -> List[Dataset]:
     """
@@ -1940,7 +1935,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     return resolution
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
+def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: MethodType = "ffill") -> Dataset:
     """
     Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency
