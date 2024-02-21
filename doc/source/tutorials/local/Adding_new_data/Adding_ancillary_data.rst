@@ -173,6 +173,49 @@ details, but they should be supplied to ensure the footprint data is
 labelled correctly.
 See schema details below for how these inputs are defined.
 
+Chunking
+^^^^^^^^
+
+When reading in a netCDF file for standardisation we can pass a dictionary of chunk sizes to the standardisation function.
+This is useful for large files as it can reduce memory usage and speed up the process.
+In this example we'll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
+chunk the file into chunks of 48 time points.
+
+As a rule of thumb aim for chunk sizes of around 150 MB in size. An easy way to check the sizes of chunks is to calculate
+the product of the chunk sizes and the number of bytes per element.
+
+Let's perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable `fp_HiTRes` is has an extra `H_back` dimension we'll calculate the chunk sizes for this variable.
+
+.. code:: ipython3
+
+    import xarray as xr
+
+    with xr.open_dataset(data_file_fp) as ds:
+      var_dtype = ds["fp_HiTRes"].dtype
+      var_dims = ds["fp_HiTRes"].dims
+
+    chunk_size = 24
+
+
+
+
+
+
+
+
+
+
+
+    ds.close()
+
+
+.. code:: ipython3
+
+    from openghg.standardise import standardise_footprint
+
+    chunks = {"time": 48}
+    standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", high_time_resolution=True, species="co2", chunks=chunks)
+
 Flux / Emissions
 ^^^^^^^^^^^^^^^^
 
