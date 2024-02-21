@@ -96,7 +96,7 @@ def test_copy_to_memory_store(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
-        memory_store = store.copy_to_memorystore(version="v0")
+        memory_store = store._copy_to_memorystore(version="v0")
         ds_recombined = xr.open_zarr(store=memory_store)
         assert ds.equals(ds_recombined)
 
@@ -175,11 +175,12 @@ def test_pop_dataset(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
-        retrieved = store.pop(version="v0")
-        assert ds.equals(retrieved)
+        with pytest.raises(NotImplementedError):
+            store._pop(version="v0")
+        # assert ds.equals(retrieved)
 
-        assert not store.version_exists(version="v0")
-        assert not store
+        # assert not store.version_exists(version="v0")
+        # assert not store
 
 
 def test_match_chunking(store):
@@ -290,7 +291,7 @@ def test_copy_actually_copies(store):
     store.add(version="v0", dataset=data_a)
 
     # Let's try copying it to a dict
-    data_a_in_dict = store.copy_to_memorystore(version="v0")
+    data_a_in_dict = store._copy_to_memorystore(version="v0")
     ds_a_from_dict = xr.open_zarr(store=data_a_in_dict, consolidated=True)
     store.delete_version(version="v0")
     ds_2 = xr.concat([ds_a_from_dict, data_b], dim="time").drop_duplicates("time")

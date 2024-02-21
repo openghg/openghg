@@ -55,7 +55,7 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def pop(self, version: str) -> Dataset:
+    def _pop(self, version: str) -> Dataset:
         """Pop some data from the store. This removes the data at this version from the store
         and returns it."""
         pass
