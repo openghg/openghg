@@ -1,7 +1,7 @@
 import pytest
 from openghg.objectstore import integrity_check
 from openghg.standardise import standardise_flux, standardise_footprint
-from openghg.objectstore import get_writable_bucket, delete_object
+from openghg.objectstore import get_writable_bucket
 from openghg.types import ObjectStoreError
 from helpers import get_footprint_datapath, get_flux_datapath, clear_test_stores
 from openghg.store.base import Datasource
@@ -42,17 +42,18 @@ def populate_store():
     )
 
 
-def test_integrity_check_delete_Datasource_keys():
+def test_integrity_check_delete_datasource_keys():
     integrity_check()
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="flux") as metastore:
         uid = metastore.select("uuid")[0]
-        ds = Datasource.load(bucket=bucket, uuid=uid)
-        keys = ds.data_keys()
-        for key in keys:
-            delete_object(bucket=bucket, key=key)
+        ds = Datasource(bucket=bucket, uuid=uid)
+
+        ds._store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
+
+# TODO - expand these integrity tests

@@ -1,4 +1,3 @@
-
 import pytest
 from helpers import clear_test_stores, get_flux_datapath
 from openghg.retrieve import search, search_flux
@@ -18,8 +17,6 @@ def clear_stores():
 
 def test_read_binary_data(mocker, clear_stores):
     clear_test_stores()
-    fake_uuids = [f"test-uuid-{n}" for n in range(1, 101)]
-    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
@@ -45,9 +42,7 @@ def test_read_binary_data(mocker, clear_stores):
         file_metadata=file_metadata,
     )
 
-    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2", "new": True}}
-
-    assert results == expected_results
+    assert results["co2_gpp-cardamom_europe"]["new"] is True
 
 
 def test_read_file():

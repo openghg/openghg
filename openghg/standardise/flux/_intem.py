@@ -1,33 +1,35 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional, Union
 
 
 def parse_intem(
     filepath: Path,
     species: str,
     source: str,
+    chunks: Dict,
     data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
     high_time_resolution: Optional[bool] = False,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
 ) -> Dict:
     """
     Parse INTEM emissions data from the specified file.
 
     Args:
-        filepath: Path to the '.nc' file containing INTEM emissions data.
+        filepath: Path to the INTEM emissions data file.
         species: Name of species
         source: Source of the emissions data
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass in an empty dictionary.
         data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
         high_time_resolution: If this is a high resolution file.
-        chunks: Chunking configuration.
-        continuous : "Flag indicating whether the data is continuous or not"
+        continuous: Flag indicating whether the data is continuous or not
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """

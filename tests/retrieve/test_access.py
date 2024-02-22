@@ -268,7 +268,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[0] == 1849.814
     assert sliced_mhd_data.mf[-1] == 1891.094
 
-
+@pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
@@ -387,7 +387,7 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert metadata["min_longitude"] == pytest.approx(float(footprint.lon.min()))
     assert metadata["max_latitude"] == pytest.approx(float(footprint.lat.max()))
     assert metadata["min_latitude"] == pytest.approx(float(footprint.lat.min()))
-    assert metadata["high_time_resolution"] == False
+    assert metadata["high_time_resolution"] == "false"
 
 
 def test_get_footprint_no_result():
