@@ -4,6 +4,8 @@ from openghg.retrieve import search
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
+import xarray as xr
+from pathlib import Path
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -22,7 +24,7 @@ def test_read_footprint_co2_from_data(mocker):
         "model": "NAME",
         "metmodel": "UKV",
         "species": "co2",
-        "high_time_resolution": True,
+        "high_time_resolution": "True",
     }
 
     binary_data = datapath.read_bytes()
@@ -65,6 +67,7 @@ def test_read_footprint_standard(keyword, value):
     domain = "EUROPE"
     model = "NAME"
     kwargs = {keyword: value}  # can't pass `keyword=value` as argument to standardise_footprint
+
     standardise_footprint(
         filepath=get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
         site=site,
@@ -112,7 +115,7 @@ def test_read_footprint_standard(keyword, value):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_high_spatial_resolution():
+def test_read_footprint_high_spatial_resolution(tmpdir):
     """
     Test high spatial resolution footprint
      - expects additional parameters for `fp_low` and `fp_high`
@@ -151,31 +154,28 @@ def test_read_footprint_high_spatial_resolution():
     assert footprint_coords == ["height", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
     assert footprint_dims == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
 
-    assert (
-        footprint_data.attrs["heights"]
-        == [
-            500.0,
-            1500.0,
-            2500.0,
-            3500.0,
-            4500.0,
-            5500.0,
-            6500.0,
-            7500.0,
-            8500.0,
-            9500.0,
-            10500.0,
-            11500.0,
-            12500.0,
-            13500.0,
-            14500.0,
-            15500.0,
-            16500.0,
-            17500.0,
-            18500.0,
-            19500.0,
-        ]
-    ).all()
+    assert footprint_data.attrs["heights"] == [
+        500.0,
+        1500.0,
+        2500.0,
+        3500.0,
+        4500.0,
+        5500.0,
+        6500.0,
+        7500.0,
+        8500.0,
+        9500.0,
+        10500.0,
+        11500.0,
+        12500.0,
+        13500.0,
+        14500.0,
+        15500.0,
+        16500.0,
+        17500.0,
+        18500.0,
+        19500.0,
+    ]
 
     assert footprint_data.attrs["variables"] == [
         "fp",
@@ -237,6 +237,10 @@ def test_read_footprint_high_spatial_resolution():
     assert footprint_data["fp_low"].min().values == 0.0
     assert footprint_data["fp_high"].min().values == 0.0
     assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
+
+    # Make sure we can write out a NetCDF
+    tmppath = Path(tmpdir).joinpath("footprint_test.nc")
+    footprint_data.to_netcdf(tmppath)
 
 
 @pytest.mark.parametrize(
@@ -482,3 +486,61 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_e" in data_vars
     assert "mean_age_particles_s" in data_vars
     assert "mean_age_particles_w" in data_vars
+
+
+def test_process_footprints():
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    for fp in (file1, file2):
+        standardise_footprint(
+            filepath=fp,
+            site="TAC",
+            inlet="100m",
+            domain="TEST_DOMAIN_MULTIFILE",
+            model="UKV",
+            store="user",
+            chunks={"time": 4},
+        )
+
+    # Get the footprints data
+    fp_res = search(site="TAC", domain="TEST_DOMAIN_MULTIFILE", data_type="footprints")
+
+    fp_obs = fp_res.retrieve_all()
+
+    with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
+        xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
+
+
+def test_passing_in_different_chunks_to_same_store_works():
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    standardise_footprint(
+        filepath=file1,
+        site="TAC",
+        inlet="100m",
+        domain="TEST_CHUNK_DOMAIN",
+        model="UKV",
+        store="user",
+        chunks={"time": 4},
+        force=True,
+    )
+    standardise_footprint(
+        filepath=file2,
+        site="TAC",
+        inlet="100m",
+        domain="TEST_CHUNK_DOMAIN",
+        model="UKV",
+        store="user",
+        chunks={"time": 2},
+        force=True,
+    )
+
+    # Get the footprints data
+    fp_res = search(site="TAC", domain="TEST_CHUNK_DOMAIN", data_type="footprints")
+
+    fp_obs = fp_res.retrieve_all()
+
+    with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
+        xr.concat([ds, ds2], dim="time").identical(fp_obs.data)

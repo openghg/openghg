@@ -1,12 +1,6 @@
 from pathlib import Path
-
 import pytest
-from helpers import (
-    get_flux_datapath,
-    get_column_datapath,
-    get_footprint_datapath,
-    get_surface_datapath,
-)
+from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores
 from openghg.retrieve import get_obs_surface, search
 from openghg.standardise import (
     standardise_column,
@@ -229,13 +223,16 @@ def test_local_obs_metadata_mismatch_fail():
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
+    from helpers import clear_test_stores
+
+    clear_test_stores()
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
     )
 
     with pytest.raises(AttrMismatchError) as e_info:
         standardise_surface(
-            filepaths=filepath,
+            filepath=filepath,
             site="TAC",
             network="DECC",
             inlet="999m",
@@ -300,6 +297,36 @@ def test_standardise_footprint():
 
     assert "error" not in results
     assert "tmb_europe_test_model_10m" in results
+
+
+from openghg.retrieve import search_footprints
+
+
+def test_standardise_footprints_chunk(caplog):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    site = "TAC"
+    network = "DECC"
+    height = "185m"
+    domain = "EUROPE"
+    model = "UKV-chunked"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    search_results = search_footprints(model="UKV-chunked", store="user")
+    fp_data = search_results.retrieve_all()
+
+    assert dict(fp_data.data.chunks) == {"time": (2, 1), "lat": (12,), "lon": (12,), "height": (20,)}
 
 
 def test_standardise_flux():
@@ -374,3 +401,44 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
+
+
+def test_standardise_footprint_different_chunking_schemes(caplog):
+    datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    clear_test_stores()
+
+    site = "TAC"
+    network = "UKV"
+    height = "100m"
+    domain = "EUROPE"
+    model = "chunk_model"
+
+    standardise_footprint(
+        filepath=datapath_a,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    standardise_footprint(
+        filepath=datapath_b,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2, "lat": 5, "lon": 5},
+    )
+
+    search_results = search(data_type="footprints", model="chunk_model", store="user")
+    fp_data = search_results.retrieve_all()
+
+    # Check that the chunking scheme is what was specified with the first standardise call
+    assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}

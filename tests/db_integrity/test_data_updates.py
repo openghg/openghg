@@ -1,16 +1,20 @@
 import pytest
 import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_flux_datapath, get_footprint_datapath
-from openghg.store.base import Datasource
+import pandas as pd
+import pytest
+from helpers import (
+    clear_test_stores,
+    get_flux_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+)
+from openghg.objectstore import get_writable_bucket
 from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux
-from openghg.retrieve import search
-from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
-from openghg.objectstore import get_bucket
+from openghg.retrieve import get_flux, search
+from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
+from openghg.store.base import Datasource
 from openghg.types import DataOverlapError
-
-from helpers import clear_test_stores
 
 
 def flux_data_read(force=False):
@@ -60,7 +64,7 @@ def test_database_update_repeat():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v1"
+    assert flux.metadata["latest_version"] == "v0"
 
 
 def test_database_update_force():
@@ -68,10 +72,10 @@ def test_database_update_force():
     Test object store can update identical data, and create a new version
     when force keyword is used.
     """
-
     # Attempt to add same data to the database twice
     clear_test_stores()
     flux_data_read()
+    # This creates a new version
     flux_data_read(force=True)
 
     em_param = {}
@@ -85,10 +89,11 @@ def test_database_update_force():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v2"
+    assert flux.metadata["latest_version"] == "v1"
 
 
 # Test variants in data from the same source being added
+
 
 def bsd_data_read_crds():
     """
@@ -127,7 +132,7 @@ def bsd_data_read_gcmd():
     )
 
 
-def bsd_small_edit_data_read(if_exists=None):
+def bsd_small_edit_data_read(if_exists="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -143,17 +148,17 @@ def bsd_small_edit_data_read(if_exists=None):
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-            filepath=(bsd_path3, bsd_prec_path3),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            if_exists=if_exists,
-            store=store,
-        )
+        filepath=(bsd_path3, bsd_prec_path3),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        if_exists=if_exists,
+        store=store,
+    )
 
 
-def bsd_diff_data_read(if_exists=None, save_current=None):
+def bsd_diff_data_read(if_exists="auto", save_current="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -167,15 +172,15 @@ def bsd_diff_data_read(if_exists=None, save_current=None):
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-            filepath=(bsd_path4, bsd_prec_path4),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            if_exists=if_exists,
-            save_current=save_current,
-            store="user"
-        )
+        filepath=(bsd_path4, bsd_prec_path4),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        if_exists=if_exists,
+        save_current=save_current,
+        store="user",
+    )
 
 
 def bsd_diff_date_range_read(overwrite=False):
@@ -327,7 +332,7 @@ def test_obs_data_read_header_diff_update():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 def test_obs_data_read_data_diff():
@@ -347,7 +352,7 @@ def test_obs_data_read_data_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    # Including if_exists="new", save_current is None by defalult --> new_version will be True
+    # Including if_exists="new", save_current="auto" by default --> new_version will be True
     bsd_diff_data_read(if_exists="new")
 
     # Search for expected species
@@ -360,11 +365,11 @@ def test_obs_data_read_data_diff():
     search_n2o = search(site="bsd", species="n2o")
 
     # Check something is found for each search
-    assert bool(search_ch4) == True
-    assert bool(search_co2) == True
-    assert bool(search_co) == True
-    assert bool(search_sf6) == True
-    assert bool(search_n2o) == True
+    assert search_ch4
+    assert search_co2
+    assert search_co
+    assert search_sf6
+    assert search_n2o
 
     # Find uuid values and use this to extract the Datasources to look at stored versions
     # Make sure that updated data (using if_exists="new" flag) has a new version.
@@ -373,13 +378,13 @@ def test_obs_data_read_data_diff():
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
-    bucket = get_bucket()
+    bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource.load(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource.load(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
 
-    assert d_sf6._latest_version == "v2"
-    assert d_n2o._latest_version == "v2"
+    assert d_sf6._latest_version == "v1"
+    assert d_n2o._latest_version == "v1"
 
     # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
@@ -405,68 +410,24 @@ def test_obs_data_read_data_diff():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 def test_obs_data_read_data_new_version():
     """
     Same data setup as test_obs_data_read_data_diff() but checking new version and correct data
-    are stored when save_current=True.
+    are stored when save_current="y".
     """
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    # Including if_exists="new", save_current=True --> new_version will be True
-    bsd_diff_data_read(if_exists="new", save_current=True)
+    # Including if_exists="new", save_current="y" --> new_version will be True
+    bsd_diff_data_read(if_exists="new", save_current="y")
 
     # Search for expected species
     # GCMD data
     search_sf6 = search(site="bsd", species="sf6")
-
-    # Compare against data from files
-    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
-
-    obs_data_sf6 = search_sf6.retrieve()
-    data_sf6 = obs_data_sf6.data
-
-    sf6 = data_sf6["sf6"].values
-    expected_sf6 = gcwerks_file_data["SF6"].values
-    np.testing.assert_allclose(sf6, expected_sf6)
-
-    metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
-
-
-def test_obs_data_read_data_overwrite_version():
-    """
-    Same data setup as test_obs_data_read_data_diff() but checking previous version is
-    overwritten and correct data are stored when save_current=False.
-    """
-    clear_test_stores()
-    # Load BSD data - GCMD data (GCWERKS)
-    bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(if_exists="new", save_current=False)
-
-    # Search for expected species
-    # GCMD data
-    search_sf6 = search(site="bsd", species="sf6")
-    search_n2o = search(site="bsd", species="n2o")
-
-    # Find uuid values and use this to extract the Datasources to look at stored versions
-    # Make sure that updated data (using if_exists="new" flag) has a new version.
-    search_sf6_results = search_sf6.results
-    search_n2o_results = search_n2o.results
-    uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
-    uuid_n2o = search_n2o_results.iloc[0]["uuid"]
-
-    bucket = get_bucket()
-    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
-
-    assert d_sf6._latest_version == "v1"
-    assert d_n2o._latest_version == "v1"
 
     # Compare against data from files
     gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
@@ -480,6 +441,52 @@ def test_obs_data_read_data_overwrite_version():
 
     metadata_sf6 = obs_data_sf6.metadata
     assert metadata_sf6["latest_version"] == "v1"
+
+
+def test_obs_data_read_data_overwrite_version():
+    """
+    Same data setup as test_obs_data_read_data_diff() but checking previous version is
+    overwritten and correct data are stored when save_current="n".
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    # Including if_exists="new", save_current="n" --> new_version will be False
+    # So this should just overwrite the data in that version
+    bsd_diff_data_read(if_exists="new", save_current="n")
+
+    # Search for expected species
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+    search_n2o = search(site="bsd", species="n2o")
+
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    # Make sure that updated data (using if_exists="new" flag) has a new version.
+    search_sf6_results = search_sf6.results
+    search_n2o_results = search_n2o.results
+    uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
+    uuid_n2o = search_n2o_results.iloc[0]["uuid"]
+
+    bucket = get_writable_bucket(name="user")
+    d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
+
+    assert d_sf6._latest_version == "v0"
+    assert d_n2o._latest_version == "v0"
+
+    # Compare against data from files
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    metadata_sf6 = obs_data_sf6.metadata
+    assert metadata_sf6["latest_version"] == "v0"
 
 
 # TODO: Add test for different time values as well.
@@ -532,11 +539,11 @@ def test_obs_data_read_two_frequencies():
     search_n2o = search(site="bsd", species="n2o")
 
     # Check something is found for each search
-    assert bool(search_ch4) == True
-    assert bool(search_co2) == True
-    assert bool(search_co) == True
-    assert bool(search_sf6) == True
-    assert bool(search_n2o) == True
+    assert search_ch4
+    assert search_co2
+    assert search_co
+    assert search_sf6
+    assert search_n2o
 
     # Extract data from original files
     crds_file_data_hourly = read_crds_file_pd(filename="bsd.picarro.hourly.108m.min.dat")
@@ -578,14 +585,13 @@ def test_obs_data_read_two_frequencies():
     uuid_co_hourly = search_co_results[search_co_results["sampling_period"] == "3600.0"].iloc[0]["uuid"]
     uuid_co_minutely = search_co_results[search_co_results["sampling_period"] == "60.0"].iloc[0]["uuid"]
 
-    bucket = get_bucket()
+    bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource.load(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource.load(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
 
-    assert d_co_hourly._latest_version == "v1"
-    assert d_co_minutely._latest_version == "v1"
-
+    assert d_co_hourly._latest_version == "v0"
+    assert d_co_minutely._latest_version == "v0"
 
 
 #  Look at replacing data with different / overlapping internal time stamps
@@ -601,16 +607,18 @@ def bsd_data_read_crds_internal_overlap(if_exists="new"):
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
 
-    standardise_surface(filepath=bsd_path_hourly,
-            source_format=source_format1,
-            site=site,
-            network=network,
-            if_exists=if_exists,
-            store="user",
-        )
+    standardise_surface(
+        filepath=bsd_path_hourly,
+        source_format=source_format1,
+        site=site,
+        network=network,
+        if_exists=if_exists,
+        store="user",
+    )
 
 
 #  Look at replacing data with different / overlapping internal time stamps
+@pytest.mark.skip(reason="We no longer split Datasets up by year so we don't need this test.")
 def test_obs_data_representative_date_overlap():
     """
     Added test based on fix for Issue 506.
@@ -622,7 +630,7 @@ def test_obs_data_representative_date_overlap():
     This test checks this will no longer raise a KeyError based on this.
     """
     clear_test_stores()
-    bucket = get_bucket(name="user")
+    bucket = get_writable_bucket(name="user")
 
     # Add same data twice, overwriting the second time
     bsd_data_read_crds_internal_overlap()
@@ -633,7 +641,7 @@ def test_obs_data_representative_date_overlap():
 
     datasources = []
     for uuid in uuids:
-        datasource = Datasource.load(bucket=bucket, uuid=uuid)
+        datasource = Datasource(bucket=bucket, uuid=uuid)
         datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]
@@ -687,7 +695,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_1 = search_sf6_1.retrieve().metadata
-    assert sf6_metadata_1["latest_version"] == "v1"
+    assert sf6_metadata_1["latest_version"] == "v0"
     assert sf6_metadata_1["start_date"] == expected_start_1
     assert sf6_metadata_1["end_date"] == expected_end_1
 
@@ -705,7 +713,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_2 = search_sf6_2.retrieve().metadata
-    assert sf6_metadata_2["latest_version"] == "v2"
+    assert sf6_metadata_2["latest_version"] == "v1"
     assert sf6_metadata_2["start_date"] == expected_start_2
     assert sf6_metadata_2["end_date"] == expected_end_2
 
@@ -727,7 +735,7 @@ def test_metadata_update():
 
 #     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-#     bucket = get_bucket()
+#     bucket = get_writable_bucket(name="user")
 #     with ObsSurface(bucket=bucket) as obs:
 #         obs.read_file(
 #             filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
@@ -739,7 +747,7 @@ def test_metadata_update():
 #     Test adding new file for GC with same time points but some different data values
 #     """
 #     clear_test_stores()
-#     bucket = get_bucket()
+#     bucket = get_writable_bucket(name="user")
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency
@@ -792,6 +800,7 @@ def test_metadata_update():
 # Deleting data
 
 # TODO: Add test to check data deletion and then adding the same data back
+
 
 @pytest.mark.parametrize(
     "standard_filename,special_filename,site,domain,model,metmodel,inlet,species",

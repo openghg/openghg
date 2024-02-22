@@ -858,3 +858,53 @@ def in_daterange(
     end_b = timestamp_tzaware(end_b)
 
     return bool((start_a <= end_b) and (end_a >= start_b))
+
+
+def dates_overlap(
+    start_a: Union[str, Timestamp],
+    end_a: Union[str, Timestamp],
+    start_b: Union[str, Timestamp],
+    end_b: Union[str, Timestamp],
+) -> bool:
+    """Check if two dateranges overlap.
+
+    Args:
+        start: Start datetime
+        end: End datetime
+    Returns:
+        bool: True if overlap
+    """
+    from openghg.util import timestamp_tzaware
+
+    start_a = timestamp_tzaware(start_a)
+    end_a = timestamp_tzaware(end_a)
+
+    start_b = timestamp_tzaware(start_b)
+    end_b = timestamp_tzaware(end_b)
+
+    return bool((start_a <= end_b) and (end_a >= start_b))
+
+
+def dates_in_range(
+    keys: List[str], start_date: Union[Timestamp, str], end_date: Union[Timestamp, str]
+) -> List[str]:
+    """Returns the keys in the key list that are between the given dates
+
+    Args:
+        keys: List of daterange keys
+        start_date: Start date
+        end_date: End date
+    Returns:
+        list: List of keys
+    """
+    start_date = timestamp_tzaware(start_date)
+    end_date = timestamp_tzaware(end_date)
+
+    in_date = []
+    for key in keys:
+        start_key, end_key = split_daterange_str(daterange_str=key)
+
+        if (start_key <= end_date) and (end_key >= start_date):
+            in_date.append(key)
+
+    return in_date

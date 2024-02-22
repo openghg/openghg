@@ -431,10 +431,10 @@ def _base_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-    from openghg.store.base import Datasource
     from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
+        dates_overlap,
         synonyms,
         timestamp_epoch,
         timestamp_now,
@@ -531,7 +531,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         expanded_search.append(not_a_list)
 
-    data_keys = {}
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
@@ -578,25 +577,19 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
             # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
             for uid, record in metadata.items():
-                _keys = Datasource.load(bucket=bucket, uuid=uid, shallow=True).keys_in_daterange(
-                    start_date=start_date, end_date=end_date
-                )
+                meta_start = record["start_date"]
+                meta_end = record["end_date"]
 
-                if _keys:
+                if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
                     metadata_in_daterange[uid] = record
-                    data_keys[uid] = _keys
 
-            if not data_keys:
+            if not metadata_in_daterange:
                 logger.warning(
                     f"No data found for the dates given in the {bucket_name} store, please try a wider search."
                 )
             # Update the metadata we'll use to create the SearchResults object
             metadata = metadata_in_daterange
-        else:
-            for uid in metadata:
-                data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
-        # TODO - adding this to make sure everything is working correctly
         # Remove once more comprehensive tests are done
         dupe_uuids = [k for k in metadata if k in general_metadata]
         if dupe_uuids:
@@ -604,4 +597,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
         general_metadata.update(metadata)
 
-    return SearchResults(keys=dict(data_keys), metadata=dict(general_metadata), start_result="data_type")
+    return SearchResults(
+        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
+    )

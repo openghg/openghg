@@ -1,3 +1,4 @@
+from __future__ import annotations
 import glob
 import json
 import os
@@ -8,6 +9,7 @@ from typing import Dict, List, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
+
 
 rlock = threading.RLock()
 
@@ -432,6 +434,25 @@ def clear_object_store() -> None:
         shutil.rmtree(local_store, ignore_errors=True)
     else:
         logger.warning("Cannot delete object store.")
+
+
+def get_folder_size(folder_path: Union[str, Path]) -> int:
+    """Get the total size of a folder
+
+    See https://stackoverflow.com/a/75101666/1303032
+
+    Args:
+        folder_path: Path to folder
+    Returns:
+        int: Total size of folder in bytes
+    """
+    total = 0
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            path = Path(root) / file
+            total += path.stat().st_size
+
+    return total
 
 
 def query_store() -> Dict:
