@@ -7,6 +7,7 @@ class SurfaceTypes(Enum):
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    GCWERKS_NC = "GCWERKS_NC"
     ICOS = "ICOS"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"

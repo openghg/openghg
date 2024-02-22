@@ -61,6 +61,14 @@ class MetastoreError(OpenGHGError):
     """Raised for errors with the metadata store"""
 
 
+class ZarrStoreError(OpenGHGError):
+    """Raised for errors with the zarr store"""
+
+
+class KeyExistsError(ZarrStoreError):
+    """Raised if key already exists in zarr store"""
+
+
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."

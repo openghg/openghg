@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any
 from pandas import Timedelta
 import warnings
 
@@ -8,6 +8,10 @@ from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
+from numcodecs import Blosc
+import logging
+
+logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> Dict:
@@ -24,6 +28,23 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
     """
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
+
+    compression = kwargs.get("compression", True)
+    compressor = kwargs.get("compressor")
+
+    if compression:
+        if compressor is None:
+            compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)
+    else:
+        logger.info("Compression disabled")
+        compressor = None
+
+    kwargs["compressor"] = compressor
+
+    try:
+        del kwargs["compression"]
+    except KeyError:
+        pass
 
     with dclass(bucket=bucket) as dc:
         result = dc.read_file(filepath=filepath, **kwargs)
@@ -46,10 +67,14 @@ def standardise_surface(
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -78,15 +103,26 @@ def standardise_surface(
                 - "from_source" / "attributes" - update mismatches based on input attributes
                 - "from_definition" / "metadata" - update mismatches based on input metadata
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data
     """
@@ -199,6 +235,10 @@ def standardise_surface(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
+            chunks=chunks,
         )
 
 
@@ -214,10 +254,14 @@ def standardise_column(
     platform: str = "satellite",
     source_format: str = "openghg",
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Read column observation file
 
@@ -241,15 +285,26 @@ def standardise_column(
         source_format : Type of data being input e.g. openghg (internal format)
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -301,6 +356,10 @@ def standardise_column(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
+            chunks=chunks,
         )
 
 
@@ -312,10 +371,14 @@ def standardise_bc(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -330,15 +393,26 @@ def standardise_bc(
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            To disable chunking pass an empty dictionary.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -381,11 +455,15 @@ def standardise_bc(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
+            chunks=chunks,
         )
 
 
 def standardise_footprint(
-    filepath: Union[str, Path],
+    filepath: Union[str, Path, List],
     site: str,
     domain: str,
     model: str,
@@ -395,22 +473,27 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
     high_time_resolution: bool = False,
+    sort: bool = False,
+    drop_duplicates: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
     Args:
-        filepath: Path of file to load
+        filepath: Path(s) of file to standardise
         site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -420,7 +503,9 @@ def standardise_footprint(
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
-        chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
@@ -428,24 +513,32 @@ def standardise_footprint(
                         Note this will be set to True automatically for Carbon Dioxide data.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
+        sort: Sort data in by time
+        drop_duplicates: Drop duplicate timestamps, keeping the first value
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
     """
     from openghg.cloud import call_function
 
-    filepath = Path(filepath)
-
     if running_on_hub():
+        raise NotImplementedError("Cloud support not yet implemented.")
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
@@ -498,6 +591,11 @@ def standardise_footprint(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
+            sort=sort,
+            drop_duplicates=drop_duplicates,
         )
 
 
@@ -512,13 +610,16 @@ def standardise_flux(
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
 ) -> Dict:
     """Process flux / emissions data
 
@@ -532,18 +633,29 @@ def standardise_flux(
                Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -599,6 +711,9 @@ def standardise_flux(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
         )
 
 
@@ -609,8 +724,15 @@ def standardise_eulerian(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     setup: Optional[str] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     store: Optional[str] = None,
+    force: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -621,10 +743,29 @@ def standardise_eulerian(
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
-        overwrite: Should this data overwrite currently stored data.
+        if_exists: What to do if existing data is present.
+            - "auto" - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "combine" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+            - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
-
+        force: Force adding of data even if this is identical to data stored.
+        compression: Enable compression in the store
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data
     """
@@ -641,11 +782,23 @@ def standardise_eulerian(
             end_date=end_date,
             setup=setup,
             overwrite=overwrite,
+            if_exists=if_exists,
+            force=force,
+            save_current=save_current,
+            compression=compression,
+            compressor=compressor,
+            filters=filters,
+            chunks=chunks,
         )
 
 
 def standardise_from_binary_data(
-    store: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
+    store: str,
+    data_type: str,
+    binary_data: bytes,
+    metadata: dict,
+    file_metadata: dict,
+    **kwargs: Any,
 ) -> Optional[Dict]:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
@@ -659,7 +812,6 @@ def standardise_from_binary_data(
         metadata: Metadata
         file_metadata: File metadata such as original filename
         **kwargs: data type specific arguments, see specific implementations in data classes.
-
     returns:
         Dictionary of result data.
     """

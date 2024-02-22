@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -184,7 +184,7 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: Union[List, str, Path],
         site: str,
         domain: str,
         model: str,
@@ -194,23 +194,26 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
-        if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        # model_params: Optional[Dict] = None,
+        sort: bool = False,
+        drop_duplicates: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
         Args:
-            filepath: Path of file to load
+            filepath: Path(s) of file(s) to standardise
             site: Site name
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -228,15 +231,24 @@ class Footprints(BaseStore):
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
+            drop_duplicates: Drop duplicate timestamps, keeping the first value
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -245,16 +257,20 @@ class Footprints(BaseStore):
             infer_date_range,
             update_zero_dim,
         )
+
         from openghg.util import (
             clean_string,
             format_inlet,
-            hash_file,
             species_lifetime,
             timestamp_now,
             check_if_need_new_version,
         )
 
-        filepath = Path(filepath)
+        if not isinstance(filepath, list):
+            filepath = [filepath]
+
+        # We wanted sorted Path objects
+        filepath = sorted([Path(f) for f in filepath])
 
         site = clean_string(site)
         network = clean_string(network)
@@ -272,170 +288,198 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # fp = Footprints.load()
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        # # Load in the metadata store
-        # metastore = load_metastore(key=fp._metakey)
-
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            logger.warning(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        if not unseen_hashes:
             return {}
 
-        # Load this into memory
-        fp_data = xr.open_dataset(filepath, chunks=chunks)
+        filepath = list(unseen_hashes.values())
 
-        if species == "co2":
-            # Expect co2 data to have high time resolution
-            if not high_time_resolution:
-                logger.info("Updating high_time_resolution to True for co2 data")
-                high_time_resolution = True
+        if not filepath:
+            return {}
 
-        if short_lifetime and not species:
-            raise ValueError(
-                "When indicating footprint is for short lived species, 'species' input must be included"
+        if chunks is None:
+            chunks = {}
+
+        # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
+        if len(filepath) > 1:
+            xr_open_fn: Callable = xr.open_mfdataset
+            logger.warning(
+                "Opening a number of footprints as a single Dataset is currently an experimental feature "
+                + "and may result in chunking errors, slow operation or high memory usage."
             )
-        elif not short_lifetime and species:
-            lifetime = species_lifetime(species)
-            if lifetime is not None:
-                # TODO: May want to add a check on length of lifetime here
-                logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                short_lifetime = True
+        else:
+            xr_open_fn = xr.open_dataset
+            filepath = filepath[0]
 
-        # Checking against expected format for footprints
-        # Based on configuration (some user defined, some inferred)
-        Footprints.validate_data(
-            fp_data,
-            high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
-            short_lifetime=short_lifetime,
-        )
+        if chunks is None:
+            chunks = {}
 
-        # Need to read the metadata from the footprints and then store it
-        # Do we need to chunk the footprints / will a Datasource store it correctly?
-        metadata: Dict[str, Union[str, float, List[float]]] = {}
+        # This accepts both single and multiple files
+        # Using open_mfdataset handles chunks different so we have this setup
+        with xr_open_fn(filepath).chunk(chunks) as fp_data:
+            if chunks:
+                logger.info(f"Rechunking with chunks={chunks}")
 
-        metadata["data_type"] = "footprints"
-        metadata["site"] = site
-        metadata["domain"] = domain
-        metadata["model"] = model
+            if species == "co2":
+                # Expect co2 data to have high time resolution
+                if not high_time_resolution:
+                    logger.info("Updating high_time_resolution to True for co2 data")
+                    high_time_resolution = True
 
-        # Include both inlet and height keywords for backwards compatability
-        metadata["inlet"] = inlet
-        metadata["height"] = inlet
+                if sort:
+                    logger.info(
+                        "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+                    )
 
-        if species is not None:
-            metadata["species"] = clean_string(species)
+            if short_lifetime and not species:
+                raise ValueError(
+                    "When indicating footprint is for short lived species, 'species' input must be included"
+                )
+            elif not short_lifetime and species:
+                lifetime = species_lifetime(species)
+                if lifetime is not None:
+                    # TODO: May want to add a check on length of lifetime here
+                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
+                    short_lifetime = True
 
-        if network is not None:
-            metadata["network"] = clean_string(network)
+            # Checking against expected format for footprints
+            # Based on configuration (some user defined, some inferred)
+            Footprints.validate_data(
+                fp_data,
+                high_spatial_resolution=high_spatial_resolution,
+                high_time_resolution=high_time_resolution,
+                short_lifetime=short_lifetime,
+            )
 
-        if metmodel is not None:
-            metadata["metmodel"] = clean_string(metmodel)
+            # Need to read the metadata from the footprints and then store it
+            # Do we need to chunk the footprints / will a Datasource store it correctly?
+            metadata: Dict[str, Union[str, float, List[float]]] = {}
 
-        # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in fp_data.coords:
-            fp_data = update_zero_dim(fp_data, dim="time")
+            metadata["data_type"] = "footprints"
+            metadata["site"] = site
+            metadata["domain"] = domain
+            metadata["model"] = model
 
-        fp_time = fp_data["time"]
+            # Include both inlet and height keywords for backwards compatability
+            metadata["inlet"] = inlet
+            metadata["height"] = inlet
 
-        start_date, end_date, period_str = infer_date_range(
-            fp_time, filepath=filepath, period=period, continuous=continuous
-        )
+            if species is not None:
+                metadata["species"] = clean_string(species)
 
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-        metadata["time_period"] = period_str
+            if network is not None:
+                metadata["network"] = clean_string(network)
 
-        metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
+            if metmodel is not None:
+                metadata["metmodel"] = clean_string(metmodel)
 
-        if high_spatial_resolution:
-            try:
-                metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
-                metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
-                metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
-                metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
+            # Check if time has 0-dimensions and, if so, expand this so time is 1D
+            if "time" in fp_data.coords:
+                fp_data = update_zero_dim(fp_data, dim="time")
 
-            except KeyError:
-                raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
+            fp_time = fp_data["time"]
 
-        metadata["high_time_resolution"] = high_time_resolution
-        metadata["high_spatial_resolution"] = high_spatial_resolution
-        metadata["short_lifetime"] = short_lifetime
+            # TODO - fix this setup
+            filepath = cast(Path, filepath)
+            start_date, end_date, period_str = infer_date_range(
+                fp_time, filepath=filepath, period=period, continuous=continuous
+            )
 
-        metadata["heights"] = [float(h) for h in fp_data.height.values]
-        # Do we also need to save all the variables we have available in this footprints?
-        metadata["variables"] = list(fp_data.data_vars)
+            metadata["start_date"] = str(start_date)
+            metadata["end_date"] = str(end_date)
+            metadata["time_period"] = period_str
 
-        # if model_params is not None:
-        #     metadata["model_parameters"] = model_params
+            metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
+            metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
+            metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
+            metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
 
-        # Set the attributes of this Dataset
-        fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
+            if high_spatial_resolution:
+                try:
+                    metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
+                    metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
+                    metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
+                    metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
 
-        # This might seem longwinded now but will help when we want to read
-        # more than one footprints at a time
-        # TODO - remove this once assign_attributes has been refactored
-        key = "_".join((site, domain, model, inlet))
+                except KeyError:
+                    raise KeyError(
+                        "Expected high spatial resolution. Unable to find lat_high or lon_high data."
+                    )
 
-        footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        footprint_data[key]["data"] = fp_data
-        footprint_data[key]["metadata"] = metadata
+            metadata["high_time_resolution"] = str(high_time_resolution)
+            metadata["high_spatial_resolution"] = str(high_spatial_resolution)
+            metadata["short_lifetime"] = str(short_lifetime)
 
-        # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should provide as much detail as possible
-        # to uniquely identify a Datasource
-        required = (
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "high_time_resolution",
-            "high_spatial_resolution",
-            "short_lifetime",
-        )
+            metadata["heights"] = [float(h) for h in fp_data.height.values]
+            # Do we also need to save all the variables we have available in this footprints?
+            metadata["variables"] = list(fp_data.data_vars)
 
-        data_type = "footprints"
-        datasource_uuids = self.assign_data(
-            data=footprint_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            required_keys=required,
-        )
+            # if model_params is not None:
+            #     metadata["model_parameters"] = model_params
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # footprint_data = update_metadata(
-        #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        # )
+            # Set the attributes of this Dataset
+            fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
 
-        # fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
+            # This might seem longwinded now but will help when we want to read
+            # more than one footprints at a time
+            # TODO - remove this once assign_attributes has been refactored
+            key = "_".join((site, domain, model, inlet))
 
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            footprint_data[key]["data"] = fp_data
+            footprint_data[key]["metadata"] = metadata
 
-        return datasource_uuids
+            # These are the keys we will take from the metadata to search the
+            # metadata store for a Datasource, they should provide as much detail as possible
+            # to uniquely identify a Datasource
+            required = (
+                "site",
+                "model",
+                "inlet",
+                "domain",
+                "high_time_resolution",
+                "high_spatial_resolution",
+                "short_lifetime",
+            )
+
+            data_type = "footprints"
+            # TODO - filter options
+            datasource_uuids = self.assign_data(
+                data=footprint_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                required_keys=required,
+                sort=sort,
+                drop_duplicates=drop_duplicates,
+                compressor=compressor,
+                filters=filters,
+            )
+
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # footprint_data = update_metadata(
+            #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
+            # )
+
+            # Record the file hash in case we see the file(s) again
+            self.store_hashes(unseen_hashes)
+
+            return datasource_uuids
 
     @staticmethod
     def schema(

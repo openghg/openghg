@@ -52,8 +52,18 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
 
+    if sort:
+        logger.warning(
+            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
+        )
+
+    if elevate_inlets:
+        logger.warning(
+            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
+        )
+
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    retrieved_data: Any = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -127,6 +137,7 @@ def get_obs_surface(
     inlet = format_inlet(inlet)
 
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         to_post: Dict[str, Union[str, Dict]] = {}
 
         to_post["function"] = "get_obs_surface"
@@ -316,6 +327,9 @@ def get_obs_surface_local(
         return None
 
     if average is not None:
+        # We need to compute the value here for the operations done further down
+        logger.info("Loading Dataset data into memory for resampling operations.")
+        data = data.compute()
         # GJ - 2021-03-09
         # TODO - check by RT
 

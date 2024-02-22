@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from numpy import ndarray
 
@@ -35,10 +35,13 @@ class ObsColumn(BaseStore):
         instrument: Optional[str] = None,
         platform: str = "satellite",
         source_format: str = "openghg",
-        if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> dict:
         """Read column observation file
 
@@ -61,22 +64,31 @@ class ObsColumn(BaseStore):
                 - "site"
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+                To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import ColumnTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_column_parser,
             check_if_need_new_version,
         )
@@ -90,15 +102,15 @@ class ObsColumn(BaseStore):
         instrument = clean_string(instrument)
         platform = clean_string(platform)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -113,16 +125,15 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        # Load in the metadata store
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         param = {
@@ -135,6 +146,7 @@ class ObsColumn(BaseStore):
             "network": network,
             "instrument": instrument,
             "platform": platform,
+            "chunks": chunks,
         }
 
         obs_data = parser_fn(**param)
@@ -159,6 +171,8 @@ class ObsColumn(BaseStore):
             data_type=data_type,
             required_keys=required,
             min_keys=3,
+            compressor=compressor,
+            filters=filters,
         )
 
         # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
@@ -170,7 +184,7 @@ class ObsColumn(BaseStore):
         # )
 
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

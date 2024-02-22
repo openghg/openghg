@@ -3,13 +3,12 @@ import logging
 import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-import warnings
 
 __all__ = ["Flux"]
 
@@ -67,12 +66,14 @@ class Flux(BaseStore):
         source_format: str = "openghg",
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
-        if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Read flux / emissions file
 
@@ -91,24 +92,33 @@ class Flux(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+                To disable chunking pass in an empty dictionary.
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import FluxTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_flux_parser,
             check_if_need_new_version,
         )
@@ -117,15 +127,15 @@ class Flux(BaseStore):
         source = clean_string(source)
         domain = clean_string(domain)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -140,13 +150,15 @@ class Flux(BaseStore):
         # Load the data retrieve object
         parser_fn = load_flux_parser(source_format=source_format)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            warnings.warn(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -204,9 +216,12 @@ class Flux(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=required,
+            compressor=compressor,
+            filters=filters,
         )
+
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 
@@ -214,9 +229,11 @@ class Flux(BaseStore):
         self,
         datapath: Union[str, Path],
         database: str,
-        if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -232,15 +249,23 @@ class Flux(BaseStore):
             datapath: Path to local copy of database archive (for now)
             database: Name of database
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
             **kwargs: Inputs for underlying parser function for the database.
+
                 Necessary inputs will depend on the database being parsed.
 
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
@@ -249,7 +274,7 @@ class Flux(BaseStore):
         from openghg.types import FluxDatabases
         from openghg.util import load_flux_database_parser, check_if_need_new_version
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
@@ -291,6 +316,8 @@ class Flux(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
         )
 
         return datasource_uuids
