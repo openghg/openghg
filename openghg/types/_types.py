@@ -1,7 +1,8 @@
 import numpy as np
 import xarray as xr
 from pathlib import Path
-from typing import DefaultDict, Dict, List, Tuple, Union, Optional, TypeVar
+from typing import DefaultDict, Dict, List, Tuple, Union, Optional, TypeVar, NamedTuple
+from dataclasses import dataclass
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
@@ -14,3 +15,7 @@ ArrayLike = Union[np.ndarray, xr.DataArray]
 ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
 XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
+
+class TimePeriod(NamedTuple):
+    value: Union[int, float, None] = None
+    unit: Optional[str] = None

@@ -5,11 +5,12 @@ import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
+from openghg.types import TimePeriod
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-TupleTimeType = Tuple[Union[int, float, None], Union[str, None]]
+# TupleTimeType = Tuple[Union[int, float, None], Union[str, None]]
 
 __all__ = ["infer_date_range", "update_zero_dim"]
 
@@ -46,11 +47,11 @@ def infer_date_range(
     if filepath is not None:
         filepath = Path(filepath)
 
-    null_freq = (None, None)
+    null_freq = TimePeriod()  # contains value=None, unit=None
 
     # Find frequency from period, if specified
     if period is not None:
-        input_freq: TupleTimeType = parse_period(period)
+        input_freq = parse_period(period)
     else:
         input_freq = null_freq
 
@@ -89,28 +90,29 @@ def infer_date_range(
                 date_match = ""
 
             # Set as default as annual if unable to derive from filepath
-            inferred_freq: TupleTimeType = (1, "years")
+            inferred_freq = TimePeriod(1, "years")
 
             if len(date_match) == 6:
                 # "yyyymm" format indicates monthly data
                 expected_date = f"{start_date.year}{start_date.month:02}"
                 if date_match == expected_date:
-                    inferred_freq = (1, "months")
+                    inferred_freq = TimePeriod(1, "months")
             elif len(date_match) == 4:
                 # "yyyy" format indicates yearly data
                 expected_date = str(start_date.year)
                 if date_match == expected_date:
-                    inferred_freq = (1, "years")
+                    inferred_freq = TimePeriod(1, "years")
 
         else:
             # Set as default as annual if filepath not supplied
-            inferred_freq = (1, "years")
+            inferred_freq = TimePeriod(1, "years")
 
         # Because frequency cannot be inferred from the data and only the filename,
         # use the user specified input in preference of the inferred value
         if input_freq != null_freq:
-            time_value: Optional[Union[int, float]] = input_freq[0]
-            time_unit: Optional[str] = input_freq[1]
+            # time_value: Optional[Union[int, float]] = input_freq[0]
+            # time_unit: Optional[str] = input_freq[1]
+            time_value, time_unit = input_freq
         else:
             if inferred_freq != null_freq:
                 logger.info(f"Only one time point, inferring frequency of {inferred_freq}")
