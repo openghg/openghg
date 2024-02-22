@@ -59,11 +59,12 @@ from openghg.retrieve import (
     search_footprints,
     search_surface,
 )
-from openghg.types import SearchError
-from openghg.util import synonyms
 from pandas import Timestamp
 from rich.progress import track
 from xarray import DataArray, Dataset
+
+from openghg.types import SearchError
+from openghg.util import synonyms
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
 
@@ -381,7 +382,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         obs: Optional[ObsData] = None,
-        store: Optional[str] = None,
+        store: Union[str, list[str], None] = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -432,7 +433,7 @@ class ModelScenario:
         fp_inlet: Optional[Union[str, list]] = None,
         network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
-        store: Optional[str] = None,
+        store: Union[str, list[str], None] = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
@@ -511,7 +512,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
-        store: Optional[str] = None,
+        store: Union[str, list[str], None] = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -604,7 +605,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        store: Union[str, list[str], None] = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
@@ -619,7 +620,6 @@ class ModelScenario:
                 "bc_input": bc_input,
                 "start_date": start_date,
                 "end_date": end_date,
-                "species": species,
                 "store": store,
             }
 
