@@ -159,7 +159,7 @@ def test_delete_all(store):
         store.add(version="v2", dataset=ds)
 
     path_v1 = store.store_path(version="v1")
-    assert path_v0.exists()
+    assert path_v1.exists()
     path_v2 = store.store_path(version="v2")
     assert path_v1.exists()
 
