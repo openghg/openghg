@@ -314,6 +314,29 @@ class Footprints(BaseStore):
         if not filepath:
             return {}
 
+        # Do some housekeeping on the inputs
+        if species == "co2":
+            # Expect co2 data to have high time resolution
+            if not high_time_resolution:
+                logger.info("Updating high_time_resolution to True for co2 data")
+                high_time_resolution = True
+
+            if sort:
+                logger.info(
+                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+                )
+
+        if short_lifetime and not species:
+            raise ValueError(
+                "When indicating footprint is for short lived species, 'species' input must be included"
+            )
+        elif not short_lifetime and species:
+            lifetime = species_lifetime(species)
+            if lifetime is not None:
+                # TODO: May want to add a check on length of lifetime here
+                logger.info("Updating short_lifetime to True since species has an associated lifetime")
+                short_lifetime = True
+
         chunks = self.check_chunks(
             filepaths=filepath,
             chunks=chunks,
@@ -338,28 +361,6 @@ class Footprints(BaseStore):
         with xr_open_fn(filepath).chunk(chunks) as fp_data:
             if chunks:
                 logger.info(f"Rechunking with chunks={chunks}")
-
-            if species == "co2":
-                # Expect co2 data to have high time resolution
-                if not high_time_resolution:
-                    logger.info("Updating high_time_resolution to True for co2 data")
-                    high_time_resolution = True
-
-                if sort:
-                    logger.info(
-                        "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-                    )
-
-            if short_lifetime and not species:
-                raise ValueError(
-                    "When indicating footprint is for short lived species, 'species' input must be included"
-                )
-            elif not short_lifetime and species:
-                lifetime = species_lifetime(species)
-                if lifetime is not None:
-                    # TODO: May want to add a check on length of lifetime here
-                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                    short_lifetime = True
 
             # Checking against expected format for footprints
             # Based on configuration (some user defined, some inferred)
