@@ -64,7 +64,7 @@ def test_database_update_repeat():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v0"
+    assert flux.metadata["latest_version"] == "v1"
 
 
 def test_database_update_force():
@@ -89,7 +89,7 @@ def test_database_update_force():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v1"
+    assert flux.metadata["latest_version"] == "v2"
 
 
 # Test variants in data from the same source being added
@@ -332,7 +332,7 @@ def test_obs_data_read_header_diff_update():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v1"
+    assert metadata_sf6["latest_version"] == "v2"
 
 
 def test_obs_data_read_data_diff():
@@ -383,8 +383,8 @@ def test_obs_data_read_data_diff():
     d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
     d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
 
-    assert d_sf6._latest_version == "v1"
-    assert d_n2o._latest_version == "v1"
+    assert d_sf6._latest_version == "v2"
+    assert d_n2o._latest_version == "v2"
 
     # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
@@ -410,7 +410,7 @@ def test_obs_data_read_data_diff():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v1"
+    assert metadata_sf6["latest_version"] == "v2"
 
 
 def test_obs_data_read_data_new_version():
@@ -440,7 +440,7 @@ def test_obs_data_read_data_new_version():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v1"
+    assert metadata_sf6["latest_version"] == "v2"
 
 
 def test_obs_data_read_data_overwrite_version():
@@ -472,8 +472,8 @@ def test_obs_data_read_data_overwrite_version():
     d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
     d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
 
-    assert d_sf6._latest_version == "v0"
-    assert d_n2o._latest_version == "v0"
+    assert d_sf6._latest_version == "v1"
+    assert d_n2o._latest_version == "v1"
 
     # Compare against data from files
     gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
@@ -486,7 +486,7 @@ def test_obs_data_read_data_overwrite_version():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v0"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 # TODO: Add test for different time values as well.
@@ -590,8 +590,8 @@ def test_obs_data_read_two_frequencies():
     d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
     d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
 
-    assert d_co_hourly._latest_version == "v0"
-    assert d_co_minutely._latest_version == "v0"
+    assert d_co_hourly._latest_version == "v1"
+    assert d_co_minutely._latest_version == "v1"
 
 
 #  Look at replacing data with different / overlapping internal time stamps
@@ -695,7 +695,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_1 = search_sf6_1.retrieve().metadata
-    assert sf6_metadata_1["latest_version"] == "v0"
+    assert sf6_metadata_1["latest_version"] == "v1"
     assert sf6_metadata_1["start_date"] == expected_start_1
     assert sf6_metadata_1["end_date"] == expected_end_1
 
@@ -713,7 +713,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_2 = search_sf6_2.retrieve().metadata
-    assert sf6_metadata_2["latest_version"] == "v1"
+    assert sf6_metadata_2["latest_version"] == "v2"
     assert sf6_metadata_2["start_date"] == expected_start_2
     assert sf6_metadata_2["end_date"] == expected_end_2
 

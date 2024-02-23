@@ -110,7 +110,7 @@ def test_add_data(data, bucket):
 
     assert d._store
 
-    ds = d.get_data(version="v0")
+    ds = d.get_data(version="v1")
 
     assert ds.equals(ch4_data)
 
@@ -135,10 +135,10 @@ def test_add_data(data, bucket):
         "data_type": "surface",
         "start_date": "2014-01-30 11:12:30+00:00",
         "end_date": "2020-12-01 22:32:29+00:00",
-        "latest_version": "v0",
+        "latest_version": "v1",
     }
 
-    d.metadata()["versions"]["v0"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
+    d.metadata()["versions"]["v1"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
     assert d.metadata().items() >= expected_metadata.items()
 
@@ -166,7 +166,7 @@ def test_versioning(capfd, bucket):
 
     min_keys = d.all_data_keys()
 
-    assert min_keys["v0"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
+    assert min_keys["v1"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
 
     detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -187,7 +187,7 @@ def test_versioning(capfd, bucket):
 
     detailed_keys = d.all_data_keys()
 
-    assert detailed_keys["v1"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
+    assert detailed_keys["v2"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
@@ -234,7 +234,7 @@ def test_replace_version(bucket):
 
     detailed_keys = d.all_data_keys()
 
-    assert detailed_keys["v1"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
+    assert detailed_keys["v2"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
@@ -283,7 +283,7 @@ def test_save_footprint(bucket):
 
     datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid, mode="r")
 
-    retrieved_ds = datasource_2.get_data(version="v0")
+    retrieved_ds = datasource_2.get_data(version="v1")
     assert retrieved_ds.equals(data)
 
     assert datasource_2._data_type == "footprints"
@@ -360,7 +360,7 @@ def test_update_daterange_replacement(data, bucket):
 
     ch4_short = ch4_data.head(40)
 
-    d.delete_version(version="v0")
+    d.delete_version(version="v1")
 
     d.add_data(metadata=metadata, data=ch4_short, data_type="surface")
 
@@ -459,7 +459,7 @@ def test_data_version_deletion(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._store.keys(version="v0"))
+    zarr_keys = set(d._store.keys(version="v1"))
 
     partial_expected_keys = {
         "ch4/.zarray",
@@ -470,12 +470,12 @@ def test_data_version_deletion(data, bucket):
 
     assert partial_expected_keys.issubset(zarr_keys)
 
-    d.delete_version(version="v0")
+    d.delete_version(version="v1")
 
-    assert "v0" not in d._data_keys
+    assert "v1" not in d._data_keys
 
     with pytest.raises(ZarrStoreError):
-        d._store.keys(version="v0")
+        d._store.keys(version="v1")
 
 
 def test_surface_data_stored_and_dated_correctly(data, bucket):
@@ -488,8 +488,8 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
 
     start, end = d.daterange()
 
-    stored_ds = d.get_data(version="v0")
-    with d.get_data(version="v0") as stored_ds:
+    stored_ds = d.get_data(version="v1")
+    with d.get_data(version="v1") as stored_ds:
         assert stored_ds.equals(ch4_data)
 
     assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware("2014-01-30T11:12:30")
@@ -527,7 +527,7 @@ def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
         "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
     ]
 
-    assert d.latest_version() == "v0"
+    assert d.latest_version() == "v1"
 
     with d.get_data(version="latest") as ds:
         assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
@@ -558,7 +558,7 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
 
-    with d.get_data(version="v0") as ds:
+    with d.get_data(version="v1") as ds:
         ds = ds.compute()
         n_days_expected = pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
         assert ds.time.size == n_days_expected
@@ -579,9 +579,9 @@ def test_add_data_combine_datasets(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data_clipped, data_type="surface", if_exists="combine")
 
-    assert d._store.version_exists(version="v0")
+    assert d._store.version_exists(version="v1")
 
-    ds_data = d._copy_to_memorystore(version="v0")
+    ds_data = d._copy_to_memorystore(version="v1")
     combined_ds = xr.open_zarr(store=ds_data, consolidated=True)
     assert combined_ds.equals(ch4_data)
 
@@ -605,7 +605,7 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
 
     expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time").sortby("time")
 
-    ds = d.get_data(version="v0").compute()
+    ds = d.get_data(version="v1").compute()
 
     assert ds.time.size == expected.time.size
     assert ds.equals(expected)
@@ -630,7 +630,7 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
 
     expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time").sortby("time")
 
-    ds = d.get_data(version="v0").compute()
+    ds = d.get_data(version="v1").compute()
 
     assert ds.time.size == expected.time.size
     assert ds.equals(expected)
