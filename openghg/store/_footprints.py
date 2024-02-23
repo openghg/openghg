@@ -288,6 +288,12 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
+        # Ensure we have a value for species
+        if species is None:
+            species = "inert"
+        else:
+            species = clean_string(species)
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
@@ -345,16 +351,22 @@ class Footprints(BaseStore):
                         "Sorting high time resolution data is very memory intensive, we recommend not sorting."
                     )
 
-            if short_lifetime and not species:
-                raise ValueError(
-                    "When indicating footprint is for short lived species, 'species' input must be included"
-                )
-            elif not short_lifetime and species:
-                lifetime = species_lifetime(species)
-                if lifetime is not None:
-                    # TODO: May want to add a check on length of lifetime here
-                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                    short_lifetime = True
+            if short_lifetime:
+                if species == "inert":
+                    raise ValueError(
+                        "When indicating footprint is for short lived species, 'species' input must be included"
+                    )
+            else:
+                if species == "inert":
+                    lifetime = None
+                else:
+                    lifetime = species_lifetime(species)
+                    if lifetime is not None:
+                        # TODO: May want to add a check on length of lifetime here
+                        logger.info(
+                            "Updating short_lifetime to True since species has an associated lifetime"
+                        )
+                        short_lifetime = True
 
             # Checking against expected format for footprints
             # Based on configuration (some user defined, some inferred)
@@ -377,9 +389,7 @@ class Footprints(BaseStore):
             # Include both inlet and height keywords for backwards compatability
             metadata["inlet"] = inlet
             metadata["height"] = inlet
-
-            if species is not None:
-                metadata["species"] = clean_string(species)
+            metadata["species"] = species
 
             if network is not None:
                 metadata["network"] = clean_string(network)
@@ -454,6 +464,7 @@ class Footprints(BaseStore):
                 "high_time_resolution",
                 "high_spatial_resolution",
                 "short_lifetime",
+                "species",
             )
 
             data_type = "footprints"
