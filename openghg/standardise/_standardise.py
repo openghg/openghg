@@ -483,6 +483,7 @@ def standardise_footprint(
     force: bool = False,
     high_spatial_resolution: bool = False,
     high_time_resolution: bool = False,
+    short_lifetime: bool = False,
     sort: bool = False,
     drop_duplicates: bool = False,
     compression: bool = True,
@@ -510,7 +511,9 @@ def standardise_footprint(
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
         high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
-                        Note this will be set to True automatically for Carbon Dioxide data.
+            Note this will be set to True automatically for Carbon Dioxide data.
+        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
+            Note this will be set to True if species has an associated lifetime.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -587,6 +590,7 @@ def standardise_footprint(
             retrieve_met=retrieve_met,
             high_spatial_resolution=high_spatial_resolution,
             high_time_resolution=high_time_resolution,
+            short_lifetime=short_lifetime,
             overwrite=overwrite,
             if_exists=if_exists,
             save_current=save_current,
