@@ -160,7 +160,7 @@ def test_delete_all(store):
 
     path_v1 = store.store_path(version="v1")
     assert path_v0.exists()
-    path_v1 = store.store_path(version="v2")
+    path_v2 = store.store_path(version="v2")
     assert path_v1.exists()
 
     parent = path_v0.parent
