@@ -327,6 +327,7 @@ class LocalZarrStore(Store):
 
             # For coordinates we haven't chunked over we'll use the full size
             for k in dataset.dims:
+                k = str(k)  # xr.Dataset.dims returns a Mapping with Hashable keys, which may not be strings
                 if k not in stored_actually_chunked:
                     stored_actually_chunked[k] = dataset.sizes[k]
 
