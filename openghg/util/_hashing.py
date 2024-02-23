@@ -85,8 +85,8 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
 
         ds = data["data"]
 
-        start_date = str(ds.time.min())
-        end_date = str(ds.time.max())
+        start_date = str(ds.time.min().values)
+        end_date = str(ds.time.max().values)
         n_timestamps = str(ds.time.size)
 
         basic_info = f"{start_date}_{end_date}_{n_timestamps}".encode("utf8")
