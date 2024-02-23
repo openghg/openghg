@@ -8,10 +8,10 @@ analysis and visualisation.
 
 .. _what-is-object-store:
 
-What is Object Store?
+What is an object store?
 ---------------------
 
-Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ~/.config/openghg/openghg.conf.
+Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ``~/.config/openghg/openghg.conf``.
 
 
 .. _using-the-tutorial-object-store:
