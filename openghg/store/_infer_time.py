@@ -23,7 +23,7 @@ def infer_date_range(
 ) -> Tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension.
-    
+
     If the time dimension only includes one value the date range will be:
      - derived from the period (if supplied)
      - derived from the filepath using pattern matching (if supplied)

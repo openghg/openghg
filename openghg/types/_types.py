@@ -16,6 +16,7 @@ ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
 XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
 
+
 class TimePeriod(NamedTuple):
     value: Union[int, float, None] = None
     unit: Optional[str] = None
