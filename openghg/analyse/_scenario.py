@@ -143,7 +143,7 @@ class ModelScenario:
             obs: Supply ObsData object directly (e.g. from get_obs...() functions)
             footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
             flux: Supply FluxData object directly (e.g. from get_flux() function)
-            store: name of object store to retrieve data from.
+            store: Name of object store to retrieve data from.
         Returns:
             None
 
