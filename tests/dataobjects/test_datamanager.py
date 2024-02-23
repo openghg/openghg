@@ -89,7 +89,7 @@ def test_delete_footprint_data(footprint_read):
     # Assert there are files in the zarr store
     assert ds._store
 
-    zarr_store_key = ds._store.store_key(version="v0")
+    zarr_store_key = ds._store.store_key(version="v1")
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         assert metastore.search({"uuid": uuid})
@@ -146,10 +146,10 @@ def test_find_modify_metadata():
         "station_latitude": 52.51775,
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
-        "latest_version": "v0",
+        "latest_version": "v1",
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
-        "versions": {"v0": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
+        "versions": {"v1": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
     }
 
     assert search_res.metadata[uuid].items() >= start_metadata.items()
@@ -219,7 +219,7 @@ def test_delete_metadata_keys():
         "station_height_masl": 50.0,
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
-        "latest_version": "v0",
+        "latest_version": "v1",
     }
 
     uuid = next(iter(res.metadata))
@@ -312,7 +312,7 @@ def test_delete_data():
     assert d._data_keys
     assert d._store
 
-    zarr_store_path = d._store.store_path(version="v0")
+    zarr_store_path = d._store.store_path(version="v1")
 
     res.delete_datasource(uuid=uid)
 

@@ -164,8 +164,8 @@ class LocalZarrStore(Store):
             )
         # Otherwise we create a new zarr Store for the version
         else:
-            if not self._stores and version != "v0":
-                raise ValueError("First version must be v0")
+            if not self._stores and version != "v1":
+                raise ValueError("First version must be v1")
 
             self._stores[version] = zarr.storage.DirectoryStore(self.store_path(version=version))
             encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
