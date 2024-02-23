@@ -60,7 +60,7 @@ def test_hash_retrieved_data(mocker):
 
     hashes = hash_retrieved_data(to_hash=to_hash)
 
-    assert hashes == {"c70ece789ca7cc076d5bcada824bd5f247469020": {"rome": "1970-01-01 00:00:00+00:00"}}
+    assert hashes == {"d7f77d27c8edd2618cef1adc5762d764d81314d0": {"rome": "1970-01-01 00:00:00+00:00"}}
 
     second_hash = hash_retrieved_data(to_hash=to_hash)
 
@@ -70,7 +70,7 @@ def test_hash_retrieved_data(mocker):
 
     diff_data_hashes = hash_retrieved_data(to_hash=to_hash)
 
-    expected_diff_data = {"00b607872783cfeaf6f22ad1aada805746ddadaa": {"rome": "1970-01-01 00:00:00+00:00"}}
+    expected_diff_data = {"90f583e3d52a708ff41a1b652af6d021d6106065": {"rome": "1970-01-01 00:00:00+00:00"}}
 
     assert diff_data_hashes == expected_diff_data
     assert diff_data_hashes != hashes
@@ -87,6 +87,6 @@ def test_hash_retrieved_data(mocker):
 
     hashes = hash_retrieved_data(to_hash=to_hash)
 
-    expected_london = {"4fc2e7ef1c301af0ca69f60f7197e624584949f8": {"london": "1970-01-01 00:00:00+00:00"}}
+    expected_london = {"85d7f85ce42c5ce4fd459cdd54595beeb2f40832": {"london": "1970-01-01 00:00:00+00:00"}}
 
     assert hashes == expected_london
