@@ -598,5 +598,5 @@ def _base_search(**kwargs: Any) -> SearchResults:
         general_metadata.update(metadata)
 
     return SearchResults(
-        metadata=dict(general_metadata), start_result="data_type", start_date=start_date, end_date=end_date
+        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
     )

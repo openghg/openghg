@@ -207,7 +207,6 @@ class Footprints(BaseStore):
         force: bool = False,
         sort: bool = False,
         drop_duplicates: bool = False,
-        compression: bool = True,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> dict:
@@ -246,12 +245,11 @@ class Footprints(BaseStore):
             force: Force adding of data even if this is identical to data stored.
             sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
             drop_duplicates: Drop duplicate timestamps, keeping the first value
-            compression: Enable compression, we recommend enabling compression
             compressor: A custom compressor to use. If None, this will default to
-            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -291,6 +289,12 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
+        # Ensure we have a value for species
+        if species is None:
+            species = "inert"
+        else:
+            species = clean_string(species)
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
@@ -326,16 +330,20 @@ class Footprints(BaseStore):
                     "Sorting high time resolution data is very memory intensive, we recommend not sorting."
                 )
 
-        if short_lifetime and not species:
-            raise ValueError(
-                "When indicating footprint is for short lived species, 'species' input must be included"
-            )
-        elif not short_lifetime and species:
-            lifetime = species_lifetime(species)
-            if lifetime is not None:
-                # TODO: May want to add a check on length of lifetime here
-                logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                short_lifetime = True
+        if short_lifetime:
+            if species == "inert":
+                raise ValueError(
+                    "When indicating footprint is for short lived species, 'species' input must be included"
+                )
+        else:
+            if species == "inert":
+                lifetime = None
+            else:
+                lifetime = species_lifetime(species)
+                if lifetime is not None:
+                    # TODO: May want to add a check on length of lifetime here
+                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
+                    short_lifetime = True
 
         chunks = self.check_chunks(
             filepaths=filepath,
@@ -355,6 +363,9 @@ class Footprints(BaseStore):
         else:
             xr_open_fn = xr.open_dataset
             filepath = filepath[0]
+
+        if chunks is None:
+            chunks = {}
 
         # This accepts both single and multiple files
         # Using open_mfdataset handles chunks different so we have this setup
@@ -383,9 +394,7 @@ class Footprints(BaseStore):
             # Include both inlet and height keywords for backwards compatability
             metadata["inlet"] = inlet
             metadata["height"] = inlet
-
-            if species is not None:
-                metadata["species"] = clean_string(species)
+            metadata["species"] = species
 
             if network is not None:
                 metadata["network"] = clean_string(network)
@@ -460,6 +469,7 @@ class Footprints(BaseStore):
                 "high_time_resolution",
                 "high_spatial_resolution",
                 "short_lifetime",
+                "species",
             )
 
             data_type = "footprints"

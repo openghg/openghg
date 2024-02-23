@@ -116,6 +116,33 @@ def test_read_footprint_standard(keyword, value):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
+def test_read_footprint_short_lifetime_no_species_raises():
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            store="user",
+            filepath=get_footprint_datapath("footprint_test.nc"),
+            site="TAC",
+            network="LGHG",
+            inlet="10m",
+            domain="EUROPE",
+            short_lifetime=True,
+            model="test_model",
+        )
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            species="inert",
+            store="user",
+            filepath=get_footprint_datapath("footprint_test.nc"),
+            site="TAC",
+            network="LGHG",
+            inlet="10m",
+            domain="EUROPE",
+            short_lifetime=True,
+            model="test_model",
+        )
+
+
 def test_read_footprint_high_spatial_resolution(tmpdir):
     """
     Test high spatial resolution footprint
@@ -214,6 +241,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "height": "10m",  # Should always be the same as inlet
         "model": "test_model",
         "domain": "europe",
+        "species": "inert",
         "start_date": "2020-08-01 00:00:00+00:00",
         "end_date": "2020-08-31 23:59:59+00:00",
         "time_period": "1 month",

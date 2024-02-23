@@ -28,7 +28,6 @@ class Datasource:
     """
 
     _datasource_root = "datasource"
-    _data_root = "data"
 
     def __init__(self, bucket: str, uuid: Optional[str] = None, mode: Literal["r", "rw"] = "rw") -> None:
         from openghg.util import timestamp_now
@@ -267,7 +266,7 @@ class Datasource:
             elif if_exists == "combine":
                 raise NotImplementedError("Combining data not yet implemented.")
                 # We'll copy the data into a temporary store and then combine the data
-                memory_store = self._store.copy_to_memorystore(version=self._latest_version)
+                memory_store = self._store._copy_to_memorystore(version=self._latest_version)
                 existing = xr.open_zarr(store=memory_store, consolidated=True)
 
                 logger.info("Combining overlapping data dateranges")
@@ -628,28 +627,10 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
+
         raise NotImplementedError(
             "Loading of data directly from Datasource no longer supported. Use memory_store to access data stored in zarr store."
         )
-
-    def define_version_key(self, version: str) -> str:
-        """Define key for version on Datasource"""
-        datasource_key = self.key()
-        version_key = f"{datasource_key}/{version}"
-        return version_key
-
-    def define_data_key(self, label: str, version: str) -> str:
-        """Define data key for internally split data element
-        (e.g. by daterange) on Datasource
-        """
-        version_key = self.define_version_key(version)
-        data_key = f"{version_key}/{label}"
-        return data_key
-
-    def define_backup_version(self, version: str) -> str:
-        """Define backup name for version folder"""
-        version_backup = f"{version}_backup"
-        return version_backup
 
     def save(self) -> None:
         """Save this Datasource object as JSON to the object store
@@ -682,15 +663,18 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def copy_to_memorystore(self, version: str = "latest") -> Dict:
+    def _copy_to_memorystore(self, version: str = "latest") -> Dict:
         """Copy the compressed data for a version from the zarr store into memory.
+        Most users should use get_data in place of this function as it offers a simpler
+        way of retrieving data.
+
+        Copying the compressed data into memory may be useful when exploring xarray and zarr
+        functionality.
 
         Example:
-            memory_store = datasource.copy_to_memorystore(version="v0")
+            memory_store = datasource._copy_to_memorystore(version="v0")
             with xr.open_zarr(memory_store, consolidated=True) as ds:
                 ...
-
-        This will create a lazily loaded xarray Dataset.
 
         Returns:
             Dict: In-memory copy of compressed data
@@ -701,12 +685,10 @@ class Datasource:
         if version == "latest":
             version = self._latest_version
 
-        return self._store.copy_to_memorystore(version=version)
+        return self._store._copy_to_memorystore(version=version)
 
     def get_data(self, version: str = "latest") -> xr.Dataset:
-        """Directly accessing a Datasource's data is no longer supported.
-        Use the copy_to_memorystore function. See its documentation for accessing data
-        stored by this Datasource.
+        """Get the version of the dataset stored in the zarr store.
 
         Args:
             version: Version string, e.g. v0, v1

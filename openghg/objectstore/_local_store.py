@@ -34,21 +34,6 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-# # TODO - context manage this? As writes are atomic not sure it needs to be closed
-# # see zarr docs
-# def open_zarr_store(bucket: str, datasource_uuid: str, mode: Literal["r", "rw"] = "rw") -> LocalZarrStore:
-#     """Open a Datasource zarr store directly
-
-#     Args:
-#         bucket: Bucket path
-#         datasource_uuid: UUID of the datasource
-#     Returns:
-#         LocalZarrStore: Local zarr store object
-#     """
-#     warnings.warn("WIP - zarr functions will move around", FutureWarning)
-#     return LocalZarrStore(bucket=bucket, datasource_uuid=datasource_uuid, mode=mode)
-
-
 def get_readable_buckets() -> Dict[str, str]:
     """Get a dictionary of readable buckets - {store_name: store_path, ...}
 

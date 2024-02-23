@@ -34,7 +34,7 @@ class _BaseData:
             metadata: Dictionary of metadata
             data: Dataset if data is already loaded
             uuid: UUID of Datasource to retrieve data from
-            version: Version of data requested from Datasrouce
+            version: Version of data requested from Datasource
             start_date: Start date of data to retrieve
             end_date: End date of data to retrieve
             sort: Sort the resulting Dataset by the time dimension, defaults to False

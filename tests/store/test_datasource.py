@@ -110,8 +110,7 @@ def test_add_data(data, bucket):
 
     assert d._store
 
-    ds_data = d.copy_to_memorystore(version="v0")
-    ds = xr.open_zarr(store=ds_data, consolidated=True)
+    ds = d.get_data(version="v0")
 
     assert ds.equals(ch4_data)
 
@@ -507,7 +506,7 @@ def test_to_memory_store(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    memory_store = d.copy_to_memorystore(version="latest")
+    memory_store = d._copy_to_memorystore(version="latest")
     with xr.open_zarr(store=memory_store) as ds:
         assert ds.equals(ch4_data)
 
@@ -582,7 +581,7 @@ def test_add_data_combine_datasets(data, bucket):
 
     assert d._store.version_exists(version="v0")
 
-    ds_data = d.copy_to_memorystore(version="v0")
+    ds_data = d._copy_to_memorystore(version="v0")
     combined_ds = xr.open_zarr(store=ds_data, consolidated=True)
     assert combined_ds.equals(ch4_data)
 

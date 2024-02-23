@@ -96,13 +96,13 @@ def test_copy_to_memory_store(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
-        memory_store = store.copy_to_memorystore(version="v0")
+        memory_store = store._copy_to_memorystore(version="v0")
         ds_recombined = xr.open_zarr(store=memory_store)
         assert ds.equals(ds_recombined)
 
 
 def test_update(store):
-    fp_1 = get_footprint_datapath("TAC-100magl_UKV_EUROPE_201607.nc")
+    fp_1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     fp_2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
     with xr.open_dataset(fp_1) as ds:
@@ -175,11 +175,12 @@ def test_pop_dataset(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
-        retrieved = store.pop(version="v0")
-        assert ds.equals(retrieved)
+        with pytest.raises(NotImplementedError):
+            store._pop(version="v0")
+        # assert ds.equals(retrieved)
 
-        assert not store.version_exists(version="v0")
-        assert not store
+        # assert not store.version_exists(version="v0")
+        # assert not store
 
 
 def test_match_chunking(store):
@@ -200,12 +201,16 @@ def test_match_chunking(store):
 
     store.delete_all()
 
+    # Let's add some data and then try and add some data with different chunking
     chunks = {"time": 4}
-    data_a_chunked = data_a.chunk(chunks)
     store.add(version="v0", dataset=data_a)
+
+    data_a_chunked = data_a.chunk(chunks)
     chunking = store.match_chunking(version="v0", dataset=data_a_chunked)
 
-    assert not chunking
+    # As the data we originally put in wasn't chunked then we get the full size of the time coordinate
+    # which is 31 here
+    assert chunking == {'time': 31}
 
     # Now try it the other way round, add chunked data and then try to match it with unchunked data
     store.delete_all()
@@ -286,7 +291,7 @@ def test_copy_actually_copies(store):
     store.add(version="v0", dataset=data_a)
 
     # Let's try copying it to a dict
-    data_a_in_dict = store.copy_to_memorystore(version="v0")
+    data_a_in_dict = store._copy_to_memorystore(version="v0")
     ds_a_from_dict = xr.open_zarr(store=data_a_in_dict, consolidated=True)
     store.delete_version(version="v0")
     ds_2 = xr.concat([ds_a_from_dict, data_b], dim="time").drop_duplicates("time")

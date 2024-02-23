@@ -174,13 +174,7 @@ class LocalZarrStore(Store):
             )
 
     def get(self, version: str) -> xr.Dataset:
-        """Open the version of the dataset stored in the zarr store.
-        This should only be used when no data will be changed in the store
-        as changes to data in the store will result in errors with an open
-        dataset.
-
-        Note that this function should not be used if the store is to be modified.
-        Please use copy_to_memorystore for that otherwise data may be lost.
+        """Get the version of the dataset stored in the zarr store.
 
         Args:
             version: Data version
@@ -192,7 +186,7 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
         return ds
 
-    def pop(self, version: str) -> xr.Dataset:
+    def _pop(self, version: str) -> xr.Dataset:
         """Pop some data from the store. This copies the data in the version specified
         to a memory store, deletes the version and returns an xarray Dataset loaded from the
         memory store.
@@ -204,6 +198,7 @@ class LocalZarrStore(Store):
         Returns:
             Dataset: Dataset popped from the store
         """
+        raise NotImplementedError("This method will be updated to ensure data is backed up.")
         self._check_writable()
         version = self._check_version(version)
 
@@ -215,12 +210,10 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=self._memory_store)
         return ds
 
-    def copy_to_memorystore(self, version: str) -> Dict:
+    def _copy_to_memorystore(self, version: str) -> Dict:
         """Copies the compressed data from the filesystem store to an in-memory store.
         This preserves the compression and chunking of the data and the store
-        can be opened as a single dataset.
-
-        Note that this function should be used if the store is to be modified.
+        can be opened as a single dataset. This may be useful for testing
 
         Args:
             version: Data version
@@ -331,6 +324,13 @@ class LocalZarrStore(Store):
                 )
 
             logger.warning(msg)
+
+            # For coordinates we haven't chunked over we'll use the full size
+            for k in dataset.dims:
+                k = str(k)  # xr.Dataset.dims returns a Mapping with Hashable keys, which may not be strings
+                if k not in stored_actually_chunked:
+                    stored_actually_chunked[k] = dataset.sizes[k]
+
             return stored_actually_chunked
 
         return {}
