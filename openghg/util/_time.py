@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Dict, List, Optional, Tuple, Union
+from openghg.types import TimePeriod
 
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
@@ -34,7 +35,7 @@ __all__ = [
     "in_daterange",
 ]
 
-TupleTimeType = Tuple[Union[int, float], str]
+# TupleTimeType = Tuple[Union[int, float], str]
 
 
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
@@ -657,7 +658,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> TupleTimeType:
+def parse_period(period: Union[str, tuple]) -> TimePeriod:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -671,17 +672,17 @@ def parse_period(period: Union[str, tuple]) -> TupleTimeType:
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
 
     Returns:
-        int, str: value and associated time period
+        TimePeriod: class containing value and associated time period (subclass of NamedTuple)
 
         Examples:
         >>> parse_period("12H")
-            (12, "hours")
+            TimePeriod(12, "hours")
         >>> parse_period("yearly")
-            (1, "years")
+            TimePeriod(1, "years")
         >>> parse_period("monthly")
-            (1, "months")
+            TimePeriod(1, "months")
         >>> parse_period((1, "minute"))
-            (1, "minutes")
+            TimePeriod(1, "minutes")
     """
     import re
 
@@ -720,7 +721,7 @@ def parse_period(period: Union[str, tuple]) -> TupleTimeType:
             unit = key
             break
 
-    return value, unit
+    return TimePeriod(value, unit)
 
 
 def create_frequency_str(
@@ -751,6 +752,8 @@ def create_frequency_str(
     """
     if period is not None:
         value, unit = parse_period(period)
+        if value is None or unit is None:
+            raise ValueError(f"Unable to derive time value and unit from period: {period}")
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
