@@ -22,13 +22,24 @@ def infer_date_range(
     continuous: bool = True,
 ) -> Tuple[Timestamp, Timestamp, str]:
     """
-    Infer the date range from the time dimension. If the time dimension
-    only includes one value the date range will be:
+    Infer the date range from the time dimension.
+    
+    If the time dimension only includes one value the date range will be:
      - derived from the period (if supplied)
      - derived from the filepath using pattern matching (if supplied)
        - 4 digits assumed to be a year
        - 6 digits assumed to be a month
      - assumed to be yearly
+
+     If the time dimension includes multiple values the date range can be
+     inferred from this directly. The period will be derived as follows:
+     - if continuous=True, assumes data is meant to be regular and will
+       infer period and date range from the data, raising an error if unable to do so.
+     - if continuous=False
+       - if period is not specified, will attempt to infer a period and if
+         unable to do so will set this to "varies".
+       - if period is specified, will use this value
+          - will compare against the inferred period and log a warning
 
     Args:
         time: DataArray containing time values
