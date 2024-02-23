@@ -1,8 +1,23 @@
 from __future__ import annotations
 
-# import cdsapi  # type: ignore
-# import numpy as np
-from typing import TYPE_CHECKING, List, Optional, Union
+import numpy as np
+from typing import List, Optional, Union, Tuple
+import os
+import pandas as pd
+import xarray as xr
+from pandas.tseries.offsets import MonthEnd
+
+from openghg.dataobjects import METData
+from openghg.util import get_start_and_end_date
+from itertools import product
+from datetime import datetime
+
+import logging
+
+import cdsapi
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 # import requests
 # from xarray import open_dataset, Dataset
@@ -10,20 +25,36 @@ from typing import TYPE_CHECKING, List, Optional, Union
 # from requests.packages.urllib3.util.retry import Retry
 # from openghg.util import timestamp_tzaware
 
-if TYPE_CHECKING:
-    from openghg.dataobjects import METData
 
 __all__ = ["retrieve_met", "METData"]
+
+
+def launch_cds_request(request: dict, dataset_savepath: str) -> bool:
+    cds_client = cdsapi.Client()
+    dataset_name = "reanalysis-era5-pressure-levels"
+
+    try:
+        cds_client.retrieve(dataset_name, request, dataset_savepath)
+
+        return True
+
+    except Exception as e:
+        logger.warn(f"Retrieve process failed with error {e}")
+
+        return False
 
 
 def retrieve_met(
     site: str,
     network: str,
-    years: Union[str, List[str]],
+    years: Optional[Union[str, List[str]]] = None,
+    months: Optional[Union[str, List[str]]] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     variables: Optional[List[str]] = None,
-) -> METData:
-    """Retrieve METData data. Note that this function will only download a
-    full year of data which may take some time.
+    save_path: Optional[str] = None,
+) -> List[METData]:
+    """Retrieve METData data. Downloads single file with the whole time period.
 
     This function currently on retrieves data from the "reanalysis-era5-pressure-levels"
     dataset but may be modified for other datasets in the future.
@@ -34,25 +65,145 @@ def retrieve_met(
     Returns:
         METData: METData object holding data and metadata
     """
-    raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
+
+    # check right date
+    if years is None and (start_date is None or end_date is None):
+        raise AttributeError("You /must pass either the argument years or both start_date and end_date")
+
+    if variables is None:
+        variables = ["u_component_of_wind", "v_component_of_wind"]
+
+        valid_variables = [
+            "divergence",
+            "fraction_of_cloud_cover",
+            "geopotential",
+            "ozone_mass_mixing_ratio",
+            "potential_vorticity",
+            "relative_humidity",
+            "specific_cloud_ice_water_content",
+            "specific_cloud_liquid_water_content",
+            "specific_humidity",
+            "specific_rain_water_content",
+            "specific_snow_water_content",
+            "temperature",
+            "u_component_of_wind",
+            "v_component_of_wind",
+            "vertical_velocity",
+            "vorticity",
+        ]
+
+        assert np.all(
+            [var in valid_variables for var in variables]
+        ), f"One of more of the variables passed does not exist in ERA5 data. The problematic variables are {set(variables) - set(valid_variables)}"
+
+    latitude, longitude, site_height, inlet_heights = get_site_data(site=site, network=network)
+
+    # Get the area to retrieve data for
+    ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
+    # Calculate the pressure at measurement height(s)
+    measure_pressure = get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
+    # Calculate the ERA5 pressure levels required
+    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
+
+    if start_date is not None and end_date is not None:
+        download_list = pd.period_range(start=start_date, end=end_date, freq="M")
+        start_d = pd.to_datetime(start_date)
+        end_d = pd.to_datetime(end_date)
+
+        years = list(set([str(download_date).split("-")[0] for download_date in download_list]))
+        months = list(set([str(download_date).split("-")[1] for download_date in download_list]))
+
+    elif years is not None:
+        (start_date, end_date) = get_start_and_end_date(years=years, months=months)
+        start_d = pd.to_datetime(start_date)
+        end_d = pd.to_datetime(end_date)
+
+    default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
+    save_path = default_save_path if save_path is None else save_path
+    assert os.path.isdir(
+        save_path
+    ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+
+    logger.info(f"Retrieving to {save_path}")
+
+    request = {
+        "product_type": "reanalysis",
+        "format": "netcdf",
+        "variable": variables,
+        "pressure_level": ecmwf_pressure_levels,
+        "year": years,
+        "month": months,
+        "day": [str(x).zfill(2) for x in range(1, 32)],
+        "time": [f"{str(x).zfill(2)}:00" for x in range(0, 24)],
+        "area": ecmwf_area,
+    }
+
+    dataset_savepath = os.path.join(
+        save_path,
+        f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}_temp.nc",
+    )
+
+    # use this to create a file in the expected format and test the whole pipelne without requesting
+    # request_status = _create_dummy_dataset(request,dataset_savepath)
+
+    # retrieve from copernicus and save requested data to a temp file
+    request_status = launch_cds_request(request, dataset_savepath)
+
+    if not request_status:
+        return []
+
+    dataset = xr.open_dataset(
+        os.path.join(
+            save_path,
+            f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}_temp.nc",
+        )
+    )
+
+    met_objects = []
+
+    for year in np.unique(dataset.time.dt.year.values):
+        for month in np.unique(dataset.time.dt.month.values):
+            metadata = {
+                "product_type": request["product_type"],
+                "format": request["format"],
+                "variable": request["variable"],
+                "pressure_level": request["pressure_level"],
+                "area": request["area"],
+                "site": site,
+                "network": network,
+                "start_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d")),
+                "end_date": str(pd.to_datetime(f"{year}-{month}-1", format="%Y-%m-%d") + MonthEnd(0)),
+                "month": int(month),
+                "year": int(year),
+            }
+
+            # resaving with attributes
+            data_monthly = dataset.sel(time=(dataset.time.dt.year == year) & (dataset.time.dt.month == month))
+
+            data_monthly.attrs.update(metadata)
+            data_monthly.to_netcdf(
+                os.path.join(
+                    save_path,
+                    f"Met_{site}_{network}_{year}{month}.nc",
+                )
+            )
+
+            met_objects.append(METData(data=data_monthly, metadata=metadata))
+    # remove temp file
+    os.remove(
+        os.path.join(
+            save_path, f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}_temp.nc"
+        )
+    )
+
+    return met_objects
+
+    # Retrieve metadata from Copernicus about the dataset, this includes
+    # the location of the data netCDF file.
+    # result = cds_client.retrieve(dataset_name, request, filepath)
+
+    # raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
     # from openghg.dataobjects import METData
-
-    # if variables is None:
-    #     variables = ["u_component_of_wind", "v_component_of_wind"]
-
-    # latitude, longitude, site_height, inlet_heights = _get_site_data(site=site, network=network)
-
-    # # Get the area to retrieve data for
-    # ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
-    # # Calculate the pressure at measurement height(s)
-    # measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
-    # # Calculate the ERA5 pressure levels required
-    # ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
-
-    # if not isinstance(years, list):
-    #     years = [years]
-    # else:
-    #     years = sorted(years)
 
     # # TODO - we might need to customise this further in the future to
     # # request other types of weather data
@@ -142,122 +293,161 @@ def retrieve_met(
 #     return dataset
 
 
-# def _two_closest_values(diff: np.ndarray) -> np.ndarray:
-#     """Get location of two closest values in an array of differences.
+def _two_closest_values(diff: np.ndarray) -> np.ndarray:
+    """Get location of two closest values in an array of differences.
 
-#     Args:
-#         diff: Numpy array of values
-#     Returns:
-#         np.ndarry: Numpy array of two closes values
-#     """
-#     closest_values: np.ndarray = np.argpartition(np.abs(diff), 2)[:2]
-#     return closest_values
-
-
-# def _get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
-#     """Extract site location data from site attributes file.
-
-#     Args:
-#         site: Site code
-#     Returns:
-#         dict: Dictionary of site data
-#     """
-#     from openghg.util import load_json
-
-#     network = network.upper()
-#     site = site.upper()
-
-#     site_info = load_json("site_info.json")
-
-#     try:
-#         site_data = site_info[site][network]
-#         latitude = float(site_data["latitude"])
-#         longitute = float(site_data["longitude"])
-#         site_height = float(site_data["height_station_masl"])
-#         inlet_heights = site_data["height_name"]
-#     except KeyError as e:
-#         raise KeyError(f"Incorrect site or network : {e}")
-
-#     return latitude, longitute, site_height, inlet_heights
+    Args:
+        diff: Numpy array of values
+    Returns:
+        np.ndarry: Numpy array of two closes values
+    """
+    closest_values: np.ndarray = np.argpartition(np.abs(diff), 2)[:2]
+    return closest_values
 
 
-# def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
-#     """Find out the area required from ERA5.
+def get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
+    """Extract site location data from site attributes file.
 
-#     Args:
-#         site_lat: Latitude of site
-#         site_long: Site longitude
-#     Returns:
-#         list: List of min/max lat long values
-#     """
-#     ecwmf_lat = np.arange(-90, 90.25, 0.25)
-#     ecwmf_lon = np.arange(-180, 180.25, 0.25)
+    Args:
+        site: Site code
+    Returns:
+        dict: Dictionary of site data
+    """
+    from openghg.util import load_json
+    from openghg_defs import site_info_file
 
-#     ecwmf_lat_indices = _two_closest_values(ecwmf_lat - site_lat)
-#     ecwmf_lon_indices = _two_closest_values(ecwmf_lon - site_long)
+    network = network.upper()
+    site = site.upper()
+    site_info = load_json(site_info_file)
 
-#     return [
-#         np.max(ecwmf_lat[ecwmf_lat_indices]),
-#         np.min(ecwmf_lon[ecwmf_lon_indices]),
-#         np.min(ecwmf_lat[ecwmf_lat_indices]),
-#         np.max(ecwmf_lon[ecwmf_lon_indices]),
-#     ]
+    try:
+        site_data = site_info[site][network]
+        latitude = float(site_data["latitude"])
+        longitute = float(site_data["longitude"])
+        site_height = float(site_data["height_station_masl"])
+        inlet_heights = site_data["height_name"]
+    except KeyError as e:
+        raise KeyError(f"Incorrect site or network : {e}")
 
-
-# def _get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
-#     """Calculate the pressure levels required
-
-#     Args:
-#         inlet_height: Height(s) of inlets
-#         site_height: Height of site
-#     Returns:
-#         list: List of pressures
-#     """
-#     import re
-
-#     if not isinstance(inlet_heights, list):
-#         inlet_heights = [inlet_heights]
-
-#     measured_pressure = []
-#     for h in inlet_heights:
-#         try:
-#             # Extract the number from the inlet height str using regex
-#             inlet = float(re.findall(r"\d+(?:\.\d+)?", h)[0])
-#             measurement_height = inlet + float(site_height)
-#             # Calculate the pressure
-#             pressure = 1000 * np.exp((-1 * measurement_height) / 7640)
-#             measured_pressure.append(pressure)
-#         except IndexError:
-#             pass
-
-#     return measured_pressure
+    return latitude, longitute, site_height, inlet_heights
 
 
-# def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
-#     """Find out what pressure levels are required from ERA5.
+def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
+    """Find out the area required from ERA5.
 
-#     Args:
-#         measure_pressure: List of pressures
-#     Returns:
-#         list: List of desired pressures
-#     """
-#     from openghg.util import load_json
+    Args:
+        site_lat: Latitude of site
+        site_long: Site longitude
+    Returns:
+        list: List of min/max lat long values
+    """
+    ecwmf_lat = np.arange(-90, 90.25, 0.25)
+    ecwmf_lon = np.arange(-180, 180.25, 0.25)
 
-#     ecmwf_metadata = load_json("ecmwf_dataset_info.json")
-#     dataset_metadata = ecmwf_metadata["datasets"]
-#     valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
+    ecwmf_lat_indices = _two_closest_values(ecwmf_lat - site_lat)
+    ecwmf_lon_indices = _two_closest_values(ecwmf_lon - site_long)
 
-#     # Available ERA5 pressure levels
-#     era5_pressure_levels = np.array(valid_levels)
+    return [
+        np.max(ecwmf_lat[ecwmf_lat_indices]),
+        np.min(ecwmf_lon[ecwmf_lon_indices]),
+        np.min(ecwmf_lat[ecwmf_lat_indices]),
+        np.max(ecwmf_lon[ecwmf_lon_indices]),
+    ]
 
-#     # Match pressure to ERA5 pressure levels
-#     ecwmf_pressure_indices = np.zeros(len(measure_pressure) * 2)
 
-#     for index, m in enumerate(measure_pressure):
-#         ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(m - era5_pressure_levels)
+def get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
+    """Calculate the pressure levels required
 
-#     desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
+    Args:
+        inlet_height: Height(s) of inlets
+        site_height: Height of site
+    Returns:
+        list: List of pressures
+    """
+    import re
 
-#     pressure_levels: List = desired_era5_pressure.astype(str).tolist()
+    if not isinstance(inlet_heights, list):
+        inlet_heights = [inlet_heights]
 
-#     return pressure_levels
+    measured_pressure = []
+    for h in inlet_heights:
+        try:
+            # Extract the number from the inlet height str using regex
+            inlet = float(re.findall(r"\d+(?:\.\d+)?", h)[0])
+            measurement_height = inlet + float(site_height)
+            # Calculate the pressure
+            pressure = 1000 * np.exp((-1 * measurement_height) / 7640)
+            measured_pressure.append(pressure)
+        except IndexError:
+            pass
+
+    return measured_pressure
+
+
+def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
+    """Find out what pressure levels are required from ERA5.
+
+    Args:
+        measure_pressure: List of pressures
+    Returns:
+        list: List of desired pressures
+    """
+    from openghg.util import load_internal_json
+
+    ecmwf_metadata = load_internal_json(filename="ecmwf_dataset_info.json")
+    dataset_metadata = ecmwf_metadata["datasets"]
+    valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
+
+    # Available ERA5 pressure levels
+    era5_pressure_levels = np.array(valid_levels)
+
+    # Match pressure to ERA5 pressure levels
+    ecwmf_pressure_indices = np.zeros(len(measure_pressure) * 2)
+
+    for index, m in enumerate(measure_pressure):
+        ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(m - era5_pressure_levels)
+
+    desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
+
+    pressure_levels: List = desired_era5_pressure.astype(str).tolist()
+
+    return pressure_levels
+
+
+def _create_dummy_dataset(request: dict, dataset_savepath: str) -> bool:
+
+    date_time_combinations = product(request["year"], request["month"], request["day"], request["time"])
+
+    times = []
+    for year, month, day, time in date_time_combinations:
+        try:
+            times.append(datetime.strptime(f"{year}-{month}-{day} {time}", "%Y-%m-%d %H:%M"))
+        except ValueError:
+            continue
+
+    coords = {
+        "longitude": [request["area"][1], request["area"][3]],
+        "latitude": [request["area"][0], request["area"][1]],
+        "level": request["pressure_level"],
+        "time": times,
+    }
+    data = np.zeros((len(times), len(request["pressure_level"]), 2, 2))
+
+    dims = ("time", "level", "latitude", "longitude")
+
+    attrs = {
+        "product_type": "reanalysis",
+        "format": "netcdf",
+        "variable": ["u_component_of_wind"],
+        "pressure_level": request["pressure_level"],
+        "area": request["area"],
+    }
+
+    dummy_dataset = xr.Dataset({"u": (dims, data)}, coords=coords, attrs=attrs)
+    try:
+        dummy_dataset.to_netcdf(dataset_savepath)
+        print(dataset_savepath, "saved")
+        return True
+    except PermissionError:
+        logger.error(f"Permission denied for folder {dataset_savepath}")
+        return False

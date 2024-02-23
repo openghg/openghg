@@ -12,7 +12,7 @@ def define_data_types() -> Tuple[str, ...]:
         "surface",
         "column",
         "emissions",
-        # "met",
+        "met",
         "footprints",
         "boundary_conditions",
         "eulerian_model",

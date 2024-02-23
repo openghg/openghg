@@ -5,6 +5,38 @@ from openghg.types import optionalPathType
 __all__ = ["get_site_info", "sites_in_network"]
 
 
+def get_site_location(site: str, network: str, site_filepath: optionalPathType = None) -> Dict[str, Any]:
+    """Extract site location data from site attributes file.
+
+    Args:
+        site: Site code
+        network: network name
+        site_filepath: Alternative site info file.
+    Returns:
+        dict: Dictionary of site data
+    """
+    network = network.upper()
+    site = site.upper()
+
+    site_info = get_site_info(site_filepath)
+
+    try:
+        site_data = site_info[site][network]
+        latitude = float(site_data["latitude"])
+        longitude = float(site_data["longitude"])
+        site_height = float(site_data["height_station_masl"])
+        inlet_heights = site_data["height_name"]
+    except KeyError as e:
+        raise KeyError(f"Incorrect site or network : {e}")
+
+    return {
+        "latitude": latitude,
+        "longitude": longitude,
+        "site_height": site_height,
+        "inlet_heights": inlet_heights,
+    }
+
+
 def get_site_info(site_filepath: optionalPathType = None) -> Dict[str, Any]:
     """Extract data from site info JSON file as a dictionary.
 
