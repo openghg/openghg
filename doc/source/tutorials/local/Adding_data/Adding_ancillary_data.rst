@@ -562,7 +562,7 @@ To get information about the expected format [#f6]_ for a data type,
 use the ``.schema()`` method for the associated object.
 
 Input format for flux data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For instance, to see the schema for flux data:
 
@@ -593,7 +593,7 @@ This tells us that the netCDF input for “flux” should contain:
   - “time” coordinate should be ``datetime64``
 
 Input format for footprints
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Similarly for ``Footprints``, as described in the standardisations
 section, there are a few different input options available:
@@ -607,7 +607,7 @@ section, there are a few different input options available:
 These can be shown by passing keywords to the ``.schema()`` method.
 
 Default (inert) footprint format
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For example, if nothing is passed this returns the details for an integrated
 footprint for an inert species:
@@ -649,7 +649,7 @@ requirement for these particle location boundary sensitivies to be
 included.
 
 Other footprint formats
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 For species with a short lifetime the input footprints require
 additional variables. This can be seen by passing the ``short_lifetime``

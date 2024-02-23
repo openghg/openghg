@@ -114,7 +114,7 @@ We can then check the data has been added to the object store.
 
 
 2. Adding new options
-------------------
+---------------------
 
 Transformation workflow
 ^^^^^^^^^^^^^^^^^^^^^^^
