@@ -99,7 +99,7 @@ def parse_acrg_org(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    dv_attribute_updates = {}
+    dv_attribute_updates: Dict[str, Dict[str, str]] = {}
     variable_names = [
         # "srr",
         "fp",
@@ -134,7 +134,8 @@ def parse_acrg_org(
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
-    fp_data = fp_data.rename(**dv_rename)
+    # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
+    fp_data = fp_data.rename(**dv_rename)  # type: ignore
     # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
 
     fp_data = fp_data.drop_dims(dim_drop)
