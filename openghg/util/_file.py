@@ -293,6 +293,15 @@ def get_logfile_path() -> Path:
 
 def check_function_open_nc(filepath: Union[Path, List[Path]]) -> Callable:
     """
+    Check the filepath input to choose which xarray open function to use:
+     - Path or single item List - use open_dataset
+     - multiple item List - use open_mfdataset
+
+    Args:
+        filepath: Path or list of filepaths
+    Returns:
+        Callable, Union[Path, List[Path]]: function and suitable filepath
+            to use with the function.
     """
     import xarray as xr
 
