@@ -7,7 +7,7 @@ include:
 
 -  “footprints”: regional outputs from an LPDM model [#f3]_ (e.g. NAME).
    The LPDM set up for these outputs is based on e.g. `Lunt et al. 2016 <https://gmd.copernicus.org/articles/9/3213/2016/>`
--  “emissions”: estimates of species emissions/flux [#f2]_ within a region
+-  “flux”: estimates of species flux/emissions [#f2]_ within a region
 -  “boundary_conditions”: vertical curtains at the boundary of a
    regional domain
 -  “eulerian_model”: Global CTM output (e.g. GEOSChem) [#f1]_
@@ -173,6 +173,64 @@ details, but they should be supplied to ensure the footprint data is
 labelled correctly.
 See schema details below for how these inputs are defined.
 
+Chunking
+^^^^^^^^
+
+When reading in a netCDF file for standardisation we can pass a dictionary of chunk sizes to the standardisation function.
+This is useful for large files as it can reduce memory usage and speed up the process.
+In this example we'll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
+chunk the file into chunks of 48 time points.
+
+As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you're running
+the standardisation process on and how you'll be retrieving using the data from the object store.
+
+Let's perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable `fp_HiTRes` is has an extra `H_back` dimension we'll calculate the chunk sizes for this variable.
+
+.. code:: ipython3
+
+    In [1]: import xarray as xr
+
+    In [2]: with xr.open_dataset("TAC-185magl_UKV_co2_EUROPE_201501.nc") as ds:
+      ...:     var_dtype = ds.fp_HiTRes.dtype
+      ...:     var_dims = ds.fp_HiTRes.sizes
+      ...:
+
+    In [3]: var_dims
+    Out[3]: Frozen({'lat': 293, 'lon': 391, 'time': 744, 'H_back': 25})
+
+    In [4]: var_dtype
+    Out[4]: dtype('float32')
+
+    In [5]: var_dtype.itemsize
+    Out[5]: 4
+
+
+Now we've got the sizes of the dimensions and the data type (32-bit floats so 4 bytes per value) of the variable we can calculate the size of the chunks in bytes.
+
+.. code:: ipython3
+
+    In [5]: chunk_size = 24
+
+    In [6]: chunk_bytes = chunk_size * var_dtype.itemsize * var_dims['lat'] * var_dims['lon'] * var_dims['H_back']
+
+    In [7]: chunk_MBs = chunk_bytes / (1024*1024)
+
+    In [7]: chunk_MBs
+    Out[7]: 262.2138977050781
+
+So we've got chunk sizes of 262 MB which seems sensible. Let's pass this to the standardisation function using the `chunks` argument.
+
+.. code:: ipython3
+
+    In [8]: from openghg.standardise import standardise_footprint
+
+    In [9]: chunks = {"time": 24}
+
+    In [10]: standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", species="co2", chunks=chunks)
+
+Try different chunk sizes to see what works best for your system.
+
+
 Flux / Emissions
 ^^^^^^^^^^^^^^^^
 
@@ -318,7 +376,7 @@ use the ``search`` function from within the ``openghg.retrieve`` sub-module:
       <tbody>
         <tr>
           <th>0</th>
-          <td>emissions</td>
+          <td>flux</td>
           <td>cv18710@bristol.ac.uk</td>
           <td>2021-01-08 12:18:49.803837+00:00</td>
           <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -398,7 +456,7 @@ standarising the data.
 
 
 To search for just one data type a specific ``search_*`` function can be
-used (or the ``data_type`` input of ``"emissions"`` or
+used (or the ``data_type`` input of ``"flux"`` or
 ``"boundary_conditions"`` can be passed to the ``search`` function). For
 example, for flux data:
 
@@ -456,7 +514,7 @@ example, for flux data:
       <tbody>
         <tr>
           <th>0</th>
-          <td>emissions</td>
+          <td>flux</td>
           <td>cv18710@bristol.ac.uk</td>
           <td>2021-01-08 12:18:49.803837+00:00</td>
           <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -496,7 +554,7 @@ For each of the data types seen above, there is an associated object from the
 ``openghg.store`` sub-module:
 
 -  ``Footprints``
--  ``Emissions``
+-  ``Flux``
 -  ``BoundaryConditions``
 -  ``EulerianModel`` [#f1]_
 
@@ -504,15 +562,15 @@ To get information about the expected format [#f6]_ for a data type,
 use the ``.schema()`` method for the associated object.
 
 Input format for flux data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For instance, to see the schema for flux data:
 
 .. code:: ipython3
 
-    from openghg.store import Emissions
+    from openghg.store import Flux
 
-    Emissions.schema()
+    Flux.schema()
 
 
 
@@ -522,7 +580,7 @@ For instance, to see the schema for flux data:
     DataSchema(data_vars={'flux': ('time', 'lat', 'lon')}, dtypes={'lat': <class 'numpy.floating'>, 'lon': <class 'numpy.floating'>, 'time': <class 'numpy.datetime64'>, 'flux': <class 'numpy.floating'>}, dims=None)
 
 
-This tells us that the netCDF input for “emissions” should contain:
+This tells us that the netCDF input for “flux” should contain:
 
 - Data variables:
 
@@ -535,7 +593,7 @@ This tells us that the netCDF input for “emissions” should contain:
   - “time” coordinate should be ``datetime64``
 
 Input format for footprints
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Similarly for ``Footprints``, as described in the standardisations
 section, there are a few different input options available:
@@ -549,7 +607,7 @@ section, there are a few different input options available:
 These can be shown by passing keywords to the ``.schema()`` method.
 
 Default (inert) footprint format
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For example, if nothing is passed this returns the details for an integrated
 footprint for an inert species:
@@ -591,7 +649,7 @@ requirement for these particle location boundary sensitivies to be
 included.
 
 Other footprint formats
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 For species with a short lifetime the input footprints require
 additional variables. This can be seen by passing the ``short_lifetime``

@@ -1,5 +1,5 @@
-Modifying and deleting data
-===========================
+Managing and deleting data
+==========================
 
 Sometimes you might want to modify some metadata after running the data
 through the standardisation scripts. After the standardisation process

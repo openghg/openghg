@@ -3,7 +3,7 @@ import pytest
 import xarray as xr
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.util import timestamp_tzaware
-from pandas import Timedelta
+from pandas import Timedelta, DateOffset
 from xarray import DataArray
 
 # %% Infer period when one time point present
@@ -107,6 +107,19 @@ def test_cannot_infer_period_from_frequency(time_varies):
     assert start_date == timestamp_tzaware("2012-02-01")
     assert end_date == timestamp_tzaware("2012-05-21")
     assert period_str == "varies"
+
+
+def test_use_input_period(time_varies):
+    """Test output when frequency cannot be inferred from data but period value is specified"""
+    continuous = False
+    period = "1 month"
+    start_date, end_date, period_str = infer_date_range(time_varies, continuous=continuous, period=period)
+
+    expected_end_date = timestamp_tzaware("2012-05-21") + DateOffset(months=1) - Timedelta(seconds=1)
+
+    assert start_date == timestamp_tzaware("2012-02-01")
+    assert end_date == expected_end_date
+    assert period_str == "1 month"
 
 
 def test_update_zero_dim():

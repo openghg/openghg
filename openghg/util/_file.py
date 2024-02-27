@@ -10,8 +10,8 @@ __all__ = [
     "load_surface_parser",
     "load_column_parser",
     "load_column_source_parser",
-    "load_emissions_parser",
-    "load_emissions_database_parser",
+    "load_flux_parser",
+    "load_flux_database_parser",
     "get_datapath",
     "get_logfile_path",
     "load_json",
@@ -94,32 +94,32 @@ def load_column_source_parser(source_format: str) -> Callable:
     return fn
 
 
-def load_emissions_parser(source_format: str) -> Callable:
-    """Load a parsing object for the emissions data type.
-    Used with `openghg.standardise.emissions` sub-module
+def load_flux_parser(source_format: str) -> Callable:
+    """Load a parsing object for the "flux" data type.
+    Used with `openghg.standardise.flux` sub-module
 
     Args:
         source_format: Name of data type e.g. OPENGHG
     Returns:
         callable: parser function
     """
-    emissions_st_module_name = "openghg.standardise.emissions"
-    fn = load_parser(data_name=source_format, module_name=emissions_st_module_name)
+    flux_st_module_name = "openghg.standardise.flux"
+    fn = load_parser(data_name=source_format, module_name=flux_st_module_name)
 
     return fn
 
 
-def load_emissions_database_parser(database: str) -> Callable:
+def load_flux_database_parser(database: str) -> Callable:
     """Load a parsing object for the source of column data.
-    Used with `openghg.transform.emissions` sub-module
+    Used with `openghg.transform.flux` sub-module
 
     Args:
         database: Name of data source e.g. EDGAR
     Returns:
         callable: parser function
     """
-    emissions_tr_module_name = "openghg.transform.emissions"
-    fn = load_parser(data_name=database, module_name=emissions_tr_module_name)
+    flux_tr_module_name = "openghg.transform.flux"
+    fn = load_parser(data_name=database, module_name=flux_tr_module_name)
 
     return fn
 
@@ -289,3 +289,29 @@ def get_logfile_path() -> Path:
         return Path.home().joinpath("openghg.log")
     else:
         return Path("/tmp/openghg.log")
+
+
+def check_function_open_nc(filepath: Union[Path, List[Path]]) -> Callable:
+    """
+    Check the filepath input to choose which xarray open function to use:
+     - Path or single item List - use open_dataset
+     - multiple item List - use open_mfdataset
+
+    Args:
+        filepath: Path or list of filepaths
+    Returns:
+        Callable, Union[Path, List[Path]]: function and suitable filepath
+            to use with the function.
+    """
+    import xarray as xr
+
+    if isinstance(filepath, list):
+        if len(filepath) > 1:
+            xr_open_fn: Callable = xr.open_mfdataset
+        else:
+            xr_open_fn = xr.open_dataset
+            filepath = filepath[0]
+    else:
+        xr_open_fn = xr.open_dataset
+
+    return xr_open_fn, filepath

@@ -2,9 +2,8 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 from typing import DefaultDict, Dict, Literal, List, Optional, Union
-import xarray as xr
 from xarray import Dataset
-from openghg.util import species_lifetime, timestamp_now
+from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.footprint")
@@ -12,7 +11,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    filepath: Path,
+    filepath: Union[Path, List[Path]],
     site: str,
     domain: str,
     model: str,
@@ -22,9 +21,9 @@ def parse_acrg_org(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
-    high_spatial_resolution: Optional[bool] = False,
-    high_time_resolution: Optional[bool] = False,
-    short_lifetime: Optional[bool] = False,
+    high_spatial_resolution: bool = False,
+    high_time_resolution: bool = False,
+    short_lifetime: bool = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """
@@ -52,8 +51,14 @@ def parse_acrg_org(
         dict: Dictionary of data
     """
 
-    # Load this into memory
-    fp_data = xr.open_dataset(filepath, chunks=chunks)
+    xr_open_fn, filepath = check_function_open_nc(filepath)
+
+    with xr_open_fn(filepath).chunk(chunks) as fp_data:
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
+
+    # # Load this into memory
+    # fp_data = xr.open_dataset(filepath, chunks=chunks)
 
     if species == "co2":
         # Expect co2 data to have high time resolution
@@ -61,16 +66,20 @@ def parse_acrg_org(
             logger.info("Updating high_time_resolution to True for co2 data")
             high_time_resolution = True
 
-    if short_lifetime and not species:
-        raise ValueError(
-            "When indicating footprint is for short lived species, 'species' input must be included"
-        )
-    elif not short_lifetime and species:
-        lifetime = species_lifetime(species)
-        if lifetime is not None:
-            # TODO: May want to add a check on length of lifetime here
-            logger.info("Updating short_lifetime to True since species has an associated lifetime")
-            short_lifetime = True
+    if short_lifetime:
+        if species == "inert":
+            raise ValueError(
+                "When indicating footprint is for short lived species, 'species' input must be included"
+            )
+    else:
+        if species == "inert":
+            lifetime = None
+        else:
+            lifetime = species_lifetime(species)
+            if lifetime is not None:
+                # TODO: May want to add a check on length of lifetime here
+                logger.info("Updating short_lifetime to True since species has an associated lifetime")
+                short_lifetime = True
 
     dv_rename = {
         "fp": "srr",
@@ -188,9 +197,9 @@ def parse_acrg_org(
         except KeyError:
             raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-    metadata["high_time_resolution"] = high_time_resolution
-    metadata["high_spatial_resolution"] = high_spatial_resolution
-    metadata["short_lifetime"] = short_lifetime
+    metadata["high_time_resolution"] = str(high_time_resolution)
+    metadata["high_spatial_resolution"] = str(high_spatial_resolution)
+    metadata["short_lifetime"] = str(short_lifetime)
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
