@@ -59,11 +59,7 @@ def test_read_footprint_co2_from_data(mocker):
 def test_read_footprint_standard(keyword, value):
     """
     Test standard footprint which should contain (at least)
-<<<<<<< HEAD
      - data variables: "fp"
-=======
-     - data variables: "srr"
->>>>>>> eb958ad2853d51a0db34e697e8b43411f0e9d3d8
      - coordinates: "height", "lat", "lon", "time"
     Check this for different variants of inlet and height inputs.
     """
@@ -94,7 +90,7 @@ def test_read_footprint_standard(keyword, value):
     footprint_coords.sort()
     assert footprint_coords == ["height", "lat", "lon", "time"]
 
-    assert "srr" in footprint_data.data_vars
+    assert "fp" in footprint_data.data_vars
 
     expected_attrs = {
         "author": "OpenGHG Cloud",
@@ -340,7 +336,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     footprint_coords.sort()
     assert footprint_coords == ["H_back", "height", "lat", "lon", "time"]
 
-    assert "srr" in footprint_data.data_vars
+    assert "fp" in footprint_data.data_vars
     assert "fp_HiTRes" in footprint_data.data_vars
 
     expected_attrs = {
@@ -405,7 +401,7 @@ def test_read_footprint_short_lived():
     footprint_coords.sort()
     assert footprint_coords == ["height", "lat", "lon", "time"]
 
-    assert "srr" in footprint_data.data_vars
+    assert "fp" in footprint_data.data_vars
     assert "mean_age_particles_n" in footprint_data.data_vars
     assert "mean_age_particles_e" in footprint_data.data_vars
     assert "mean_age_particles_s" in footprint_data.data_vars
@@ -442,7 +438,7 @@ def test_footprint_schema():
     data_schema = Footprints.schema()
 
     data_vars = data_schema.data_vars
-    assert "srr" in data_vars
+    assert "fp" in data_vars
     assert "particle_locations_n" in data_vars
     assert "particle_locations_e" in data_vars
     assert "particle_locations_s" in data_vars
@@ -460,7 +456,7 @@ def test_footprint_schema_spatial():
     data_schema = Footprints.schema(high_spatial_resolution=True)
 
     data_vars = data_schema.data_vars
-    assert "srr" not in data_vars  # "srr" not required (but can be present in file)
+    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
     assert "fp_low" in data_vars
     assert "fp_high" in data_vars
 
@@ -487,7 +483,7 @@ def test_footprint_schema_temporal():
     data_schema = Footprints.schema(high_time_resolution=True)
 
     data_vars = data_schema.data_vars
-    assert "srr" not in data_vars  # "srr" not required (but can be present in file)
+    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
     assert "fp_HiTRes" in data_vars
 
     assert "particle_locations_n" in data_vars
@@ -507,7 +503,7 @@ def test_footprint_schema_lifetime():
     data_schema = Footprints.schema(short_lifetime=True)
 
     data_vars = data_schema.data_vars
-    assert "srr" in data_vars
+    assert "fp" in data_vars
 
     assert "particle_locations_n" in data_vars
     assert "particle_locations_e" in data_vars
