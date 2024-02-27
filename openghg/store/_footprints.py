@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -194,7 +194,7 @@ class Footprints(BaseStore):
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         source_format: str = "acrg_org",
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
@@ -225,7 +225,7 @@ class Footprints(BaseStore):
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             continuous: Whether time stamps have to be continuous.
             chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
-                Passing "auto" will ask xarray to calculate a chunk size.
+                Uses default is None.
             source_format : Type of data being input e.g. acrg_org
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
