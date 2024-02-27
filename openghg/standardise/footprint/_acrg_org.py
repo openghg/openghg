@@ -82,7 +82,7 @@ def parse_acrg_org(
                 short_lifetime = True
 
     dv_rename = {
-        "fp": "srr",
+        # "fp": "srr",
         "temperature": "air_temperature",
         "pressure": "air_pressure",
         "wind_direction": "wind_from_direction",
@@ -101,7 +101,8 @@ def parse_acrg_org(
 
     dv_attribute_updates = {}
     variable_names = [
-        "srr",
+        # "srr",
+        "fp",
         "air_temperature",
         "air_pressure",
         "wind_speed",
@@ -114,7 +115,8 @@ def parse_acrg_org(
     for dv in variable_names:
         dv_attribute_updates[dv] = {}
 
-    dv_attribute_updates["srr"]["long_name"] = "source_receptor_relationship"
+    # dv_attribute_updates["srr"]["long_name"] = "source_receptor_relationship"
+    dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
     dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
     dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
     dv_attribute_updates["atmosphere_boundary_layer_thickness"][

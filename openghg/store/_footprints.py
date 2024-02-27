@@ -435,7 +435,7 @@ class Footprints(BaseStore):
 
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
-        By default, this will just include "srr" variable but this will be superceded
+        By default, this will just include "fp" variable but this will be superceded
         if high_spatial_resolution or high_time_resolution are specified.
 
         Args:
@@ -475,8 +475,8 @@ class Footprints(BaseStore):
 
         if not high_time_resolution and not high_spatial_resolution:
             # Includes standard footprint variable
-            data_vars["srr"] = ("time", "lat", "lon")
-            dtypes["srr"] = np.floating
+            data_vars["fp"] = ("time", "lat", "lon")
+            dtypes["fp"] = np.floating
 
         if high_spatial_resolution:
             # Include options for high spatial resolution footprint

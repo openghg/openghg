@@ -60,7 +60,7 @@ def test_read_footprint_standard(keyword, value):
     """
     Test standard footprint which should contain (at least)
      - data variables: "fp"
-     - coordinates: "height", "lat", "lev", "lon", "time"
+     - coordinates: "height", "lat", "lon", "time"
     Check this for different variants of inlet and height inputs.
     """
     site = "TAC"
@@ -88,7 +88,7 @@ def test_read_footprint_standard(keyword, value):
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["height", "lat", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
 
@@ -148,7 +148,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
      - expects additional parameters for `fp_low` and `fp_high`
      - expects additional coordinates for `lat_high`, `lon_high`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_spatial_resolution"
+       - "high_spatial_resolution": "True"
     """
     site = "TMB"
     domain = "EUROPE"
@@ -178,8 +178,8 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
     footprint_coords.sort()
     footprint_dims.sort()
 
-    assert footprint_coords == ["height", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
-    assert footprint_dims == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    assert footprint_coords == ["height", "lat", "lat_high", "lon", "lon_high", "time"]
+    assert footprint_dims == ["height", "index", "lat", "lat_high", "lon", "lon_high", "time"]
 
     assert footprint_data.attrs["heights"] == [
         500.0,
@@ -206,11 +206,11 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
 
     assert footprint_data.attrs["variables"] == [
         "fp",
-        "temperature",
-        "pressure",
+        "air_temperature",
+        "air_pressure",
         "wind_speed",
-        "wind_direction",
-        "PBLH",
+        "wind_from_direction",
+        "atmosphere_boundary_layer_thickness",
         "release_lon",
         "release_lat",
         "particle_locations_n",
@@ -261,10 +261,10 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
 
     assert footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
     assert footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
-    assert footprint_data["pressure"].max().values == pytest.approx(1011.92)
+    assert footprint_data["air_pressure"].max().values == pytest.approx(1011.92)
     assert footprint_data["fp_low"].min().values == 0.0
     assert footprint_data["fp_high"].min().values == 0.0
-    assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
+    assert footprint_data["air_pressure"].min().values == pytest.approx(1011.92)
 
     # Make sure we can write out a NetCDF
     tmppath = Path(tmpdir).joinpath("footprint_test.nc")
@@ -334,7 +334,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["H_back", "height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["H_back", "height", "lat", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
     assert "fp_HiTRes" in footprint_data.data_vars
@@ -399,7 +399,7 @@ def test_read_footprint_short_lived():
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+    assert footprint_coords == ["height", "lat", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
     assert "mean_age_particles_n" in footprint_data.data_vars
