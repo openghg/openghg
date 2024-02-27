@@ -257,12 +257,7 @@ class Footprints(BaseStore):
         """
         from openghg.types import FootprintTypes
 
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            check_if_need_new_version,
-            load_footprint_parser
-        )
+        from openghg.util import clean_string, format_inlet, check_if_need_new_version, load_footprint_parser
 
         if not isinstance(filepath, list):
             filepath = [filepath]

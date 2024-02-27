@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import DefaultDict, Dict, Literal, List, Optional, Union, Callable
-import xarray as xr
+from typing import DefaultDict, Dict, Literal, List, Optional, Union
 from xarray import Dataset
 from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
 from openghg.store import infer_date_range, update_zero_dim
@@ -79,9 +78,7 @@ def parse_acrg_org(
             lifetime = species_lifetime(species)
             if lifetime is not None:
                 # TODO: May want to add a check on length of lifetime here
-                logger.info(
-                    "Updating short_lifetime to True since species has an associated lifetime"
-                )
+                logger.info("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
     # Need to read the metadata from the footprints and then store it

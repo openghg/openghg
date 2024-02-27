@@ -1,7 +1,7 @@
 import bz2
 import json
 from pathlib import Path
-from typing import Any, Callable, Literal, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from openghg.types import pathType
 
