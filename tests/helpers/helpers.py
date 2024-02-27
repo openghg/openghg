@@ -41,18 +41,18 @@ def get_surface_datapath(filename: str, source_format: str) -> Path:
 
 
 def get_mobile_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the mobile test data file"""
     return get_datapath_base(data_type="mobile", filename=filename)
 
 
 def get_column_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the column test data file"""
     return get_datapath_base(data_type="column", filename=filename)
 
 
-def get_emissions_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
-    return get_datapath_base(data_type="emissions", filename=filename)
+def get_flux_datapath(filename: str) -> Path:
+    """Return the path to the flux test data file"""
+    return get_datapath_base(data_type="flux", filename=filename)
 
 
 def get_bc_datapath(filename: str) -> Path:
@@ -135,7 +135,6 @@ def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
 def all_datasource_keys(keys: Dict) -> List[str]:
     ds_keys = []
     for key_data in keys.values():
-        data_keys = list(key_data["keys"].values())
-        ds_keys.extend(data_keys)
+        ds_keys.extend(key_data["keys"])
 
     return ds_keys

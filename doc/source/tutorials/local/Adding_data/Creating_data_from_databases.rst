@@ -8,7 +8,7 @@ object store ([see here and here] - add links to previous tutorial
 pages). OpenGHG also provides functionality to create data from
 underlying databases and add this to the object store as well. At
 present, this has been implemented for the `EDGAR global anthropogenic
-database <https://edgar.jrc.ec.europa.eu/>`__ to allow emissions files
+database <https://edgar.jrc.ec.europa.eu/>`__ to allow flux / emissions files
 to be created on a regional domain.
 
 0. Using the tutorial object store
@@ -32,14 +32,14 @@ affect your use of OpenGHG outside of this tutorial.
 ---------------------------------------------
 
 To create emissions maps from an underlying database, we can use the
-``transform_emissions_data(...)`` function in the ``openghg.transform``
+``transform_flux_data(...)`` function in the ``openghg.transform``
 module.
 
 .. code:: python
 
-   from openghg.transform import transform_emissions_data
+   from openghg.transform import transform_flux_data
 
-   transform_emissions_data(datapath, database, ...)  # Additional keywords
+   transform_flux_data(datapath, database, ...)  # Additional keywords
 
 This function expects the path, the name of the database as well as
 keyword inputs which will be determined by the underlying function being
@@ -52,7 +52,7 @@ interest. A flux map of the correct format will then be created and
 added to the openghg object store with the associated keywords.
 
 In the background, this will call the
-``openghg.transform.emissions.parse_edgar`` function
+``openghg.transform.flux.parse_edgar`` function
 and we can look at this function for details of what keywords we need to
 provide:
 
@@ -94,11 +94,11 @@ provided is v6.0, annual, global and for methane.
 
 .. code:: python
 
-   from openghg.transform import transform_emissions_data
+   from openghg.transform import transform_flux_data
 
    database = "edgar"
 
-   transform_emissions_data(datapath=edgar_datapath, database=database, date=2014, domain="EUROPE", species="ch4")
+   transform_flux_data(datapath=edgar_datapath, database=database, date=2014, domain="EUROPE", species="ch4")
 
 *Note: this can take a few minutes to complete.*
 
@@ -114,7 +114,7 @@ We can then check the data has been added to the object store.
 
 
 2. Adding new options
-------------------
+---------------------
 
 Transformation workflow
 ^^^^^^^^^^^^^^^^^^^^^^^

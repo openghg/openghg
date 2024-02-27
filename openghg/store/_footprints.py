@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Dict, Literal, Optional, Tuple, Union, Any, cast
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -183,7 +183,7 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: Union[List, str, Path],
         site: str,
         domain: str,
         model: str,
@@ -200,14 +200,20 @@ class Footprints(BaseStore):
         high_spatial_resolution: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
-        # model_params: Optional[Dict] = None,
+        force: bool = False,
+        sort: bool = False,
+        drop_duplicates: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
         Args:
-            filepath: Path of file to load
+            filepath: Path(s) of file(s) to standardise
             site: Site name
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -227,14 +233,42 @@ class Footprints(BaseStore):
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
-            overwrite: Overwrite any currently stored data
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
+            drop_duplicates: Drop duplicate timestamps, keeping the first value
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
         from openghg.types import FootprintTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_footprint_parser
 
-        filepath = Path(filepath)
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            check_if_need_new_version,
+            load_footprint_parser
+        )
+
+        if not isinstance(filepath, list):
+            filepath = [filepath]
+
+        # We wanted sorted Path objects
+        filepath = sorted([Path(f) for f in filepath])
 
         site = clean_string(site)
         network = clean_string(network)
@@ -252,7 +286,10 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
-        if species is not None:
+        # Ensure we have a value for species
+        if species is None:
+            species = "inert"
+        else:
             species = clean_string(species)
 
         if network is not None:
@@ -269,12 +306,33 @@ class Footprints(BaseStore):
         # Load the data retrieve object
         parser_fn = load_footprint_parser(source_format=source_format)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
+        # file_hash = hash_file(filepath=filepath)
+        # if file_hash in self._file_hashes and not overwrite:
+        if overwrite and if_exists == "auto":
             logger.warning(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
             )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
+
+        filepath = list(unseen_hashes.values())
+
+        if not filepath:
+            return {}
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -326,28 +384,49 @@ class Footprints(BaseStore):
                 short_lifetime=short_lifetime,
             )
 
-        # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should provide as much detail as possible
-        # to uniquely identify a Datasource
-        required = (
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "high_time_resolution",
-            "high_spatial_resolution",
-            "short_lifetime",
-        )
+            if species == "co2" and sort is True:
+                logger.info(
+                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+                )
 
-        data_type = "footprints"
-        datasource_uuids = self.assign_data(
-            data=footprint_data, overwrite=overwrite, data_type=data_type, required_keys=required
-        )
+            # These are the keys we will take from the metadata to search the
+            # metadata store for a Datasource, they should provide as much detail as possible
+            # to uniquely identify a Datasource
+            required = (
+                "site",
+                "model",
+                "inlet",
+                "domain",
+                "high_time_resolution",
+                "high_spatial_resolution",
+                "short_lifetime",
+                "species",
+            )
 
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            data_type = "footprints"
+            # TODO - filter options
+            datasource_uuids = self.assign_data(
+                data=footprint_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                required_keys=required,
+                sort=sort,
+                drop_duplicates=drop_duplicates,
+                compressor=compressor,
+                filters=filters,
+            )
 
-        return datasource_uuids
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # footprint_data = update_metadata(
+            #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
+            # )
+
+            # Record the file hash in case we see the file(s) again
+            self.store_hashes(unseen_hashes)
+
+            return datasource_uuids
 
     @staticmethod
     def schema(

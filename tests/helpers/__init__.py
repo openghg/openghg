@@ -5,7 +5,7 @@ from .helpers import (
     clear_test_stores,
     get_bc_datapath,
     get_column_datapath,
-    get_emissions_datapath,
+    get_flux_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
     get_info_datapath,

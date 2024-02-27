@@ -5,14 +5,23 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
+## 0.8.0 - xxxx-xx-xx
 
-### Updated
- - standardise_footprint was updated to allow a source_format input to be specified. This currently only support "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+### Added
+
+- Added option to pass `store` argument to `ModelScenario` init method. [PR #928](https://github.com/openghg/openghg/pull/928)
 
 ### Fixed
 
+- Issue caused when passing a list of files to be processed. If OpenGHG had seen some of the files before it would refuse to process any of them - [PR #890](https://github.com/openghg/openghg/pull/890)
 - Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
+- Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
+
+### Changed
+
+- Moved to store data in [Zarr](https://github.com/zarr-developers/zarr-python) stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
+- standardise_footprint was updated to allow a source_format input to be specified. This currently only support "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+
 
 ## [0.7.0] - 2023-12-15
 
@@ -43,6 +52,8 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
+
+- Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
 
 ## [0.6.2] - 2023-08-07
 
