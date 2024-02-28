@@ -11,7 +11,9 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_gcwerks_nc(data_filepath=thd_path, site="THD", instrument="gcmd", network="agage",)
 
@@ -41,7 +43,9 @@ def test_read_file_capegrim(cgo_data):
 
 
 def test_read_file_thd():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_gcwerks_nc(
         data_filepath=thd_path,
@@ -74,7 +78,9 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="AGAGE-GCMD_THD_cfc-11_20240208v1-test.nc", source_format="GC_nc"
+    )
 
     with pytest.raises(ValueError):
         parse_gcwerks_nc(
