@@ -354,7 +354,6 @@ class Footprints(BaseStore):
             short_lifetime=short_lifetime,
         )
 
-        # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
         if len(filepath) > 1:
             xr_open_fn: Callable = xr.open_mfdataset
             logger.warning(
