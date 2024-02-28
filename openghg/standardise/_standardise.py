@@ -120,7 +120,7 @@ def standardise_surface(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
             To disable chunking pass an empty dictionary.
     Returns:
@@ -302,7 +302,7 @@ def standardise_column(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
             To disable chunking pass an empty dictionary.
     Returns:
@@ -410,7 +410,7 @@ def standardise_bc(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
             To disable chunking pass an empty dictionary.
     returns:
@@ -504,7 +504,7 @@ def standardise_footprint(
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
             by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
@@ -637,7 +637,7 @@ def standardise_flux(
                Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
             To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
@@ -767,7 +767,7 @@ def standardise_eulerian(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
             To disable chunking pass an empty dictionary.
     Returns:

@@ -224,6 +224,7 @@ class Footprints(BaseStore):
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
+            chunks: Chunking schema to use when storing data.
             continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
@@ -641,7 +642,8 @@ class Footprints(BaseStore):
         """
         if high_spatial_resolution or short_lifetime:
             raise NotImplementedError(
-                "Chunking schema for footprints with high spatial resolution or short lifetime is not currently set."
+                "Chunking schema for footprints with high spatial resolution or short lifetime is not currently set.\n"
+                + "Using the default chunking schema."
             )
 
         # TODO - could these defaults be changed in the object store config maybe?

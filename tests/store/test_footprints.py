@@ -575,6 +575,26 @@ def test_passing_in_different_chunks_to_same_store_works():
         xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
 
 
+def test_pass_empty_dict_means_full_dimension_chunks():
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    bucket = get_writable_bucket(name="user")
+
+    f = Footprints(bucket=bucket)
+
+    # Start with no chunks passed
+    checked_chunks = f.check_chunks(
+        filepaths=[file1, file2],
+        chunks={},
+        high_spatial_resolution=False,
+        high_time_resolution=False,
+        short_lifetime=False,
+    )
+
+    assert checked_chunks == {"lat": 12, "lon": 12, "time": 3}
+
+
 def test_footprints_chunking_schema():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
@@ -591,7 +611,7 @@ def test_footprints_chunking_schema():
         short_lifetime=False,
     )
 
-    assert checked_chunks == {'lat': 12, 'lon': 12, 'time': 480}
+    assert checked_chunks == {"lat": 12, "lon": 12, "time": 480}
 
     checked_chunks = f.check_chunks(
         filepaths=[file1, file2],

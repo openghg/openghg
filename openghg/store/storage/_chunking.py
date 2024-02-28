@@ -17,6 +17,5 @@ class ChunkingSchema:
     variable: str
     chunks: Dict[str, int]
     secondary_dims: List[str]
-    # max chunk size in bytes (250 MB)
-    # TODO - do we want to make this configurable?
-    max_chunk_size: int = 262144000
+    # max chunk size in megabytes
+    max_chunk_size: int = 300
