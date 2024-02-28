@@ -1,9 +1,9 @@
 import bz2
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
-from openghg.types import pathType
+from openghg.types import pathType, multiPathType
 
 __all__ = [
     "load_parser",
@@ -291,7 +291,7 @@ def get_logfile_path() -> Path:
         return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(filepath: Union[Path, List[Path]]) -> Callable:
+def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset

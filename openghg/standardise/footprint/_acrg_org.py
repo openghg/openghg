@@ -3,15 +3,17 @@ from pathlib import Path
 from collections import defaultdict
 from typing import DefaultDict, Dict, Literal, List, Optional, Union
 from xarray import Dataset
+
 from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
 from openghg.store import infer_date_range, update_zero_dim
+from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_acrg_org(
-    filepath: Union[Path, List[Path]],
+    filepath: multiPathType,
     site: str,
     domain: str,
     model: str,
@@ -46,7 +48,6 @@ def parse_acrg_org(
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
         chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
-                        Passing "auto" will ask xarray to calculate a chunk size.
     Returns:
         dict: Dictionary of data
     """
@@ -107,8 +108,16 @@ def parse_acrg_org(
 
     fp_time = fp_data["time"]
 
+    # If filepath is a single file, the naming scheme of this file can be used
+    # as one factor to try and determine the period.
+    # If multiple files, this input isn't needed.
+    if isinstance(filepath, (str, Path)):
+        input_filepath = filepath
+    else:
+        input_filepath = None
+
     start_date, end_date, period_str = infer_date_range(
-        fp_time, filepath=filepath, period=period, continuous=continuous
+        fp_time, filepath=input_filepath, period=period, continuous=continuous
     )
 
     metadata["start_date"] = str(start_date)
