@@ -379,49 +379,49 @@ class Footprints(BaseStore):
                 short_lifetime=short_lifetime,
             )
 
-            if species == "co2" and sort is True:
-                logger.info(
-                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-                )
-
-            # These are the keys we will take from the metadata to search the
-            # metadata store for a Datasource, they should provide as much detail as possible
-            # to uniquely identify a Datasource
-            required = (
-                "site",
-                "model",
-                "inlet",
-                "domain",
-                "high_time_resolution",
-                "high_spatial_resolution",
-                "short_lifetime",
-                "species",
+        if species == "co2" and sort is True:
+            logger.info(
+                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
-            data_type = "footprints"
-            # TODO - filter options
-            datasource_uuids = self.assign_data(
-                data=footprint_data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                required_keys=required,
-                sort=sort,
-                drop_duplicates=drop_duplicates,
-                compressor=compressor,
-                filters=filters,
-            )
+        # These are the keys we will take from the metadata to search the
+        # metadata store for a Datasource, they should provide as much detail as possible
+        # to uniquely identify a Datasource
+        required = (
+            "site",
+            "model",
+            "inlet",
+            "domain",
+            "high_time_resolution",
+            "high_spatial_resolution",
+            "short_lifetime",
+            "species",
+        )
 
-            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-            # update_keys = ["start_date", "end_date", "latest_version"]
-            # footprint_data = update_metadata(
-            #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
-            # )
+        data_type = "footprints"
+        # TODO - filter options
+        datasource_uuids = self.assign_data(
+            data=footprint_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required,
+            sort=sort,
+            drop_duplicates=drop_duplicates,
+            compressor=compressor,
+            filters=filters,
+        )
 
-            # Record the file hash in case we see the file(s) again
-            self.store_hashes(unseen_hashes)
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # footprint_data = update_metadata(
+        #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
 
-            return datasource_uuids
+        # Record the file hash in case we see the file(s) again
+        self.store_hashes(unseen_hashes)
+
+        return datasource_uuids
 
     @staticmethod
     def schema(
