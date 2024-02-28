@@ -541,7 +541,7 @@ class BaseStore:
         self,
         filepaths: Union[str, list[str]],
         chunks: Optional[Dict[str, int]] = None,
-        max_chunk_size: int = 262144000,
+        max_chunk_size: int = 300,
         **chunking_kwargs: Any,
     ) -> Dict[str, int]:
         """Check the chunk size of a variable in a dataset and return the chunk size
@@ -551,7 +551,7 @@ class BaseStore:
             variable: Name of the variable that we want to check for max chunksize
             chunk_dimension: Dimension to chunk over
             secondary_dimensions: List of secondary dimensions to chunk over
-            max_chunk_size: Maximum chunk size in bytes, defaults to 250 MB
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
         Returns:
             Dict: Dictionary of chunk sizes
         """
@@ -586,9 +586,13 @@ class BaseStore:
         # We need to add in the sizes of the other dimensions so we calculate
         # the chunk size correctly
         # TODO - should we check if the specified chunk size is greater than the dimension size?
-        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))
+        MB_to_bytes = 1024 * 1024
+        bytes_to_MB = 1 / MB_to_bytes
 
-        if current_chunksize > max_chunk_size:
+        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))  # bytes
+        max_chunk_size_bytes = max_chunk_size * MB_to_bytes
+
+        if current_chunksize > max_chunk_size_bytes:
             # Do we want to check the secondary dimensions really?
             # if secondary_dimensions is not None:
             # raise NotImplementedError("Secondary dimensions scaling not yet implemented")
@@ -598,7 +602,7 @@ class BaseStore:
             #     chunks[dim] = max(int(ratio * chunks[dim]), 10)
             # else:
             raise ValueError(
-                f"Chunk size {current_chunksize} is greater than the maximum chunk size {max_chunk_size}"
+                f"Chunk size {current_chunksize * bytes_to_MB} is greater than the maximum chunk size {max_chunk_size}"
             )
 
         # Do we need to supply the chunks of the other dimensions?
