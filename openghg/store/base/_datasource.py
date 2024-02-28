@@ -210,7 +210,7 @@ class Datasource:
         if self._latest_version and not new_version:
             version_str = self._latest_version
         else:
-            version_str = f"v{str(len(self._data_keys))}"
+            version_str = f"v{str(len(self._data_keys) + 1)}"
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
@@ -672,7 +672,7 @@ class Datasource:
         functionality.
 
         Example:
-            memory_store = datasource._copy_to_memorystore(version="v0")
+            memory_store = datasource._copy_to_memorystore(version="v1")
             with xr.open_zarr(memory_store, consolidated=True) as ds:
                 ...
 
@@ -691,7 +691,7 @@ class Datasource:
         """Get the version of the dataset stored in the zarr store.
 
         Args:
-            version: Version string, e.g. v0, v1
+            version: Version string, e.g. v1, v2
         Returns:
             None
         """

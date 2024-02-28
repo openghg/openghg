@@ -5,11 +5,12 @@ import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
+from openghg.types import TimePeriod
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-TupleTimeType = Tuple[Union[int, float], str]
+# TupleTimeType = Tuple[Union[int, float, None], Union[str, None]]
 
 __all__ = ["infer_date_range", "update_zero_dim"]
 
@@ -21,13 +22,24 @@ def infer_date_range(
     continuous: bool = True,
 ) -> Tuple[Timestamp, Timestamp, str]:
     """
-    Infer the date range from the time dimension. If the time dimension
-    only includes one value the date range will be:
+    Infer the date range from the time dimension.
+
+    If the time dimension only includes one value the date range will be:
      - derived from the period (if supplied)
      - derived from the filepath using pattern matching (if supplied)
        - 4 digits assumed to be a year
        - 6 digits assumed to be a month
      - assumed to be yearly
+
+     If the time dimension includes multiple values the date range can be
+     inferred from this directly. The period will be derived as follows:
+     - if continuous=True, assumes data is meant to be regular and will
+       infer period and date range from the data, raising an error if unable to do so.
+     - if continuous=False
+       - if period is not specified, will attempt to infer a period and if
+         unable to do so will set this to "varies".
+       - if period is specified, will use this value
+          - will compare against the inferred period and log a warning
 
     Args:
         time: DataArray containing time values
@@ -43,11 +55,16 @@ def infer_date_range(
     """
     from openghg.util import create_frequency_str, parse_period, relative_time_offset, timestamp_tzaware
 
+    if filepath is not None:
+        filepath = Path(filepath)
+
+    null_freq = TimePeriod()  # contains value=None, unit=None
+
     # Find frequency from period, if specified
     if period is not None:
-        freq: Optional[TupleTimeType] = parse_period(period)
+        input_freq = parse_period(period)
     else:
-        freq = None
+        input_freq = null_freq
 
     # Changed this from len(time) as a length of a single value
     # DataArray was throwing an len() of unsized object error
@@ -84,35 +101,36 @@ def infer_date_range(
                 date_match = ""
 
             # Set as default as annual if unable to derive from filepath
-            inferred_freq: Optional[TupleTimeType] = (1, "years")
+            inferred_freq = TimePeriod(1, "years")
 
             if len(date_match) == 6:
                 # "yyyymm" format indicates monthly data
                 expected_date = f"{start_date.year}{start_date.month:02}"
                 if date_match == expected_date:
-                    inferred_freq = (1, "months")
+                    inferred_freq = TimePeriod(1, "months")
             elif len(date_match) == 4:
                 # "yyyy" format indicates yearly data
                 expected_date = str(start_date.year)
                 if date_match == expected_date:
-                    inferred_freq = (1, "years")
+                    inferred_freq = TimePeriod(1, "years")
 
         else:
             # Set as default as annual if filepath not supplied
-            inferred_freq = (1, "years")
+            inferred_freq = TimePeriod(1, "years")
 
         # Because frequency cannot be inferred from the data and only the filename,
         # use the user specified input in preference of the inferred value
-        if freq is not None:
-            time_value: Optional[Union[int, float]] = freq[0]
-            time_unit: Optional[str] = freq[1]
+        if input_freq != null_freq:
+            # time_value: Optional[Union[int, float]] = input_freq[0]
+            # time_unit: Optional[str] = input_freq[1]
+            time_value, time_unit = input_freq
         else:
-            if inferred_freq is not None:
+            if inferred_freq != null_freq:
                 logger.info(f"Only one time point, inferring frequency of {inferred_freq}")
                 time_value, time_unit = inferred_freq
 
         # Check input period against inferred period
-        if inferred_freq != freq and period is not None:
+        if inferred_freq != input_freq and period is not None:
             logger.warning(
                 f"Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
             )
@@ -134,21 +152,22 @@ def infer_date_range(
         if inferred_period is None:
             if continuous:
                 raise ValueError(
-                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continuous=False to remove this constraint."
+                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continuous=False (and optionally specify period input) to remove this constraint."
                 )
             else:
-                inferred_freq = None
-                time_value, time_unit = None, None
+                inferred_freq = null_freq
         else:
             inferred_freq = parse_period(inferred_period)
-            time_value, time_unit = inferred_freq
 
         # Because frequency will be inferred from the data, use the inferred
         # value in preference to any user specified input.
         # Note: this is opposite to the other part of this branch.
-        if freq is not None and inferred_freq is not None and freq != inferred_freq:
-            logger.warning(f"Input period: {period} does not map to inferred frequency {inferred_freq}")
-            freq = inferred_freq
+        if inferred_freq != null_freq:
+            if input_freq != null_freq and input_freq != inferred_freq:
+                logger.warning(f"Input period: {period} does not map to inferred frequency {inferred_freq}")
+            time_value, time_unit = inferred_freq
+        else:
+            time_value, time_unit = input_freq
 
         # Create time offset, using inferred offset
         start_date = timestamp_tzaware(time[0].values)
@@ -158,7 +177,7 @@ def infer_date_range(
         else:
             end_date = timestamp_tzaware(time[-1].values)
 
-        if inferred_period is not None:
+        if time_value is not None:
             period_str = create_frequency_str(time_value, time_unit)
         else:
             period_str = "varies"

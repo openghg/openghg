@@ -170,7 +170,7 @@ def test_search_site_data_version():
     metadata = res.metadata[key]
 
     assert "latest_version" in metadata
-    assert metadata["latest_version"] == "v0"
+    assert metadata["latest_version"] == "v1"
 
 
 def test_multi_type_search():
