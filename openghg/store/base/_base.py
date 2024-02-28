@@ -7,7 +7,6 @@ import logging
 import math
 from pathlib import Path
 from pandas import Timestamp
-import re
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
@@ -571,18 +570,12 @@ class BaseStore:
 
         with open_dataset(filepaths[0]) as ds:
             dim_sizes = dict(ds[variable].sizes)
-            var_dtype = str(ds[variable].dtype)
+            var_dtype_bytes = ds[variable].dtype.itemsize
 
         if secondary_dimensions is not None:
             missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
             if missing_dims:
                 raise ValueError(f"File {filepaths[0]} is missing the following dimensions: {missing_dims}")
-
-        # Calculate the chunk size
-        if m := re.search(r"\d+$", var_dtype):
-            fp_dtype_bytes = int(m.group(0)) / 8
-        else:
-            fp_dtype_bytes = 8  # assume worst case: 64 bit
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks
@@ -593,7 +586,7 @@ class BaseStore:
         # We need to add in the sizes of the other dimensions so we calculate
         # the chunk size correctly
         # TODO - should we check if the specified chunk size is greater than the dimension size?
-        current_chunksize = int(fp_dtype_bytes * math.prod(chunks.values()))
+        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))
 
         if current_chunksize > max_chunk_size:
             # Do we want to check the secondary dimensions really?
