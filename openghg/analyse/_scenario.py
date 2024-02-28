@@ -112,7 +112,7 @@ class ModelScenario:
         footprint: Optional[FootprintData] = None,
         flux: Union[FluxData, Dict[str, FluxData], None] = None,
         bc: Optional[BoundaryConditionsData] = None,
-        store: Union[str, list[str], None] = None,
+        store: Optional[str] = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
