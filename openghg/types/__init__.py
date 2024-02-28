@@ -33,4 +33,5 @@ from ._types import (
     ArrayLikeMatch,
     XrDataLike,
     XrDataLikeMatch,
+    TimePeriod,
 )
