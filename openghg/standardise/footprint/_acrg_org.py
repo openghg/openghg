@@ -26,7 +26,7 @@ def parse_acrg_org(
     high_spatial_resolution: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
 ) -> Dict:
     """
     Read and parse input emissions data in original ACRG format.
@@ -57,9 +57,6 @@ def parse_acrg_org(
     with xr_open_fn(filepath).chunk(chunks) as fp_data:
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
-
-    # # Load this into memory
-    # fp_data = xr.open_dataset(filepath, chunks=chunks)
 
     if species == "co2":
         # Expect co2 data to have high time resolution
