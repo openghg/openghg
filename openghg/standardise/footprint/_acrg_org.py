@@ -16,8 +16,8 @@ def parse_acrg_org(
     domain: str,
     model: str,
     inlet: str,
+    species: str,
     metmodel: Optional[str] = None,
-    species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
@@ -36,7 +36,7 @@ def parse_acrg_org(
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         metmodel: Underlying meteorlogical model used (e.g. UKV)
-        species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+        species: Species name. For a long-lived species this should be "inert".
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
@@ -93,9 +93,7 @@ def parse_acrg_org(
     # Include both inlet and height keywords for backwards compatability
     metadata["inlet"] = inlet
     metadata["height"] = inlet
-
-    if species is not None:
-        metadata["species"] = species
+    metadata["species"] = species
 
     if network is not None:
         metadata["network"] = network
