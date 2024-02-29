@@ -44,10 +44,11 @@ def parse_acrg_org(
         continuous: Whether time stamps have to be continuous.
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
         high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
-                        Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
-                        Note this will be set to True if species has an associated lifetime.
-        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+            Note this will be set to True if species has an associated lifetime.
+        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
     Returns:
         dict: Dictionary of data
     """
