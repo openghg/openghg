@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Moved to store data in [Zarr](https://github.com/zarr-developers/zarr-python) stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
 - standardise_footprint was updated to allow a source_format input to be specified. This currently only support "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+- Internal format for "footprint" data type was updated to rename meteorlogical variable names to standard names[PR #918](https://github.com/openghg/openghg/pull/918).
 
 
 ## [0.7.0] - 2023-12-15
