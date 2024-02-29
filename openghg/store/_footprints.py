@@ -224,8 +224,8 @@ class Footprints(BaseStore):
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             continuous: Whether time stamps have to be continuous.
-            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
-                Uses default is None.
+            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             source_format : Type of data being input e.g. acrg_org
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
