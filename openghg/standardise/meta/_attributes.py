@@ -159,7 +159,6 @@ def get_attributes(
 
     species_lower = species.lower()
     species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
-    
 
     variable_names = cast(Dict[str, Any], ds.variables)
     matched_keys = [var for var in variable_names if species_search in var]
@@ -167,7 +166,6 @@ def get_attributes(
     # If we don't have any variables to rename, raise an error
     if not matched_keys:
         raise NameError(f"Cannot find species {species_search} in Dataset variables")
-
 
     # Load attributes files
     species_attrs = get_species_info()

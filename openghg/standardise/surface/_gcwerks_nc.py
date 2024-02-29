@@ -8,7 +8,7 @@ from openghg.types import optionalPathType
 
 def find_files(data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Path]:
     """A helper file to find new format GCWERKS .nc files in a given folder.
-    The files are of the format AGAGE-GCMS-Medusa_SITE_species.nc, replacing the two .C data and precision files. 
+    The files are of the format AGAGE-GCMS-Medusa_SITE_species.nc, replacing the two .C data and precision files.
 
     Please note the limited scope of this function, it will only work with
     files that are named in the correct pattern.
