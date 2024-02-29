@@ -5,6 +5,7 @@ from ._enum import (
     ObsTypes,
     FluxTypes,
     FluxDatabases,
+    FootprintTypes,
     DataTypes,
 )
 from ._errors import (

@@ -46,6 +46,13 @@ class FluxDatabases(Enum):
     EDGAR = "EDGAR"
 
 
+class FootprintTypes(Enum):
+    """For standardising footprint inputs"""
+
+    # OPENGHG = "OPENGHG"  # To be implemented
+    ACRG_ORG = "ACRG_ORG"
+
+
 class ObsTypes(Enum):
     """ """
 

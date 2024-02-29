@@ -1,9 +1,9 @@
 import bz2
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
-from openghg.types import pathType
+from openghg.types import pathType, multiPathType
 
 __all__ = [
     "load_parser",
@@ -120,6 +120,21 @@ def load_flux_database_parser(database: str) -> Callable:
     """
     flux_tr_module_name = "openghg.transform.flux"
     fn = load_parser(data_name=database, module_name=flux_tr_module_name)
+
+    return fn
+
+
+def load_footprint_parser(source_format: str) -> Callable:
+    """Load a parsing object for the footprint data type.
+    Used with `openghg.standardise.footprint` sub-module
+
+    Args:
+        source_format: Name of data type e.g. OPENGHG, ACRG_ORG
+    Returns:
+        callable: parser function
+    """
+    footprint_st_module_name = "openghg.standardise.footprint"
+    fn = load_parser(data_name=source_format, module_name=footprint_st_module_name)
 
     return fn
 
@@ -274,3 +289,29 @@ def get_logfile_path() -> Path:
         return Path.home().joinpath("openghg.log")
     else:
         return Path("/tmp/openghg.log")
+
+
+def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
+    """
+    Check the filepath input to choose which xarray open function to use:
+     - Path or single item List - use open_dataset
+     - multiple item List - use open_mfdataset
+
+    Args:
+        filepath: Path or list of filepaths
+    Returns:
+        Callable, Union[Path, List[Path]]: function and suitable filepath
+            to use with the function.
+    """
+    import xarray as xr
+
+    if isinstance(filepath, list):
+        if len(filepath) > 1:
+            xr_open_fn: Callable = xr.open_mfdataset
+        else:
+            xr_open_fn = xr.open_dataset
+            filepath = filepath[0]
+    else:
+        xr_open_fn = xr.open_dataset
+
+    return xr_open_fn, filepath
