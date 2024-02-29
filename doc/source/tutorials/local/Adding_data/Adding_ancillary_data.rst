@@ -178,11 +178,18 @@ Chunking
 
 When reading in a netCDF file for standardisation we can pass a dictionary of chunk sizes to the standardisation function.
 This is useful for large files as it can reduce memory usage and speed up the process.
-In this example we'll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
-chunk the file into chunks of 48 time points.
 
-As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you're running
-the standardisation process on and how you'll be retrieving using the data from the object store.
+
+Default chunking
+""""""""""""""""
+
+If you don't specify chunk sizes OpenGHG will use a default chunking schema for the the data type. For footprints the chunking scheme used will depend on the properties of the footprint, such as whether it is a high time resolution CO2 footprint, a high spatial resolution footprint or a short lifetime species footprint. The default chunking scheme is designed to be a good compromise between memory usage and speed. If you're unsure what chunk sizes to use then it's best to leave the chunking to OpenGHG.
+
+Manual chunking
+"""""""""""""""
+
+As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you're running the standardisation process on and how you'll be retrieving using the data from the object store. In this example we'll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
+chunk the file into chunks of 24 time points.
 
 Let's perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable `fp_HiTRes` is has an extra `H_back` dimension we'll calculate the chunk sizes for this variable.
 
