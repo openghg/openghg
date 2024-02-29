@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import DefaultDict, Dict, Literal, List, Optional, Union
+from typing import DefaultDict, Dict, List, Optional, Union
 from xarray import Dataset
 
 from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
