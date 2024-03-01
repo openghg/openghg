@@ -273,6 +273,6 @@ def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
     if store not in writable_stores:
         raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
 
-    res = search(data_type=data_type, **kwargs)
+    res = search(data_type=data_type, store=store, **kwargs)
     metadata = res.metadata
     return DataManager(metadata=metadata, store=store)

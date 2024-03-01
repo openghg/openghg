@@ -20,6 +20,7 @@ a `from_bucket` class method, and a `close` method.
 These methods are only needed by `store.BaseStore`.
 
 """
+
 from __future__ import annotations
 
 from collections.abc import Generator
