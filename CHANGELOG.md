@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
-## 0.8.0 - xxxx-xx-xx
-
 ### Added
 
 - Added option to pass `store` argument to `ModelScenario` init method. [PR #928](https://github.com/openghg/openghg/pull/928)
@@ -22,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Moved to store data in [Zarr](https://github.com/zarr-developers/zarr-python) stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
+- standardise_footprint was updated to allow a source_format input to be specified. This currently only support "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
 
 
 ## [0.7.0] - 2023-12-15

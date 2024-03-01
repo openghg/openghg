@@ -472,6 +472,7 @@ def standardise_footprint(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    source_format: str = "acrg_org",
     period: Optional[Union[str, tuple]] = None,
     chunks: Optional[Dict] = None,
     continuous: bool = True,
@@ -503,6 +504,7 @@ def standardise_footprint(
         metmodel: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
+        source_format: Format of the input data format, for example acrg_org
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
@@ -584,6 +586,7 @@ def standardise_footprint(
             metmodel=metmodel,
             species=species,
             network=network,
+            source_format=source_format,
             period=period,
             chunks=chunks,
             continuous=continuous,
