@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
 has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
+- Added database configuration file to specify database type as tinydb or mongodb. - [PR #800](https://github.com/openghg/openghg/pull/800)
+
+
 ### Fixed
 
 - Bug fix for sampling period attribute having a value of "NOT_SET" and combining the observation and footprint data. Previously this was raising a ValueError. [PR #808](https://github.com/openghg/openghg/pull/808)

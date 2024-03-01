@@ -1,0 +1,6 @@
+config_version = ""
+[database]
+  type = ""
+
+  [database.mongodb]
+    uri = "mongodb connection string"
