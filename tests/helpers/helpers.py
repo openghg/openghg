@@ -1,5 +1,6 @@
 """ Some helper functions for things we do in tests frequently
 """
+
 import shutil
 import tempfile
 from pathlib import Path
@@ -16,7 +17,21 @@ def temporary_store_paths() -> Dict[str, Path]:
     }
 
 
+def clear_test_store(name: str) -> None:
+    """Clear one of the testing object stores
+
+    Args:
+        name: Name of store to clear
+    Returns:
+        None
+    """
+    tmp_stores = temporary_store_paths()
+    path = tmp_stores[name]
+    shutil.rmtree(path=path, ignore_errors=True)
+
+
 def clear_test_stores() -> None:
+    """Clears the testing object stores"""
     # Clears the testing object stores
     tmp_stores = temporary_store_paths()
     for path in tmp_stores.values():
