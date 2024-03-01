@@ -451,7 +451,18 @@ class Footprints(BaseStore):
                 and include associated dimensions ("H_back").
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
+
+        Returns:
+            DataSchema object describing this format.
+
+        Note: In PARIS format the coordinate dimensions are ("latitude", "longitude") rather than ("lat", "lon")
+            but given that all other openghg internal formats are ("lat", "lon"), we are currently keeping all
+            footprint internal formats consistent with this.
         """
+
+        # # Note: In PARIS format the coordinate dimensions are ("latitude", "longitude") rather than ("lat", "lon")
+        # # but given that all other openghg internal formats are ("lat", "lon"), we are currently keeping the
+        # # footprint internal format consistent with this.
 
         # Names of data variables and associated dimensions (as a tuple)
         data_vars: Dict[str, Tuple[str, ...]] = {}

@@ -80,6 +80,74 @@ def parse_acrg_org(
                 logger.info("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
+    dv_rename = {
+        # "fp": "srr",
+        "temperature": "air_temperature",
+        "pressure": "air_pressure",
+        "wind_direction": "wind_from_direction",
+        "PBLH": "atmosphere_boundary_layer_thickness",
+    }
+
+    attribute_rename = {"fp_output_units": "lpdm_native_output_units"}
+
+    # # Removed for now - this renaming to match to PARIS would mean the dimension names
+    # # were inconsistent between data types/
+    # dim_rename = {"lat": "latitude", "lon": "longitude"}
+
+    dim_drop = "lev"
+
+    dim_reorder = ("time", "height", "lat", "lon")
+
+    dv_attribute_updates: Dict[str, Dict[str, str]] = {}
+    variable_names = [
+        # "srr",
+        "fp",
+        "air_temperature",
+        "air_pressure",
+        "wind_speed",
+        "wind_from_direction",
+        "atmosphere_boundary_layer_thickness",
+        "release_lon",
+        "release_lat",
+    ]
+
+    for dv in variable_names:
+        dv_attribute_updates[dv] = {}
+
+    # dv_attribute_updates["srr"]["long_name"] = "source_receptor_relationship"
+    dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
+    dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
+    dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
+    dv_attribute_updates["atmosphere_boundary_layer_thickness"][
+        "long_name"
+    ] = "atmospheric boundary layer thickness at release"
+
+    dv_attribute_updates["wind_speed"]["units"] = "m s-1"
+    dv_attribute_updates["wind_speed"]["long_name"] = "wind speed at release"
+
+    dv_attribute_updates["wind_from_direction"]["units"] = "degree"
+    dv_attribute_updates["wind_from_direction"]["long_name"] = "wind direction at release"
+
+    dv_attribute_updates["release_lon"]["units"] = "degree_east"
+    dv_attribute_updates["release_lon"]["long_name"] = "Release longitude"
+    dv_attribute_updates["release_lat"]["units"] = "degree_north"
+    dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
+
+    # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
+    fp_data = fp_data.rename(**dv_rename)  # type: ignore
+    # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
+
+    fp_data = fp_data.drop_dims(dim_drop)
+    fp_data = fp_data.transpose(*dim_reorder, ...)
+
+    for attr, new_attr in attribute_rename.items():
+        if attr in fp_data:
+            fp_data.attrs[new_attr] = fp_data.attrs.pop(attr)
+
+    for dv, attr_details in dv_attribute_updates.items():
+        for key, value in attr_details.items():
+            fp_data[dv].attrs[key] = value
+
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
     metadata: Dict[str, Union[str, float, List[float]]] = {}
@@ -148,6 +216,7 @@ def parse_acrg_org(
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params
 
+    # TODO: Decide if to remove this as may not be the right thing for data we're outputting.
     # Set the attributes of this Dataset
     fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
 
