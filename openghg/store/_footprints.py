@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.store.storage import ChunkingSchema
+from openghg.util import species_lifetime
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -223,6 +225,7 @@ class Footprints(BaseStore):
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
+            chunks: Chunking schema to use when storing data.
             continuous: Whether time stamps have to be continuous.
             chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
@@ -326,8 +329,40 @@ class Footprints(BaseStore):
         if not filepath:
             return {}
 
-        if chunks is None:
-            chunks = {}
+        # Do some housekeeping on the inputs
+        if species == "co2":
+            # Expect co2 data to have high time resolution
+            if not high_time_resolution:
+                logger.info("Updating high_time_resolution to True for co2 data")
+                high_time_resolution = True
+
+            if sort:
+                logger.info(
+                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+                )
+
+        if short_lifetime:
+            if species == "inert":
+                raise ValueError(
+                    "When indicating footprint is for short lived species, 'species' input must be included"
+                )
+        else:
+            if species == "inert":
+                lifetime = None
+            else:
+                lifetime = species_lifetime(species)
+                if lifetime is not None:
+                    # TODO: May want to add a check on length of lifetime here
+                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
+                    short_lifetime = True
+
+        chunks = self.check_chunks(
+            filepaths=filepath,
+            chunks=chunks,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
+            short_lifetime=short_lifetime,
+        )
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -559,3 +594,37 @@ class Footprints(BaseStore):
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)
+
+    def chunking_schema(
+        self,
+        high_time_resolution: bool = False,
+        high_spatial_resolution: bool = False,
+        short_lifetime: bool = False,
+    ) -> ChunkingSchema:
+        """
+        Get chunking schema for footprint data.
+
+        Args:
+            high_time_resolution : Set footprint variable to be high time resolution.
+            high_spatial_resolution : Set footprint variables include high and low resolution options.
+            short_lifetime: Include additional particle age parameters for short lived species.
+        Returns:
+            dict: Chunking schema for footprint data.
+        """
+        if high_spatial_resolution or short_lifetime:
+            raise NotImplementedError(
+                "Chunking schema for footprints with high spatial resolution or short lifetime is not currently set.\n"
+                + "Using the default chunking schema."
+            )
+
+        # TODO - could these defaults be changed in the object store config maybe?
+        if high_time_resolution:
+            var = "fp_HiTRes"
+            time_chunk_size = 24
+            secondary_vars = ["lat", "lon", "H_back"]
+        else:
+            var = "fp"
+            time_chunk_size = 480
+            secondary_vars = ["lat", "lon"]
+
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)

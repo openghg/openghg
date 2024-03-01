@@ -4,14 +4,16 @@
 
 from __future__ import annotations
 import logging
+import math
 from pathlib import Path
 from pandas import Timestamp
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
-
+from xarray import open_dataset
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
@@ -96,6 +98,9 @@ class BaseStore:
         raise NotImplementedError
 
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
+
+    def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
 
     def store_hashes(self, hashes: Dict[str, Path]) -> None:
@@ -531,6 +536,82 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
+
+    def check_chunks(
+        self,
+        filepaths: Union[str, list[str]],
+        chunks: Optional[Dict[str, int]] = None,
+        max_chunk_size: int = 300,
+        **chunking_kwargs: Any,
+    ) -> Dict[str, int]:
+        """Check the chunk size of a variable in a dataset and return the chunk size
+
+        Args:
+            filepaths: List of file paths
+            variable: Name of the variable that we want to check for max chunksize
+            chunk_dimension: Dimension to chunk over
+            secondary_dimensions: List of secondary dimensions to chunk over
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+        Returns:
+            Dict: Dictionary of chunk sizes
+        """
+        if not isinstance(filepaths, list):
+            filepaths = [filepaths]
+
+        try:
+            default_schema = self.chunking_schema(**chunking_kwargs)
+        except NotImplementedError:
+            logger.warn(f"No chunking schema found for {type(self).__name__}")
+            return {}
+
+        variable = default_schema.variable
+        default_chunks = default_schema.chunks
+        secondary_dimensions = default_schema.secondary_dims
+
+        with open_dataset(filepaths[0]) as ds:
+            dim_sizes = dict(ds[variable].sizes)
+            var_dtype_bytes = ds[variable].dtype.itemsize
+
+        if secondary_dimensions is not None:
+            missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
+            if missing_dims:
+                raise ValueError(f"File {filepaths[0]} is missing the following dimensions: {missing_dims}")
+
+        # Make the 'chunks' dict, using dim_sizes for any unspecified dims
+        specified_chunks = default_chunks if chunks is None else chunks
+        # TODO - revisit this type hinting
+        chunks = dict(dim_sizes, **specified_chunks)  # type: ignore
+
+        # So now we want to check the size of the chunks
+        # We need to add in the sizes of the other dimensions so we calculate
+        # the chunk size correctly
+        # TODO - should we check if the specified chunk size is greater than the dimension size?
+        MB_to_bytes = 1024 * 1024
+        bytes_to_MB = 1 / MB_to_bytes
+
+        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))  # bytes
+        max_chunk_size_bytes = max_chunk_size * MB_to_bytes
+
+        if current_chunksize > max_chunk_size_bytes:
+            # Do we want to check the secondary dimensions really?
+            # if secondary_dimensions is not None:
+            # raise NotImplementedError("Secondary dimensions scaling not yet implemented")
+            # ratio = np.power(max_chunk_size / current_chunksize, 1 / len(secondary_dimensions))
+            # for dim in secondary_dimensions:
+            #     # Rescale chunks, but don't allow chunks smaller than 10
+            #     chunks[dim] = max(int(ratio * chunks[dim]), 10)
+            # else:
+            raise ValueError(
+                f"Chunk size {current_chunksize * bytes_to_MB} is greater than the maximum chunk size {max_chunk_size}"
+            )
+
+        # Do we need to supply the chunks of the other dimensions?
+        # rechunk = {k: v for k, v in chunks.items() if v < dim_sizes[k]}
+        # rechunk = {}
+        # for k in dim_sizes:
+        #     if chunks[k] < dim_sizes[k]:
+        #         rechunk[k] = chunks.pop(k)
+        return chunks
 
 
 def get_data_class(data_type: str) -> type[BaseStore]:
