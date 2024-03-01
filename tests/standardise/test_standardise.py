@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores
+from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores, clear_test_store
 from openghg.retrieve import get_obs_surface, search
 from openghg.standardise import (
     standardise_column,
@@ -78,6 +78,7 @@ def test_standardise_obs_openghg():
      - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
      - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
     """
+    clear_test_store("user")
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
