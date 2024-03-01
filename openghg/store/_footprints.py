@@ -435,7 +435,7 @@ class Footprints(BaseStore):
 
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
-        By default, this will just include "fp" variable but this will be superceded
+        By default, this will include "fp" variable but this will be superceded
         if high_spatial_resolution or high_time_resolution are specified.
 
         Args:
