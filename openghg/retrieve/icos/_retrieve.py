@@ -328,10 +328,13 @@ def _retrieve_remote(
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
     # Now filter the dataframe so we can extract the PIDS
     # We filter out any data that contains "Obspack" or "csv" in the specLabel
+    # Also filter out some drought files which cause trouble being read in
+    # For some reason they have separate station record pages that contain "ATMO_"
     filtered_sources = data_pids[
         data_pids["specLabel"].str.contains(search_str)
         & ~data_pids["specLabel"].str.contains("Obspack")
         & ~data_pids["specLabel"].str.contains("csv")
+        & ~data_pids["station"].str.contains("ATMO_")
     ]
 
     if filtered_sources.empty:
