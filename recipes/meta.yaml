@@ -10,7 +10,7 @@ package:
 
 source:
   git_url: https://github.com/openghg/openghg.git
-  git_rev: {{ GIT_DESCRIBE_TAG }}
+  git_rev: ${{ env.GIT_DESCRIBE_TAG }}
   git_depth: 1
 
 build:
