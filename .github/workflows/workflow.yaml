@@ -112,3 +112,4 @@ jobs:
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          GIT_TAG: ${{ github.ref_name }}
