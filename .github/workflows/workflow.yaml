@@ -32,7 +32,7 @@ jobs:
         id: get_tag
         run: |
           git fetch --tags
-          TAG=0.7.1
+          TAG=0.1
           echo "Latest tag is $TAG"
           echo "::set-output name=TAG::$TAG"
       - name: Build and push the conda package
