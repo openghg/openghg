@@ -45,6 +45,7 @@ jobs:
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
+          anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
           GIT_TAG: ${{ steps.get_tag.outputs.TAG }}
