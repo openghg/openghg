@@ -2,7 +2,7 @@ name: Manual Conda Build Push
 
 on:
     push: 
-      branches: "feature/**"
+      branches: "feature/conda_upload_branch"
 jobs:
     release_conda:
       name: Build and publish conda package
