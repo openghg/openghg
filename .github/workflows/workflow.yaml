@@ -31,7 +31,6 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          git fetch --tags
           TAG=$(git describe --tags --abbrev=0)
           echo "Latest tag is $TAG"
           echo "::set-output name=TAG::$TAG"
