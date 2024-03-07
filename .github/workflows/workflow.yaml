@@ -31,7 +31,8 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          TAG=$(git describe --tags --abbrev=0)
+          git fetch --tags
+          TAG=0.7.1
           echo "Latest tag is $TAG"
           echo "::set-output name=TAG::$TAG"
       - name: Build and push the conda package
