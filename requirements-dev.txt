@@ -6,6 +6,7 @@ pytest >= 6.2.5
 pytest-tornasync
 pytest-cov
 pytest-mock
+pytest-timeout
 requests-mock
 # For mypy
 mypy==1.7.1

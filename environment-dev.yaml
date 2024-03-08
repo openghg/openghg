@@ -53,3 +53,4 @@ dependencies:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types
       - icoscp
+      - pytest-timeout
