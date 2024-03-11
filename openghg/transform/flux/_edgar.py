@@ -1,7 +1,7 @@
 import re
 import zipfile
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 import logging
 import numpy as np
@@ -94,48 +94,48 @@ def parse_edgar(
 
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
 
-    # Check if input is a zip file
-    if zipfile.is_zipfile(datapath):
-        zipped = True
-        zip_folder = zipfile.ZipFile(datapath)
-    else:
-        zipped = False
+    def _get_data_files(datapath: Path, edgar_version: Optional[str] = None) -> list[Path]:
+        # Check if input is a zip file
+        if zipfile.is_zipfile(datapath):
+            zip_folder = zipfile.ZipFile(datapath)
 
-    known_versions = _edgar_known_versions()
+            if edgar_version is None:
+                edgar_version = _check_readme_version(zippath=zip_folder)  # try to extract from readme
 
-    # Check readme file for edgar version (if not specified)
-    if zipped and edgar_version is None:
-        edgar_version = _check_readme_version(zippath=zip_folder)
-    elif edgar_version is None:
-        edgar_version = _check_readme_version(datapath=datapath)
+            folder_filelist = [Path(name) for name in zip_folder.namelist()]
 
-    # Extract list of data files
-    if zipped:
-        zip_filelist = zip_folder.infolist()
-        # folder_filelist = list(zip_folder.namelist())
-        folder_filelist = [Path(filename.filename) for filename in zip_filelist]
-    else:
-        folder_filelist = list(datapath.glob("*"))
+        else:
+            if edgar_version is None:
+                edgar_version = _check_readme_version(datapath=datapath)  # try to extract from readme
 
-    # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
-    suffix = ".nc"
-    data_files = [file for file in folder_filelist if file.suffix == suffix]
+            folder_filelist = list(datapath.glob("*"))
+
+        # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
+        suffix = ".nc"
+        data_files = [file for file in folder_filelist if file.suffix == suffix]
+        return data_files
+
+    data_files = _get_data_files(datapath, edgar_version=edgar_version)
 
     if not data_files:
         raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
 
-    for file in data_files:
+    db_info: dict[str, Any] = {}
+    for data_file in data_files:
         try:
-            db_info = _extract_file_info(file)
+            db_info = _extract_file_info(data_file)
         except ValueError:
-            db_info = {}
             continue
+        else:
+            # previously there was no break, and on a ValueError, db_info was reset to
+            # an empty dict... so if we successfully extract once, that could be overwritten
+            # either by new file info, or by an empty dict.
+            # probably we want to raise an error if the db info is incompatible?
+            break
 
     # Extract species from filename if not specified
-    try:
-        species_from_file: Optional[str] = db_info["species"]
-    except KeyError:
-        species_from_file = None
+    species_from_file: Optional[str] = db_info.get("species", None)
+
 
     if species is None:
         species = species_from_file
@@ -154,6 +154,8 @@ def parse_edgar(
         )
 
     # If version not yet found, extract version from file naming scheme
+    known_versions = _edgar_known_versions()
+
     if edgar_version is None:
         possible_version = db_info["version"]
         possible_version_clean = clean_string(possible_version)
@@ -205,7 +207,7 @@ def parse_edgar(
             edgar_file = file
             edgar_file_info = file_info
             break
-    else:
+    else:  # no break
         all_years = list(files_by_year.keys())
         all_years.sort()
         start_year, end_year = all_years[0], all_years[-1]
@@ -222,8 +224,11 @@ def parse_edgar(
 
     # For a zipped archive need to unzip the netcdf file and place in a
     # temporary directory.
-    if zipped:
+    if zipfile.is_zipfile(datapath):
         temp_extract_folder = tempfile.TemporaryDirectory()
+
+        zip_folder = zipfile.ZipFile(datapath)
+        zip_filelist = zip_folder.infolist()
 
         for zipinfo in zip_filelist:
             if zipinfo.filename == edgar_file.name:
@@ -303,7 +308,7 @@ def parse_edgar(
 
     # After the data has been extracted and used from the unzipped netcdf
     # file clean up and remove temporary directory and file.
-    if zipped:
+    if zipfile.is_zipfile(datapath):
         temp_extract_folder.cleanup()
 
     # Check for "time" dimension and add if missing.
