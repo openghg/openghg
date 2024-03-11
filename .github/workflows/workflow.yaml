@@ -2,13 +2,13 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devel]
+    branches: [master, devel, new_object_store]
     tags:
       - "*"
     paths-ignore:
       - 'CHANGELOG.md'
   pull_request:
-    branches: [master, devel]
+    branches: [master, devel, new_object_store]
     paths-ignore:
       - 'CHANGELOG.md'
 
