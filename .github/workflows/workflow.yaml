@@ -1,6 +1,13 @@
-name: new object store test 
+name: OpenGHG tests
 
 on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - "*"
+    paths-ignore:
+      - 'CHANGELOG.md'
   pull_request:
     branches:
       - '*'
