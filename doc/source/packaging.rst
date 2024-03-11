@@ -36,7 +36,7 @@ To create a release first checkout the "main" branch.
 
 .. code-block:: bash
 
-   git checkout main
+   git checkout master
    git pull
 
 Next, merge in all changes from the "devel" branch.
@@ -52,16 +52,16 @@ release and updated, e.g.
 
 ::
 
-  `0.11.2 <https://github.com/metawards/MetaWards/compare/0.11.1...0.11.2>`__ - May 11th 2020
+  `0.7.0 <https://github.com/openghg/openghg/compare/0.6.2...0.7.0>`__ - May 11th 2020
 
 
 could be changed to
 
 ::
 
-  `0.12.0 <https://github.com/metawards/MetaWards/compare/0.11.2...0.12.0>`__ - May 18th 2020
+  `0.7.1 <https://github.com/openghg/openghg/compare/0.7.0...0.7.1>`__ - May 18th 2020
 
-when moving from the 0.11.2 to 0.12.0 release.
+when moving from the 0.7.0 to 0.7.1 release.
 
 Now push this change back to GitHub, using;
 
@@ -71,51 +71,6 @@ Now push this change back to GitHub, using;
 
 This will trigger a CI/CD run which will build and test everything on Linux for Python 3.9 - 3.12.
 Everything should work, as "devel" should have been in a release-ready state.
-
-Testing the packages
---------------------
-
-`GitHub actions <https://github.com/metawards/MetaWards/actions>`__ will
-produce the source and binary wheels for ``metawards`` on all supported
-platforms. This will be in an artifact called ``dist`` which you should
-download and unpack.
-
-.. image:: images/github_artifacts.jpg
-   :alt: Image of the GitHub Actions interface showing the dist artifact
-
-You should unpack these into the ``dist`` directory, e.g.
-
-.. code-block:: bash
-
-   cd dist
-   unzip ~/Downloads/dist.zip
-
-This should result in six binary wheels and once source package, e.g.
-
-::
-
-    metawards-0.11.1+7.g52b3671-cp37-cp37m-macosx_10_14_x86_64.whl
-    metawards-0.11.1+7.g52b3671-cp37-cp37m-manylinux1_x86_64.whl
-    metawards-0.11.1+7.g52b3671-cp37-cp37m-win_amd64.whl
-    metawards-0.11.1+7.g52b3671-cp38-cp38-macosx_10_14_x86_64.whl
-    metawards-0.11.1+7.g52b3671-cp38-cp38-manylinux1_x86_64.whl
-    metawards-0.11.1+7.g52b3671-cp38-cp38-win_amd64.whl
-    metawards-0.11.1+7.g52b3671.tar.gz
-
-Try to install the package related to you machine, just to double-check
-that it is working, e.g.
-
-.. code-block:: bash
-
-   pip install ./metawards-0.11.1+7.g52b3671-cp37-cp37m-macosx_10_14_x86_64.whl
-   cd ..
-   pytest tests
-
-Once it is working, remove these temporary packages from your ``dist`` folder,
-
-.. code-block:: bash
-
-   rm dist/*
 
 Tagging a new release
 ---------------------
@@ -132,7 +87,7 @@ the command would be;
 
 .. code-block:: bash
 
-   git tag -a 0.12.0 -m "0.12.0 release"
+   git tag -a 0.7.1 -m "0.7.1 release"
 
 Next, push your tag to GitHub;
 
@@ -148,62 +103,3 @@ that is included in the package to tag versions.
 This will also trigger a full CI/CD to test and build the new version.
 Again, it should work as this tag was taken from your fully-tested
 "main" branch.
-
-Uploading packages to pypi
---------------------------
-
-While you are waiting for the CI/CD GitHub Actions to complete, make sure
-that your version of twine is fully up to date;
-
-.. code-block:: bash
-
-   pip install --upgrade twine
-
-Once GitHub actions is complete, you will see that another build artifact
-is ready for download. Download this and unpack it into your ``dist``
-directory as before. You should now have a ``dist`` directory that
-contains six binary wheels and one source package, named according to
-the release version. For example, for the 0.11.2 release we had;
-
-.. code-block:: bash
-
-   $ ls dist
-    metawards-0.11.2-cp37-cp37m-macosx_10_14_x86_64.whl
-    metawards-0.11.2-cp37-cp37m-manylinux1_x86_64.whl
-    metawards-0.11.2-cp37-cp37m-win_amd64.whl
-    metawards-0.11.2-cp38-cp38-macosx_10_14_x86_64.whl
-    metawards-0.11.2-cp38-cp38-manylinux1_x86_64.whl
-    metawards-0.11.2-cp38-cp38-win_amd64.whl
-    metawards-0.11.2.tar.gz
-
-Now you can upload to pypi using the command;
-
-.. code-block:: bash
-
-   python3 -m twine upload dist/*
-
-.. note::
-
-    You will need a username and password for pypi and to have
-    permission to upload code to this project. Currently only
-    the release manager has permission. If you would like
-    join the release management team then please get in touch.
-
-Testing the final release
--------------------------
-
-Finally(!) test the release on a range of different machines by logging
-in and typing;
-
-.. code-block:: bash
-
-   pip install metawards=={VERSION}
-
-replacing ``{VERSION}`` with the version number, e.g. for 0.11.2
-
-.. code-block:: bash
-
-   pip install metawards==0.11.2
-
-Play with the code, run the tests and run some examples. Everything should
-work as you have performed lots of prior testing to get to this stage.
