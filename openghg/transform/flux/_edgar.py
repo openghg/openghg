@@ -63,8 +63,6 @@ def parse_edgar(
     TODO: Allow date range to be extracted rather than year?
     TODO: Add monthly parsing and sector stacking options
     """
-    import tempfile
-
     from openghg.standardise.meta import assign_flux_attributes, define_species_label
     from openghg.store import infer_date_range
     from openghg.util import (
@@ -222,19 +220,18 @@ def parse_edgar(
             edgar_file = files_by_year[end_year]
             edgar_file_info = _extract_file_info(edgar_file)
 
-    # For a zipped archive need to unzip the netcdf file and place in a
-    # temporary directory.
-    if zipfile.is_zipfile(datapath):
-        temp_extract_folder = tempfile.TemporaryDirectory()
+    source_from_file = edgar_file_info["source"]
+    if source_from_file in ("TOTALS", ""):
+        source = "anthro"
+    elif species_label == "co2" and "TOTALS" in source_from_file:
+        co2_source = "_".join(source_from_file.split("_")[:-1])
+        source = clean_string(f"{co2_source}_anthro")
+    else:
+        source = clean_string(source_from_file)
+    database = "EDGAR"
+    database_version = clean_string(edgar_version)
 
-        zip_folder = zipfile.ZipFile(datapath)
-        zip_filelist = zip_folder.infolist()
 
-        for zipinfo in zip_filelist:
-            if zipinfo.filename == edgar_file.name:
-                zip_folder.extract(zipinfo, path=temp_extract_folder.name)
-                edgar_file = temp_extract_folder.name / edgar_file
-                break
 
     # Dimension - (lat, lon) - no time dimension
     # time is not included in the file just in the filename *sigh*!
@@ -247,8 +244,15 @@ def parse_edgar(
     # v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
     # v50_N2O_1978.0.1x0.1.zip (or .zip)
 
-    with xr.open_dataset(edgar_file) as temp:
-        edgar_ds = temp
+    # get dataset
+    if zipfile.is_zipfile(datapath):
+        # open zip file before opening with xarray
+        open_edgar_file = zipfile.ZipFile(datapath).open(str(edgar_file))
+        with xr.open_dataset(open_edgar_file) as temp:  # type: ignore this is correct, mypy is confused
+            edgar_ds = temp
+    else:
+        with xr.open_dataset(edgar_file) as temp:
+            edgar_ds = temp
 
     # Expected name e.g. "emi_ch4", "emi_co2"
     name = f"emi_{species_label}"
@@ -305,11 +309,6 @@ def parse_edgar(
         flux_values = flux_da.values
 
     edgar_attrs = edgar_ds.attrs
-
-    # After the data has been extracted and used from the unzipped netcdf
-    # file clean up and remove temporary directory and file.
-    if zipfile.is_zipfile(datapath):
-        temp_extract_folder.cleanup()
 
     # Check for "time" dimension and add if missing.
     flux_ndim = flux_values.ndim
