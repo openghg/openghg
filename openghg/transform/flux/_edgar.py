@@ -498,6 +498,31 @@ def _edgar_known_versions() -> list:
     return known_versions
 
 
+def _check_readme_data(readme_data: str) -> Optional[str]:
+    """Parse EDGAR _readme.html to find version.
+
+    Args:
+        readme_data: string containing contents of _readme.html
+
+    Returns:
+        EDGAR version, if found, otherwise None
+    """
+    try:
+        # Ignoring types as issues caught by try-except statement
+        # Find and extract title line from html file
+        title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
+        # Extract version e.g. "v6.0" or "v4.3.2"
+        edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
+    except ValueError:
+        edgar_version = None
+    else:
+        # Check against known versions and remove '.' if these don't match.
+        known_versions = _edgar_known_versions()
+        if edgar_version not in known_versions:
+            edgar_version = edgar_version.replace(".", "")
+
+    return edgar_version
+
 def _check_readme_version(
     datapath: Optional[Path] = None, zippath: Optional[ZipFile] = None
 ) -> Optional[str]:
@@ -543,19 +568,7 @@ def _check_readme_version(
         raise ValueError("One of datapath or zippath must be specified.")
 
     if readme_data is not None:
-        try:
-            # Ignoring types as issues caught by try-except statement
-            # Find and extract title line from html file
-            title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
-            # Extract version e.g. "v6.0" or "v4.3.2"
-            edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
-        except ValueError:
-            pass
-        else:
-            # Check against known versions and remove '.' if these don't match.
-            known_versions = _edgar_known_versions()
-            if edgar_version not in known_versions:
-                edgar_version = edgar_version.replace(".", "")
+        edgar_version = _check_readme_data(readme_data)
     else:
         edgar_version = None
 
