@@ -1,10 +1,11 @@
 import pytest
-from helpers import get_footprint_datapath
+from helpers import clear_test_store, get_footprint_datapath
 from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
+from openghg.types import DatasourceLookupError
 import xarray as xr
 from pathlib import Path
 
@@ -364,6 +365,157 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
 
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
+
+
+def add_tac_metmodel_data():
+    user_store = "user"
+    clear_test_store(name=user_store)
+
+    datapath_no_metmodel_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
+
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+
+    standardise_footprint(
+        filepath=datapath_no_metmodel_1,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        store=user_store,
+    )
+
+    datapath_metmodel = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    metmodel = "UKV"
+
+    standardise_footprint(
+        filepath=datapath_metmodel,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+        store=user_store,
+    )
+
+
+# Failing for right reasons at the moment (returning one datasource, want this to return two) - until code is updated to fix this.
+def test_footprint_metmodel_additional_key():
+    """
+    Test additional, optional key (metmodel) will produce different data sources.
+    """
+    # May want to create a quick fixture for this and set up as a few different tests:
+    # - add data with different met model  - covered
+    # - afterwards, add new data with no met model - can this attach to correct object
+    #   - will raise DatabaseLookUp Error the first time (no metmodel given)
+    #   - should be able to add when metmodel=np.nan is passed.
+
+    user_store = "user"
+    # clear_test_store(name=user_store)
+
+    # datapath_no_metmodel_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
+
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+
+    # standardise_footprint(
+    #     filepath=datapath_no_metmodel_1,
+    #     site=site,
+    #     model=model,
+    #     height=height,
+    #     domain=domain,
+    #     store=user_store,
+    # )
+
+    # datapath_metmodel = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    # metmodel = "UKV"
+
+    # standardise_footprint(
+    #     filepath=datapath_metmodel,
+    #     site=site,
+    #     model=model,
+    #     height=height,
+    #     domain=domain,
+    #     metmodel=metmodel,
+    #     store=user_store,
+    # )
+
+    add_tac_metmodel_data()
+
+    # Get the footprints data
+    footprint_search = search(site=site, domain=domain, data_type="footprints")
+    footprint_results = footprint_search.results
+
+    assert len(footprint_results) == 2
+
+
+def test_footprint_metmodel_new_data_raises():
+    """
+    """
+    # footprint_obs = footprint_search.retrieve_all()
+    # footprint_data = footprint_obs.data
+
+    # Next step of trying to add additional data and make sure this gets associated with
+    # details which have no metmodel
+    datapath_no_metmodel_2 = get_footprint_datapath("TAC-100magl_TEST_201607.nc")
+
+    user_store = "user"
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+
+    with pytest.raises(DatasourceLookupError) as msg:
+        standardise_footprint(
+            filepath=datapath_no_metmodel_2,
+            site=site,
+            model=model,
+            height=height,
+            domain=domain,
+            store=user_store,
+        )
+
+        assert "More than once Datasource" in msg
+
+
+def test_footprint_metmodel_new_data_nan():
+    """
+    """
+    from numpy import nan
+
+    # Next step of trying to add additional data and make sure this gets associated with
+    # details which have no metmodel
+    datapath_no_metmodel_2 = get_footprint_datapath("TAC-100magl_TEST_201607.nc")
+
+    user_store = "user"
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+
+    metmodel = nan
+
+    standardise_footprint(
+        filepath=datapath_no_metmodel_2,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+        store=user_store,
+    )
+
+    # # Search and retrieve data
+    # # - check the date ranges make sense for the entry with no metmodel
+    # # May need to add ability to search for missing data as well!
+
+    # assert   # check correct data has been associated
 
 
 def test_read_footprint_short_lived():
