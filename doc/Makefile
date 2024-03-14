@@ -32,6 +32,8 @@ clean:
 html:
 	mkdir -p $(BUILD_DIR)/html $(BUILD_DIR)/doctrees
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILD_DIR)/html $(FILES)
+	mkdir -p $(BUILD_DIR)/html/tutorials/local/Exploring_data/images
+	cd source/images && cp *.html ../../$(BUILD_DIR)/html/tutorials/local/Exploring_data/images/
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
 
