@@ -1,6 +1,6 @@
+import pathlib
 import re
 import zipfile
-from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 import logging
@@ -8,14 +8,52 @@ import numpy as np
 import xarray as xr
 from numpy import ndarray
 
+from openghg.standardise.meta import assign_flux_attributes, define_species_label
+from openghg.store import infer_date_range
+from openghg.util import (
+    clean_string,
+    molar_mass,
+    synonyms,
+    find_coord_name,
+    convert_internal_longitude,
+    timestamp_now,
+)
+
+
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
+Path = Union[pathlib.Path, zipfile.Path]
 
+def assemble_edgar_metadata(
+    filepath: Path,
+    date: str,
+    species: Optional[str] = None,
+    domain: Optional[str] = None,
+    edgar_version: Optional[str] = None,
+) -> dict[str, Any]:
+    try:
+        metadata = _extract_file_info(filepath)
+    except ValueError as e:
+        raise ValueError(f"Could extract EDGAR metadata from file f{filepath.name}") from e
+
+    if species is not None:
+        species = define_species_label(species)[0]
+
+        if species != synonyms(metadata["species"]):
+            logger.warning(
+                "Input species does not match species extracted from",
+                " database filenames. Please check.",
+            )
+
+        metadata["species"] = species
+
+    
+    return metadata
 
 def parse_edgar(
-    datapath: Path,
+    datapath: pathlib.Path,
     date: str,
     species: Optional[str] = None,
     domain: Optional[str] = None,
@@ -92,31 +130,28 @@ def parse_edgar(
 
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
 
-    def _get_data_files(datapath: Path, edgar_version: Optional[str] = None) -> list[Path]:
-        # Check if input is a zip file
-        if zipfile.is_zipfile(datapath):
-            zip_folder = zipfile.ZipFile(datapath)
+    if zipfile.is_zipfile(datapath):
+        datapath = zipfile.Path(datapath) # type: ignore
 
-            if edgar_version is None:
-                edgar_version = _check_readme_version(zippath=zip_folder)  # try to extract from readme
+    # NOTE: the built-in `open` method doesn't work with zipfile.Path
+    # but there is a zipfile.Path.open method that works the same as
+    # pathlib.Path.open
 
-            folder_filelist = [Path(name) for name in zip_folder.namelist()]
+    folder_filelist = [x for x in datapath.iterdir() if x.is_file()]
 
-        else:
-            if edgar_version is None:
-                edgar_version = _check_readme_version(datapath=datapath)  # try to extract from readme
-
-            folder_filelist = list(datapath.glob("*"))
-
-        # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
-        suffix = ".nc"
-        data_files = [file for file in folder_filelist if file.suffix == suffix]
-        return data_files
-
-    data_files = _get_data_files(datapath, edgar_version=edgar_version)
+    # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
+    data_files = [file for file in folder_filelist if file.suffix == ".nc"]
 
     if not data_files:
         raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
+
+    if edgar_version is None:
+        # check if _readme.html is in folder_filelist, and if so, try to extract version
+        if (readme := datapath / "_readme.html").exists():
+            with readme.open("r") as f:  # pathlib.Path and zipfile.Path have .open method
+                edgar_version = _check_readme_data(f.read())
+
+
 
     db_info: dict[str, Any] = {}
     for data_file in data_files:
@@ -131,19 +166,18 @@ def parse_edgar(
             # probably we want to raise an error if the db info is incompatible?
             break
 
+
     # Extract species from filename if not specified
     species_from_file: Optional[str] = db_info.get("species", None)
 
 
     if species is None:
+        if species_from_file is None:
+            raise ValueError("Unable to retrieve species from database filenames; please specify.")
         species = species_from_file
 
     # Check synonyms and compare against filename value
-    if species is not None:
-        species_label = define_species_label(species)[0]
-        # species_label = synonyms(species).lower()
-    else:
-        raise ValueError("Unable to retrieve species from database filenames." " Please specify")
+    species_label = define_species_label(species)[0]
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
         logger.warning(
@@ -184,12 +218,12 @@ def parse_edgar(
     if len(date) == 4:
         year = int(date)
     else:
-        raise ValueError(f"Do no accept date which does not represent a year yet: {date}")
+        raise ValueError(f"Date {date} does not represent a year; only annual EDGAR data can be processed currently.")
 
     files_by_year = {}
-    for file in data_files:
+    for data_file in data_files:
         try:
-            file_info = _extract_file_info(file)
+            file_info = _extract_file_info(data_file)
         except ValueError:
             continue
 
@@ -199,10 +233,10 @@ def parse_edgar(
 
         year_from_file = file_info["year"]
 
-        files_by_year[year_from_file] = file
+        files_by_year[year_from_file] = data_file
 
         if year_from_file == year:
-            edgar_file = file
+            edgar_file = data_file
             edgar_file_info = file_info
             break
     else:  # no break
@@ -245,14 +279,8 @@ def parse_edgar(
     # v50_N2O_1978.0.1x0.1.zip (or .zip)
 
     # get dataset
-    if zipfile.is_zipfile(datapath):
-        # open zip file before opening with xarray
-        open_edgar_file = zipfile.ZipFile(datapath).open(str(edgar_file))
-        with xr.open_dataset(open_edgar_file) as temp:  # type: ignore this is correct, mypy is confused
-            edgar_ds = temp
-    else:
-        with xr.open_dataset(edgar_file) as temp:
-            edgar_ds = temp
+    # using .open("rb") for pathlib.Path and zipfile.Path compatibility
+    edgar_ds = xr.open_dataset(edgar_file.open("rb"))
 
     # Expected name e.g. "emi_ch4", "emi_co2"
     name = f"emi_{species_label}"
@@ -338,17 +366,6 @@ def parse_edgar(
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
-
-    source_from_file = edgar_file_info["source"]
-    if source_from_file in ("TOTALS", ""):
-        source = "anthro"
-    elif species_label == "co2" and "TOTALS" in source_from_file:
-        co2_source = "_".join(source_from_file.split("_")[:-1])
-        source = clean_string(f"{co2_source}_anthro")
-    else:
-        source = clean_string(source_from_file)
-    database = "EDGAR"
-    database_version = clean_string(edgar_version)
 
     metadata = {}
     metadata.update(attrs)
@@ -604,8 +621,12 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
 
     # Extract filename stem (name without extension) and split
-    edgar_file = Path(edgar_file)
+    if isinstance(edgar_file, str):
+        edgar_file = pathlib.Path(edgar_file)
+    if isinstance(edgar_file, zipfile.Path):
+        edgar_file = pathlib.Path(edgar_file.name)  # zipfile.Path.stem is Python 3.11+
     filename = edgar_file.stem
+
     filename_split = filename.split("_")
 
     # Check if we can extract the known components from the filename
