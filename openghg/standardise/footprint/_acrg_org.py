@@ -161,10 +161,12 @@ def parse_acrg_org(
     metadata["inlet"] = inlet
     metadata["height"] = inlet
     metadata["species"] = species
-    metadata["metmodel"] = metmodel
+
+    if metmodel is not None:
+        metadata["metmodel"] = metmodel
 
     if network is not None:
-        metadata["network"] = network        
+        metadata["network"] = network
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
