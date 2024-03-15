@@ -6,7 +6,7 @@ Pack and Doc is now fully tested and deployed using GitHub actions.
 The development process should be;
 
 * New features are developed on feature branches, called ``feature-{feature}``,
-  either in the `main Pack and Doc repository <https://github.com/openghg/openghg>`__
+  either in the `devel OpenGHG repository <https://github.com/openghg/openghg>`__
   for authorised developers, or in personal forks for
   new developers.
 * Bug fixes or issue fixes are developed on fix branches, called
@@ -16,14 +16,13 @@ The development process should be;
   request can be merged into ``devel``.
 
 The result of this is that "devel" should contain the fully-working and
-tested, and most up-to-date version of ``pack and doc``. However, this
+tested, and most up-to-date version of ``OpenGHG``. However, this
 version should not be used for production runs.
 
 Defining a release
 ------------------
 
-We will release ``pack and doc`` regularly. Releases aim to be backwards
-compatible and capable of being used for production runs, at least for
+Releases aim to be backwards compatible and capable of being used for production runs, at least for
 the functionality that is fully described in the tutorial.
 
 We use `semantic versioning <https://semver.org>`__ and take care
