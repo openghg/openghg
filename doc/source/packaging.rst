@@ -2,15 +2,14 @@
 Packaging releases
 ==================
 
-Pack and Doc is now fully tested and deployed using GitHub actions.
+OpenGHG is now fully tested and deployed using GitHub actions.
 The development process should be;
 
 * New features are developed on feature branches, called ``feature-{feature}``,
   either in the `devel OpenGHG repository <https://github.com/openghg/openghg>`__
-  for authorised developers, or in personal forks for
-  new developers.
+  for authorised developers.
 * Bug fixes or issue fixes are developed on fix branches, called
-  ``fix-issue-{number}`` (again in either the main repository or forks).
+  ``fix-issue-{number}``.
 * Pull requests are issued from these branches to ``devel``. All merge conflicts
   must be fixed in the branch and all tests must pass before the pull
   request can be merged into ``devel``.
@@ -31,45 +30,19 @@ not to cause breaking changes in the public API.
 Creating a release
 ------------------
 
-To create a release first checkout the "main" branch.
+To create a release first checkout the "devel" branch.
 
 .. code-block:: bash
 
-   git checkout master
+   git checkout devel
    git pull
 
-Next, merge in all changes from the "devel" branch.
+Make sure to have a fully working devel branch.
 
-.. code-block:: bash
+Now create a PR to merge "devel" into "master".
+Make sure all of the "changelog" is updated.
 
-   git pull origin devel
-
-Next, update the :doc:`changelog` with details about this release. This
-should include the link at the top of the release that shows the commit
-differences between versions. This can be easily copied from a previous
-release and updated, e.g.
-
-::
-
-  `0.7.0 <https://github.com/openghg/openghg/compare/0.6.2...0.7.0>`__ - May 11th 2020
-
-
-could be changed to
-
-::
-
-  `0.7.1 <https://github.com/openghg/openghg/compare/0.7.0...0.7.1>`__ - May 18th 2020
-
-when moving from the 0.7.0 to 0.7.1 release.
-
-Now push this change back to GitHub, using;
-
-.. code-block:: bash
-
-   git push
-
-This will trigger a CI/CD run which will build and test everything on Linux for Python 3.9 - 3.12.
-Everything should work, as "devel" should have been in a release-ready state.
+Upon PR approval the changes from "devel" can be merged into "master".
 
 Tagging a new release
 ---------------------
@@ -79,6 +52,7 @@ version. Do this using the ``git tag`` command, e.g.
 
 .. code-block:: bash
 
+   git checkout master
    git tag -a {VERSION} -m "{VERSION} release"
 
 replacing ``{VERSION}`` with the version number. For this 0.12.0 release
