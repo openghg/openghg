@@ -102,4 +102,4 @@ that is included in the package to tag versions.
 
 This will also trigger a full CI/CD to test and build the new version.
 Again, it should work as this tag was taken from your fully-tested
-"main" branch.
+"master" branch.
