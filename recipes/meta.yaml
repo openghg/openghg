@@ -11,7 +11,6 @@ package:
 source:
   git_url: https://github.com/openghg/openghg.git
   git_rev: {{ GIT_TAG }}
-  git_depth: 1
 
 build:
   noarch: python
