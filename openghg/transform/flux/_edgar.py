@@ -251,8 +251,8 @@ def parse_edgar(
             logger.info(
                 f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}."
             )
-            edgar_file = files_by_year[end_year]
-            edgar_file_info = _extract_file_info(edgar_file)
+        edgar_file = files_by_year[end_year]
+        edgar_file_info = _extract_file_info(edgar_file)
 
     source_from_file = edgar_file_info["source"]
     if source_from_file in ("TOTALS", ""):
