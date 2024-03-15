@@ -246,7 +246,7 @@ def test_read_file_fails_ambiguous(clear_stores, load_edgar):
     try:
         load_edgar("ch4", "v5.0", 2015, database_version=False)  # do not pass `database_version="v50"`
     except Exception as e:
-        assert "More than once Datasource found for metadata" in e.args[0]
+        assert "More than one Datasource found for metadata" in e.args[0]
     else:
         raise AssertionError("This test should throw/catch a DatasourceLookupError with a useful message!")
 

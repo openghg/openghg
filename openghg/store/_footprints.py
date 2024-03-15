@@ -290,11 +290,14 @@ class Footprints(BaseStore):
         else:
             species = clean_string(species)
 
+        # Ensure we have a clear missing value for metmodel
+        if metmodel is None:
+            metmodel = "NOT_SET"
+        else:
+            metmodel = clean_string(metmodel)
+
         if network is not None:
             network = clean_string(network)
-
-        if metmodel is not None:
-            metmodel = clean_string(metmodel)
 
         try:
             source_format = FootprintTypes[source_format.upper()].value
@@ -431,6 +434,7 @@ class Footprints(BaseStore):
             "high_spatial_resolution",
             "short_lifetime",
             "species",
+            "metmodel",
         )
 
         data_type = "footprints"

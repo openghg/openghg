@@ -199,6 +199,7 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
+        from openghg.store.spec import null_metadata_values
 
         uuids = {}
 
@@ -216,8 +217,12 @@ class BaseStore:
                 # Our lookup results and gas data have the same keys
                 uuid = lookup_results[key]
 
+                ignore_values = null_metadata_values()
+
                 # Do we want all the metadata in the Dataset attributes?
-                to_add = {k: v for k, v in metadata.items() if k not in dataset.attrs}
+                to_add = {
+                    k: v for k, v in metadata.items() if k not in dataset.attrs and v not in ignore_values
+                }
                 dataset.attrs.update(to_add)
 
                 # Take a copy of the metadata so we can update it
@@ -307,7 +312,7 @@ class BaseStore:
             if not required_result:
                 results[key] = False
             elif len(required_result) > 1:
-                raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+                raise DatasourceLookupError("More than one Datasource found for metadata, refine lookup.")
             else:
                 results[key] = required_result[0]["uuid"]
 
