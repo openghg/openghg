@@ -28,27 +28,59 @@ Path = Union[pathlib.Path, zipfile.Path]
 
 def assemble_edgar_metadata(
     filepath: Path,
-    date: str,
     species: Optional[str] = None,
-    domain: Optional[str] = None,
-    edgar_version: Optional[str] = None,
+    version: Optional[str] = None,
 ) -> dict[str, Any]:
-    try:
-        metadata = _extract_file_info(filepath)
-    except ValueError as e:
-        raise ValueError(f"Could extract EDGAR metadata from file f{filepath.name}") from e
+    """Combine given metadata with metadata extracted from filename.
+
+    Args:
+        filepath: pathlib.Path or zipfile.Path to EDGAR datafile
+        species: species of flux
+        version: EDGAR database version
+
+    Returns:
+        dictionary containing keys: version, species, year, source, resolution
+    """
+    known_versions = _edgar_known_versions()
 
     if species is not None:
         species = define_species_label(species)[0]
 
-        if species != synonyms(metadata["species"]):
-            logger.warning(
-                "Input species does not match species extracted from",
-                " database filenames. Please check.",
-            )
+    valid_version = False
+    if version is not None:
+        version = clean_string(version)
+        if version in known_versions:
+            valid_version = True
 
-        metadata["species"] = species
+    try:
+        metadata = _extract_file_info(filepath)
+    except ValueError as e:
+        # NOTE: if species is not None and valid_version is True, then we have everything we
+        # need except resolution at this point...
+        raise ValueError(f"Could extract EDGAR metadata from file f{filepath.name}") from e
+    else:
+        if species:
+            if species != synonyms(metadata["species"]):
+                logger.warning(
+                    "Input species does not match species extracted from",
+                    " database filenames. Please check.",
+                )
+            metadata["species"] = species
 
+        if not valid_version:
+            if clean_string(metadata["version"]) not in known_versions:
+                if version is None:
+                    raise ValueError(
+                        f"Unable to infer EDGAR version ({version})."
+                        f" Please pass as an argument (one of {known_versions})"
+                    )
+                else:
+                    raise ValueError(
+                        f"Unable to infer EDGAR version."
+                        f" Please pass as an argument (one of {known_versions})"
+                    )
+            else:
+                metadata["version"] = clean_string(metadata["version"])
     
     return metadata
 
@@ -140,7 +172,8 @@ def parse_edgar(
     folder_filelist = [x for x in datapath.iterdir() if x.is_file()]
 
     # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
-    data_files = [file for file in folder_filelist if file.suffix == ".nc"]
+    # Path(file.name).suffix workaround because zipfile.Path.suffix is Python 3.11+
+    data_files = [file for file in folder_filelist if pathlib.Path(file.name).suffix == ".nc"]
 
     if not data_files:
         raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
@@ -384,7 +417,7 @@ def parse_edgar(
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file, period=period)
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
 
     prior_info_dict = {
         "EDGAR": {
