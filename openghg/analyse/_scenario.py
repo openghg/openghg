@@ -712,6 +712,8 @@ class ModelScenario:
         obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
 
+        if obs_data is None or footprint_data is None:
+            raise ValueError("Obs Data and Footprint Data don't overlap")
         # Only non satellite datasets with different periods need to be resampled
         timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
         tolerance = 1e-9  # seconds
