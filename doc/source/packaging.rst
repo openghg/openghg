@@ -87,7 +87,7 @@ the command would be;
 
 .. code-block:: bash
 
-   git tag -a 0.7.1 -m "0.7.1 release"
+   git tag -a 0.7.1 -m "OpenGHG release v0.7.1"
 
 Next, push your tag to GitHub;
 
