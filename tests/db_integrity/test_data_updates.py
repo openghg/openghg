@@ -868,3 +868,80 @@ def test_standardising_footprint_with_additional_keys(
 
     assert special_dict["new"] == True
     assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?
+
+
+def test_standardising_footprint_metmodel():
+    """
+    Test footprints can be distinguished using the metmodel key.
+
+    At the moment, if this key is not specified this will set the metmodel
+    value as "not_set". When adding new data, if no metmodel is specified the
+    new data should be linked with this keyword and data as well.
+    """
+
+    clear_test_stores()
+
+    # Add initial data with no metmodel specified.
+    datapath_no_metmodel_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
+
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+
+    standardise_footprint(
+        filepath=datapath_no_metmodel_1,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        store="user",
+    )
+
+    # Add new data with all keywords the same except for metmodel="ukv"
+    datapath_metmodel = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    metmodel = "UKV"
+
+    standardise_footprint(
+        filepath=datapath_metmodel,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+        store="user",
+    )
+
+    # Check the search returns two values
+    footprint_search_1 = search(site=site, domain=domain, data_type="footprints")
+    footprint_results_1 = footprint_search_1.results
+
+    assert len(footprint_results_1) == 2
+
+    # Check search using metmodel="not_set" returns 1 result.
+    footprint_search_2 = search(site=site, domain=domain, metmodel="not_set", data_type="footprints")
+    footprint_results_2 = footprint_search_2.results
+
+    assert len(footprint_results_2) == 1
+
+    # Add new data without metmodel specified.
+    # Check this is added to metmodel="not_set" option
+    datapath_no_metmodel_2 = get_footprint_datapath("TAC-100magl_TEST_201607.nc")
+
+    standardise_footprint(
+        filepath=datapath_no_metmodel_2,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+        store="user",
+    )
+
+    # Check data retrieved contains the correct concatenated date range from both 201606 and 201607 files.
+    footprint_search_no_metmodel = search(site=site, domain=domain, metmodel="not_set", data_type="footprints")
+    footprint_retrieve_no_metmodel = footprint_search_no_metmodel.retrieve()
+    footprint_data_no_metmodel = footprint_retrieve_no_metmodel.data
+
+    assert footprint_data_no_metmodel.time[0] == pd.Timestamp("2016-06-01T00:00")
+    assert footprint_data_no_metmodel.time[-1] == pd.Timestamp("2016-07-07T00:00")
