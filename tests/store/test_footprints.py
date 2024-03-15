@@ -1,11 +1,10 @@
 import pytest
-from helpers import clear_test_store, get_footprint_datapath
+from helpers import get_footprint_datapath
 from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
-from openghg.types import DatasourceLookupError
 import xarray as xr
 from pathlib import Path
 
@@ -365,41 +364,6 @@ def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
 
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
-
-
-def add_tac_met_model_data():
-    user_store = "user"
-    clear_test_store(name=user_store)
-
-    datapath_no_met_model_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
-
-    site = "TAC"
-    height = "100m"
-    domain = "TEST"
-    model = "NAME"
-
-    standardise_footprint(
-        filepath=datapath_no_met_model_1,
-        site=site,
-        model=model,
-        height=height,
-        domain=domain,
-        store=user_store,
-    )
-
-    datapath_met_model = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-
-    met_model = "UKV"
-
-    standardise_footprint(
-        filepath=datapath_met_model,
-        site=site,
-        model=model,
-        height=height,
-        domain=domain,
-        met_model=met_model,
-        store=user_store,
-    )
 
 
 def test_read_footprint_short_lived():
