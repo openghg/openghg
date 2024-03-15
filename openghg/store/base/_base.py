@@ -220,7 +220,9 @@ class BaseStore:
                 ignore_values = null_metadata_values()
 
                 # Do we want all the metadata in the Dataset attributes?
-                to_add = {k: v for k, v in metadata.items() if k not in dataset.attrs and v not in ignore_values}
+                to_add = {
+                    k: v for k, v in metadata.items() if k not in dataset.attrs and v not in ignore_values
+                }
                 dataset.attrs.update(to_add)
 
                 # Take a copy of the metadata so we can update it

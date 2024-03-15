@@ -51,7 +51,7 @@ def null_metadata_values() -> List:
     """
     Defines values which indicate metadata value is not specified.
     Returns:
-        list: values to be seen as null 
+        list: values to be seen as null
     """
     # TODO: Depending on how this is implemented, may want to update this to include np.nan values
     null_values = ["not_set", "NOT_SET"]
