@@ -1,6 +1,7 @@
 import pathlib
 import re
 import zipfile
+from collections import namedtuple
 from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 import logging
@@ -26,6 +27,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 Path = Union[pathlib.Path, zipfile.Path]
 
+
+# TODO: make this work for...
+# - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
+# - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
+# - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 def assemble_edgar_metadata(
     filepath: Path,
     species: Optional[str] = None,
@@ -66,10 +72,14 @@ def assemble_edgar_metadata(
                     " database filenames. Please check.",
                 )
             metadata["species"] = species
+        else:
+            metadata["species"] = clean_string(metadata["species"])
 
-        if not valid_version:
+        if valid_version:
+            metadata["version"] = version
+        else:
             if clean_string(metadata["version"]) not in known_versions:
-                if version is None:
+                if version is not None:
                     raise ValueError(
                         f"Unable to infer EDGAR version ({version})."
                         f" Please pass as an argument (one of {known_versions})"
@@ -81,6 +91,18 @@ def assemble_edgar_metadata(
                     )
             else:
                 metadata["version"] = clean_string(metadata["version"])
+
+
+        source_from_file = metadata["source"]
+        if source_from_file in ("TOTALS", ""):
+            source = "anthro"
+        elif metadata["species"] == "co2" and "TOTALS" in source_from_file:
+            co2_source = "_".join(source_from_file.split("_")[:-1])
+            source = clean_string(f"{co2_source}_anthro")
+        else:
+            source = clean_string(source_from_file)
+
+        metadata["source"] = source
     
     return metadata
 
@@ -184,95 +206,29 @@ def parse_edgar(
             with readme.open("r") as f:  # pathlib.Path and zipfile.Path have .open method
                 edgar_version = _check_readme_data(f.read())
 
-
-
-    db_info: dict[str, Any] = {}
-    for data_file in data_files:
-        try:
-            db_info = _extract_file_info(data_file)
-        except ValueError:
-            continue
-        else:
-            # previously there was no break, and on a ValueError, db_info was reset to
-            # an empty dict... so if we successfully extract once, that could be overwritten
-            # either by new file info, or by an empty dict.
-            # probably we want to raise an error if the db info is incompatible?
-            break
-
-
-    # Extract species from filename if not specified
-    species_from_file: Optional[str] = db_info.get("species", None)
-
-
-    if species is None:
-        if species_from_file is None:
-            raise ValueError("Unable to retrieve species from database filenames; please specify.")
-        species = species_from_file
-
-    # Check synonyms and compare against filename value
-    species_label = define_species_label(species)[0]
-
-    if species_from_file is not None and species_label != synonyms(species_from_file):
-        logger.warning(
-            "Input species does not match species extracted from",
-            " database filenames. Please check.",
-        )
-
-    # If version not yet found, extract version from file naming scheme
-    known_versions = _edgar_known_versions()
-
-    if edgar_version is None:
-        possible_version = db_info["version"]
-        possible_version_clean = clean_string(possible_version)
-        if possible_version_clean in known_versions:
-            edgar_version = possible_version_clean
-
-    edgar_version = clean_string(edgar_version)
-
-    if edgar_version not in known_versions:
-        if edgar_version is None:
-            raise ValueError(
-                f"Unable to infer EDGAR version ({edgar_version})."
-                f" Please pass as an argument (one of {known_versions})"
-            )
-        else:
-            raise ValueError(
-                f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})"
-            )
-
-    # TODO: May want to split out into a separate function, so we can use this for
-    # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
-    # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
-    # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
-
-    if isinstance(date, int):
-        date = str(date)
-
     if len(date) == 4:
         year = int(date)
     else:
-        raise ValueError(f"Date {date} does not represent a year; only annual EDGAR data can be processed currently.")
+        raise ValueError(f"Date {date} does not represent a year;"
+                         " only annual EDGAR data can be processed currently.")
 
-    files_by_year = {}
+    FileInfo = namedtuple("FileInfo", "path metadata")
+    files_by_year: dict[int, FileInfo] = {}
     for data_file in data_files:
         try:
-            file_info = _extract_file_info(data_file)
+            metadata = assemble_edgar_metadata(data_file, species, edgar_version)
         except ValueError:
             continue
+        else:
+            # Check if data is actually monthly "...2015_1" etc. - can't parse yet
+            if "month" in metadata:
+                raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
 
-        # Check if data is actually monthly "...2015_1" etc. - can't parse yet
-        if "month" in file_info:
-            raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
+            files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
-        year_from_file = file_info["year"]
-
-        files_by_year[year_from_file] = data_file
-
-        if year_from_file == year:
-            edgar_file = data_file
-            edgar_file_info = file_info
-            break
-    else:  # no break
+    try:
+        edgar_file, edgar_file_info = files_by_year[year]
+    except KeyError:
         all_years = list(files_by_year.keys())
         all_years.sort()
         start_year, end_year = all_years[0], all_years[-1]
@@ -284,19 +240,9 @@ def parse_edgar(
             logger.info(
                 f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}."
             )
-        edgar_file = files_by_year[end_year]
-        edgar_file_info = _extract_file_info(edgar_file)
+        edgar_file, edgar_file_info = files_by_year[end_year]
 
-    source_from_file = edgar_file_info["source"]
-    if source_from_file in ("TOTALS", ""):
-        source = "anthro"
-    elif species_label == "co2" and "TOTALS" in source_from_file:
-        co2_source = "_".join(source_from_file.split("_")[:-1])
-        source = clean_string(f"{co2_source}_anthro")
-    else:
-        source = clean_string(source_from_file)
-    database = "EDGAR"
-    database_version = clean_string(edgar_version)
+    species_label = edgar_file_info["species"]
 
 
 
@@ -403,12 +349,13 @@ def parse_edgar(
     metadata = {}
     metadata.update(attrs)
 
+    source = edgar_file_info["source"]
     metadata["species"] = species_label
     metadata["domain"] = domain
     metadata["source"] = source
     metadata["date"] = date
-    metadata["database"] = database
-    metadata["database_version"] = database_version
+    metadata["database"] = "EDGAR"
+    metadata["database_version"] = edgar_file_info["version"]
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = "flux"
