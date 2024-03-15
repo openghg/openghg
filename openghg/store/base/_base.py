@@ -307,7 +307,7 @@ class BaseStore:
             if not required_result:
                 results[key] = False
             elif len(required_result) > 1:
-                raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+                raise DatasourceLookupError("More than one Datasource found for metadata, refine lookup.")
             else:
                 results[key] = required_result[0]["uuid"]
 
