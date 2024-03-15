@@ -115,7 +115,7 @@ To standardise [#f4]_ footprint data, we pass the following arguments to
 - ``model``: name of model used to create the footprint
 
 Additional details can also be specified, in particular, for the
-meteorological model used (metmodel) and the species name (if relevant).
+meteorological model used (met_model) and the species name (if relevant).
 
 For the example below, the footprint data generated from the NAME model
 for the Tacolneston (TAC) site at 100m inlet. This covers an area over

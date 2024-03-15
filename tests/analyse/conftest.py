@@ -198,7 +198,7 @@ def data_read():
         site=site1,
         model=model1,
         network=network1,
-        metmodel="UKV",
+        met_model="UKV",
         height=height1,
         domain="TEST",
         species="co2",

@@ -24,7 +24,7 @@ def test_read_footprint_co2_from_data(mocker):
         "inlet": "100m",
         "domain": "TEST",
         "model": "NAME",
-        "metmodel": "UKV",
+        "met_model": "UKV",
         "species": "co2",
         "high_time_resolution": "True",
     }
@@ -274,7 +274,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "site,inlet,metmodel,start,end,filename",
+    "site,inlet,met_model,start,end,filename",
     [
         (
             "TAC",
@@ -294,7 +294,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         ),
     ],
 )
-def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
+def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -319,7 +319,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         filepath=datapath,
         site=site,
         model=model,
-        metmodel=metmodel,
+        met_model=met_model,
         inlet=inlet,
         species=species,
         domain=domain,
@@ -349,7 +349,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "height": inlet,  # Should always be the same as inlet
         "model": "NAME",
         "species": "co2",
-        "metmodel": metmodel.lower(),
+        "met_model": met_model.lower(),
         "domain": domain.lower(),
         "start_date": start,
         "end_date": end,
@@ -367,11 +367,11 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def add_tac_metmodel_data():
+def add_tac_met_model_data():
     user_store = "user"
     clear_test_store(name=user_store)
 
-    datapath_no_metmodel_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
+    datapath_no_met_model_1 = get_footprint_datapath("TAC-100magl_TEST_201606.nc")
 
     site = "TAC"
     height = "100m"
@@ -379,7 +379,7 @@ def add_tac_metmodel_data():
     model = "NAME"
 
     standardise_footprint(
-        filepath=datapath_no_metmodel_1,
+        filepath=datapath_no_met_model_1,
         site=site,
         model=model,
         height=height,
@@ -387,17 +387,17 @@ def add_tac_metmodel_data():
         store=user_store,
     )
 
-    datapath_metmodel = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    datapath_met_model = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
 
-    metmodel = "UKV"
+    met_model = "UKV"
 
     standardise_footprint(
-        filepath=datapath_metmodel,
+        filepath=datapath_met_model,
         site=site,
         model=model,
         height=height,
         domain=domain,
-        metmodel=metmodel,
+        met_model=met_model,
         store=user_store,
     )
 
@@ -409,7 +409,7 @@ def test_read_footprint_short_lived():
     inlet = "20m"
     domain = "TEST"
     model = "NAME"
-    metmodel = "UKV"
+    met_model = "UKV"
     species = "Rn"
 
     # Expect rn data to be short lived
@@ -419,7 +419,7 @@ def test_read_footprint_short_lived():
         filepath=datapath,
         site=site,
         model=model,
-        metmodel=metmodel,
+        met_model=met_model,
         inlet=inlet,
         species=species,
         domain=domain,
@@ -452,7 +452,7 @@ def test_read_footprint_short_lived():
         "height": inlet,  # Should always be the same value as inlet
         "model": "NAME",
         "species": "rn",  # TODO: May want to see if we can keep this capitalised?
-        "metmodel": "ukv",
+        "met_model": "ukv",
         "domain": "test",
         "start_date": "2018-01-01 00:00:00+00:00",
         "end_date": "2018-01-02 23:59:59+00:00",

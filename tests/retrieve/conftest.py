@@ -152,7 +152,7 @@ def data_read():
     height = "100m"
     domain = "TEST"
     model = "NAME"
-    metmodel = "UKV"
+    met_model = "UKV"
 
     standardise_footprint(
         store="user",
@@ -162,7 +162,7 @@ def data_read():
         network=network,
         height=height,
         domain=domain,
-        metmodel=metmodel,
+        met_model=met_model,
     )
 
     standardise_footprint(
@@ -173,7 +173,7 @@ def data_read():
         network=network,
         height=height,
         domain=domain,
-        metmodel=metmodel,
+        met_model=met_model,
     )
 
     # High time resolution footprints
@@ -186,7 +186,7 @@ def data_read():
         network="DECC",
         height="100m",
         domain="TEST",
-        metmodel="UKV",
+        met_model="UKV",
         high_time_resolution=True,
     )
 
