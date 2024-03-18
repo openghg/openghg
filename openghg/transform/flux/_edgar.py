@@ -567,93 +567,63 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
         edgar_file = pathlib.Path(edgar_file.name)  # zipfile.Path.stem is Python 3.11+
     filename = edgar_file.stem
 
-    filename_split = filename.split("_")
+    # remove unwanted parts like:
+    # FT2021, FT2022, etc
+    # GHG
+    # emi_nc, flx_nc
+    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?"]
+    cleaning_regexps_joined = "|".join(cleaning_regexps)
+    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
 
-    # Check if we can extract the known components from the filename
-    # - version, species (upper), year
-    try:
-        version = filename_split[0]
-        species = filename_split[1]
-    except IndexError:
+    filename_clean = cleaning_pat.sub("", filename)
+
+    # parse string of form:
+    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
+    info_pat = re.compile(
+        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
+        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
+        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
+        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
+        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
+        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
+        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
+    )
+
+    if m := info_pat.search(filename_clean):
+        file_info = m.groupdict()
+    else:
+        # info_pat matches all files in known EDGAR versions
+        # (verified by searching all file names for these versions
+        # 18 March 2024)
         raise ValueError(f"Did not recognise input file format: {filename}")
+
+    # make "source" string
+    co2_options = file_info.pop("co2_options") or ""
+
+    sector = file_info.pop("sector") or ""
+    sector = sector.replace("_", "-")
+
+    source = "_".join([co2_options, sector])
+    source = source.strip("_")  # in case co2_options or sector is ""
+
+    # if not source:
+    #     raise ValueError(f"Unable to extract source: {filename}")
+
+    file_info["source"] = source
+
+    # year and month should be integers
+    file_info["year"] = int(file_info["year"])
+
+    if file_info["month"] is not None:
+        file_info["month"] = int(file_info["month"])
     else:
-        index_remaining = 2
+        del file_info["month"]
 
-    # CO2 input has 2 options e.g.
-    # - "v6.0_CO2_excl_short-cycle_org_C_2015_TOTALS.0.1x0.1.nc"
-    # - "v6.0_CO2_org_short-cycle_C_1970_TOTALS.0.1x0.1.nc"
-    if species.lower() == "co2":
-        co2_options = ["excl_short-cycle_org_C", "org_short-cycle_C"]
-        for option in co2_options:
-            if option in filename:
-                option_split = option.split("_")
-                extra_sections = len(option_split)
-                index_remaining += extra_sections
+    # file_info["version"] = clean_string(file_info["version"])
 
-                source = "_".join(option_split[0:2]) + "_"
-                break
-        else:
-            source = ""
-    else:
-        source = ""
-
-    # Check if year can be cast to integer to check this is a valid value
-    try:
-        year_str = filename_split[index_remaining]
-        year = int(year_str)
-    except IndexError:
-        raise ValueError(f"Unable to cast year extracted from file format to an integer: {year_str}")
-    except ValueError:
-        # In some files there is no source specified so
-        # filename_split[2] contains the year and resolution
-        # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1"
-        try:
-            year = int(year_str.split(".")[0])
-        except ValueError:
-            raise ValueError(f"Could not find valid year value from file: {filename}")
-    else:
-        index_remaining += 1
-
-    # Check whether month is included in filename
-    # e.g. "v6.0_CH4_2015_1_ENE.0.1x0.1.nc"
-    try:
-        month: Optional[int] = int(filename_split[3])
-    except (IndexError, ValueError):
-        month = None
-    else:
-        index_remaining += 1
-
-    # Attempt to extract source(s) and resolution from filename stem
-    # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc" --> "TOTALS.0.1x0.1"
-    # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1" (note no source in filename)
-    # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC_6A_6D.0.1x0.1"
-    try:
-        source_resolution = "-".join(filename_split[index_remaining:])
-    except (IndexError, ValueError):
-        raise ValueError(f"Unable to extract source: {filename}")
-    else:
-        # e.g. "TOTALS.0.1x0.1" --> "TOTALS", "0.1x0.1"
-        # e.g. "2015.0.1x0.1" --> "2015", "0.1x0.1" --> "", "0.1x0.1"
-        # e.g. "IPCC_6A_6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
-        em_source = source_resolution.split(".")[0]
-        resolution = source_resolution.lstrip(em_source).lstrip(".")
-        # Check source was actually contained in filename and not just the year
-        # If so, set source to contain empty string
-        if em_source == str(year):
-            source += ""
-        else:
-            source += em_source
-
-    file_info = {
-        "version": version,
-        "species": species,
-        "year": year,
-        "source": source,
-        "resolution": resolution,
-    }
-
-    if month is not None:
-        file_info["month"] = month
+    # if not file_info["version"] in _edgar_known_versions:
+    #     raise ValueError(f"Version {file_info['version']} inferred from {filename} not know known "
+    #                      f"EDGAR versions: {_edgar_known_versions}.")
 
     return file_info
 
