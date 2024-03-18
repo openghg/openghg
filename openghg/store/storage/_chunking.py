@@ -12,7 +12,6 @@ class ChunkingSchema:
         secondary_dimensions: List of secondary dimensions to chunk over
     """
 
-
     variable: str
     chunks: Dict[str, int]
     secondary_dims: List[str]
