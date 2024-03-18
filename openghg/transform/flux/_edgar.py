@@ -210,13 +210,6 @@ def parse_edgar(
         timestamp_now,
     )
 
-    # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
-    # Additional edgar functions which could be incorporated.
-    # - getedgarv5annualsectors
-    # - getedgarv432annualsectors
-    # - (monthly sectors?)
-    # TODO: Work out how to select frequency
-    # - could try and relate to period e.g. "monthly" versus "yearly" etc.
     period = None
 
     raw_edgar_domain = "globaledgar"
@@ -289,18 +282,6 @@ def parse_edgar(
     species_label = edgar_file_info["species"]
 
 
-
-    # Dimension - (lat, lon) - no time dimension
-    # time is not included in the file just in the filename *sigh*!
-
-    # v432_CH4_1978.0.1x0.1.nc (or .zip)
-    # v50_CH4_1978.0.1x0.1.nc (or .zip)
-    # v6.0_CH4_1978_TOTALS.0.1x0.1.nc
-
-    # v50_CO2_excl_short-cycle_org_C_1978.0.1x0.1.nc (or .zip)
-    # v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
-    # v50_N2O_1978.0.1x0.1.zip (or .zip)
-
     # get dataset
     # using .open("rb") for pathlib.Path and zipfile.Path compatibility
     edgar_ds = xr.open_dataset(edgar_file.open("rb"))
@@ -308,15 +289,6 @@ def parse_edgar(
     # Expected name e.g. "emi_ch4", "emi_co2"
     name = f"emi_{species_label}"
 
-    # For reference, from "_readme.html" from v6.0 data:
-    # 'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
-    #  for the .txt files with longitude and latitude coordinates referring to
-    #  the low-left corner of each grid-cell.'
-    # 'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
-    #  for the .txt files with longitude and latitude coordinates referring to
-    #  the low-left corner of each grid-cell.'
-    # 'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude
-    # and latitude coordinates referring to the cell center of each grid-cell.'
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
