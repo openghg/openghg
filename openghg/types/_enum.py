@@ -7,6 +7,7 @@ class SurfaceTypes(Enum):
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    GCWERKS_NC = "GCWERKS_NC"
     ICOS = "ICOS"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
@@ -56,6 +57,7 @@ class ObsTypes(Enum):
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    GCWERKS_NC = "GCWERKS_NC"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
     ICOS = "ICOS"

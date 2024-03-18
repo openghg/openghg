@@ -13,10 +13,10 @@ def test_summarise_format():
 
     # Check expected source format is returned for specific value
     name = "Gosan, Korea"
-    expected_source_format = "GCWERKS"
+    expected_source_format = np.array(["GCWERKS", "GCWERKS_NC"])
 
     selection = summary_df[summary_df["Long name"] == name]
-    assert selection["Source format"].values == expected_source_format
+    assert np.all(selection["Source format"].values == expected_source_format)
 
 
 def test_summarise_site():
