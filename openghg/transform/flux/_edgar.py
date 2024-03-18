@@ -215,17 +215,10 @@ def parse_edgar(
 
     period = None
 
-    raw_edgar_domain = "globaledgar"
-
-    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
-
-    if domain is None:
-        domain = raw_edgar_domain
-
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
 
     if zipfile.is_zipfile(datapath):
-        datapath = zipfile.Path(datapath) # type: ignore
+        datapath = zipfile.Path(datapath)  # type: ignore
 
     # NOTE: the built-in `open` method doesn't work with zipfile.Path
     # but there is a zipfile.Path.open method that works the same as
@@ -238,7 +231,7 @@ def parse_edgar(
     data_files = [file for file in folder_filelist if pathlib.Path(file.name).suffix == ".nc"]
 
     if not data_files:
-        raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
+        raise ValueError(f"No '.nc' files found in datapath: {datapath}")
 
     if edgar_version is None:
         # check if _readme.html is in folder_filelist, and if so, try to extract version
@@ -249,8 +242,9 @@ def parse_edgar(
     if len(date) == 4:
         year = int(date)
     else:
-        raise ValueError(f"Date {date} does not represent a year;"
-                         " only annual EDGAR data can be processed currently.")
+        raise ValueError(
+            f"Date {date} does not represent a year;" " only annual EDGAR data can be processed currently."
+        )
 
     FileInfo = namedtuple("FileInfo", "path metadata")
     files_by_year: dict[int, FileInfo] = {}
@@ -266,41 +260,45 @@ def parse_edgar(
 
             files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
+    if not files_by_year:
+        raise ValueError(f"Unable to extract EDGAR file info from any files in {datapath}.")
+
     try:
         edgar_file, edgar_file_info = files_by_year[year]
     except KeyError:
-        all_years = list(files_by_year.keys())
-        all_years.sort()
+        all_years = sorted(list(files_by_year.keys()))
         start_year, end_year = all_years[0], all_years[-1]
+
         if year < start_year:
-            raise ValueError(
-                f"EDGAR {edgar_version} range: {start_year}-{end_year}." f" {year} is before this period."
-            )
+            raise ValueError(f"Files span range: {start_year}-{end_year}." f" {year} is before this period.")
         elif year > end_year:
-            logger.info(
-                f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}."
-            )
+            logger.info(f"Using last available year from range:" f"{start_year}-{end_year}.")
         edgar_file, edgar_file_info = files_by_year[end_year]
 
     species_label = edgar_file_info["species"]
-
+    version = edgar_file_info["version"]
 
     # get dataset
     # using .open("rb") for pathlib.Path and zipfile.Path compatibility
     edgar_ds = xr.open_dataset(edgar_file.open("rb"))
 
-    # Expected name e.g. "emi_ch4", "emi_co2"
-    name = f"emi_{species_label}"
+    # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
+    name = "fluxes" if version == "v8" else f"emi_{species_label}"
 
+    # just in case we didn't get the name right...
+    if name not in (dvs := edgar_ds.data_vars):
+        name = dvs[0]
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    # flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
     flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
+
+    # TODO: some options for f-gases (.emi files) have different units...
+    # need to catch this
 
     lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
     lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
@@ -311,7 +309,11 @@ def parse_edgar(
         )
 
     # Check range of longitude values and convert to -180 - +180
-    flux_da = convert_internal_longitude(flux_da, lon_name=lon_name)
+    flux_da = convert_internal_longitude(
+        flux_da, lon_name=lon_name
+    )  # TODO is this creating NaNs for East Asia domain?
+
+    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
 
     if lat_out is not None and lon_out is not None:
         # Will produce import error if xesmf has not been installed.
@@ -340,11 +342,15 @@ def parse_edgar(
     time_name = "time"
     if time_name in flux_da:
         time = flux_da[time_name].values
+        flux = flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
     elif time_name not in flux_da and flux_ndim == 2:
         time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
         flux = flux_values[np.newaxis, ...]
-    elif flux_ndim != 3:
-        raise ValueError(f"Expected '{name}' to contain 2 or 3 dimensions. Actually: {flux_ndim}")
+    else:
+        raise ValueError(
+            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
+            f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
+        )
 
     dims = ("time", "lat", "lon")
 
@@ -366,6 +372,10 @@ def parse_edgar(
 
     metadata = {}
     metadata.update(attrs)
+
+    raw_edgar_domain = "globaledgar"
+    if domain is None:
+        domain = raw_edgar_domain
 
     source = edgar_file_info["source"]
     metadata["species"] = species_label
