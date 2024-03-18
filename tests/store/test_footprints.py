@@ -23,7 +23,7 @@ def test_read_footprint_co2_from_data(mocker):
         "inlet": "100m",
         "domain": "TEST",
         "model": "NAME",
-        "metmodel": "UKV",
+        "met_model": "UKV",
         "species": "co2",
         "high_time_resolution": "True",
     }
@@ -273,7 +273,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "site,inlet,metmodel,start,end,filename",
+    "site,inlet,met_model,start,end,filename",
     [
         (
             "TAC",
@@ -293,7 +293,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         ),
     ],
 )
-def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
+def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -318,7 +318,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         filepath=datapath,
         site=site,
         model=model,
-        metmodel=metmodel,
+        met_model=met_model,
         inlet=inlet,
         species=species,
         domain=domain,
@@ -348,7 +348,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "height": inlet,  # Should always be the same as inlet
         "model": "NAME",
         "species": "co2",
-        "metmodel": metmodel.lower(),
+        "met_model": met_model.lower(),
         "domain": domain.lower(),
         "start_date": start,
         "end_date": end,
@@ -373,7 +373,7 @@ def test_read_footprint_short_lived():
     inlet = "20m"
     domain = "TEST"
     model = "NAME"
-    metmodel = "UKV"
+    met_model = "UKV"
     species = "Rn"
 
     # Expect rn data to be short lived
@@ -383,7 +383,7 @@ def test_read_footprint_short_lived():
         filepath=datapath,
         site=site,
         model=model,
-        metmodel=metmodel,
+        met_model=met_model,
         inlet=inlet,
         species=species,
         domain=domain,
@@ -416,7 +416,7 @@ def test_read_footprint_short_lived():
         "height": inlet,  # Should always be the same value as inlet
         "model": "NAME",
         "species": "rn",  # TODO: May want to see if we can keep this capitalised?
-        "metmodel": "ukv",
+        "met_model": "ukv",
         "domain": "test",
         "start_date": "2018-01-01 00:00:00+00:00",
         "end_date": "2018-01-02 23:59:59+00:00",

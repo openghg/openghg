@@ -469,7 +469,7 @@ def standardise_footprint(
     model: str,
     inlet: Optional[str] = None,
     height: Optional[str] = None,
-    metmodel: Optional[str] = None,
+    met_model: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
     source_format: str = "acrg_org",
@@ -501,7 +501,7 @@ def standardise_footprint(
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
-        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         source_format: Format of the input data format, for example acrg_org
@@ -557,7 +557,7 @@ def standardise_footprint(
             "high_spatial_resolution": high_spatial_resolution,
             "high_time_resolution": high_time_resolution,
             "overwrite": overwrite,
-            "metmodel": metmodel,
+            "met_model": met_model,
             "species": species,
             "network": network,
             "period": period,
@@ -583,7 +583,7 @@ def standardise_footprint(
             model=model,
             inlet=inlet,
             height=height,
-            metmodel=metmodel,
+            met_model=met_model,
             species=species,
             network=network,
             source_format=source_format,
