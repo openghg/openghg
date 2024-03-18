@@ -1,3 +1,48 @@
+"""
+Parse EDGAR flux files and perform area-conservative regridding
+of fluxes.
+
+Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
+
+Additional edgar functions which could be incorporated.
+- getedgarv5annualsectors
+- getedgarv432annualsectors
+- (monthly sectors?)
+
+TODO: Work out how to select frequency
+- could try and relate to period e.g. "monthly" versus "yearly" etc.
+
+EDGAR flux files tend to have dimensions (lat, lon), and no time dimension;
+however, time is included in the filename, so we try to extract this, along
+with version, species, sector, and resolution.
+
+Typical file names:
+
+ v432_CH4_1978.0.1x0.1.nc (or .zip)
+ v50_CH4_1978.0.1x0.1.nc (or .zip)
+ v6.0_CH4_1978_TOTALS.0.1x0.1.nc
+
+ v50_CO2_excl_short-cycle_org_C_1978.0.1x0.1.nc (or .zip)
+ v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
+ v50_N2O_1978.0.1x0.1.zip (or .zip)
+
+Futher information is contained in the EDGAR readme files.
+For instance, from "_readme.html" from v6.0 data:
+
+'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
+ for the .txt files with longitude and latitude coordinates referring to
+ the low-left corner of each grid-cell.'
+
+'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
+ for the .txt files with longitude and latitude coordinates referring to
+ the low-left corner of each grid-cell.'
+
+'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude
+ and latitude coordinates referring to the cell center of each grid-cell.'
+
+For EDGAR v8.0,
+
+"""
 import pathlib
 import re
 import zipfile
@@ -91,7 +136,6 @@ def assemble_edgar_metadata(
                     )
             else:
                 metadata["version"] = clean_string(metadata["version"])
-
 
         source_from_file = metadata["source"]
         if source_from_file in ("TOTALS", ""):
@@ -307,8 +351,7 @@ def parse_edgar(
         lat_in_cut = flux_da_cut[lat_name]
         lon_in_cut = flux_da_cut[lon_name]
 
-        # regrid2d() used within acrg code for equivalent regrid function
-        # but switched to using xesmf (rather than iris) here instead.
+        # area conservative regrid
         flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
     else:
         lat_out = flux_da[lat_name]
