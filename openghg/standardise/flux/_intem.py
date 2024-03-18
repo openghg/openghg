@@ -22,7 +22,8 @@ def parse_intem(
         species: Name of species
         source: Source of the emissions data
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
         data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
