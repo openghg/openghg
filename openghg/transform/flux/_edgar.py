@@ -69,8 +69,12 @@ from openghg.util import (
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 Path = Union[pathlib.Path, zipfile.Path]
+
+
+_edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
 
 
 # TODO: make this work for...
@@ -92,7 +96,7 @@ def assemble_edgar_metadata(
     Returns:
         dictionary containing keys: version, species, year, source, resolution
     """
-    known_versions = _edgar_known_versions()
+    known_versions = _edgar_known_versions
 
     if species is not None:
         species = define_species_label(species)[0]
@@ -147,8 +151,9 @@ def assemble_edgar_metadata(
             source = clean_string(source_from_file)
 
         metadata["source"] = source
-    
+
     return metadata
+
 
 def parse_edgar(
     datapath: pathlib.Path,
@@ -199,12 +204,10 @@ def parse_edgar(
     TODO: Allow date range to be extracted rather than year?
     TODO: Add monthly parsing and sector stacking options
     """
-    from openghg.standardise.meta import assign_flux_attributes, define_species_label
+    from openghg.standardise.meta import assign_flux_attributes
     from openghg.store import infer_date_range
     from openghg.util import (
-        clean_string,
         molar_mass,
-        synonyms,
         find_coord_name,
         convert_internal_longitude,
         timestamp_now,
@@ -504,12 +507,6 @@ def _check_lat_lon(
     return lat_out, lon_out
 
 
-def _edgar_known_versions() -> list:
-    """Define list of known versions for the EDGAR database"""
-    known_versions = ["v432", "v50", "v60"]
-    return known_versions
-
-
 def _check_readme_data(readme_data: str) -> Optional[str]:
     """Parse EDGAR _readme.html to find version.
 
@@ -529,60 +526,8 @@ def _check_readme_data(readme_data: str) -> Optional[str]:
         edgar_version = None
     else:
         # Check against known versions and remove '.' if these don't match.
-        known_versions = _edgar_known_versions()
-        if edgar_version not in known_versions:
+        if edgar_version not in _edgar_known_versions:
             edgar_version = edgar_version.replace(".", "")
-
-    return edgar_version
-
-def _check_readme_version(
-    datapath: Optional[Path] = None, zippath: Optional[ZipFile] = None
-) -> Optional[str]:
-    """
-    Attempts to extract the edgar version from the associated "_readme.html"
-    file, if present.
-
-    Args:
-        datapath : Path to the folder containing the downloaded EDGAR files
-        zippath: Path to zipped archive file (direct from EDGAR)
-
-    Returns:
-        str : edgar version if found (None otherwise)
-    """
-
-    # Work out version if possible from readme
-    # All database versions so far may contain "_readme.html" file
-    # "v6.0"
-    #  - "TOTALS_nc.zip" is what is downloaded from website
-    #  - "_readme.html" title line: "<title>EDGAR v6.0_GHG (2021)</title>"
-    # "v5.0"
-    #  - "v50_CH4_1970_2015.zip" can be downloaded
-    #  - "_readme.html" title line: "<title>EDGAR v5.0 (2019)</title>"
-    # "v4.3.2"
-    #  - "v432_CH4_1970_2012.zip" can be downloaded
-    #  - "_readme.html" title line: "<title>EDGAR v4.3.2 (2017)</title>"
-
-    # Check for readme html file and, if present, extract version
-    readme_filename = "_readme.html"
-    if zippath is not None:
-        try:
-            # Cast extracted bytes to a str object
-            readme_data: Optional[str] = str(zippath.read(readme_filename))
-        except ValueError:
-            readme_data = None
-    elif datapath is not None:
-        readme_filepath = datapath.joinpath(readme_filename)
-        if readme_filepath.exists():
-            readme_data = readme_filepath.read_text()
-        else:
-            readme_data = None
-    else:
-        raise ValueError("One of datapath or zippath must be specified.")
-
-    if readme_data is not None:
-        edgar_version = _check_readme_data(readme_data)
-    else:
-        edgar_version = None
 
     return edgar_version
 
