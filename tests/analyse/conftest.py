@@ -2,7 +2,7 @@ import pytest
 from helpers import (
     clear_test_stores,
     get_bc_datapath,
-    get_emissions_datapath,
+    get_flux_datapath,
     get_footprint_datapath,
     get_surface_datapath,
 )
@@ -57,66 +57,99 @@ def data_read():
         inlet="10m",
     )
 
-    # Emissions data
+    # Emissions / Flux data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
     source1 = "anthro"
     domain = "EUROPE"
-    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
-    standardise_flux(
-        store="user",
-        filepath=emissions_datapath1,
-        species="ch4",
-        source=source1,
-        domain=domain,
-        high_time_resolution=False,
-    )
+    flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
+    standardise_flux(store="user",
+                             filepath=flux_datapath1,
+                             species="ch4",
+                             source=source1,
+                             domain=domain,
+                             high_time_resolution=False,
+                             )
 
     # Waste data for CH4 (from UKGHG model)
     source2 = "waste"
-    emissions_datapath2 = get_emissions_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
-    standardise_flux(
-        store="user",
-        filepath=emissions_datapath2,
-        species="ch4",
-        source=source2,
-        domain=domain,
-        high_time_resolution=False,
-    )
+    flux_datapath2 = get_flux_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
+    standardise_flux(store="user",
+                             filepath=flux_datapath2,
+                             species="ch4",
+                             source=source2,
+                             domain=domain,
+                             high_time_resolution=False,
+                             )
 
     # Natural sources for CO2 (R-total from Cardamom)
     #  - 2 hourly (high resolution?)
     source3 = "natural-rtot"
-    emissions_datapath3 = get_emissions_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
+    flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
+    standardise_flux(store="user",
+                             filepath=flux_datapath3,
+                             species="co2",
+                             source=source3,
+                             domain="TEST",
+                             high_time_resolution=True,
+                             )
+
+    flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
+
     standardise_flux(
-        store="user",
-        filepath=emissions_datapath3,
+        filepath=flux_datapath3,
         species="co2",
         source=source3,
         domain="TEST",
         high_time_resolution=True,
+        store="user",
     )
 
     # Ocean flux for CO2
     #  - monthly (cut down data to 1 month)
     source4 = "ocean"
-    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+
+    flux_datapath4a = get_flux_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    flux_datapath4b = get_flux_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
+
     standardise_flux(
-        store="user",
-        filepath=emissions_datapath4a,
+        filepath=flux_datapath4a,
         species="co2",
         source=source4,
         domain="TEST",
         high_time_resolution=False,
-    )
-    standardise_flux(
+        period="1 month",
         store="user",
-        filepath=emissions_datapath4b,
+    )
+
+    standardise_flux(
+        filepath=flux_datapath4b,
         species="co2",
         source=source4,
         domain="TEST",
         high_time_resolution=False,
+        period="1 month",
+        store="user",
     )
+    # Ocean flux for CO2
+    #  - monthly (cut down data to 1 month)
+    source4 = "ocean"
+    flux_datapath4a = get_flux_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
+    flux_datapath4b = get_flux_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    standardise_flux(store="user",
+                             filepath=flux_datapath4a,
+                             species="co2",
+                             source=source4,
+                             domain="TEST",
+                             high_time_resolution=False,
+                             )
+
+    standardise_flux(store="user",
+                             filepath=flux_datapath4b,
+                             species="co2",
+                             source=source4,
+                             domain="TEST",
+                             high_time_resolution=False,
+                             )
 
     # Boundary conditions data
     # CH4
@@ -165,7 +198,7 @@ def data_read():
         site=site1,
         model=model1,
         network=network1,
-        metmodel="UKV",
+        met_model="UKV",
         height=height1,
         domain="TEST",
         species="co2",

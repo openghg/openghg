@@ -1,15 +1,21 @@
 from __future__ import annotations
+import logging
 import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Literal, Optional, Tuple, Union
-import logging
+from typing import Any, Dict, Optional, Tuple, Union
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-import warnings
+
+__all__ = ["Flux"]
+
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -17,11 +23,11 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class Emissions(BaseStore):
-    """This class is used to process emissions / flux data"""
+class Flux(BaseStore):
+    """This class is used to process flux / emissions flux data"""
 
-    _data_type = "emissions"
-    _root = "Emissions"
+    _data_type = "flux"
+    _root = "Flux"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
@@ -60,17 +66,22 @@ class Emissions(BaseStore):
         source_format: str = "openghg",
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
-        """Read emissions file
+        """Read flux / emissions file
 
         Args:
-            filepath: Path of emissions file
+            filepath: Path of flux / emissions file
             species: Species name
-            domain: Emissions domain
-            source: Emissions source
+            domain: Flux / Emissions domain
+            source: Flux / Emissions source
             database: Name of database source for this input (if relevant)
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
@@ -81,34 +92,74 @@ class Emissions(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                To disable chunking pass in an empty dictionary.
             continuous: Whether time stamps have to be continuous.
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import EmissionsTypes
-        from openghg.util import clean_string, hash_file, load_emissions_parser
+        from openghg.types import FluxTypes
+        from openghg.util import (
+            clean_string,
+            load_flux_parser,
+            check_if_need_new_version,
+        )
 
         species = clean_string(species)
         source = clean_string(source)
         domain = clean_string(domain)
 
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
         filepath = Path(filepath)
 
         try:
-            source_format = EmissionsTypes[source_format.upper()].value
+            source_format = FluxTypes[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_parser(source_format=source_format)
+        parser_fn = load_flux_parser(source_format=source_format)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            warnings.warn(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -120,7 +171,7 @@ class Emissions(BaseStore):
             "high_time_resolution": high_time_resolution,
             "period": period,
             "continuous": continuous,
-            "data_type": "emissions",
+            "data_type": "flux",
             "chunks": chunks,
         }
 
@@ -144,12 +195,13 @@ class Emissions(BaseStore):
                     f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
                     f"This is not accepted by the current standardisation function: {parser_fn}"
                 )
-        emissions_data = parser_fn(**input_parameters)
 
-        # Checking against expected format for Emissions
-        for split_data in emissions_data.values():
+        flux_data = parser_fn(**input_parameters)
+
+        # Checking against expected format for Flux
+        for split_data in flux_data.values():
             em_data = split_data["data"]
-            Emissions.validate_data(em_data)
+            Flux.validate_data(em_data)
 
         min_required = ["species", "source", "domain"]
         for key, value in optional_keywords.items():
@@ -158,12 +210,19 @@ class Emissions(BaseStore):
 
         required = tuple(min_required)
 
-        data_type = "emissions"
+        data_type = "flux"
         datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required
+            data=flux_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required,
+            compressor=compressor,
+            filters=filters,
         )
+
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 
@@ -171,41 +230,69 @@ class Emissions(BaseStore):
         self,
         datapath: Union[str, Path],
         database: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
-        Read and transform an emissions database. This will find the appropriate
+        Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
         are determined by which database is being used.
 
         The underlying parser functions will be of the form:
-            - openghg.transform.emissions.parse_{database.lower()}
-                - e.g. openghg.transform.emissions.parse_edgar()
+            - openghg.transform.flux.parse_{database.lower()}
+                - e.g. openghg.transform.flux.parse_edgar()
 
         Args:
             datapath: Path to local copy of database archive (for now)
             database: Name of database
-            overwrite: Should this data overwrite currently stored data
-                which matches.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
             **kwargs: Inputs for underlying parser function for the database.
+
                 Necessary inputs will depend on the database being parsed.
 
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.types import EmissionsDatabases
-        from openghg.util import load_emissions_database_parser
+        from openghg.types import FluxDatabases
+        from openghg.util import load_flux_database_parser, check_if_need_new_version
+
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         datapath = Path(datapath)
 
         try:
-            data_type = EmissionsDatabases[database.upper()].value
+            data_type = FluxDatabases[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_database_parser(database=database)
+        parser_fn = load_flux_database_parser(database=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
@@ -214,19 +301,24 @@ class Emissions(BaseStore):
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
 
-        emissions_data = parser_fn(**param)
+        flux_data = parser_fn(**param)
 
-        # Checking against expected format for Emissions
-        for split_data in emissions_data.values():
+        # Checking against expected format for Flux
+        for split_data in flux_data.values():
             em_data = split_data["data"]
-            Emissions.validate_data(em_data)
+            Flux.validate_data(em_data)
 
         required_keys = ("species", "source", "domain")
 
-        data_type = "emissions"
-        overwrite = False
+        data_type = "flux"
         datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
+            data=flux_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
         )
 
         return datasource_uuids
@@ -234,7 +326,7 @@ class Emissions(BaseStore):
     @staticmethod
     def schema() -> DataSchema:
         """
-        Define schema for emissions Dataset.
+        Define schema for flux / emissions Dataset.
 
         Includes flux/emissions for each time and position:
             - "flux"
@@ -243,7 +335,7 @@ class Emissions(BaseStore):
         Expected data types for all variables and coordinates also included.
 
         Returns:
-            DataSchema : Contains schema for Emissions.
+            DataSchema : Contains schema for Flux.
         """
         data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
@@ -255,8 +347,8 @@ class Emissions(BaseStore):
     @staticmethod
     def validate_data(data: Dataset) -> None:
         """
-        Validate input data against Emissions schema - definition from
-        Emissions.schema() method.
+        Validate input data against Flux schema - definition from
+        Flux.schema() method.
 
         Args:
             data : xarray Dataset in expected format
@@ -265,7 +357,7 @@ class Emissions(BaseStore):
             None
 
             Raises a ValueError with details if the input data does not adhere
-            to the Emissions schema.
+            to the Flux schema.
         """
-        data_schema = Emissions.schema()
+        data_schema = Flux.schema()
         data_schema.validate_data(data)

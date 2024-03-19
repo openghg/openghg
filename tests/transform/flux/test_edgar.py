@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-from helpers import get_emissions_datapath
-from openghg.transform.emissions import parse_edgar
-from openghg.transform.emissions._edgar import _extract_file_info
+from helpers import get_flux_datapath
+from openghg.transform.flux import parse_edgar
+from openghg.transform.flux._edgar import _extract_file_info
 
 # TODO: Add tests
 # - single sector EDGAR data can be read and intepreted correctly for v6.0
@@ -24,7 +24,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     """
     Test parse edgar function against different global, annual database versions.
     """
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     year = "2015"
 
@@ -96,7 +96,7 @@ def test_parse_edgar_domain():
     xesmf = pytest.importorskip("xesmf")
 
     folder = "v6.0_CH4"
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     species = "ch4"
     year = "2015"
@@ -151,7 +151,7 @@ def test_parse_edgar_new_domain():
     xesmf = pytest.importorskip("xesmf")
 
     folder = "v6.0_CH4"
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     species = "ch4"
     year = "2015"
@@ -189,7 +189,7 @@ def test_parse_edgar_unknown_domain():
     Test error raised when unknown domain used and no lat, lon values provided
     """
     folder = "v6.0_CH4"
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     species = "ch4"
     year = "2015"
@@ -204,7 +204,7 @@ def test_parse_edgar_no_domain():
     Test error raised when new lat, lon values provided but no domain name
     """
     folder = "v6.0_CH4"
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     species = "ch4"
     year = "2015"

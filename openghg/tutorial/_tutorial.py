@@ -81,7 +81,7 @@ def populate_footprint_co2() -> None:
                 # height = "185m"
                 inlet = "185m"
                 model = "NAME"
-                metmodel = "UKV"
+                met_model = "UKV"
 
                 standardise_footprint(
                     filepath=tac_co2_path,
@@ -89,7 +89,7 @@ def populate_footprint_co2() -> None:
                     inlet=inlet,
                     domain=domain,
                     model=model,
-                    metmodel=metmodel,
+                    met_model=met_model,
                     species=species,
                 )
 
