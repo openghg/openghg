@@ -66,10 +66,10 @@ def parse_openghg(
 
     data_filepath = Path(data_filepath)
 
-    if data_filepath.suffix != ".nc":
-        raise ValueError("Input file must be a .nc (netcdf) file.")
-
-    data = xr.open_dataset(data_filepath)  # Change this to with statement?
+    try:
+        data = xr.open_dataset(data_filepath)  # Change this to with statement?
+    except ValueError as e:
+        raise ValueError(f"Input file {data_filepath.name} could not be opened by xarray.") from e
 
     # Extract current attributes from input data
     attributes = data.attrs
