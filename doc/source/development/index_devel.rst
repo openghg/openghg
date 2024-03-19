@@ -25,6 +25,15 @@ Covers how we develop OpenGHG and the standards we adhere to
 
    python_devel
 
+Packaging & Release
+-------------------
+
+Covers steps to create a OpenGHG release and packaging steps
+
+.. toctree::
+   :maxdepth: 1
+   
+   packaging
 
 Data Specifications
 -------------------
