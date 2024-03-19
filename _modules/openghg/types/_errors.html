@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.types._errors &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -449,12 +449,24 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mismatch between attributes of input file and derived metadata&quot;&quot;&quot;</span>
 
 
+<span class="k">class</span> <span class="nc">DataOverlapError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;New data overlaps with current data stored&quot;&quot;&quot;</span>
+
+
 <span class="k">class</span> <span class="nc">ConfigFileError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised for errors with configuraion file&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised for errors with configuration file&quot;&quot;&quot;</span>
 
 
 <span class="k">class</span> <span class="nc">MetastoreError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised for errors with the metadata store&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">ZarrStoreError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised for errors with the zarr store&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">KeyExistsError</span><span class="p">(</span><span class="n">ZarrStoreError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if key already exists in zarr store&quot;&quot;&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">construct_xesmf_import_error</span><span class="p">(</span><span class="n">exception</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">ImportError</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

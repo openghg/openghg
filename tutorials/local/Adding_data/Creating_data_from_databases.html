@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Using databases to add data &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>Using databases to add data &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -46,13 +46,15 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Creating_data_from_databases';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Creating_data_from_databases';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Metadata and attributes" href="Metadata_and_attributes.html" />
+    <link rel="prev" title="Adding ancillary spatial data" href="Adding_ancillary_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -127,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -150,7 +152,7 @@
                     </li>
                 
 
-                    <li class="nav-item">
+                    <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
@@ -246,9 +248,7 @@ document.write(`
       
       
       
-        
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -268,7 +268,7 @@ document.write(`
                     </li>
                 
 
-                    <li class="nav-item">
+                    <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
@@ -320,6 +320,48 @@ document.write(`
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Adding_observation_data.html">Adding observation data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Using databases to add data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Metadata_and_attributes.html">Metadata and attributes</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Updating_existing_data.html">Updating existing data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
@@ -352,6 +394,9 @@ document.write(`
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page">Using...</li>
   </ul>
 </nav>
@@ -377,7 +422,7 @@ object store ([see here and here] - add links to previous tutorial
 pages). OpenGHG also provides functionality to create data from
 underlying databases and add this to the object store as well. At
 present, this has been implemented for the <a class="reference external" href="https://edgar.jrc.ec.europa.eu/">EDGAR global anthropogenic
-database</a> to allow emissions files
+database</a> to allow flux / emissions files
 to be created on a regional domain.</p>
 <section id="using-the-tutorial-object-store">
 <h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
@@ -396,11 +441,11 @@ affect your use of OpenGHG outside of this tutorial.</p>
 <section id="creating-emissions-from-the-edgar-database">
 <h2>1. Creating emissions from the EDGAR database<a class="headerlink" href="#creating-emissions-from-the-edgar-database" title="Link to this heading">#</a></h2>
 <p>To create emissions maps from an underlying database, we can use the
-<code class="docutils literal notranslate"><span class="pre">transform_emissions_data(...)</span></code> function in the <code class="docutils literal notranslate"><span class="pre">openghg.transform</span></code>
+<code class="docutils literal notranslate"><span class="pre">transform_flux_data(...)</span></code> function in the <code class="docutils literal notranslate"><span class="pre">openghg.transform</span></code>
 module.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.transform</span> <span class="kn">import</span> <span class="n">transform_emissions_data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.transform</span> <span class="kn">import</span> <span class="n">transform_flux_data</span>
 
-<span class="n">transform_emissions_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># Additional keywords</span>
+<span class="n">transform_flux_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># Additional keywords</span>
 </pre></div>
 </div>
 <p>This function expects the path, the name of the database as well as
@@ -412,7 +457,7 @@ available and a link provided to the folder path (<code class="docutils literal 
 interest. A flux map of the correct format will then be created and
 added to the openghg object store with the associated keywords.</p>
 <p>In the background, this will call the
-<code class="docutils literal notranslate"><span class="pre">openghg.transform.emissions.parse_edgar</span></code> function
+<code class="docutils literal notranslate"><span class="pre">openghg.transform.flux.parse_edgar</span></code> function
 and we can look at this function for details of what keywords we need to
 provide:</p>
 <ul class="simple">
@@ -448,11 +493,11 @@ provided is v6.0, annual, global and for methane.</p>
 will need to pass the name of the object store you wish to write to to
 the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">transform_data</span></code> function.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.transform</span> <span class="kn">import</span> <span class="n">transform_emissions_data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.transform</span> <span class="kn">import</span> <span class="n">transform_flux_data</span>
 
 <span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;edgar&quot;</span>
 
-<span class="n">transform_emissions_data</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">edgar_datapath</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="mi">2014</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<span class="n">transform_flux_data</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">edgar_datapath</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="mi">2014</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><em>Note: this can take a few minutes to complete.</em></p>
@@ -500,6 +545,24 @@ be expanded for use with any data type as appropriate.</p>
                 <footer class="prev-next-footer">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="Adding_ancillary_data.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Adding ancillary spatial data</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Metadata_and_attributes.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Metadata and attributes</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               

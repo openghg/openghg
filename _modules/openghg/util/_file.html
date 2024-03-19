@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._file &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.util._file &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -371,17 +371,17 @@ document.write(`
 <span></span><span class="kn">import</span> <span class="nn">bz2</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">multiPathType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;load_parser&quot;</span><span class="p">,</span>
     <span class="s2">&quot;load_surface_parser&quot;</span><span class="p">,</span>
     <span class="s2">&quot;load_column_parser&quot;</span><span class="p">,</span>
     <span class="s2">&quot;load_column_source_parser&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;load_emissions_parser&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;load_emissions_database_parser&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_flux_parser&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_flux_database_parser&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_datapath&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_logfile_path&quot;</span><span class="p">,</span>
     <span class="s2">&quot;load_json&quot;</span><span class="p">,</span>
@@ -473,40 +473,49 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="load_emissions_parser">
-<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.load_emissions_parser">[docs]</a>
-<span class="k">def</span> <span class="nf">load_emissions_parser</span><span class="p">(</span><span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a parsing object for the emissions data type.</span>
-<span class="sd">    Used with `openghg.standardise.emissions` sub-module</span>
+<span class="k">def</span> <span class="nf">load_flux_parser</span><span class="p">(</span><span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a parsing object for the &quot;flux&quot; data type.</span>
+<span class="sd">    Used with `openghg.standardise.flux` sub-module</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        source_format: Name of data type e.g. OPENGHG</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        callable: parser function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">emissions_st_module_name</span> <span class="o">=</span> <span class="s2">&quot;openghg.standardise.emissions&quot;</span>
-    <span class="n">fn</span> <span class="o">=</span> <span class="n">load_parser</span><span class="p">(</span><span class="n">data_name</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">emissions_st_module_name</span><span class="p">)</span>
+    <span class="n">flux_st_module_name</span> <span class="o">=</span> <span class="s2">&quot;openghg.standardise.flux&quot;</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">load_parser</span><span class="p">(</span><span class="n">data_name</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">flux_st_module_name</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">fn</span></div>
+    <span class="k">return</span> <span class="n">fn</span>
 
 
-
-<div class="viewcode-block" id="load_emissions_database_parser">
-<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.load_emissions_database_parser">[docs]</a>
-<span class="k">def</span> <span class="nf">load_emissions_database_parser</span><span class="p">(</span><span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">load_flux_database_parser</span><span class="p">(</span><span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a parsing object for the source of column data.</span>
-<span class="sd">    Used with `openghg.transform.emissions` sub-module</span>
+<span class="sd">    Used with `openghg.transform.flux` sub-module</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        database: Name of data source e.g. EDGAR</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        callable: parser function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">emissions_tr_module_name</span> <span class="o">=</span> <span class="s2">&quot;openghg.transform.emissions&quot;</span>
-    <span class="n">fn</span> <span class="o">=</span> <span class="n">load_parser</span><span class="p">(</span><span class="n">data_name</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">emissions_tr_module_name</span><span class="p">)</span>
+    <span class="n">flux_tr_module_name</span> <span class="o">=</span> <span class="s2">&quot;openghg.transform.flux&quot;</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">load_parser</span><span class="p">(</span><span class="n">data_name</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">flux_tr_module_name</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">fn</span></div>
+    <span class="k">return</span> <span class="n">fn</span>
 
+
+<span class="k">def</span> <span class="nf">load_footprint_parser</span><span class="p">(</span><span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a parsing object for the footprint data type.</span>
+<span class="sd">    Used with `openghg.standardise.footprint` sub-module</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_format: Name of data type e.g. OPENGHG, ACRG_ORG</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        callable: parser function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">footprint_st_module_name</span> <span class="o">=</span> <span class="s2">&quot;openghg.standardise.footprint&quot;</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">load_parser</span><span class="p">(</span><span class="n">data_name</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">footprint_st_module_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fn</span>
 
 
 <div class="viewcode-block" id="get_datapath">
@@ -689,6 +698,32 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/tmp/openghg.log&quot;</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span> <span class="nf">check_function_open_nc</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">multiPathType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the filepath input to choose which xarray open function to use:</span>
+<span class="sd">     - Path or single item List - use open_dataset</span>
+<span class="sd">     - multiple item List - use open_mfdataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: Path or list of filepaths</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Callable, Union[Path, List[Path]]: function and suitable filepath</span>
+<span class="sd">            to use with the function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">xr_open_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xr_open_fn</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xr_open_fn</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span>
+
+    <span class="k">return</span> <span class="n">xr_open_fn</span><span class="p">,</span> <span class="n">filepath</span>
 </pre></div>
 
                 </article>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -502,9 +502,9 @@ document.write(`
             <span class="n">metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="p">})</span>
             <span class="n">metastore</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">backup</span><span class="p">)</span>
 
-            <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
             <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span>
-            <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span></div>
+            <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DataManager.view_backup">
@@ -559,7 +559,7 @@ document.write(`
         <span class="k">with</span> <span class="n">open_metastore</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">metastore</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">uuid</span><span class="p">:</span>
                 <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
                 <span class="c1"># Save a backup of the metadata for now</span>
                 <span class="n">found_record</span> <span class="o">=</span> <span class="n">metastore</span><span class="o">.</span><span class="n">search</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">})</span>
                 <span class="n">current_metadata</span> <span class="o">=</span> <span class="n">found_record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -605,7 +605,7 @@ document.write(`
                     <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="n">updated</span><span class="p">:</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span>
+                    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                     <span class="c1"># Update the metadata stored internally so we&#39;re up to date</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
@@ -637,8 +637,9 @@ document.write(`
                 <span class="c1"># First remove the data from the metadata store</span>
                 <span class="n">metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">})</span>
 
-                <span class="c1"># Delete all the data associated with a Datasource</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="c1"># Delete all the data associated with a Datasource and the</span>
+                <span class="c1"># data in its zarr store.</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
                 <span class="n">d</span><span class="o">.</span><span class="n">delete_all_data</span><span class="p">()</span>
 
                 <span class="c1"># Then delete the Datasource itself</span>

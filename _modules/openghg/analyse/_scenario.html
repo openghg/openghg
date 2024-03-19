@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -475,17 +475,18 @@ document.write(`
         <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">metmodel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">met_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">flux</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FluxData</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flux</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">FluxData</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a ModelScenario instance based on a set of keywords to be</span>
@@ -496,26 +497,27 @@ document.write(`
 <span class="sd">        which may be available within the object store. The combination of these supplied</span>
 <span class="sd">        will be used to extract the relevant data. Related keywords are as follows:</span>
 <span class="sd">         - Observation data: site, species, inlet, network, start_date, end_data</span>
-<span class="sd">         - Footprint data: site, inlet, domain, model, metmodel, species, start_date, end_date</span>
+<span class="sd">         - Footprint data: site, inlet, domain, model, met_model, species, start_date, end_date</span>
 <span class="sd">         - Flux data: species, sources, domain, start_date, end_date</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            site : Site code e.g. &quot;TAC&quot;</span>
-<span class="sd">            species : Species code e.g. &quot;ch4&quot;</span>
-<span class="sd">            inlet : Inlet value e.g. &quot;10m&quot;</span>
+<span class="sd">            site: Site code e.g. &quot;TAC&quot;</span>
+<span class="sd">            species: Species code e.g. &quot;ch4&quot;</span>
+<span class="sd">            inlet: Inlet value e.g. &quot;10m&quot;</span>
 <span class="sd">            height: Alias for inlet.</span>
-<span class="sd">            network : Network name e.g. &quot;AGAGE&quot;</span>
-<span class="sd">            domain : Domain name e.g. &quot;EUROPE&quot;</span>
-<span class="sd">            model : Model name used in creation of footprint e.g. &quot;NAME&quot;</span>
-<span class="sd">            metmodel : Name of met model used in creation of footprint e.g. &quot;UKV&quot;</span>
-<span class="sd">            fp_inlet : Specify footprint release height options if this doesn&#39;t match to site value.</span>
-<span class="sd">            sources : Emissions sources</span>
-<span class="sd">            bc_input : Input keyword for boundary conditions e.g. &quot;mozart&quot; or &quot;cams&quot;</span>
-<span class="sd">            start_date : Start of date range to use. Note for flux this may not be applied</span>
-<span class="sd">            end_date : End of date range to use. Note for flux this may not be applied</span>
-<span class="sd">            obs : Supply ObsData object directly (e.g. from get_obs...() functions)</span>
-<span class="sd">            footprint : Supply FootprintData object directly (e.g. from get_footprint() function)</span>
-<span class="sd">            flux : Supply FluxData object directly (e.g. from get_flux() function)</span>
+<span class="sd">            network: Network name e.g. &quot;AGAGE&quot;</span>
+<span class="sd">            domain: Domain name e.g. &quot;EUROPE&quot;</span>
+<span class="sd">            model: Model name used in creation of footprint e.g. &quot;NAME&quot;</span>
+<span class="sd">            met_model: Name of met model used in creation of footprint e.g. &quot;UKV&quot;</span>
+<span class="sd">            fp_inlet: Specify footprint release height options if this doesn&#39;t match to site value.</span>
+<span class="sd">            sources: Emissions sources</span>
+<span class="sd">            bc_input: Input keyword for boundary conditions e.g. &quot;mozart&quot; or &quot;cams&quot;</span>
+<span class="sd">            start_date: Start of date range to use. Note for flux this may not be applied</span>
+<span class="sd">            end_date: End of date range to use. Note for flux this may not be applied</span>
+<span class="sd">            obs: Supply ObsData object directly (e.g. from get_obs...() functions)</span>
+<span class="sd">            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)</span>
+<span class="sd">            flux: Supply FluxData object directly (e.g. from get_flux() function)</span>
+<span class="sd">            store: Name of object store to retrieve data from.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 
@@ -543,6 +545,7 @@ document.write(`
             <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
             <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
             <span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span>
+            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Make sure obs data is present, make sure inputs match to metadata</span>
@@ -561,12 +564,13 @@ document.write(`
             <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-            <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
+            <span class="n">met_model</span><span class="o">=</span><span class="n">met_model</span><span class="p">,</span>
             <span class="n">fp_inlet</span><span class="o">=</span><span class="n">fp_inlet</span><span class="p">,</span>
             <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
             <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">footprint</span><span class="o">=</span><span class="n">footprint</span><span class="p">,</span>
+            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Add flux data (directly or through keywords)</span>
@@ -578,6 +582,7 @@ document.write(`
             <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
             <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
             <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">,</span>
+            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Add boundary conditions (directly or through keywords)</span>
@@ -588,6 +593,7 @@ document.write(`
             <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
             <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
             <span class="n">bc</span><span class="o">=</span><span class="n">bc</span><span class="p">,</span>
+            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Initialise attributes used for caching</span>
@@ -661,6 +667,7 @@ document.write(`
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add observation data based on keywords or direct ObsData object.</span>
@@ -684,6 +691,7 @@ document.write(`
                 <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
                 <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
                 <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
+                <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">obs_keywords</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;obs_surface&quot;</span><span class="p">)</span>
@@ -706,13 +714,14 @@ document.write(`
         <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">metmodel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">met_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add footprint data based on keywords or direct FootprintData object.</span>
@@ -725,7 +734,7 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># Search for footprint data based on keywords</span>
-        <span class="c1"># - site, domain, inlet (can extract from obs / height_name), model, metmodel</span>
+        <span class="c1"># - site, domain, inlet (can extract from obs / height_name), model, met_model</span>
         <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
 
@@ -765,9 +774,10 @@ document.write(`
                     <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">fp_inlet_option</span><span class="p">,</span>
                     <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
                     <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
-                    <span class="c1"># &quot;metmodel&quot;: metmodel,  # Should be added to inputs for get_footprint()</span>
+                    <span class="c1"># &quot;met_model&quot;: met_model,  # Should be added to inputs for get_footprint()</span>
                     <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
                     <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
+                    <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span>
                 <span class="p">}</span>
 
                 <span class="c1"># Check whether general inert footprint should be extracted (suitable for long-lived species)</span>
@@ -802,6 +812,7 @@ document.write(`
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">flux</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FluxData</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add flux data based on keywords or direct FluxData object.</span>
@@ -826,7 +837,7 @@ document.write(`
                 <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
 
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
-                <span class="n">flux_keywords_1</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">}</span>
+                <span class="n">flux_keywords_1</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span> <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">}</span>
 
                 <span class="c1"># For CO2 we need additional emissions data before a start_date to</span>
                 <span class="c1"># match to high time resolution footprints.</span>
@@ -897,6 +908,7 @@ document.write(`
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add boundary conditions data based on keywords or direct BoundaryConditionsData object.</span>
@@ -911,7 +923,7 @@ document.write(`
                 <span class="s2">&quot;bc_input&quot;</span><span class="p">:</span> <span class="n">bc_input</span><span class="p">,</span>
                 <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
                 <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
-                <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+                <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">bc_keywords</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">)</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -373,7 +373,7 @@ document.write(`
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
@@ -434,7 +434,13 @@ document.write(`
         <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">save_current</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">compressor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read boundary conditions file</span>
 
@@ -451,7 +457,27 @@ document.write(`
 <span class="sd">                     - suitable pandas Offset Alias</span>
 <span class="sd">                     - tuple of (value, unit) as would be passed to pandas.Timedelta function</span>
 <span class="sd">            continuous: Whether time stamps have to be continuous.</span>
-<span class="sd">            overwrite: Should this data overwrite currently stored data.</span>
+<span class="sd">            if_exists: What to do if existing data is present.</span>
+<span class="sd">                - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
+<span class="sd">                   - adds data if no overlap</span>
+<span class="sd">                   - raises DataOverlapError if there is an overlap</span>
+<span class="sd">                - &quot;new&quot; - just include new data and ignore previous</span>
+<span class="sd">                - &quot;combine&quot; - replace and insert new data into current timeseries</span>
+<span class="sd">            save_current: Whether to save data in current form and create a new version.</span>
+<span class="sd">                - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
+<span class="sd">                - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
+<span class="sd">                - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
+<span class="sd">            overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
+<span class="sd">            force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">            compressor: A custom compressor to use. If None, this will default to</span>
+<span class="sd">                `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
+<span class="sd">                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
+<span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
+<span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
+<span class="sd">            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
+<span class="sd">                for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
+<span class="sd">                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
+<span class="sd">                To disable chunking pass in an empty dictionary.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of datasource UUIDs data assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -461,97 +487,132 @@ document.write(`
             <span class="n">infer_date_range</span><span class="p">,</span>
             <span class="n">update_zero_dim</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">timestamp_now</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">clean_string</span><span class="p">,</span>
+            <span class="n">timestamp_now</span><span class="p">,</span>
+            <span class="n">check_if_need_new_version</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
 
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
         <span class="n">bc_input</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">bc_input</span><span class="p">)</span>
         <span class="n">domain</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs.&quot;</span>
+                <span class="s2">&quot;See documentation for details of these inputs and options.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
+
+        <span class="c1"># Making sure new version will be created by default if force keyword is included.</span>
+        <span class="k">if</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
+
+        <span class="n">new_version</span> <span class="o">=</span> <span class="n">check_if_need_new_version</span><span class="p">(</span><span class="n">if_exists</span><span class="p">,</span> <span class="n">save_current</span><span class="p">)</span>
+
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-        <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
-            <span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">unseen_hashes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_hashes</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unseen_hashes</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="n">bc_data</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
-        <span class="c1"># Some attributes are numpy types we can&#39;t serialise to JSON so convert them</span>
-        <span class="c1"># to their native types here</span>
-        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">author_name</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG Cloud&quot;</span>
-        <span class="n">bc_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
+        <span class="k">with</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span> <span class="k">as</span> <span class="n">bc_data</span><span class="p">:</span>
+            <span class="c1"># Some attributes are numpy types we can&#39;t serialise to JSON so convert them</span>
+            <span class="c1"># to their native types here</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="n">author_name</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG Cloud&quot;</span>
+            <span class="n">bc_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;bc_input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_input</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
 
-        <span class="c1"># Check if time has 0-dimensions and, if so, expand this so time is 1D</span>
-        <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-            <span class="n">bc_data</span> <span class="o">=</span> <span class="n">update_zero_dim</span><span class="p">(</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;bc_input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_input</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
 
-        <span class="c1"># Currently ACRG boundary conditions are split by month or year</span>
-        <span class="n">bc_time</span> <span class="o">=</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+            <span class="c1"># Check if time has 0-dimensions and, if so, expand this so time is 1D</span>
+            <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="n">bc_data</span> <span class="o">=</span> <span class="n">update_zero_dim</span><span class="p">(</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
-        <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span>
-            <span class="n">bc_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
-        <span class="p">)</span>
+            <span class="c1"># Currently ACRG boundary conditions are split by month or year</span>
+            <span class="n">bc_time</span> <span class="o">=</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
 
-        <span class="c1"># Checking against expected format for boundary conditions</span>
-        <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">bc_data</span><span class="p">)</span>
-        <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;boundary_conditions&quot;</span>
+            <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span>
+                <span class="n">bc_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
+            <span class="p">)</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_type</span>
+            <span class="c1"># Checking against expected format for boundary conditions</span>
+            <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">bc_data</span><span class="p">)</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;boundary_conditions&quot;</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_type</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;input_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;input_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">bc_input</span><span class="p">,</span> <span class="n">domain</span><span class="p">))</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
 
-        <span class="n">boundary_conditions_data</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-        <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_data</span>
-        <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">bc_input</span><span class="p">,</span> <span class="n">domain</span><span class="p">))</span>
 
-        <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;bc_input&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
+            <span class="n">boundary_conditions_data</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+            <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_data</span>
+            <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
-        <span class="c1"># This performs the lookup and assignment of data to new or</span>
-        <span class="c1"># exisiting Datasources</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-            <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
-        <span class="p">)</span>
+            <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;bc_input&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Record the file hash in case we see this file again</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
+            <span class="c1"># This performs the lookup and assignment of data to new or</span>
+            <span class="c1"># existing Datasources</span>
+            <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span>
+                <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
+                <span class="n">new_version</span><span class="o">=</span><span class="n">new_version</span><span class="p">,</span>
+                <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+                <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
+                <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">datasource_uuids</span></div>
+            <span class="c1"># TODO: MAY NEED TO ADD BACK IN OR CAN DELETE</span>
+            <span class="c1"># update_keys = [&quot;start_date&quot;, &quot;end_date&quot;, &quot;latest_version&quot;]</span>
+            <span class="c1"># boundary_conditions_data = update_metadata(</span>
+            <span class="c1">#     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys</span>
+            <span class="c1"># )</span>
+
+            <span class="c1"># bc_store.add_datasources(</span>
+            <span class="c1">#     uuids=datasource_uuids,</span>
+            <span class="c1">#     data=boundary_conditions_data,</span>
+            <span class="c1">#     metastore=metastore,</span>
+            <span class="c1">#     update_keys=update_keys,</span>
+            <span class="c1"># )</span>
+
+            <span class="c1"># Record the file hash in case we see this file again</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
 
 <div class="viewcode-block" id="BoundaryConditions.schema">

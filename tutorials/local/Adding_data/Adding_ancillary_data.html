@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -46,15 +46,15 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Adding_ancillary_data';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Adding_ancillary_data';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Comparing observations to emissions" href="../Analysing_data/Comparing_with_emissions.html" />
+    <link rel="next" title="Using databases to add data" href="Creating_data_from_databases.html" />
     <link rel="prev" title="Adding observation data" href="Adding_observation_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -332,6 +332,15 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Adding ancillary spatial data</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Creating_data_from_databases.html">Using databases to add data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Metadata_and_attributes.html">Metadata and attributes</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Updating_existing_data.html">Updating existing data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -345,9 +354,6 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
@@ -416,7 +422,7 @@ include:</p>
 <ul class="simple">
 <li><p>“footprints”: regional outputs from an LPDM model <a class="footnote-reference brackets" href="#f3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (e.g. NAME).
 The LPDM set up for these outputs is based on e.g. <em class="xref py py-obj">Lunt et al. 2016</em></p></li>
-<li><p>“emissions”: estimates of species emissions/flux <a class="footnote-reference brackets" href="#f2" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> within a region</p></li>
+<li><p>“flux”: estimates of species flux/emissions <a class="footnote-reference brackets" href="#f2" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> within a region</p></li>
 <li><p>“boundary_conditions”: vertical curtains at the boundary of a
 regional domain</p></li>
 <li><p>“eulerian_model”: Global CTM output (e.g. GEOSChem) <a class="footnote-reference brackets" href="#f1" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></li>
@@ -503,7 +509,7 @@ same set of latitude and longitude bounds.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: name of model used to create the footprint</p></li>
 </ul>
 <p>Additional details can also be specified, in particular, for the
-meteorological model used (metmodel) and the species name (if relevant).</p>
+meteorological model used (met_model) and the species name (if relevant).</p>
 <p>For the example below, the footprint data generated from the NAME model
 for the Tacolneston (TAC) site at 100m inlet. This covers an area over
 Europe which we have defined as the “EUROPE” domain. Unless a specific
@@ -552,6 +558,58 @@ footprint as well.</p></li>
 details, but they should be supplied to ensure the footprint data is
 labelled correctly.
 See schema details below for how these inputs are defined.</p>
+</section>
+<section id="chunking">
+<h4>Chunking<a class="headerlink" href="#chunking" title="Link to this heading">#</a></h4>
+<p>When reading in a netCDF file for standardisation we can pass a dictionary of chunk sizes to the standardisation function.
+This is useful for large files as it can reduce memory usage and speed up the process.</p>
+<section id="default-chunking">
+<h5>Default chunking<a class="headerlink" href="#default-chunking" title="Link to this heading">#</a></h5>
+<p>If you don’t specify chunk sizes OpenGHG will use a default chunking schema for the the data type. For footprints the chunking scheme used will depend on the properties of the footprint, such as whether it is a high time resolution CO2 footprint, a high spatial resolution footprint or a short lifetime species footprint. The default chunking scheme is designed to be a good compromise between memory usage and speed. If you’re unsure what chunk sizes to use then it’s best to leave the chunking to OpenGHG.</p>
+</section>
+<section id="manual-chunking">
+<h5>Manual chunking<a class="headerlink" href="#manual-chunking" title="Link to this heading">#</a></h5>
+<p>As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you’re running the standardisation process on and how you’ll be retrieving using the data from the object store. In this example we’ll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
+chunk the file into chunks of 24 time points.</p>
+<p>Let’s perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable <em class="xref py py-obj">fp_HiTRes</em> is has an extra <em class="xref py py-obj">H_back</em> dimension we’ll calculate the chunk sizes for this variable.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="gp">In [2]: </span><span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;TAC-185magl_UKV_co2_EUROPE_201501.nc&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+<span class="go">  ...:     var_dtype = ds.fp_HiTRes.dtype</span>
+<span class="go">  ...:     var_dims = ds.fp_HiTRes.sizes</span>
+<span class="go">  ...:</span>
+
+<span class="gp">In [3]: </span><span class="n">var_dims</span>
+<span class="gh">Out[3]: </span><span class="go">Frozen({&#39;lat&#39;: 293, &#39;lon&#39;: 391, &#39;time&#39;: 744, &#39;H_back&#39;: 25})</span>
+
+<span class="gp">In [4]: </span><span class="n">var_dtype</span>
+<span class="gh">Out[4]: </span><span class="go">dtype(&#39;float32&#39;)</span>
+
+<span class="gp">In [5]: </span><span class="n">var_dtype</span><span class="o">.</span><span class="n">itemsize</span>
+<span class="gh">Out[5]: </span><span class="go">4</span>
+</pre></div>
+</div>
+<p>Now we’ve got the sizes of the dimensions and the data type (32-bit floats so 4 bytes per value) of the variable we can calculate the size of the chunks in bytes.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">24</span>
+
+<span class="gp">In [6]: </span><span class="n">chunk_bytes</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">*</span> <span class="n">var_dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">var_dims</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">var_dims</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">var_dims</span><span class="p">[</span><span class="s1">&#39;H_back&#39;</span><span class="p">]</span>
+
+<span class="gp">In [7]: </span><span class="n">chunk_MBs</span> <span class="o">=</span> <span class="n">chunk_bytes</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span>
+
+<span class="gp">In [7]: </span><span class="n">chunk_MBs</span>
+<span class="gh">Out[7]: </span><span class="go">262.2138977050781</span>
+</pre></div>
+</div>
+<p>So we’ve got chunk sizes of 262 MB which seems sensible. Let’s pass this to the standardisation function using the <em class="xref py py-obj">chunks</em> argument.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span>
+
+<span class="gp">In [9]: </span><span class="n">chunks</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">24</span><span class="p">}</span>
+
+<span class="gp">In [10]: </span><span class="n">standardise_footprint</span><span class="p">(</span><span class="n">data_file_fp</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Try different chunk sizes to see what works best for your system.</p>
+</section>
 </section>
 <section id="flux-emissions">
 <h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Link to this heading">#</a></h4>
@@ -621,7 +679,7 @@ consistent keywords should be used to describe like data so this can be
 associated and distinguished correctly. Combinations of these keywords with
 the other identifiers (such as species and domain) should allow associated data
 in a timeseries to be identified.</p>
-<p>See the <a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html#modifying-and-deleting-data"><span class="std std-ref">Modifying and deleting data</span></a> tutorial for how to update stored
+<p>See the <span class="xref std std-ref">Modifying and deleting data</span> tutorial for how to update stored
 metadata if needed.</p>
 </section>
 <section id="reviewing-what-is-in-the-object-store">
@@ -678,7 +736,7 @@ use the <code class="docutils literal notranslate"><span class="pre">search</spa
   <tbody>
     <tr>
       <th>0</th>
-      <td>emissions</td>
+      <td>flux</td>
       <td>cv18710@bristol.ac.uk</td>
       <td>2021-01-08 12:18:49.803837+00:00</td>
       <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -754,7 +812,7 @@ use the <code class="docutils literal notranslate"><span class="pre">search</spa
 </div><p>Here we see the data types we’ve added, along with the keywords used when
 standarising the data.</p>
 <p>To search for just one data type a specific <code class="docutils literal notranslate"><span class="pre">search_*</span></code> function can be
-used (or the <code class="docutils literal notranslate"><span class="pre">data_type</span></code> input of <code class="docutils literal notranslate"><span class="pre">&quot;emissions&quot;</span></code> or
+used (or the <code class="docutils literal notranslate"><span class="pre">data_type</span></code> input of <code class="docutils literal notranslate"><span class="pre">&quot;flux&quot;</span></code> or
 <code class="docutils literal notranslate"><span class="pre">&quot;boundary_conditions&quot;</span></code> can be passed to the <code class="docutils literal notranslate"><span class="pre">search</span></code> function). For
 example, for flux data:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_flux</span>
@@ -805,7 +863,7 @@ example, for flux data:</p>
   <tbody>
     <tr>
       <th>0</th>
-      <td>emissions</td>
+      <td>flux</td>
       <td>cv18710@bristol.ac.uk</td>
       <td>2021-01-08 12:18:49.803837+00:00</td>
       <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -839,7 +897,7 @@ include other separators.</p>
 <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> sub-module:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Footprints</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Emissions</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Flux</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code> <a class="footnote-reference brackets" href="#f1" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></li>
 </ul>
@@ -848,15 +906,15 @@ use the <code class="docutils literal notranslate"><span class="pre">.schema()</
 <section id="input-format-for-flux-data">
 <h3>Input format for flux data<a class="headerlink" href="#input-format-for-flux-data" title="Link to this heading">#</a></h3>
 <p>For instance, to see the schema for flux data:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Flux</span>
 
-<span class="n">Emissions</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+<span class="n">Flux</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;flux&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;flux&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
 </pre></div>
 </div>
-<p>This tells us that the netCDF input for “emissions” should contain:</p>
+<p>This tells us that the netCDF input for “flux” should contain:</p>
 <ul class="simple">
 <li><p>Data variables:</p>
 <ul>
@@ -1015,11 +1073,11 @@ raw data files to the object store.</p>
       </div>
     </a>
     <a class="right-next"
-       href="../Analysing_data/Comparing_with_emissions.html"
+       href="Creating_data_from_databases.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Comparing observations to emissions</p>
+        <p class="prev-next-title">Using databases to add data</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1045,6 +1103,11 @@ raw data files to the object store.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-domains">Data domains</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#footprints">Footprints</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chunking">Chunking</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#default-chunking">Default chunking</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#manual-chunking">Manual chunking</a></li>
+</ul>
+</li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#flux-emissions">Flux / Emissions</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-conditions">Boundary conditions</a></li>
 </ul>

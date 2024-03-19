@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Comparing observations to emissions &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>Comparing observations to emissions &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,10 +51,10 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Working with carbon dioxide" href="Working_with_co2.html" />
-    <link rel="prev" title="Adding ancillary spatial data" href="../Adding_new_data/Adding_ancillary_data.html" />
+    <link rel="prev" title="Updating existing data" href="../Adding_data/Updating_existing_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -326,10 +326,19 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Adding_new_data/Adding_observation_data.html">Adding observation data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_observation_data.html">Adding observation data</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Creating_data_from_databases.html">Using databases to add data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Metadata_and_attributes.html">Metadata and attributes</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Updating_existing_data.html">Updating existing data</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Comparing observations to emissions</a></li>
@@ -345,9 +354,6 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
@@ -414,8 +420,8 @@ document.write(`
 acillary data into a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>, which can compute modelled
 outputs based on ancillary data, and compare these modelled outputs
 to observed measurements.</p>
-<p>This tutorial builds on the tutorials <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">Adding observation data</span></a>
-and <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a>.</p>
+<p>This tutorial builds on the tutorials <a class="reference internal" href="../Adding_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">Adding observation data</span></a>
+and <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Plots created within this tutorial may not show up on the
@@ -423,7 +429,7 @@ online documentation version of this notebook.</p>
 </div>
 <section id="using-the-tutorial-object-store">
 <h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
-<p>As in the <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>,
+<p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>,
 we will use the tutorial object store to avoid cluttering your personal
 object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
@@ -433,18 +439,18 @@ object store.</p>
 </div>
 <p>Omit this step if you want to analyse data in your local object store.
 (This data needs to be added following the instructions in the
-<a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">previous</span></a> <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">tutorials</span></a>.)</p>
+<a class="reference internal" href="../Adding_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">previous</span></a> <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">tutorials</span></a>.)</p>
 </section>
 <section id="loading-data-sources-into-the-object-store">
 <h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Link to this heading">#</a></h2>
 <p>We begin by adding observation, footprint, flux, and (optionally)
 boundary conditions data to the object store.
-See <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a> for more details
+See <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a> for more details
 on these inputs.
 This data relates to Tacolneston (TAC) site within the DECC
 network and the area around Europe (EUROPE domain).</p>
 <p>We’ll use some helper functions from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule
-to retrieve raw data in the <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#input-format"><span class="std std-ref">expected format</span></a>:</p>
+to retrieve raw data in the <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#input-format"><span class="std std-ref">expected format</span></a>:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_inert</span><span class="p">,</span> <span class="n">populate_flux_ch4</span><span class="p">,</span> <span class="n">populate_bc_ch4</span>
 </pre></div>
 </div>
@@ -463,7 +469,7 @@ to retrieve raw data in the <a class="reference internal" href="../Adding_new_da
 <p>With this ancillary data, we can start to make comparisons between model
 data, such as bottom-up inventories, and our observations. This analysis
 is based around a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object which can be created to link
-together observation, footprint, emissions data and boundary conditions
+together observation, footprint, flux / emissions data and boundary conditions
 data.</p>
 <p>Above we loaded observation data from the Tacolneston site into the
 object store. We also added both an associated footprint (sensitivity map)
@@ -667,12 +673,12 @@ tutorial object store using the <code class="docutils literal notranslate"><span
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../Adding_new_data/Adding_ancillary_data.html"
+       href="../Adding_data/Updating_existing_data.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Adding ancillary spatial data</p>
+        <p class="prev-next-title">Updating existing data</p>
       </div>
     </a>
     <a class="right-next"

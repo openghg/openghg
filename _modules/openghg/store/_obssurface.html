@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0.7.1 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0.8.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
+    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 01, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -371,7 +371,7 @@ document.write(`
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
@@ -432,7 +432,10 @@ document.write(`
             <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
             <span class="s2">&quot;measurement_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;if_exists&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;save_current&quot;</span><span class="p">,</span>
             <span class="s2">&quot;overwrite&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;force&quot;</span><span class="p">,</span>
             <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
             <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
         <span class="p">}</span>
@@ -480,18 +483,24 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Timedelta</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
-        <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">verify_site_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+        <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">save_current</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">compressor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process files and store in the object store. This function</span>
 <span class="sd">            utilises the process functions of the other classes in this submodule</span>
@@ -502,6 +511,7 @@ document.write(`
 <span class="sd">            source_format: Data format, for example CRDS, GCWERKS</span>
 <span class="sd">            site: Site code/name</span>
 <span class="sd">            network: Network name</span>
+
 <span class="sd">            inlet: Inlet height. Format &#39;NUMUNIT&#39; e.g. &quot;10m&quot;.</span>
 <span class="sd">                If retrieve multiple files pass None, OpenGHG will attempt to</span>
 <span class="sd">                extract this from the file.</span>
@@ -510,16 +520,40 @@ document.write(`
 <span class="sd">            instrument: Instrument name</span>
 <span class="sd">            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).</span>
 <span class="sd">            measurement_type: Type of measurement e.g. insitu, flask</span>
+<span class="sd">            verify_site_code: Verify the site code</span>
+<span class="sd">            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
+<span class="sd">                        update_mismatch: This determines whether mismatches between the internal data</span>
+<span class="sd">                attributes and the supplied / derived metadata can be updated or whether</span>
+<span class="sd">                this should raise an AttrMismatchError.</span>
+<span class="sd">                If True, currently updates metadata with attribute value.</span>
 <span class="sd">            update_mismatch: This determines how mismatches between the internal data</span>
-<span class="sd">                  &quot;attributes&quot; and the supplied / derived &quot;metadata&quot; are handled.</span>
-<span class="sd">                  This includes the options:</span>
-<span class="sd">                      - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
-<span class="sd">                      - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on input data (e.g. data attributes)</span>
-<span class="sd">                      - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on associated data (e.g. site_info.json)</span>
-<span class="sd">            overwrite: Overwrite previously uploaded data</span>
-<span class="sd">                  verify_site_code: Verify the site code</span>
-<span class="sd">                  site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
-<span class="sd">                      Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
+<span class="sd">                &quot;attributes&quot; and the supplied / derived &quot;metadata&quot; are handled.</span>
+<span class="sd">                This includes the options:</span>
+<span class="sd">                    - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                    - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on input data (e.g. data attributes)</span>
+<span class="sd">                    - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on associated data (e.g. site_info.json)</span>
+<span class="sd">            if_exists: What to do if existing data is present.</span>
+<span class="sd">                - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
+<span class="sd">                   - adds data if no overlap</span>
+<span class="sd">                   - raises DataOverlapError if there is an overlap</span>
+<span class="sd">                - &quot;new&quot; - just include new data and ignore previous</span>
+<span class="sd">                - &quot;combine&quot; - replace and insert new data into current timeseries</span>
+<span class="sd">            save_current: Whether to save data in current form and create a new version.</span>
+<span class="sd">                - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
+<span class="sd">                - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
+<span class="sd">                - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
+<span class="sd">            overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
+<span class="sd">            force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">            compressor: A custom compressor to use. If None, this will default to</span>
+<span class="sd">                `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
+<span class="sd">            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
+<span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
+<span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters</span>
+<span class="sd">            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
+<span class="sd">                for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
+<span class="sd">                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
+<span class="sd">                To disable chunking pass in an empty dictionary.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of Datasource UUIDs</span>
 
@@ -534,6 +568,7 @@ document.write(`
             <span class="n">hash_file</span><span class="p">,</span>
             <span class="n">load_surface_parser</span><span class="p">,</span>
             <span class="n">verify_site</span><span class="p">,</span>
+            <span class="n">check_if_need_new_version</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -566,6 +601,19 @@ document.write(`
         <span class="c1"># Try to ensure inlet is &#39;NUM&#39;&#39;UNIT&#39; e.g. &quot;10m&quot;</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs.&quot;</span>
+                <span class="s2">&quot;See documentation for details of these inputs and options.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
+
+        <span class="c1"># Making sure new version will be created by default if force keyword is included.</span>
+        <span class="k">if</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
+
+        <span class="n">new_version</span> <span class="o">=</span> <span class="n">check_if_need_new_version</span><span class="p">(</span><span class="n">if_exists</span><span class="p">,</span> <span class="n">save_current</span><span class="p">)</span>
 
         <span class="n">sampling_period_seconds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># If we have a sampling period passed we want the number of seconds</span>
@@ -605,29 +653,30 @@ document.write(`
 
         <span class="n">results</span><span class="p">:</span> <span class="n">resultsType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
         <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data we expect a tuple of (data file, precision file).&quot;</span><span class="p">)</span>
 
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                        <span class="s2">&quot;For GCWERKS data both data and precision filepaths must be given as a tuple.&quot;</span>
-                    <span class="p">)</span>
+                <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
+            <span class="c1"># This hasn&#39;t been updated to use the new check_hashes function due to</span>
+            <span class="c1"># the added complication of the GCWERKS precision file handling,</span>
+            <span class="c1"># so we&#39;ll just use the old method for now.</span>
             <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
                 <span class="p">)</span>
-                <span class="k">break</span>
+                <span class="k">continue</span>
 
             <span class="c1"># Define required input parameters for parser function</span>
             <span class="n">required_parameters</span> <span class="o">=</span> <span class="p">{</span>
@@ -685,22 +734,10 @@ document.write(`
             <span class="k">if</span> <span class="ow">not</span> <span class="n">validated</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="c1"># Alternative workflow: Would only stops certain species within a</span>
-            <span class="c1"># file being written to the object store.</span>
-            <span class="c1"># to_remove = []</span>
-            <span class="c1"># for key, value in data.items():</span>
-            <span class="c1">#     species = key.split(&#39;_&#39;)[0]</span>
-            <span class="c1">#     try:</span>
-            <span class="c1">#         ObsSurface.validate_data(value[&quot;data&quot;], species=species)</span>
-            <span class="c1">#     except ValueError:</span>
-            <span class="c1">#         print(f&quot;WARNING: standardised data for &#39;{source_format}&#39; is not in expected OpenGHG format.&quot;)</span>
-            <span class="c1">#         print(f&quot;Check data for {species}&quot;)</span>
-            <span class="c1">#         print(value[&quot;data&quot;])</span>
-            <span class="c1">#         print(&quot;Not writing to object store.&quot;)</span>
-            <span class="c1">#         to_remove.append(key)</span>
-            <span class="c1">#</span>
-            <span class="c1"># for remove in to_remove:</span>
-            <span class="c1">#     data.pop(remove)</span>
+            <span class="c1"># Ensure the data is chunked</span>
+            <span class="k">if</span> <span class="n">chunks</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
 
             <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s2">&quot;species&quot;</span><span class="p">,</span>
@@ -720,20 +757,19 @@ document.write(`
             <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
             <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
+                <span class="n">new_version</span><span class="o">=</span><span class="n">new_version</span><span class="p">,</span>
                 <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
                 <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
                 <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
-
-            <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
-            <span class="c1"># ease of checking by user</span>
-            <span class="c1"># TODO - maybe add a timestamp to this string?</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
-
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
 
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
 
@@ -748,6 +784,7 @@ document.write(`
         <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aqmesh&quot;</span><span class="p">,</span>
         <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
+        <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DefaultDict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read AQMesh data for the Glasgow network</span>
@@ -769,6 +806,13 @@ document.write(`
         <span class="c1"># data_filepath = Path(data_filepath)</span>
         <span class="c1"># metadata_filepath = Path(metadata_filepath)</span>
 
+        <span class="c1"># if overwrite and if_exists == &quot;auto&quot;:</span>
+        <span class="c1">#     logger.warning(</span>
+        <span class="c1">#         &quot;Overwrite flag is deprecated in preference to `if_exists` input.&quot;</span>
+        <span class="c1">#         &quot;See documentation for details of this input and options.&quot;</span>
+        <span class="c1">#     )</span>
+        <span class="c1">#     if_exists = &quot;new&quot;</span>
+
         <span class="c1"># # Get a dict of data and metadata</span>
         <span class="c1"># processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)</span>
 
@@ -779,9 +823,10 @@ document.write(`
 
         <span class="c1">#     file_hash = hash_file(filepath=data_filepath)</span>
 
-        <span class="c1">#     if self.seen_hash(file_hash=file_hash) and overwrite is False:</span>
+        <span class="c1">#     if self.seen_hash(file_hash=file_hash) and not force:</span>
         <span class="c1">#         raise ValueError(</span>
-        <span class="c1">#             f&quot;This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.&quot;</span>
+        <span class="c1">#             f&quot;This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n&quot;</span>
+        <span class="c1">#              &quot;If necessary, use force=True to bypass this to add this data.&quot;</span>
         <span class="c1">#         )</span>
         <span class="c1">#         break</span>
 
@@ -882,25 +927,50 @@ document.write(`
     <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+        <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">compressor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary of data in standard format, see the data spec under</span>
-<span class="sd">                Development -&gt; Data specifications in the documentation</span>
-<span class="sd">            overwrite: If True overwrite currently stored data</span>
+<span class="sd">            Development -&gt; Data specifications in the documentation</span>
+<span class="sd">            if_exists: What to do if existing data is present.</span>
+<span class="sd">                - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
+<span class="sd">                   - adds data if no overlap</span>
+<span class="sd">                   - raises DataOverlapError if there is an overlap</span>
+<span class="sd">                - &quot;new&quot; - creates new version with just new data</span>
+<span class="sd">                - &quot;combine&quot; - replace and insert new data into current timeseries</span>
+<span class="sd">            overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
 <span class="sd">            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).</span>
 <span class="sd">            required_metakeys: Keys in the metadata we should use to store this metadata in the object store</span>
 <span class="sd">                if None it defaults to:</span>
-<span class="sd">                {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
-<span class="sd">                &quot;network&quot;, &quot;source_format&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
+<span class="sd">                    {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
+<span class="sd">                    &quot;network&quot;, &quot;source_format&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
+<span class="sd">            compressor: A custom compressor to use. If None, this will default to</span>
+<span class="sd">                `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
+<span class="sd">                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
+<span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
+<span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict or None:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_retrieved_data</span>
+
+        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Overwrite flag is deprecated in preference to `if_exists` input.&quot;</span>
+                <span class="s2">&quot;See documentation for details of this input and options.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
+
+        <span class="c1"># TODO: May need to delete</span>
+        <span class="c1"># obs = ObsSurface.load()</span>
+        <span class="c1"># metastore = load_metastore(key=obs._metakey)</span>
 
         <span class="c1"># Very rudimentary hash of the data and associated metadata</span>
         <span class="n">hashes</span> <span class="o">=</span> <span class="n">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
@@ -909,6 +979,10 @@ document.write(`
             <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
+
+        <span class="c1"># Making sure data can be force overwritten if force keyword is included.</span>
+        <span class="k">if</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_hashes_to_compare</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Note: There is no new data to process.&quot;</span><span class="p">)</span>
@@ -941,10 +1015,12 @@ document.write(`
         <span class="c1"># in the metastore</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
             <span class="n">required_keys</span><span class="o">=</span><span class="n">required_metakeys</span><span class="p">,</span>
             <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
+            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">hashes</span><span class="o">=</span><span class="n">hashes</span><span class="p">)</span>
@@ -985,12 +1061,12 @@ document.write(`
 
         <span class="c1"># Load the Datasource and get all its keys</span>
         <span class="c1"># iterate over these keys and delete them</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
 
         <span class="n">data_keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">raw_keys</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">data_keys</span><span class="p">:</span>
-            <span class="n">key_data</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+            <span class="n">key_data</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">version</span><span class="p">]</span>
 
             <span class="k">for</span> <span class="n">daterange</span> <span class="ow">in</span> <span class="n">key_data</span><span class="p">:</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">key_data</span><span class="p">[</span><span class="n">daterange</span><span class="p">]</span>
