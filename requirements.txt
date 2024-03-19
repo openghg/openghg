@@ -7,6 +7,7 @@ ipywidgets
 matplotlib
 msgpack
 nbformat
+numcodecs
 nc-time-axis
 netcdf4
 numexpr
@@ -23,3 +24,4 @@ tinydb
 toml
 urllib3 >= 1.26.3
 xarray
+zarr

@@ -82,6 +82,7 @@ def retrieve(**kwargs: Any) -> Union[List[ObsData], ObsData, None]:
     from xarray import load_dataset
 
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_ceda"
         post_data["arguments"] = kwargs

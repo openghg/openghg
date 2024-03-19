@@ -7,6 +7,7 @@ import xarray as xr
 from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
+from helpers import clear_test_stores
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
 
@@ -102,13 +103,18 @@ def test_scenario_infer_inputs_ch4():
     assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
 
     # Obs data - values
-    obs_mf = obs_data["mf"]
+    obs_mf = obs_data["mf"].compute()
+
     assert np.isclose(obs_mf[0], 1915.11)
     assert np.isclose(obs_mf[-1], 1942.41)
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
+
+    print(model_scenario.footprint.data.time[0])
+    print(model_scenario.footprint.data.time[-1])
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2012-08-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2012-08-31T22:00:00")
 
@@ -187,6 +193,7 @@ def test_scenario_infer_inputs_co2():
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2014-07-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2014-07-04T00:00:00")  # Test file - reduced time axis
 
@@ -615,7 +622,12 @@ def obs_ch4_dummy():
     inlet = "10m"
     sampling_period = "60.0"
 
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
@@ -624,6 +636,7 @@ def obs_ch4_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -923,6 +936,7 @@ def obs_co2_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
