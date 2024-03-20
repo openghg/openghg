@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional, Union
 
 
 def parse_openghg(
@@ -13,16 +13,28 @@ def parse_openghg(
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
 ) -> Dict:
     """
-    Read and parse input emissions data already in OpenGHG format.
+    Read and parse input flux / emissions data already in OpenGHG format.
 
     Args:
-        filepath: Path to data file
-        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
-        Passing "auto" will ask xarray to calculate a chunk size.
+        filepath: Path to the flux file.
+        species: Name of species
+        source: Source of the emissions data
+        domain: Geographic domain
+        data_type: Type of data
+        database: Name of the database
+        database_version: Version of the database
+        model: Model name if applicable.
+        high_time_resolution: If this is a high resolution file.
+        period: The time period for which data is to be parsed.
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
+        continuous: Flag indicating whether the data is continuous or not
     Returns:
         dict: Dictionary of data
     """
@@ -31,7 +43,7 @@ def parse_openghg(
     from openghg.util import timestamp_now
     from xarray import open_dataset
 
-    em_data = open_dataset(filepath, chunks=chunks)
+    em_data = open_dataset(filepath).chunk(chunks)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -60,10 +72,10 @@ def parse_openghg(
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
+    metadata["data_type"] = "flux"
     metadata["source_format"] = "openghg"
 
-    # As emissions files handle things slightly differently we need to check the time values
+    # As flux / emissions files handle things slightly differently we need to check the time values
     # more carefully.
     # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
     # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
@@ -91,11 +103,11 @@ def parse_openghg(
 
     key = "_".join((species, source, domain))
 
-    emissions_data: Dict[str, dict] = {}
-    emissions_data[key] = {}
-    emissions_data[key]["data"] = em_data
-    emissions_data[key]["metadata"] = metadata
+    flux_data: Dict[str, dict] = {}
+    flux_data[key] = {}
+    flux_data[key]["data"] = em_data
+    flux_data[key]["metadata"] = metadata
 
-    emissions_data = assign_flux_attributes(emissions_data)
+    flux_data = assign_flux_attributes(flux_data)
 
-    return emissions_data
+    return flux_data
