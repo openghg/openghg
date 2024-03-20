@@ -38,7 +38,7 @@ Creating a release
 
 * The creation of the packages required by PyPI and conda is handled in the     GitHub actions workflow files under ``.github/workflows/workflow.yaml``. The package build and release workflow will only be triggered by a tagged commit. Before we get to this step we need to make sure everything is set up to do a release.
 
-* Ensure all issues in a ``milestone`` are complete
+Ensure all issues in the release milestone are complete
 
 * To create a release first check-out the ``devel`` branch.
 
