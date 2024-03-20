@@ -5,26 +5,68 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
+
+## [0.8.0] - 2024-03-19
+
+This version brings a breaking change with the move to use the [Zarr](https://zarr.dev/) file format for data storage. This means that object stores created with previous versions of OpenGHG will need to be repopulated to use this version. You should notice improvements in time taken for standardisation, memory consumption and disk usage. With the use of Zarr comes the ability for the user to control the way which data is processed and stored. Please see [the documentation](https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking) for more on this.
 
 ### Added
+
+- Added option to pass `store` argument to `ModelScenario` init method. [PR #928](https://github.com/openghg/openghg/pull/928)
+
+### Fixed
+
+- Issue caused when passing a list of files to be processed. If OpenGHG had seen some of the files before it would refuse to process any of them - [PR #890](https://github.com/openghg/openghg/pull/890)
+
+### Changed
+
+- Moved to store data in [Zarr](https://github.com/zarr-developers/zarr-python) stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
+- standardise_footprint was updated to allow a source_format input to be specified. This currently only supports "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+- Internal format for "footprint" data type was updated to rename meteorological variable names to standard names [PR #918](https://github.com/openghg/openghg/pull/918).
+- Standardise_footprint now uses the meterological model input as a distinguishing keyword when adding data. [PR #955](https://github.com/openghg/openghg/pull/955).
+- Meterological model input renamed from `metmodel` to `met_model` [PR #957](https://github.com/openghg/openghg/pull/957).
+- Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
+
+## [0.7.1] - 2024-03-01
+
+### Fixed
+
+- Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
+- Missing requirement for filelock package added to conda environment file [PR #857](https://github.com/openghg/openghg/pull/857)
+- Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)
+- Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
+
+
+## [0.7.0] - 2023-12-15
+
+### Added
+
 - Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
-
 - Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
-
 - Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
-
 - Added `MetaStore` abstract base class as interface for metastore classes, and a `ClassicMetaStore` subclass implements the same bucket/key structure as the previous metastore.
   All references to TinyDB are now in the `objectstore` module, meaning that there is only one place where code needs to change to use a different backend with the metastore - [PR #771](https://github.com/openghg/openghg/pull/771)
+- Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718)
+- Added config for Black to `pyproject.toml` - [PR #822](https://github.com/openghg/openghg/pull/822)
+- Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
+- Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
+has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
-- Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
-  lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+### Fixed
 
-- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+- Bug fix for sampling period attribute having a value of "NOT_SET" and combining the observation and footprint data. Previously this was raising a ValueError. [PR #808](https://github.com/openghg/openghg/pull/808)
+- Bug where `radon` was not fetched using `retrieve_atmospheric` from icos data. - [PR #794](https://github.com/openghg/openghg/pull/794)
+- Bug with CRDS parse function where data for all species was being dropped if only one species was missing - [PR #829](https://github.com/openghg/openghg/pull/829)
+- Datetime processing has been updated to be compatible with Pandas 2.0: the `date_parser` argument of `read_csv` was deprecated in favour of `date_format`. [PR #816](https://github.com/openghg/openghg/pull/816)
+- Updated ICOS retrieval functionality to match new metadata retrieved from ICOS Carbon Portal - [PR #806](https://github.com/openghg/openghg/pull/806)
+- Added "parse_intem" function to parse intem emissions files - [PR #804](https://github.com/openghg/openghg/pull/804)
 
 ### Changed
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
+- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
 
 
 ## [0.6.2] - 2023-08-07
@@ -33,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bug where the object store path being written to JSON led to an invalid path being given to some users - [PR #741](https://github.com/openghg/openghg/pull/741)
 
-### Changes
+### Changed
 
 - Added read-only opening of the metadata store of each storage class when searching. This is done using a `mode` argument pased to the `load_metastore` function - [PR #763](https://github.com/openghg/openghg/pull/763)
 

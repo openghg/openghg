@@ -8,7 +8,7 @@ import numpy as np
 import xarray as xr
 from numpy import ndarray
 
-logger = logging.getLogger("openghg.transform.emissions")
+logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
@@ -357,13 +357,13 @@ def parse_edgar(
     metadata["database_version"] = database_version
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
+    metadata["data_type"] = "flux"
 
     attrs = {"author": metadata["author"], "processed": metadata["processed"]}
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file, period=period)
 
     prior_info_dict = {
         "EDGAR": {

@@ -21,6 +21,7 @@ def retrieve_atmospheric(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -49,6 +50,7 @@ def retrieve_atmospheric(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -64,6 +66,7 @@ def retrieve_atmospheric(
         dataset_source=dataset_source,
         update_mismatch=update_mismatch,
         store=store,
+        force=force,
     )
 
 
@@ -105,6 +108,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_icos"
         post_data["search_terms"] = kwargs
@@ -148,6 +152,7 @@ def local_retrieve(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -177,6 +182,7 @@ def local_retrieve(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -225,14 +231,19 @@ def local_retrieve(
 
         bucket = get_writable_bucket(name=store)
         with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data)
+            obs.store_data(data=standardised_data, force=force)
 
         # Create the expected ObsData type
         obs_data = []
         for data in standardised_data.values():
             measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = ["citation_string", "instrument_data", "dobj_pid", "dataset_source"]
+            skip_keys = [
+                "citation_string",
+                "instrument_data",
+                "dobj_pid",
+                "dataset_source",
+            ]
             metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
@@ -317,7 +328,17 @@ def _retrieve_remote(
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
     # Now filter the dataframe so we can extract the PIDS
-    filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
+    # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
+    filtered_sources = data_pids[
+        data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
+    ]
+
+    if filtered_sources.empty:
+        species_lower = [s.lower() for s in species]
+        # For this see https://stackoverflow.com/a/55335207
+        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
+        # Now filter the dataframe so we can extract the PIDS
+        filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))

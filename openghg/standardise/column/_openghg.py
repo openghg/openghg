@@ -14,6 +14,7 @@ def parse_openghg(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: str = "satellite",
+    chunks: Optional[Dict] = None,
     **kwargs: str,
 ) -> Dict:
     """
@@ -47,8 +48,11 @@ def parse_openghg(
             - "satellite"
             - "site"
             Note: this will be superceded if site or satellite keywords are specified.
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
         kwargs: Any additional attributes to be associated with the data.
-
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
@@ -59,11 +63,10 @@ def parse_openghg(
 
     data_filepath = Path(data_filepath)
 
-    if data_filepath.suffix != ".nc":
+    if data_filepath.suffix.lower() != ".nc":
         raise ValueError("Input file must be a .nc (netcdf) file.")
 
-    with xr.open_dataset(data_filepath) as temp:
-        data = temp
+    data = xr.open_dataset(data_filepath).chunk(chunks)
 
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)

@@ -1,5 +1,5 @@
-Modifying and deleting data
-===========================
+Managing and deleting data
+==========================
 
 Sometimes you might want to modify some metadata after running the data
 through the standardisation scripts. After the standardisation process
@@ -96,7 +96,6 @@ check** it.
 
     dm.update_metadata(uuid=uuid, to_update=updated)
 
-
 When you run ``update_metadata`` the internal store of metadata for each
 ``Datasource`` is updated. If you want to **really** make sure that the
 metadata in the object store has been updated you can run ``refresh``.
@@ -114,6 +113,9 @@ And check the model has been changed.
 .. code:: python
 
     metadata["model"]
+
+You'll need to update the metadata for each ``Datasource``. You may automate this process yourself
+but please be careful as to avoid data loss.
 
 Deleting keys
 -------------
@@ -153,6 +155,10 @@ by restoring from backup. Each ``DataManager`` object stores a backup of
 the current metadata each time you run ``update_metadata``. Let's add
 some bad metadata, have a quick look at the backup and then restore it.
 We'll start with a fresh ``DataManager`` object.
+
+.. warning::
+    The backed up data is only stored in memory for the lifetime of the ``DataManager`` object.
+    The backup is not stored in the object store.
 
 .. code:: python
 
@@ -203,6 +209,7 @@ Then check again
 .. code:: python
 
     dm.metadata[uuid]["domain"]
+
 
 Multiple backups
 ----------------

@@ -3,8 +3,8 @@ from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_flux,
     search_eulerian,
+    search_flux,
     search_footprints,
     search_surface,
 )
@@ -51,6 +51,22 @@ def test_search_surface(inlet_keyword, inlet_value):
     assert partial_metdata.items() <= res.metadata[key].items()
 
     assert not search_surface(site="hfd", species="co2", inlet="888m")
+
+
+def test_search_surface_selects_dates():
+    res = search_surface(site="hfd", species="co2", inlet="50m")
+
+    data = res.retrieve_all().data
+
+    assert data.time[0] == Timestamp("2013-11-23T12:28:30")
+    assert data.time[-1] == Timestamp("2020-06-24T09:41:30")
+
+    res = search_surface(site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date="2014-12-31")
+
+    data_sliced = res.retrieve_all().data
+
+    assert data_sliced.time[0] == Timestamp("2014-01-01T22:36:30")
+    assert data_sliced.time[-1] == Timestamp("2014-01-07T09:17:30")
 
 
 def test_search_surface_range():
@@ -167,20 +183,20 @@ def test_multi_type_search():
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     obs = res.retrieve_all()
 
     # Make sure the retrieval works correctly
     data_types = set([ob.metadata["data_type"] for ob in obs])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     res = search(species="ch4", data_type=["surface"])
 
     assert len(res.metadata) == 7
 
-    res = search(species="co2", data_type=["surface", "emissions"])
+    res = search(species="co2", data_type=["surface", "flux"])
 
     assert len(res.metadata) == 8
 
@@ -272,7 +288,7 @@ def test_search_footprints_multiple():
         height="100m",
         domain="TEST",
         model="NAME",
-        high_time_resolution=False,
+        high_time_resolution=False
     )
 
     key = next(iter(res.metadata))
@@ -282,7 +298,7 @@ def test_search_footprints_multiple():
         "height": "100m",
         "domain": "test",
         "model": "name",
-        "metmodel": "ukv",
+        "met_model": "ukv",
         "network": "decc",
         "time_period": "1 hour",
     }
@@ -311,7 +327,7 @@ def test_search_footprints_select():
         domain="TEST",
         model="NAME",
         start_date="2016-01-01",
-        end_date="2016-08-01",
+        end_date="2016-07-31",
     )
 
     # Test retrieved footprint data found from the search contains data
@@ -319,6 +335,7 @@ def test_search_footprints_select():
     footprint_data = res.retrieve()
     data = footprint_data.data
     time = data["time"]
+
     assert time[0] == Timestamp("2016-07-01T00:00:00")
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
@@ -346,7 +363,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_resolution"] == True
+    assert metadata["high_time_resolution"] == "true"
 
 
 def test_search_flux():
@@ -371,7 +388,7 @@ def test_search_flux():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
@@ -407,7 +424,7 @@ def test_search_flux_select():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
