@@ -283,7 +283,7 @@ def parse_edgar(
     edgar_ds = xr.open_dataset(edgar_file.open("rb"))
 
     # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
-    name = "fluxes" if version == "v8" else f"emi_{species_label}"
+    name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
     # just in case we didn't get the name right...
     if name not in (dvs := edgar_ds.data_vars):
