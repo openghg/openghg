@@ -298,7 +298,7 @@ def test_search_footprints_multiple():
         "height": "100m",
         "domain": "test",
         "model": "name",
-        "metmodel": "ukv",
+        "met_model": "ukv",
         "network": "decc",
         "time_period": "1 hour",
     }

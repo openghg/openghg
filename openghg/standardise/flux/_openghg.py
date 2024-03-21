@@ -31,7 +31,8 @@ def parse_openghg(
         high_time_resolution: If this is a high resolution file.
         period: The time period for which data is to be parsed.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
         continuous: Flag indicating whether the data is continuous or not
     Returns:

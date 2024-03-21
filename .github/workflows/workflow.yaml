@@ -2,14 +2,13 @@ name: OpenGHG tests
 
 on:
   push:
-    branches:
-      - '*'
+    branches: [master, devel]
     tags:
       - "*"
     paths-ignore:
       - 'CHANGELOG.md'
   pull_request:
-    branches: [master, devel, new_object_store]
+    branches: [master, devel]
     paths-ignore:
       - 'CHANGELOG.md'
 
@@ -141,3 +140,4 @@ jobs:
           anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          GIT_TAG: ${{ github.ref_name }}

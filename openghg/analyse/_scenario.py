@@ -101,7 +101,7 @@ class ModelScenario:
         network: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
-        metmodel: Optional[str] = None,
+        met_model: Optional[str] = None,
         fp_inlet: Union[str, list, None] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
@@ -123,7 +123,7 @@ class ModelScenario:
         which may be available within the object store. The combination of these supplied
         will be used to extract the relevant data. Related keywords are as follows:
          - Observation data: site, species, inlet, network, start_date, end_data
-         - Footprint data: site, inlet, domain, model, metmodel, species, start_date, end_date
+         - Footprint data: site, inlet, domain, model, met_model, species, start_date, end_date
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
@@ -134,7 +134,7 @@ class ModelScenario:
             network: Network name e.g. "AGAGE"
             domain: Domain name e.g. "EUROPE"
             model: Model name used in creation of footprint e.g. "NAME"
-            metmodel: Name of met model used in creation of footprint e.g. "UKV"
+            met_model: Name of met model used in creation of footprint e.g. "UKV"
             fp_inlet: Specify footprint release height options if this doesn't match to site value.
             sources: Emissions sources
             bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams"
@@ -190,7 +190,7 @@ class ModelScenario:
             height=height,
             domain=domain,
             model=model,
-            metmodel=metmodel,
+            met_model=met_model,
             fp_inlet=fp_inlet,
             start_date=start_date,
             end_date=end_date,
@@ -334,7 +334,7 @@ class ModelScenario:
         height: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
-        metmodel: Optional[str] = None,
+        met_model: Optional[str] = None,
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         species: Optional[str] = None,
@@ -354,7 +354,7 @@ class ModelScenario:
         )
 
         # Search for footprint data based on keywords
-        # - site, domain, inlet (can extract from obs / height_name), model, metmodel
+        # - site, domain, inlet (can extract from obs / height_name), model, met_model
         if site is not None and footprint is None:
             site = clean_string(site)
 
@@ -394,7 +394,7 @@ class ModelScenario:
                     "inlet": fp_inlet_option,
                     "domain": domain,
                     "model": model,
-                    # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
+                    # "met_model": met_model,  # Should be added to inputs for get_footprint()
                     "start_date": start_date,
                     "end_date": end_date,
                     "store": store,

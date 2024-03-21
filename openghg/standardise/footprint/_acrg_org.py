@@ -19,7 +19,7 @@ def parse_acrg_org(
     model: str,
     inlet: str,
     species: str,
-    metmodel: Optional[str] = None,
+    met_model: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
@@ -37,7 +37,7 @@ def parse_acrg_org(
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -162,11 +162,11 @@ def parse_acrg_org(
     metadata["height"] = inlet
     metadata["species"] = species
 
+    if met_model is not None:
+        metadata["met_model"] = met_model
+
     if network is not None:
         metadata["network"] = network
-
-    if metmodel is not None:
-        metadata["metmodel"] = metmodel
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:

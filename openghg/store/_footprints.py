@@ -191,7 +191,7 @@ class Footprints(BaseStore):
         model: str,
         inlet: Optional[str] = None,
         height: Optional[str] = None,
-        metmodel: Optional[str] = None,
+        met_model: Optional[str] = None,
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
@@ -221,7 +221,7 @@ class Footprints(BaseStore):
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
             height: Alias for inlet. One of height or inlet MUST be included.
-            metmodel: Underlying meteorlogical model used (e.g. UKV)
+            met_model: Underlying meteorlogical model used (e.g. UKV)
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -290,11 +290,14 @@ class Footprints(BaseStore):
         else:
             species = clean_string(species)
 
+        # Ensure we have a clear missing value for met_model
+        if met_model is None:
+            met_model = "NOT_SET"
+        else:
+            met_model = clean_string(met_model)
+
         if network is not None:
             network = clean_string(network)
-
-        if metmodel is not None:
-            metmodel = clean_string(metmodel)
 
         try:
             source_format = FootprintTypes[source_format.upper()].value
@@ -372,7 +375,7 @@ class Footprints(BaseStore):
             "domain": domain,
             "model": model,
             "inlet": inlet,
-            "metmodel": metmodel,
+            "met_model": met_model,
             "species": species,
             "network": network,
             "high_time_resolution": high_time_resolution,
@@ -431,6 +434,7 @@ class Footprints(BaseStore):
             "high_spatial_resolution",
             "short_lifetime",
             "species",
+            "met_model",
         )
 
         data_type = "footprints"

@@ -121,7 +121,8 @@ def standardise_surface(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data
@@ -303,7 +304,8 @@ def standardise_column(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -411,7 +413,8 @@ def standardise_bc(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -469,7 +472,7 @@ def standardise_footprint(
     model: str,
     inlet: Optional[str] = None,
     height: Optional[str] = None,
-    metmodel: Optional[str] = None,
+    met_model: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
     source_format: str = "acrg_org",
@@ -501,13 +504,14 @@ def standardise_footprint(
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
-        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         source_format: Format of the input data format, for example acrg_org
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
@@ -557,7 +561,7 @@ def standardise_footprint(
             "high_spatial_resolution": high_spatial_resolution,
             "high_time_resolution": high_time_resolution,
             "overwrite": overwrite,
-            "metmodel": metmodel,
+            "met_model": met_model,
             "species": species,
             "network": network,
             "period": period,
@@ -583,7 +587,7 @@ def standardise_footprint(
             model=model,
             inlet=inlet,
             height=height,
-            metmodel=metmodel,
+            met_model=met_model,
             species=species,
             network=network,
             source_format=source_format,
@@ -641,7 +645,8 @@ def standardise_flux(
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
@@ -771,7 +776,8 @@ def standardise_eulerian(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG as per the TODO RELEASE: add link to documentation.
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
     Returns:
         dict: Dictionary of result data

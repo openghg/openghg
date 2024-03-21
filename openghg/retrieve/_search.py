@@ -163,7 +163,7 @@ def search_footprints(
     domain: Optional[str] = None,
     model: Optional[str] = None,
     height: Optional[str] = None,
-    metmodel: Optional[str] = None,
+    met_model: Optional[str] = None,
     species: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -183,7 +183,7 @@ def search_footprints(
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         height: Alias for inlet
-        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -206,7 +206,7 @@ def search_footprints(
         "height": height,
         "domain": domain,
         "model": model,
-        "metmodel": metmodel,
+        "met_model": met_model,
         "species": species,
         "network": network,
         "start_date": start_date,
