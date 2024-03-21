@@ -40,7 +40,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 
 
 ### Fixed
-- Added check's if the new paths provided by user are present in the object store and raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
+- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
 
 ## [0.7.0] - 2023-12-15
 
