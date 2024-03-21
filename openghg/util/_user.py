@@ -127,13 +127,13 @@ def create_config(silent: bool = False) -> None:
         if new_shared_stores:
             existing = [k for k in new_shared_stores if k in stores]
 
-            existing_paths = [path["path"] for path in stores.values()]
+            existing_paths = [path_data["path"] for path_data in stores.values()]
 
             # Here it checks if newly entered paths are already present in config file.
             duplicate_paths_with_store_name = {
-                store_name: path
-                for store_name, path in new_shared_stores.items()
-                if path["path"] in existing_paths
+                store_name: path_data
+                for store_name, path_data in new_shared_stores.items()
+                if path_data["path"] in existing_paths
             }
 
             if existing:
