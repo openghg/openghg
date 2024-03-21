@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Added check to verify if `obs` and `footprint` have disjoint time co-ordinates then raise ValueError - [PR #954](https://github.com/openghg/openghg/pull/954)
+- Added check to verify if `obs` and `footprint` have overlapping time coordinates when creating a `ModelScenario` object, if not then raise `ValueError` - [PR #954](https://github.com/openghg/openghg/pull/954)
 
 ## [0.8.0] - 2024-03-19
 
