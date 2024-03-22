@@ -201,6 +201,9 @@ def test_parse_edgar_unknown_domain():
 
 @pytest.fixture(scope="session")
 def edgar_v8_data():
+    """
+    Fixture to process the v8.0 file and returns dictionary
+    """
     folder = "v8.0_CH4"
     filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
@@ -209,6 +212,9 @@ def edgar_v8_data():
 
 
 def test_edgar_v8(edgar_v8_data):
+    """
+    Test to check processed data values for parse_edgar
+    """
     data_values = list(edgar_v8_data.values())[0]
     assert "ch4_anthro_globaledgar_1970" in edgar_v8_data
     assert "ch4" in data_values["data"].attrs["species"]

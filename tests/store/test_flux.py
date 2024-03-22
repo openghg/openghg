@@ -308,7 +308,7 @@ def test_add_edgar_database(clear_stores):
 
 
 def test_add_edgar_v8_database(clear_stores):
-    """Test edgar can be added to object store (default domain)"""
+    """Test edgar v8.0 can be added to object store (default domain)"""
     folder = "v8.0_CH4"
     test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
@@ -360,6 +360,9 @@ def test_add_edgar_v8_database(clear_stores):
 
 
 def test_edgar_v8_raises_error():
+    """
+    Test to check if incorrect data variable is present in processing file then it should raise value error for v8.0 file
+    """
     with pytest.raises(
         ValueError,
         match="Data variable fluxes not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0",
