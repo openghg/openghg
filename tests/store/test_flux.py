@@ -305,6 +305,58 @@ def test_add_edgar_database(clear_stores):
     assert metadata.items() >= expected_metadata.items()
 
 
+def test_add_edgar_v8_database(clear_stores):
+    """Test edgar can be added to object store (default domain)"""
+    folder = "v8.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "1970"
+
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date)
+
+    default_domain = "globaledgar"
+
+    version = "v8.0"
+    species = "ch4"
+    default_source = "anthro"
+
+    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search_flux(
+        species=species,
+        date=date,
+        database=database,
+        database_version=version,
+    )
+
+    assert search_results
+
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
+    
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": default_source,
+        "database": database.lower(),
+        "database_version": version.replace(".", ""),
+        "date": "1970",
+        "author": "openghg cloud",
+        "start_date": "1970-01-01 00:00:00+00:00",
+        "end_date": "1970-12-31 23:59:59+00:00",
+        "min_longitude": -179.95,
+        "max_longitude": 179.95,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": 'standard',
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
 def test_transform_and_add_edgar_database(clear_stores):
     """
     Test EDGAR database can be transformed (regridded) and added to the object store.
