@@ -277,10 +277,11 @@ def parse_edgar(
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
     # just in case we didn't get the name right...
-    if version.startswith("v8") and name not in edgar_ds.data_vars:
-        raise ValueError(
-            f" Data var {name} not present in file. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
-        )
+    if name not in (dvs := edgar_ds.data_vars):
+        if version.startswith("v8") and name not in dvs:
+            raise ValueError(
+                f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
+            )
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
@@ -525,12 +526,12 @@ def _check_readme_data(readme_data: str) -> Optional[str]:
         title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
         # Extract version e.g. "v6.0" or "v4.3.2"
         edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
-    except ValueError:
-        edgar_version = None
-    else:
+    except (ValueError, AttributeError):
+        return None
+
         # Check against known versions and remove '.' if these don't match.
-        if edgar_version not in _edgar_known_versions:
-            edgar_version = edgar_version.replace(".", "")
+    if edgar_version not in _edgar_known_versions:
+        edgar_version = edgar_version.replace(".", "")
 
     return edgar_version
 
