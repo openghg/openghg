@@ -43,6 +43,7 @@ For instance, from "_readme.html" from v6.0 data:
 For EDGAR v8.0,
 
 """
+
 import pathlib
 import re
 import zipfile
