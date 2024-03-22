@@ -48,14 +48,21 @@ import re
 import zipfile
 from collections import namedtuple
 from typing import Any, Dict, Optional, Tuple, Union, cast
+from zipfile import ZipFile
 import logging
 import numpy as np
 import xarray as xr
 from numpy import ndarray
-from openghg.standardise.meta import define_species_label
+
+from openghg.standardise.meta import assign_flux_attributes, define_species_label
+from openghg.store import infer_date_range
 from openghg.util import (
     clean_string,
+    molar_mass,
     synonyms,
+    find_coord_name,
+    convert_internal_longitude,
+    timestamp_now,
 )
 
 
@@ -279,11 +286,10 @@ def parse_edgar(
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
     # just in case we didn't get the name right...
-    if name not in (dvs := edgar_ds.data_vars):
-        if version.startswith("v8") and name not in dvs:
-            raise ValueError(
-                f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
-            )
+    if version.startswith("v8") and name not in edgar_ds.data_vars:
+        raise ValueError(
+            f" Data var {name} not present in file. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
+        )
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
