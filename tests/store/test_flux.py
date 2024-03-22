@@ -1,4 +1,5 @@
 import pytest
+import os
 from helpers import clear_test_stores, get_flux_datapath
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
@@ -48,14 +49,15 @@ def test_read_binary_data(mocker, clear_stores):
 def test_read_file():
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
-    proc_results = standardise_flux(store="user",
-                                    filepath=test_datapath,
-                                    species="co2",
-                                    source="gpp-cardamom",
-                                    domain="europe",
-                                    high_time_resolution=False,
-                                    force=True,  # For ease, make sure we can add the same data.
-                                    )
+    proc_results = standardise_flux(
+        store="user",
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+        high_time_resolution=False,
+        force=True,  # For ease, make sure we can add the same data.
+    )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
@@ -335,7 +337,7 @@ def test_add_edgar_v8_database(clear_stores):
 
     edgar_obs = search_results.retrieve_all()
     metadata = edgar_obs.metadata
-    
+
     expected_metadata = {
         "species": species,
         "domain": default_domain,
@@ -350,11 +352,25 @@ def test_add_edgar_v8_database(clear_stores):
         "max_longitude": 179.95,
         "min_latitude": -89.95,
         "max_latitude": 89.95,
-        "time_resolution": 'standard',
+        "time_resolution": "standard",
         "time_period": "1 year",
     }
 
     assert metadata.items() >= expected_metadata.items()
+
+
+def test_edgar_v8_raises_error():
+    with pytest.raises(
+        ValueError,
+        match="Data variable fluxes not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0",
+    ):
+        folder = "v8.0_CH4"
+        test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+        modified_datapath = os.path.join(test_datapath, "false_data")
+        database = "EDGAR"
+        date = "1970"
+
+        transform_flux_data(store="user", datapath=modified_datapath, database=database, date=date)
 
 
 def test_transform_and_add_edgar_database(clear_stores):
@@ -372,7 +388,9 @@ def test_transform_and_add_edgar_database(clear_stores):
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_flux_data(
+        store="user", datapath=test_datapath, database=database, date=date, domain=domain
+    )
 
     version = "v6.0"
     species = "ch4"
