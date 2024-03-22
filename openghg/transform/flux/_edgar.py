@@ -48,7 +48,6 @@ import re
 import zipfile
 from collections import namedtuple
 from typing import Any, Dict, Optional, Tuple, Union, cast
-from zipfile import ZipFile
 import logging
 import numpy as np
 import xarray as xr
@@ -204,15 +203,6 @@ def parse_edgar(
     TODO: Allow date range to be extracted rather than year?
     TODO: Add monthly parsing and sector stacking options
     """
-    from openghg.standardise.meta import assign_flux_attributes
-    from openghg.store import infer_date_range
-    from openghg.util import (
-        molar_mass,
-        find_coord_name,
-        convert_internal_longitude,
-        timestamp_now,
-    )
-
     period = None
 
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
