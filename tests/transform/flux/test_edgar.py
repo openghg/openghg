@@ -198,21 +198,22 @@ def test_parse_edgar_unknown_domain():
     with pytest.raises(ValueError):
         parse_edgar(filepath, date=year, species=species, domain=domain)
 
+
 @pytest.fixture(scope="session")
 def edgar_v8_data():
     folder = "v8.0_CH4"
     filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
-    
-    data = parse_edgar(datapath=filepath, 
-                         date="1970")
+
+    data = parse_edgar(datapath=filepath, date="1970")
     return data
+
 
 def test_edgar_v8(edgar_v8_data):
     data_values = list(edgar_v8_data.values())[0]
-    assert 'ch4_anthro_globaledgar_1970' in edgar_v8_data
+    assert "ch4_anthro_globaledgar_1970" in edgar_v8_data
     assert "ch4" in data_values["data"].attrs["species"]
     assert "globaledgar" in data_values["data"].attrs["domain"]
-
+    assert "flux" in data_values["data"]
 
 
 def test_parse_edgar_no_domain():
@@ -275,23 +276,11 @@ def test_parse_edgar_no_domain():
         ),
         (
             "v8.0_FT2022_GHG_CH4_1970_TOTALS_flx.nc",
-            {
-                "version": "v8.0",
-                "species": "CH4",
-                "year": 1970,
-                "source": "TOTALS",
-                "resolution": None
-            },
+            {"version": "v8.0", "species": "CH4", "year": 1970, "source": "TOTALS", "resolution": None},
         ),
         (
             "v8.0_FT2022_GHG_CO2_2020_TOTALS_flx_nc.zip",
-            {
-                "version": "v8.0",
-                "species": "CO2",
-                "year": 2020,
-                "source": "TOTALS",
-                "resolution": None
-            },
+            {"version": "v8.0", "species": "CO2", "year": 2020, "source": "TOTALS", "resolution": None},
         ),
         (
             "v7.0_FT2021_CO2_excl_short-cycle_org_C_2020_TOTALS.0.1x0.1.zip",
@@ -300,18 +289,12 @@ def test_parse_edgar_no_domain():
                 "species": "CO2",
                 "year": 2020,
                 "source": "excl_short-cycle_TOTALS",
-                "resolution": "0.1x0.1"
+                "resolution": "0.1x0.1",
             },
         ),
         (
             "v7.0_FT2021_N2O_2021_FFF.zip",
-            {
-                "version": "v7.0",
-                "species": "N2O",
-                "year": 2021,
-                "source": "FFF",
-                "resolution": None
-            },
+            {"version": "v7.0", "species": "N2O", "year": 2021, "source": "FFF", "resolution": None},
         ),
     ],
 )
