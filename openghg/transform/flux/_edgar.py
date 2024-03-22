@@ -48,21 +48,14 @@ import re
 import zipfile
 from collections import namedtuple
 from typing import Any, Dict, Optional, Tuple, Union, cast
-from zipfile import ZipFile
 import logging
 import numpy as np
 import xarray as xr
 from numpy import ndarray
-
-from openghg.standardise.meta import assign_flux_attributes, define_species_label
-from openghg.store import infer_date_range
+from openghg.standardise.meta import define_species_label
 from openghg.util import (
     clean_string,
-    molar_mass,
     synonyms,
-    find_coord_name,
-    convert_internal_longitude,
-    timestamp_now,
 )
 
 
