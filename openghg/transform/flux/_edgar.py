@@ -82,7 +82,7 @@ _edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
 # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
 # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 def assemble_edgar_metadata(
-    filepath: Path,
+    filepath: Union[pathlib.Path, zipfile.Path],
     species: Optional[str] = None,
     version: Optional[str] = None,
 ) -> dict[str, Any]:
