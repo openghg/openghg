@@ -269,7 +269,7 @@ def read_local_config() -> Dict:
             valid_stores[name] = store_data
         # Otherwise we check an existing store to see if it's the correct format
         else:
-            if _check_valid_store(store_path):
+            if check_valid_store(store_path):
                 valid_stores[name] = store_data
             else:
                 logger.warning(
@@ -348,7 +348,7 @@ def _migrate_config() -> None:
         raise FileNotFoundError("Configuration file not found.")
 
 
-def _check_valid_store(store_path: Path) -> bool:
+def check_valid_store(store_path: Path) -> bool:
     """Checks if the store is a valid object store using the new Zarr storage
     format. If it is return True, otherwise False.
 
