@@ -75,7 +75,6 @@ from ._user import (
     get_user_config_path,
     read_local_config,
     check_config,
-    check_valid_store,
 )
 from ._util import (
     find_matching_site,
