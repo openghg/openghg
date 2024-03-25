@@ -302,6 +302,25 @@ def test_parse_edgar_no_domain():
             "v7.0_FT2021_N2O_2021_FFF.zip",
             {"version": "v7.0", "species": "N2O", "year": 2021, "source": "FFF", "resolution": None},
         ),
+        (
+            "v7.0_FT2021_N2O_2021_TNR_Aviation_CDS.0.1x0.1.zip",
+            {
+                "version": "v7.0",
+                "species": "N2O",
+                "year": 2021,
+                "source": "TNR-Aviation-CDS",
+                "resolution": "0.1x0.1",
+            },
+        ),
+        (
+            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc", 
+            {"version": "v8.0", 
+             "species": "HFC-43-10-mee", 
+             "year": 1994,
+             "source": "TOTALS", 
+             "resolution": None}
+        )
+
     ],
 )
 def test_extract_file_info(edgar_file, expected_file_info):
