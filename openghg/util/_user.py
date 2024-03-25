@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import uuid
 import toml
 import shutil
-from openghg.types import ConfigFileError
+from openghg.types import ConfigFileError, ObjectStoreError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -355,7 +355,7 @@ def _check_valid_store(store_path: Path) -> bool:
     TODO - remove this when users have all moved to the new object store format.
 
     Args:
-        store: Object store name
+        store_path: Object store path
     Returns:
         bool: True if valid, False if not
     """
@@ -364,7 +364,7 @@ def _check_valid_store(store_path: Path) -> bool:
     store_dirs = list(data_dir.glob("*"))
     # Let's take the first data directory and see if there's a zarr folder in it
     if not store_dirs:
-        return False
+        raise ObjectStoreError("No data found in the object store, please check the path and try again.")
 
     store_data_dir = store_dirs[0]
 
