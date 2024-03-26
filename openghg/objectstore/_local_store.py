@@ -82,7 +82,7 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
     if not writable_buckets:
         raise ObjectStoreError("No writable object stores found. Check configuration file.")
 
-    if len(writable_buckets) == 1:
+    if name is None and len(writable_buckets) == 1:
         return next(iter(writable_buckets.values()))
     elif name is not None:
         try:
