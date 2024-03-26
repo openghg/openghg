@@ -822,6 +822,7 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
 
 
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
+
     """Test expected modelled observations within footprints_data_merge method with known dummy data"""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
 
@@ -845,6 +846,62 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
+
+@pytest.fixture
+def obs_dummy():
+    """
+    Create example ObsData object with dummy data
+     - Species is methane (ch4)
+     - Hourly frequency for 2012-01-01 - 2012-01-02 (48 time points)
+     - "mf" values are from 1, 48
+    """
+    from openghg.dataobjects import ObsData
+
+    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="H")
+
+    ntime = len(time)
+    values = np.arange(0, ntime, 1)
+
+    species = "ch4"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
+
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+
+    # Potential metadata:
+    # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
+    #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
+    # - data_type
+    metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
+
+    obsdata = ObsData(data=data, metadata=metadata)
+
+    return obsdata
+
+@pytest.fixture
+def model_scenario_dummy(obs_dummy, footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
+    """Create ModelScenario with input dummy data"""
+    model_scenario = ModelScenario(
+        obs=obs_dummy, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
+    )
+
+    return model_scenario
+
+def test_disjoint_time_obs_footprint(model_scenario_dummy):
+    """Tests if disjoint timeseries are existing in obs and footprint data
+    It raises error"""
+
+    with pytest.raises (ValueError):
+        model_scenario_dummy.combine_obs_footprint()
 
 
 def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
