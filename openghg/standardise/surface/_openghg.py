@@ -89,6 +89,7 @@ def parse_openghg(
     # Run some checks on the
     data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
 
+    print(metadata_initial)
     # Populate metadata with values from attributes if inputs have not been passed
     for key, value in metadata_initial.items():
         if value is None:
@@ -101,10 +102,16 @@ def parse_openghg(
             if key in attributes:
                 attributes_value = attributes[key]
                 if str(value).lower() != str(attributes_value).lower():
-                    # If inputs do not match attribute values, raise a ValueError
-                    raise ValueError(
-                        f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                    )
+                    try:
+                        # As we may have things like 1200 != 1200.0
+                        # we'll check if the floats are equal
+                        if float(value) == float(attributes_value):
+                            continue
+                    except ValueError:
+                        # If inputs do not match attribute values, raise a ValueError
+                        raise ValueError(
+                            f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                        )
 
     # Read the inlet
     if inlet is None:

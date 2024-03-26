@@ -31,7 +31,6 @@ from typing import Any, cast, Literal, Optional, Type
 from filelock import FileLock
 from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
 from openghg.objectstore.metastore import TinyDBMetaStore
-from openghg.store import storage_class_info
 from openghg.types import MetastoreError
 from openghg.util import hash_string
 import tinydb
@@ -48,7 +47,9 @@ def get_metakey(data_type: str) -> str:
         Metakey string for given data type, if found, or "default"
             if data type not found.
     """
-    object_store_data_classes = storage_class_info()
+    from openghg.store import data_class_info
+
+    object_store_data_classes = data_class_info()
     try:
         result = object_store_data_classes[data_type]
     except KeyError:
