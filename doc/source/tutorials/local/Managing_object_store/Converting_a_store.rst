@@ -16,8 +16,8 @@ Let's first add a new object store to our ``openghg.conf`` using ``openghg --qui
     OpenGHG configuration
     ---------------------
 
-    [03/26/24 14:25:17] INFO     INFO:openghg.util:User config exists at /home/gareth/.openghg/openghg.conf, checking...             _user.py:91
-                        INFO     INFO:openghg.util:Current user object store path: /home/gareth/openghg_store                       _user.py:102
+    INFO:openghg.util:User config exists at /home/gareth/.openghg/openghg.conf, checking...             _user.py:91
+    INFO:openghg.util:Current user object store path: /home/gareth/openghg_store                       _user.py:102
     Would you like to update the path? (y/n): n
     Would you like to add another object store? (y/n): y
     Enter the name of the store: openghg_store_zarr
@@ -28,7 +28,7 @@ Let's first add a new object store to our ``openghg.conf`` using ``openghg --qui
 
     Enter object store permissions: rw
     Would you like to add another object store? (y/n): n
-    [03/26/24 14:25:40] INFO     INFO:openghg.util:Configuration written to /home/gareth/.openghg/openghg.conf
+    INFO:openghg.util:Configuration written to /home/gareth/.openghg/openghg.conf
 
 
 Now we have a new object store called ``openghg_store_zarr`` in our configuration file and the path of that object
@@ -71,6 +71,6 @@ To do this we can pass a chunks dictionary and the name of the data type that wa
     old_store = "/home/gareth/openghg_store"
     new_store = "openghg_store_zarr"
 
-    convert_store(path_in=old_store, store_out=new_store, to_convert=["footprnts"], chunks={"time": 24})
+    convert_store(path_in=old_store, store_out=new_store, to_convert=["footprints"], chunks={"time": 24})
 
 You may need to experiment with the chunk sizes to find the optimal size for the data being converted.
