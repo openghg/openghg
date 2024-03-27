@@ -28,6 +28,10 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Meterological model input renamed from `metmodel` to `met_model` [PR #957](https://github.com/openghg/openghg/pull/957).
 - Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
 
+### Added
+
+- More more explanation regarding use of `search_*` and `get_*` function in tutorial 1 [PR #952](https://github.com/openghg/openghg/pull/952)
+
 ## [0.7.1] - 2024-03-01
 
 ### Fixed
