@@ -535,7 +535,7 @@ def _check_readme_data(readme_data: str) -> Optional[str]:
     return edgar_version
 
 
-def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
+def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Dict:
     """
     Extract details from EDGAR filename.
 
