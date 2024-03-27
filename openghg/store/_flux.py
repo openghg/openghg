@@ -213,7 +213,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
-            file_hashes=unseen_hashes.keys(),
+            file_hashes=list(unseen_hashes.keys()),
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

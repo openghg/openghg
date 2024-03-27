@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, Dict, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
@@ -381,20 +381,21 @@ class Datasource:
         Returns:
             None
         """
-        if not isinstance(hash, list):
+        if not isinstance(file_hashes, list):
             file_hashes = [file_hashes]
 
-        if "original_file_hashes" in self._metadata:
+        if "original_file_hashes" not in self._metadata:
+            self._metadata["original_file_hashes"] = {version: file_hashes}
+        else:
             if version in self._metadata["original_file_hashes"]:
                 self._metadata["original_file_hashes"][version].extend(file_hashes)
-        else:
-            self._metadata["original_file_hashes"] = {}
-            self._metadata["original_file_hashes"][version] = file_hashes
+            else:
+                self._metadata["original_file_hashes"][version] = file_hashes
 
     def delete_all_data(self) -> None:
         """Delete the zarr store that contains all the data
         associated with this Datasource and clear out all keys
-        stored in this Datasource.=
+        stored in this Datasource.
 
         Returns:
             None

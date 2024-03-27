@@ -106,7 +106,16 @@ def test_add_data(data, bucket):
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
+    test_hash = "test-hash-123"
+
+    d.add_data(
+        metadata=metadata,
+        data=ch4_data,
+        file_hashes=test_hash,
+        sort=False,
+        drop_duplicates=False,
+        data_type="surface",
+    )
 
     assert d._store
 
@@ -161,7 +170,16 @@ def test_versioning(capfd, bucket):
 
     min_ch4_data = min_data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
+    test_hash = "test-hash-123"
+
+    d.add_data(
+        metadata=metadata,
+        data=min_ch4_data,
+        file_hashes=test_hash,
+        sort=False,
+        drop_duplicates=False,
+        data_type="surface",
+    )
     d.save()
 
     min_keys = d.all_data_keys()
@@ -176,6 +194,7 @@ def test_versioning(capfd, bucket):
     d.add_data(
         metadata=metadata,
         data=detailed_ch4_data,
+        file_hashes=test_hash,
         data_type="surface",
         sort=False,
         drop_duplicates=False,
@@ -205,11 +224,19 @@ def test_replace_version(bucket):
 
     min_ch4_data = min_data["ch4"]["data"]
     metadata = {"foo": "bar"}
+    test_hash = "test-hash-123"
 
     d = Datasource(bucket=bucket)
     # Fix the UUID for the tests
     d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
-    d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
+    d.add_data(
+        metadata=metadata,
+        data=min_ch4_data,
+        file_hashes=test_hash,
+        sort=False,
+        drop_duplicates=False,
+        data_type="surface",
+    )
 
     # Save initial data
     bucket = get_bucket()
@@ -223,6 +250,7 @@ def test_replace_version(bucket):
     d.add_data(
         metadata=metadata,
         data=detailed_ch4_data,
+        file_hashes=test_hash,
         sort=False,
         drop_duplicates=False,
         data_type="surface",
@@ -274,10 +302,16 @@ def test_save_footprint(bucket):
     data = xr.open_dataset(filepath)
 
     bucket = get_bucket()
+    test_hash = "test-hash-123"
 
     datasource = Datasource(bucket=bucket)
     datasource.add_data(
-        data=data, metadata=metadata, sort=False, drop_duplicates=False, data_type="footprints"
+        data=data,
+        metadata=metadata,
+        file_hashes=test_hash,
+        sort=False,
+        drop_duplicates=False,
+        data_type="footprints",
     )
     datasource.save()
 
@@ -320,8 +354,9 @@ def test_save_and_load(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_data, file_hashes=test_hash, data_type="surface")
     d.save()
 
     d_2 = Datasource(bucket=bucket, uuid=d.uuid())
@@ -341,9 +376,17 @@ def test_incorrect_datatype_raises(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
     with pytest.raises(TypeError):
-        d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="CRDS")
+        d.add_data(
+            metadata=metadata,
+            data=ch4_data,
+            file_hashes=test_hash,
+            sort=False,
+            drop_duplicates=False,
+            data_type="CRDS",
+        )
 
 
 def test_update_daterange_replacement(data, bucket):
@@ -352,8 +395,16 @@ def test_update_daterange_replacement(data, bucket):
     d = Datasource(bucket=bucket)
 
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
-    d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
+    d.add_data(
+        metadata=metadata,
+        data=ch4_data,
+        file_hashes=test_hash,
+        sort=False,
+        drop_duplicates=False,
+        data_type="surface",
+    )
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2020-12-01 22:31:30+00:00")
@@ -362,7 +413,7 @@ def test_update_daterange_replacement(data, bucket):
 
     d.delete_version(version="v1")
 
-    d.add_data(metadata=metadata, data=ch4_short, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_short, file_hashes=test_hash, data_type="surface")
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
@@ -379,7 +430,8 @@ def test_in_daterange(data, bucket):
 
     d = Datasource(bucket=bucket)
     d._uuid = "test-id-123"
-    d.add_data(metadata=metadata, data=data, data_type="surface")
+    test_hash = "test-hash-123"
+    d.add_data(metadata=metadata, data=data, file_hashes=test_hash, data_type="surface")
 
     assert d.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
@@ -432,12 +484,13 @@ def test_integrity_check(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
     assert ch4_data["ch4"][0] == pytest.approx(1959.55)
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_data, file_hashes=test_hash, data_type="surface")
     d.save()
 
     uid = d.uuid()
@@ -456,8 +509,9 @@ def test_data_version_deletion(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_data, file_hashes=test_hash, data_type="surface")
 
     zarr_keys = set(d._store.keys(version="v1"))
 
@@ -483,8 +537,9 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_data, file_hashes=test_hash, data_type="surface")
 
     start, end = d.daterange()
 
@@ -503,8 +558,9 @@ def test_to_memory_store(data, bucket):
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+    test_hash = "test-hash-123"
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=ch4_data, file_hashes=test_hash, data_type="surface")
 
     memory_store = d._copy_to_memorystore(version="latest")
     with xr.open_zarr(store=memory_store) as ds:
@@ -515,11 +571,21 @@ def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
+    test_hash_a = "test-hash-123"
+    test_hash_b = "test-hash-124"
+    test_hash_c = "test-hash-125"
+
     d = Datasource(bucket=bucket)
 
-    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
-    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
-    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+    d.add_data(
+        metadata=attributes, data=data_a, file_hashes=test_hash_a, data_type="surface", new_version=False
+    )
+    d.add_data(
+        metadata=attributes, data=data_b, file_hashes=test_hash_b, data_type="surface", new_version=False
+    )
+    d.add_data(
+        metadata=attributes, data=data_c, file_hashes=test_hash_c, data_type="surface", new_version=False
+    )
 
     assert d.data_keys() == [
         "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
@@ -550,13 +616,38 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
     data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
     data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes)
 
+    test_hash_a = "test-hash-123"
+    test_hash_b = "test-hash-124"
+    test_hash_c = "test-hash-125"
+
     attributes = create_attributes()
 
     d = Datasource(bucket=bucket)
 
-    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
-    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
-    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
+    d.add_data(
+        metadata=attributes,
+        data=data_a,
+        file_hashes=test_hash_a,
+        data_type="surface",
+        new_version=False,
+        if_exists="combine",
+    )
+    d.add_data(
+        metadata=attributes,
+        data=data_b,
+        file_hashes=test_hash_b,
+        data_type="surface",
+        new_version=False,
+        if_exists="combine",
+    )
+    d.add_data(
+        metadata=attributes,
+        data=data_c,
+        file_hashes=test_hash_c,
+        data_type="surface",
+        new_version=False,
+        if_exists="combine",
+    )
 
     with d.get_data(version="v1") as ds:
         ds = ds.compute()
@@ -638,7 +729,9 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
 
 def test_bytes_stored(data, bucket):
     d = Datasource(bucket=bucket)
-    d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
+    d.add_data(
+        metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], file_hashes=[], data_type="surface"
+    )
 
     d.save()
 
@@ -647,3 +740,23 @@ def test_bytes_stored(data, bucket):
     d = Datasource(bucket=bucket)
 
     assert d.bytes_stored() == 0
+
+
+def test_add_file_hashes(bucket):
+    d = Datasource(bucket=bucket)
+
+    file_hashes_v1 = ["test-hash-123"]
+    d.add_hashes(version="v1", file_hashes=file_hashes_v1)
+
+    assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1}
+
+    file_hashes_v2 = ["test-hash-124"]
+    d.add_hashes(version="v2", file_hashes=file_hashes_v2)
+
+    assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1, "v2": file_hashes_v2}
+
+    file_hashes_v2_again = ["test-hash-125", "test-hash-126", "test-hash-127"]
+    d.add_hashes(version="v2", file_hashes=file_hashes_v2_again)
+
+    expected_v2 = ["test-hash-124", "test-hash-125", "test-hash-126", "test-hash-127"]
+    assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1, "v2": expected_v2}

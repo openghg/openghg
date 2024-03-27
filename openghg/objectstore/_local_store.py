@@ -6,7 +6,7 @@ import os
 import threading
 from pathlib import Path
 import shutil
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
@@ -346,14 +346,16 @@ def set_compressed_file(bucket: str, key: str, filepath: Path) -> None:
     Returns:
         None
     """
-    filename = f"{bucket}/{key}._data.gz"
+    filename = Path(f"{bucket}/{key}._data.gz")
+    filename.parent.mkdir(exist_ok=True)
 
     # We shouldn't hit this but this but it might help us catch some logic errors
     if exists(bucket=bucket, key=key):
         raise ObjectStoreError("A compressed version of this file already exists.")
 
-    with open(filepath, "rb") as f_in, gzip.open(filename, "wb") as f_out:
-        shutil.copyfileobj(f_in, f_out)
+    with open(filepath, "rb") as f_in:
+        with gzip.open(filename, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
 
 def get_compressed_file(bucket: str, key: str, out_filepath: Path) -> None:
