@@ -1,11 +1,12 @@
 from __future__ import annotations
 import glob
+import gzip
 import json
 import os
 import threading
 from pathlib import Path
 import shutil
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
@@ -333,6 +334,42 @@ def set_object(bucket: str, key: str, data: bytes) -> None:
 
             with open(filename, "wb") as f:
                 f.write(data)
+
+
+def set_compressed_file(bucket: str, key: str, filepath: Path) -> None:
+    """Compress file and store in object store
+
+    Args:
+        bucket: Bucket path
+        key: Key for data in bucket
+        filepath: Path to file
+    Returns:
+        None
+    """
+    filename = f"{bucket}/{key}._data.gz"
+
+    # We shouldn't hit this but this but it might help us catch some logic errors
+    if exists(bucket=bucket, key=key):
+        raise ObjectStoreError("A compressed version of this file already exists.")
+
+    with open(filepath, "rb") as f_in, gzip.open(filename, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
+
+
+def get_compressed_file(bucket: str, key: str, out_filepath: Path) -> None:
+    """Get compressed file from object store and write to out_filepath
+
+    Args:
+        bucket: Bucket path
+        key: Key for data in bucket
+        out_filepath: Path to write file to
+    Returns:
+        None
+    """
+    filename = f"{bucket}/{key}._data.gz"
+
+    with gzip.open(filename, "rb") as f_in, open(out_filepath, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
 
 def set_object_from_json(bucket: str, key: str, data: Union[str, Dict]) -> None:

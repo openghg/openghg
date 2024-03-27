@@ -380,6 +380,7 @@ class ObsSurface(BaseStore):
             data_type = "surface"
             datasource_uuids = self.assign_data(
                 data=data,
+                file_hashes=file_hash,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
@@ -393,6 +394,7 @@ class ObsSurface(BaseStore):
             logger.info(f"Completed processing: {data_filepath.name}.")
 
         self._file_hashes[file_hash] = data_filepath.name
+        self.store_original_file(filepath=data_filepath, file_hash=file_hash)
 
         return dict(results)
 
@@ -601,7 +603,6 @@ class ObsSurface(BaseStore):
 
         keys_to_process = set(data.keys())
         if file_hashes_to_compare:
-            # TODO - add this to log
             logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
             keys_to_process -= file_hashes_to_compare
 
@@ -626,6 +627,8 @@ class ObsSurface(BaseStore):
         # in the metastore
         datasource_uuids = self.assign_data(
             data=to_process,
+            # As we don't have original files to store we'll just say not set here
+            file_hashes=[],
             if_exists=if_exists,
             data_type=data_type,
             required_keys=required_metakeys,

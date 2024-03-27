@@ -135,14 +135,13 @@ class BoundaryConditions(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
+        # TODO - tidy this hoop jumping
         filepath = Path(filepath)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
             return {}
-
-        filepath = next(iter(unseen_hashes.values()))
 
         if chunks is None:
             chunks = {}
@@ -211,6 +210,7 @@ class BoundaryConditions(BaseStore):
             # existing Datasources
             datasource_uuids = self.assign_data(
                 data=boundary_conditions_data,
+                file_hashes=unseen_hashes.keys(),
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
@@ -234,6 +234,7 @@ class BoundaryConditions(BaseStore):
 
             # Record the file hash in case we see this file again
             self.store_hashes(unseen_hashes)
+            self.store_original_files(hash_data=unseen_hashes)
 
             return datasource_uuids
 

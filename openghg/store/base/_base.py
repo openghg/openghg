@@ -8,10 +8,16 @@ import math
 from pathlib import Path
 from pandas import Timestamp
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
+from typing import Any, Dict, List, Iterable, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import (
+    get_object_from_json,
+    exists,
+    set_object_from_json,
+    set_compressed_file,
+    get_compressed_file,
+)
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -160,10 +166,49 @@ class BaseStore:
 
         return seen, unseen
 
+    def store_original_file(self, filepath: Path, file_hash: str) -> None:
+        """Store a compressed version of the original data file in the object store
+
+        Args:
+            filepath: Path to file
+            file_hash: SHA1 hash of file
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}"
+        set_compressed_file(bucket=self._bucket, key=key, filepath=filepath)
+
+    def store_original_files(self, hash_data: Dict[str, Path]) -> None:
+        """Store compressed versions of the original data files in the object store.
+        This expects a dictionary of file hashes and file paths created by the
+        BaseStore.check_hashes function.
+
+        Args:
+            hash_data: Dictionary of SHA1 hash: filepath key values
+        Returns:
+            None
+        """
+        for file_hash, filepath in hash_data.items():
+            self.store_original_file(filepath=filepath, file_hash=file_hash)
+
+    def get_original_files(self, file_hash: str, out_filepath) -> None:
+        """Retrieve an original data file from the object store and
+        write to to a path of the user's choosing
+
+        Args:
+            file_hash: SHA1 hash of file
+            out_filepath: Path to store the file
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}"
+        get_compressed_file(bucket=self._bucket, key=key, out_filepath=out_filepath)
+
     def assign_data(
         self,
         data: Dict,
         data_type: str,
+        file_hashes: Union[str, List],
         required_keys: Sequence[str],
         sort: bool = True,
         drop_duplicates: bool = True,
@@ -181,6 +226,7 @@ class BaseStore:
                 data: Dictionary containing data and metadata for species
                 overwrite: If True overwrite current data stored
                 data_type: Type of data, timeseries etc
+                file_hashes: Hashes of original data files
                 required_keys: Required minimum keys to lookup unique Datasource
                 sort: Sort data in time dimension
                 drop_duplicates: Drop duplicate timestamps, keeping the first value
@@ -243,12 +289,13 @@ class BaseStore:
                 datasource.add_data(
                     metadata=meta_copy,
                     data=dataset,
+                    data_type=data_type,
+                    file_hashes=file_hashes,
                     sort=sort,
                     drop_duplicates=drop_duplicates,
                     skip_keys=skip_keys,
                     new_version=new_version,
                     if_exists=if_exists,
-                    data_type=data_type,
                     compressor=compressor,
                     filters=filters,
                 )

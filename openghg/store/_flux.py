@@ -213,6 +213,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
+            file_hashes=unseen_hashes.keys(),
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -223,6 +224,7 @@ class Flux(BaseStore):
 
         # Record the file hash in case we see this file again
         self.store_hashes(unseen_hashes)
+        self.store_original_files(hash_data=unseen_hashes)
 
         return datasource_uuids
 
@@ -297,6 +299,9 @@ class Flux(BaseStore):
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
 
+        # TODO - QUESTION - how to hash this data?
+        # I imagine we just want to store the EDGAR database version/hash
+
         # Define parameters to pass to the parser function from kwargs
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
@@ -313,6 +318,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
+            file_hashes=[],
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
