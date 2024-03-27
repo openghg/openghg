@@ -89,7 +89,6 @@ def parse_openghg(
     # Run some checks on the
     data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
 
-    print(metadata_initial)
     # Populate metadata with values from attributes if inputs have not been passed
     for key, value in metadata_initial.items():
         if value is None:

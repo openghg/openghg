@@ -116,7 +116,10 @@ def convert_store(
                     version = max([v.name for v in data_folderpath.iterdir()], key=lambda x: int(x[1:]))
                 except (ValueError, AttributeError):
                     # .iterdir gives empty sequence or some version name doesn't match r"v\d+" (e.g. "v10", etc.)
-                    raise ValueError("No data versions found for this search result.")
+                    logger.warning(
+                        f"Unable to find a data sversion for {data_type} data with UUID {uuid}, skipping..."
+                    )
+                    continue
 
             # Now get the files to restandardise
             version_folderpath = data_folderpath.joinpath(version)
@@ -128,7 +131,7 @@ def convert_store(
             # Parse some values to the format required for standardising
             tf_none = {"true": True, "false": False, "none": None}
             for k, v in standardise_kwargs.items():
-                if not isinstance(v, bool) and v.lower() in tf_none:
+                if isinstance(v, str) and v.lower() in tf_none:
                     standardise_kwargs[k] = tf_none[v.lower()]
                 if k == "sampling_period":
                     if m := re.search(r"(\d+\.?\d*)", v):
@@ -137,11 +140,10 @@ def convert_store(
                     else:
                         standardise_kwargs[k] = None
 
-            # if chunks is None:
-            #     chunks = {}
-
             # The number of Datasources converted
             n_converted = 0
+            # An error will be raised if we get daterange overlaps, we'll just warn the user
+            overlap_msg = f"Data overlap error for {data_type} data with UUID {uuid}"
 
             if data_type == "surface":
                 try:
@@ -154,7 +156,7 @@ def convert_store(
                         **standardise_kwargs,
                     )
                 except DataOverlapError:
-                    logger.warning(f"Data overlap error for record {uuid}")
+                    logger.warning(overlap_msg)
                 else:
                     n_converted += 1
 
@@ -172,7 +174,7 @@ def convert_store(
                         **standardise_kwargs,
                     )
                 except DataOverlapError:
-                    logger.warning(f"Data overlap error for record {uuid}")
+                    logger.warning(overlap_msg)
                 else:
                     n_converted += 1
             else:
@@ -186,9 +188,9 @@ def convert_store(
                             **standardise_kwargs,
                         )
                     except DataOverlapError:
-                        logger.warning(f"Data overlap error for record {uuid}")
+                        logger.warning(overlap_msg)
                     except ValueError as e:
-                        logger.warning(f"Error standardising record {uuid}: {e}")
+                        logger.warning(f"Error standardising {data_type} data with UUID {uuid}: {e}")
                     else:
                         n_converted += 1
 
