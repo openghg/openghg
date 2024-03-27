@@ -496,10 +496,10 @@ def _check_lat_lon(
             else:
                 lon_out = lon_domain
 
-            if lon_out.max() > 180 or lon_out.min() < -180:
+            if lon_out.max() - lon_out.min() >= 360:
                 raise ValueError(
                     "Invalid domain definition."
-                    " Expected longitude in range: -180 - 180."
+                    " Expected longitude in range: 0 to 360."
                     f"Current longitude: {lon_out.min()} - {lon_out.max()}"
                 )
 
