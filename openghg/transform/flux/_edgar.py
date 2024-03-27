@@ -276,11 +276,13 @@ def parse_edgar(
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
     # just in case we didn't get the name right...
-    if name not in (dvs := edgar_ds.data_vars):
-        if version.startswith("v8") and name not in dvs:
+    if name not in edgar_ds.data_vars:
+        if version.startswith("v8"):
             raise ValueError(
                 f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
             )
+        else:
+            raise ValueError(f"Data variable {name} not present.")
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
