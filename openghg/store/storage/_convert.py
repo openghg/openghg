@@ -117,7 +117,7 @@ def convert_store(
                 except (ValueError, AttributeError):
                     # .iterdir gives empty sequence or some version name doesn't match r"v\d+" (e.g. "v10", etc.)
                     logger.warning(
-                        f"Unable to find a data sversion for {data_type} data with UUID {uuid}, skipping..."
+                        f"Unable to find a data version for {data_type} data with UUID {uuid}, skipping..."
                     )
                     continue
 
