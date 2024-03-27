@@ -71,7 +71,6 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
-Path = Union[pathlib.Path, zipfile.Path]
 
 
 _edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
