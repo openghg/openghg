@@ -229,8 +229,6 @@ def parse_edgar(
         if readme.exists():
             with readme.open("r") as f:  # pathlib.Path and zipfile.Path have .open method
                 edgar_version = _check_readme_data(f.read())
-        else:
-            raise FileNotFoundError("_readme.html doesn't exist. Unable to extract edgar version")
 
     if len(date) == 4:
         year = int(date)
