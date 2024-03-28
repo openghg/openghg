@@ -64,12 +64,12 @@ def test_convert_longitude(lon_in, expected_lon_out):
         (np.array([360.0]), np.array([0.0])),
         (np.array([181.0]), np.array([181.0])),
         (np.array([-180.0, 0.0, 179.9]), np.array([180.0, 0.0, 179.9])),
-        (np.arange(1, 361, 1), np.arange(1, 361, 1)),
+        (np.arange(1, 360, 1), np.arange(1, 360, 1)),
     ],
 )
 def test_convert_longitude_scale(lon_in, expected_lon_out):
     lon_out = convert_lon_to_360(lon_in)
-    assert(lon_out, expected_lon_out)
+    np.testing.assert_allclose(lon_out, expected_lon_out)
 
 
 @pytest.mark.parametrize(
