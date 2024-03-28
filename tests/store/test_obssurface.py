@@ -925,3 +925,18 @@ def test_drop_only_correct_nan():
 
     assert len(rgl_co2_data["time"]) == 1
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
+
+def test_optional_parameters():
+    """Test if ValueError is raised for invalid input value to calibration_scale."""
+
+    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+
+    with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
+        standardise_surface(filepath=data_filepath, 
+                        source_format="OPENGHG", 
+                        site="TAC", 
+                        network="DECC",
+                        calibration_scale="unknown",
+                        instrument='picarro',
+                        store="group" )
+        
