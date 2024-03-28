@@ -7,7 +7,8 @@ from ._domain import (
     get_domain_info,
     find_domain,
     find_coord_name,
-    convert_longitude,
+    convert_lon_to_180,
+    convert_lon_to_360,
     convert_internal_longitude,
     cut_data_extent,
 )
