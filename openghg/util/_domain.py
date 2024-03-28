@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
-__all__ = ["get_domain_info", "find_domain", "convert_longitude"]
+__all__ = ["get_domain_info", "find_domain", "convert_lon_to_180", "convert_lon_to_360"]
 
 
 def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
@@ -140,7 +140,7 @@ def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
     return name
 
 
-def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
+def convert_lon_to_180(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     """
     Convert longitude extent from (0 to 360) to (-180 to 180).
     This does *not* reorder the values.
@@ -150,8 +150,26 @@ def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     Returns:
         ndarray / DataArray : Updated longitude values in the same order.
     """
-    # Check range of longitude values and convert to -180 - +180
+
+    # Check range of longitude values and convert to -180 to 180.
     longitude = ((longitude - 180) % 360) - 180
+
+    return longitude
+
+
+def convert_lon_to_360(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
+    """
+    Convert longitude extent to (0 to 360).
+    This does *not* reorder the values.
+
+    Args:
+        longitude: Valid longitude values in degrees.
+    Returns:
+        ndarray / DataArray : Updated longitude values in the same order.
+    """
+
+    # Check range of longitude values and convert to 0 to 360.
+    longitude = longitude % 360
 
     return longitude
 
@@ -177,7 +195,7 @@ def convert_internal_longitude(
             raise ValueError("Please specify 'lon_name'.")
 
     longitude = data[lon_name]
-    longitude = convert_longitude(longitude)
+    longitude = convert_lon_to_180(longitude)
 
     data = data.assign_coords({lon_name: longitude})
 
