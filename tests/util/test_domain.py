@@ -68,7 +68,6 @@ def test_convert_longitude(lon_in, expected_lon_out):
     ],
 )
 def test_convert_longitude_scale(lon_in, expected_lon_out):
-    # Your conversion logic here
     lon_out = convert_lon_to_360(lon_in)
     assert(lon_out, expected_lon_out)
 
