@@ -169,7 +169,7 @@ def convert_lon_to_360(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     """
 
     # Check range of longitude values and convert to 0 to 360.
-    longitude = (longitude + 360) % 360
+    longitude = longitude % 360
 
     return longitude
 
