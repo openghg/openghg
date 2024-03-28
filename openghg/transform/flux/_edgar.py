@@ -276,7 +276,7 @@ def parse_edgar(
     # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
-    # just in case we didn't get the name right...
+    # check that data variable `name` is in `edgar_ds`
     if name not in edgar_ds.data_vars:
         if version.startswith("v8"):
             raise ValueError(
