@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
-from openghg.util import convert_internal_longitude, convert_lon_to_180, cut_data_extent, find_domain
+from openghg.util import convert_internal_longitude, convert_lon_to_180, convert_lon_to_360, cut_data_extent, find_domain
 from openghg.util._domain import _get_coord_data
 
 
@@ -56,6 +56,21 @@ def test_convert_longitude(lon_in, expected_lon_out):
     """Test expected longitude conversion for individual values and range."""
     lon_out = convert_lon_to_180(lon_in)
     np.testing.assert_allclose(lon_out, expected_lon_out)
+
+
+@pytest.mark.parametrize(
+    "lon_in,expected_lon_out",
+    [
+        (np.array([360.0]), np.array([0.0])),
+        (np.array([181.0]), np.array([181.0])),
+        (np.array([-180.0, 0.0, 179.9]), np.array([180.0, 0.0, 179.9])),
+        (np.arange(1, 361, 1), np.arange(1, 361, 1)),
+    ],
+)
+def test_convert_longitude_scale(lon_in, expected_lon_out):
+    # Your conversion logic here
+    lon_out = convert_lon_to_360(lon_in)
+    assert(lon_out, expected_lon_out)
 
 
 @pytest.mark.parametrize(
