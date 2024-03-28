@@ -451,7 +451,7 @@ def _check_lat_lon(
         ndarray, ndarray: Latitude and longitude arrays
         None, None: if all inputs are None, a tuple of Nones will be returned.
     """
-    from openghg.util import convert_longitude, find_domain
+    from openghg.util import convert_lon_to_360, find_domain
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
@@ -506,8 +506,8 @@ def _check_lat_lon(
                 )
 
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
-        logger.info("Converting longitude to stay within -180 - 180 bounds")
-        lon_converted = convert_longitude(lon_out)
+        logger.info("Converting longitude to stay within 0 to 360 bounds")
+        lon_converted = convert_lon_to_360(lon_out)
         lon_out = cast(Optional[ndarray], lon_converted)
 
     return lat_out, lon_out
