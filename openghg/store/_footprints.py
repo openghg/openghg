@@ -476,7 +476,7 @@ class Footprints(BaseStore):
     def schema(
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
-        time_resolved: [bool] = False,
+        time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
     ) -> DataSchema:
