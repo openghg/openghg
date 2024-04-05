@@ -579,9 +579,9 @@ def get_flux_attributes(
     global_attributes["source"] = source
     global_attributes["domain"] = domain
 
-    # Add any 'prior' information for emissions databases.
+    # Add any 'prior' information for flux / emissions databases.
     if prior_info_dict is not None:
-        # For composite emissions files this may contain > 1 prior input
+        # For composite flux / emissions files this may contain > 1 prior input
         global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
             prior_number = i + 1

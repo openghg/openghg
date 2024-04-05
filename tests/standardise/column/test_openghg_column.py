@@ -22,10 +22,11 @@ def test_read_file():
     domain = "BRAZIL"
     species = "methane"
 
-    data = parse_openghg(filepath,
-                         satellite=satellite,
-                         domain=domain,
-                         species=species,
+    data = parse_openghg(
+        filepath,
+        satellite=satellite,
+        domain=domain,
+        species=species,
     )
 
     assert "ch4" in data
@@ -47,8 +48,8 @@ def test_read_file():
         "domain": domain,
         "selection": domain,
         "instrument": "TANSO-FTS",
-        "data_owner": 'University of Leicester, Rob Parker',
-        "data_owner_email" : 'rjp23@leicester.ac.uk',
+        "data_owner": "University of Leicester, Rob Parker",
+        "data_owner_email": "rjp23@leicester.ac.uk",
     }
 
     metadata = output_ch4["metadata"]
@@ -56,7 +57,6 @@ def test_read_file():
 
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
-
 
 
 # def test_read_file_no_attr():

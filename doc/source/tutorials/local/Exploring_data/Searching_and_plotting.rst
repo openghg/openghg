@@ -86,7 +86,7 @@ to extract, for example, just the methane data:
     tac_surface_search.results
 
 There are also equivalent search functions for other data types
-including ``search_footprints``, ``search_emissions`` and ``search_bc``.
+including ``search_footprints``, ``search_flux`` and ``search_bc``.
 
 2. Plotting
 -----------------

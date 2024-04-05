@@ -7,6 +7,7 @@ class SurfaceTypes(Enum):
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    GCWERKS_NC = "GCWERKS_NC"
     ICOS = "ICOS"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
@@ -32,21 +33,28 @@ class ColumnSources(Enum):
     GOSAT = "GOSAT"
 
 
-class EmissionsTypes(Enum):
-    """For standardising emissions/flux inputs"""
+class FluxTypes(Enum):
+    """For standardising flux/emissions inputs"""
 
     OPENGHG = "OPENGHG"
+    INTEM = "INTEM"
 
 
-class EmissionsDatabases(Enum):
-    """For extracting and transforming emissions/flux databases"""
+class FluxDatabases(Enum):
+    """For extracting and transforming flux/emissions databases"""
 
     EDGAR = "EDGAR"
 
 
+class FootprintTypes(Enum):
+    """For standardising footprint inputs"""
+
+    # OPENGHG = "OPENGHG"  # To be implemented
+    ACRG_ORG = "ACRG_ORG"
+
+
 class ObsTypes(Enum):
-    """
-    """
+    """ """
 
     SURFACE = "ObsSurface"
     COLUMN = "ObsColumn"
@@ -69,3 +77,4 @@ class DataTypes(Enum):
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
     OPENGHG = "OPENGHG"
+    INTEM = "INTEM"

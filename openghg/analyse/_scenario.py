@@ -101,17 +101,18 @@ class ModelScenario:
         network: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
-        metmodel: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
+        met_model: Optional[str] = None,
+        fp_inlet: Union[str, list, None] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
         bc_input: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        start_date: Union[str, Timestamp, None] = None,
+        end_date: Union[str, Timestamp, None] = None,
         obs: Optional[ObsData] = None,
         footprint: Optional[FootprintData] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        flux: Union[FluxData, Dict[str, FluxData], None] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Optional[str] = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
@@ -122,26 +123,27 @@ class ModelScenario:
         which may be available within the object store. The combination of these supplied
         will be used to extract the relevant data. Related keywords are as follows:
          - Observation data: site, species, inlet, network, start_date, end_data
-         - Footprint data: site, inlet, domain, model, metmodel, species, start_date, end_date
+         - Footprint data: site, inlet, domain, model, met_model, species, start_date, end_date
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
-            site : Site code e.g. "TAC"
-            species : Species code e.g. "ch4"
-            inlet : Inlet value e.g. "10m"
+            site: Site code e.g. "TAC"
+            species: Species code e.g. "ch4"
+            inlet: Inlet value e.g. "10m"
             height: Alias for inlet.
-            network : Network name e.g. "AGAGE"
-            domain : Domain name e.g. "EUROPE"
-            model : Model name used in creation of footprint e.g. "NAME"
-            metmodel : Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet : Specify footprint release height options if this doesn't match to site value.
-            sources : Emissions sources
-            bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
-            start_date : Start of date range to use. Note for flux this may not be applied
-            end_date : End of date range to use. Note for flux this may not be applied
-            obs : Supply ObsData object directly (e.g. from get_obs...() functions)
-            footprint : Supply FootprintData object directly (e.g. from get_footprint() function)
-            flux : Supply FluxData object directly (e.g. from get_flux() function)
+            network: Network name e.g. "AGAGE"
+            domain: Domain name e.g. "EUROPE"
+            model: Model name used in creation of footprint e.g. "NAME"
+            met_model: Name of met model used in creation of footprint e.g. "UKV"
+            fp_inlet: Specify footprint release height options if this doesn't match to site value.
+            sources: Emissions sources
+            bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams"
+            start_date: Start of date range to use. Note for flux this may not be applied
+            end_date: End of date range to use. Note for flux this may not be applied
+            obs: Supply ObsData object directly (e.g. from get_obs...() functions)
+            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
+            flux: Supply FluxData object directly (e.g. from get_flux() function)
+            store: Name of object store to retrieve data from.
         Returns:
             None
 
@@ -169,6 +171,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             obs=obs,
+            store=store,
         )
 
         # Make sure obs data is present, make sure inputs match to metadata
@@ -187,12 +190,13 @@ class ModelScenario:
             height=height,
             domain=domain,
             model=model,
-            metmodel=metmodel,
+            met_model=met_model,
             fp_inlet=fp_inlet,
             start_date=start_date,
             end_date=end_date,
             species=species,
             footprint=footprint,
+            store=store,
         )
 
         # Add flux data (directly or through keywords)
@@ -204,6 +208,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             flux=flux,
+            store=store,
         )
 
         # Add boundary conditions (directly or through keywords)
@@ -214,6 +219,7 @@ class ModelScenario:
             start_date=start_date,
             end_date=end_date,
             bc=bc,
+            store=store,
         )
 
         # Initialise attributes used for caching
@@ -284,6 +290,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         obs: Optional[ObsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -307,6 +314,7 @@ class ModelScenario:
                 "network": network,
                 "start_date": start_date,
                 "end_date": end_date,
+                "store": store,
             }
 
             obs = self._get_data(obs_keywords, data_type="obs_surface")
@@ -326,13 +334,14 @@ class ModelScenario:
         height: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
-        metmodel: Optional[str] = None,
+        met_model: Optional[str] = None,
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         species: Optional[str] = None,
         fp_inlet: Optional[Union[str, list]] = None,
         network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
@@ -345,7 +354,7 @@ class ModelScenario:
         )
 
         # Search for footprint data based on keywords
-        # - site, domain, inlet (can extract from obs / height_name), model, metmodel
+        # - site, domain, inlet (can extract from obs / height_name), model, met_model
         if site is not None and footprint is None:
             site = clean_string(site)
 
@@ -379,16 +388,16 @@ class ModelScenario:
 
             footprint_keyword_options = []
             for fp_inlet_option in fp_inlet_options:
-
                 footprint_keywords = {
                     "site": site,
                     "height": fp_inlet_option,
                     "inlet": fp_inlet_option,
                     "domain": domain,
                     "model": model,
-                    # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
+                    # "met_model": met_model,  # Should be added to inputs for get_footprint()
                     "start_date": start_date,
                     "end_date": end_date,
+                    "store": store,
                 }
 
                 # Check whether general inert footprint should be extracted (suitable for long-lived species)
@@ -420,6 +429,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -444,7 +454,7 @@ class ModelScenario:
                 sources = [sources]
 
             for name in sources:
-                flux_keywords_1 = {"species": species, "source": name, "domain": domain}
+                flux_keywords_1 = {"species": species, "source": name, "domain": domain, "store": store}
 
                 # For CO2 we need additional emissions data before a start_date to
                 # match to high time resolution footprints.
@@ -463,13 +473,28 @@ class ModelScenario:
 
                 flux_source = self._get_data(flux_keywords, data_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
+
                 if flux_source is not None:
+                    # try to infer source name from FluxData metadata
+                    if name is None and len(sources) == 1:
+                        try:
+                            name = flux_source.metadata["source"]
+                        except KeyError:
+                            raise ValueError(
+                                "Flux 'source' could not be inferred from metadata/attributes. Please specify the source(s) of the flux."
+                            )
                     flux[name] = flux_source
 
         elif flux is not None:
             if not isinstance(flux, dict):
-                name = flux.metadata["source"]
-                flux = {name: flux}
+                try:
+                    name = flux.metadata["source"]
+                except KeyError:
+                    raise ValueError(
+                        "Flux 'source' could not be inferred from `flux` metadata/attributes. Please specify the source(s) of the flux in the `FluxData` metadata.."
+                    )
+                else:
+                    flux = {name: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
@@ -497,6 +522,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         bc: Optional[BoundaryConditionsData] = None,
+        store: Optional[str] = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
@@ -505,14 +531,13 @@ class ModelScenario:
         # Search for boundary conditions data based on keywords
         # - domain, species, bc_input
         if domain is not None and bc is None:
-
             bc_keywords = {
                 "species": species,
                 "domain": domain,
                 "bc_input": bc_input,
                 "start_date": start_date,
                 "end_date": end_date,
-                "species": species,
+                "store": store,
             }
 
             bc = self._get_data(bc_keywords, data_type="boundary_conditions")
@@ -633,7 +658,6 @@ class ModelScenario:
                 infer_sampling_period = True
             else:
                 obs_data_period_s = float(sampling_period)
-            obs_data_period_s = float(obs_attributes["sampling_period"])
         elif "sampling_period_estimate" in obs_attributes:
             estimate = obs_attributes["sampling_period_estimate"]
             logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
@@ -655,6 +679,10 @@ class ModelScenario:
             # Check if the periods differ by more than 1 second
             if max_diff > 1.0:
                 raise ValueError("Sample period can be not be derived from observations")
+
+            estimate = f"{obs_data_period_s:.1f}"
+            logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
+            obs.data.attrs["sampling_period_estimate"] = estimate
 
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
@@ -775,7 +803,7 @@ class ModelScenario:
         try:
             mf = obs.data["mf"]
             units: Optional[float] = float(mf.attrs["units"])
-        except KeyError:
+        except (ValueError, KeyError):
             units = None
         except AttributeError:
             raise AttributeError("Unable to read mf attribute from observation data.")
@@ -1267,7 +1295,6 @@ class ModelScenario:
         logger.info("Calculating modelled timeseries comparison:")
         iters = track(time_array.values)
         for tt, time in enumerate(iters):
-
             # Get correct index for low resolution data based on start and current date
             current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
             tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
@@ -1453,7 +1480,6 @@ class ModelScenario:
             loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
 
         else:
-
             loss_n = 1.0
             loss_e = 1.0
             loss_s = 1.0
