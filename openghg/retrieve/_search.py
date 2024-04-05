@@ -140,7 +140,10 @@ def search_flux(
 
     # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
     if high_time_resolution is not None:
-        warnings.warn("This argument is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
         time_resolved = high_time_resolution
     if start_date is not None:
         start_date = str(start_date)
@@ -208,9 +211,13 @@ def search_footprints(
         SearchResults: SearchResults object
     """
     from openghg.util import format_inlet
+
     # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
     if high_time_resolution is not None:
-        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        warnings.warn(
+            "This feature is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
         time_resolved = high_time_resolution
     args = {
         "site": site,

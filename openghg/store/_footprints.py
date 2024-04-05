@@ -277,7 +277,10 @@ class Footprints(BaseStore):
 
         # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution is not None:
-            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            warnings.warn(
+                "This feature is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
             time_resolved = high_time_resolution
 
         # Make sure `inlet` OR the alias `height` is included
@@ -515,12 +518,18 @@ class Footprints(BaseStore):
 
         # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
-            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            warnings.warn(
+                "This feature is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
             time_resolved = high_time_resolution
 
         # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
-            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            warnings.warn(
+                "This feature is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
             time_resolved = high_time_resolution
 
         # Names of data variables and associated dimensions (as a tuple)
@@ -614,7 +623,10 @@ class Footprints(BaseStore):
         """
         # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
-            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            warnings.warn(
+                "This feature is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
             time_resolved = high_time_resolution
 
         data_schema = Footprints.schema(
