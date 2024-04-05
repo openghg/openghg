@@ -488,7 +488,7 @@ def standardise_footprint(
     force: bool = False,
     high_spatial_resolution: bool = False,
     time_resolved: Optional[bool] = False,
-    high_time_resolution: bool = False, 
+    high_time_resolution: bool = False,
     short_lifetime: bool = False,
     sort: bool = False,
     drop_duplicates: bool = False,
