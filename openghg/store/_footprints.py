@@ -621,6 +621,7 @@ class Footprints(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the Footprints schema.
         """
+        
         # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
             warnings.warn(
