@@ -149,7 +149,7 @@ For the standards associated the footprint files, there are also flags
 which can be passed to sub-categorise the footprint inputs: -
 ``high_spatial_resolution`` - footprints containing multiple spatial
 resolutions. This is usually an embedded high resolution region within a
-larger lower resolution domain. - ``high_time_resolution`` - footprints which
+larger lower resolution domain. - ``time_resolved`` - footprints which
 include an additional dimension for resolving on the time axis. This is
 associated with shorter term flux changes (e.g. natural sources of
 carbon dioxide). A species will normally be associated with this
@@ -513,7 +513,7 @@ example, for flux data:
           <th>min_longitude</th>
           <th>max_latitude</th>
           <th>min_latitude</th>
-          <th>high_time_resolution</th>
+          <th>time_resolved</th>
           <th>time_period</th>
           <th>uuid</th>
         </tr>

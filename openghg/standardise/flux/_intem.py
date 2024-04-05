@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import warnings
 
 
 def parse_intem(
@@ -11,6 +12,7 @@ def parse_intem(
     domain: str = "europe",
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
+    time_resolved: Optional[bool] = False,
     high_time_resolution: Optional[bool] = False,
     continuous: bool = True,
 ) -> Dict:
@@ -29,7 +31,8 @@ def parse_intem(
         domain: Geographic domain, default is 'europe'.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
-        high_time_resolution: If this is a high resolution file.
+        time_resolved: If this is a high resolution file.
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         continuous: Flag indicating whether the data is continuous or not
     Returns:
         Dict: Parsed emissions data in dictionary format.
@@ -37,6 +40,13 @@ def parse_intem(
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
     from xarray import open_dataset
+
+    if high_time_resolution:
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
+        time_resolved = high_time_resolution
 
     emissions_dataset = open_dataset(filepath).chunk(chunks)
 
@@ -67,7 +77,7 @@ def parse_intem(
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = data_type
     metadata["source_format"] = "openghg"
-    metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+    metadata["time_resolution"] = "high" if time_resolved else "standard"
     dataset_time = emissions_dataset["time"]
 
     # Fetching start_date and end_date from dataset time dimension

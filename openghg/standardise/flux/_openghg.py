@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import warnings
 
 
 def parse_openghg(
@@ -11,6 +12,7 @@ def parse_openghg(
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
+    time_resolved: Optional[bool] = False,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Optional[Dict] = None,
@@ -28,7 +30,8 @@ def parse_openghg(
         database: Name of the database
         database_version: Version of the database
         model: Model name if applicable.
-        high_time_resolution: If this is a high resolution file.
+        time_resolved: If this is a high resolution file.
+        high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         period: The time period for which data is to be parsed.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
@@ -42,6 +45,13 @@ def parse_openghg(
     from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
     from xarray import open_dataset
+
+    if high_time_resolution:
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
+        time_resolved = high_time_resolution
 
     em_data = open_dataset(filepath).chunk(chunks)
 
@@ -98,7 +108,7 @@ def parse_openghg(
     metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
     metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
-    metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+    metadata["time_resolution"] = "high" if time_resolved else "standard"
     metadata["time_period"] = period_str
 
     key = "_".join((species, source, domain))

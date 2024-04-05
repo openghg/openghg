@@ -37,7 +37,7 @@ def populate_store():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        high_time_resolution=False,
+        time_resolved=False,
         store="user",
     )
 
