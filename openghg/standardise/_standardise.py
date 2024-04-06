@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Union, Any
 from pandas import Timedelta
 import warnings
 
-from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
@@ -26,6 +25,8 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
     Returns:
         dict: Dictionary of result data.
     """
+    from openghg.store import get_data_class
+
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
 
@@ -828,6 +829,8 @@ def standardise_from_binary_data(
     returns:
         Dictionary of result data.
     """
+    from openghg.store import get_data_class
+
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
 

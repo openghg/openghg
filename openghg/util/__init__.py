@@ -7,7 +7,8 @@ from ._domain import (
     get_domain_info,
     find_domain,
     find_coord_name,
-    convert_longitude,
+    convert_lon_to_180,
+    convert_lon_to_360,
     convert_internal_longitude,
     cut_data_extent,
 )
@@ -69,7 +70,13 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import create_config, get_user_id, get_user_config_path, read_local_config, check_config
+from ._user import (
+    create_config,
+    get_user_id,
+    get_user_config_path,
+    read_local_config,
+    check_config,
+)
 from ._util import (
     find_matching_site,
     multiple_inlets,

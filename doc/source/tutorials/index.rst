@@ -80,3 +80,8 @@ delete or modify already existing data.
    :maxdepth: 1
 
    local/Managing_object_store/Changing_object_store
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Managing_object_store/Converting_a_store
