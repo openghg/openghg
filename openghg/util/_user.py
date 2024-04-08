@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import uuid
 import toml
 import shutil
-from openghg.types import ConfigFileError
+from openghg.types import ConfigFileError, ObjectStoreError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -259,6 +259,30 @@ def read_local_config() -> Dict:
                 or run openghg --quickstart"
         )
 
+    # Check see is the store uses the new zarr storage format
+    # for OpenGHG >= 0.8.0
+    valid_stores = {}
+    for name, store_data in config["object_store"].items():
+        store_path = Path(store_data["path"])
+        # If it doesn't exist or its empty then we expect it to be created / populated
+        if not store_path.exists() or not any(store_path.iterdir()):
+            valid_stores[name] = store_data
+        # Otherwise we check an existing store to see if it's the correct format
+        else:
+            if _check_valid_store(store_path):
+                valid_stores[name] = store_data
+            else:
+                logger.warning(
+                    f"Object store {name} does not use the new Zarr storage format and will be ignored."
+                )
+
+    if not valid_stores:
+        raise ConfigFileError(
+            "We've only detected old (non-Zarr) object stores. Please update your configuration to add a new path."
+        )
+
+    config["object_store"] = valid_stores
+
     return config
 
 
@@ -322,3 +346,26 @@ def _migrate_config() -> None:
         shutil.rmtree(old_config_path.parent)  # remove "openghg" dir from ~/.config
     else:
         raise FileNotFoundError("Configuration file not found.")
+
+
+def _check_valid_store(store_path: Path) -> bool:
+    """Checks if the store is a valid object store using the new Zarr storage
+    format. If it is return True, otherwise False.
+
+    TODO - remove this when users have all moved to the new object store format.
+
+    Args:
+        store_path: Object store path
+    Returns:
+        bool: True if valid, False if not
+    """
+    data_dir = Path(store_path).joinpath("data")
+    # Now check if there's a zarr folder in the data directory
+    store_dirs = list(data_dir.glob("*"))
+    # Let's take the first data directory and see if there's a zarr folder in it
+    if not store_dirs:
+        raise ObjectStoreError("No data found in the object store, please check the path and try again.")
+
+    store_data_dir = store_dirs[0]
+
+    return store_data_dir.joinpath("zarr").exists()

@@ -1,21 +1,161 @@
+"""
+Parse EDGAR flux files and perform area-conservative regridding
+of fluxes.
+
+Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
+
+Additional edgar functions which could be incorporated.
+- getedgarv5annualsectors
+- getedgarv432annualsectors
+- (monthly sectors?)
+
+TODO: Work out how to select frequency
+- could try and relate to period e.g. "monthly" versus "yearly" etc.
+
+EDGAR flux files tend to have dimensions (lat, lon), and no time dimension;
+however, time is included in the filename, so we try to extract this, along
+with version, species, sector, and resolution.
+
+Typical file names:
+
+ v432_CH4_1978.0.1x0.1.nc (or .zip)
+ v50_CH4_1978.0.1x0.1.nc (or .zip)
+ v6.0_CH4_1978_TOTALS.0.1x0.1.nc
+
+ v50_CO2_excl_short-cycle_org_C_1978.0.1x0.1.nc (or .zip)
+ v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
+ v50_N2O_1978.0.1x0.1.zip (or .zip)
+
+Futher information is contained in the EDGAR readme files.
+For instance, from "_readme.html" from v6.0 data:
+
+'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
+ for the .txt files with longitude and latitude coordinates referring to
+ the low-left corner of each grid-cell.'
+
+'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
+ for the .txt files with longitude and latitude coordinates referring to
+ the low-left corner of each grid-cell.'
+
+'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude
+ and latitude coordinates referring to the cell center of each grid-cell.'
+
+For EDGAR v8.0,
+
+"""
+
+import pathlib
 import re
 import zipfile
-from pathlib import Path
-from typing import Dict, Optional, Tuple, Union, cast
-from zipfile import ZipFile
+from collections import namedtuple
+from typing import Any, Dict, Optional, Tuple, Union, cast
 import logging
 import numpy as np
 import xarray as xr
 from numpy import ndarray
 
+from openghg.standardise.meta import assign_flux_attributes, define_species_label
+from openghg.store import infer_date_range
+from openghg.util import (
+    clean_string,
+    molar_mass,
+    synonyms,
+    find_coord_name,
+    convert_internal_longitude,
+    timestamp_now,
+)
+
+
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
 
+_edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
+
+
+# TODO: make this work for...
+# - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
+# - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
+# - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
+def assemble_edgar_metadata(
+    filepath: Union[pathlib.Path, zipfile.Path],
+    species: Optional[str] = None,
+    version: Optional[str] = None,
+) -> dict[str, Any]:
+    """Combine given metadata with metadata extracted from filename.
+
+    Args:
+        filepath: pathlib.Path or zipfile.Path to EDGAR datafile
+        species: species of flux
+        version: EDGAR database version
+
+    Returns:
+        dictionary containing keys: version, species, year, source, resolution
+    """
+    known_versions = _edgar_known_versions
+
+    if species is not None:
+        species = define_species_label(species)[0]
+
+    valid_version = False
+    if version is not None:
+        version = clean_string(version)
+        if version in known_versions:
+            valid_version = True
+
+    try:
+        metadata = _extract_file_info(filepath)
+    except ValueError as e:
+        # NOTE: if species is not None and valid_version is True, then we have everything we
+        # need except resolution at this point...
+        raise ValueError(f"Could extract EDGAR metadata from file f{filepath.name}") from e
+    else:
+        if species:
+            if species != synonyms(metadata["species"]):
+                logger.warning(
+                    "Input species does not match species extracted from",
+                    " database filenames. Please check.",
+                )
+            metadata["species"] = species
+        else:
+            metadata["species"] = clean_string(metadata["species"])
+
+        if valid_version:
+            metadata["version"] = version
+        else:
+            if clean_string(metadata["version"]) not in known_versions:
+                if version is not None:
+                    raise ValueError(
+                        f"Unable to infer EDGAR version ({version})."
+                        f" Please pass as an argument (one of {known_versions})"
+                    )
+                else:
+                    raise ValueError(
+                        f"Unable to infer EDGAR version."
+                        f" Please pass as an argument (one of {known_versions})"
+                    )
+            else:
+                metadata["version"] = clean_string(metadata["version"])
+
+        source_from_file = metadata["source"]
+        if source_from_file in ("TOTALS", ""):
+            source = "anthro"
+        elif metadata["species"] == "co2" and "TOTALS" in source_from_file:
+            co2_source = "_".join(source_from_file.split("_")[:-1])
+            source = clean_string(f"{co2_source}_anthro")
+        else:
+            source = clean_string(source_from_file)
+
+        metadata["source"] = source
+
+    return metadata
+
+
 def parse_edgar(
-    datapath: Path,
+    datapath: pathlib.Path,
     date: str,
     species: Optional[str] = None,
     domain: Optional[str] = None,
@@ -63,209 +203,98 @@ def parse_edgar(
     TODO: Allow date range to be extracted rather than year?
     TODO: Add monthly parsing and sector stacking options
     """
-    import tempfile
-
-    from openghg.standardise.meta import assign_flux_attributes, define_species_label
-    from openghg.store import infer_date_range
-    from openghg.util import (
-        clean_string,
-        molar_mass,
-        synonyms,
-        find_coord_name,
-        convert_internal_longitude,
-        timestamp_now,
-    )
-
-    # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
-    # Additional edgar functions which could be incorporated.
-    # - getedgarv5annualsectors
-    # - getedgarv432annualsectors
-    # - (monthly sectors?)
-    # TODO: Work out how to select frequency
-    # - could try and relate to period e.g. "monthly" versus "yearly" etc.
     period = None
-
-    raw_edgar_domain = "globaledgar"
-
-    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
-
-    if domain is None:
-        domain = raw_edgar_domain
 
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
 
-    # Check if input is a zip file
     if zipfile.is_zipfile(datapath):
-        zipped = True
-        zip_folder = zipfile.ZipFile(datapath)
-    else:
-        zipped = False
+        datapath = zipfile.Path(datapath)  # type: ignore
 
-    known_versions = _edgar_known_versions()
+    # NOTE: the built-in `open` method doesn't work with zipfile.Path
+    # but there is a zipfile.Path.open method that works the same as
+    # pathlib.Path.open
 
-    # Check readme file for edgar version (if not specified)
-    if zipped and edgar_version is None:
-        edgar_version = _check_readme_version(zippath=zip_folder)
-    elif edgar_version is None:
-        edgar_version = _check_readme_version(datapath=datapath)
-
-    # Extract list of data files
-    if zipped:
-        zip_filelist = zip_folder.infolist()
-        # folder_filelist = list(zip_folder.namelist())
-        folder_filelist = [Path(filename.filename) for filename in zip_filelist]
-    else:
-        folder_filelist = list(datapath.glob("*"))
+    folder_filelist = [x for x in datapath.iterdir() if x.is_file()]
 
     # Extract netcdf files (only, for now) - ".txt" is also an option (not implemented)
-    suffix = ".nc"
-    data_files = [file for file in folder_filelist if file.suffix == suffix]
+    # Path(file.name).suffix workaround because zipfile.Path.suffix is Python 3.11+
+    data_files = [file for file in folder_filelist if pathlib.Path(file.name).suffix == ".nc"]
 
     if not data_files:
-        raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
+        raise ValueError(f"No '.nc' files found in datapath: {datapath}")
 
-    for file in data_files:
-        try:
-            db_info = _extract_file_info(file)
-        except ValueError:
-            db_info = {}
-            continue
-
-    # Extract species from filename if not specified
-    try:
-        species_from_file: Optional[str] = db_info["species"]
-    except KeyError:
-        species_from_file = None
-
-    if species is None:
-        species = species_from_file
-
-    # Check synonyms and compare against filename value
-    if species is not None:
-        species_label = define_species_label(species)[0]
-        # species_label = synonyms(species).lower()
-    else:
-        raise ValueError("Unable to retrieve species from database filenames." " Please specify")
-
-    if species_from_file is not None and species_label != synonyms(species_from_file):
-        logger.warning(
-            "Input species does not match species extracted from",
-            " database filenames. Please check.",
-        )
-
-    # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
-        possible_version = db_info["version"]
-        possible_version_clean = clean_string(possible_version)
-        if possible_version_clean in known_versions:
-            edgar_version = possible_version_clean
-
-    edgar_version = clean_string(edgar_version)
-
-    if edgar_version not in known_versions:
-        if edgar_version is None:
-            raise ValueError(
-                f"Unable to infer EDGAR version ({edgar_version})."
-                f" Please pass as an argument (one of {known_versions})"
-            )
-        else:
-            raise ValueError(
-                f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})"
-            )
-
-    # TODO: May want to split out into a separate function, so we can use this for
-    # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
-    # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
-    # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
-
-    if isinstance(date, int):
-        date = str(date)
+        # check if _readme.html is in folder_filelist, and if so, try to extract version
+        readme = datapath / "_readme.html"
+        if readme.exists():
+            with readme.open("r") as f:  # pathlib.Path and zipfile.Path have .open method
+                edgar_version = _check_readme_data(f.read())
 
     if len(date) == 4:
         year = int(date)
     else:
-        raise ValueError(f"Do no accept date which does not represent a year yet: {date}")
+        raise ValueError(
+            f"Date {date} does not represent a year;" " only annual EDGAR data can be processed currently."
+        )
 
-    files_by_year = {}
-    for file in data_files:
+    FileInfo = namedtuple("FileInfo", "path metadata")
+    files_by_year: dict[int, FileInfo] = {}
+    for data_file in data_files:
         try:
-            file_info = _extract_file_info(file)
+            metadata = assemble_edgar_metadata(data_file, species, edgar_version)
         except ValueError:
             continue
+        else:
+            # Check if data is actually monthly "...2015_1" etc. - can't parse yet
+            if "month" in metadata:
+                raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
 
-        # Check if data is actually monthly "...2015_1" etc. - can't parse yet
-        if "month" in file_info:
-            raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
+            files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
-        year_from_file = file_info["year"]
+    if not files_by_year:
+        raise ValueError(f"Unable to extract EDGAR file info from any files in {datapath}.")
 
-        files_by_year[year_from_file] = file
-
-        if year_from_file == year:
-            edgar_file = file
-            edgar_file_info = file_info
-            break
-    else:
-        all_years = list(files_by_year.keys())
-        all_years.sort()
+    try:
+        edgar_file, edgar_file_info = files_by_year[year]
+    except KeyError:
+        all_years = sorted(list(files_by_year.keys()))
         start_year, end_year = all_years[0], all_years[-1]
+
         if year < start_year:
-            raise ValueError(
-                f"EDGAR {edgar_version} range: {start_year}-{end_year}." f" {year} is before this period."
-            )
+            raise ValueError(f"Files span range: {start_year}-{end_year}." f" {year} is before this period.")
         elif year > end_year:
-            logger.info(
-                f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}."
+            logger.info(f"Using last available year from range:" f"{start_year}-{end_year}.")
+        edgar_file, edgar_file_info = files_by_year[end_year]
+
+    species_label = edgar_file_info["species"]
+    version = edgar_file_info["version"]
+
+    # get dataset
+    # using .open("rb") for pathlib.Path and zipfile.Path compatibility
+    edgar_ds = xr.open_dataset(edgar_file.open("rb"))
+
+    # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
+    name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
+
+    # check that data variable `name` is in `edgar_ds`
+    if name not in edgar_ds.data_vars:
+        if version.startswith("v8"):
+            raise ValueError(
+                f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
             )
-            edgar_file = files_by_year[end_year]
-            edgar_file_info = _extract_file_info(edgar_file)
-
-    # For a zipped archive need to unzip the netcdf file and place in a
-    # temporary directory.
-    if zipped:
-        temp_extract_folder = tempfile.TemporaryDirectory()
-
-        for zipinfo in zip_filelist:
-            if zipinfo.filename == edgar_file.name:
-                zip_folder.extract(zipinfo, path=temp_extract_folder.name)
-                edgar_file = temp_extract_folder.name / edgar_file
-                break
-
-    # Dimension - (lat, lon) - no time dimension
-    # time is not included in the file just in the filename *sigh*!
-
-    # v432_CH4_1978.0.1x0.1.nc (or .zip)
-    # v50_CH4_1978.0.1x0.1.nc (or .zip)
-    # v6.0_CH4_1978_TOTALS.0.1x0.1.nc
-
-    # v50_CO2_excl_short-cycle_org_C_1978.0.1x0.1.nc (or .zip)
-    # v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
-    # v50_N2O_1978.0.1x0.1.zip (or .zip)
-
-    with xr.open_dataset(edgar_file) as temp:
-        edgar_ds = temp
-
-    # Expected name e.g. "emi_ch4", "emi_co2"
-    name = f"emi_{species_label}"
-
-    # For reference, from "_readme.html" from v6.0 data:
-    # 'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
-    #  for the .txt files with longitude and latitude coordinates referring to
-    #  the low-left corner of each grid-cell.'
-    # 'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
-    #  for the .txt files with longitude and latitude coordinates referring to
-    #  the low-left corner of each grid-cell.'
-    # 'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude
-    # and latitude coordinates referring to the cell center of each grid-cell.'
+        else:
+            raise ValueError(f"Data variable {name} not present.")
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    # flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
     flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
+
+    # TODO: some options for f-gases (.emi files) have different units...
+    # need to catch this
 
     lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
     lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
@@ -276,7 +305,11 @@ def parse_edgar(
         )
 
     # Check range of longitude values and convert to -180 - +180
-    flux_da = convert_internal_longitude(flux_da, lon_name=lon_name)
+    flux_da = convert_internal_longitude(
+        flux_da, lon_name=lon_name
+    )  # TODO is this creating NaNs for East Asia domain?
+
+    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
 
     if lat_out is not None and lon_out is not None:
         # Will produce import error if xesmf has not been installed.
@@ -291,8 +324,7 @@ def parse_edgar(
         lat_in_cut = flux_da_cut[lat_name]
         lon_in_cut = flux_da_cut[lon_name]
 
-        # regrid2d() used within acrg code for equivalent regrid function
-        # but switched to using xesmf (rather than iris) here instead.
+        # area conservative regrid
         flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
     else:
         lat_out = flux_da[lat_name]
@@ -301,21 +333,20 @@ def parse_edgar(
 
     edgar_attrs = edgar_ds.attrs
 
-    # After the data has been extracted and used from the unzipped netcdf
-    # file clean up and remove temporary directory and file.
-    if zipped:
-        temp_extract_folder.cleanup()
-
     # Check for "time" dimension and add if missing.
     flux_ndim = flux_values.ndim
     time_name = "time"
     if time_name in flux_da:
         time = flux_da[time_name].values
+        flux = flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
     elif time_name not in flux_da and flux_ndim == 2:
         time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
         flux = flux_values[np.newaxis, ...]
-    elif flux_ndim != 3:
-        raise ValueError(f"Expected '{name}' to contain 2 or 3 dimensions. Actually: {flux_ndim}")
+    else:
+        raise ValueError(
+            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
+            f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
+        )
 
     dims = ("time", "lat", "lon")
 
@@ -335,26 +366,20 @@ def parse_edgar(
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
 
-    source_from_file = edgar_file_info["source"]
-    if source_from_file in ("TOTALS", ""):
-        source = "anthro"
-    elif species_label == "co2" and "TOTALS" in source_from_file:
-        co2_source = "_".join(source_from_file.split("_")[:-1])
-        source = clean_string(f"{co2_source}_anthro")
-    else:
-        source = clean_string(source_from_file)
-    database = "EDGAR"
-    database_version = clean_string(edgar_version)
-
     metadata = {}
     metadata.update(attrs)
 
+    raw_edgar_domain = "globaledgar"
+    if domain is None:
+        domain = raw_edgar_domain
+
+    source = edgar_file_info["source"]
     metadata["species"] = species_label
     metadata["domain"] = domain
     metadata["source"] = source
     metadata["date"] = date
-    metadata["database"] = database
-    metadata["database_version"] = database_version
+    metadata["database"] = "EDGAR"
+    metadata["database_version"] = edgar_file_info["version"]
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = "flux"
@@ -363,7 +388,7 @@ def parse_edgar(
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file, period=period)
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
 
     prior_info_dict = {
         "EDGAR": {
@@ -426,7 +451,7 @@ def _check_lat_lon(
         ndarray, ndarray: Latitude and longitude arrays
         None, None: if all inputs are None, a tuple of Nones will be returned.
     """
-    from openghg.util import convert_longitude, find_domain
+    from openghg.util import convert_lon_to_360, find_domain
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
@@ -473,92 +498,47 @@ def _check_lat_lon(
             else:
                 lon_out = lon_domain
 
-            if lon_out.max() > 180 or lon_out.min() < -180:
+            if lon_out.max() - lon_out.min() >= 360:
                 raise ValueError(
                     "Invalid domain definition."
-                    " Expected longitude in range: -180 - 180."
+                    " Expected longitude in range: 0 to 360."
                     f"Current longitude: {lon_out.min()} - {lon_out.max()}"
                 )
 
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
-        logger.info("Converting longitude to stay within -180 - 180 bounds")
-        lon_converted = convert_longitude(lon_out)
+        logger.info("Converting longitude to stay within 0 to 360 bounds")
+        lon_converted = convert_lon_to_360(lon_out)
         lon_out = cast(Optional[ndarray], lon_converted)
 
     return lat_out, lon_out
 
 
-def _edgar_known_versions() -> list:
-    """Define list of known versions for the EDGAR database"""
-    known_versions = ["v432", "v50", "v60"]
-    return known_versions
-
-
-def _check_readme_version(
-    datapath: Optional[Path] = None, zippath: Optional[ZipFile] = None
-) -> Optional[str]:
-    """
-    Attempts to extract the edgar version from the associated "_readme.html"
-    file, if present.
+def _check_readme_data(readme_data: str) -> Optional[str]:
+    """Parse EDGAR _readme.html to find version.
 
     Args:
-        datapath : Path to the folder containing the downloaded EDGAR files
-        zippath: Path to zipped archive file (direct from EDGAR)
+        readme_data: string containing contents of _readme.html
 
     Returns:
-        str : edgar version if found (None otherwise)
+        EDGAR version, if found, otherwise None
     """
+    try:
+        # Ignoring types as issues caught by try-except statement
+        # Find and extract title line from html file
+        title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
+        # Extract version e.g. "v6.0" or "v4.3.2"
+        edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
+    except (ValueError, AttributeError):
+        return None
 
-    # Work out version if possible from readme
-    # All database versions so far may contain "_readme.html" file
-    # "v6.0"
-    #  - "TOTALS_nc.zip" is what is downloaded from website
-    #  - "_readme.html" title line: "<title>EDGAR v6.0_GHG (2021)</title>"
-    # "v5.0"
-    #  - "v50_CH4_1970_2015.zip" can be downloaded
-    #  - "_readme.html" title line: "<title>EDGAR v5.0 (2019)</title>"
-    # "v4.3.2"
-    #  - "v432_CH4_1970_2012.zip" can be downloaded
-    #  - "_readme.html" title line: "<title>EDGAR v4.3.2 (2017)</title>"
-
-    # Check for readme html file and, if present, extract version
-    readme_filename = "_readme.html"
-    if zippath is not None:
-        try:
-            # Cast extracted bytes to a str object
-            readme_data: Optional[str] = str(zippath.read(readme_filename))
-        except ValueError:
-            readme_data = None
-    elif datapath is not None:
-        readme_filepath = datapath.joinpath(readme_filename)
-        if readme_filepath.exists():
-            readme_data = readme_filepath.read_text()
-        else:
-            readme_data = None
-    else:
-        raise ValueError("One of datapath or zippath must be specified.")
-
-    if readme_data is not None:
-        try:
-            # Ignoring types as issues caught by try-except statement
-            # Find and extract title line from html file
-            title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
-            # Extract version e.g. "v6.0" or "v4.3.2"
-            edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
-        except ValueError:
-            pass
-        else:
-            # Check against known versions and remove '.' if these don't match.
-            known_versions = _edgar_known_versions()
-            if edgar_version not in known_versions:
-                edgar_version = edgar_version.replace(".", "")
-    else:
-        edgar_version = None
+        # Check against known versions and remove '.' if these don't match.
+    if edgar_version not in _edgar_known_versions:
+        edgar_version = edgar_version.replace(".", "")
 
     return edgar_version
 
 
-def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
+def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Dict:
     """
     Extract details from EDGAR filename.
 
@@ -587,95 +567,69 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
 
     # Extract filename stem (name without extension) and split
-    edgar_file = Path(edgar_file)
+    if isinstance(edgar_file, str):
+        edgar_file = pathlib.Path(edgar_file)
+    if isinstance(edgar_file, zipfile.Path):
+        edgar_file = pathlib.Path(edgar_file.name)  # zipfile.Path.stem is Python 3.11+
     filename = edgar_file.stem
-    filename_split = filename.split("_")
 
-    # Check if we can extract the known components from the filename
-    # - version, species (upper), year
-    try:
-        version = filename_split[0]
-        species = filename_split[1]
-    except IndexError:
+    # remove unwanted parts like:
+    # FT2021, FT2022, etc
+    # GHG
+    # emi_nc, flx_nc
+    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?"]
+    cleaning_regexps_joined = "|".join(cleaning_regexps)
+    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
+
+    filename_clean = cleaning_pat.sub("", filename)
+
+    # parse string of form:
+    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
+    info_pat = re.compile(
+        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
+        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
+        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
+        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
+        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
+        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
+        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
+    )
+
+    if m := info_pat.search(filename_clean):
+        file_info = m.groupdict()
+    else:
+        # info_pat matches all files in known EDGAR versions
+        # (verified by searching all file names for these versions
+        # 18 March 2024)
         raise ValueError(f"Did not recognise input file format: {filename}")
+
+    # make "source" string
+    co2_options = file_info.pop("co2_options") or ""
+
+    sector = file_info.pop("sector") or ""
+    sector = sector.replace("_", "-")
+
+    source = "_".join([co2_options, sector])
+    source = source.strip("_")  # in case co2_options or sector is ""
+
+    # if not source:
+    #     raise ValueError(f"Unable to extract source: {filename}")
+
+    file_info["source"] = source
+
+    # year and month should be integers
+    file_info["year"] = int(file_info["year"])
+
+    if file_info["month"] is not None:
+        file_info["month"] = int(file_info["month"])
     else:
-        index_remaining = 2
+        del file_info["month"]
 
-    # CO2 input has 2 options e.g.
-    # - "v6.0_CO2_excl_short-cycle_org_C_2015_TOTALS.0.1x0.1.nc"
-    # - "v6.0_CO2_org_short-cycle_C_1970_TOTALS.0.1x0.1.nc"
-    if species.lower() == "co2":
-        co2_options = ["excl_short-cycle_org_C", "org_short-cycle_C"]
-        for option in co2_options:
-            if option in filename:
-                option_split = option.split("_")
-                extra_sections = len(option_split)
-                index_remaining += extra_sections
+    # file_info["version"] = clean_string(file_info["version"])
 
-                source = "_".join(option_split[0:2]) + "_"
-                break
-        else:
-            source = ""
-    else:
-        source = ""
-
-    # Check if year can be cast to integer to check this is a valid value
-    try:
-        year_str = filename_split[index_remaining]
-        year = int(year_str)
-    except IndexError:
-        raise ValueError(f"Unable to cast year extracted from file format to an integer: {year_str}")
-    except ValueError:
-        # In some files there is no source specified so
-        # filename_split[2] contains the year and resolution
-        # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1"
-        try:
-            year = int(year_str.split(".")[0])
-        except ValueError:
-            raise ValueError(f"Could not find valid year value from file: {filename}")
-    else:
-        index_remaining += 1
-
-    # Check whether month is included in filename
-    # e.g. "v6.0_CH4_2015_1_ENE.0.1x0.1.nc"
-    try:
-        month: Optional[int] = int(filename_split[3])
-    except (IndexError, ValueError):
-        month = None
-    else:
-        index_remaining += 1
-
-    # Attempt to extract source(s) and resolution from filename stem
-    # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc" --> "TOTALS.0.1x0.1"
-    # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1" (note no source in filename)
-    # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC_6A_6D.0.1x0.1"
-    try:
-        source_resolution = "-".join(filename_split[index_remaining:])
-    except (IndexError, ValueError):
-        raise ValueError(f"Unable to extract source: {filename}")
-    else:
-        # e.g. "TOTALS.0.1x0.1" --> "TOTALS", "0.1x0.1"
-        # e.g. "2015.0.1x0.1" --> "2015", "0.1x0.1" --> "", "0.1x0.1"
-        # e.g. "IPCC_6A_6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
-        em_source = source_resolution.split(".")[0]
-        resolution = source_resolution.lstrip(em_source).lstrip(".")
-        # Check source was actually contained in filename and not just the year
-        # If so, set source to contain empty string
-        if em_source == str(year):
-            source += ""
-        else:
-            source += em_source
-
-    file_info = {
-        "version": version,
-        "species": species,
-        "year": year,
-        "source": source,
-        "resolution": resolution,
-    }
-
-    if month is not None:
-        file_info["month"] = month
+    # if not file_info["version"] in _edgar_known_versions:
+    #     raise ValueError(f"Version {file_info['version']} inferred from {filename} not know known "
+    #                      f"EDGAR versions: {_edgar_known_versions}.")
 
     return file_info
 
