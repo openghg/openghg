@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-import os
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
@@ -13,21 +13,20 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 
-__all__ = ["OneDTtimeseries"]
+__all__ = ["OneDTimeseries"]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class OneDTtimeseries(BaseStore):
+class OneDTimeseries(BaseStore):
     """This class is used to process ond dimension timeseries data"""
 
     _data_type = "1d_timeseries"
 
-    # Identify if below section of code is relevant,
-    # If so What changes do we want here?
-    """ _root = "BoundaryConditions"
-    _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
+    # New uuid is generated using the package - Delete comment in future
+    """ _root = "OneDTimeseries"
+    _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
@@ -140,7 +139,7 @@ class OneDTtimeseries(BaseStore):
         )
 
         # Checking against expected format for boundary conditions
-        OneDTtimeseries.validate_data(oned_data)
+        OneDTimeseries.validate_data(oned_data)
         data_type = "1d_timeseries"
 
         metadata["start_date"] = str(start_date)
@@ -188,7 +187,7 @@ class OneDTtimeseries(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the BoundaryConditions schema.
         """
-        data_schema = OneDTtimeseries.schema()
+        data_schema = OneDTimeseries.schema()
         data_schema.validate_data(data)
 
     @staticmethod
