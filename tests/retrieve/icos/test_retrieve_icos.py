@@ -13,7 +13,7 @@ from openghg.dataobjects import ObsData, SearchResults
 from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.util import get_logfile_path
 
-
+@pytest.mark.xfail(reason="Cloud tests marked for removal. Cloud code needs rewrite.")
 def test_retrieve_icos_cloud(monkeypatch, mocker):
     monkeypatch.setenv("OPENGHG_HUB", "1")
     mocker.patch("openghg.cloud.call_function", return_value={"content": {"found": False}})
