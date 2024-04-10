@@ -916,4 +916,5 @@ def standardise_oned_timeseries(
         save_current=save_current,
         force=force,
         compressor=compressor,
-        filters=filters)
+        filters=filters,
+    )
