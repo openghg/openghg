@@ -839,3 +839,81 @@ def standardise_from_binary_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
     return result
+
+
+def standardise_oned_timeseries(
+    filepath: Union[str, Path],
+    species: str,
+    source: str,
+    domain: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    chunks: Optional[Dict] = None,
+    store: Optional[str] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
+    overwrite: bool = False,
+    force: bool = False,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+) -> Dict:
+    """Process one dimension timeseries file
+
+    Args:
+        filepath: Path of boundary conditions file
+        species: Species name
+        domain: Region for boundary conditions
+        source: Flux / Emissions source
+        database: Name of database source for this input (if relevant)
+        database_version: Name of database version (if relevant)
+        model: Model name (if relevant)
+        source_format : Type of data being input e.g. openghg (internal format)
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        If specified, should be one of:
+            - "yearly", "monthly"
+            - suitable pandas Offset Alias
+            - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
+        continuous: Whether time stamps have to be continuous.
+        if_exists: What to do if existing data is present.
+            - "auto" - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "combine" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+            - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
+        force: Force adding of data even if this is identical to data stored.
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.      Returns:
+        dict: Dictionary of datasource UUIDs data assigned to
+    """
+    if running_on_hub():
+        raise NotImplementedError("Serverless not implemented yet for One dimensional timeseries model.")
+    return standardise(
+        data_type="oned_timeseries",
+        store=store,
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        database=database,
+        database_version=database_version,
+        model=model,
+        chunks=chunks,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compressor=compressor,
+        filters=filters)
