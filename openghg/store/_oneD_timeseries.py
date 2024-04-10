@@ -151,7 +151,7 @@ class OneDTimeseries(BaseStore):
 
         if not unseen_hashes:
             return {}
-        
+
         filepath = next(iter(unseen_hashes.values()))
 
         if chunks is None:

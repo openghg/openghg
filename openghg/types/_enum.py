@@ -62,7 +62,7 @@ class ObsTypes(Enum):
 
 
 class OneD_types(Enum):
-    """ For standardising one dimensional timeseries data"""
+    """For standardising one dimensional timeseries data"""
 
     CRF = "Crf"
 

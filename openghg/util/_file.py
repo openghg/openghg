@@ -154,6 +154,7 @@ def load_oned_parser(source_format: str) -> Callable:
 
     return fn
 
+
 def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
