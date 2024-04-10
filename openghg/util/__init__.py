@@ -31,6 +31,7 @@ from ._file import (
     load_json,
     load_internal_json,
     load_surface_parser,
+    load_oned_parser,
     read_header,
     check_function_open_nc,
 )

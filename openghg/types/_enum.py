@@ -61,6 +61,12 @@ class ObsTypes(Enum):
     MOBILE = "ObsMobile"
 
 
+class OneD_types(Enum):
+    """ For standardising one dimensional timeseries data"""
+
+    CRF = "Crf"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
