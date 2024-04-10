@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
 from xarray import Dataset
-from typing import TYPE_CHECKING, Any, DefaultDict, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -296,46 +296,46 @@ class OneDTimeseries(BaseStore):
 
     #     return datasource_uuids
 
-    # @staticmethod
-    # def validate_data(data: Dataset) -> None:
-    #     """
-    #     Validate input data against BoundaryConditions schema - definition from
-    #     BoundaryConditions.schema() method.
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against BoundaryConditions schema - definition from
+        BoundaryConditions.schema() method.
 
-    #     Args:
-    #         data : xarray Dataset in expected format
+        Args:
+            data : xarray Dataset in expected format
 
-    #     Returns:
-    #         None
+        Returns:
+            None
 
-    #         Raises a ValueError with details if the input data does not adhere
-    #         to the BoundaryConditions schema.
-    #     """
-    #     data_schema = OneDTimeseries.schema()
-    #     data_schema.validate_data(data)
+            Raises a ValueError with details if the input data does not adhere
+            to the BoundaryConditions schema.
+        """
+        data_schema = OneDTimeseries.schema()
+        data_schema.validate_data(data)
 
-    # @staticmethod
-    # def schema() -> DataSchema:
-    #     """
-    #     Define schema for one dimensional timeseries(OneDTimeseries) Dataset.
+    @staticmethod
+    def schema() -> DataSchema:
+        """
+        Define schema for one dimensional timeseries(OneDTimeseries) Dataset.
 
-    #     Includes observation for each time of the defined domain:
-    #         - "Obs"
-    #             - expected dimensions: ("time")
+        Includes observation for each time of the defined domain:
+            - "Obs"
+                - expected dimensions: ("time")
 
-    #     Expected data types for all variables and coordinates also included.
+        Expected data types for all variables and coordinates also included.
 
-    #     Returns:
-    #         DataSchema : Contains schema for OneDTimeseries.
-    #     """
-    #     from openghg.store import DataSchema
+        Returns:
+            DataSchema : Contains schema for OneDTimeseries.
+        """
+        from openghg.store import DataSchema
 
-    #     data_vars: Dict[str, Tuple[str, ...]] = {"Obs": ("time")}
-    #     dtypes = {
-    #         "time": np.datetime64,
-    #         "Obs": np.floating,
-    #     }
+        data_vars: Dict[str, Tuple[str, ...]] = {"Obs": ("time")}
+        dtypes = {
+            "time": np.datetime64,
+            "Obs": np.floating,
+        }
 
-    #     data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
-    #     return data_format
+        return data_format
