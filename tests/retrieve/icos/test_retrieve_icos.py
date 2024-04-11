@@ -57,7 +57,10 @@ def test_icos_retrieve_invalid_site(mocker, caplog, socket_disabled):
 
     assert no_data is None
 
-    assert "Please check you have passed a valid ICOS site." in caplog.text
+    assert (
+        "Please check you have passed a valid ICOS site and have a working internet connection."
+        in caplog.text
+    )
 
 
 def test_ensure_we_have_no_network_access(socket_disabled):
