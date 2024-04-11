@@ -108,6 +108,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_icos"
         post_data["search_terms"] = kwargs
