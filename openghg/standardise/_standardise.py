@@ -901,7 +901,7 @@ def standardise_oned_timeseries(
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for One dimensional timeseries model.")
     return standardise(
-        data_type="oned_timeseries",
+        data_type="OneDTimeseries",
         store=store,
         filepath=filepath,
         species=species,

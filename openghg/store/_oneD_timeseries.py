@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class OneDTimeseries(BaseStore):
     """This class is used to process ond dimension timeseries data"""
 
-    _data_type = "oned_timeseries"
+    _data_type = "OneDTimeseries"
 
     # New uuid is generated using the package - Delete comment in future
     """ _root = "OneDTimeseries"
@@ -162,7 +162,7 @@ class OneDTimeseries(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "data_type": "oned_timeseries",
+            "data_type": "OneDTimeseries",
             "chunks": chunks,
         }
 
@@ -201,7 +201,7 @@ class OneDTimeseries(BaseStore):
 
         required = tuple(min_required)
 
-        data_type = "oned_timeseries"
+        data_type = "OneDTimeseries"
         datasource_uuids = self.assign_data(
             data=oned_data,
             if_exists=if_exists,
