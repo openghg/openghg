@@ -42,7 +42,6 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-mock
-  - pytest-socket
   - requests-mock
   - pytest-tornasync
   - mypy==1.7.1
