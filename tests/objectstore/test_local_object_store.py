@@ -107,7 +107,7 @@ def test_set_get_compressed_file(tmp_path):
     assert filepath.exists()
 
     out_filepath = Path(tmp_path, "decompressed_file.dat")
-    get_compressed_file(bucket=bucket, key=key, out_filepath=out_filepath)
+    get_compressed_file(bucket=bucket, key=key, output_filepath=out_filepath)
 
     assert out_filepath.exists()
 

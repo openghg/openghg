@@ -409,7 +409,9 @@ def test_search_flux_retrieve_original_files():
         domain="europe",
     )
 
-    hashes = res.metadata["original_file_hashes"]
+    uid = next(iter(res.metadata))
+
+    hashes = res.metadata[uid]["original_file_hashes"]["v1"]
     assert "9ff6de082836e1735d2b2dea2dbbc69b2dc89229" in hashes
     assert "9554a94b439317770b99c3877a1b17941bb19255" in hashes
 
