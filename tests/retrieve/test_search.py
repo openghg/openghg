@@ -400,13 +400,21 @@ def test_search_flux():
 
 
 def test_search_flux_retrieve_original_files():
+    """Ensure we can retrieve the original files from the data
+    returned by the search result.
+    """
     res = search_flux(
         species="co2",
         source="gpp-cardamom",
         domain="europe",
     )
 
-    print(res)
+    hashes = res.metadata["original_file_hashes"]
+    assert "9ff6de082836e1735d2b2dea2dbbc69b2dc89229" in hashes
+    assert "9554a94b439317770b99c3877a1b17941bb19255" in hashes
+
+    # Retrieve the hashes
+    # TODO
 
 
 def test_search_flux_select():
