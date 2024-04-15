@@ -380,7 +380,7 @@ class ObsSurface(BaseStore):
             data_type = "surface"
             datasource_uuids = self.assign_data(
                 data=data,
-                file_hashes=file_hash,
+                file_hashes={file_hash: data_filepath},
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,

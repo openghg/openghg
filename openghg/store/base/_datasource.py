@@ -113,7 +113,7 @@ class Datasource:
         metadata: Dict,
         data: xr.Dataset,
         data_type: str,
-        file_hashes: Union[str, List],
+        file_hashes: Dict,
         sort: bool = False,
         drop_duplicates: bool = False,
         skip_keys: Optional[List] = None,
@@ -172,7 +172,7 @@ class Datasource:
         self,
         data: xr.Dataset,
         data_type: str,
-        file_hashes: Union[str, List],
+        file_hashes: Dict,
         sort: bool,
         drop_duplicates: bool,
         new_version: bool = True,
@@ -372,25 +372,32 @@ class Datasource:
 
         self._last_updated = timestamp_str_now
 
-    def add_hashes(self, version: str, file_hashes: Union[str, List]) -> None:
+    def add_hashes(self, version: str, file_hashes: Dict) -> None:
         """Add hashes of original data files to metadata
 
         Args:
             version: Version
-            file_hash: SHA1 file hash
+            file_hashes: SHA1 file hash
         Returns:
             None
         """
-        if not isinstance(file_hashes, list):
-            file_hashes = [file_hashes]
+        # We'll filepaths in the file_hashes dictionary
+        filename_only = {}
+        for file_hash, filepath in file_hashes.items():
+            try:
+                filename = filepath.name
+            except AttributeError:
+                filename = filepath
+
+            filename_only[file_hash] = filename
 
         if "original_file_hashes" not in self._metadata:
-            self._metadata["original_file_hashes"] = {version: file_hashes}
+            self._metadata["original_file_hashes"] = {version: filename_only}
         else:
             if version in self._metadata["original_file_hashes"]:
-                self._metadata["original_file_hashes"][version].extend(file_hashes)
+                self._metadata["original_file_hashes"][version].update(filename_only)
             else:
-                self._metadata["original_file_hashes"][version] = file_hashes
+                self._metadata["original_file_hashes"][version] = filename_only
 
     def delete_all_data(self) -> None:
         """Delete the zarr store that contains all the data

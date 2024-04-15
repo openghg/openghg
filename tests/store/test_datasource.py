@@ -745,18 +745,23 @@ def test_bytes_stored(data, bucket):
 def test_add_file_hashes(bucket):
     d = Datasource(bucket=bucket)
 
-    file_hashes_v1 = ["test-hash-123"]
+    file_hashes_v1 = {"test_file_1.nc": "test-hash-123"}
     d.add_hashes(version="v1", file_hashes=file_hashes_v1)
 
     assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1}
 
-    file_hashes_v2 = ["test-hash-124"]
+    file_hashes_v2 = {"test_file_2.nc": "test-hash-124"}
     d.add_hashes(version="v2", file_hashes=file_hashes_v2)
 
     assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1, "v2": file_hashes_v2}
 
-    file_hashes_v2_again = ["test-hash-125", "test-hash-126", "test-hash-127"]
+    file_hashes_v2_again = {
+        "test_file_3.nc": "test-hash-125",
+        "test_file_4.nc": "test-hash-126",
+        "test_file_5.nc": "test-hash-127",
+    }
+
     d.add_hashes(version="v2", file_hashes=file_hashes_v2_again)
 
-    expected_v2 = ["test-hash-124", "test-hash-125", "test-hash-126", "test-hash-127"]
+    expected_v2 = {**file_hashes_v2, **file_hashes_v2_again}
     assert d._metadata["original_file_hashes"] == {"v1": file_hashes_v1, "v2": expected_v2}

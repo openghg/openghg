@@ -111,4 +111,4 @@ def test_set_get_compressed_file(tmp_path):
 
     assert out_filepath.exists()
 
-    filecmp.cmp(tac_filepath, out_filepath)
+    assert filecmp.cmp(tac_filepath, out_filepath)

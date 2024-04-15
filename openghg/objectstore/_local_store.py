@@ -347,7 +347,7 @@ def set_compressed_file(bucket: str, key: str, filepath: Path) -> None:
         None
     """
     filename = Path(f"{bucket}/{key}._data.gz")
-    filename.parent.mkdir(exist_ok=True)
+    filename.parent.mkdir(exist_ok=True, parents=True)
 
     # We shouldn't hit this but this but it might help us catch some logic errors
     if exists(bucket=bucket, key=key):
@@ -358,7 +358,7 @@ def set_compressed_file(bucket: str, key: str, filepath: Path) -> None:
             shutil.copyfileobj(f_in, f_out)
 
 
-def get_compressed_file(bucket: str, key: str, out_filepath: Path) -> None:
+def get_compressed_file(bucket: str, key: str, output_filepath: Path) -> None:
     """Get compressed file from object store and write to out_filepath
 
     Args:
@@ -370,7 +370,7 @@ def get_compressed_file(bucket: str, key: str, out_filepath: Path) -> None:
     """
     filename = f"{bucket}/{key}._data.gz"
 
-    with gzip.open(filename, "rb") as f_in, open(out_filepath, "wb") as f_out:
+    with gzip.open(filename, "rb") as f_in, open(output_filepath, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
 
 

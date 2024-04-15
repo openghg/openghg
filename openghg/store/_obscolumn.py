@@ -167,7 +167,7 @@ class ObsColumn(BaseStore):
         data_type = "column"
         datasource_uuids = self.assign_data(
             data=obs_data,
-            file_hashes=list(unseen_hashes.keys()),
+            file_hashes=unseen_hashes,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

@@ -8,12 +8,13 @@ import math
 from pathlib import Path
 from pandas import Timestamp
 from types import TracebackType
-from typing import Any, Dict, List, Iterable, Optional, Sequence, TypeVar, Union, Tuple
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
 from openghg.objectstore import (
     get_object_from_json,
     exists,
+    get_object_names,
     set_object_from_json,
     set_compressed_file,
     get_compressed_file,
@@ -166,16 +167,48 @@ class BaseStore:
 
         return seen, unseen
 
-    def store_original_file(self, filepath: Path, file_hash: str) -> None:
-        """Store a compressed version of the original data file in the object store
+    def get_original_file(self, file_hash: str, filename: str, output_folder: Path) -> None:
+        """Retrieve a compressed original file from the object store
+        and export to the output folder
 
         Args:
-            filepath: Path to file
-            file_hash: SHA1 hash of file
+            file_hash: Hash of file
+            filename: Name of file
+            output_folder: Folder to export file to
         Returns:
             None
         """
-        key = f"{self._root}/original_files/{file_hash}"
+        key = f"{self._root}/original_files/{file_hash}/{filename}"
+        output_filepath = Path(output_folder, filename)
+        get_compressed_file(bucket=self._bucket, key=key, output_filepath=output_filepath)
+
+    def get_original_files(self, hash_data: Dict, output_folder: Union[str, Path]) -> None:
+        """Retrieve original files from the object store
+
+        Args:
+            hash_data: Hash data from Datasource metadata
+            output_folder: Folder to export files to
+        Returns:
+            None
+        """
+        output_folder = Path(output_folder)
+
+        if not output_folder.exists():
+            raise FileNotFoundError(f"Output folder {output_folder} does not exist.")
+
+        for file_hash, filename in hash_data.items():
+            self.get_original_file(file_hash=file_hash, filename=filename, output_folder=output_folder)
+
+    def store_original_file(self, file_hash: str, filepath: Path) -> None:
+        """Store a compressed version of the original data file in the object store
+
+        Args:
+            file_hash: SHA1 hash of file
+            filepath: Path to file
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}/{filepath.name}"
         set_compressed_file(bucket=self._bucket, key=key, filepath=filepath)
 
     def store_original_files(self, hash_data: Dict[str, Path]) -> None:
@@ -189,26 +222,13 @@ class BaseStore:
             None
         """
         for file_hash, filepath in hash_data.items():
-            self.store_original_file(filepath=filepath, file_hash=file_hash)
-
-    def get_original_files(self, file_hash: str, out_filepath) -> None:
-        """Retrieve an original data file from the object store and
-        write to to a path of the user's choosing
-
-        Args:
-            file_hash: SHA1 hash of file
-            out_filepath: Path to store the file
-        Returns:
-            None
-        """
-        key = f"{self._root}/original_files/{file_hash}"
-        get_compressed_file(bucket=self._bucket, key=key, out_filepath=out_filepath)
+            self.store_original_file(file_hash=file_hash, filepath=filepath)
 
     def assign_data(
         self,
         data: Dict,
         data_type: str,
-        file_hashes: Union[str, List],
+        file_hashes: Dict,
         required_keys: Sequence[str],
         sort: bool = True,
         drop_duplicates: bool = True,
