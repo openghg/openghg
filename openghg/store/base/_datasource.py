@@ -44,7 +44,7 @@ class Datasource:
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
-            self._metadata: Dict[str, Union[str, List, Dict]] = {}
+            self._metadata: Dict = {}
             self._start_date = None
             self._end_date = None
             self._status: Optional[Dict] = None
