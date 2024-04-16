@@ -4,15 +4,14 @@ import toml
 from openghg.types import ConfigFileError
 from openghg.util import check_config, create_config, read_local_config
 
+@pytest.fixture
+def tmp_config_path(tmp_path):
+    return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
+
 
 @pytest.fixture
-def tmp_config_path(tmpdir):
-    return Path(tmpdir).joinpath("config_folder").joinpath("mock_config.conf")
-
-
-@pytest.fixture
-def tmp_home_path(tmpdir):
-    return Path(tmpdir).joinpath("tmp_home_path")
+def tmp_home_path(tmp_path):
+    return tmp_path.joinpath("tmp_home_path_config_tests")
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 import pytest
-from helpers import get_footprint_datapath
+from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
@@ -636,10 +636,12 @@ def test_footprints_chunking_schema():
 
 
 def test_store_and_retrieve_original_files(tmp_path):
+    clear_test_store(name="group")
+
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
-    bucket = get_writable_bucket(name="user")
+    bucket = get_writable_bucket(name="group")
 
     f = Footprints(bucket=bucket)
 
