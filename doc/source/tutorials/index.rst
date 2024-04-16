@@ -81,8 +81,14 @@ retrieving the original files that were standardised and added to the object sto
    :maxdepth: 1
 
    local/Managing_object_store/Managing_object_stores
-
+   
 .. toctree::
    :maxdepth: 1
 
    local/Managing_object_store/Retrieve_original_files
+   
+.. toctree::
+   :maxdepth: 1
+
+   local/Managing_object_store/Converting_a_store
+

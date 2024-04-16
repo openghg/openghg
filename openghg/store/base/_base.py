@@ -684,22 +684,3 @@ class BaseStore:
         #     if chunks[k] < dim_sizes[k]:
         #         rechunk[k] = chunks.pop(k)
         return chunks
-
-
-def get_data_class(data_type: str) -> type[BaseStore]:
-    """Return data class corresponding to given data type.
-
-    Args:
-        data_type: one of "surface", "column", "flux", "footprints",
-    "boundary_conditions", or "eulerian_model"
-
-    Returns:
-        Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,
-    `Footprints`, `BoundaryConditions`.
-    """
-    try:
-        data_class = BaseStore._registry[data_type]
-    except KeyError:
-        raise ValueError(f"No data class for data type {data_type}.")
-    else:
-        return data_class

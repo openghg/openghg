@@ -199,6 +199,29 @@ def test_parse_edgar_unknown_domain():
         parse_edgar(filepath, date=year, species=species, domain=domain)
 
 
+@pytest.fixture(scope="session")
+def edgar_v8_data():
+    """
+    Fixture to process the v8.0 file and returns dictionary
+    """
+    folder = "v8.0_CH4"
+    filepath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    data = parse_edgar(datapath=filepath, date="1970")
+    return data
+
+
+def test_edgar_v8(edgar_v8_data):
+    """
+    Test to check processed data values for parse_edgar
+    """
+    data_values = list(edgar_v8_data.values())[0]
+    assert "ch4_anthro_globaledgar_1970" in edgar_v8_data
+    assert "ch4" in data_values["data"].attrs["species"]
+    assert "globaledgar" in data_values["data"].attrs["domain"]
+    assert "flux" in data_values["data"]
+
+
 def test_parse_edgar_no_domain():
     """
     Test error raised when new lat, lon values provided but no domain name
@@ -257,6 +280,47 @@ def test_parse_edgar_no_domain():
                 "resolution": "0.1x0.1",
             },
         ),
+        (
+            "v8.0_FT2022_GHG_CH4_1970_TOTALS_flx.nc",
+            {"version": "v8.0", "species": "CH4", "year": 1970, "source": "TOTALS", "resolution": None},
+        ),
+        (
+            "v8.0_FT2022_GHG_CO2_2020_TOTALS_flx_nc.zip",
+            {"version": "v8.0", "species": "CO2", "year": 2020, "source": "TOTALS", "resolution": None},
+        ),
+        (
+            "v7.0_FT2021_CO2_excl_short-cycle_org_C_2020_TOTALS.0.1x0.1.zip",
+            {
+                "version": "v7.0",
+                "species": "CO2",
+                "year": 2020,
+                "source": "excl_short-cycle_TOTALS",
+                "resolution": "0.1x0.1",
+            },
+        ),
+        (
+            "v7.0_FT2021_N2O_2021_FFF.zip",
+            {"version": "v7.0", "species": "N2O", "year": 2021, "source": "FFF", "resolution": None},
+        ),
+        (
+            "v7.0_FT2021_N2O_2021_TNR_Aviation_CDS.0.1x0.1.zip",
+            {
+                "version": "v7.0",
+                "species": "N2O",
+                "year": 2021,
+                "source": "TNR-Aviation-CDS",
+                "resolution": "0.1x0.1",
+            },
+        ),
+        (
+            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc", 
+            {"version": "v8.0", 
+             "species": "HFC-43-10-mee", 
+             "year": 1994,
+             "source": "TOTALS", 
+             "resolution": None}
+        )
+
     ],
 )
 def test_extract_file_info(edgar_file, expected_file_info):
