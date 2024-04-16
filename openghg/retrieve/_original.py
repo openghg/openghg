@@ -14,6 +14,7 @@ def retrieve_original_files(
 
     Args:
         store: Object store to retrieve from
+        data_type: Data type, e.g. footprints, surface etc
         hash_data: Hash data dictionary from metadata
         output_folderpath: The folder to save the retrieved files to
     Returns:

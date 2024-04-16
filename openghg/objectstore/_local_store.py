@@ -101,11 +101,12 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
 
 def get_tutorial_store_path() -> Path:
     """Get the path to the local tutorial store
+    in the user's home directory.
 
     Returns:
         pathlib.Path: Path of tutorial store
     """
-    return get_user_objectstore_path() / "tutorial_store"
+    return Path.home() / "openghg_tutorial_store"
 
 
 # @lru_cache
