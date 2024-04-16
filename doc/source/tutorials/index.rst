@@ -68,15 +68,21 @@ Exploring data
 Managing the the object store
 -----------------------------
 
-These tutorials will help you understand how to add different types of data to the OpenGHG object store and how to
-delete or modify already existing data.
+These tutorials will help you understand how to add different types of data to the
+OpenGHG object store and how to delete or modify already existing data. We also cover
+retrieving the original files that were standardised and added to the object store.
 
 .. toctree::
    :maxdepth: 1
 
-   local/Managing_object_store/Modifying_and_deleting_data
+   local/Managing_object_store/Managing_and_deleting_data
 
 .. toctree::
    :maxdepth: 1
 
-   local/Managing_object_store/Changing_object_store
+   local/Managing_object_store/Managing_object_stores
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Managing_object_store/Retrieve_original_files
