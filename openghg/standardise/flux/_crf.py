@@ -1,19 +1,16 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional
 
 
-def parse_crf2023(
+def parse_crf(
     filepath: Path,
-    species: str = "HFCs",
-    source: str = "crf2023",
+    species: str,
+    source: str = "crf",
     domain: str = "europe",
-    data_type: str = "emissions",
+    data_type: str = "flux",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
-    continuous: bool = True,
 ) -> Dict:
     """
     Parse INTEM emissions data from the specified file.
@@ -23,13 +20,10 @@ def parse_crf2023(
         species (str): Name of species
         source (str): Source of the emissions data, default is 'intem'.
         domain (str): Geographic domain, default is 'europe'.
-        data_type (str): Type of data, default is 'emissions'.
+        data_type (str): Type of data, default is 'flux'.
         database (Optional[str]): Database name if applicable.
         database_version (Optional[str]): Version of the database if applicable.
         model (Optional[str]): Model name if applicable.
-        period : "needs explainer"
-        chunks : (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
-        continuous (bool): "needs explainer"
 
     Returns:
         Dict: Parsed emissions data in dictionary format.
@@ -68,7 +62,6 @@ def parse_crf2023(
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
     metadata["source_format"] = "openghg"
 
     dataframe_dict = dataframe.to_dict()
