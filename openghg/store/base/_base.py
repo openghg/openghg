@@ -14,7 +14,6 @@ from xarray import open_dataset
 from openghg.objectstore import (
     get_object_from_json,
     exists,
-    get_object_names,
     set_object_from_json,
     set_compressed_file,
     get_compressed_file,

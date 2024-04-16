@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Union
 
-from openghg.store.base import get_data_class
+from openghg.store import get_data_class
 from openghg.objectstore import get_bucket
 
 
