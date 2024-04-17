@@ -3,17 +3,19 @@ direction: right
 classes: {
   metadata_arrow: {
     style: {
-      stroke: red
+      stroke: green
     }
   }
   combined_arrow: {
     style: {
-      stroke: green
+      stroke: red
     }
   }
 }
 
 stand_fns -> standardise -> datatype_classes -> baseclass
+
+(stand_fns -> standardise -> datatype_classes -> baseclass)[0].class: combined_arrow
 
 stand_fns: "Standardisation" {
   grid-columns: 1
@@ -38,6 +40,14 @@ stand_fns.standardise_surface -> standardise
 stand_fns.standardise_eulerian -> standardise
 stand_fns.standardise_from_binary_data -> standardise
 
+(stand_fns.standardise_bc -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_flux -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_footprint -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_column -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_surface -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_eulerian -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_from_binary_data -> standardise)[0].class: combined_arrow
+
 datatype_classes: "Storage classes" {
   grid-columns: 1
 
@@ -56,13 +66,12 @@ datatype_classes.Footprints.read_file -> baseclass.assign_data
 datatype_classes.ObsColumn.read_file -> baseclass.assign_data
 datatype_classes.ObsSurface.read_file -> baseclass.assign_data
 
-# Leave these as blue
-# (datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data)[0].class: combined_arrow
-# (datatype_classes.Flux.read_file -> baseclass.assign_data)[0].class: combined_arrow
-# (datatype_classes.EulerianModel.read_file -> baseclass.assign_data)[0].class: combined_arrow
-# (datatype_classes.Footprints.read_file -> baseclass.assign_data)[0].class: combined_arrow
-# (datatype_classes.ObsColumn.read_file -> baseclass.assign_data)[0].class: combined_arrow
-# (datatype_classes.ObsSurface.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.Flux.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.EulerianModel.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.Footprints.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.ObsColumn.read_file -> baseclass.assign_data)[0].class: combined_arrow
+(datatype_classes.ObsSurface.read_file -> baseclass.assign_data)[0].class: combined_arrow
 
 
 baseclass: "Base" {
@@ -113,6 +122,7 @@ new_ds: New Datasource
 #
 datasource: "Datasource" {
   add_data -> add_timed_data -> add_metadata
+  (add_data -> add_timed_data)[0].class: combined_arrow
   to_lowercase
   "_metadata.update" -> _metadata
 
@@ -138,19 +148,25 @@ datasource: "Datasource" {
 baseclass.assign_data -> existing_ds: Unique metadata matches\n existing record
 baseclass.assign_data -> new_ds: New unique metadata
 
+(baseclass.assign_data -> existing_ds)[0].class: combined_arrow
+(baseclass.assign_data -> new_ds)[0].class: combined_arrow
+
 existing_ds -> datasource.add_data
 new_ds -> datasource.add_data
+
+(existing_ds -> datasource.add_data)[0].class: combined_arrow
+(new_ds -> datasource.add_data)[0].class: combined_arrow
 
 
 key: Key {
   combined data {
     style: {
-      font-color: blue
+      font-color: red
     }
   }
   metadata only {
     style: {
-      font-color: red
+      font-color: blue
     }
   }
 }
