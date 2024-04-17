@@ -56,6 +56,14 @@ datatype_classes.Footprints.read_file -> baseclass.assign_data
 datatype_classes.ObsColumn.read_file -> baseclass.assign_data
 datatype_classes.ObsSurface.read_file -> baseclass.assign_data
 
+# Leave these as blue
+# (datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data)[0].class: combined_arrow
+# (datatype_classes.Flux.read_file -> baseclass.assign_data)[0].class: combined_arrow
+# (datatype_classes.EulerianModel.read_file -> baseclass.assign_data)[0].class: combined_arrow
+# (datatype_classes.Footprints.read_file -> baseclass.assign_data)[0].class: combined_arrow
+# (datatype_classes.ObsColumn.read_file -> baseclass.assign_data)[0].class: combined_arrow
+# (datatype_classes.ObsSurface.read_file -> baseclass.assign_data)[0].class: combined_arrow
+
 
 baseclass: "Base" {
   assign_data
@@ -68,8 +76,6 @@ baseclass: "Base" {
     "_db.search"
 
     search -> _get_query: Metadata
-    # Won't bother with arrow colours for now
-    # (search -> _get_query)[0].class: metadata_arrow
     _get_query -> search: Query object
     _get_query -> _format_metadata: Metadata
     _format_metadata -> _get_query: Lowercased metadata
@@ -77,12 +83,27 @@ baseclass: "Base" {
     "tinydb.Query().fragment" -> search: Query object
     search -> "_db.search": Query object
     "_db.search" -> search: List of records
+
+    # (search -> _get_query)[0].class: metadata_arrow
+    # (_get_query -> search)[0].class: metadata_arrow
+    # (_get_query -> _format_metadata)[0].class: metadata_arrow
+    # (_format_metadata -> _get_query)[0].class: metadata_arrow
+    # (search -> "tinydb.Query().fragment")[0].class: metadata_arrow
+    # ("tinydb.Query().fragment" -> search)[0].class: metadata_arrow
+    # (search -> "_db.search")[0].class: metadata_arrow
+    # ("_db.search" -> search)[0].class: metadata_arrow
+
   }
 
   assign_data -> datasource_lookup: Metadata
   datasource_lookup -> assign_data: List of records
   datasource_lookup -> metastore.search: Metadata
   metastore.search -> datasource_lookup: List of records
+
+  # (assign_data -> datasource_lookup)[0].class: metadata_arrow
+  # (datasource_lookup -> assign_data)[0].class: metadata_arrow
+  # (datasource_lookup -> metastore.search)[0].class: metadata_arrow
+  # (metastore.search -> datasource_lookup)[0].class: metadata_arrow
 }
 
 existing_ds: Exisiting Datasource
@@ -91,14 +112,25 @@ new_ds: New Datasource
 # How to show a new Datasource being created?
 #
 datasource: "Datasource" {
-  add_data -> add_metadata
+  add_data -> add_timed_data -> add_metadata
   to_lowercase
-  "_metadata.update"
+  "_metadata.update" -> _metadata
 
   add_metadata -> to_lowercase: Metadata
   to_lowercase -> add_metadata: Lowercased metadata
-  add_metadata -> "_metadata.update": Lowercased metadata
+  add_metadata -> "_metadata.update": Lowercased metadata dict
 
+  add_metadata -> add_metadata_key -> _metadata: Add data_type
+  add_metadata -> add_metadata_key -> _metadata: Add latest_version
+  add_metadata -> add_metadata_key -> _metadata: Add timestamp
+  add_metadata -> add_metadata_key -> _metadata: Add start_date
+  add_metadata -> add_metadata_key -> _metadata: Add end_date
+
+  # self.add_metadata_key(key="data_type", value=data_type)
+  # self.add_metadata_key(key="latest_version", value=version_str)
+  # self.add_metadata_key(key="timestamp", value=timestamp_str_now)
+  # self.add_metadata_key(key="start_date", value=str(start))
+  # self.add_metadata_key(key="end_date", value=str(end))
 
 }
 
@@ -108,3 +140,17 @@ baseclass.assign_data -> new_ds: New unique metadata
 
 existing_ds -> datasource.add_data
 new_ds -> datasource.add_data
+
+
+key: Key {
+  combined data {
+    style: {
+      font-color: blue
+    }
+  }
+  metadata only {
+    style: {
+      font-color: red
+    }
+  }
+}
