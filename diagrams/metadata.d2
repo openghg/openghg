@@ -30,16 +30,32 @@ stand_fns: "Standardisation" {
 
 standardise: "standardise"
 
-datatype_classes: "Storage classes" {
-  grid-columns: 2
+stand_fns.standardise_bc -> standardise
+stand_fns.standardise_flux -> standardise
+stand_fns.standardise_footprint -> standardise
+stand_fns.standardise_column -> standardise
+stand_fns.standardise_surface -> standardise
+stand_fns.standardise_eulerian -> standardise
+stand_fns.standardise_from_binary_data -> standardise
 
-  "BoundaryConditions.read_file"
-  "Flux.read_file"
-  "EulerianModel.read_file"
-  "Footprints.read_file"
-  "ObsColumn.read_file"
-  "ObsSurface.read_file"
+datatype_classes: "Storage classes" {
+  grid-columns: 1
+
+  BoundaryConditions.read_file
+  Flux.read_file
+  EulerianModel.read_file
+  Footprints.read_file
+  ObsColumn.read_file
+  ObsSurface.read_file
 }
+
+datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data
+datatype_classes.Flux.read_file -> baseclass.assign_data
+datatype_classes.EulerianModel.read_file -> baseclass.assign_data
+datatype_classes.Footprints.read_file -> baseclass.assign_data
+datatype_classes.ObsColumn.read_file -> baseclass.assign_data
+datatype_classes.ObsSurface.read_file -> baseclass.assign_data
+
 
 baseclass: "Base" {
   assign_data
