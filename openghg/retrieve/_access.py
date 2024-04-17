@@ -52,8 +52,18 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
 
+    if sort:
+        logger.warning(
+            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
+        )
+
+    if elevate_inlets:
+        logger.warning(
+            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
+        )
+
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    retrieved_data: Any = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -127,6 +137,7 @@ def get_obs_surface(
     inlet = format_inlet(inlet)
 
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         to_post: Dict[str, Union[str, Dict]] = {}
 
         to_post["function"] = "get_obs_surface"
@@ -236,11 +247,15 @@ def get_obs_surface_local(
     from openghg.retrieve import search_surface
     from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
     from pandas import Timedelta
+    from openghg.util import synonyms
 
     if running_on_hub():
         raise ValueError(
             "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
         )
+
+    if species is not None:
+        species = synonyms(species)
 
     data_type = "surface"
 
@@ -312,6 +327,9 @@ def get_obs_surface_local(
         return None
 
     if average is not None:
+        # We need to compute the value here for the operations done further down
+        logger.info("Loading Dataset data into memory for resampling operations.")
+        data = data.compute()
         # GJ - 2021-03-09
         # TODO - check by RT
 
@@ -533,7 +551,7 @@ def get_flux(
         time_resolution=time_resolution,
         start_date=start_date,
         end_date=end_date,
-        data_type="emissions",
+        data_type="flux",
         **kwargs,
     )
 

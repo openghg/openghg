@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Dict
+from typing import Any, Tuple, Dict, List
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
@@ -11,7 +11,7 @@ def define_data_types() -> Tuple[str, ...]:
     data_types = (
         "surface",
         "column",
-        "emissions",
+        "flux",
         # "met",
         "footprints",
         "boundary_conditions",
@@ -27,7 +27,7 @@ def define_data_type_classes() -> Dict[str, Any]:
     """
     from openghg.store import (
         BoundaryConditions,
-        Emissions,
+        Flux,
         EulerianModel,
         Footprints,
         ObsColumn,
@@ -37,7 +37,7 @@ def define_data_type_classes() -> Dict[str, Any]:
     data_type_classes = {
         "surface": ObsSurface,
         "column": ObsColumn,
-        "emissions": Emissions,
+        "flux": Flux,
         # "met": ???
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,
@@ -45,3 +45,15 @@ def define_data_type_classes() -> Dict[str, Any]:
     }
 
     return data_type_classes
+
+
+def null_metadata_values() -> List:
+    """
+    Defines values which indicate metadata value is not specified.
+    Returns:
+        list: values to be seen as null
+    """
+    # TODO: Depending on how this is implemented, may want to update this to include np.nan values
+    null_values = ["not_set", "NOT_SET"]
+
+    return null_values

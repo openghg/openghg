@@ -1,8 +1,9 @@
 """ Some helper functions for things we do in tests frequently
 """
+
 import shutil
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from typing import Dict, List, Union
 
 
@@ -16,7 +17,21 @@ def temporary_store_paths() -> Dict[str, Path]:
     }
 
 
+def clear_test_store(name: str) -> None:
+    """Clear one of the testing object stores
+
+    Args:
+        name: Name of store to clear
+    Returns:
+        None
+    """
+    tmp_stores = temporary_store_paths()
+    path = tmp_stores[name]
+    shutil.rmtree(path=path, ignore_errors=True)
+
+
 def clear_test_stores() -> None:
+    """Clears the testing object stores"""
     # Clears the testing object stores
     tmp_stores = temporary_store_paths()
     for path in tmp_stores.values():
@@ -41,18 +56,18 @@ def get_surface_datapath(filename: str, source_format: str) -> Path:
 
 
 def get_mobile_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the mobile test data file"""
     return get_datapath_base(data_type="mobile", filename=filename)
 
 
 def get_column_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the column test data file"""
     return get_datapath_base(data_type="column", filename=filename)
 
 
-def get_emissions_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
-    return get_datapath_base(data_type="emissions", filename=filename)
+def get_flux_datapath(filename: str) -> Path:
+    """Return the path to the flux test data file"""
+    return get_datapath_base(data_type="flux", filename=filename)
 
 
 def get_bc_datapath(filename: str) -> Path:
@@ -122,8 +137,9 @@ def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
 
 
 def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
-    from openghg.objectstore import get_bucket
     from pathlib import Path
+
+    from openghg.objectstore import get_bucket
 
     if not isinstance(key, list):
         key = [key]
@@ -134,7 +150,6 @@ def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
 def all_datasource_keys(keys: Dict) -> List[str]:
     ds_keys = []
     for key_data in keys.values():
-        data_keys = list(key_data["keys"].values())
-        ds_keys.extend(data_keys)
+        ds_keys.extend(key_data["keys"])
 
     return ds_keys

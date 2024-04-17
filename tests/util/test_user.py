@@ -1,26 +1,80 @@
-from openghg.util import create_config, check_config, read_local_config
-import toml
 from pathlib import Path
 import pytest
+import toml
 from openghg.types import ConfigFileError
+from openghg.util import check_config, create_config, read_local_config
 
 
 @pytest.fixture
-def mock_conf_path(tmpdir, monkeypatch, mocker):
-    monkeypatch.setenv("HOME", str(tmpdir))
-    mock_path = Path(tmpdir).joinpath("mock_config.conf")
-    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_path)
+def tmp_config_path(tmpdir):
+    return Path(tmpdir).joinpath("config_folder").joinpath("mock_config.conf")
 
 
 @pytest.fixture
-def mock_contents():
+def tmp_home_path(tmpdir):
+    return Path(tmpdir).joinpath("tmp_home_path")
+
+
+@pytest.fixture
+def mock_get_user_config_path(tmp_config_path, mocker):
+    tmp_config_path.parent.mkdir(parents=True)
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=tmp_config_path)
+
+
+@pytest.fixture
+def write_mock_config(tmpdir, tmp_config_path):
     mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
-    mock_path = "/tmp/mock_store"
-    return {"object_store": {"user": {"path": mock_path, "permissions": "rw"}, "user_id": mock_uuid}}
+    mock_path = Path(tmpdir).joinpath("mock_store")
+    mock_shared_path = Path(tmpdir).joinpath("mock_shared_store")
+    mock_conf = {
+        "object_store": {
+            "user": {"path": mock_path, "permissions": "rw"},
+            "shared": {"path": mock_shared_path, "permission": "rw"},
+        },
+        "user_id": mock_uuid,
+    }
+
+    tmp_config_path.write_text(toml.dumps(mock_conf))
 
 
-def check_read_local_config():
-    # Make sure we can't read an empty config
+def test_read_config_check_old_stores(
+    mock_get_user_config_path, write_mock_config, caplog
+):
+    """This tests the read_local_config function when the user has an old store in their config file.
+    This test and the _check_valid_store function may be removed once the move to the new store setup is complete.
+    """
+    config = read_local_config()
+
+    user_store_path = Path(config["object_store"]["user"]["path"])
+
+    # Let's mock some data having been written to the object store
+    zarr_store_folderpath = user_store_path.joinpath("data/test-uuid-123/zarr")
+    zarr_store_folderpath.mkdir(parents=True)
+
+    config = read_local_config()
+
+    assert "Zarr storage format and will be ignored" not in caplog.text
+
+    zarr_store_folderpath.rmdir()
+
+    config = read_local_config()
+
+    assert len(config["object_store"]) == 1
+    assert "Zarr storage format and will be ignored" in caplog.text
+
+    # Let's now make a zarr folder and make sure this object store is still valid
+    shared_store_path = Path(config["object_store"]["shared"]["path"])
+    zarr_store_folderpath = shared_store_path.joinpath("data/test-uuid-123/zarr")
+    zarr_store_folderpath.mkdir(parents=True)
+
+    config = read_local_config()
+    assert len(config["object_store"]) == 1
+
+    # Now we remove the zarr store and check the config again
+    # As there's now a folder structure there a ConfigFileError should be raised
+    # as the store is no longer valid and OpenGHG can't find a valid store
+    zarr_store_folderpath.rmdir()
+
     with pytest.raises(ConfigFileError):
         read_local_config()
 
@@ -75,7 +129,11 @@ def test_check_config(mocker, caplog, monkeypatch, tmpdir):
 
     mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
     mock_path = "/tmp/mock_store"
-    mock_conf = {"object_store": {"user": {"path": mock_path, "permissions": "rw"}}, "user_id": mock_uuid, "config_version": "2"}
+    mock_conf = {
+        "object_store": {"user": {"path": mock_path, "permissions": "rw"}},
+        "user_id": mock_uuid,
+        "config_version": "2",
+    }
     mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
 
     mock_config_path.write_text("testing-123")

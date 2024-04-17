@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
-from types import TracebackType
+from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 
@@ -26,20 +25,6 @@ class BoundaryConditions(BaseStore):
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> BoundaryConditions:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -72,7 +57,13 @@ class BoundaryConditions(BaseStore):
         domain: str,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -89,7 +80,27 @@ class BoundaryConditions(BaseStore):
                      - suitable pandas Offset Alias
                      - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                To disable chunking pass in an empty dictionary.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -99,97 +110,132 @@ class BoundaryConditions(BaseStore):
             infer_date_range,
             update_zero_dim,
         )
-        from openghg.util import clean_string, hash_file, timestamp_now
+        from openghg.util import (
+            clean_string,
+            timestamp_now,
+            check_if_need_new_version,
+        )
+
         from xarray import open_dataset
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
         filepath = Path(filepath)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
 
-        bc_data = open_dataset(filepath)
+        filepath = next(iter(unseen_hashes.values()))
 
-        # Some attributes are numpy types we can't serialise to JSON so convert them
-        # to their native types here
-        attrs = {}
-        for key, value in bc_data.attrs.items():
-            try:
-                attrs[key] = value.item()
-            except AttributeError:
-                attrs[key] = value
+        if chunks is None:
+            chunks = {}
 
-        author_name = "OpenGHG Cloud"
-        bc_data.attrs["author"] = author_name
+        with open_dataset(filepath).chunk(chunks) as bc_data:
+            # Some attributes are numpy types we can't serialise to JSON so convert them
+            # to their native types here
+            attrs = {}
+            for key, value in bc_data.attrs.items():
+                try:
+                    attrs[key] = value.item()
+                except AttributeError:
+                    attrs[key] = value
 
-        metadata = {}
-        metadata.update(attrs)
+            author_name = "OpenGHG Cloud"
+            bc_data.attrs["author"] = author_name
 
-        metadata["species"] = species
-        metadata["domain"] = domain
-        metadata["bc_input"] = bc_input
-        metadata["author"] = author_name
-        metadata["processed"] = str(timestamp_now())
+            metadata = {}
+            metadata.update(attrs)
 
-        # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in bc_data.coords:
-            bc_data = update_zero_dim(bc_data, dim="time")
+            metadata["species"] = species
+            metadata["domain"] = domain
+            metadata["bc_input"] = bc_input
+            metadata["author"] = author_name
+            metadata["processed"] = str(timestamp_now())
 
-        # Currently ACRG boundary conditions are split by month or year
-        bc_time = bc_data["time"]
+            # Check if time has 0-dimensions and, if so, expand this so time is 1D
+            if "time" in bc_data.coords:
+                bc_data = update_zero_dim(bc_data, dim="time")
 
-        start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
-        )
+            # Currently ACRG boundary conditions are split by month or year
+            bc_time = bc_data["time"]
 
-        # Checking against expected format for boundary conditions
-        BoundaryConditions.validate_data(bc_data)
-        data_type = "boundary_conditions"
+            start_date, end_date, period_str = infer_date_range(
+                bc_time, filepath=filepath, period=period, continuous=continuous
+            )
 
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-        metadata["data_type"] = data_type
+            # Checking against expected format for boundary conditions
+            BoundaryConditions.validate_data(bc_data)
+            data_type = "boundary_conditions"
 
-        metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-        metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-        metadata["max_height"] = round(float(bc_data["height"].max()), 5)
+            metadata["start_date"] = str(start_date)
+            metadata["end_date"] = str(end_date)
+            metadata["data_type"] = data_type
 
-        metadata["input_filename"] = filepath.name
+            metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
+            metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
+            metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
+            metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
+            metadata["min_height"] = round(float(bc_data["height"].min()), 5)
+            metadata["max_height"] = round(float(bc_data["height"].max()), 5)
 
-        metadata["time_period"] = period_str
+            metadata["input_filename"] = filepath.name
 
-        key = "_".join((species, bc_input, domain))
+            metadata["time_period"] = period_str
 
-        boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        boundary_conditions_data[key]["data"] = bc_data
-        boundary_conditions_data[key]["metadata"] = metadata
+            key = "_".join((species, bc_input, domain))
 
-        required_keys = ("species", "bc_input", "domain")
+            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            boundary_conditions_data[key]["data"] = bc_data
+            boundary_conditions_data[key]["metadata"] = metadata
 
-        # This performs the lookup and assignment of data to new or
-        # exisiting Datasources
-        datasource_uuids = self.assign_data(
-            data=boundary_conditions_data,
-            overwrite=overwrite,
-            data_type=data_type,
-            required_keys=required_keys,
-        )
+            required_keys = ("species", "bc_input", "domain")
 
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            # This performs the lookup and assignment of data to new or
+            # existing Datasources
+            datasource_uuids = self.assign_data(
+                data=boundary_conditions_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                required_keys=required_keys,
+                compressor=compressor,
+                filters=filters,
+            )
 
-        return datasource_uuids
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # boundary_conditions_data = update_metadata(
+            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
+            # )
+
+            # bc_store.add_datasources(
+            #     uuids=datasource_uuids,
+            #     data=boundary_conditions_data,
+            #     metastore=metastore,
+            #     update_keys=update_keys,
+            # )
+
+            # Record the file hash in case we see this file again
+            self.store_hashes(unseen_hashes)
+
+            return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:

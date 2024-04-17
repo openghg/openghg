@@ -1,23 +1,11 @@
 import pytest
 from openghg.objectstore import integrity_check
-from openghg.standardise import (
-    standardise_surface,
-    standardise_flux,
-    standardise_column,
-    standardise_footprint,
-)
-from openghg.objectstore import get_writable_bucket, delete_object
+from openghg.standardise import standardise_flux, standardise_footprint
+from openghg.objectstore import get_writable_bucket
 from openghg.types import ObjectStoreError
-from helpers import (
-    get_surface_datapath,
-    get_column_datapath,
-    get_footprint_datapath,
-    get_emissions_datapath,
-    clear_test_stores,
-)
-from openghg.store import Footprints, Emissions
+from helpers import get_footprint_datapath, get_flux_datapath, clear_test_stores
 from openghg.store.base import Datasource
-import tinydb
+from openghg.objectstore.metastore import open_metastore
 
 
 @pytest.fixture(autouse=True)
@@ -43,9 +31,9 @@ def populate_store():
         store="user",
     )
 
-    emissions_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    flux_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
     standardise_flux(
-        filepath=emissions_datapath,
+        filepath=flux_datapath,
         species="co2",
         source="gpp-cardamom",
         domain="europe",
@@ -54,17 +42,18 @@ def populate_store():
     )
 
 
-def test_integrity_check_delete_Datasource_keys():
+def test_integrity_check_delete_datasource_keys():
     integrity_check()
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
-    with Emissions(bucket=bucket) as em:
-        uid = em.datasources()[0]
-        ds = Datasource.load(bucket=bucket, uuid=uid)
-        keys = ds.data_keys()
-        for key in keys:
-            delete_object(bucket=bucket, key=key)
+    with open_metastore(bucket=bucket, data_type="flux") as metastore:
+        uid = metastore.select("uuid")[0]
+        ds = Datasource(bucket=bucket, uuid=uid)
+
+        ds._store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
+
+# TODO - expand these integrity tests
