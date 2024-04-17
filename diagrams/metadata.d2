@@ -1,6 +1,19 @@
 direction: right
 
-stand_fns -> standardise -> datatype_classes -> baseclass -> datasource
+classes: {
+  metadata_arrow: {
+    style: {
+      stroke: red
+    }
+  }
+  combined_arrow: {
+    style: {
+      stroke: green
+    }
+  }
+}
+
+stand_fns -> standardise -> datatype_classes -> baseclass
 
 stand_fns: "Standardisation" {
   grid-columns: 1
@@ -30,17 +43,52 @@ datatype_classes: "Storage classes" {
 
 baseclass: "Base" {
   assign_data
-}
+  "datasource_lookup"
+  metastore: "Metastore" {
+    search
+    _get_query
+    _format_metadata
+    "tinydb.Query().fragment"
+    "_db.search"
 
-
-datasource: "Datasource" {
-  grid-columns: 1
-  add_data
-  add_metadata: {
-    grid-columns: 1
-    to_lowercase -> "self._metadata.update()"
+    search -> _get_query: Metadata
+    # Won't bother with arrow colours for now
+    # (search -> _get_query)[0].class: metadata_arrow
+    _get_query -> search: Query object
+    _get_query -> _format_metadata: Metadata
+    _format_metadata -> _get_query: Lowercased metadata
+    search -> "tinydb.Query().fragment": Lowercased metadata
+    "tinydb.Query().fragment" -> search: Query object
+    search -> "_db.search": Query object
+    "_db.search" -> search: List of records
   }
 
+  assign_data -> datasource_lookup: Metadata
+  datasource_lookup -> assign_data: List of records
+  datasource_lookup -> metastore.search: Metadata
+  metastore.search -> datasource_lookup: List of records
+}
+
+existing_ds: Exisiting Datasource
+new_ds: New Datasource
+
+# How to show a new Datasource being created?
+#
+datasource: "Datasource" {
   add_data -> add_metadata
+  to_lowercase
+  "_metadata.update"
+
+  add_metadata -> to_lowercase: Metadata
+  to_lowercase -> add_metadata: Lowercased metadata
+  add_metadata -> "_metadata.update": Lowercased metadata
+
 
 }
+
+
+baseclass.assign_data -> existing_ds: Unique metadata matches\n existing record
+baseclass.assign_data -> new_ds: New unique metadata
+
+existing_ds -> datasource.add_data
+new_ds -> datasource.add_data
