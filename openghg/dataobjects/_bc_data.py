@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from ._basedata import _BaseData
 
 __all__ = ["BoundaryConditionsData"]
 
 
-@dataclass(frozen=True)
 class BoundaryConditionsData(_BaseData):
     """This class is used to return boundary conditions data from the get_bc function
 

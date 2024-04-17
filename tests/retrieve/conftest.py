@@ -3,26 +3,17 @@ from helpers import (
     clear_test_stores,
     get_bc_datapath,
     get_column_datapath,
-    get_emissions_datapath,
+    get_flux_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.objectstore import get_bucket
-from openghg.standardise import (
-    standardise_bc,
-    standardise_column,
-    standardise_eulerian,
-    standardise_flux,
-    standardise_footprint,
-    standardise_surface,
-)
+from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
 
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
     clear_test_stores()
-    bucket = get_bucket()
 
     # DECC network sites
     network = "DECC"
@@ -109,8 +100,8 @@ def data_read():
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
-    test_datapath1 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
-    test_datapath2 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
 
     species = "co2"
     source = "gpp-cardamom"
@@ -161,7 +152,7 @@ def data_read():
     height = "100m"
     domain = "TEST"
     model = "NAME"
-    metmodel = "UKV"
+    met_model = "UKV"
 
     standardise_footprint(
         store="user",
@@ -171,7 +162,7 @@ def data_read():
         network=network,
         height=height,
         domain=domain,
-        metmodel=metmodel,
+        met_model=met_model,
     )
 
     standardise_footprint(
@@ -182,7 +173,7 @@ def data_read():
         network=network,
         height=height,
         domain=domain,
-        metmodel=metmodel,
+        met_model=met_model,
     )
 
     # High time resolution footprints
@@ -195,7 +186,7 @@ def data_read():
         network="DECC",
         height="100m",
         domain="TEST",
-        metmodel="UKV",
+        met_model="UKV",
         high_time_resolution=True,
     )
 
