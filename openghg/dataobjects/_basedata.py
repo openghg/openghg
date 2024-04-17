@@ -67,7 +67,7 @@ class _BaseData:
         elif uuid is not None and version is not None:
             slice_time = False
             if start_date is not None or end_date is not None:
-                slice_time = True
+                # slice_time = True
                 if start_date is None:
                     start_date = timestamp_epoch()
                 if end_date is None:
