@@ -13,12 +13,15 @@ classes: {
   }
 }
 
+# These control the flow of the main blocks in the diagram to the right
 stand_fns -> standardise -> datatype_classes -> baseclass
-
 (stand_fns -> standardise -> datatype_classes -> baseclass)[0].class: combined_arrow
 
 stand_fns: "Standardisation" {
+  # Like a CSS grid layout, you can set the number
+  # of columns and rows
   grid-columns: 1
+  # grid-rows: 1
 
   standardise_bc
   standardise_flux
@@ -40,6 +43,8 @@ stand_fns.standardise_surface -> standardise
 stand_fns.standardise_eulerian -> standardise
 stand_fns.standardise_from_binary_data -> standardise
 
+# This is how we apply the colour to the arrows showing the flow
+# of the combined data
 (stand_fns.standardise_bc -> standardise)[0].class: combined_arrow
 (stand_fns.standardise_flux -> standardise)[0].class: combined_arrow
 (stand_fns.standardise_footprint -> standardise)[0].class: combined_arrow
@@ -48,30 +53,27 @@ stand_fns.standardise_from_binary_data -> standardise
 (stand_fns.standardise_eulerian -> standardise)[0].class: combined_arrow
 (stand_fns.standardise_from_binary_data -> standardise)[0].class: combined_arrow
 
+# Adding a key: name and then { }
+# creates a class that we can add functions / objects within
 datatype_classes: "Storage classes" {
   grid-columns: 1
 
-  BoundaryConditions.read_file
-  Flux.read_file
-  EulerianModel.read_file
-  Footprints.read_file
-  ObsColumn.read_file
-  ObsSurface.read_file
+  # Here we create an arrow to an object outside the container
+  # so we use _. to allow us to reference that object
+  BoundaryConditions.read_file -> _.baseclass.assign_data
+  Flux.read_file -> _.baseclass.assign_data
+  EulerianModel.read_file -> _.baseclass.assign_data
+  Footprints.read_file -> _.baseclass.assign_data
+  ObsColumn.read_file -> _.baseclass.assign_data
+  ObsSurface.read_file -> _.baseclass.assign_data
+
+  (BoundaryConditions.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (Flux.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (EulerianModel.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (Footprints.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (ObsColumn.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (ObsSurface.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
 }
-
-datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data
-datatype_classes.Flux.read_file -> baseclass.assign_data
-datatype_classes.EulerianModel.read_file -> baseclass.assign_data
-datatype_classes.Footprints.read_file -> baseclass.assign_data
-datatype_classes.ObsColumn.read_file -> baseclass.assign_data
-datatype_classes.ObsSurface.read_file -> baseclass.assign_data
-
-(datatype_classes.BoundaryConditions.read_file -> baseclass.assign_data)[0].class: combined_arrow
-(datatype_classes.Flux.read_file -> baseclass.assign_data)[0].class: combined_arrow
-(datatype_classes.EulerianModel.read_file -> baseclass.assign_data)[0].class: combined_arrow
-(datatype_classes.Footprints.read_file -> baseclass.assign_data)[0].class: combined_arrow
-(datatype_classes.ObsColumn.read_file -> baseclass.assign_data)[0].class: combined_arrow
-(datatype_classes.ObsSurface.read_file -> baseclass.assign_data)[0].class: combined_arrow
 
 
 baseclass: "Base" {
@@ -93,15 +95,6 @@ baseclass: "Base" {
     search -> "_db.search": Query object
     "_db.search" -> search: List of records
 
-    # (search -> _get_query)[0].class: metadata_arrow
-    # (_get_query -> search)[0].class: metadata_arrow
-    # (_get_query -> _format_metadata)[0].class: metadata_arrow
-    # (_format_metadata -> _get_query)[0].class: metadata_arrow
-    # (search -> "tinydb.Query().fragment")[0].class: metadata_arrow
-    # ("tinydb.Query().fragment" -> search)[0].class: metadata_arrow
-    # (search -> "_db.search")[0].class: metadata_arrow
-    # ("_db.search" -> search)[0].class: metadata_arrow
-
   }
 
   assign_data -> datasource_lookup: Metadata
@@ -109,17 +102,14 @@ baseclass: "Base" {
   datasource_lookup -> metastore.search: Metadata
   metastore.search -> datasource_lookup: List of records
 
-  # (assign_data -> datasource_lookup)[0].class: metadata_arrow
-  # (datasource_lookup -> assign_data)[0].class: metadata_arrow
-  # (datasource_lookup -> metastore.search)[0].class: metadata_arrow
-  # (metastore.search -> datasource_lookup)[0].class: metadata_arrow
+  assign_data -> Metastore.insert: If new Datasource
+  assign_data -> Metastore.update: If existing Datasource
+
+  assign_data <-> to_lowercase
+  assign_data -> _.datasource.add_data
+  (assign_data -> _.datasource.add_data)[0].class: combined_arrow
 }
 
-existing_ds: Exisiting Datasource
-new_ds: New Datasource
-
-# How to show a new Datasource being created?
-#
 datasource: "Datasource" {
   add_data -> add_timed_data -> add_metadata
   (add_data -> add_timed_data)[0].class: combined_arrow
@@ -136,35 +126,20 @@ datasource: "Datasource" {
   add_metadata -> add_metadata_key -> _metadata: Add start_date
   add_metadata -> add_metadata_key -> _metadata: Add end_date
 
-  # self.add_metadata_key(key="data_type", value=data_type)
-  # self.add_metadata_key(key="latest_version", value=version_str)
-  # self.add_metadata_key(key="timestamp", value=timestamp_str_now)
-  # self.add_metadata_key(key="start_date", value=str(start))
-  # self.add_metadata_key(key="end_date", value=str(end))
-
 }
 
 
-baseclass.assign_data -> existing_ds: Unique metadata matches\n existing record
-baseclass.assign_data -> new_ds: New unique metadata
+# (existing_ds -> datasource.add_data)[0].class: combined_arrow
+# (new_ds -> datasource.add_data)[0].class: combined_arrow
 
-(baseclass.assign_data -> existing_ds)[0].class: combined_arrow
-(baseclass.assign_data -> new_ds)[0].class: combined_arrow
-
-existing_ds -> datasource.add_data
-new_ds -> datasource.add_data
-
-(existing_ds -> datasource.add_data)[0].class: combined_arrow
-(new_ds -> datasource.add_data)[0].class: combined_arrow
-
-
+# TODO - is there a proper way to make a key from classes?
 key: Key {
-  combined data {
+  Combined data {
     style: {
       font-color: red
     }
   }
-  metadata only {
+  Metadata only {
     style: {
       font-color: blue
     }
