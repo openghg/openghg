@@ -3,12 +3,18 @@ direction: right
 classes: {
   metadata_arrow: {
     style: {
-      stroke: green
+      stroke: blue
     }
   }
   combined_arrow: {
     style: {
       stroke: red
+    }
+  }
+
+  final_arrow: {
+    style: {
+      stroke: green
     }
   }
 }
@@ -75,7 +81,6 @@ datatype_classes: "Storage classes" {
   (ObsSurface.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
 }
 
-
 baseclass: "Base" {
   assign_data
   "datasource_lookup"
@@ -101,9 +106,13 @@ baseclass: "Base" {
   datasource_lookup -> assign_data: List of records
   datasource_lookup -> metastore.search: Metadata
   metastore.search -> datasource_lookup: List of records
+  assign_data -> Dataset.attrs: Add (almost) all metadata to attrs
 
   assign_data -> Metastore.insert: If new Datasource
   assign_data -> Metastore.update: If existing Datasource
+
+  (assign_data -> Metastore.insert)[0].class: final_arrow
+  (assign_data -> Metastore.update)[0].class: final_arrow
 
   assign_data <-> to_lowercase
   assign_data -> _.datasource.add_data
@@ -115,7 +124,7 @@ datasource: "Datasource" {
   (add_data -> add_timed_data)[0].class: combined_arrow
   to_lowercase
   "_metadata.update" -> _metadata
-
+  # uuid -> _.baseclass.assign_data
   add_metadata -> to_lowercase: Metadata
   to_lowercase -> add_metadata: Lowercased metadata
   add_metadata -> "_metadata.update": Lowercased metadata dict
@@ -126,6 +135,8 @@ datasource: "Datasource" {
   add_metadata -> add_metadata_key -> _metadata: Add start_date
   add_metadata -> add_metadata_key -> _metadata: Add end_date
 
+  _metadata -> _.baseclass.assign_data
+  (_metadata -> _.baseclass.assign_data)[0].class: final_arrow
 }
 
 
@@ -142,6 +153,12 @@ key: Key {
   Metadata only {
     style: {
       font-color: blue
+    }
+  }
+
+  Final metadata {
+    style: {
+      font-color: green
     }
   }
 }
