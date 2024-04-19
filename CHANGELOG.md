@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
+- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
 
 ## [0.8.0] - 2024-03-19
 
@@ -49,7 +50,6 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Missing requirement for filelock package added to conda environment file [PR #857](https://github.com/openghg/openghg/pull/857)
 - Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)
 - Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
-
 
 ## [0.7.0] - 2023-12-15
 
