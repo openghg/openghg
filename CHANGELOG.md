@@ -51,6 +51,10 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)
 - Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
 
+### Fixed
+
+- Bug fix for passing calibration_scale as optional parameter to the parser function. [PR #872](https://github.com/openghg/openghg/pull/872)
+
 ## [0.7.0] - 2023-12-15
 
 ### Added
