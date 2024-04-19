@@ -76,6 +76,7 @@ def standardise_surface(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -125,6 +126,8 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
+        kwargs: To pass in additional tag as metadata
+
     Returns:
         dict: Dictionary of result data
     """
@@ -163,6 +166,8 @@ def standardise_surface(
             metadata["instrument"] = instrument
         if sampling_period is not None:
             metadata["sampling_period"] = sampling_period
+
+        metadata.update(kwargs) if kwargs else None
 
         responses = {}
         for fpath in filepath:
@@ -264,6 +269,7 @@ def standardise_column(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Read column observation file
 
@@ -307,7 +313,9 @@ def standardise_column(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
-            To disable chunking pass an empty dictionary.
+            To disable chunking pass an empty dictionary.        kwargs: To pass in additional tag as metadata
+
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -333,6 +341,7 @@ def standardise_column(
         }
 
         metadata = {k: v for k, v in metadata.items() if v is not None}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -382,6 +391,7 @@ def standardise_bc(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -395,7 +405,9 @@ def standardise_bc(
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
+        if_exists: What to do if existing data is present.        kwargs: To pass in additional tag as metadata
+
+
             - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
@@ -434,6 +446,7 @@ def standardise_bc(
             "continuous": continuous,
             "overwrite": overwrite,
         }
+        metadata.update(kwargs) if kwargs else None
 
         if period is not None:
             metadata["period"] = period
@@ -494,6 +507,7 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -541,6 +555,8 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        kwargs: To pass in additional tag as metadata
+
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -570,6 +586,7 @@ def standardise_footprint(
         }
 
         metadata = {k: v for k, v in metadata.items() if v is not None}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -632,6 +649,7 @@ def standardise_flux(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Process flux / emissions data
 
@@ -651,7 +669,8 @@ def standardise_flux(
             To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
+        if_exists: What to do if existing data is present.        kwargs: To pass in additional tag as metadata
+
             - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
@@ -697,6 +716,7 @@ def standardise_flux(
                 metadata[key] = value
 
         metadata = {k: v for k, v in metadata.items()}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -746,6 +766,7 @@ def standardise_eulerian(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -779,12 +800,16 @@ def standardise_eulerian(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-            To disable chunking pass an empty dictionary.
+            To disable chunking pass an empty dictionary.        kwargs: To pass in additional tag as metadata
+
     Returns:
         dict: Dictionary of result data
     """
     if running_on_hub():
+        metadata = {}
+        metadata.update(kwargs) if kwargs else None
         raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
+
     else:
         return standardise(
             store=store,
