@@ -12,8 +12,8 @@ def parse_intem(
     domain: str = "europe",
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
-    time_resolved: bool = False,
-    high_time_resolution: bool = False,
+    time_resolved: Optional[bool] = False,
+    high_time_resolution: Optional[bool] = False,
     continuous: bool = True,
 ) -> Dict:
     """
