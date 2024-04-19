@@ -387,7 +387,7 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert metadata["min_longitude"] == pytest.approx(float(footprint["lon"].min()))
     assert metadata["max_latitude"] == pytest.approx(float(footprint["lat"].max()))
     assert metadata["min_latitude"] == pytest.approx(float(footprint["lat"].min()))
-    assert metadata["high_time_resolution"] == "false"
+    assert metadata["time_resolved"] == "false"
 
 
 def test_get_footprint_no_result():

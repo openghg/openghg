@@ -112,7 +112,7 @@ def data_read():
         species=species,
         source=source,
         domain=domain,
-        high_time_resolution=False,
+        time_resolved=False,
     )
     standardise_flux(
         store="user",
@@ -120,7 +120,7 @@ def data_read():
         species=species,
         source=source,
         domain=domain,
-        high_time_resolution=False,
+        time_resolved=False,
     )
 
     # Footprint data
@@ -187,7 +187,7 @@ def data_read():
         height="100m",
         domain="TEST",
         met_model="UKV",
-        high_time_resolution=True,
+        time_resolved=True,
     )
 
     # Boundary conditions

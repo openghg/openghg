@@ -27,7 +27,7 @@ def test_read_binary_data(mocker, clear_stores):
         "species": "co2",
         "source": "gpp-cardamom",
         "domain": "europe",
-        "high_time_resolution": False,
+        "time_resolved": False,
     }
 
     sha1_hash = hash_bytes(data=binary_data)
@@ -55,7 +55,7 @@ def test_read_file():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        high_time_resolution=False,
+        time_resolved=False,
         force=True,  # For ease, make sure we can add the same data.
     )
 
