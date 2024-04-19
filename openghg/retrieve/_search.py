@@ -109,8 +109,8 @@ def search_flux(
     model: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    time_resolved: bool = False,
-    high_time_resolution: bool = False,  # DEPRECATED: use time_resolved instead
+    time_resolved: bool = None,
+    high_time_resolution: bool = None,  # DEPRECATED: use time_resolved instead
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     **kwargs: Any,
@@ -174,8 +174,8 @@ def search_footprints(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
-    time_resolved: bool = None,
-    high_time_resolution: bool = None,  # DEPRECATED: use time_resolved instead
+    time_resolved: Optional[bool] = None,
+    high_time_resolution: Optional[bool] = None,  # DEPRECATED: use time_resolved instead
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
