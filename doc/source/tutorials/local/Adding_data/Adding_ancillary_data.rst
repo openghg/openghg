@@ -553,6 +553,22 @@ Note that the ``source`` and ``bc_input`` keywords can also include “-”
 to logically separate the descriptor e.g. “anthro-waste” but should not
 include other separators.
 
+Checking if a file has already been added
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To check if a file has already been added to the object store you can use the
+``check_file_processed`` function from ``openghg.retrieve``. We need to pass in the store
+to check, the data type and the path to the file. Here we'll check the user store to see if the footprints file
+we retrieved earlier has already been added.
+
+.. code:: ipython3
+
+    from openghg.retrieve import check_file_processed
+
+    seen = check_file_processed(store="user", data_type="footprints", filepath=data_file_fp)
+    seen
+    True
+
 
 2. Input format
 ---------------

@@ -7,7 +7,7 @@ from ._access import (
     get_obs_surface_local,
 )
 from ._export import get_ceda_file
-from ._original import retrieve_original_files
+from ._original import check_file_processed, retrieve_original_files
 from ._search import (
     search,
     search_bc,

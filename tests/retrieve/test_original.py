@@ -1,5 +1,6 @@
-from openghg.retrieve import search_footprints, retrieve_original_files
+from openghg.retrieve import search_footprints, retrieve_original_files, check_file_processed
 from openghg.util import hash_file
+from helpers import get_footprint_datapath
 
 
 def test_retrieve_original_footprint_file(tmp_path):
@@ -25,3 +26,20 @@ def test_retrieve_original_footprint_file(tmp_path):
     fp2 = tmp_path / "TAC-100magl_UKV_TEST_201608.nc"
     assert hash_file(fp1) == "3920587db1d5e5c1455842d54238eaaa8a47b3df"
     assert hash_file(fp2) == "944374a2bf570f54c9066ed4a7bb7e4108a31280"
+
+
+def test_check_if_file_already_processed(tmp_path):
+    fp_datapath1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    assert check_file_processed(store="user", data_type="footprints", filepath=fp_datapath1)
+
+    fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    assert check_file_processed(store="user", data_type="footprints", filepath=fp_datapath2)
+
+    test_str = "this is a test string"
+
+    test_filepath = tmp_path.joinpath("testing_123.txt")
+    test_filepath.write_text(test_str)
+
+    assert not check_file_processed(store="user", data_type="footprints", filepath=test_filepath)
