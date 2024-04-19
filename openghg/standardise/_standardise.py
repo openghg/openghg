@@ -487,6 +487,7 @@ def standardise_footprint(
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
+    time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     sort: bool = False,
@@ -517,10 +518,11 @@ def standardise_footprint(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
             Note this will be set to True automatically for Carbon Dioxide data.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -547,6 +549,13 @@ def standardise_footprint(
     """
     from openghg.cloud import call_function
 
+    if high_time_resolution:
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
+        time_resolved = high_time_resolution
+
     if running_on_hub():
         raise NotImplementedError("Cloud support not yet implemented.")
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
@@ -560,7 +569,7 @@ def standardise_footprint(
             "continuous": continuous,
             "retrieve_met": retrieve_met,
             "high_spatial_resolution": high_spatial_resolution,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "overwrite": overwrite,
             "met_model": met_model,
             "species": species,
@@ -597,7 +606,7 @@ def standardise_footprint(
             continuous=continuous,
             retrieve_met=retrieve_met,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
             overwrite=overwrite,
             if_exists=if_exists,
@@ -620,7 +629,8 @@ def standardise_flux(
     source_format: str = "openghg",
     database_version: Optional[str] = None,
     model: Optional[str] = None,
-    high_time_resolution: Optional[bool] = False,
+    time_resolved: bool = False,
+    high_time_resolution: bool = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Optional[Dict] = None,
     continuous: bool = True,
@@ -643,7 +653,8 @@ def standardise_flux(
         source_format: Data format, for example openghg, intem
         date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
-        high_time_resolution: If this is a high resolution file
+        time_resolved: If this is a high resolution file
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         period: Period of measurements, if not passed this is inferred from the time coords
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
@@ -676,6 +687,13 @@ def standardise_flux(
 
     filepath = Path(filepath)
 
+    if high_time_resolution:
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
+        time_resolved = high_time_resolution
+
     if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="flux")
 
@@ -683,7 +701,7 @@ def standardise_flux(
             "species": species,
             "source": source,
             "domain": domain,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "continuous": continuous,
             "overwrite": overwrite,
             "chunks": chunks,
@@ -716,7 +734,7 @@ def standardise_flux(
             database=database,
             database_version=database_version,
             model=model,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             period=period,
             continuous=continuous,
             chunks=chunks,

@@ -4,6 +4,7 @@ import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Optional, Tuple, Union
+import warnings
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
@@ -64,7 +65,8 @@ class Flux(BaseStore):
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "openghg",
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: bool = False,
+        high_time_resolution: bool = False,
         period: Optional[Union[str, tuple]] = None,
         chunks: Optional[Dict] = None,
         continuous: bool = True,
@@ -86,7 +88,8 @@ class Flux(BaseStore):
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
             source_format : Type of data being input e.g. openghg (internal format)
-            high_time_resolution: If this is a high resolution file
+            time_resolved: If this is a high resolution file
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             If specified, should be one of:
                 - "yearly", "monthly"
@@ -128,6 +131,13 @@ class Flux(BaseStore):
         source = clean_string(source)
         domain = clean_string(domain)
 
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
@@ -168,7 +178,7 @@ class Flux(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "period": period,
             "continuous": continuous,
             "data_type": "flux",
