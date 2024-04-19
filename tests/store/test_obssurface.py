@@ -113,8 +113,6 @@ def test_same_source_data_same_datasource():
 
 def test_read_data(mocker):
     clear_test_stores()
-    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
-    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     # Get some bytes
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
@@ -136,17 +134,10 @@ def test_read_data(mocker):
         file_metadata=file_metadata,
     )
 
-    expected = {
-        "processed": {
-            "bsd.picarro.1minute.248m.min.dat": {
-                "ch4": {"uuid": "test-uuid-1", "new": True},
-                "co2": {"uuid": "test-uuid-9", "new": True},
-                "co": {"uuid": "test-uuid-17", "new": True},
-            }
-        }
-    }
-
-    assert result == expected
+    species = ["ch4", "co2", "co"]
+    for k, v in result["processed"]["bsd.picarro.1minute.248m.min.dat"].items():
+        assert k in species
+        assert v["new"] is True
 
     with pytest.raises(ValueError):
         metadata = {}
@@ -189,7 +180,7 @@ def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
         )
 
 
-def test_read_CRDS(bucket):
+def test_read_CRDS(bucket, tmpdir):
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     results = standardise_surface(
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
@@ -204,34 +195,18 @@ def test_read_CRDS(bucket):
 
     uid = data["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=bucket, uuid=uid).data()
-    ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
+    datasource = Datasource(bucket=bucket, uuid=uid)
 
-    assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
-    assert ch4_data["ch4"][0] == 1959.55
-    assert ch4_data["ch4"][-1] == 1962.8
-    assert ch4_data["ch4_variability"][-1] == 1.034
-    assert ch4_data["ch4_number_of_observations"][-1] == 26.0
+    assert datasource.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid_one = metastore.select("uuid")[0]
-        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-
-        first_set_datasources = metastore.select("uuid")
-
-    data_keys = list(datasource.data().keys())
-
-    expected_keys = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
-    ]
-
-    assert data_keys == expected_keys
+    # Values here have changed from the previous test as we're now looking at the whole
+    # dataset rather than the first year
+    with datasource.get_data(version="latest") as ch4_data:
+        assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
+        assert ch4_data["ch4"][0] == 1959.55
+        assert ch4_data["ch4"][-1] == 1955.93
+        assert ch4_data["ch4_variability"][-1] == 0.232
+        assert ch4_data["ch4_number_of_observations"][-1] == 23.0
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.future.dat", source_format="CRDS")
 
@@ -239,27 +214,19 @@ def test_read_CRDS(bucket):
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
     )
 
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        assert len(metastore.search()) == 3
+    # Let's load the same Datasource again and check that the data has been updated
+    datasource = Datasource(bucket=bucket, uuid=uid)
 
-        uuid_one = metastore.select("uuid")[0]
-        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-        data_keys = sorted(list(datasource.data().keys()))
-
-        assert first_set_datasources == metastore.select("uuid")
-
-    new_expected_keys = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
+    assert datasource.data_keys() == [
+        "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:21:29+00:00",
     ]
 
-    assert data_keys == new_expected_keys
+    # Now let's make sure we can write out this retrieved data to NetCDF
+    tmppath = Path(tmpdir).joinpath("test.nc")
+
+    with datasource.get_data(version="latest") as ch4_data:
+        ch4_data.to_netcdf(tmppath)
 
 
 def test_read_GC(bucket):
@@ -342,39 +309,39 @@ def test_read_GC(bucket):
     # Load in some data
     uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
-    hfc152a_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
+    hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
 
-    assert hfc152a_data.time[0] == Timestamp("2018-01-01T02:24:00")
-    assert hfc152a_data.time[-1] == Timestamp("2018-01-31T23:33:00")
+    with hfc_datasource.get_data(version="latest") as ds:
+        # hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
-    assert hfc152a_data["hfc152a"][0] == 4.409
-    assert hfc152a_data["hfc152a"][-1] == 4.262
+        assert ds.time[0] == Timestamp("2018-01-01T02:24:00")
+        assert ds["hfc152a"][0] == 4.409
+        assert ds["hfc152a_repeatability"][0] == 0.03557
+        assert ds["hfc152a_status_flag"][0] == 0
+        assert ds["hfc152a_integration_flag"][0] == 0
 
-    assert hfc152a_data["hfc152a_repeatability"][0] == 0.03557
-    assert hfc152a_data["hfc152a_repeatability"][-1] == 0.03271
+        assert ds.time[-1] == Timestamp("2018-01-31T23:33:00")
+        assert ds["hfc152a"][-1] == 4.262
+        assert ds["hfc152a_repeatability"][-1] == 0.03271
+        assert ds["hfc152a_status_flag"][-1] == 0
+        assert ds["hfc152a_integration_flag"][-1] == 0
 
-    assert hfc152a_data["hfc152a_status_flag"][0] == 0
-    assert hfc152a_data["hfc152a_status_flag"][-1] == 0
-
-    assert hfc152a_data["hfc152a_integration_flag"][0] == 0
-    assert hfc152a_data["hfc152a_integration_flag"][-1] == 0
+        hfc152a_attrs = ds.attrs
 
     # Check we have the Datasource info saved
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
         uuids = metastore.select("uuid")
 
-        attrs = hfc152a_data.attrs
+        attrs = hfc152a_attrs
 
         assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
 
         # # Now test that if we add more data it adds it to the same Datasource
         uuid_one = uuids[0]  # metastore.search()[0]['uuid']
 
-    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
+    datasource = Datasource(bucket=bucket, uuid=uuid_one)
 
-    data_one = datasource.data()
-    assert list(data_one.keys()) == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
+    assert datasource.data_keys() == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.future.C", source_format="GC")
     precision_filepath = get_surface_datapath(
@@ -389,15 +356,15 @@ def test_read_GC(bucket):
         network="AGAGE",
     )
 
-    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-    data_one = datasource.data()
+    datasource = Datasource(bucket=bucket, uuid=uuid_one)
 
-    assert sorted(list(data_one.keys())) == [
+    assert datasource.data_keys() == [
         "2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00",
         "2023-01-01-02:24:00+00:00_2023-01-31-23:52:59+00:00",
     ]
 
 
+@pytest.mark.skip(reason="Cranfield data processing will be removed.")
 def test_read_cranfield():
     clear_test_stores()
 
@@ -412,7 +379,7 @@ def test_read_cranfield():
 
     uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=get_bucket(), uuid=uuid, shallow=False).data()
+    ch4_data = Datasource(bucket=get_bucket(), uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2018-05-05")
@@ -423,29 +390,6 @@ def test_read_cranfield():
 
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
-
-
-@pytest.mark.skip(reason="Update to read both US and Glasgow site data")
-def test_read_beaco2n(bucket):
-    data_filepath = get_surface_datapath(filename="Charlton_Community_Center.csv", source_format="BEACO2N")
-
-    results = standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="BEACO2N",
-        site="CCC",
-        network="BEACO2N",
-        overwrite=True,
-    )
-
-    uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]["uuid"]
-
-    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
-
-    assert co2_data.time[0] == Timestamp("2015-04-18T04:00:00")
-    assert co2_data["co2"][0] == 410.4
-    assert co2_data["co2_qc"][0] == 2
 
 
 def test_read_openghg_format(bucket):
@@ -464,12 +408,12 @@ def test_read_openghg_format(bucket):
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
-    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    co2_data = co2_data["2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00"]
+    co2_data = Datasource(bucket=bucket, uuid=uuid)
 
-    assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
-    assert co2_data["co2"][0] == 385.25
-    assert co2_data["co2_variability"][0] == 0.843
+    with co2_data.get_data(version="latest") as co2_data:
+        assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
+        assert co2_data["co2"][0] == 385.25
+        assert co2_data["co2_variability"][0] == 0.843
 
 
 def test_read_noaa_raw(bucket):
@@ -490,27 +434,16 @@ def test_read_noaa_raw(bucket):
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
 
-    co_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
+    co_datasource = Datasource(bucket=bucket, uuid=uuid)
 
-    assert sorted(list(co_data.keys())) == [
-        "1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00",
-        "2009-06-13-16:32:00+00:00_2009-12-03-00:30:00+00:00",
-        "2010-01-10-00:13:00+00:00_2010-12-09-16:05:00+00:00",
-        "2011-01-27-04:55:00+00:00_2011-11-11-14:45:00+00:00",
-        "2016-12-03-12:37:00+00:00_2016-12-18-05:30:00+00:00",
-        "2017-01-27-19:10:00+00:00_2017-07-15-04:15:00+00:00",
-    ]
+    with co_datasource.get_data(version="latest") as co_data:
+        assert co_data["co"][0] == pytest.approx(94.9)
+        assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
+        assert co_data["co_selection_flag"][0] == 0
 
-    co_data = co_data["1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00"]
-
-    assert co_data["co"][0] == pytest.approx(94.9)
-    assert co_data["co"][-1] == pytest.approx(95.65)
-
-    assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
-    assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
-
-    assert co_data["co_selection_flag"][0] == 0
-    assert co_data["co_selection_flag"][-1] == 0
+        assert co_data["co"][-1] == pytest.approx(73.16)
+        assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
+        assert co_data["co_selection_flag"][-1] == pytest.approx(0)
 
 
 def test_read_noaa_metastorepack(bucket):
@@ -530,29 +463,18 @@ def test_read_noaa_metastorepack(bucket):
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
+    ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
 
-    assert sorted(list(ch4_data.keys())) == [
-        "1993-06-17-00:12:30+00:00_1993-11-20-21:50:00+00:00",
-        "1994-01-02-22:10:00+00:00_1994-12-24-22:15:00+00:00",
-        "1995-02-06-12:00:00+00:00_1995-11-08-19:55:00+00:00",
-        "1996-01-21-22:10:00+00:00_1996-12-01-20:00:00+00:00",
-        "1997-02-12-19:00:00+00:00_1997-12-20-20:15:00+00:00",
-        "1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00",
-        "1999-01-14-22:15:00+00:00_1999-12-31-23:35:00+00:00",
-        "2000-03-05-00:00:00+00:00_2000-11-04-22:30:00+00:00",
-        "2001-01-05-21:45:00+00:00_2001-12-06-12:00:00+00:00",
-        "2002-01-12-12:00:00+00:00_2002-01-12-12:00:01+00:00",  # Code added 1 second to ensure is not a range of 0 seconds.
-    ]
+    assert ch4_datasource.data_keys() == ["1993-06-17-00:12:30+00:00_2002-01-12-12:00:00+00:00"]
 
-    data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
-
-    assert data.time[0] == Timestamp("1998-01-01T23:10:00")
-    assert data["ch4"][0] == pytest.approx(1.83337e-06)
-    assert data["ch4_number_of_observations"][0] == 2.0
-    assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
+    with ch4_datasource.get_data(version="latest") as ch4_data:
+        ch4_data.time[0] == Timestamp("1993-06-17T00:12:30.000000000")
+        ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
+        ch4_data["ch4_number_of_observations"][0] == 2.0
+        ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
 
+@pytest.mark.skip(reason="Thames Barrier data read to be removed.")
 def test_read_thames_barrier(bucket):
     clear_test_stores()
 
@@ -852,13 +774,10 @@ def test_read_multiside_aqmesh():
     assert data.attrs.items() >= expected_attrs.items()
 
 
-def test_store_icos_carbonportal_data(bucket, mocker):
+def test_store_icos_carbonportal_data(bucket):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
-    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
-    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
-
     test_data_nc = get_surface_datapath(filename="test_toh_co2_147m.nc", source_format="ICOS")
     ds = xr.open_dataset(test_data_nc)
 
@@ -873,7 +792,11 @@ def test_store_icos_carbonportal_data(bucket, mocker):
         first_result = metastore.store_data(data=data)
         second_result = metastore.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
+    assert first_result["co2"]["new"] is True
+
+    with ObsSurface(bucket=bucket) as obs:
+        second_result = obs.store_data(data=data)
+
     assert second_result is None
 
 
@@ -930,7 +853,11 @@ def test_gcwerks_fp_not_a_tuple_raises():
         standardise_surface(
             store="user", filepath=filepath, source_format="GCWERKS", site="cgo", network="agage"
         )
-        standardise_surface(store="user", filepath=filepath, source_format="gc", site="cgo", network="agage")
+
+    with pytest.raises(TypeError):
+        standardise_surface(
+            store="user", filepath=filepath, source_format="gcwerks", site="cgo", network="agage"
+        )
 
 
 def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):

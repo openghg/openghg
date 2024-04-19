@@ -14,8 +14,7 @@ def format_inlet(
     units: str = "m",
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
-) -> str:
-    ...
+) -> str: ...
 
 
 @overload
@@ -24,8 +23,7 @@ def format_inlet(
     units: str = "m",
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 def format_inlet(
