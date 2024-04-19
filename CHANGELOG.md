@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
 
+### Added
+
+- Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
+- Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
+
 ### Fixed
 
+- Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
 - Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
 
 ## [0.8.0] - 2024-03-19

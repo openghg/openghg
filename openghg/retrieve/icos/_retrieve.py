@@ -318,7 +318,7 @@ def _retrieve_remote(
     stat = station.get(stationId=site.upper())
 
     if not stat.valid:
-        logger.error("Please check you have passed a valid ICOS site.")
+        logger.error("Please check you have passed a valid ICOS site and have a working internet connection.")
         return None
 
     data_pids = stat.data(level=data_level)
@@ -328,9 +328,14 @@ def _retrieve_remote(
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
     # Now filter the dataframe so we can extract the PIDS
-    # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
+    # We filter out any data that contains "Obspack" or "csv" in the specLabel
+    # Also filter out some drought files which cause trouble being read in
+    # For some reason they have separate station record pages that contain "ATMO_"
     filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
+        data_pids["specLabel"].str.contains(search_str)
+        & ~data_pids["specLabel"].str.contains("Obspack")
+        & ~data_pids["specLabel"].str.contains("csv")
+        & ~data_pids["station"].str.contains("ATMO_")
     ]
 
     if filtered_sources.empty:
@@ -338,7 +343,11 @@ def _retrieve_remote(
         # For this see https://stackoverflow.com/a/55335207
         search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
         # Now filter the dataframe so we can extract the PIDS
-        filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str)
+            & ~data_pids["specLabel"].str.contains("Obspack")
+            & ~data_pids["specLabel"].str.contains("csv")
+        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
