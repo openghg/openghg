@@ -15,7 +15,7 @@ def define_data_types() -> Tuple[str, ...]:
         "footprints",
         "boundary_conditions",
         "eulerian_model",
-        "fluxtimeseries",
+        "flux_timeseries",
     )
 
     return data_types
@@ -43,7 +43,7 @@ def define_data_type_classes() -> Dict[str, Any]:
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,
         "eulerian_model": EulerianModel,
-        "fluxtimeseries": FluxTimeseries,
+        "flux_timeseries": FluxTimeseries,
     }
 
     return data_type_classes

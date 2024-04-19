@@ -845,7 +845,8 @@ def standardise_flux_timeseries(
     filepath: Union[str, Path],
     species: str,
     source: str,
-    domain: str,
+    domain: Optional[str] = None,
+    source_format: str = "crf",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
@@ -856,6 +857,8 @@ def standardise_flux_timeseries(
     force: bool = False,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: Optional[bool] = None,
 ) -> Dict:
     """Process one dimension timeseries file
 
@@ -898,9 +901,9 @@ def standardise_flux_timeseries(
         dict: Dictionary of datasource UUIDs data assigned to
     """
     if running_on_hub():
-        raise NotImplementedError("Serverless not implemented yet for One dimensional timeseries model.")
+        raise NotImplementedError("Serverless not implemented yet for Flux timeseries model.")
     return standardise(
-        data_type="FluxTimeseries",
+        data_type="flux_timeseries",
         store=store,
         filepath=filepath,
         species=species,

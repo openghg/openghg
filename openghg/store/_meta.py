@@ -29,7 +29,7 @@ def get_data_class(data_type: str) -> type[BaseStore]:
 
     Args:
         data_type: one of "surface", "column", "flux", "footprints",
-    "boundary_conditions", or "eulerian_model"
+    "boundary_conditions", "eulerian_model or flux_timeseries"
 
     Returns:
         Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,

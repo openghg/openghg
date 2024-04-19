@@ -7,25 +7,24 @@ def parse_crf(
     filepath: Path,
     species: str,
     source: str = "crf",
-    domain: str = "europe",
-    data_type: str = "flux",
+    domain: Optional[str] = None,
+    data_type: str = "flux_timeseries",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
-    chunks: Optional[Dict] = None,
 ) -> Dict:
     """
-    Parse INTEM emissions data from the specified file.
+    Parse CRF emissions data from the specified file.
 
     Args:
-        filepath (Path): Path to the '.xlsx' file containing INTEM emissions data.
-        species (str): Name of species
-        source (str): Source of the emissions data, default is 'intem'.
-        domain (str): Geographic domain, default is 'europe'.
-        data_type (str): Type of data, default is 'flux'.
-        database (Optional[str]): Database name if applicable.
-        database_version (Optional[str]): Version of the database if applicable.
-        model (Optional[str]): Model name if applicable.
+        filepath: Path to the '.xlsx' file containing CRF emissions data.
+        species: Name of species
+        source: Source of the emissions data, e.g. "energy", default is 'crf'.
+        domain: Geographic domain, default is 'None'. Instead region is used to identify area
+        data_type: Type of data, default is 'flux_timeseries'.
+        database: Database name if applicable.
+        database_version: Version of the database if applicable.
+        model: Model name if applicable.
 
     Returns:
         Dict: Parsed emissions data in dictionary format.
@@ -51,9 +50,10 @@ def parse_crf(
 
     metadata = {}
     metadata["species"] = species
-    metadata["domain"] = domain
+    if domain:
+        metadata["domain"] = domain
     metadata["source"] = source
-
+    metadata["region"] = "uk"
     optional_keywords = {"database": database, "database_version": database_version, "model": model}
 
     for key, value in optional_keywords.items():
@@ -64,7 +64,7 @@ def parse_crf(
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["source_format"] = "openghg"
+    metadata["source_format"] = "crf"
 
     dataframe = dataframe.rename_axis("time")
     dataarray = dataframe.to_xarray()

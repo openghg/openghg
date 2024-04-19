@@ -22,9 +22,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class FluxTimeseries(BaseStore):
     """This class is used to process ond dimension timeseries data"""
 
-    _data_type = "FluxTimeseries"
-
-    # New uuid is generated using the package - Delete comment in future
+    _data_type = "flux_timeseries"
     """ _root = "FluxTimeseries"
     _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
@@ -56,13 +54,12 @@ class FluxTimeseries(BaseStore):
         self,
         filepath: Union[str, Path],
         species: str,
-        domain: str,
         source: str,
+        domain: Optional[str] = None,
         database: Optional[str] = None,
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "crf",
-        chunks: Optional[Dict] = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -73,9 +70,9 @@ class FluxTimeseries(BaseStore):
         """Read one dimension timeseries file
 
         Args:
-            filepath: Path of boundary conditions file
+            filepath: Path of flux timeseries / emissions timeseries file
             species: Species name
-            domain: Region for boundary conditions
+            domain: Region for Flux timeseries
             source: Flux / Emissions source
             database: Name of database source for this input (if relevant)
             database_version: Name of database version (if relevant)
@@ -86,10 +83,6 @@ class FluxTimeseries(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
-            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -120,7 +113,8 @@ class FluxTimeseries(BaseStore):
 
         species = clean_string(species)
         source = clean_string(source)
-        domain = clean_string(domain)
+        if domain:
+            domain = clean_string(domain)
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -152,9 +146,6 @@ class FluxTimeseries(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
-        if chunks is None:
-            chunks = {}
-
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
         param = {
@@ -162,8 +153,7 @@ class FluxTimeseries(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "data_type": "FluxTimeseries",
-            "chunks": chunks,
+            "data_type": "flux_timeseries",
         }
 
         optional_keywords: dict[Any, Any] = {
@@ -201,7 +191,7 @@ class FluxTimeseries(BaseStore):
 
         required = tuple(min_required)
 
-        data_type = "FluxTimeseries"
+        data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
             data=flux_timeseries_data,
             if_exists=if_exists,
@@ -220,8 +210,8 @@ class FluxTimeseries(BaseStore):
     @staticmethod
     def validate_data(data: Dataset) -> None:
         """
-        Validate input data against BoundaryConditions schema - definition from
-        BoundaryConditions.schema() method.
+        Validate input data against FluxTimeseries schema - definition from
+        FluxTimeseries.schema() method.
 
         Args:
             data : xarray Dataset in expected format
@@ -230,7 +220,7 @@ class FluxTimeseries(BaseStore):
             None
 
             Raises a ValueError with details if the input data does not adhere
-            to the BoundaryConditions schema.
+            to the FluxTimeseries schema.
         """
         data_schema = FluxTimeseries.schema()
         data_schema.validate_data(data)
