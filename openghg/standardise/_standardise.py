@@ -841,7 +841,7 @@ def standardise_from_binary_data(
     return result
 
 
-def standardise_oned_timeseries(
+def standardise_flux_timeseries(
     filepath: Union[str, Path],
     species: str,
     source: str,
@@ -900,7 +900,7 @@ def standardise_oned_timeseries(
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for One dimensional timeseries model.")
     return standardise(
-        data_type="OneDTimeseries",
+        data_type="FluxTimeseries",
         store=store,
         filepath=filepath,
         species=species,

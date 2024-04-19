@@ -33,7 +33,7 @@ def get_data_class(data_type: str) -> type[BaseStore]:
 
     Returns:
         Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,
-    `Footprints`, `BoundaryConditions`, `OneDTimeseries`.
+    `Footprints`, `BoundaryConditions`, `FluxTimeseries`.
     """
     try:
         data_class = BaseStore._registry[data_type]

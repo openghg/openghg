@@ -13,19 +13,19 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 
-__all__ = ["OneDTimeseries"]
+__all__ = ["FluxTimeseries"]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class OneDTimeseries(BaseStore):
+class FluxTimeseries(BaseStore):
     """This class is used to process ond dimension timeseries data"""
 
-    _data_type = "OneDTimeseries"
+    _data_type = "FluxTimeseries"
 
     # New uuid is generated using the package - Delete comment in future
-    """ _root = "OneDTimeseries"
+    """ _root = "FluxTimeseries"
     _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
@@ -110,11 +110,11 @@ class OneDTimeseries(BaseStore):
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.      Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import OneD_types
+        from openghg.types import FluxTimeseriesTypes
 
         from openghg.util import (
             clean_string,
-            load_oned_parser,
+            load_flux_timeseries_parser,
             check_if_need_new_version,
         )
 
@@ -138,12 +138,12 @@ class OneDTimeseries(BaseStore):
         filepath = Path(filepath)
 
         try:
-            source_format = OneD_types[source_format.upper()].value
+            source_format = FluxTimeseriesTypes[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_oned_parser(source_format=source_format)
+        parser_fn = load_flux_timeseries_parser(source_format=source_format)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
@@ -162,7 +162,7 @@ class OneDTimeseries(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "data_type": "OneDTimeseries",
+            "data_type": "FluxTimeseries",
             "chunks": chunks,
         }
 
@@ -187,12 +187,12 @@ class OneDTimeseries(BaseStore):
                     f"This is not accepted by the current standardisation function: {parser_fn}"
                 )
 
-        oned_data = parser_fn(**input_parameters)
+        flux_timeseries_data = parser_fn(**input_parameters)
 
         # Checking against expected format for Flux
-        for split_data in oned_data.values():
+        for split_data in flux_timeseries_data.values():
             em_data = split_data["data"]
-            OneDTimeseries.validate_data(em_data)
+            FluxTimeseries.validate_data(em_data)
 
         min_required = ["species", "source", "domain"]
         for key, value in optional_keywords.items():
@@ -201,9 +201,9 @@ class OneDTimeseries(BaseStore):
 
         required = tuple(min_required)
 
-        data_type = "OneDTimeseries"
+        data_type = "FluxTimeseries"
         datasource_uuids = self.assign_data(
-            data=oned_data,
+            data=flux_timeseries_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -216,83 +216,6 @@ class OneDTimeseries(BaseStore):
         self.store_hashes(unseen_hashes)
 
         return datasource_uuids
-
-    # TODO: Delete below comments after complete agreement on development.
-
-    #     if filepath.suffix.endswith(".nc"):
-    #         oned_data = open_dataset(filepath)
-    #     elif filepath.suffix.endswith(".xlsx") or (".csv"):
-    #         # TODO: Determine the index, and values to be fetched from the csv files inorder to be converted into xarray dataset compatible for further operations
-    #         oned_data = pd.read_csv(filepath)
-    #         oned_data = Dataset.from_dataframe(oned_data)
-    #     # Some attributes are numpy types we can't serialise to JSON so convert them
-    #     # to their native types here
-    #     attrs = {}
-    #     for key, value in oned_data.attrs.items():
-    #         try:
-    #             attrs[key] = value.item()
-    #         except AttributeError:
-    #             attrs[key] = value
-
-    #     author_name = "OpenGHG Cloud"
-    #     oned_data.attrs["author"] = author_name
-
-    #     metadata = {}
-    #     metadata.update(attrs)
-
-    #     metadata["species"] = species
-    #     metadata["domain"] = domain
-    #     metadata["author"] = author_name
-    #     metadata["processed"] = str(timestamp_now())
-
-    #     # Check if time has 0-dimensions and, if so, expand this so time is 1D
-    #     if "time" in oned_data.coords:
-    #         oned_data = update_zero_dim(oned_data, dim="time")
-
-    #     # Currently ACRG boundary conditions are split by month or year
-    #     oneD_time = oned_data["time"]
-
-    #     start_date, end_date, period_str = infer_date_range(
-    #         oneD_time, filepath=filepath, period=period, continuous=continuous
-    #     )
-
-    #     # Checking against expected format for boundary conditions
-    #     OneDTimeseries.validate_data(oned_data)
-    #     data_type = "oned_timeseries"
-
-    #     metadata["start_date"] = str(start_date)
-    #     metadata["end_date"] = str(end_date)
-    #     metadata["data_type"] = data_type
-
-    #     metadata["input_filename"] = filepath.name
-
-    #     metadata["time_period"] = period_str
-
-    #     key = "_".join((species, domain))
-
-    #     oneD_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-    #     oneD_data[key]["data"] = oned_data
-    #     oneD_data[key]["metadata"] = metadata
-
-    #     required_keys = ("species", "domain")
-
-    #     # This performs the lookup and assignment of data to new or
-    #     # exisiting Datasources
-    #     data_type = "oned_timeseries"
-    #     datasource_uuids = self.assign_data(
-    #         data=oneD_data,
-    #         if_exists=if_exists,
-    #         new_version=new_version,
-    #         data_type=data_type,
-    #         required_keys=required_keys,
-    #         compressor=compressor,
-    #         filters=filters,
-    #     )
-
-    #     # Record the file hash in case we see this file again
-    #     self._file_hashes[file_hash] = filepath.name
-
-    #     return datasource_uuids
 
     @staticmethod
     def validate_data(data: Dataset) -> None:
@@ -309,13 +232,13 @@ class OneDTimeseries(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the BoundaryConditions schema.
         """
-        data_schema = OneDTimeseries.schema()
+        data_schema = FluxTimeseries.schema()
         data_schema.validate_data(data)
 
     @staticmethod
     def schema() -> DataSchema:
         """
-        Define schema for one dimensional timeseries(OneDTimeseries) Dataset.
+        Define schema for one dimensional timeseries(FluxTimeseries) Dataset.
 
         Includes observation for each time of the defined domain:
             - "Obs"
@@ -324,14 +247,14 @@ class OneDTimeseries(BaseStore):
         Expected data types for all variables and coordinates also included.
 
         Returns:
-            DataSchema : Contains schema for OneDTimeseries.
+            DataSchema : Contains schema for FluxTimeseries.
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {"oneD": ("time",)}
+        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time",)}
         dtypes = {
             "time": np.datetime64,
-            "oneD": np.floating,
+            "flux": np.floating,
         }
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)

@@ -61,7 +61,7 @@ class ObsTypes(Enum):
     MOBILE = "ObsMobile"
 
 
-class OneD_types(Enum):
+class FluxTimeseriesTypes(Enum):
     """For standardising one dimensional timeseries data"""
 
     CRF = "Crf"
