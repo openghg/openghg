@@ -380,13 +380,13 @@ class ObsSurface(BaseStore):
             if optional_metadata:
                 common_keys = set(required_keys) & set(optional_metadata.keys())
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"

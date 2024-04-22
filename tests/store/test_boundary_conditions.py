@@ -1,10 +1,16 @@
 import numpy as np
-from helpers import get_bc_datapath
+import pytest
+from helpers import get_bc_datapath,clear_test_stores
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
 from openghg.util import hash_bytes
 from xarray import open_dataset
+
+
+@pytest.fixture
+def clear_stores():
+    clear_test_stores()
 
 
 def test_read_data_monthly(mocker):
@@ -227,3 +233,54 @@ def test_bc_schema():
     assert "vmr_w" in data_vars
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_optional_metadata(clear_stores):
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        optional_metadata={"project":"openghg_test", "tag":"tests"}
+    )
+
+    search_results = search(
+        species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
+    )
+
+    bc_obs = search_results.retrieve_all()
+    metadata = bc_obs.metadata
+
+    assert "project" in metadata
+    assert "tag" in metadata
+
+
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    with pytest.raises(ValueError):
+        standardise_bc(
+            store="user",
+            filepath=test_datapath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            optional_metadata={"purpose":"openghg_tests", "species":"co2"}
+        )

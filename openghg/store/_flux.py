@@ -224,13 +224,13 @@ class Flux(BaseStore):
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
 
-        if common_keys:
-            raise ValueError(
-                f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-            )
-        else:
-            for key, parsed_data in flux_data.items():
-                parsed_data["metadata"].update(optional_metadata)
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -257,6 +257,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -331,6 +332,17 @@ class Flux(BaseStore):
             Flux.validate_data(em_data)
 
         required_keys = ("species", "source", "domain")
+
+        if optional_metadata:
+            common_keys = set(required_keys) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(

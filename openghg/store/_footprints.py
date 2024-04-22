@@ -451,13 +451,13 @@ class Footprints(BaseStore):
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
 
-        if common_keys:
-            raise ValueError(
-                f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-            )
-        else:
-            for key, parsed_data in footprint_data.items():
-                parsed_data["metadata"].update(optional_metadata)
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in footprint_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options
