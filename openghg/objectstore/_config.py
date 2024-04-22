@@ -49,35 +49,37 @@ def create_default_config(store: str) -> None:
     # TODO - where to store these keys?
 
     defaults = {
-        "boundary_conditions": ["species", "bc_input", "domain"],
-        "eulerian_model": ["model", "species", "date"],
-        # QUESTION - do we want all these keys here? The last three were from optional_keywords
-        "flux": ["species", "source", "domain", "database", "database_version", "model"],
-        "footprints": [
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "high_time_resolution",
-            "high_spatial_resolution",
-            "short_lifetime",
-            "species",
-            "met_model",
-        ],
-        "obscolumn": ["satellite", "selection", "domain", "site", "species", "network"],
-        "obssurface": [
-            "species",
-            "site",
-            "sampling_period",
-            "station_long_name",
-            "inlet",
-            "instrument",
-            "network",
-            "source_format",
-            "data_source",
-            "icos_data_level",
-            "data_type",
-        ],
+        "default_metakeys": {
+            "boundary_conditions": ["species", "bc_input", "domain"],
+            "eulerian_model": ["model", "species", "date"],
+            # QUESTION - do we want all these keys here? The last three were from optional_keywords
+            "flux": ["species", "source", "domain", "database", "database_version", "model"],
+            "footprints": [
+                "site",
+                "model",
+                "inlet",
+                "domain",
+                "high_time_resolution",
+                "high_spatial_resolution",
+                "short_lifetime",
+                "species",
+                "met_model",
+            ],
+            "obscolumn": ["satellite", "selection", "domain", "site", "species", "network"],
+            "obssurface": [
+                "species",
+                "site",
+                "sampling_period",
+                "station_long_name",
+                "inlet",
+                "instrument",
+                "network",
+                "source_format",
+                "data_source",
+                "icos_data_level",
+                "data_type",
+            ],
+        }
     }
 
     # Write the version this config folder was created by
