@@ -212,6 +212,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -446,6 +447,17 @@ class Footprints(BaseStore):
             "species",
             "met_model",
         )
+
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+        if common_keys:
+            raise ValueError(
+                f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+            )
+        else:
+            for key, parsed_data in footprint_data.items():
+                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options

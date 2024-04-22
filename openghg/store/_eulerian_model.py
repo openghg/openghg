@@ -42,6 +42,7 @@ class EulerianModel(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -196,6 +197,17 @@ class EulerianModel(BaseStore):
             model_data[key]["metadata"] = metadata
 
             required = ("model", "species", "date")
+
+            if optional_metadata:
+                common_keys = set(required) & set(optional_metadata.keys())
+
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in model_data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(

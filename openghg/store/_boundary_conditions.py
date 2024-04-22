@@ -64,6 +64,7 @@ class BoundaryConditions(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -206,6 +207,17 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["metadata"] = metadata
 
             required_keys = ("species", "bc_input", "domain")
+
+            if optional_metadata:
+                common_keys = set(required_keys) & set(optional_metadata.keys())
+
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in boundary_conditions_data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
