@@ -124,6 +124,7 @@ class ObsSurface(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[dict] = {},
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -375,6 +376,13 @@ class ObsSurface(BaseStore):
                 "icos_data_level",
                 "data_type",
             )
+
+            if optional_metadata:
+                for optional_key, optional_value in optional_metadata.items():
+                    if optional_key in required_keys:
+                        raise ValueError(f"Optional metadata key '{optional_key}' is already present in required keys.")
+                    else:
+                        data["metadata"][optional_key] = optional_value
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
