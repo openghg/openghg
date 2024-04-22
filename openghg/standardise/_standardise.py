@@ -76,7 +76,7 @@ def standardise_surface(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -242,7 +242,7 @@ def standardise_surface(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
@@ -266,7 +266,7 @@ def standardise_column(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Read column observation file
 
@@ -366,7 +366,7 @@ def standardise_column(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
@@ -386,7 +386,7 @@ def standardise_bc(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -468,7 +468,7 @@ def standardise_bc(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
@@ -501,7 +501,7 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -624,7 +624,7 @@ def standardise_footprint(
             filters=filters,
             sort=sort,
             drop_duplicates=drop_duplicates,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
@@ -650,7 +650,7 @@ def standardise_flux(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Process flux / emissions data
 
@@ -754,7 +754,7 @@ def standardise_flux(
             compression=compression,
             compressor=compressor,
             filters=filters,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
@@ -774,7 +774,7 @@ def standardise_eulerian(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
-    optional_metadata: Optional[dict] = {}
+    optional_metadata: Optional[dict] = {},
 ) -> Dict:
     """Read Eulerian model output
 
@@ -832,7 +832,7 @@ def standardise_eulerian(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata
+            optional_metadata=optional_metadata,
         )
 
 
