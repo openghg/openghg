@@ -70,6 +70,10 @@ def parse_crf(
     dataarray = dataframe.to_xarray()
     dataarray = dataarray.assign_coords(time=dataarray.time)
 
+    flux_time = dataarray["time"]
+    metadata["start-date"] = flux_time[0].values
+    metadata["end-date"] = flux_time[-1].values
+
     emissions_data: Dict[str, dict] = {}
     emissions_data[key] = {}
     emissions_data[key]["data"] = dataarray

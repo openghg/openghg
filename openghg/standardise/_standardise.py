@@ -908,6 +908,7 @@ def standardise_flux_timeseries(
         filepath=filepath,
         species=species,
         source=source,
+        source_format=source_format,
         domain=domain,
         database=database,
         database_version=database_version,
