@@ -124,7 +124,7 @@ class ObsSurface(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
-        optional_metadata: Optional[dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
