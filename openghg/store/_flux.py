@@ -118,6 +118,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
