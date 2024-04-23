@@ -1,12 +1,8 @@
 import pytest
-from helpers import get_eulerian_datapath, clear_test_stores
+from helpers import get_eulerian_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_eulerian
 from xarray import open_dataset
-
-@pytest.fixture
-def clear_stores():
-    clear_test_stores()
 
 
 def test_read_file():
@@ -53,11 +49,12 @@ def test_read_file():
         assert metadata[key] == expected_value
 
 
-def test_optional_metadata_raise_error(clear_stores):
+def test_optional_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
 
+    clear_test_store("user")
     with pytest.raises(ValueError):
         test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 

@@ -1,15 +1,12 @@
 import numpy as np
 import pytest
-from helpers import get_column_datapath, clear_test_stores
+from helpers import get_column_datapath, clear_test_store
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search_column
 from openghg.standardise import standardise_column
 from openghg.store.base import Datasource
 from pandas import Timestamp
 
-@pytest.fixture
-def clear_store():
-    clear_test_stores()
 
 def test_read_openghg_format():
     """
@@ -50,10 +47,12 @@ def test_read_openghg_format():
         assert np.isclose(ch4_data["xch4"][0], 1844.2019)
 
 
-def test_optional_metadata_raise_error(clear_store):
+def test_optional_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
+
+    clear_test_store("user")
     filename = "gosat-fts_gosat_20170318_ch4-column.nc"
     datafile = get_column_datapath(filename=filename)
 

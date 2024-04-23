@@ -1,16 +1,11 @@
 import numpy as np
 import pytest
-from helpers import get_bc_datapath,clear_test_stores
+from helpers import get_bc_datapath,clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
 from openghg.util import hash_bytes
 from xarray import open_dataset
-
-
-@pytest.fixture
-def clear_stores():
-    clear_test_stores()
 
 
 def test_read_data_monthly(mocker):
@@ -235,10 +230,12 @@ def test_bc_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata_raise_error(clear_stores):
+def test_optional_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
+
+    clear_test_store("user")
     test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
 
     species = "co2"
