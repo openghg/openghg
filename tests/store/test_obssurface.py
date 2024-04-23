@@ -926,17 +926,48 @@ def test_drop_only_correct_nan():
     assert len(rgl_co2_data["time"]) == 1
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
 
+
 def test_optional_parameters():
     """Test if ValueError is raised for invalid input value to calibration_scale."""
 
     data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
 
     with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
-        standardise_surface(filepath=data_filepath, 
-                        source_format="OPENGHG", 
-                        site="TAC", 
+        standardise_surface(filepath=data_filepath,
+                        source_format="OPENGHG",
+                        site="TAC",
                         network="DECC",
                         calibration_scale="unknown",
                         instrument='picarro',
                         store="group" )
-        
+
+
+def test_optional_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+
+    clear_test_stores()
+    rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
+
+    with pytest.raises(ValueError):
+        standardise_surface(
+            filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"species":"openghg_tests"}
+        )
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+
+    rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
+
+    standardise_surface(
+        filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"project":"openghg_tests"}
+    )
+
+    rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")
+    rgl_ch4_metadata = rgl_ch4.metadata
+
+    assert "project" in rgl_ch4_metadata

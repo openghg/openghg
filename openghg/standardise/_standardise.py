@@ -76,6 +76,7 @@ def standardise_surface(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -125,6 +126,7 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict: Dictionary of result data
     """
@@ -241,6 +243,7 @@ def standardise_surface(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
+            optional_metadata=optional_metadata,
         )
 
 
@@ -264,6 +267,7 @@ def standardise_column(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Read column observation file
 
@@ -308,6 +312,7 @@ def standardise_column(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -363,6 +368,7 @@ def standardise_column(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
+            optional_metadata=optional_metadata,
         )
 
 
@@ -382,6 +388,7 @@ def standardise_bc(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -417,6 +424,7 @@ def standardise_bc(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -463,6 +471,7 @@ def standardise_bc(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
+            optional_metadata=optional_metadata,
         )
 
 
@@ -495,6 +504,7 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -543,6 +553,7 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -617,6 +628,7 @@ def standardise_footprint(
             filters=filters,
             sort=sort,
             drop_duplicates=drop_duplicates,
+            optional_metadata=optional_metadata,
         )
 
 
@@ -642,6 +654,7 @@ def standardise_flux(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Process flux / emissions data
 
@@ -680,6 +693,7 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -745,6 +759,7 @@ def standardise_flux(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            optional_metadata=optional_metadata,
         )
 
 
@@ -764,6 +779,7 @@ def standardise_eulerian(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -798,6 +814,7 @@ def standardise_eulerian(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict: Dictionary of result data
     """
@@ -821,6 +838,7 @@ def standardise_eulerian(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
+            optional_metadata=optional_metadata,
         )
 
 

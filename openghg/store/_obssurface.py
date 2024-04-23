@@ -124,6 +124,7 @@ class ObsSurface(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -177,6 +178,7 @@ class ObsSurface(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -375,6 +377,17 @@ class ObsSurface(BaseStore):
                 "icos_data_level",
                 "data_type",
             )
+
+            if optional_metadata:
+                common_keys = set(required_keys) & set(optional_metadata.keys())
+
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"

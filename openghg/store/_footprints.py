@@ -212,6 +212,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -258,6 +259,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -446,6 +448,17 @@ class Footprints(BaseStore):
             "species",
             "met_model",
         )
+
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in footprint_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options

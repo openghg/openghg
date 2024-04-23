@@ -1,5 +1,5 @@
 import pytest
-from helpers import get_footprint_datapath
+from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
@@ -633,3 +633,67 @@ def test_footprints_chunking_schema():
             time_resolved=False,
             short_lifetime=False,
         )
+
+
+def test_optional_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    clear_test_store("user")
+
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    site = "WAO"
+    inlet = "20m"
+    domain = "TEST"
+    model = "NAME"
+    met_model = "UKV"
+    species = "Rn"
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            store="user",
+            filepath=datapath,
+            site=site,
+            model=model,
+            met_model=met_model,
+            inlet=inlet,
+            species=species,
+            domain=domain,
+            optional_metadata={"site":"test"},
+    )
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    site = "WAO"
+    inlet = "20m"
+    domain = "TEST"
+    model = "NAME"
+    met_model = "UKV"
+    species = "Rn"
+
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        met_model=met_model,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+        optional_metadata={"project":"test"},
+    )
+
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints",)
+
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_metadata = footprint_obs.metadata
+
+    assert "project" in footprint_metadata
