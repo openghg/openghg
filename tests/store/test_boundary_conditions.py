@@ -235,7 +235,28 @@ def test_bc_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata(clear_stores):
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    with pytest.raises(ValueError):
+        standardise_bc(
+            store="user",
+            filepath=test_datapath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            optional_metadata={"purpose":"openghg_tests", "species":"co2"},
+        )
+
+
+def test_optional_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -263,24 +284,3 @@ def test_optional_metadata(clear_stores):
 
     assert "project" in metadata
     assert "tag" in metadata
-
-
-def test_optional_metadata_raise_error(clear_stores):
-    """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
-    """
-    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
-
-    species = "co2"
-    bc_input = "CAMS"
-    domain = "EUROPE"
-
-    with pytest.raises(ValueError):
-        standardise_bc(
-            store="user",
-            filepath=test_datapath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-            optional_metadata={"purpose":"openghg_tests", "species":"co2"}
-        )

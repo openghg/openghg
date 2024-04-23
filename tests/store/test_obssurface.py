@@ -942,6 +942,20 @@ def test_optional_parameters():
                         store="group" )
 
 
+def test_optional_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+
+    clear_test_stores()
+    rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
+
+    with pytest.raises(ValueError):
+        standardise_surface(
+            filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"species":"openghg_tests"}
+        )
+
+
 def test_optional_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
@@ -960,17 +974,3 @@ def test_optional_metadata():
     rgl_ch4_metadata = rgl_ch4.metadata
 
     assert "project" in rgl_ch4_metadata
-
-
-def test_optional_metadata_raise_error():
-    """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
-    """
-
-    clear_test_stores()
-    rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
-
-    with pytest.raises(ValueError):
-        standardise_surface(
-            filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"species":"openghg_tests"}
-        )

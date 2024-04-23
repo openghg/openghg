@@ -53,8 +53,18 @@ def test_read_file():
         assert metadata[key] == expected_value
 
 
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
 
-def test_optional_metadata(clear_stores):
+    with pytest.raises(ValueError):
+        test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
+
+        proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4", optional_metadata={"species":"ch4", "tag":"tests"})
+
+
+def test_optional_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -71,14 +81,3 @@ def test_optional_metadata(clear_stores):
 
     assert "project" in metadata
     assert "tag" in metadata
-
-
-def test_optional_metadata_raise_error(clear_stores):
-    """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
-    """
-
-    with pytest.raises(ValueError):
-        test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
-
-        proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4", optional_metadata={"species":"ch4", "tag":"tests"})

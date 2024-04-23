@@ -50,7 +50,30 @@ def test_read_openghg_format():
         assert np.isclose(ch4_data["xch4"][0], 1844.2019)
 
 
-def test_optional_metadata(clear_store):
+def test_optional_metadata_raise_error(clear_store):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    filename = "gosat-fts_gosat_20170318_ch4-column.nc"
+    datafile = get_column_datapath(filename=filename)
+
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
+    with pytest.raises(ValueError):
+        standardise_column(
+            store="user",
+            filepath=datafile,
+            source_format="OPENGHG",
+            satellite=satellite,
+            domain=domain,
+            species=species,
+            optional_metadata={"domain":"openghg_test"}
+     )
+
+
+def test_optional_metadata():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -74,26 +97,3 @@ def test_optional_metadata(clear_store):
     metadata = col_data.metadata
 
     assert "project" in metadata
-
-
-def test_optional_metadata_raise_error(clear_store):
-    """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
-    """
-    filename = "gosat-fts_gosat_20170318_ch4-column.nc"
-    datafile = get_column_datapath(filename=filename)
-
-    satellite = "GOSAT"
-    domain = "BRAZIL"
-    species = "methane"
-
-    with pytest.raises(ValueError):
-        standardise_column(
-            store="user",
-            filepath=datafile,
-            source_format="OPENGHG",
-            satellite=satellite,
-            domain=domain,
-            species=species,
-            optional_metadata={"domain":"openghg_test"}
-     )

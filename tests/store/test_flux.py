@@ -452,7 +452,21 @@ def test_flux_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata(clear_stores):
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    folder = "v6.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    with pytest.raises(ValueError):
+        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
+
+
+def test_optional_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -479,17 +493,3 @@ def test_optional_metadata(clear_stores):
 
     assert "project" in metadata
     assert "tag" in metadata
-
-
-def test_optional_metadata_raise_error(clear_stores):
-    """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
-    """
-    folder = "v6.0_CH4"
-    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
-
-    database = "EDGAR"
-    date = "2015"
-
-    with pytest.raises(ValueError):
-        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
