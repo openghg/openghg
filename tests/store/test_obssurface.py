@@ -961,14 +961,11 @@ def test_optional_metadata():
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
 
-    clear_test_stores()
     rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
 
     standardise_surface(
         filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"project":"openghg_tests"}
     )
-
-    # Compare output to GCWerks - there should be a valid CH4 data point at 2014-06-16 03:34
 
     rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")
     rgl_ch4_metadata = rgl_ch4.metadata
