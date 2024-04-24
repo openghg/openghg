@@ -237,20 +237,21 @@ So we've got chunk sizes of 262 MB which seems sensible. Let's pass this to the 
 
 Try different chunk sizes to see what works best for your system.
 
-Adding Tags to input data as Optional Metadata
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Adding Tags while Standardising data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now we can add tags to data while standardising by supplying `optional_metadata`
-dictionary with self declared values.
-
+Now we can add tags to data as a distinguisher while standardising data. This can be done by supplying `optional_metadata`
+dictionary with self-declared values.
+ 
 .. code:: ipython3
-
-  from openghg.standardise import standardise_footprint
-
-  optional_metadata = {"project": "openghg"}
-
-  standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", optional_metadata=optional_metadata)
-
+ 
+ from openghg.standardise import standardise_footprint
+ 
+ optional_metadata = {"project": "openghg", "sub_task":"experiment"}
+ 
+ standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME", optional_metadata=optional_metadata)
+ 
+By including this metadata, you can ensure that your data is organized in a way that makes sense for you. This is especially useful if you're working on a large project with multiple data sources.
 
 Flux / Emissions
 ^^^^^^^^^^^^^^^^
