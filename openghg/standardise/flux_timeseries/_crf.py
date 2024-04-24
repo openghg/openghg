@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from typing import Dict, Optional
+from openghg.store import infer_date_range
 
 
 def parse_crf(
@@ -70,14 +71,17 @@ def parse_crf(
     dataarray = dataframe.to_xarray()
     dataarray = dataarray.assign_coords(time=dataarray.time)
 
-    flux_time = dataarray["time"]
-    metadata["start-date"] = flux_time[0].values
-    metadata["end-date"] = flux_time[-1].values
+    start_date, end_date, period_str = infer_date_range(
+        dataarray.time, filepath=filepath, period="yearly", continuous=True
+    )
 
-    emissions_data: Dict[str, dict] = {}
-    emissions_data[key] = {}
-    emissions_data[key]["data"] = dataarray
-    emissions_data[key]["metadata"] = metadata
-    print(emissions_data)
+    metadata["start-date"] = str(start_date)
+    metadata["end-date"] = str(end_date)
+    metadata["period"] = str(period_str)
 
-    return emissions_data
+    flux_timeseries_data: Dict[str, dict] = {}
+    flux_timeseries_data[key] = {}
+    flux_timeseries_data[key]["data"] = dataarray
+    flux_timeseries_data[key]["metadata"] = metadata
+
+    return flux_timeseries_data

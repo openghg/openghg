@@ -127,7 +127,7 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model", "flux_timeseries"].
             sort: Sort data in time dimension
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase

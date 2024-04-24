@@ -184,7 +184,7 @@ class FluxTimeseries(BaseStore):
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
+        min_required = ["species", "source"]
         for key, value in optional_keywords.items():
             if value is not None:
                 min_required.append(key)
