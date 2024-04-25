@@ -25,7 +25,7 @@ def test_read_footprint_co2_from_data(mocker):
         "model": "NAME",
         "met_model": "UKV",
         "species": "co2",
-        "high_time_resolution": "True",
+        "time_resolved": "True",
     }
 
     binary_data = datapath.read_bytes()
@@ -35,7 +35,7 @@ def test_read_footprint_co2_from_data(mocker):
     file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
 
     # Expect co2 data to be high time resolution
-    # - could include high_time_resolution=True but don't need to as this will be set automatically
+    # - could include time_resolved=True but don't need to as this will be set automatically
     result = standardise_from_binary_data(
         store="user",
         data_type="footprints",
@@ -108,7 +108,7 @@ def test_read_footprint_standard(keyword, value):
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "time_period": "2 hours",
     }
 
@@ -254,7 +254,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "short_lifetime": "False",
     }
 
@@ -299,7 +299,7 @@ def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
      - expects additional parameter for `fp_HiTRes`
      - expects additional coordinate for `H_back`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_time_resolution"
+       - "spatial_resolution": "time_resolved"
 
     Two tests included on same domain for CO2:
     - TAC data - includes H_back as an integer (older style footprint)
@@ -312,7 +312,7 @@ def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
     species = "co2"
 
     # Expect co2 data to be high time resolution
-    # - could include high_time_resolution=True but don't need to as this will be set automatically
+    # - could include time_resolved=True but don't need to as this will be set automatically
     standardise_footprint(
         store="user",
         filepath=datapath,
@@ -357,7 +357,7 @@ def test_read_footprint_co2(site, inlet, met_model, start, end, filename):
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "True",
+        "time_resolved": "True",
         "short_lifetime": "False",
         "time_period": "1 hour",
     }
@@ -425,7 +425,7 @@ def test_read_footprint_short_lived():
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "short_lifetime": "True",
         "time_period": "1 hour",
     }
@@ -478,10 +478,10 @@ def test_footprint_schema_spatial():
 def test_footprint_schema_temporal():
     """
     Check expected data variables and extra dimensions
-    are being included for high_time_resolution Footprint schema
+    are being included for time_resolved Footprint schema
     """
 
-    data_schema = Footprints.schema(high_time_resolution=True)
+    data_schema = Footprints.schema(time_resolved=True)
 
     data_vars = data_schema.data_vars
     assert "fp" not in data_vars  # "fp" not required (but can be present in file)
@@ -588,7 +588,7 @@ def test_pass_empty_dict_means_full_dimension_chunks():
         filepaths=[file1, file2],
         chunks={},
         high_spatial_resolution=False,
-        high_time_resolution=False,
+        time_resolved=False,
         short_lifetime=False,
     )
 
@@ -607,7 +607,7 @@ def test_footprints_chunking_schema():
     checked_chunks = f.check_chunks(
         filepaths=[file1, file2],
         high_spatial_resolution=False,
-        high_time_resolution=False,
+        time_resolved=False,
         short_lifetime=False,
     )
 
@@ -617,7 +617,7 @@ def test_footprints_chunking_schema():
         filepaths=[file1, file2],
         chunks={"time": 4},
         high_spatial_resolution=False,
-        high_time_resolution=False,
+        time_resolved=False,
         short_lifetime=False,
     )
 
@@ -630,7 +630,7 @@ def test_footprints_chunking_schema():
             filepaths=[file1, file2],
             chunks={"time": int(1e9)},
             high_spatial_resolution=False,
-            high_time_resolution=False,
+            time_resolved=False,
             short_lifetime=False,
         )
 
@@ -664,3 +664,68 @@ def test_store_and_retrieve_original_files(tmp_path):
     # Let's make sure they're exactly the same files
     for filepath in original_files:
         assert hash_file(filepath) in unseen
+
+
+def test_optional_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    clear_test_store("user")
+
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    site = "WAO"
+    inlet = "20m"
+    domain = "TEST"
+    model = "NAME"
+    met_model = "UKV"
+    species = "Rn"
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            store="user",
+            filepath=datapath,
+            site=site,
+            model=model,
+            met_model=met_model,
+            inlet=inlet,
+            species=species,
+            domain=domain,
+            optional_metadata={"site":"test"},
+    )
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    site = "WAO"
+    inlet = "20m"
+    domain = "TEST"
+    model = "NAME"
+    met_model = "UKV"
+    species = "Rn"
+
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        met_model=met_model,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+        optional_metadata={"project":"test"},
+    )
+
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints",)
+
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_metadata = footprint_obs.metadata
+
+    assert "project" in footprint_metadata
+

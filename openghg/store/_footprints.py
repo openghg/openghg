@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
+import warnings
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -200,6 +201,7 @@ class Footprints(BaseStore):
         source_format: str = "acrg_org",
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
+        time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
         if_exists: str = "auto",
@@ -210,6 +212,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -232,8 +235,9 @@ class Footprints(BaseStore):
             source_format : Type of data being input e.g. acrg_org
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-            high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+            time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             if_exists: What to do if existing data is present.
@@ -255,6 +259,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -264,6 +269,13 @@ class Footprints(BaseStore):
 
         if not isinstance(filepath, list):
             filepath = [filepath]
+
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
 
         # We wanted sorted Path objects
         filepath = sorted([Path(f) for f in filepath])
@@ -335,9 +347,9 @@ class Footprints(BaseStore):
         # Do some housekeeping on the inputs
         if species == "co2":
             # Expect co2 data to have high time resolution
-            if not high_time_resolution:
-                logger.info("Updating high_time_resolution to True for co2 data")
-                high_time_resolution = True
+            if not time_resolved:
+                logger.info("Updating time_resolved to True for co2 data")
+                time_resolved = True
 
             if sort:
                 logger.info(
@@ -363,7 +375,7 @@ class Footprints(BaseStore):
             filepaths=filepath,
             chunks=chunks,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
 
@@ -378,7 +390,7 @@ class Footprints(BaseStore):
             "met_model": met_model,
             "species": species,
             "network": network,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "high_spatial_resolution": high_spatial_resolution,
             "short_lifetime": short_lifetime,
             "period": period,
@@ -413,7 +425,7 @@ class Footprints(BaseStore):
             Footprints.validate_data(
                 fp_data,
                 high_spatial_resolution=high_spatial_resolution,
-                high_time_resolution=high_time_resolution,
+                time_resolved=time_resolved,
                 short_lifetime=short_lifetime,
             )
 
@@ -430,12 +442,23 @@ class Footprints(BaseStore):
             "model",
             "inlet",
             "domain",
-            "high_time_resolution",
+            "time_resolved",
             "high_spatial_resolution",
             "short_lifetime",
             "species",
             "met_model",
         )
+
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in footprint_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options
@@ -468,6 +491,7 @@ class Footprints(BaseStore):
     def schema(
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
+        time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
     ) -> DataSchema:
@@ -477,7 +501,7 @@ class Footprints(BaseStore):
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
         By default, this will include "fp" variable but this will be superceded
-        if high_spatial_resolution or high_time_resolution are specified.
+        if high_spatial_resolution or time_resolved are specified.
 
         Args:
             particle_locations: Include 4-directional particle location variables:
@@ -487,9 +511,10 @@ class Footprints(BaseStore):
                 - "fp_low"
                 - "fp_high"
                 and include associated additional dimensions ("lat_high", "lon_high").
-            high_time_resolution : Set footprint variable to be high time resolution
+            time_resolved: Set footprint variable to be high time resolution
                 - "fp_HiTRes"
                 and include associated dimensions ("H_back").
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
 
@@ -514,7 +539,14 @@ class Footprints(BaseStore):
             "time": np.datetime64,
         }
 
-        if not high_time_resolution and not high_spatial_resolution:
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
+
+        if not time_resolved and not high_spatial_resolution:
             # Includes standard footprint variable
             data_vars["fp"] = ("time", "lat", "lon")
             dtypes["fp"] = np.floating
@@ -529,7 +561,7 @@ class Footprints(BaseStore):
             dtypes["fp_low"] = np.floating
             dtypes["fp_high"] = np.floating
 
-        if high_time_resolution:
+        if time_resolved:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
             data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
@@ -575,6 +607,7 @@ class Footprints(BaseStore):
         data: Dataset,
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
+        time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
     ) -> None:
@@ -593,16 +626,23 @@ class Footprints(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the Footprints schema.
         """
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
         data_schema = Footprints.schema(
             particle_locations=particle_locations,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)
 
     def chunking_schema(
         self,
+        time_resolved: bool = False,
         high_time_resolution: bool = False,
         high_spatial_resolution: bool = False,
         short_lifetime: bool = False,
@@ -611,7 +651,8 @@ class Footprints(BaseStore):
         Get chunking schema for footprint data.
 
         Args:
-            high_time_resolution : Set footprint variable to be high time resolution.
+            time_resolved : Set footprint variable to be high time resolution.
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             high_spatial_resolution : Set footprint variables include high and low resolution options.
             short_lifetime: Include additional particle age parameters for short lived species.
         Returns:
@@ -624,7 +665,14 @@ class Footprints(BaseStore):
             )
 
         # TODO - could these defaults be changed in the object store config maybe?
+
         if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
+        if time_resolved:
             var = "fp_HiTRes"
             time_chunk_size = 24
             secondary_vars = ["lat", "lon", "H_back"]

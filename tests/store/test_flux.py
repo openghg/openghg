@@ -27,7 +27,7 @@ def test_read_binary_data(mocker, clear_stores):
         "species": "co2",
         "source": "gpp-cardamom",
         "domain": "europe",
-        "high_time_resolution": False,
+        "time_resolved": False,
     }
 
     sha1_hash = hash_bytes(data=binary_data)
@@ -55,7 +55,7 @@ def test_read_file():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        high_time_resolution=False,
+        time_resolved=False,
         force=True,  # For ease, make sure we can add the same data.
     )
 
@@ -450,3 +450,46 @@ def test_flux_schema():
     assert "lon" in data_vars["flux"]
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    folder = "v6.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    with pytest.raises(ValueError):
+        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+    folder = "v6.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"project":"openghg_tests", "tag":"tests"})
+
+    version = "v6.0"
+    species = "ch4"
+
+    search_results = search_flux(
+        species=species,
+        date=date,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+    )
+
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
+
+    assert "project" in metadata
+    assert "tag" in metadata

@@ -285,7 +285,12 @@ def test_search_footprints_multiple():
         - 2016-08-01 (3 time points)
     """
     res = search_footprints(
-        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", high_time_resolution=False
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        model="NAME",
+        time_resolved=False
     )
 
     key = next(iter(res.metadata))
@@ -337,11 +342,11 @@ def test_search_footprints_select():
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
-def test_search_footprints_high_time_resolution():
+def test_search_footprints_time_resolved():
     """Test search for high time resolution footprints
 
     Expected behaviour: searching for footprints with
-    keyword argument `high_time_resolution = True` should only
+    keyword argument `time_resolved = True` should only
     return results for high time resolution footprints.
     """
     res = search_footprints(
@@ -352,7 +357,7 @@ def test_search_footprints_high_time_resolution():
         model="NAME",
         start_date="2014-07-01",
         end_date="2014-08-01",
-        high_time_resolution=True,
+        time_resolved=True,
     )
 
     # results dataframes should have exactly one row
@@ -360,7 +365,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_resolution"] == "true"
+    assert metadata["time_resolved"] == "true"
 
 
 def test_search_flux():

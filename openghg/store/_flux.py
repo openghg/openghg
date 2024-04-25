@@ -4,6 +4,7 @@ import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Optional, Tuple, Union
+import warnings
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
@@ -64,7 +65,8 @@ class Flux(BaseStore):
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "openghg",
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: bool = False,
+        high_time_resolution: bool = False,
         period: Optional[Union[str, tuple]] = None,
         chunks: Optional[Dict] = None,
         continuous: bool = True,
@@ -74,6 +76,7 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read flux / emissions file
 
@@ -86,7 +89,8 @@ class Flux(BaseStore):
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
             source_format : Type of data being input e.g. openghg (internal format)
-            high_time_resolution: If this is a high resolution file
+            time_resolved: If this is a high resolution file
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             If specified, should be one of:
                 - "yearly", "monthly"
@@ -114,6 +118,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -127,6 +132,13 @@ class Flux(BaseStore):
         species = clean_string(species)
         source = clean_string(source)
         domain = clean_string(domain)
+
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -168,7 +180,7 @@ class Flux(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "period": period,
             "continuous": continuous,
             "data_type": "flux",
@@ -210,6 +222,17 @@ class Flux(BaseStore):
 
         required = tuple(min_required)
 
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
+
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
@@ -237,6 +260,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -314,6 +338,17 @@ class Flux(BaseStore):
             Flux.validate_data(em_data)
 
         required_keys = ("species", "source", "domain")
+
+        if optional_metadata:
+            common_keys = set(required_keys) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
