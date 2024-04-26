@@ -13,6 +13,7 @@ def parse_crf(
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
+    region: str = "UK",
 ) -> Dict:
     """
     Parse CRF emissions data from the specified file.
@@ -26,7 +27,7 @@ def parse_crf(
         database: Database name if applicable.
         database_version: Version of the database if applicable.
         model: Model name if applicable.
-
+        region: Region/Country of the CRF data
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """
@@ -39,6 +40,8 @@ def parse_crf(
     # Creating dataframe based on species name
     if species.lower() in sheet_selector:
         dataframe = pd.read_excel(filepath, sheet_name=sheet_selector[species.lower()], skiprows=4)
+    else:
+        raise ValueError(f"Species {species} is incorrect. Please select from {list(sheet_selector.keys())}")
 
     if species.lower() == "co2" or species.lower() == "hfc":
         dataframe = dataframe.iloc[1]
@@ -54,7 +57,6 @@ def parse_crf(
     if domain:
         metadata["domain"] = domain
     metadata["source"] = source
-    metadata["region"] = "uk"
     optional_keywords = {"database": database, "database_version": database_version, "model": model}
 
     for key, value in optional_keywords.items():
@@ -78,6 +80,9 @@ def parse_crf(
     metadata["start-date"] = str(start_date)
     metadata["end-date"] = str(end_date)
     metadata["period"] = str(period_str)
+    metadata["region"] = region
+
+    key = "_".join((species, source, region))
 
     flux_timeseries_data: Dict[str, dict] = {}
     flux_timeseries_data[key] = {}

@@ -21,6 +21,7 @@ def data_class_info() -> Dict:
             "_uuid": "4e787366-be91-4fc5-ad1b-4adcb213d478",
         },
         "eulerian_model": {"_root": "EulerianModel", "_uuid": "63ff2365-3ba2-452a-a53d-110140805d06"},
+        "flux_timeseries": {"_root": "FluxTimeseries", "_uuid": "099b597b-0598-4efa-87dd-472dfe027f5d8"},
     }
 
 
