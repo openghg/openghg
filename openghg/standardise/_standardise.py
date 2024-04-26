@@ -955,4 +955,6 @@ def standardise_flux_timeseries(
         force=force,
         compressor=compressor,
         filters=filters,
+        period=period,
+        continuous=continuous,
     )
