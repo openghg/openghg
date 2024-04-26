@@ -132,7 +132,7 @@ def populate_flux_co2() -> None:
         species=species,
         source=source_natural,
         domain=domain,
-        high_time_resolution=True,
+        time_resolved=True,
     )
     standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain)
 

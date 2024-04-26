@@ -347,7 +347,7 @@ def test_standardise_flux():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        high_time_resolution=False,
+        time_resolved=False,
         force=True,
         store="user",
     )
