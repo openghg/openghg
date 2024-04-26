@@ -207,7 +207,8 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            required_keys = ("species", "bc_input", "domain")
+            # required_keys = ("species", "bc_input", "domain")
+            required_keys = self.get_metakeys()
 
             if optional_metadata:
                 common_keys = set(required_keys) & set(optional_metadata.keys())

@@ -197,7 +197,8 @@ class EulerianModel(BaseStore):
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
-            required = ("model", "species", "date")
+            # required = ("model", "species", "date")
+            required = self.get_metakeys()
 
             if optional_metadata:
                 common_keys = set(required) & set(optional_metadata.keys())

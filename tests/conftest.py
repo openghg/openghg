@@ -2,6 +2,7 @@ import os
 import sys
 from typing import Iterator
 from unittest.mock import patch
+from pathlib import Path
 
 import pytest
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
@@ -10,6 +11,8 @@ from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
 sys.path.insert(0, os.path.abspath("."))
 
 tmp_store_paths = temporary_store_paths()
+
+from openghg.objectstore import get_metakey_defaults
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -25,6 +28,15 @@ def default_session_fixture() -> Iterator[None]:
     }
 
     with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
+        yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_metakeys():
+    # TODO - implement this in a different way
+    default_keys = get_metakey_defaults()
+
+    with patch("openghg.objectstore._config.get_metakeys", return_value=default_keys):
         yield
 
 

@@ -437,17 +437,19 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = (
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "time_resolved",
-            "high_spatial_resolution",
-            "short_lifetime",
-            "species",
-            "met_model",
-        )
+        # required = (
+        #     "site",
+        #     "model",
+        #     "inlet",
+        #     "domain",
+        #     "time_resolved",
+        #     "high_spatial_resolution",
+        #     "short_lifetime",
+        #     "species",
+        #     "met_model",
+        # )
+
+        required = self.get_metakeys()
 
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
@@ -457,7 +459,7 @@ class Footprints(BaseStore):
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
             else:
-                for key, parsed_data in footprint_data.items():
+                for parsed_data in footprint_data.values():
                     parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"

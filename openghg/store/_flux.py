@@ -215,12 +215,15 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+        # min_required = ["species", "source", "domain"]
+        required = self.get_metakeys()
 
-        required = tuple(min_required)
+        # QUESTION - do we want to do this if we can customise the required keys anyway?
+        # for key, value in optional_keywords.items():
+        #     if value is not None:
+        #         min_required.append(key)
+
+        # required = tuple(min_required)
 
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())

@@ -364,19 +364,21 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            required_keys = (
-                "species",
-                "site",
-                "sampling_period",
-                "station_long_name",
-                "inlet",
-                "instrument",
-                "network",
-                "source_format",
-                "data_source",
-                "icos_data_level",
-                "data_type",
-            )
+            # required_keys = (
+            #     "species",
+            #     "site",
+            #     "sampling_period",
+            #     "station_long_name",
+            #     "inlet",
+            #     "instrument",
+            #     "network",
+            #     "source_format",
+            #     "data_source",
+            #     "icos_data_level",
+            #     "data_type",
+            # )
+
+            required_keys = self.get_metakeys()
 
             if optional_metadata:
                 common_keys = set(required_keys) & set(optional_metadata.keys())
@@ -386,7 +388,7 @@ class ObsSurface(BaseStore):
                         f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                     )
                 else:
-                    for key, parsed_data in data.items():
+                    for parsed_data in data.values():
                         parsed_data["metadata"].update(optional_metadata)
 
             # Create Datasources, save them to the object store and get their UUIDs

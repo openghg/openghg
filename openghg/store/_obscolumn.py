@@ -164,7 +164,8 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        # required = ("satellite", "selection", "domain", "site", "species", "network")
+        required = self.get_metakeys()
 
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
@@ -174,7 +175,7 @@ class ObsColumn(BaseStore):
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
             else:
-                for key, parsed_data in obs_data.items():
+                for parsed_data in obs_data.values():
                     parsed_data["metadata"].update(optional_metadata)
 
         data_type = "column"
