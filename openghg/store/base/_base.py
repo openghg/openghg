@@ -11,7 +11,7 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_datatype_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -159,6 +159,14 @@ class BaseStore:
             logger.info("No new files to process.")
 
         return seen, unseen
+
+    def get_metakeys(self) -> List[str]:
+        """Read the required metakeys from config
+
+        Returns:
+            list: List of metakeys
+        """
+        return get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
 
     def assign_data(
         self,
