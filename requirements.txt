@@ -13,6 +13,7 @@ netcdf4
 numexpr
 numpy
 openghg_defs
+openpyxl
 pandas >= 2.0
 plotly
 pyvis
