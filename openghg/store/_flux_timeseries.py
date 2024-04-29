@@ -60,6 +60,8 @@ class FluxTimeseries(BaseStore):
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "crf",
+        period: Optional[Union[str, tuple]] = None,
+        continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -154,6 +156,8 @@ class FluxTimeseries(BaseStore):
             "domain": domain,
             "source": source,
             "data_type": "flux_timeseries",
+            "period": period,
+            "continuous": continuous,
         }
 
         optional_keywords: dict[Any, Any] = {

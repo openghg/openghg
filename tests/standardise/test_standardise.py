@@ -454,6 +454,16 @@ def test_standardise_footprint_different_chunking_schemes(caplog):
     assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}
 
 
+def test_incompatible_species_for_flux_timeseries():
+    """This function tests if incompatible species values is supplied to standardise"""
+
+    data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
+    with pytest.raises(ValueError):
+        standardise_flux_timeseries(
+            filepath=data_path, species="hfc123", source="crf", period="years", continuous=False, store="user"
+        )
+
+
 def test_standardise_flux_timeseries():
     """This function tests flux_timeseries standardisation function"""
 
@@ -463,13 +473,3 @@ def test_standardise_flux_timeseries():
     )
 
     assert "ch4_crf_UK" in flux_results
-
-
-def test_incompatible_species_for_flux_timeseries():
-    """This function tests if incompatible species values is supplied to standardise"""
-
-    data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
-    with pytest.raises(ValueError):
-        standardise_flux_timeseries(
-            filepath=data_path, species="hfc123", source="crf", period="years", continuous=False, store="user"
-        )

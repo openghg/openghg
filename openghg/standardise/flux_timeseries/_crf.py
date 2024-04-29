@@ -1,6 +1,6 @@
 import numpy as np
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from openghg.store import infer_date_range
 
 
@@ -14,6 +14,8 @@ def parse_crf(
     database_version: Optional[str] = None,
     model: Optional[str] = None,
     region: str = "UK",
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
 ) -> Dict:
     """
     Parse CRF emissions data from the specified file.
@@ -28,6 +30,12 @@ def parse_crf(
         database_version: Version of the database if applicable.
         model: Model name if applicable.
         region: Region/Country of the CRF data
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+            If specified, should be one of:
+                - "yearly", "monthly"
+                - suitable pandas Offset Alias
+                - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        continuous: Whether time stamps have to be continuous.
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """
@@ -74,7 +82,7 @@ def parse_crf(
     dataarray = dataarray.assign_coords(time=dataarray.time)
 
     start_date, end_date, period_str = infer_date_range(
-        dataarray.time, filepath=filepath, period="yearly", continuous=True
+        dataarray.time, filepath=filepath, period=period, continuous=continuous
     )
 
     metadata["start-date"] = str(start_date)
