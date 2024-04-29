@@ -9,6 +9,8 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.util import synonyms
+
 from xarray import DataArray, Dataset
 
 __all__ = ["Flux"]
@@ -130,6 +132,7 @@ class Flux(BaseStore):
         )
 
         species = clean_string(species)
+        species = synonyms(species)
         source = clean_string(source)
         domain = clean_string(domain)
 

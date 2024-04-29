@@ -90,16 +90,14 @@ class ObsColumn(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import ColumnTypes
-        from openghg.util import (
-            clean_string,
-            load_column_parser,
-            check_if_need_new_version,
-        )
+        from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
         site = clean_string(site)
         species = clean_string(species)
+        if species is not None:
+            species = synonyms(species)
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)

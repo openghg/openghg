@@ -194,6 +194,7 @@ class ObsSurface(BaseStore):
             load_surface_parser,
             verify_site,
             check_if_need_new_version,
+            synonyms,
         )
 
         if not isinstance(filepath, list):
@@ -344,6 +345,7 @@ class ObsSurface(BaseStore):
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
                 species = key.split("_")[0]
+                species = synonyms(species)
                 try:
                     ObsSurface.validate_data(value["data"], species=species)
                 except ValueError:
