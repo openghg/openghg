@@ -211,6 +211,9 @@ class BaseStore:
 
         uuids = {}
 
+        # Get the metadata keys for this type
+        metakeys = self.get_metakeys()
+
         self._metastore.acquire_lock()
         try:
             lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
@@ -311,8 +314,10 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
             required_result = self._metastore.search(required_metadata)
