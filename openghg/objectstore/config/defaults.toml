@@ -1,6 +1,23 @@
-boundary_conditions = [ "species", "bc_input", "domain",]
-eulerian_model = [ "model", "species", "date",]
-flux = [ "species", "source", "domain", "database", "database_version", "model",]
-footprints = [ "site", "model", "inlet", "domain", "time_resolved", "high_spatial_resolution", "short_lifetime", "species", "met_model",]
-column = [ "satellite", "selection", "domain", "site", "species", "network",]
-surface = [ "species", "site", "sampling_period", "station_long_name", "inlet", "instrument", "network", "source_format", "data_source", "icos_data_level", "data_type",]
+[boundary_conditions]
+required = [ "species", "bc_input", "domain",]
+optional = []
+
+[eulerian_model]
+required = [ "model", "species", "date",]
+optional = []
+
+[flux]
+required = [ "species", "source", "domain",]
+optional = [ "database", "database_version", "model",]
+
+[footprints]
+required = [ "site", "model", "inlet", "domain", "time_resolved", "high_spatial_resolution", "short_lifetime", "species", "met_model",]
+optional = []
+
+[column]
+required = [ "satellite", "selection", "domain", "site", "species", "network",]
+optional = []
+
+[surface]
+required = [ "species", "site", "sampling_period", "station_long_name", "inlet", "instrument", "network", "source_format", "data_source", "icos_data_level", "data_type",]
+optional = []
