@@ -378,10 +378,15 @@ class ObsSurface(BaseStore):
             #     "data_type",
             # )
 
-            required_keys = self.get_metakeys()
+            required, optional = self.get_metakeys()
+
+            if optional:
+                raise NotImplementedError(
+                    f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
+                )
 
             if optional_metadata:
-                common_keys = set(required_keys) & set(optional_metadata.keys())
+                common_keys = set(required) & set(optional_metadata.keys())
 
                 if common_keys:
                     raise ValueError(
@@ -398,7 +403,7 @@ class ObsSurface(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required_keys,
+                required_keys=required,
                 min_keys=5,
                 compressor=compressor,
                 filters=filters,

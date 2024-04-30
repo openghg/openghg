@@ -165,7 +165,12 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         # required = ("satellite", "selection", "domain", "site", "species", "network")
-        required = self.get_metakeys()
+        required, optional = self.get_metakeys()
+
+        if optional:
+            raise NotImplementedError(
+                f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
+            )
 
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
