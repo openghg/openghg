@@ -227,6 +227,19 @@ class Flux(BaseStore):
             if optional_keywords[key] is not None:
                 required_keys.append(key)
 
+        # Here we'll parse the metadata
+        # And read the arguments passed into the function
+        # Read the optional metadata and check if we want t
+
+        # Create the metadata from the arguments that aren't None
+        # this includes the optional metadata
+
+        # Match arguments with required / optional
+        # Match optional_metadata with required / optional
+
+        # Create the metadata to store
+        # Create the lookup metadata
+
         if optional_metadata:
             common_keys = set(required_keys) & set(optional_metadata.keys())
 

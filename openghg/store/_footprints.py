@@ -186,10 +186,13 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
+        # Data related
         filepath: Union[List, str, Path],
+        # Parsing and metadata related - hard requirement
         site: str,
         domain: str,
         model: str,
+        # Optional kwargs, need to parse these and set values
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         met_model: Optional[str] = None,
@@ -199,11 +202,15 @@ class Footprints(BaseStore):
         continuous: bool = True,
         chunks: Optional[Dict] = None,
         source_format: str = "acrg_org",
-        retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
+        # Optional metadat dictionary
+        optional_metadata: Optional[Dict] = None,
+        # Do we need this? It's currently unused
+        retrieve_met: bool = False,
+        # These arguments handle the storage of data
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -212,7 +219,6 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -264,7 +270,6 @@ class Footprints(BaseStore):
             dict: UUIDs of Datasources data has been assigned to
         """
         from openghg.types import FootprintTypes
-
         from openghg.util import clean_string, format_inlet, check_if_need_new_version, load_footprint_parser
 
         if not isinstance(filepath, list):
@@ -450,6 +455,8 @@ class Footprints(BaseStore):
         # )
 
         required, optional = self.get_metakeys()
+
+        parsed_metadata = self.parse_metadata(**param, **optional_metadata)
 
         if optional:
             raise NotImplementedError(

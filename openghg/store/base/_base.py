@@ -15,7 +15,7 @@ from openghg.objectstore import get_object_from_json, exists, set_object_from_js
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file
+from openghg.util import timestamp_now, to_lowercase, hash_file, clean_string, format_inlet
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -87,6 +87,89 @@ class BaseStore:
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def parse_optional_metadata(**kwargs) -> Dict:
+        """Parse optional keyword arguments, ensuring any
+        with a None value are set to a fixed value expected
+        by the metadata storage.
+
+        Args:
+            kwargs: Any number of keyword arguments
+        Returns:
+            dict: Dictionary of parsed metadata
+        """
+        parsed = {}
+
+        for key, value in kwargs.items():
+            parsed[key] = value if value is not None else "NOT_SET"
+
+        return parsed
+
+    def _not_set_value(self) -> str:
+        return "NOT_SET"
+
+    def create_lookup(self, **kwargs) -> Dict:
+        """Create the Datasource lookup dictionary
+
+        Args:
+            **kwargs: Metadata for lookup
+        Returns:
+            dict: Dictionary of parsed lookup metadata
+        """
+        required, optional = self.get_metakeys()
+
+        # Make sure we have all the required metadata
+        missing = [k for k in required if k not in kwargs or kwargs[k] is None]
+        if missing:
+            raise ValueError(
+                f"We have some missing keys. We require data for: {required}\n" + f"We are missing {missing}."
+            )
+
+        required_metadata = {k: kwargs[k] for k in required}
+
+        # Now check the optional metadata
+        optional_metadata = {}
+        for k in optional:
+            optional_metadata[k] = kwargs[k] if kwargs[k] is not None else self._not_set_value()
+
+        # We use this to perform the Datasource lookup
+        lookup_metadata = {**required_metadata, **optional_metadata}
+
+        return lookup_metadata
+
+    def parse_metadata(self, **kwargs):
+        """Parse all the metadata given to us. This metadata is for internal use
+        only and should not be assigned to Dataset attributes.
+        Dataset attributes should be parsed using parse_attributes
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+            **kwargs: Expanded keyword
+        """
+        # TODO - this is a very simple WIP version of this function
+        # Create the full metadata dictionary
+        parsed_metadata = {}
+        for k, v in kwargs.items():
+            if v is None:
+                parsed_metadata[k] = self._not_set_value()
+                continue
+
+            if k in ["inlet", "height"]:
+                # Format as inlet
+                val = format_inlet(clean_string(v))
+            elif k in ["max_longitude", "min_longitude", "max_latitude", "min_latitude", "etc"]:
+                # val = format_latlong(v)
+                pass
+            else:
+                # QUESTION - what do we want to remove here?
+                val = clean_string(val)
+
+            parsed_metadata[k] = val
+
+        return parsed_metadata
+
+    def parse_attributes(**kwargs):
+        raise NotImplementedError
 
     def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
         raise NotImplementedError
@@ -169,22 +252,6 @@ class BaseStore:
         """
         metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
         return tuple(metakeys["required"]), tuple(metakeys["optional"])
-
-    def parse_metakeys(self, metadata: Dict) -> Dict:
-        """Creates the metadata dictionary we use to perform the Datasource lookup
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Parsed metadata dictionary
-        """
-        raise NotImplementedError
-        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
-
-        required = metakeys["required"]
-        optional = metakeys["optional"]
-
-        # for_lookup = {k: v for k, v in metadata if k in required or k in optional}
 
     def assign_data(
         self,
