@@ -175,6 +175,7 @@ class Flux(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
+        # TODO - better match the arguments to the parser functions
         param = {
             "filepath": filepath,
             "species": species,
@@ -216,17 +217,18 @@ class Flux(BaseStore):
             Flux.validate_data(em_data)
 
         # min_required = ["species", "source", "domain"]
-        required = self.get_metakeys()
+        # TODO - move this comparison lookup to the assign_data
+        required, optional = self.get_metakeys()
 
-        # QUESTION - do we want to do this if we can customise the required keys anyway?
-        # for key, value in optional_keywords.items():
-        #     if value is not None:
-        #         min_required.append(key)
-
-        # required = tuple(min_required)
+        # TODO - this will be moved into the metadata parsing function in the
+        # next chunk of work
+        required_keys = list(required)
+        for key in optional:
+            if optional_keywords[key] is not None:
+                required_keys.append(key)
 
         if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
+            common_keys = set(required_keys) & set(optional_metadata.keys())
 
             if common_keys:
                 raise ValueError(
@@ -242,7 +244,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )
