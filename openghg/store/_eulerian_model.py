@@ -198,7 +198,12 @@ class EulerianModel(BaseStore):
             model_data[key]["metadata"] = metadata
 
             # required = ("model", "species", "date")
-            required = self.get_metakeys()
+            required, optional = self.get_metakeys()
+
+            if optional:
+                raise NotImplementedError(
+                    f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
+                )
 
             if optional_metadata:
                 common_keys = set(required) & set(optional_metadata.keys())
