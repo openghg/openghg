@@ -160,13 +160,31 @@ class BaseStore:
 
         return seen, unseen
 
-    def get_metakeys(self) -> List[str]:
-        """Read the required metakeys from config
+    def get_metakeys(self) -> Tuple[Tuple[str], Tuple[str]]:
+        """Read the required metakeys from config. Returns both the
+        required and optional metakeys as a tuple.
 
         Returns:
-            list: List of metakeys
+            tuple: required keys, optional keys
         """
-        return get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
+        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
+        return tuple(metakeys["required"]), tuple(metakeys["optional"])
+
+    def parse_metakeys(self, metadata: Dict) -> Dict:
+        """Creates the metadata dictionary we use to perform the Datasource lookup
+
+        Args:
+            metadata: Dictionary of metadata
+        Returns:
+            dict: Parsed metadata dictionary
+        """
+        raise NotImplementedError
+        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
+
+        required = metakeys["required"]
+        optional = metakeys["optional"]
+
+        # for_lookup = {k: v for k, v in metadata if k in required or k in optional}
 
     def assign_data(
         self,
@@ -212,7 +230,7 @@ class BaseStore:
         uuids = {}
 
         # Get the metadata keys for this type
-        metakeys = self.get_metakeys()
+        # metakeys = self.get_metakeys()
 
         self._metastore.acquire_lock()
         try:

@@ -3,7 +3,7 @@ import importlib
 import importlib.resources
 from pathlib import Path
 import toml
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import openghg.objectstore
 
@@ -103,7 +103,7 @@ def get_metakeys(bucket: str) -> Dict:
     return config
 
 
-def get_datatype_metakeys(bucket: str, data_type: str) -> List[str]:
+def get_datatype_metakeys(bucket: str, data_type: str) -> Dict:
     """Return a list of the metakeys
 
     Args:
