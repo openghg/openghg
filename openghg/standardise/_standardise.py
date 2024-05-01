@@ -941,6 +941,12 @@ def standardise_flux_timeseries(
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
+
+    if domain:
+        logger.warning(
+            "Geographic domain, default is 'None'. Instead region is used to identify area, Please supply region in future instances"
+        )
+        region = domain
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for Flux timeseries model.")
     return standardise(
