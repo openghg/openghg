@@ -77,7 +77,7 @@ class FluxTimeseries(BaseStore):
             filepath: Path of flux timeseries / emissions timeseries file
             species: Species name
             domain: Region for Flux timeseries
-            source: Flux / Emissions source
+            source: Source of the emissions data, e.g. "energy", "anthro", default is 'anthro'.
             region: Region/Country of the CRF data
             domain: Geographic domain, default is 'None'. Instead region is used to identify area
             database: Name of database source for this input (if relevant)
@@ -159,7 +159,7 @@ class FluxTimeseries(BaseStore):
         param = {
             "filepath": filepath,
             "species": species,
-            "domain": domain,
+            "region": region,
             "source": source,
             "data_type": "flux_timeseries",
             "period": period,
