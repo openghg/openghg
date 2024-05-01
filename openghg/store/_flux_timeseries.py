@@ -68,6 +68,7 @@ class FluxTimeseries(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read one dimension timeseries file
 
@@ -102,7 +103,9 @@ class FluxTimeseries(BaseStore):
                 `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.      Returns:
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import FluxTimeseriesTypes
@@ -194,6 +197,17 @@ class FluxTimeseries(BaseStore):
                 min_required.append(key)
 
         required = tuple(min_required)
+
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_timeseries_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
