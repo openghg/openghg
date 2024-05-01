@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
+from openghg.util._metadata import format_species, format_bc_input, format_domain
 
 __all__ = ["BoundaryConditions"]
 
@@ -113,16 +114,15 @@ class BoundaryConditions(BaseStore):
             update_zero_dim,
         )
         from openghg.util import (
-            clean_string,
             timestamp_now,
             check_if_need_new_version,
         )
 
         from xarray import open_dataset
 
-        species = clean_string(species)
-        bc_input = clean_string(bc_input)
-        domain = clean_string(domain)
+        species = format_species(species)
+        bc_input = format_bc_input(bc_input)
+        domain = format_domain(domain)
 
         if overwrite and if_exists == "auto":
             logger.warning(
