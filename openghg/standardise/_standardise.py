@@ -882,6 +882,7 @@ def standardise_flux_timeseries(
     species: str,
     source: str,
     domain: Optional[str] = None,
+    region: str = "UK",
     source_format: str = "crf",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
@@ -895,13 +896,15 @@ def standardise_flux_timeseries(
     filters: Optional[Any] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
+    optional_metadata: Optional[Dict] = None,
 ) -> Dict:
     """Process one dimension timeseries file
 
     Args:
         filepath: Path of flux timeseries file
         species: Species name
-        domain: Region for flux timeseries
+        domain: Geographic domain, default is 'None'. Instead region is used to identify area
+        region: Region/Country of the CRF data
         source: Flux / Emissions source
         database: Name of database source for this input (if relevant)
         database_version: Name of database version (if relevant)
@@ -933,7 +936,9 @@ def standardise_flux_timeseries(
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.      Returns:
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+    Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
     if running_on_hub():
@@ -946,6 +951,7 @@ def standardise_flux_timeseries(
         source=source,
         source_format=source_format,
         domain=domain,
+        region=region,
         database=database,
         database_version=database_version,
         model=model,
@@ -957,4 +963,5 @@ def standardise_flux_timeseries(
         filters=filters,
         period=period,
         continuous=continuous,
+        optional_metadata=optional_metadata,
     )

@@ -7,7 +7,7 @@ from openghg.store import infer_date_range
 def parse_crf(
     filepath: Path,
     species: str,
-    source: str = "crf",
+    source: str = "anthro",
     domain: Optional[str] = None,
     data_type: str = "flux_timeseries",
     database: Optional[str] = None,
@@ -23,7 +23,7 @@ def parse_crf(
     Args:
         filepath: Path to the '.xlsx' file containing CRF emissions data.
         species: Name of species
-        source: Source of the emissions data, e.g. "energy", default is 'crf'.
+        source: Source of the emissions data, e.g. "energy", "anthro", default is 'anthro'.
         domain: Geographic domain, default is 'None'. Instead region is used to identify area
         data_type: Type of data, default is 'flux_timeseries'.
         database: Database name if applicable.

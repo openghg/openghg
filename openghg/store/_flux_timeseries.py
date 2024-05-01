@@ -55,6 +55,7 @@ class FluxTimeseries(BaseStore):
         filepath: Union[str, Path],
         species: str,
         source: str,
+        region: str,
         domain: Optional[str] = None,
         database: Optional[str] = None,
         database_version: Optional[str] = None,
@@ -77,6 +78,8 @@ class FluxTimeseries(BaseStore):
             species: Species name
             domain: Region for Flux timeseries
             source: Flux / Emissions source
+            region: Region/Country of the CRF data
+            domain: Geographic domain, default is 'None'. Instead region is used to identify area
             database: Name of database source for this input (if relevant)
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
