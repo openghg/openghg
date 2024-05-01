@@ -21,3 +21,18 @@ optional = []
 [surface]
 required = [ "species", "site", "sampling_period", "station_long_name", "inlet", "instrument", "network", "source_format", "data_source", "icos_data_level", "data_type",]
 optional = []
+
+[types]
+float = []
+int = []
+latlong = ["max_longitude",
+            "min_longitude",
+            "max_latitude",
+            "min_latitude",
+            "max_longitude_high"
+            "min_longitude_high"
+            "max_latitude_high"
+            "min_latitude_high",]
+species = []
+height = []
+date = []

@@ -1,12 +1,13 @@
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.objectstore import get_writable_bucket
+from openghg.objectstore import get_writable_bucket, get_metakey_defaults
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
+from unittest.mock import patch
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -660,8 +661,8 @@ def test_optional_metadata_raise_error():
             inlet=inlet,
             species=species,
             domain=domain,
-            optional_metadata={"site":"test"},
-    )
+            optional_metadata={"site": "test"},
+        )
 
 
 def test_optional_metadata():
@@ -687,13 +688,70 @@ def test_optional_metadata():
         inlet=inlet,
         species=species,
         domain=domain,
-        optional_metadata={"project":"test"},
+        optional_metadata={"project": "test"},
     )
 
     # Get the footprints data
-    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints",)
+    footprint_results = search(
+        site=site,
+        domain=domain,
+        species=species,
+        data_type="footprints",
+    )
 
     footprint_obs = footprint_results.retrieve_all()
     footprint_metadata = footprint_obs.metadata
 
     assert "project" in footprint_metadata
+
+
+# These tests test that custom keys can be used to create unique Datasources
+@pytest.fixture()
+def mock_metakeys():
+    # TODO - implement this in a different way
+    default_keys = get_metakey_defaults()
+
+    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+
+    with patch("openghg.objectstore._config.get_metakeys", return_value=default_keys):
+        yield
+
+
+def test_standardise_footprints_different_datasources(mock_metakeys):
+    """This tests that adding keys to the optional section of footprints
+    results in data being assigned to different Datasources.
+    """
+    clear_test_store(name="user")
+
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    site = "TAC"
+    domain = "EUROPE"
+    model = "UKV"
+    inlet = "100m"
+
+    optional_metadata = {"project": "zoo", "special_tag": "elephant"}
+    res_1 = standardise_footprint(
+        filepath=file1,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        optional_metadata=optional_metadata,
+        store="user",
+    )
+
+    optional_metadata = {"project": "aquarium", "special_tag": "jellyfish"}
+    res_2 = standardise_footprint(
+        filepath=file2,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        optional_metadata=optional_metadata,
+        store="user",
+    )
+
+    # Make sure they're different Datasources
+    assert res_1["tac_europe_UKV_100m"]["uuid"] != res_2["tac_europe_UKV_100m"]["uuid"]

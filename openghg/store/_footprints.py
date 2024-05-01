@@ -440,7 +440,7 @@ class Footprints(BaseStore):
             )
 
         # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should provide as much detail as possible
+        # metadata store for a Datasource, they should pxrovide as much detail as possible
         # to uniquely identify a Datasource
         # required = (
         #     "site",
@@ -456,7 +456,7 @@ class Footprints(BaseStore):
 
         required, optional = self.get_metakeys()
 
-        parsed_metadata = self.parse_metadata(**param, **optional_metadata)
+        # parsed_metadata = self.parse_metadata(**param, **optional_metadata)
 
         if optional:
             raise NotImplementedError(
@@ -470,9 +470,21 @@ class Footprints(BaseStore):
                 raise ValueError(
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
+            # TODO - move this step?
             else:
                 for parsed_data in footprint_data.values():
                     parsed_data["metadata"].update(optional_metadata)
+
+            # We want to create the lookup keys based on what's passed in
+            # By default they're just the required keys, if we get some optional metadata then
+            # we do some checks and add them to the list
+            lookup_keys = list(required)
+            if optional:
+                # This and the above will be moved into the parsing function?
+                lookup_keys = list(required)
+                for key in optional_metadata:
+                    if key in optional:
+                        lookup_keys.append(key)
 
         data_type = "footprints"
         # TODO - filter options
@@ -481,7 +493,7 @@ class Footprints(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             sort=sort,
             drop_duplicates=drop_duplicates,
             compressor=compressor,

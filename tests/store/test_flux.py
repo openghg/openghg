@@ -1,6 +1,7 @@
 import pytest
 import os
 from helpers import clear_test_stores, get_flux_datapath
+from openghg.objectstore import get_metakey_defaults
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
@@ -9,11 +10,28 @@ from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
 from typing import Any, Union
+from unittest.mock import patch
 
 
 @pytest.fixture
 def clear_stores():
     clear_test_stores()
+
+# These tests test that custom keys can be used to create unique Datasources
+@pytest.fixture()
+def mock_metakeys():
+    # TODO - implement this in a different way
+    default_keys = get_metakey_defaults()
+
+    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+
+    with patch("openghg.objectstore._config.get_metakeys", return_value=default_keys):
+        yield
+
+def test_standardise_flux_different_datasources_optional_metadata(mock_metakeys):
+    assert False
+
+
 
 
 def test_read_binary_data(mocker, clear_stores):
