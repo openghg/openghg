@@ -1,66 +1,28 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 import warnings
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import clean_string, species_lifetime
-from openghg.util import format_inlet as util_format_inlet
+from openghg.util import species_lifetime
+from openghg.util._metadata import (
+    format_site,
+    format_network,
+    format_domain,
+    consolidate_inlet_height,
+    format_inlet,
+    format_species,
+    format_met_model,
+)
 from xarray import Dataset
 
 __all__ = ["Footprints"]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
-
-
-
-def format_site(site: str) -> str:
-    return clean_string(site)
-
-def format_network(network: Optional[str]) -> Optional[str]:
-    return clean_string(network)
-
-def format_domain(domain: str) -> str:
-    return clean_string(domain)
-
-def consolidate_inlet_height(inlet: Optional[str], height: Optional[str]) -> str:
-    # Make sure `inlet` OR the alias `height` is included
-    # Note: from this point only `inlet` variable should be used.
-    if inlet is None and height is None:
-        raise ValueError("One of inlet (or height) must be specified as an input")
-    elif inlet is None:
-        inlet = cast(str, height)
-
-    return inlet
-
-def format_inlet(inlet: str) -> str:
-    # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
-    inlet = clean_string(inlet)
-    inlet = util_format_inlet(inlet)
-    inlet = cast(str, inlet)
-    return inlet
-
-def format_species(species: Optional[str]) -> str:
-    # Ensure we have a value for species
-    if species is None:
-        species = "inert"
-    else:
-        species = clean_string(species)
-
-    return species
-
-def format_met_model(met_model: Optional[str]) -> str:
-    # Ensure we have a clear missing value for met_model
-    if met_model is None:
-        met_model = "NOT_SET"
-    else:
-        met_model = clean_string(met_model)
-
-    return met_model
 
 
 class Footprints(BaseStore):
@@ -317,6 +279,7 @@ class Footprints(BaseStore):
         if not isinstance(filepath, list):
             filepath = [filepath]
 
+        # TODO: make sure `high_time_resolution` deprecation is enforced everywhere
         if high_time_resolution:
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
