@@ -899,9 +899,9 @@ def standardise_flux_timeseries(
     """Process one dimension timeseries file
 
     Args:
-        filepath: Path of boundary conditions file
+        filepath: Path of flux timeseries file
         species: Species name
-        domain: Region for boundary conditions
+        domain: Region for flux timeseries
         source: Flux / Emissions source
         database: Name of database source for this input (if relevant)
         database_version: Name of database version (if relevant)
