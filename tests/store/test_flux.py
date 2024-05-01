@@ -17,22 +17,6 @@ from unittest.mock import patch
 def clear_stores():
     clear_test_stores()
 
-# These tests test that custom keys can be used to create unique Datasources
-@pytest.fixture()
-def mock_metakeys():
-    # TODO - implement this in a different way
-    default_keys = get_metakey_defaults()
-
-    default_keys["footprints"]["optional"] = ["project", "special_tag"]
-
-    with patch("openghg.objectstore._config.get_metakeys", return_value=default_keys):
-        yield
-
-def test_standardise_flux_different_datasources_optional_metadata(mock_metakeys):
-    assert False
-
-
-
 
 def test_read_binary_data(mocker, clear_stores):
     clear_test_stores()
@@ -481,7 +465,13 @@ def test_optional_metadata_raise_error(clear_stores):
     date = "2015"
 
     with pytest.raises(ValueError):
-        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
+        proc_results = transform_flux_data(
+            store="user",
+            datapath=test_datapath,
+            database=database,
+            date=date,
+            optional_metadata={"domain": "openghg_tests"},
+        )
 
 
 def test_optional_metadata():
@@ -494,7 +484,13 @@ def test_optional_metadata():
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"project":"openghg_tests", "tag":"tests"})
+    proc_results = transform_flux_data(
+        store="user",
+        datapath=test_datapath,
+        database=database,
+        date=date,
+        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+    )
 
     version = "v6.0"
     species = "ch4"

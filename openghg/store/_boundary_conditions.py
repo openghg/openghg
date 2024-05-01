@@ -207,24 +207,11 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            # required_keys = ("species", "bc_input", "domain")
-            required, optional = self.get_metakeys()
+            lookup_keys = self.get_lookup_keys(optional_metadata)
 
-            if optional:
-                raise NotImplementedError(
-                    f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
-                )
-
-            if optional_metadata:
-                common_keys = set(required) & set(optional_metadata.keys())
-
-                if common_keys:
-                    raise ValueError(
-                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                    )
-                else:
-                    for key, parsed_data in boundary_conditions_data.items():
-                        parsed_data["metadata"].update(optional_metadata)
+            if optional_metadata is not None:
+                for parsed_data in boundary_conditions_data.values():
+                    parsed_data["metadata"].update(optional_metadata)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
@@ -233,7 +220,7 @@ class BoundaryConditions(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required,
+                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

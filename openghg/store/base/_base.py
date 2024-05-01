@@ -167,24 +167,40 @@ class BaseStore:
         Returns:
             tuple: required keys, optional keys
         """
+        # raise NotImplementedError("May be removed.")
         metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
         return tuple(metakeys["required"]), tuple(metakeys["optional"])
 
-    def parse_metakeys(self, metadata: Dict) -> Dict:
-        """Creates the metadata dictionary we use to perform the Datasource lookup
+    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
 
         Args:
-            metadata: Dictionary of metadata
+            optional_metadata: Dictionary of optional metadata
         Returns:
-            dict: Parsed metadata dictionary
+            tuple: Tuple of keys
         """
-        raise NotImplementedError
         metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
-
         required = metakeys["required"]
         optional = metakeys["optional"]
 
-        # for_lookup = {k: v for k, v in metadata if k in required or k in optional}
+        lookup_keys = list(required)
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata)
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+            if optional:
+                for key in optional_metadata:
+                    if key in optional:
+                        lookup_keys.append(key)
+
+        return lookup_keys
 
     def assign_data(
         self,
