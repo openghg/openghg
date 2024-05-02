@@ -62,7 +62,7 @@ def parse_crf(
 
     metadata = {}
     metadata["species"] = species
-    if domain:
+    if domain is not None:
         metadata["domain"] = domain
     metadata["source"] = source
     optional_keywords = {"database": database, "database_version": database_version, "model": model}
