@@ -231,17 +231,17 @@ class FluxTimeseries(BaseStore):
     @staticmethod
     def validate_data(data: Dataset) -> None:
         """
-        Validate input data against FluxTimeseries schema - definition from
-        FluxTimeseries.schema() method.
+            Validate input data against FluxTimeseries schema - definition from
+            FluxTimeseries.schema() method.
 
-        Args:
-            data : xarray Dataset in expected format
+            Args:
+                data : xarray Dataset in expected format
 
-        Returns:
-            None
+            Returns:
+                None
 
-    Raises: ValueError if the input data does not match the schema
-            to the FluxTimeseries schema.
+        Raises: ValueError if the input data does not match the schema
+                to the FluxTimeseries schema.
         """
         data_schema = FluxTimeseries.schema()
         data_schema.validate_data(data)
