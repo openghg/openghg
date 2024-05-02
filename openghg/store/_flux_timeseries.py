@@ -240,7 +240,7 @@ class FluxTimeseries(BaseStore):
         Returns:
             None
 
-            Raises a ValueError with details if the input data does not adhere
+    Raises: ValueError if the input data does not match the schema
             to the FluxTimeseries schema.
         """
         data_schema = FluxTimeseries.schema()
