@@ -942,7 +942,7 @@ def standardise_flux_timeseries(
         dict: Dictionary of datasource UUIDs data assigned to
     """
 
-    if domain:
+    if domain is not None:
         logger.warning(
             "Geographic domain, default is 'None'. Instead region is used to identify area, Please supply region in future instances"
         )
