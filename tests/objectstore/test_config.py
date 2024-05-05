@@ -38,3 +38,7 @@ def test_write_metakeys(tmp_store):
     mock_metakeys = {k: mock_keys for k in data_class_info()}
 
     write_metakeys(bucket=tmp_store, metakeys=mock_metakeys)
+
+    with pytest.raises(ValueError):
+        mock_metakeys = {}
+        write_metakeys(bucket=tmp_store, metakeys=mock_metakeys)
