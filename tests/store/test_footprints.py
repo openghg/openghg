@@ -713,7 +713,7 @@ def mock_metakeys():
 
     default_keys["footprints"]["optional"] = ["project", "special_tag"]
 
-    with patch("openghg.objectstore._config.get_metakeys", return_value=default_keys):
+    with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield
 
 
