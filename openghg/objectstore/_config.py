@@ -89,8 +89,9 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
 
     # QUESTION - do this automatically or get the user to create it manually / by command line interface
     if not metakey_path.exists():
-        logger.debug(f"Creating default metakeys file at {metakey_path}.")
-        create_default_config(bucket=bucket)
+        # logger.debug(f"Creating default metakeys file at {metakey_path}.")
+        # create_default_config(bucket=bucket)
+        raise ValueError(f"No metakey config file found at {metakey_path}")
 
     return toml.loads(metakey_path.read_text())
 
