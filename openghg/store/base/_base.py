@@ -138,7 +138,7 @@ class BaseStore:
 
         return lookup_metadata
 
-    def parse_metadata(self, **kwargs):
+    def parse_metadata(self, **kwargs) -> Dict:
         """Parse all the metadata given to us. This metadata is for internal use
         only and should not be assigned to Dataset attributes.
         Dataset attributes should be parsed using parse_attributes
@@ -169,7 +169,7 @@ class BaseStore:
 
         return parsed_metadata
 
-    def parse_attributes(**kwargs):
+    def parse_attributes(**kwargs) -> Dict:
         raise NotImplementedError
 
     def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
@@ -251,8 +251,41 @@ class BaseStore:
         Returns:
             tuple: required keys data, optional keys data
         """
+        # raise NotImplementedError("May be removed.")
         metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
-        return metakeys.get("required"), metakeys.get("optional", {})
+        return metakeys["required"], metakeys.get("optional", {})
+
+    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
+        required = metakeys["required"]
+        # We may not have an optional key
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata)
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+            if optional:
+                for key in optional_metadata:
+                    if key in optional:
+                        lookup_keys.append(key)
+
+        return lookup_keys
 
     def assign_data(
         self,

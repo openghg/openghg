@@ -439,53 +439,13 @@ class Footprints(BaseStore):
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
-        # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should pxrovide as much detail as possible
-        # to uniquely identify a Datasource
-        # required = (
-        #     "site",
-        #     "model",
-        #     "inlet",
-        #     "domain",
-        #     "time_resolved",
-        #     "high_spatial_resolution",
-        #     "short_lifetime",
-        #     "species",
-        #     "met_model",
-        # )
+        # TODO - we'll further tidy this up when we move the metdata parsing
+        # into a centralised place
+        lookup_keys = self.get_lookup_keys(optional_metadata)
 
-        required, optional = self.get_metakeys()
-
-        # Until we parse the types let's just take the keys from these
-        required = tuple(required)
-        optional = tuple(optional)
-
-        # parsed_metadata = self.parse_metadata(**param, **optional_metadata)
-
-        # Create the lookup keys from the required keys, then we'll use any optional metadata below
-        # We'll move this to a centralised place
-        lookup_keys = required
-
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            # TODO - move this step?
-            else:
-                for parsed_data in footprint_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
-
-            # We want to create the lookup keys based on what's passed in
-            # By default they're just the required keys, if we get some optional metadata then
-            # we do some checks and add them to the list
-            if optional:
-                lookup_keys = list(required)
-                for key in optional_metadata:
-                    if key in optional:
-                        lookup_keys.append(key)
+        if optional_metadata is not None:
+            for parsed_data in footprint_data.values():
+                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options

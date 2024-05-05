@@ -164,28 +164,11 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        # required = ("satellite", "selection", "domain", "site", "species", "network")
-        required, optional = self.get_metakeys()
+        lookup_keys = self.get_lookup_keys(optional_metadata)
 
-        # Until we parse the types let's just take the keys from these
-        required = tuple(required)
-        optional = tuple(optional)
-
-        if optional:
-            raise NotImplementedError(
-                f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
-            )
-
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for parsed_data in obs_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+        if optional_metadata is not None:
+            for parsed_data in obs_data.values():
+                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
@@ -193,7 +176,7 @@ class ObsColumn(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             min_keys=3,
             compressor=compressor,
             filters=filters,

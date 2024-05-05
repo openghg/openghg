@@ -216,44 +216,17 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        # min_required = ["species", "source", "domain"]
-        # TODO - move this comparison lookup to the assign_data
-        required, optional = self.get_metakeys()
+        if optional_metadata is None:
+            optional_metadata = {}
 
-        # Until we parse the types let's just take the keys from these
-        required = tuple(required)
-        optional = tuple(optional)
+        # TODO - the optional params
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        optional_metadata.update(to_add)
 
-        # TODO - this will be moved into the metadata parsing function in the
-        # next chunk of work
-        required_keys = list(required)
-        for key in optional:
-            if optional_keywords[key] is not None:
-                required_keys.append(key)
-
-        # Here we'll parse the metadata
-        # And read the arguments passed into the function
-        # Read the optional metadata and check if we want t
-
-        # Create the metadata from the arguments that aren't None
-        # this includes the optional metadata
-
-        # Match arguments with required / optional
-        # Match optional_metadata with required / optional
-
-        # Create the metadata to store
-        # Create the lookup metadata
-
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # TODO - really we want the metadata completely formed before we perform
+        # the Datasource lookup, the above is a hack to get what we have here working for now
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -261,7 +234,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required_keys,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
