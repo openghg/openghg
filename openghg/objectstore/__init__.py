@@ -50,7 +50,6 @@ from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, 
 from ._integrity import integrity_check
 from ._config import (
     get_metakeys,
-    get_datatype_metakeys,
     write_metakeys,
     create_default_config,
     get_metakey_defaults,
