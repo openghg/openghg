@@ -220,6 +220,10 @@ class Flux(BaseStore):
         # TODO - move this comparison lookup to the assign_data
         required, optional = self.get_metakeys()
 
+        # Until we parse the types let's just take the keys from these
+        required = tuple(required)
+        optional = tuple(optional)
+
         # TODO - this will be moved into the metadata parsing function in the
         # next chunk of work
         required_keys = list(required)

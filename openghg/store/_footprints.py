@@ -456,12 +456,15 @@ class Footprints(BaseStore):
 
         required, optional = self.get_metakeys()
 
+        # Until we parse the types let's just take the keys from these
+        required = tuple(required)
+        optional = tuple(optional)
+
         # parsed_metadata = self.parse_metadata(**param, **optional_metadata)
 
-        if optional:
-            raise NotImplementedError(
-                f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
-            )
+        # Create the lookup keys from the required keys, then we'll use any optional metadata below
+        # We'll move this to a centralised place
+        lookup_keys = required
 
         if optional_metadata:
             common_keys = set(required) & set(optional_metadata.keys())
@@ -478,9 +481,7 @@ class Footprints(BaseStore):
             # We want to create the lookup keys based on what's passed in
             # By default they're just the required keys, if we get some optional metadata then
             # we do some checks and add them to the list
-            lookup_keys = list(required)
             if optional:
-                # This and the above will be moved into the parsing function?
                 lookup_keys = list(required)
                 for key in optional_metadata:
                     if key in optional:

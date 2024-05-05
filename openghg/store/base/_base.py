@@ -116,6 +116,7 @@ class BaseStore:
         Returns:
             dict: Dictionary of parsed lookup metadata
         """
+        raise NotImplementedError
         required, optional = self.get_metakeys()
 
         # Make sure we have all the required metadata
@@ -243,15 +244,15 @@ class BaseStore:
 
         return seen, unseen
 
-    def get_metakeys(self) -> Tuple[Tuple[str], Tuple[str]]:
+    def get_metakeys(self) -> Tuple[Dict, Dict]:
         """Read the required metakeys from config. Returns both the
         required and optional metakeys as a tuple.
 
         Returns:
-            tuple: required keys, optional keys
+            tuple: required keys data, optional keys data
         """
         metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
-        return tuple(metakeys["required"]), tuple(metakeys["optional"])
+        return metakeys.get("required"), metakeys.get("optional", {})
 
     def assign_data(
         self,

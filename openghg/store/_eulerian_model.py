@@ -200,6 +200,10 @@ class EulerianModel(BaseStore):
             # required = ("model", "species", "date")
             required, optional = self.get_metakeys()
 
+            # Until we parse the types let's just take the keys from these
+            required = tuple(required)
+            optional = tuple(optional)
+
             if optional:
                 raise NotImplementedError(
                     f"Use of optional metadata keywords not yet implemented for {self.__class__.__name__}"
