@@ -11,7 +11,7 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_datatype_metakeys
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -160,17 +160,6 @@ class BaseStore:
 
         return seen, unseen
 
-    def get_metakeys(self) -> Tuple[Tuple[str], Tuple[str]]:
-        """Read the required metakeys from config. Returns both the
-        required and optional metakeys as a tuple.
-
-        Returns:
-            tuple: required keys, optional keys
-        """
-        # raise NotImplementedError("May be removed.")
-        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
-        return tuple(metakeys["required"]), tuple(metakeys["optional"])
-
     def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
@@ -181,9 +170,14 @@ class BaseStore:
         Returns:
             tuple: Tuple of keys
         """
-        metakeys = get_datatype_metakeys(bucket=self._bucket, data_type=self._data_type)
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+
         required = metakeys["required"]
-        optional = metakeys["optional"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
 
         lookup_keys = list(required)
         # Check if anything in optional_metadata tries to override our required keys
