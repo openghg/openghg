@@ -88,7 +88,7 @@ class BaseStore:
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def parse_optional_metadata(**kwargs) -> Dict:
+    def parse_optional_metadata(self, **kwargs) -> Dict:
         """Parse optional keyword arguments, ensuring any
         with a None value are set to a fixed value expected
         by the metadata storage.
@@ -101,7 +101,7 @@ class BaseStore:
         parsed = {}
 
         for key, value in kwargs.items():
-            parsed[key] = value if value is not None else "NOT_SET"
+            parsed[key] = value if value is not None else self._not_set_value()
 
         return parsed
 
@@ -147,6 +147,12 @@ class BaseStore:
             optional_metadata: Dictionary of optional metadata
             **kwargs: Expanded keyword
         """
+        metakeys = self._get_metakeys()
+
+        # For this step we want to parse the metadata that comes in
+        # We'll build a lookup for each key so we know what functions to apply
+        parse_lookup = {}
+
         # TODO - this is a very simple WIP version of this function
         # Create the full metadata dictionary
         parsed_metadata = {}
@@ -244,6 +250,19 @@ class BaseStore:
 
         return seen, unseen
 
+    def _get_metakeys(self) -> Tuple[Dict, Dict]:
+        """Get the metakeys for this data type
+
+        Returns:
+            dict: Dictionary of required and optional metadata
+        """
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+
+        return metakeys["required"], metakeys.get("optional", {})
+
     def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
@@ -254,14 +273,7 @@ class BaseStore:
         Returns:
             tuple: Tuple of keys
         """
-        try:
-            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
-        except KeyError:
-            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-
-        required = metakeys["required"]
-        # We might not get any optional keys
-        optional = metakeys.get("optional", {})
+        required, optional = self._get_metakeys()
 
         lookup_keys = list(required)
         # Check if anything in optional_metadata tries to override our required keys
