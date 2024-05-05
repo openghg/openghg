@@ -31,7 +31,7 @@ def _get_metakeys_filepath(bucket: str) -> Path:
     Returns:
         Path: Path to metakeys TOML
     """
-    return _get_config_folderpath(bucket=bucket) / "db" / "metadata_keys.toml"
+    return _get_config_folderpath(bucket=bucket) / "metadata_keys.toml"
 
 
 def get_metakey_defaults() -> Dict:
@@ -62,7 +62,7 @@ def create_default_config(bucket: str) -> None:
     config_folderpath.mkdir(parents=True)
 
     # Make the expected folder structure
-    db_config_folderpath = config_folderpath.joinpath("db")
+    db_config_folderpath = config_folderpath.joinpath("config")
     db_config_folderpath.mkdir()
 
     default_keys = get_metakey_defaults()
@@ -118,4 +118,10 @@ def write_metakeys(bucket: str, metakeys: Dict) -> None:
         )
 
     metakey_path = _get_metakeys_filepath(bucket=bucket)
+    config_folder = metakey_path.parent
+
+    if not config_folder.exists():
+        logger.debug(f"Creating folder at {config_folder}")
+        config_folder.mkdir(parents=True)
+
     metakey_path.write_text(toml.dumps(metakeys))
