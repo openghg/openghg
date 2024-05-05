@@ -1,22 +1,15 @@
-from dataclasses import dataclass
+import logging
 import importlib
 import importlib.resources
 from pathlib import Path
 import toml
-from typing import Dict, Union
+from typing import Dict
 
 import openghg.objectstore
+from openghg.types import ObjectStoreError
 
-
-# from openghg.util import timestamp_now
-from openghg.types import ConfigFileError, ObjectStoreError
-
-
-@dataclass(frozen=True)
-class ObjectStoreConfig:
-    store_path: Union[str, Path]
-    metadata_keys: Dict[str, Dict]
-    config_version: int
+logger = logging.getLogger("openghg.objectstore")
+logger.setLevel(logging.INFO)  # Have to set level for logger as well as handlerF
 
 
 def _get_config_folderpath(bucket: str) -> Path:
@@ -62,7 +55,6 @@ def create_default_config(bucket: str) -> None:
     Returns:
         None
     """
-    # bucket = get_bucket(name=store)
     config_folderpath = _get_config_folderpath(bucket=bucket)
     if config_folderpath.exists():
         raise ObjectStoreError(f"config folder already exists at {config_folderpath}")
@@ -85,7 +77,7 @@ def create_default_config(bucket: str) -> None:
     # version_filepath.write_text(toml.dumps(version_data))
 
 
-def get_metakeys(bucket: str) -> Dict:
+def get_metakeys(bucket: str) -> Dict[str, Dict]:
     """Read the object store config
 
     Args:
@@ -95,32 +87,12 @@ def get_metakeys(bucket: str) -> Dict:
     """
     metakey_path = _get_metakeys_filepath(bucket=bucket)
 
+    # QUESTION - do this automatically or get the user to create it manually / by command line interface
     if not metakey_path.exists():
-        raise ConfigFileError(f"Unable to read metadata keys config file in {bucket} at {metakey_path}")
+        logger.debug(f"Creating default metakeys file at {metakey_path}.")
+        create_default_config(bucket=bucket)
 
-    config = toml.loads(metakey_path.read_text())
-
-    return config
-
-
-def get_datatype_metakeys(bucket: str, data_type: str) -> Dict:
-    """Return a list of the metakeys
-
-    Args:
-        data_type: Name of storage class
-    Returns:
-        list: List of keys
-    """
-    from openghg.store import data_class_info
-
-    valid_classes = set(data_class_info())
-
-    if data_type not in valid_classes:
-        raise ValueError(f"{data_type} is not a valid storage class. Valid classes are: {valid_classes}")
-
-    metakeys = get_metakeys(bucket=bucket)
-
-    return metakeys[data_type]
+    return toml.loads(metakey_path.read_text())
 
 
 def write_metakeys(bucket: str, metakeys: Dict) -> None:
