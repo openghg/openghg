@@ -322,6 +322,30 @@ in a timeseries to be identified.
 See the :ref:`Modifying and deleting data` tutorial for how to update stored
 metadata if needed.
 
+Flux Timeseries - [One dimensional timeseries data]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Flux timeseries data is one dimensional data i.e. time dimension.
+Currently, this is used to standardise ` National Inventory Submissions - CRF data <https://unfccc.int/ghg-inventories-annex-i-parties/2024>`_  provided by UK Inventory team to United Nations Climate Change.
+
+To  standardise flux timeseries data we pass the following arguments
+to ``standardise_flux_timeseries``:
+
+- ``filepath``: path to inventory file (this is the first positional argument)
+- ``species``: a name for the associated species(“ch4”, “n2o”, “co2”, “hfc”).
+- ``source``: Flux / Emissions source
+
+.. code:: ipython3
+
+    from openghg.standardise import standardise_flux_timeseries
+
+    data_path = "~/GBR_2023_2021_13042023_170954.xlsx"
+    standardise_flux_timeseries(filepath=data_path,
+                            species="ch4",
+                            source="crf",
+                            period="years",
+                            continuous=False,
+                            store="user"
+                            )
 
 Reviewing what is in the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
