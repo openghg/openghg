@@ -37,7 +37,7 @@ def parse_crf(
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
         continuous: Whether time stamps have to be continuous.
     Returns:
-        Dict: Parsed emissions data in dictionary format.
+        Dict: Parsed flux timeseries data in dictionary format.
     """
     import pandas as pd
     from openghg.util import timestamp_now
