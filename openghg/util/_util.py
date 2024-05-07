@@ -3,7 +3,7 @@
 """
 
 from collections.abc import Iterable
-from typing import Any, Dict, Iterator, Optional, Tuple
+from typing import Any, Dict, Iterator, Optional, Tuple, List
 import logging
 
 logger = logging.getLogger("openghg.util")
@@ -100,7 +100,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
 
     inverted = _create_site_lookup_dict()
 
-    matches = process.extract(query=site_name, choices=inverted.keys())  # type: ignore
+    matches: List[Any] = process.extract(query=site_name, choices=inverted.keys())  # type: ignore
     highest_score = matches[0][1]
 
     if highest_score < 90:
