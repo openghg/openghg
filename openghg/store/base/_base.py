@@ -140,6 +140,11 @@ class BaseStore:
         parsed_metadata = {}
         # Now parse the metadata, parsing the metadata based on the type that's in the function lookup
         for key, value in kwargs.items():
+            # Keep bools as they are
+            if isinstance(value, bool):
+                parsed_metadata[key] = value
+                continue
+
             if key in optional and value is None:
                 parsed_metadata[key] = self._not_set_value()
                 continue
