@@ -3,6 +3,7 @@
 """
 
 from __future__ import annotations
+from functools import reduce
 import logging
 import math
 from pathlib import Path
@@ -15,7 +16,15 @@ from openghg.objectstore import get_object_from_json, exists, set_object_from_js
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file, clean_string, format_inlet
+from openghg.util import (
+    timestamp_now,
+    to_lowercase,
+    hash_file,
+    clean_string,
+    format_inlet,
+    timestamp_tzaware,
+    format_inlet,
+)
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -147,31 +156,52 @@ class BaseStore:
             optional_metadata: Dictionary of optional metadata
             **kwargs: Expanded keyword
         """
-        metakeys = self._get_metakeys()
+        required, optional = self._get_metakeys()
 
-        # For this step we want to parse the metadata that comes in
-        # We'll build a lookup for each key so we know what functions to apply
-        parse_lookup = {}
+        # Check if we're missing any keys
+        missing_keys = set(required) - set(kwargs)
+        if missing_keys:
+            raise ValueError(f"We're missing {len(missing_keys)} required metadata keys: {missing_keys}")
 
-        # TODO - this is a very simple WIP version of this function
-        # Create the full metadata dictionary
+        # We don't care if they're required or optional here we just need to know how to parse them
+        combined = dict(**required, **optional)
+
+        # NOTE - this is a placeholder for something proper
+        def parse_latlong(val):
+            try:
+                p = round(float(val["lon"].max()), 5)
+            # What will this rase?
+            # Leaving this bare so it gets picked up by the linter and gets changed
+            except:
+                p = round(val, 5)
+
+            return p
+
+        # TODO - move this
+        parse_fns = {
+            "str": clean_string,
+            "timestamp": timestamp_tzaware,
+            "height": format_inlet,
+            "latlong": parse_latlong,
+        }
+
         parsed_metadata = {}
-        for k, v in kwargs.items():
-            if v is None:
-                parsed_metadata[k] = self._not_set_value()
-                continue
+        # Now parse the metadata, parsing the metadata based on the type that's in the function lookup
+        for key, value in kwargs.items():
+            # TODO - add check for list of data, what do we do with that?
+            if key in combined:
+                try:
+                    metadata_types = combined[key]["type"]
+                except KeyError:
+                    functions = [clean_string]
+                else:
+                    functions = [parse_fns[k] for k in metadata_types]
 
-            if k in ["inlet", "height"]:
-                # Format as inlet
-                val = format_inlet(clean_string(v))
-            elif k in ["max_longitude", "min_longitude", "max_latitude", "min_latitude", "etc"]:
-                # val = format_latlong(v)
-                pass
-            else:
-                # QUESTION - what do we want to remove here?
-                val = clean_string(val)
+                # Now we apply those functions to the metadata in the order they
+                parsed_metadata[key] = reduce(lambda res, f: f(res), functions, value)
 
-            parsed_metadata[k] = val
+        # Do we want to lowercase all the metadata?
+        parsed_metadata = to_lowercase(parsed_metadata)
 
         return parsed_metadata
 

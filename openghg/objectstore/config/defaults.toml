@@ -11,7 +11,7 @@ type = [ "str",]
 type = [ "str",]
 
 [footprints.required.inlet]
-type = [ "height",]
+type = [ "str", "height",]
 
 [footprints.required.domain]
 type = [ "str",]
