@@ -82,6 +82,17 @@ The ``ObsSurface`` class is used to process surface observation data.
 .. toctree::
    :maxdepth: 1
 
+openghg.store.FluxTimeseries
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``FluxTimeseries`` class is used to process UK inventory data.
+
+.. autoclass:: openghg.store.FluxTimeseries
+    :members:
+    :private-members:
+
+.. toctree::
+   :maxdepth: 1
 
 Recombination functions
 =======================

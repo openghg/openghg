@@ -41,6 +41,10 @@ Emissions / flux
 
 .. autofunction:: openghg.standardise.emissions.parse_intem
 
+Flux Timeseries
+^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.flux_timeseries.parse_crf
 
 Metadata
 ^^^^^^^^
