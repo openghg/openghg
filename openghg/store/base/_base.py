@@ -23,7 +23,6 @@ from openghg.util import (
     clean_string,
     format_inlet,
     timestamp_tzaware,
-    format_inlet,
 )
 
 
@@ -97,55 +96,8 @@ class BaseStore:
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def parse_optional_metadata(self, **kwargs) -> Dict:
-        """Parse optional keyword arguments, ensuring any
-        with a None value are set to a fixed value expected
-        by the metadata storage.
-
-        Args:
-            kwargs: Any number of keyword arguments
-        Returns:
-            dict: Dictionary of parsed metadata
-        """
-        parsed = {}
-
-        for key, value in kwargs.items():
-            parsed[key] = value if value is not None else self._not_set_value()
-
-        return parsed
-
     def _not_set_value(self) -> str:
         return "NOT_SET"
-
-    def create_lookup(self, **kwargs) -> Dict:
-        """Create the Datasource lookup dictionary
-
-        Args:
-            **kwargs: Metadata for lookup
-        Returns:
-            dict: Dictionary of parsed lookup metadata
-        """
-        raise NotImplementedError
-        required, optional = self.get_metakeys()
-
-        # Make sure we have all the required metadata
-        missing = [k for k in required if k not in kwargs or kwargs[k] is None]
-        if missing:
-            raise ValueError(
-                f"We have some missing keys. We require data for: {required}\n" + f"We are missing {missing}."
-            )
-
-        required_metadata = {k: kwargs[k] for k in required}
-
-        # Now check the optional metadata
-        optional_metadata = {}
-        for k in optional:
-            optional_metadata[k] = kwargs[k] if kwargs[k] is not None else self._not_set_value()
-
-        # We use this to perform the Datasource lookup
-        lookup_metadata = {**required_metadata, **optional_metadata}
-
-        return lookup_metadata
 
     def parse_metadata(self, **kwargs) -> Dict:
         """Parse all the metadata given to us. This metadata is for internal use
@@ -158,8 +110,8 @@ class BaseStore:
         """
         required, optional = self._get_metakeys()
 
-        # Check if we're missing any keys
-        missing_keys = set(required) - set(kwargs)
+        # Check if we have any Nones for the required keys
+        missing_keys = [k for k in required if kwargs[k] is None]
         if missing_keys:
             raise ValueError(f"We're missing {len(missing_keys)} required metadata keys: {missing_keys}")
 
@@ -167,7 +119,7 @@ class BaseStore:
         combined = dict(**required, **optional)
 
         # NOTE - this is a placeholder for something proper
-        def parse_latlong(val):
+        def parse_latlong(val: Any) -> float:
             try:
                 p = round(float(val["lon"].max()), 5)
             # What will this rase?
@@ -188,7 +140,11 @@ class BaseStore:
         parsed_metadata = {}
         # Now parse the metadata, parsing the metadata based on the type that's in the function lookup
         for key, value in kwargs.items():
-            # TODO - add check for list of data, what do we do with that?
+            if key in optional and value is None:
+                parsed_metadata[key] = self._not_set_value()
+                continue
+
+            # TODO - add check for list/tuple/dict of data, what do we do with that?
             if key in combined:
                 try:
                     metadata_types = combined[key]["type"]
@@ -198,7 +154,11 @@ class BaseStore:
                     functions = [parse_fns[k] for k in metadata_types]
 
                 # Now we apply those functions to the metadata in the order they
-                parsed_metadata[key] = reduce(lambda res, f: f(res), functions, value)
+                parsed_val = reduce(lambda res, f: f(res), functions, value)
+            else:
+                parsed_val = clean_string(value)
+
+            parsed_metadata[key] = parsed_val
 
         # Do we want to lowercase all the metadata?
         parsed_metadata = to_lowercase(parsed_metadata)
