@@ -100,7 +100,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
 
     inverted = _create_site_lookup_dict()
 
-    matches: List[Any] = process.extract(query=site_name, choices=inverted.keys())  # type: ignore
+    matches: List = process.extract(query=site_name, choices=inverted.keys())
     highest_score = matches[0][1]
 
     if highest_score < 90:
