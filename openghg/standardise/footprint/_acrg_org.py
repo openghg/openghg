@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
-from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union
+
+# from collections import defaultdict
+from typing import DefaultDict, Dict, List, Optional, Union, Tuple
 import warnings
-from xarray import Dataset
+import xarray as xr
 
 from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
 from openghg.store import infer_date_range, update_zero_dim
@@ -29,7 +30,7 @@ def parse_acrg_org(
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     chunks: Optional[Dict] = None,
-) -> Dict:
+) -> Tuple[xr.Dataset, Dict]:
     """
     Read and parse input emissions data in original ACRG format.
 
@@ -160,23 +161,24 @@ def parse_acrg_org(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: Dict[str, Union[str, float, List[float]]] = {}
+    # metadata: Dict[str, Union[str, float, List[float]]] = {}
+    metadata = {}
 
-    metadata["data_type"] = "footprints"
-    metadata["site"] = site
-    metadata["domain"] = domain
-    metadata["model"] = model
+    # metadata["data_type"] = "footprints"
+    # metadata["site"] = site
+    # metadata["domain"] = domain
+    # metadata["model"] = model
 
-    # Include both inlet and height keywords for backwards compatability
-    metadata["inlet"] = inlet
-    metadata["height"] = inlet
-    metadata["species"] = species
+    # # Include both inlet and height keywords for backwards compatability
+    # metadata["inlet"] = inlet
+    # metadata["height"] = inlet
+    # metadata["species"] = species
 
-    if met_model is not None:
-        metadata["met_model"] = met_model
+    # if met_model is not None:
+    #     metadata["met_model"] = met_model
 
-    if network is not None:
-        metadata["network"] = network
+    # if network is not None:
+    #     metadata["network"] = network
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
@@ -215,9 +217,9 @@ def parse_acrg_org(
         except KeyError:
             raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-    metadata["time_resolved"] = str(time_resolved)
-    metadata["high_spatial_resolution"] = str(high_spatial_resolution)
-    metadata["short_lifetime"] = str(short_lifetime)
+    # metadata["time_resolved"] = str(time_resolved)
+    # metadata["high_spatial_resolution"] = str(high_spatial_resolution)
+    # metadata["short_lifetime"] = str(short_lifetime)
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
@@ -233,10 +235,10 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    # key = "_".join((site, domain, model, inlet))
 
-    footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-    footprint_data[key]["data"] = fp_data
-    footprint_data[key]["metadata"] = metadata
+    # footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+    # footprint_data[key]["data"] = fp_data
+    # footprint_data[key]["metadata"] = metadata
 
-    return footprint_data
+    return fp_data, metadata
