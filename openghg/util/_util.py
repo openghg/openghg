@@ -132,7 +132,7 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
 
     site_list = possible_sites.keys()
 
-    matches = process.extract(site_name, site_list)  # type: ignore
+    matches: List = process.extract(site_name, site_list)
 
     scores = [s for m, s, _ in matches]
 
