@@ -70,11 +70,11 @@ def parse_acrg_org(
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
 
-    if species == "co2":
-        # Expect co2 data to have high time resolution
-        if not time_resolved:
-            logger.info("Updating time_resolved to True for co2 data")
-            time_resolved = True
+    # if species == "co2":
+    # # Expect co2 data to have high time resolution
+    # if not time_resolved:
+    #     logger.info("Updating time_resolved to True for co2 data")
+    #     time_resolved = True
 
     if short_lifetime:
         if species == "inert":
