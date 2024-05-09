@@ -262,10 +262,10 @@ class FluxTimeseries(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time",)}
+        data_vars: Dict[str, Tuple[str, ...]] = {"flux_timeseries": ("time",)}
         dtypes = {
             "time": np.datetime64,
-            "flux": np.floating,
+            "flux_timeseries": np.floating,
         }
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)

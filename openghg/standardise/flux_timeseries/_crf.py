@@ -57,7 +57,7 @@ def parse_crf(
         dataframe = dataframe.iloc[49]
 
     dataframe = pd.DataFrame(dataframe).iloc[2:-1]
-    dataframe = dataframe.rename(columns={dataframe.columns[0]: "flux"}).astype(np.floating)
+    dataframe = dataframe.rename(columns={dataframe.columns[0]: "flux_timeseries"}).astype(np.floating)
     dataframe.index = pd.to_datetime(dataframe.index, format="%Y")
 
     metadata = {}
