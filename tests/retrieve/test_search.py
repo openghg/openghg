@@ -343,29 +343,37 @@ def test_search_footprints_select():
 
 
 def test_search_footprints_time_resolved():
-    """Test search for high time resolution footprints
+    """Test search for time resolved footprints
 
     Expected behaviour: searching for footprints with
     keyword argument `time_resolved = True` should only
-    return results for high time resolution footprints.
+    return results for time resolved footprints.
     """
+
+    # Check search for footprints returns multiple entries
+    res_all = search_footprints(
+        site="TAC",
+    )    
+
+    # Based on loaded data in conftest.py,
+    # more than one footprint for TAC should be found (standard, time_resolved)
+    assert res_all.results.shape[0] > 1
+
+    # Check searching using the time_resolved keyword, finds only the time resolved footprint.
     res = search_footprints(
         site="TAC",
-        network="DECC",
-        height="100m",
-        domain="TEST",
-        model="NAME",
-        start_date="2014-07-01",
-        end_date="2014-08-01",
         time_resolved=True,
     )
 
-    # results dataframes should have exactly one row
+    # results dataframes should have exactly one row (only time resolved footprint)
     assert res.results.shape[0] == 1
 
     # check attributes
     metadata = res.retrieve().metadata
     assert metadata["time_resolved"] == "true"
+
+
+# def test_search
 
 
 def test_search_flux():
