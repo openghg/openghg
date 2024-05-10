@@ -3,7 +3,7 @@ import pytest
 from helpers import get_retrieval_datapath
 from openghg.cloud import package_from_function
 from openghg.dataobjects import SearchResults
-from openghg.retrieve.ceda import retrieve_surface
+from openghg.retrieve.ceda import retrieve_surface, retrieve_column
 from pandas import Timestamp
 from xarray import load_dataset
 
@@ -103,3 +103,9 @@ def test_ceda_retrieve(mocker):
     assert download_data.call_count == 1
 
     assert bsd_data.data.equals(second_bsd_data.data)
+
+def test_retrieve_ceda_tccon():
+
+    url = "https://dap.ceda.ac.uk/neodc/tccon/tccon_mirror/data/bremen01/ggg2020/br20090106_20210624.public.qc.nc"
+
+    tccon_data = retrieve_column(url=url,additional_metadata={"site":"BRM"}, store="user")
