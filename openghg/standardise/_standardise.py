@@ -903,7 +903,7 @@ def standardise_flux_timeseries(
     Args:
         filepath: Path of flux timeseries file
         species: Species name
-        domain: Geographic domain, default is 'None'. Instead region is used to identify area
+        domain: If flux is related to pre-existing domain (e.g. "EUROPE") with defined latitude-longitude bounds this can be used to flag that. Otherwise, use `region` input to describe the name of a region (e.g. "UK").
         region: Region/Country of the CRF data
         source: Flux / Emissions source
         database: Name of database source for this input (if relevant)
