@@ -205,13 +205,6 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    if high_time_resolution:
-        warnings.warn(
-            "This argument is deprecated and will be replaced in future versions with time_resolved.",
-            DeprecationWarning,
-        )
-        time_resolved = high_time_resolution
-
     args = {
         "site": site,
         "inlet": inlet,
@@ -225,7 +218,6 @@ def search_footprints(
         "end_date": end_date,
         "period": period,
         "continuous": continuous,
-        "time_resolved": time_resolved,
         "high_spatial_resolution": high_spatial_resolution,
         "short_lifetime": short_lifetime,
     }
@@ -234,6 +226,20 @@ def search_footprints(
     for k in ["start_date", "end_date"]:
         if args[k] is not None:
             args[k] = str(args[k])
+
+    # Either (or both) of 'high_time_resolution' and 'time_resolved' may be in the metatore,
+    # so both are allowed in search but deprecation warning passed.
+    # - ensure passing time_resolved=True gives back all relevant footprints.
+    if high_time_resolution is not None:
+        warnings.warn(
+        "The 'high_time_resolution' argument is deprecated and will be replaced in future versions with 'time_resolved'.",
+        DeprecationWarning,
+        )
+        if time_resolved is None:
+            time_resolved = high_time_resolution
+
+    high_time_resolution = time_resolved  # Includes at the moment for backwards compatability
+    args["option_time_resolved"] = {"time_resolved": time_resolved, "high_time_resolution": high_time_resolution}
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
@@ -482,16 +488,19 @@ def _base_search(**kwargs: Any) -> SearchResults:
     # - clean search terms directly or within data structures
     search_kwargs = {}
     for k, v in kwargs.items():
-        if v is None:
-            continue
-        elif isinstance(v, (list, tuple)):
+        if isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
+            if not v:  # Check empty list
+                v = None
         elif isinstance(v, dict):
             v = {key: clean_string(value) for key, value in v.items() if value is not None}
+            if not v:  # Check empty dict
+                v = None
         else:
             v = clean_string(v)
 
-        search_kwargs[k] = v
+        if v is not None:
+            search_kwargs[k] = v
 
     # Species translation
     species = search_kwargs.get("species")

@@ -8,6 +8,7 @@ from openghg.retrieve import (
     search_footprints,
     search_surface,
 )
+from openghg.dataobjects import data_manager
 from pandas import Timestamp
 
 
@@ -384,6 +385,71 @@ def test_search_footprints_time_resolved():
     # check attributes
     metadata = res.retrieve().metadata
     assert metadata["time_resolved"] == "true"
+
+
+@pytest.fixture()
+def previous_htr_footprint_setup():
+    """
+    Mimic the previous setup when adding "high_time_resolution" (now
+    termed "time_resolved") footprints so this has the previous
+    high_time_resolution="true" key rather than the new time_resolved="true".
+    """
+    from helpers import get_footprint_datapath
+    from openghg.standardise import standardise_footprint
+
+    # Add high time resolution footprint
+    hitres_fp_datapath = get_footprint_datapath("TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc")
+    standardise_footprint(
+        store="user",
+        filepath=hitres_fp_datapath,
+        site="TAC",
+        model="NAME",
+        network="DECC",
+        height="185m",
+        domain="TEST",
+        met_model="UKV",
+        time_resolved=True,
+    )
+
+    # Find this footprint and update the metadata
+    dm = data_manager(data_type="footprints", site="TAC", inlet="185m", time_resolved=True, store="user")
+    uuid = next(iter(dm.metadata))
+    
+    # Removed time_resolved key
+    to_delete = "time_resolved"
+    value = dm.metadata[uuid][to_delete]
+    dm.update_metadata(uuid=uuid, to_delete=to_delete)
+    
+    # Add high_time_resolution key
+    to_add = {"high_time_resolution": value}
+    dm.update_metadata(uuid=uuid, to_update=to_add)
+
+
+def test_search_high_time_resolution(previous_htr_footprint_setup):
+    """
+    Check backwards comptability for footprints added to an object store
+    prior to the use of time_resolved keyword in preference to
+    high_time_resolution.
+    """
+
+    # Check search for footprints returns multiple entries
+    res = search_footprints(
+        site="TAC",
+        inlet="185m",
+        high_time_resolution=True,
+    )    
+
+    # results dataframes find the footprint labeled as high_time_resolution
+    assert res.results.shape[0] == 1
+
+    # check attributes
+    metadata = res.retrieve().metadata
+    assert metadata["high_time_resolution"] == "true"
+
+    # Remove temporary datasource from the object store
+    dm = data_manager(data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user")
+    uuid = next(iter(dm.metadata))
+    dm.delete_datasource(uuid=uuid)
 
 
 def test_search_flux():
