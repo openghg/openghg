@@ -62,7 +62,9 @@ def test_search_surface_selects_dates():
     assert data.time[0] == Timestamp("2013-11-23T12:28:30")
     assert data.time[-1] == Timestamp("2020-06-24T09:41:30")
 
-    res = search_surface(site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date="2014-12-31")
+    res = search_surface(
+        site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date="2014-12-31"
+    )
 
     data_sliced = res.retrieve_all().data
 
@@ -222,7 +224,11 @@ def test_many_term_search():
 def test_optional_term_search():
     """Test search using dict inputs. This should create an OR search between the key, value pairs in the dictionaries"""
     # Note: had to be careful to not create duplicates as this currently raises an error.
-    res = search(site="bsd", inlet_option={"inlet": "42m", "height": "42m"}, name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"})
+    res = search(
+        site="bsd",
+        inlet_option={"inlet": "42m", "height": "42m"},
+        name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"},
+    )
 
     assert len(res.metadata) == 3
     assert res.metadata
@@ -297,12 +303,7 @@ def test_search_footprints_multiple():
         - 2016-08-01 (3 time points)
     """
     res = search_footprints(
-        site="TAC",
-        network="DECC",
-        height="100m",
-        domain="TEST",
-        model="NAME",
-        time_resolved=False
+        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", time_resolved=False
     )
 
     key = next(iter(res.metadata))
@@ -365,7 +366,7 @@ def test_search_footprints_time_resolved():
     # Check search for footprints returns multiple entries
     res_all = search_footprints(
         site="TAC",
-    )    
+    )
 
     # Based on loaded data in conftest.py,
     # more than one footprint for TAC should be found (standard, time_resolved)
@@ -412,12 +413,12 @@ def previous_htr_footprint_setup():
     # Find this footprint and update the metadata
     dm = data_manager(data_type="footprints", site="TAC", inlet="185m", time_resolved=True, store="user")
     uuid = next(iter(dm.metadata))
-    
+
     # Removed time_resolved key
     to_delete = "time_resolved"
     value = dm.metadata[uuid][to_delete]
     dm.update_metadata(uuid=uuid, to_delete=to_delete)
-    
+
     # Add high_time_resolution key
     to_add = {"high_time_resolution": value}
     dm.update_metadata(uuid=uuid, to_update=to_add)
@@ -435,7 +436,7 @@ def test_search_high_time_resolution(previous_htr_footprint_setup):
         site="TAC",
         inlet="185m",
         high_time_resolution=True,
-    )    
+    )
 
     # results dataframes find the footprint labeled as high_time_resolution
     assert res.results.shape[0] == 1
@@ -445,7 +446,9 @@ def test_search_high_time_resolution(previous_htr_footprint_setup):
     assert metadata["high_time_resolution"] == "true"
 
     # Remove temporary datasource from the object store
-    dm = data_manager(data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user")
+    dm = data_manager(
+        data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user"
+    )
     uuid = next(iter(dm.metadata))
     dm.delete_datasource(uuid=uuid)
 

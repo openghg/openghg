@@ -205,7 +205,7 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    args = {
+    args: Dict[str, Any] = {
         "site": site,
         "inlet": inlet,
         "height": height,
@@ -232,14 +232,17 @@ def search_footprints(
     # - ensure passing time_resolved=True gives back all relevant footprints.
     if high_time_resolution is not None:
         warnings.warn(
-        "The 'high_time_resolution' argument is deprecated and will be replaced in future versions with 'time_resolved'.",
-        DeprecationWarning,
+            "The 'high_time_resolution' argument is deprecated and will be replaced in future versions with 'time_resolved'.",
+            DeprecationWarning,
         )
         if time_resolved is None:
             time_resolved = high_time_resolution
 
     high_time_resolution = time_resolved  # Includes at the moment for backwards compatability
-    args["option_time_resolved"] = {"time_resolved": time_resolved, "high_time_resolution": high_time_resolution}
+    args["option_time_resolved"] = {
+        "time_resolved": time_resolved,
+        "high_time_resolution": high_time_resolution,
+    }
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
@@ -573,7 +576,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
             expand_key_values = [(k, value) for value in v]
             multiple_options.append(expand_key_values)
         elif isinstance(v, dict):
-            expand_key_values = v.items()
+            expand_key_values = list(v.items())
             multiple_options.append(expand_key_values)
         else:
             single_options[k] = v
