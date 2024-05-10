@@ -202,6 +202,7 @@ def test_multi_type_search():
 
 
 def test_many_term_search():
+    """Test search using list inputs. This should create an OR search between the terms in the arguments with lists."""
     res = search(site=["bsd", "tac"], species=["co2", "ch4"], inlet=["42m", "100m"])
 
     assert len(res.metadata) == 4
@@ -215,6 +216,18 @@ def test_many_term_search():
 
     inlets = set([x["inlet"] for x in res.metadata.values()])
     assert inlets == {"100m", "42m"}
+
+
+def test_optional_term_search():
+    """Test search using dict inputs. This should create an OR search between the key, value pairs in the dictionaries"""
+    # Note: had to be careful to not create duplicates as this currently raises an error.
+    res = search(site="bsd", inlet_option={"inlet": "42m", "height": "42m"}, name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"})
+
+    assert len(res.metadata) == 3
+    assert res.metadata
+
+    inlets = set([x["inlet"] for x in res.metadata.values()])
+    assert inlets == {"42m"}
 
 
 def test_nonsense_terms():
@@ -369,9 +382,6 @@ def test_search_footprints_time_resolved():
     # check attributes
     metadata = res.retrieve().metadata
     assert metadata["time_resolved"] == "true"
-
-
-# def test_search
 
 
 def test_search_flux():
