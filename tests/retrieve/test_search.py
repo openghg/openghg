@@ -355,7 +355,14 @@ def test_search_footprints_select():
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
-def test_search_footprints_time_resolved():
+@pytest.mark.parametrize(
+    "time_resolved_keyword,value",
+    [
+        ("time_resolved", True),
+        ("high_time_resolution", True),
+    ],
+)
+def test_search_footprints_time_resolved(time_resolved_keyword, value):
     """Test search for time resolved footprints
 
     Expected behaviour: searching for footprints with
@@ -373,15 +380,12 @@ def test_search_footprints_time_resolved():
     assert res_all.results.shape[0] > 1
 
     # Check searching using the time_resolved keyword, finds only the time resolved footprint.
-    res = search_footprints(
-        site="TAC",
-        time_resolved=True,
-    )
+    res = search_footprints(site="TAC", **{time_resolved_keyword: value})
 
     # results dataframes should have exactly one row (only time resolved footprint)
     assert res.results.shape[0] == 1
 
-    # check attributes
+    # check attributes include time_resolved
     metadata = res.retrieve().metadata
     assert metadata["time_resolved"] == "true"
 
@@ -423,6 +427,15 @@ def previous_htr_footprint_setup():
     to_add = {"high_time_resolution": value}
     dm.update_metadata(uuid=uuid, to_update=to_add)
 
+    yield
+
+    # Remove temporary datasource from the object store
+    dm = data_manager(
+        data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user"
+    )
+    uuid = next(iter(dm.metadata))
+    dm.delete_datasource(uuid=uuid)
+
 
 def test_search_high_time_resolution(previous_htr_footprint_setup):
     """
@@ -431,26 +444,33 @@ def test_search_high_time_resolution(previous_htr_footprint_setup):
     high_time_resolution.
     """
 
-    # Check search for footprints returns multiple entries
-    res = search_footprints(
+    # Check search for footprints returns expected footprint using high_time_resolution
+    res1 = search_footprints(
         site="TAC",
         inlet="185m",
         high_time_resolution=True,
     )
 
-    # results dataframes find the footprint labeled as high_time_resolution
-    assert res.results.shape[0] == 1
+    # Check results to ensure footprint labeled as high_time_resolution is found
+    assert res1.results.shape[0] == 1
+
+    # Check attributes
+    metadata1 = res1.retrieve().metadata
+    assert metadata1["high_time_resolution"] == "true"
+
+    # Check search for footprints returns expected footprint using time_resolved
+    res2 = search_footprints(
+        site="TAC",
+        inlet="185m",
+        time_resolved=True,
+    )
+
+    # Check results to ensure footprint labeled as high_time_resolution is found
+    assert res2.results.shape[0] == 1
 
     # check attributes
-    metadata = res.retrieve().metadata
-    assert metadata["high_time_resolution"] == "true"
-
-    # Remove temporary datasource from the object store
-    dm = data_manager(
-        data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user"
-    )
-    uuid = next(iter(dm.metadata))
-    dm.delete_datasource(uuid=uuid)
+    metadata2 = res2.retrieve().metadata
+    assert metadata2["high_time_resolution"] == "true"
 
 
 def test_search_flux():
