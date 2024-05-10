@@ -379,7 +379,9 @@ def _check_valid_store(store_path: Path) -> bool:
     store_dirs = list(data_dir.glob("*"))
     # Let's take the first data directory and see if there's a zarr folder in it
     if not store_dirs:
-        raise ObjectStoreError("No data found in the object store, please check the path and try again.")
+        logger.info(f"No data found in the object store {store_path}, "
+                    "so we are treating this empty store as a zarr store.")
+        return True
 
     store_data_dir = store_dirs[0]
 
