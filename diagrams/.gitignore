@@ -1,0 +1,4 @@
+# We only want the actual diagram files
+*.svg
+*.pdf
+*.png

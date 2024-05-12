@@ -1,0 +1,141 @@
+direction: right
+
+classes: {
+    metadata_arrow: {
+      style: {
+        stroke: blue
+      }
+    }
+    combined_arrow: {
+      style: {
+        stroke: red
+      }
+    }
+
+    final_arrow: {
+      style: {
+        stroke: green
+      }
+    }
+
+    data_arrow: {
+        style: {
+          stroke: orange
+        }
+      }
+  }
+
+raw_data -> standardisation_fns
+
+raw_data: Raw data
+standardisation_fns: Standardisation
+user_parser: User supplied parser
+user_parser2: User supplied parser
+openghg_parser: OpenGHG parser
+
+user_parser -> standardisation_fns
+standardisation_fns -> StorageClass
+#  -> openghg_parser
+# standardisation_fns -> user_parser2
+user_parser2 -> parser_out
+openghg_parser -> parser_out
+
+# (standardisation_fns -> openghg_parser)[0].class: combined_arrow
+# (standardisation_fns -> user_parser2)[0].class: combined_arrow
+# (user_parser2 -> parser_out)[0].class: combined_arrow
+# (openghg_parser -> parser_out)[0].class: combined_arrow
+
+# Update the diagram so that the data is parsed by the parser function
+# and that function returns data AND metadata but this metadata is not the final version
+# key: value kwargs that are passed into the standardise function can also be added
+# to the metadata before we pass it to the data schema / metadata schema checks
+#
+# We'd require that the final metadata require the keys in the required_keys config file /
+# wherever that comes from
+#
+# Datasource lookup gets the required keys from search
+# Does the lookup
+# Parses the result
+#
+# Ensure that the formatting is done in a central place
+
+parser_out: Parser output {
+    dataset
+    metadata
+}
+
+standardisation_fns -> DataSchemaCheck.check_schema
+(standardisation_fns -> DataSchemaCheck.check_schema)[0].class: combined_arrow
+
+parser_out -> standardisation_fns
+(parser_out -> standardisation_fns)[0].class: combined_arrow
+
+standardisation_fns
+
+DataSchemaCheck {
+    check_schema.style.multiple: true
+}
+
+standardisation_fns -> StorageClass
+(standardisation_fns -> StorageClass)[0].class: combined_arrow
+
+
+datasource: Datasource
+zarrstore: Zarr Store
+
+StorageClass {
+    read_file
+}
+
+BaseStore {
+    parse_metadata
+    assign_data
+}
+
+# MetaParser {
+#     grid-columns: 1
+#     check_metadata -> create_record
+#     create_record -> _.MetaRecord -> _.StorageClass.store_metadata
+
+#     (_.MetaRecord -> _.StorageClass.store_metadata)[0].class: final_arrow
+# }
+
+# MetaRecord
+# MetaRecord.style.multiple: true
+
+
+
+
+
+
+# Datasource {
+#     add_data -> _.ZarrStore
+#     (add_data -> _.ZarrStore)[0].class: data_arrow
+#     add_metadata -> _.MetaStore.insert
+#     (add_metadata -> _.MetaStore.insert)[0].class: final_arrow
+# }
+
+# ZarrStore
+
+# MetaStore {
+#     insert
+# }
+
+# key: Key {
+#     Combined data {
+#       style: {
+#         font-color: red
+#       }
+#     }
+#     Metadata only {
+#       style: {
+#         font-color: blue
+#       }
+#     }
+
+#     Final metadata {
+#       style: {
+#         font-color: green
+#       }
+#     }
+#   }
