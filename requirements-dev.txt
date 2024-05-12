@@ -9,7 +9,7 @@ pytest-mock
 pytest-timeout
 requests-mock
 # For mypy
-mypy==1.7.1
+mypy==1.10.0
 types-paramiko
 types-PyYAML
 types-requests
