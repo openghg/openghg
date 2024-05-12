@@ -8,12 +8,12 @@ def parse_crf(
     filepath: Path,
     species: str,
     source: str = "anthro",
+    region: str = "UK",
     domain: Optional[str] = None,
     data_type: str = "flux_timeseries",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
-    region: str = "UK",
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
 ) -> Dict:
@@ -24,12 +24,12 @@ def parse_crf(
         filepath: Path to the '.xlsx' file containing CRF emissions data.
         species: Name of species
         source: Source of the emissions data, e.g. "energy", "anthro", default is 'anthro'.
+        region: Region/Country of the CRF data
         domain: Geographic domain, default is 'None'. Instead region is used to identify area
         data_type: Type of data, default is 'flux_timeseries'.
         database: Database name if applicable.
         database_version: Version of the database if applicable.
         model: Model name if applicable.
-        region: Region/Country of the CRF data
         period: Period of measurements. Only needed if this can not be inferred from the time coords
             If specified, should be one of:
                 - "yearly", "monthly"

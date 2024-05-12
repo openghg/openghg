@@ -881,9 +881,9 @@ def standardise_flux_timeseries(
     filepath: Union[str, Path],
     species: str,
     source: str,
-    domain: Optional[str] = None,
     region: str = "UK",
     source_format: str = "crf",
+    domain: Optional[str] = None,
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
@@ -903,14 +903,14 @@ def standardise_flux_timeseries(
     Args:
         filepath: Path of flux timeseries file
         species: Species name
-        domain: If flux is related to pre-existing domain (e.g. "EUROPE") with defined latitude-longitude bounds this can be used to flag that. Otherwise, use `region` input to describe the name of a region (e.g. "UK").
-        region: Region/Country of the CRF data
         source: Flux / Emissions source
+        region: Region/Country of the CRF data
+        source_format : Type of data being input e.g. openghg (internal format)
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        domain: If flux is related to pre-existing domain (e.g. "EUROPE") with defined latitude-longitude bounds this can be used to flag that. Otherwise, use `region` input to describe the name of a region (e.g. "UK").
         database: Name of database source for this input (if relevant)
         database_version: Name of database version (if relevant)
         model: Model name (if relevant)
-        source_format : Type of data being input e.g. openghg (internal format)
-        period: Period of measurements. Only needed if this can not be inferred from the time coords
         If specified, should be one of:
             - "yearly", "monthly"
             - suitable pandas Offset Alias

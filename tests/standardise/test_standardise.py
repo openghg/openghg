@@ -472,4 +472,4 @@ def test_standardise_flux_timeseries():
         filepath=data_path, species="ch4", source="crf", period="years", continuous=False, store="user"
     )
 
-    assert "ch4_crf_UK" in flux_results
+    assert "ch4_crf_uk" in flux_results

@@ -121,8 +121,9 @@ class FluxTimeseries(BaseStore):
 
         species = clean_string(species)
         source = clean_string(source)
+        region = clean_string(region)
         if domain:
-            domain = clean_string(domain)
+            region = clean_string(domain)
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -194,7 +195,7 @@ class FluxTimeseries(BaseStore):
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-        min_required = ["species", "source"]
+        min_required = ["species", "source", "region"]
         for key, value in optional_keywords.items():
             if value is not None:
                 min_required.append(key)
