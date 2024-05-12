@@ -3,7 +3,7 @@
 """
 
 from collections.abc import Iterable
-from typing import Any, Dict, Iterator, Optional, Tuple, List
+from typing import Any, Dict, Iterator, Optional, Tuple
 import logging
 
 logger = logging.getLogger("openghg.util")
