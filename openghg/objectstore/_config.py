@@ -5,7 +5,7 @@ from pathlib import Path
 import toml
 from typing import Dict
 
-import openghg.objectstore
+import openghg.data
 from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.objectstore")
@@ -42,7 +42,7 @@ def get_metakey_defaults() -> Dict:
     """
     # We use importlib here to allow us to get the path of the file independent of how OpenGHG
     # is installed
-    defaults_file = importlib.resources.files(openghg.objectstore) / "config" / "defaults.toml"
+    defaults_file = importlib.resources.files(openghg.data) / "config" / "objectstore" / "defaults.toml"
     defaults = toml.loads(defaults_file.read_text())
     return defaults
 
