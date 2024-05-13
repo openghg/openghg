@@ -4,13 +4,11 @@ __all__ = ["clean_string", "to_lowercase"]
 
 
 @overload
-def clean_string(to_clean: str) -> str:
-    ...
+def clean_string(to_clean: str) -> str: ...
 
 
 @overload
-def clean_string(to_clean: None) -> None:
-    ...
+def clean_string(to_clean: None) -> None: ...
 
 
 def clean_string(to_clean: Optional[str]) -> Union[str, None]:
@@ -26,6 +24,9 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
     if to_clean is None:
         return None
+
+    if isinstance(to_clean, bool):
+        return str(to_clean).lower()
 
     try:
         # This might be used with numbers
@@ -44,28 +45,23 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
 
 @overload
-def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict:
-    ...
+def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict: ...
 
 
 @overload
-def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List:
-    ...
+def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List: ...
 
 
 @overload
-def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple:
-    ...
+def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple: ...
 
 
 @overload
-def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set:
-    ...
+def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set: ...
 
 
 @overload
-def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str:
-    ...
+def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str: ...
 
 
 def to_lowercase(

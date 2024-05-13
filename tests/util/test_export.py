@@ -82,9 +82,9 @@ def test_export_to_dashboard():
                                 "site": "test_site",
                                 "instrument": "picarro",
                                 "inlet": "100m",
-                                "station_latitude": 52.123,
-                                "station_longitude": 52.123,
-                                "species": "co2"
+                                "latitude": 52.123,
+                                "longitude": 52.123,
+                                "species": "co2",
                             },
                         }
                     }

@@ -66,10 +66,10 @@ def parse_openghg(
 
     data_filepath = Path(data_filepath)
 
-    if data_filepath.suffix != ".nc":
-        raise ValueError("Input file must be a .nc (netcdf) file.")
-
-    data = xr.open_dataset(data_filepath)  # Change this to with statement?
+    try:
+        data = xr.open_dataset(data_filepath)  # Change this to with statement?
+    except ValueError as e:
+        raise ValueError(f"Input file {data_filepath.name} could not be opened by xarray.") from e
 
     # Extract current attributes from input data
     attributes = data.attrs
@@ -101,10 +101,16 @@ def parse_openghg(
             if key in attributes:
                 attributes_value = attributes[key]
                 if str(value).lower() != str(attributes_value).lower():
-                    # If inputs do not match attribute values, raise a ValueError
-                    raise ValueError(
-                        f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                    )
+                    try:
+                        # As we may have things like 1200 != 1200.0
+                        # we'll check if the floats are equal
+                        if float(value) == float(attributes_value):
+                            continue
+                    except ValueError:
+                        # If inputs do not match attribute values, raise a ValueError
+                        raise ValueError(
+                            f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                        )
 
     # Read the inlet
     if inlet is None:

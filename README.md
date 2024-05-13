@@ -2,7 +2,7 @@
 
 ## OpenGHG - a cloud platform for greenhouse gas data analysis and collaboration
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![codecov](https://codecov.io/gh/openghg/openghg/branch/devel/graph/badge.svg)](https://codecov.io/gh/openghg/openghg) ![OpenGHG tests](https://github.com/openghg/openghg/workflows/OpenGHG%20tests/badge.svg?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![OpenGHG tests](https://github.com/openghg/openghg/workflows/OpenGHG%20tests/badge.svg?branch=master)
 
 OpenGHG is a project based on the prototype [HUGS platform](https://github.com/hugs-cloud/hugs) which aims to be a platform for collaboration and analysis
 of greenhouse gas (GHG) data.
@@ -209,10 +209,20 @@ The `udunits` package is not `pip` installable so we've added a separate flag to
 sudo apt-get install libudunits2-0
 ```
 
+#### Running CF Checker tests
+
 You can then run the `cfchecks` marked tests using
 
 ```bash
 pytest -v --run-cfchecks tests/
+```
+
+#### Running ICOS tests
+
+Some of our tests retrieve data from the ICOS Carbon Portal and so to avoid load on the ICOS severs these should not be run frequently. They should only be run when working on this functionality or before a release. These tests are marked `icos` with `pytest.mark`.
+
+```bash
+pytest -v --run-icos tests/
 ```
 
 If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us

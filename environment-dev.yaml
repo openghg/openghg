@@ -1,0 +1,56 @@
+name: openghg_dev_env
+channels:
+  - openghg
+  - conda-forge
+  - defaults
+  - anaconda
+dependencies:
+  - python>=3.9
+  - conda-build
+  - addict
+  - dask
+  - h5netcdf
+  - filelock
+  - matplotlib
+  - msgpack-python
+  - netcdf4
+  - nbformat
+  - numexpr
+  - numpy
+  - nc-time-axis
+  - openghg_defs
+  - pandas>=2.0
+  - pip
+  - plotly
+  - pyvis
+  - rapidfuzz
+  - requests>=2.25
+  - scipy
+  - tinydb
+  - toml
+  - rich
+  - ipywidgets
+  - xarray
+  - rich
+  - urllib3>=1.26.3
+  - xesmf>=0.7
+  - zarr
+  - numcodecs
+  - git
+  - flake8
+  - pre-commit
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - requests-mock
+  - pytest-tornasync
+  - mypy==1.7.1
+  - types-PyYAML
+  - types-requests
+  - types-toml
+  - types-urllib3
+  - pip:
+      - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
+      - msgpack-types
+      - icoscp
+      - pytest-timeout

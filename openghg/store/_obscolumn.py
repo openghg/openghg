@@ -1,14 +1,13 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -24,20 +23,6 @@ class ObsColumn(BaseStore):
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def __enter__(self) -> ObsColumn:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
-
     def read_file(
         self,
         filepath: Union[str, Path],
@@ -50,7 +35,14 @@ class ObsColumn(BaseStore):
         instrument: Optional[str] = None,
         platform: str = "satellite",
         source_format: str = "openghg",
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read column observation file
 
@@ -72,12 +64,37 @@ class ObsColumn(BaseStore):
                 - "satellite"
                 - "site"
             source_format : Type of data being input e.g. openghg (internal format)
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import ColumnTypes
-        from openghg.util import clean_string, hash_file, load_column_parser
+        from openghg.util import (
+            clean_string,
+            load_column_parser,
+            check_if_need_new_version,
+        )
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -87,6 +104,19 @@ class ObsColumn(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
         platform = clean_string(platform)
+
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
 
@@ -98,15 +128,15 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        # Load in the metadata store
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping."
-            )
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
+
+        if chunks is None:
+            chunks = {}
 
         # Define parameters to pass to the parser function
         param = {
@@ -119,6 +149,7 @@ class ObsColumn(BaseStore):
             "network": network,
             "instrument": instrument,
             "platform": platform,
+            "chunks": chunks,
         }
 
         obs_data = parser_fn(**param)
@@ -135,13 +166,39 @@ class ObsColumn(BaseStore):
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
 
+        if optional_metadata:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in obs_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
+
         data_type = "column"
         datasource_uuids = self.assign_data(
-            data=obs_data, overwrite=overwrite, data_type=data_type, required_keys=required, min_keys=3
+            data=obs_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required,
+            min_keys=3,
+            compressor=compressor,
+            filters=filters,
         )
 
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+
+        # obs_store.add_datasources(
+        #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
+        # )
+
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

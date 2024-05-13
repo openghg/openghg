@@ -1,10 +1,11 @@
-from helpers import get_bc_datapath
+import numpy as np
+import pytest
+from helpers import get_bc_datapath,clear_test_store
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions
 from openghg.standardise import standardise_bc, standardise_from_binary_data
+from openghg.store import BoundaryConditions
 from openghg.util import hash_bytes
 from xarray import open_dataset
-import numpy as np
 
 
 def test_read_data_monthly(mocker):
@@ -27,9 +28,13 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    proc_results = standardise_from_binary_data(data_type="boundary_conditions", store="user",
-                                                binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
-                                                )
+    proc_results = standardise_from_binary_data(
+        data_type="boundary_conditions",
+        store="user",
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata,
+    )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
     assert proc_results["ch4_mozart_europe"]["new"] is True
@@ -45,8 +50,8 @@ def test_read_file_monthly():
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
-        overwrite=True,
-        )
+        force=True,
+    )
 
     assert "ch4_mozart_europe" in proc_results
 
@@ -93,12 +98,13 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    standardise_bc(store="user",
-                   filepath=test_datapath,
-                   species=species,
-                   bc_input=bc_input,
-                   domain=domain,
-                   )
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -154,12 +160,13 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    standardise_bc(store="user",
-                   filepath=test_datapath,
-                   species=species,
-                   bc_input=bc_input,
-                   domain=domain,
-                   )
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -221,3 +228,56 @@ def test_bc_schema():
     assert "vmr_w" in data_vars
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_optional_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+
+    clear_test_store("user")
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    with pytest.raises(ValueError):
+        standardise_bc(
+            store="user",
+            filepath=test_datapath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            optional_metadata={"purpose":"openghg_tests", "species":"co2"},
+        )
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        optional_metadata={"project":"openghg_test", "tag":"tests"}
+    )
+
+    search_results = search(
+        species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
+    )
+
+    bc_obs = search_results.retrieve_all()
+    metadata = bc_obs.metadata
+
+    assert "project" in metadata
+    assert "tag" in metadata

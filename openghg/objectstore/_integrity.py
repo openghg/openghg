@@ -1,33 +1,60 @@
-from openghg.store.spec import define_data_type_classes
+from __future__ import annotations
+
+from collections import defaultdict
+import logging
+from typing import Optional
+
 from openghg.objectstore import get_readable_buckets
+from openghg.objectstore.metastore import open_metastore
+from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
 
 
-def integrity_check() -> None:
+logger = logging.getLogger("openghg.objectstore")
+logger.setLevel(level=logging.DEBUG)
+
+
+def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, str]]]:
     """Check the integrity of object stores.
 
+    Args:
+        raise_error: if True, raise ObjectStoreError if integrity check fails.
+        Otherwise, return a list of Datasources that failed the integrity check are returned.
+
     Returns:
-        None
+        Nested dictionaries of failed datasource UUIDs, keyed by bucket and data type, if failures
+        found, otherwise None.
     """
     from openghg.store.base import Datasource
 
     # For now loop over each of the object stores, can we somehow lock the object store?
     readable_buckets = get_readable_buckets()
-    datastore_classes = define_data_type_classes().values()
+    data_types = define_data_types()
 
+    failed_datasources = defaultdict(dict)
     for bucket in readable_buckets.values():
-        for storage_class in datastore_classes:
+        for data_type in data_types:
             # Now load the object
-            with storage_class(bucket=bucket) as sc:
+            with open_metastore(bucket=bucket, data_type=data_type) as metastore:
                 # Get all the Datasources
-                datasource_uuids = sc.datasources()
+                datasource_uuids = metastore.select("uuid")
                 # Check they all exist
+                failures = []
                 for uid in datasource_uuids:
-                    Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                    try:
+                        Datasource(bucket=bucket, uuid=uid).integrity_check()
+                    except ObjectStoreError:
+                        failures.append(uid)
 
-                metastore_uuids = [r["uuid"] for r in sc._metastore]
+                if failures:
+                    failed_datasources[bucket][data_type] = failures
 
-                if datasource_uuids != metastore_uuids:
-                    raise ObjectStoreError(
-                        f"{storage_class} - Mismatch between metastore Datasource UUIDs and {storage_class} Datasource UUIDs."
-                    )
+    if failed_datasources:
+        if raise_error:
+            raise ObjectStoreError(
+                "The following Datasources failed their integrity checks:"
+                + f"\n{dict(failed_datasources)}"
+                + "\nYour object store is corrupt. Please remove these Datasources."
+            )
+        return failed_datasources
+    return None
