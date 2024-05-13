@@ -166,20 +166,20 @@ def infer_date_range(
         if inferred_freq != null_freq:
             if input_freq != null_freq and input_freq != inferred_freq:
                 logger.warning(f"Input period: {period} does not map to inferred frequency {inferred_freq}")
-            time_value, time_unit = inferred_freq
+            time_period = inferred_freq
         else:
-            time_value, time_unit = input_freq
+            time_period = inferred_freq
 
         # Create time offset, using inferred offset
         start_date = timestamp_tzaware(time[0].values)
-        if time_value is not None:
-            time_delta = DateOffset(**{time_unit: time_value})
+        if time_period.value is not None:
+            time_delta = time_period.to_date_offset()
             end_date = timestamp_tzaware(time[-1].values) + time_delta - Timedelta(seconds=1)
         else:
             end_date = timestamp_tzaware(time[-1].values)
 
-        if time_value is not None:
-            period_str = create_frequency_str(time_value, time_unit)
+        if time_period.value is not None:
+            period_str = create_frequency_str(*time_period)
         else:
             period_str = "varies"
 
