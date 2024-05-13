@@ -62,6 +62,8 @@ class _BaseData:
         if attrs_to_check is not None:
             raise NotImplementedError("attrs_to_check not implemented yet")
 
+        sorted = False  # Check so we don't sort more than once
+
         if data is not None:
             self.data = data
         elif uuid is not None and version is not None:
@@ -80,9 +82,13 @@ class _BaseData:
 
             self.data = self._zarrstore.get(version=version)
             if slice_time:
+                # If slicing by time, this must be sorted along the time dimension
+                self.data = self.data.sortby("time")
+                sorted = True
+
                 if self.data.time.size > 1:
                     start_date = start_date - Timedelta("1s")
-                    end_date = end_date - Timedelta("1s")
+                    end_date = end_date - Timedelta("1s")  # TODO: May want to remove this as end_date is already calculated as time period - 1s, slice is also right exclusive
 
                     # TODO - I feel we should do this in a tider way
                     start_date = start_date.tz_localize(None)
@@ -94,7 +100,7 @@ class _BaseData:
                 "Must supply either data or uuid and version, cannot create an empty data object."
             )
 
-        if sort:
+        if sort and not sorted:
             try:
                 self.data = self.data.sortby("time")
             except KeyError:
