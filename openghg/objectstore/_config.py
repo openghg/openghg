@@ -80,8 +80,13 @@ def _write_metakey_config(bucket: str, metakeys: Dict) -> None:
     Returns:
         None
     """
+    try:
+        version = str(importlib.metadata.version("openghg"))
+    except importlib.metadata.PackageNotFoundError:
+        version = "UNKNOWN"
+
     config_data = {
-        "openghg_version": importlib.metadata.version("openghg"),
+        "openghg_version": version,
         "date_written": str(timestamp_now()),
         "metakeys": metakeys,
     }
