@@ -123,7 +123,7 @@ class FluxTimeseries(BaseStore):
         source = clean_string(source)
         region = clean_string(region)
         if domain:
-            region = clean_string(domain)
+            domain = clean_string(domain)
 
         if overwrite and if_exists == "auto":
             logger.warning(
