@@ -1,7 +1,7 @@
 # type: ignore
-import sys
-
+import pathlib
 import setuptools
+import sys
 
 sys.path.insert(0, ".")  # noqa
 import versioneer  # noqa
@@ -14,6 +14,17 @@ files = ["openghg/*"]
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
+
+def create_package_data():
+    """Allows us to add all of the contents of the data folder
+    as setuptools doesn't support recursive globbing. If we move to
+    pyproject.toml properly we may be able to remove this.
+    """
+    data_files = [p for p in pathlib.Path("data").rglob("*")]
+    data_files.append("py.typed")
+    return data_files
+
+
 setuptools.setup(
     version=versioneer.get_version(),
     install_requires=requirements,
@@ -25,7 +36,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/openghg/openghg",
     packages=setuptools.find_packages(include=["openghg", "openghg.*"]),
-    package_data={"": ["data/*", "py.typed"]},
+    package_data={"": create_package_data()},
     classifiers=[
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
