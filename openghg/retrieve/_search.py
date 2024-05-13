@@ -205,14 +205,7 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    if high_time_resolution:
-        warnings.warn(
-            "This argument is deprecated and will be replaced in future versions with time_resolved.",
-            DeprecationWarning,
-        )
-        time_resolved = high_time_resolution
-
-    args = {
+    args: Dict[str, Any] = {
         "site": site,
         "inlet": inlet,
         "height": height,
@@ -225,7 +218,6 @@ def search_footprints(
         "end_date": end_date,
         "period": period,
         "continuous": continuous,
-        "time_resolved": time_resolved,
         "high_spatial_resolution": high_spatial_resolution,
         "short_lifetime": short_lifetime,
     }
@@ -234,6 +226,23 @@ def search_footprints(
     for k in ["start_date", "end_date"]:
         if args[k] is not None:
             args[k] = str(args[k])
+
+    # Either (or both) of 'high_time_resolution' and 'time_resolved' may be in the metatore,
+    # so both are allowed in search but deprecation warning passed.
+    # - ensure passing time_resolved=True gives back all relevant footprints.
+    if high_time_resolution is not None:
+        warnings.warn(
+            "The 'high_time_resolution' argument is deprecated and will be replaced in future versions with 'time_resolved'.",
+            DeprecationWarning,
+        )
+        if time_resolved is None:
+            time_resolved = high_time_resolution
+
+    high_time_resolution = time_resolved  # Includes at the moment for backwards compatability
+    args["option_time_resolved"] = {
+        "time_resolved": time_resolved,
+        "high_time_resolution": high_time_resolution,
+    }
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
@@ -376,6 +385,15 @@ def search(**kwargs: Any) -> SearchResults:
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
 
+    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
+     - None - argument will be ignored.
+     - list/tuple - an OR search will be created for the argument and each of the values.
+     - dict - an OR search will be created for the key, value pairs.
+       - Note: in this case the name of argument itself will be ignored.
+     - str/other - argument used directly.
+
+    All input search values are formatted (openghg.utils.clean_string).
+
     This function detects the running environment and routes the call
     to either the cloud or local search function.
 
@@ -423,6 +441,15 @@ def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
+    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
+     - None - argument will be ignored.
+     - list/tuple - an OR search will be created for the argument and each of the values.
+     - dict - an OR search will be created for the key, value pairs.
+       - Note: in this case the name of argument itself will be ignored.
+     - str/other - argument used directly.
+
+    All input search values are formatted (openghg.utils.clean_string).
+
     This function will only perform a "local" search. It may be used either by a cloud function
     or when using OpenGHG locally, it does no environment detection.
     We suggest using the search function that takes care of everything for you.
@@ -459,8 +486,24 @@ def _base_search(**kwargs: Any) -> SearchResults:
             "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
         )
 
-    # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
+    # Select and format the search terms
+    # - ignore any kwargs which are None
+    # - clean search terms directly or within data structures
+    search_kwargs = {}
+    for k, v in kwargs.items():
+        if isinstance(v, (list, tuple)):
+            v = [clean_string(value) for value in v if value is not None]
+            if not v:  # Check empty list
+                v = None
+        elif isinstance(v, dict):
+            v = {key: clean_string(value) for key, value in v.items() if value is not None}
+            if not v:  # Check empty dict
+                v = None
+        else:
+            v = clean_string(v)
+
+        if v is not None:
+            search_kwargs[k] = v
 
     # Species translation
     species = search_kwargs.get("species")
@@ -521,27 +564,33 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         del search_kwargs["end_date"]
 
-    # Here we process the kwargs and flatten out the lists so
-    # we create the combinations of search queries correctly
-    a_list = {}
-    not_a_list = {}
+    # Here we process the kwargs, allowing us to create the correct combinations of search queries.
+    # To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
+    # - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
+    # - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
+    # - we then expect searches for all permutations across both lists.
+    multiple_options = []
+    single_options = {}
     for k, v in search_kwargs.items():
         if isinstance(v, (list, tuple)):
-            a_list[k] = v
+            expand_key_values = [(k, value) for value in v]
+            multiple_options.append(expand_key_values)
+        elif isinstance(v, dict):
+            expand_key_values = list(v.items())
+            multiple_options.append(expand_key_values)
         else:
-            not_a_list[k] = v
+            single_options[k] = v
 
-    # If we have lists of values to find we need to flatten them out
     expanded_search = []
-    if a_list:
-        keys, values = zip(*a_list.items())
-        for v in itertools.product(*values):
-            d = dict(zip(keys, v))
-            if not_a_list:
-                d.update(not_a_list)
+    if multiple_options:
+        # Ensure that all permutations of the search options are created.
+        for kv_pair in itertools.product(*multiple_options):
+            d = dict(kv_pair)
+            if single_options:
+                d.update(single_options)
             expanded_search.append(d)
     else:
-        expanded_search.append(not_a_list)
+        expanded_search.append(single_options)
 
     general_metadata = {}
 
