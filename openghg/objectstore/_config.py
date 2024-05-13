@@ -1,12 +1,11 @@
 import logging
 import importlib
-import importlib.resources
 from pathlib import Path
 import toml
 from typing import Dict
 
-import openghg.data
 from openghg.types import ObjectStoreError
+from openghg.util import timestamp_now
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handlerF
@@ -42,7 +41,7 @@ def get_metakey_defaults() -> Dict:
     """
     # We use importlib here to allow us to get the path of the file independent of how OpenGHG
     # is installed
-    defaults_file = importlib.resources.files(openghg.data) / "config" / "objectstore" / "defaults.toml"
+    defaults_file = importlib.resources.files("openghg.data") / "config" / "objectstore" / "defaults.toml"
     defaults = toml.loads(defaults_file.read_text())
     return defaults
 
@@ -66,15 +65,35 @@ def create_default_config(bucket: str) -> None:
     db_config_folderpath.mkdir()
 
     default_keys = get_metakey_defaults()
-    # Now we create the default metadata keys file and write out the defaults
-    metadata_keys_filepath = _get_metakeys_filepath(bucket=bucket)
-    metadata_keys_filepath.write_text(toml.dumps(default_keys))
 
-    # # Write the version this config folder was created by
-    # version_str = "1"
-    # version_filepath = config_folderpath.joinpath("version.toml")
-    # version_data = {"config_version": version_str, "file_created": str(timestamp_now())}
-    # version_filepath.write_text(toml.dumps(version_data))
+    # Now we create the default metadata keys file and write out the defaults
+    _write_metakey_config(bucket=bucket, metakeys=default_keys)
+
+
+def _write_metakey_config(bucket: str, metakeys: Dict) -> None:
+    """Write the metakeys data to file, adding the version of OpenGHG
+    it was written by and a timestamp.
+
+    Args:
+        bucket: Path to object store
+        metakeys: Dictionary of metakeys data
+    Returns:
+        None
+    """
+    config_data = {
+        "openghg_version": importlib.metadata.version("openghg"),
+        "date_written": str(timestamp_now()),
+        "metakeys": metakeys,
+    }
+
+    metakey_path = _get_metakeys_filepath(bucket=bucket)
+    config_folder = metakey_path.parent
+
+    if not config_folder.exists():
+        logger.debug(f"Creating folder at {config_folder}")
+        config_folder.mkdir(parents=True)
+
+    metakey_path.write_text(toml.dumps(config_data))
 
 
 def get_metakeys(bucket: str) -> Dict[str, Dict]:
@@ -87,13 +106,12 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
     """
     metakey_path = _get_metakeys_filepath(bucket=bucket)
 
-    # QUESTION - do this automatically or get the user to create it manually / by command line interface
     if not metakey_path.exists():
-        # logger.debug(f"Creating default metakeys file at {metakey_path}.")
-        # create_default_config(bucket=bucket)
-        raise ValueError(f"No metakey config file found at {metakey_path}")
+        logger.debug(f"Creating default metakeys file at {metakey_path}.")
+        create_default_config(bucket=bucket)
 
-    return toml.loads(metakey_path.read_text())
+    config_data = toml.loads(metakey_path.read_text())
+    return config_data["metakeys"]
 
 
 def write_metakeys(bucket: str, metakeys: Dict) -> None:
@@ -117,11 +135,4 @@ def write_metakeys(bucket: str, metakeys: Dict) -> None:
             + f"We're missing: {missing_keys}"
         )
 
-    metakey_path = _get_metakeys_filepath(bucket=bucket)
-    config_folder = metakey_path.parent
-
-    if not config_folder.exists():
-        logger.debug(f"Creating folder at {config_folder}")
-        config_folder.mkdir(parents=True)
-
-    metakey_path.write_text(toml.dumps(metakeys))
+    _write_metakey_config(bucket=bucket, metakeys=metakeys)
