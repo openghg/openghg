@@ -391,6 +391,7 @@ class Footprints(BaseStore):
         # Intermediate step between raw and final data
         parsed_data = parser_fn(filepath, chunks)
 
+        final_data = []
         # Final data to be added to the object store
         for dataset, metadata in parsed_data:
             dataset_time = dataset["time"]
@@ -436,9 +437,16 @@ class Footprints(BaseStore):
 
             # Now we parse the metadata to get the final product
 
-            # TODO - add checks for the optinal metadata
-            # if optional_metadata is not None:
-            #     metadata.update(optional_metadata)
+            if optional_metadata is not None:
+                for key, value in optional_metadata.items():
+                    if key in metadata:
+                        logger.warning(f"Key shadows that of parsed metadata {key}, skipping.")
+                        continue
+                    else:
+                        metadata[key] = value
+
+            final_metadata = self.parse_metadata(**metadata)
+            final_data.append((dataset, final_metadata))
 
         data_type = "footprints"
         # TODO - filter options
