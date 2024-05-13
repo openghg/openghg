@@ -88,7 +88,8 @@ class _BaseData:
 
                 if self.data.time.size > 1:
                     start_date = start_date - Timedelta("1s")
-                    end_date = end_date - Timedelta("1s")  # TODO: May want to remove this as end_date is already calculated as time period - 1s, slice is also right exclusive
+                    # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
+                    end_date = end_date - Timedelta("1s")
 
                     # TODO - I feel we should do this in a tider way
                     start_date = start_date.tz_localize(None)
