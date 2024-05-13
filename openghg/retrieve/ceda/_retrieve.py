@@ -255,32 +255,32 @@ def local_retrieve(
 
     # If we're going to be using site, species and inlet here we should check that that
     # information is in the metadata
-    if kwargs["data_type"] != "column":
-        if not {"site", "inlet"} <= metadata.keys():
-            site_name = metadata["long_name"]
-            site_code = site_code_finder(site_name=site_name)
 
-            if site_code is not None:
-                metadata["site"] = site_code
-            else:
-                if additional_metadata:
-                    try:
-                        metadata["site"] = additional_metadata["site"]
-                    except KeyError:
-                        logger.error("Unable to read site from additional_metadata.")
-                        return None
-                else:
-                    logger.error("Error: cannot find site code, please pass additional metadata.")
-                    return None
+    if not {"site", "inlet"} <= metadata.keys():
+        site_name = metadata["station_long_name"]
+        site_code = site_code_finder(site_name=site_name)
 
-            try:
-                metadata["inlet"] = f"{int(metadata['inlet_height_magl'])}m"
-            except KeyError:
+        if site_code is not None:
+            metadata["site"] = site_code
+        else:
+            if additional_metadata:
                 try:
-                    metadata["inlet"] = additional_metadata["inlet"]
+                    metadata["site"] = additional_metadata["site"]
                 except KeyError:
-                    logger.error("Unable to read inlet from data or additional_metadata.")
+                    logger.error("Unable to read site from additional_metadata.")
                     return None
+            else:
+                logger.error("Error: cannot find site code, please pass additional metadata.")
+                return None
+
+        try:
+            metadata["inlet"] = f"{int(metadata['inlet_height_magl'])}m"
+        except KeyError:
+            try:
+                metadata["inlet"] = additional_metadata["inlet"]
+            except KeyError:
+                logger.error("Unable to read inlet from data or additional_metadata.")
+                return None
 
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
