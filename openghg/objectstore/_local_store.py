@@ -106,7 +106,7 @@ def get_tutorial_store_path() -> Path:
     Returns:
         pathlib.Path: Path of tutorial store
     """
-    return Path.home() / "openghg_tutorial_store"
+    return get_user_objectstore_path() / "tutorial_store"
 
 
 # @lru_cache
