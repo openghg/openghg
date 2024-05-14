@@ -136,7 +136,7 @@ def infer_date_range(
                 f"Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
             )
 
-        # Create time offset and use to create start and end datetime
+        # Create time offset and use to create start and end datetimetime
         time_delta = relative_time_offset(unit=time_unit, value=time_value)
         start_date = timestamp_tzaware(time.values[0])
         end_date = start_date + time_delta - Timedelta(seconds=1)

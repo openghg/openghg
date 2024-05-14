@@ -757,6 +757,10 @@ def create_frequency_str(
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
+    if "-" in unit:
+        if unit.startswith("Y"):
+            unit = "years"
+
     if value == 1:
         frequency_str = f"{value} {unit.rstrip('s')}"
     else:
