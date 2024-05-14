@@ -5,13 +5,62 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
+
+### Added
+
+- Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
+- Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
+- Argument `time_resolved` is added as phase 1 change for `high_time_resolution`, also metadata is updated and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
+- Added explicit backwards compatability when searching previous object stores containing the `high_time_resolution` keyword rather than `time_resolved` - [PR #990](https://github.com/openghg/openghg/pull/990)
+- Added ability to pass additional tags as optional metadata through `standardising_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
+
+### Fixed
+
+- Problem where the zarr store check raised an error for empty stores, preventing new zarr stores from being created - [#PR 993](https://github.com/openghg/openghg/pull/993) 
+- Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
+- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
+- Added check to verify if `obs` and `footprint` have overlapping time coordinates when creating a `ModelScenario` object, if not then raise `ValueError` - [PR #954](https://github.com/openghg/openghg/pull/954)
+- Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
+
+## [0.8.0] - 2024-03-19
+
+This version brings a breaking change with the move to use the [Zarr](https://zarr.dev/) file format for data storage. This means that object stores created with previous versions of OpenGHG will need to be repopulated to use this version. You should notice improvements in time taken for standardisation, memory consumption and disk usage. With the use of Zarr comes the ability for the user to control the way which data is processed and stored. Please see [the documentation](https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking) for more on this.
+
+### Added
+
+- Added option to pass `store` argument to `ModelScenario` init method. [PR #928](https://github.com/openghg/openghg/pull/928)
+
+### Fixed
+
+- Issue caused when passing a list of files to be processed. If OpenGHG had seen some of the files before it would refuse to process any of them - [PR #890](https://github.com/openghg/openghg/pull/890)
+
+### Changed
+
+- Moved to store data in [Zarr](https://github.com/zarr-developers/zarr-python) stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
+- standardise_footprint was updated to allow a source_format input to be specified. This currently only supports "acrg_org" type but can be expanded upon [PR #914](https://github.com/openghg/openghg/pull/914).
+- Internal format for "footprint" data type was updated to rename meteorological variable names to standard names [PR #918](https://github.com/openghg/openghg/pull/918).
+- Standardise_footprint now uses the meterological model input as a distinguishing keyword when adding data. [PR #955](https://github.com/openghg/openghg/pull/955).
+- Meterological model input renamed from `metmodel` to `met_model` [PR #957](https://github.com/openghg/openghg/pull/957).
+- Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
+
+### Added
+
+- More more explanation regarding use of `search_*` and `get_*` function in tutorial 1 [PR #952](https://github.com/openghg/openghg/pull/952)
+
+## [0.7.1] - 2024-03-01
 
 ## Added
 
 - Added `GCWerks_NC` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive [git repository](https://github.com/mrghg/agage-archive).
 - Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
+- Missing requirement for filelock package added to conda environment file [PR #857](https://github.com/openghg/openghg/pull/857)
+- Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)
 - Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
+
+### Fixed
+
+- Bug fix for passing calibration_scale as optional parameter to the parser function. [PR #872](https://github.com/openghg/openghg/pull/872)
 
 ## [0.7.0] - 2023-12-15
 
@@ -42,6 +91,7 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
+
 
 ## [0.6.2] - 2023-08-07
 

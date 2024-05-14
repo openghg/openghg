@@ -6,7 +6,9 @@ import pytest
 import xarray as xr
 from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.dataobjects import ObsData
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
+from helpers import clear_test_stores
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
 
@@ -102,13 +104,18 @@ def test_scenario_infer_inputs_ch4():
     assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
 
     # Obs data - values
-    obs_mf = obs_data["mf"]
+    obs_mf = obs_data["mf"].compute()
+
     assert np.isclose(obs_mf[0], 1915.11)
     assert np.isclose(obs_mf[-1], 1942.41)
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
+
+    print(model_scenario.footprint.data.time[0])
+    print(model_scenario.footprint.data.time[-1])
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2012-08-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2012-08-31T22:00:00")
 
@@ -187,6 +194,7 @@ def test_scenario_infer_inputs_co2():
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2014-07-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2014-07-04T00:00:00")  # Test file - reduced time axis
 
@@ -603,7 +611,6 @@ def obs_ch4_dummy():
      - Hourly frequency for 2012-01-01 - 2012-01-02 (48 time points)
      - "mf" values are from 1, 48
     """
-    from openghg.dataobjects import ObsData
 
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
 
@@ -615,7 +622,12 @@ def obs_ch4_dummy():
     inlet = "10m"
     sampling_period = "60.0"
 
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
@@ -624,6 +636,7 @@ def obs_ch4_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -834,6 +847,42 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
+def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
+    """Tests if disjoint timeseries are existing in obs and footprint data
+    It raises error"""
+
+    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="H")
+
+    ntime = len(time)
+    values = np.arange(0, ntime, 1)
+
+    species = "ch4"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
+
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+
+    metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
+
+    obsdata = ObsData(data=data, metadata=metadata)
+
+    model_scenario = ModelScenario(
+        obs=obsdata, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
+    )
+
+    with pytest.raises(ValueError):
+        model_scenario.combine_obs_footprint()
+
+
 def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
@@ -902,7 +951,6 @@ def obs_co2_dummy():
      - 30-min frequency for 2012-01-01 (48 time points)
      - "mf" values are from 1, 48
     """
-    from openghg.dataobjects import ObsData
 
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-01T23:30:00", freq="30min")
 
@@ -923,6 +971,7 @@ def obs_co2_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 

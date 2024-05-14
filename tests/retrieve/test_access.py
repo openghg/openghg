@@ -3,14 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import (
-    attributes_checker_get_obs,
-    call_function_packager,
-    get_emissions_datapath,
-    get_footprint_datapath,
-    get_surface_datapath,
-    metadata_checker_obssurface,
-)
+from helpers import call_function_packager
 from openghg.dataobjects import ObsData
 from openghg.retrieve import (
     get_bc,
@@ -275,7 +268,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[0] == 1849.814
     assert sliced_mhd_data.mf[-1] == 1891.094
 
-
+@pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
@@ -341,6 +334,18 @@ def test_get_flux():
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01")
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
 def test_get_flux_no_result():
     """Test sensible error message is being returned when no results are found
     with input keywords for get_flux function"""
@@ -390,11 +395,11 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert footprint.time[0] == Timestamp("2020-08-01")
     assert footprint.time[-1] == Timestamp("2020-08-01")
 
-    assert metadata["max_longitude"] == pytest.approx(float(footprint.lon.max()))
-    assert metadata["min_longitude"] == pytest.approx(float(footprint.lon.min()))
-    assert metadata["max_latitude"] == pytest.approx(float(footprint.lat.max()))
-    assert metadata["min_latitude"] == pytest.approx(float(footprint.lat.min()))
-    assert metadata["high_time_resolution"] == False
+    assert metadata["max_longitude"] == pytest.approx(float(footprint["lon"].max()))
+    assert metadata["min_longitude"] == pytest.approx(float(footprint["lon"].min()))
+    assert metadata["max_latitude"] == pytest.approx(float(footprint["lat"].max()))
+    assert metadata["min_latitude"] == pytest.approx(float(footprint["lat"].min()))
+    assert metadata["time_resolved"] == "false"
 
 
 def test_get_footprint_no_result():

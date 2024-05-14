@@ -38,5 +38,5 @@ jobs:
         run: conda develop .
         shell: micromamba-shell {0}
       - name: Run the tests
-        run: pytest tests/
+        run: pytest -v tests/
         shell: micromamba-shell {0}
