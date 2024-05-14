@@ -17,6 +17,7 @@ from openghg.objectstore import (
     set_object_from_json,
     set_compressed_file,
     get_compressed_file,
+    delete_objects,
 )
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
@@ -222,6 +223,28 @@ class BaseStore:
         """
         for file_hash, filepath in hash_data.items():
             self.store_original_file(file_hash=file_hash, filepath=filepath)
+
+    def delete_original_file(self, file_hash: str) -> None:
+        """Delete original files stored in the object store
+
+        Args:
+            file_hash: Hash of file to delete
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}"
+        delete_objects(bucket=self._bucket, prefix=key)
+
+    def delete_original_files(self, file_hashes: Sequence) -> None:
+        """Delete original files stored in the object store
+
+        Args:
+            file_hashes: List of file hashes for files to delete
+        Returns:
+            None
+        """
+        for file_hash in file_hashes:
+            self.delete_original_file(file_hash)
 
     def assign_data(
         self,

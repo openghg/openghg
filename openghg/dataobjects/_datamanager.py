@@ -4,6 +4,7 @@ import logging
 from typing import DefaultDict, Dict, List, Set, Optional, Union
 
 from openghg.store.base import Datasource
+from openghg.store import get_data_class
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
@@ -239,21 +240,45 @@ class DataManager:
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
+        dclass = get_data_class(data_type=dtype)
 
-        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
-            for uid in uuid:
-                # First remove the data from the metadata store
-                metastore.delete({"uuid": uid})
+        with dclass(bucket=self._bucket) as storage_class:
+            metastore = storage_class._metastore
+            metastore.acquire_lock()
+            try:
+                # Make sure we delete the hashes and original files from the object
+                # store as well
+                for uid in uuid:
+                    # First remove the data from the metadata store
+                    metastore.delete({"uuid": uid})
 
-                # Delete all the data associated with a Datasource and the
-                # data in its zarr store.
-                d = Datasource(bucket=self._bucket, uuid=uid)
-                d.delete_all_data()
+                    # Delete all the data associated with a Datasource and the
+                    # data in its zarr store.
+                    d = Datasource(bucket=self._bucket, uuid=uid)
 
-                # Then delete the Datasource itself
-                delete_object(bucket=self._bucket, key=d.key())
+                    # Get all the file hashes out of the metadata
+                    file_hashes = []
+                    for version_data in d._metadata["original_file_hashes"].values():
+                        for file_hash in version_data:
+                            file_hashes.append(file_hash)
 
-                logger.info(f"Deleted Datasource with UUID {uid}.")
+                    # Delete all the original files associated with this Datasource
+                    storage_class.delete_original_files(file_hashes=file_hashes)
+
+                    # Now remove the file hashes from the storage class
+                    unique_hashes = set(file_hashes)
+                    storage_class._file_hashes = {
+                        k: v for k, v in storage_class._file_hashes.items() if k not in unique_hashes
+                    }
+
+                    d.delete_all_data()
+
+                    # Then delete the Datasource itself
+                    delete_object(bucket=self._bucket, key=d.key())
+
+                    logger.info(f"Deleted Datasource with UUID {uid}.")
+            finally:
+                metastore.release_lock()
 
 
 def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:

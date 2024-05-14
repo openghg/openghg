@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 from helpers import (
     clear_test_stores,
@@ -11,6 +12,7 @@ from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_footprint, standardise_surface
 from openghg.store.base import Datasource
+from openghg.store import Footprints
 from openghg.types import ObjectStoreError
 
 
@@ -80,6 +82,10 @@ def test_delete_footprint_data(footprint_read):
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         uuid = metastore.select("uuid")[0]
 
+    fp = Footprints(bucket=bucket)
+
+    assert fp._file_hashes == {"8be7399b13b47fa43cda9437540962b894f2a29d": "footprint_test.nc"}
+
     ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
@@ -88,6 +94,13 @@ def test_delete_footprint_data(footprint_read):
 
     # Assert there are files in the zarr store
     assert ds._store
+
+    # Make sure the original file is stored
+    hashes = ds._metadata["original_file_hashes"]["v1"]
+    test_file_hash = next(iter(hashes))
+    original_file_key = f"Footprints/original_files/{test_file_hash}/footprint_test.nc"
+
+    assert exists(bucket=bucket, key=key)
 
     zarr_store_key = ds._store.store_key(version="v1")
 
@@ -100,7 +113,15 @@ def test_delete_footprint_data(footprint_read):
     with pytest.raises(ObjectStoreError):
         Datasource(bucket=bucket, uuid=uuid)
 
+    # Ensure the zarr store has been deleted
     assert not exists(bucket=bucket, key=zarr_store_key)
+
+    # Ensure the original file has been deleted
+    assert not exists(bucket=bucket, key=original_file_key)
+
+    # Load Footprints again
+    fp = Footprints(bucket=bucket)
+    assert fp._file_hashes == {}
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         assert metastore.search({"uuid": uuid}) == []
