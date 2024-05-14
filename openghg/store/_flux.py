@@ -328,7 +328,7 @@ class Flux(BaseStore):
         edgar_name = f"edgar_{database}"
         # Now this isn't the hashes of the files but could serve a similar purpose
         # We don't need to hash all the files in the database
-        file_hashes = {edgar_name: edgar_database_size}
+        database_identifier = {edgar_name: edgar_database_size}
 
         # Define parameters to pass to the parser function from kwargs
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
@@ -357,7 +357,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
-            file_hashes=file_hashes,
+            file_hashes=database_identifier,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
