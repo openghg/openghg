@@ -620,6 +620,7 @@ class ObsSurface(BaseStore):
             keys_to_process -= file_hashes_to_compare
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
+        data_hashes = dict(zip(to_process.keys(), keys_to_process))
 
         if required_metakeys is None:
             required_metakeys = (
@@ -641,7 +642,7 @@ class ObsSurface(BaseStore):
         datasource_uuids = self.assign_data(
             data=to_process,
             # As we don't have original files to store we'll just say not set here
-            file_hashes={},
+            file_hashes=data_hashes,
             if_exists=if_exists,
             data_type=data_type,
             required_keys=required_metakeys,
