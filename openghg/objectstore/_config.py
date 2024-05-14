@@ -1,6 +1,7 @@
 import logging
 import importlib
 from pathlib import Path
+import pkgutil
 import toml
 from typing import Dict
 
@@ -41,9 +42,9 @@ def get_metakey_defaults() -> Dict:
     """
     # We use importlib here to allow us to get the path of the file independent of how OpenGHG
     # is installed
-    defaults_file = importlib.resources.files("openghg.data") / "config" / "objectstore" / "defaults.toml"
-    defaults = toml.loads(defaults_file.read_text())
-    return defaults
+
+    toml_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.toml")
+    return toml.loads(toml_bytes.decode(encoding="utf-8"))
 
 
 def create_default_config(bucket: str) -> None:
