@@ -94,7 +94,7 @@ def standardise_surface(
         calibration_scale: Calibration scale for data
         measurement_type: Type of measurement e.g. insitu, flask
         verify_site_code: Verify the site code
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         store: Name of object store to write to, required if user has access to more than one
             writable store
