@@ -7,6 +7,7 @@ import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
 import inspect
+from openghg.standardise.meta import assign_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
@@ -340,7 +341,13 @@ class ObsSurface(BaseStore):
 
             # Call appropriate standardisation function with input parameters
             data = parser_fn(**input_parameters)
-
+            data = assign_attributes(
+                data=data,
+                site=site,
+                network=network,
+                update_mismatch=update_mismatch,
+                site_filepath=site_filepath,
+            )
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
                 species = key.split("_")[0]
