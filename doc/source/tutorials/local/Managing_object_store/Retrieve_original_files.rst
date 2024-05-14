@@ -106,7 +106,7 @@ hashes for that version
 Export original file
 --------------------
 
-How we have the hash data we can retrieve the files from the object store. To export the files
+Now we have the hash data we can retrieve the files from the object store. To export the files
 we'll need a folder to export them to. Let's create a folder in our home directory for this.
 
 .. code-block:: ipython3
