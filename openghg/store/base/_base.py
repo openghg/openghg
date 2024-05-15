@@ -43,7 +43,7 @@ class BaseStore:
         self._creation_datetime = str(timestamp_now())
         self._stored = False
         # Hashes of previously uploaded files
-        self._file_hashes: Dict[str, str] = {}
+        self._file_hashes: Dict[str, List] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
         # Where we'll store this object's metastore
@@ -110,16 +110,20 @@ class BaseStore:
     def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
 
-    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+    def store_hashes(self, hashes: Dict[str, Path], datasource_uuids: Dict) -> None:
         """Store the hashes of files we've seen before
 
         Args:
             hahes: Dictionary of hashes
+            datasource_uuids: UUIDs of Datasources these files have been added to
         Returns:
             None
         """
-        name_only = {k: v.name for k, v in hashes.items()}
-        self._file_hashes.update(name_only)
+        hash_data = {}
+        for filehash in hashes:
+            hash_data[filehash] = [v["uuid"] for v in datasource_uuids.values()]
+
+        self._file_hashes.update(hash_data)
 
     def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
@@ -245,6 +249,39 @@ class BaseStore:
         """
         for file_hash in file_hashes:
             self.delete_original_file(file_hash)
+
+    # TODO - need a better name for this
+    def delete_records(self, file_hashes: Sequence, datasource_uuid: str) -> None:
+        """Checks the number of Datasources associated with a file, if only this
+        Datasource
+
+        Args:
+            file_hashes: Hashes of files to remove
+            datasource_uuid: UUID of Datasource associated with files
+        Returns:
+            None
+        """
+        to_delete = []
+        for filehash in file_hashes:
+            records = self._file_hashes[filehash].copy()
+            if len(records) == 1:
+                # We shouldn't hit this but we'll check
+                if datasource_uuid not in records:
+                    raise ValueError(
+                        "Mismatch in UUID of Datasource stored for this"
+                        + f"filehash ({next(iter(records))} and the one given {datasource_uuid})"
+                    )
+
+                to_delete.append(filehash)
+            else:
+                records.remove(datasource_uuid)
+                self._file_hashes[filehash] = records
+
+        for filehash in to_delete:
+            self._file_hashes.pop(filehash)
+            # We only delete the original file if there are no longer
+            # any Datasources containing its data
+            self.delete_original_file(filehash)
 
     def assign_data(
         self,

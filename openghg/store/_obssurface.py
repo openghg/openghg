@@ -651,7 +651,7 @@ class ObsSurface(BaseStore):
             filters=filters,
         )
 
-        self.store_hashes(hashes=hashes)
+        self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
 
         return datasource_uuids
 
