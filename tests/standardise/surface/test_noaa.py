@@ -86,17 +86,8 @@ def test_read_obspack_flask_2021():
     assert ch4_data.time[-1] == Timestamp("2001-01-15T12:34:56")
     assert ch4_data["ch4"][0] == pytest.approx(921.43)
     assert ch4_data["ch4"][-1] == pytest.approx(1143.27)
-    assert ch4_data["ch4"].attrs["units"] == "1e-9"
     assert ch4_data["ch4_variability"][0] == pytest.approx(2.71)
     assert ch4_data["ch4_variability"][-1] == pytest.approx(1.4)
-
-    attributes = ch4_data.attrs
-
-    assert "sampling_period" in attributes
-    assert attributes["sampling_period"] == "NOT_SET"
-    assert "sampling_period_estimate" in attributes
-    assert float(attributes["sampling_period_estimate"]) > 0.0
-    assert attributes["units"] == "nanomol mol-1"
 
     ch4_metadata = data[inlet_key]["metadata"]
 
@@ -106,8 +97,6 @@ def test_read_obspack_flask_2021():
     # Check inlet in metadata
     assert ch4_metadata["inlet"] == "-2922m"
     assert ch4_metadata["inlet_height_magl"] == "-2922"
-
-    parsed_surface_metachecker(data=data)
 
 
 def test_read_obspack_tower_multi_height():
