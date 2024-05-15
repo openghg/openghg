@@ -299,7 +299,6 @@ def _read_obspack(
     Returns:
         dict: Dictionary of results
     """
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
 
     valid_types = ("flask", "insitu", "pfp")
@@ -402,14 +401,6 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
-    gas_data = assign_attributes(
-        data=gas_data,
-        site=site,
-        network=network,
-        update_mismatch=update_mismatch,
-        site_filepath=site_filepath,
-    )
-
     return gas_data
 
 
@@ -445,7 +436,6 @@ def _read_raw_file(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.standardise.meta import assign_attributes
 
     # TODO: Added this for now to make sure inlet is specified but may be able to remove
     # if this can be derived from the data format.
@@ -466,10 +456,6 @@ def _read_raw_file(
         species=species,
         measurement_type=measurement_type,
         sampling_period=sampling_period,
-    )
-
-    gas_data = assign_attributes(
-        data=gas_data, site=site, network="NOAA", update_mismatch=update_mismatch, site_filepath=site_filepath
     )
 
     return gas_data
