@@ -2,24 +2,24 @@
 from typing import Dict
 
 from openghg.dataobjects import SearchResults
+from openghg.dataobjects import ObsData
 
 
-def parsed_surface_metachecker(data: Dict) -> None:
-    """Checks the metadata and attributes for data stored in a dictionary of the type
-    returned from the standardisation functions such as parse_crds. This is a dictionary
-    keyed by species name with metadata and data sub-keys.
+def parsed_surface_metachecker(data: ObsData, species = str) -> None:
+    """Checks the metadata and attributes for data stored in object stores
+    returned after standardising and retrieving from the object stores using search_*.
 
     Args:
         data: Dictionary of gas data
     Returns:
         None
     """
-    for species, gas_data in data.items():
-        metadata = gas_data["metadata"]
-        attributes = gas_data["data"].attrs
 
-        assert metadata_checker_obssurface(metadata=metadata, species=species)
-        assert attributes_checker_obssurface(attrs=attributes, species=species)
+    attributes = data.data.attrs
+    metadata = data.metadata
+
+    assert metadata_checker_obssurface(metadata=metadata, species=species)
+    assert attributes_checker_obssurface(attrs=attributes, species=species)
 
 
 def metadata_checker_obssurface(metadata: Dict, species: str) -> bool:
