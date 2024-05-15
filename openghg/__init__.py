@@ -69,7 +69,7 @@ logger.addHandler(fileHandler)
 
 # Create console handler - set to WARNING (lower level)
 consoleHandler = _RichHandler()
-consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
 consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
