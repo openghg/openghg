@@ -222,5 +222,5 @@ def parse_openghg(
             )
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
-    
+
     return gas_data
