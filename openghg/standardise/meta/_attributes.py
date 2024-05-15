@@ -29,7 +29,7 @@ def assign_attributes(
     to the Datasource allowing more detailed searching of data.
 
     If accessing underlying stored site or species definitions, this will
-    be accessed from the openghg/supplementary_data repository by default.
+    be accessed from the openghg/openghg_defs repository by default.
 
     Args:
         data: Dictionary containing data, metadata and attributes
@@ -115,7 +115,7 @@ def get_attributes(
     Attributes of the xarray DataSet are modified, and variable names are changed
 
     If accessing underlying stored site or species definitions, this will
-    be accessed from the openghg/supplementary_data repository by default.
+    be accessed from the openghg/openghg_defs repository by default.
 
     Variable naming related to species name will be defined using
     define_species_label() function.
@@ -427,7 +427,7 @@ def _site_info_attributes(
     else:
         logger.info(
             f"We haven't seen site {site} before, please let us know so we can update our records."
-            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/supplementary_data"
+            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/openghg_defs"
         )
         # TODO - log not seen site message here
         # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
