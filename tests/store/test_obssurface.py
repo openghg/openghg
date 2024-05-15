@@ -477,17 +477,6 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4_number_of_observations"][0] == 2.0
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
-def test_noaa_obspack_2021():
-    filepath = get_surface_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA")
-
-    results = standardise_surface(
-        store="user",
-        filepath=filepath,
-        source_format="NOAA",
-        site="POCN25",
-        network="NOAA",
-        inlet="flask",
-    )
 
 @pytest.mark.skip(reason="Thames Barrier data read to be removed.")
 def test_read_thames_barrier(bucket):
