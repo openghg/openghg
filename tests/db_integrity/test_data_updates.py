@@ -34,7 +34,7 @@ def flux_data_read(force=False):
         species="ch4",
         source=source1,
         domain=domain,
-        high_time_resolution=False,
+        time_resolved=False,
         force=force,
         store=store,
     )
@@ -48,7 +48,7 @@ def test_database_update_repeat():
     # Attempt to add same data to the database twice
     flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
     args = (flux_datapath1, "ch4", "anthro", "EUROPE")
-    kwargs = {"store": "user", "high_time_resolution": False, "store": "user"}
+    kwargs = {"store": "user", "time_resolved": False, "store": "user"}
 
     standardise_flux(*args, **kwargs)
     standardise_flux(*args, **kwargs)
