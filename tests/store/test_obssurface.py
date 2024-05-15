@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
+from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath, parsed_surface_metachecker
 from openghg.objectstore import (
     exists,
     get_bucket,
@@ -461,6 +461,10 @@ def test_read_noaa_metastorepack(bucket):
         overwrite=True,
     )
 
+    noaa_data = search_surface().retrieve_all()
+
+    parsed_surface_metachecker(data=noaa_data, species = noaa_data.metadata["species"])
+
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
     ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
@@ -473,6 +477,17 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4_number_of_observations"][0] == 2.0
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
+def test_noaa_obspack_2021():
+    filepath = get_surface_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA")
+
+    results = standardise_surface(
+        store="user",
+        filepath=filepath,
+        source_format="NOAA",
+        site="POCN25",
+        network="NOAA",
+        inlet="flask",
+    )
 
 @pytest.mark.skip(reason="Thames Barrier data read to be removed.")
 def test_read_thames_barrier(bucket):
