@@ -237,13 +237,13 @@ def _read_data(
     # just picks out the first one.
 
     species_attributes = load_internal_json(filename="attributes.json")
-    if dataset.units in species_attributes["unit_interpret"].values():
+    if dataset.mf.units in species_attributes["unit_interpret"].values():
         for key, value in species_attributes["unit_interpret"].items():
-            if dataset.units == value:
+            if dataset.mf.units == value:
                 units[species] = key
                 break
     else:
-        units[species] = dataset.units
+        units[species] = dataset.mf.units
 
     # this line just copies over Matt's units, which are 1e-12-format.
 
