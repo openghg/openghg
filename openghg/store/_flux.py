@@ -175,6 +175,7 @@ class Flux(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
+        # TODO - better match the arguments to the parser functions
         param = {
             "filepath": filepath,
             "species": species,
@@ -215,23 +216,17 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+        if optional_metadata is None:
+            optional_metadata = {}
 
-        required = tuple(min_required)
+        # TODO - the optional params
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        optional_metadata.update(to_add)
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # TODO - really we want the metadata completely formed before we perform
+        # the Datasource lookup, the above is a hack to get what we have here working for now
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -239,7 +234,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )

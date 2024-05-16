@@ -1,0 +1,119 @@
+[boundary_conditions.optional]
+
+[eulerian_model.optional]
+
+[column.optional]
+
+[footprints.required.site]
+type = [ "str",]
+
+[footprints.required.model]
+type = [ "str",]
+
+[footprints.required.inlet]
+type = [ "height",]
+
+[footprints.required.domain]
+type = [ "str",]
+
+[footprints.required.time_resolved]
+type = [ "bool",]
+
+[footprints.required.high_spatial_resolution]
+type = [ "bool",]
+
+[footprints.required.short_lifetime]
+type = [ "bool",]
+
+[footprints.required.species]
+type = [ "str", "species",]
+
+[footprints.required.met_model]
+type = [ "str",]
+
+[flux.required.species]
+type = [ "str",]
+
+[flux.required.source]
+type = [ "str",]
+
+[flux.required.domain]
+type = [ "str",]
+
+[flux.optional.database]
+type = [ "str",]
+
+[flux.optional.database_version]
+type = [ "str",]
+
+[flux.optional.model]
+type = [ "str",]
+
+[boundary_conditions.required.species]
+type = [ "str",]
+
+[boundary_conditions.required.bc_input]
+type = [ "str",]
+
+[boundary_conditions.required.domain]
+type = [ "str",]
+
+[eulerian_model.required.model]
+type = [ "str",]
+
+[eulerian_model.required.species]
+type = [ "str",]
+
+[eulerian_model.required.date]
+type = [ "timestamp",]
+
+[column.required.satellite]
+type = [ "str",]
+
+[column.required.selection]
+type = [ "str",]
+
+[column.required.domain]
+type = [ "str",]
+
+[column.required.site]
+type = [ "str",]
+
+[column.required.species]
+type = [ "species",]
+
+[column.required.network]
+type = [ "str",]
+
+[surface.required.species]
+type = [ "str",]
+
+[surface.required.site]
+type = [ "str",]
+
+[surface.required.sampling_period]
+type = [ "str",]
+
+[surface.required.station_long_name]
+type = [ "str",]
+
+[surface.required.inlet]
+type = [ "str",]
+
+[surface.required.instrument]
+type = [ "str",]
+
+[surface.required.network]
+type = [ "str",]
+
+[surface.required.source_format]
+type = [ "str",]
+
+[surface.required.data_source]
+type = [ "str",]
+
+[surface.required.icos_data_level]
+type = [ "str",]
+
+[surface.required.data_type]
+type = [ "str",]

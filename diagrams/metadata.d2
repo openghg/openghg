@@ -1,0 +1,164 @@
+direction: right
+
+classes: {
+  metadata_arrow: {
+    style: {
+      stroke: blue
+    }
+  }
+  combined_arrow: {
+    style: {
+      stroke: red
+    }
+  }
+
+  final_arrow: {
+    style: {
+      stroke: green
+    }
+  }
+}
+
+# These control the flow of the main blocks in the diagram to the right
+stand_fns -> standardise -> datatype_classes -> baseclass
+(stand_fns -> standardise -> datatype_classes -> baseclass)[0].class: combined_arrow
+
+stand_fns: "Standardisation" {
+  # Like a CSS grid layout, you can set the number
+  # of columns and rows
+  grid-columns: 1
+  # grid-rows: 1
+
+  standardise_bc
+  standardise_flux
+  standardise_footprint
+  standardise_column
+  standardise_surface
+  standardise_eulerian
+  standardise_from_binary_data
+
+}
+
+standardise: "standardise"
+
+stand_fns.standardise_bc -> standardise
+stand_fns.standardise_flux -> standardise
+stand_fns.standardise_footprint -> standardise
+stand_fns.standardise_column -> standardise
+stand_fns.standardise_surface -> standardise
+stand_fns.standardise_eulerian -> standardise
+stand_fns.standardise_from_binary_data -> standardise
+
+# This is how we apply the colour to the arrows showing the flow
+# of the combined data
+(stand_fns.standardise_bc -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_flux -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_footprint -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_column -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_surface -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_eulerian -> standardise)[0].class: combined_arrow
+(stand_fns.standardise_from_binary_data -> standardise)[0].class: combined_arrow
+
+# Adding a key: name and then { }
+# creates a class that we can add functions / objects within
+datatype_classes: "Storage classes" {
+  grid-columns: 1
+
+  # Here we create an arrow to an object outside the container
+  # so we use _. to allow us to reference that object
+  BoundaryConditions.read_file -> _.baseclass.assign_data
+  Flux.read_file -> _.baseclass.assign_data
+  EulerianModel.read_file -> _.baseclass.assign_data
+  Footprints.read_file -> _.baseclass.assign_data
+  ObsColumn.read_file -> _.baseclass.assign_data
+  ObsSurface.read_file -> _.baseclass.assign_data
+
+  (BoundaryConditions.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (Flux.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (EulerianModel.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (Footprints.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (ObsColumn.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+  (ObsSurface.read_file -> _.baseclass.assign_data)[0].class: combined_arrow
+}
+
+baseclass: "Base" {
+  assign_data
+  "datasource_lookup"
+  metastore: "Metastore" {
+    search
+    _get_query
+    _format_metadata
+    "tinydb.Query().fragment"
+    "_db.search"
+
+    search -> _get_query: Metadata
+    _get_query -> search: Query object
+    _get_query -> _format_metadata: Metadata
+    _format_metadata -> _get_query: Lowercased metadata
+    search -> "tinydb.Query().fragment": Lowercased metadata
+    "tinydb.Query().fragment" -> search: Query object
+    search -> "_db.search": Query object
+    "_db.search" -> search: List of records
+
+  }
+
+  assign_data -> datasource_lookup: Metadata
+  datasource_lookup -> assign_data: List of records
+  datasource_lookup -> metastore.search: Metadata
+  metastore.search -> datasource_lookup: List of records
+  assign_data -> Dataset.attrs: Add (almost) all metadata to attrs
+
+  assign_data -> Metastore.insert: If new Datasource
+  assign_data -> Metastore.update: If existing Datasource
+
+  (assign_data -> Metastore.insert)[0].class: final_arrow
+  (assign_data -> Metastore.update)[0].class: final_arrow
+
+  assign_data <-> to_lowercase
+  assign_data -> _.datasource.add_data
+  (assign_data -> _.datasource.add_data)[0].class: combined_arrow
+}
+
+datasource: "Datasource" {
+  add_data -> add_timed_data -> add_metadata
+  (add_data -> add_timed_data)[0].class: combined_arrow
+  to_lowercase
+  "_metadata.update" -> _metadata
+  # uuid -> _.baseclass.assign_data
+  add_metadata -> to_lowercase: Metadata
+  to_lowercase -> add_metadata: Lowercased metadata
+  add_metadata -> "_metadata.update": Lowercased metadata dict
+
+  add_metadata -> add_metadata_key -> _metadata: Add data_type
+  add_metadata -> add_metadata_key -> _metadata: Add latest_version
+  add_metadata -> add_metadata_key -> _metadata: Add timestamp
+  add_metadata -> add_metadata_key -> _metadata: Add start_date
+  add_metadata -> add_metadata_key -> _metadata: Add end_date
+
+  _metadata -> _.baseclass.assign_data
+  (_metadata -> _.baseclass.assign_data)[0].class: final_arrow
+}
+
+
+# (existing_ds -> datasource.add_data)[0].class: combined_arrow
+# (new_ds -> datasource.add_data)[0].class: combined_arrow
+
+# TODO - is there a proper way to make a key from classes?
+key: Key {
+  Combined data {
+    style: {
+      font-color: red
+    }
+  }
+  Metadata only {
+    style: {
+      font-color: blue
+    }
+  }
+
+  Final metadata {
+    style: {
+      font-color: green
+    }
+  }
+}

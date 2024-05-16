@@ -3,6 +3,7 @@
 """
 
 from __future__ import annotations
+from functools import reduce
 import logging
 import math
 from pathlib import Path
@@ -11,11 +12,18 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file
+from openghg.util import (
+    timestamp_now,
+    to_lowercase,
+    hash_file,
+    clean_string,
+    format_inlet,
+    timestamp_tzaware,
+)
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -87,6 +95,83 @@ class BaseStore:
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def _not_set_value(self) -> str:
+        return "NOT_SET"
+
+    def parse_metadata(self, **kwargs) -> Dict:
+        """Parse all the metadata given to us. This metadata is for internal use
+        only and should not be assigned to Dataset attributes.
+        Dataset attributes should be parsed using parse_attributes
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+            **kwargs: Expanded keyword
+        """
+        required, optional = self._get_metakeys()
+
+        # Check if we have any Nones for the required keys
+        missing_keys = [k for k in required if kwargs[k] is None]
+        if missing_keys:
+            raise ValueError(f"We're missing {len(missing_keys)} required metadata keys: {missing_keys}")
+
+        # We don't care if they're required or optional here we just need to know how to parse them
+        combined = dict(**required, **optional)
+
+        # NOTE - this is a placeholder for something proper
+        def parse_latlong(val: Any) -> float:
+            try:
+                p = round(float(val["lon"].max()), 5)
+            # What will this rase?
+            # Leaving this bare so it gets picked up by the linter and gets changed
+            except:
+                p = round(val, 5)
+
+            return p
+
+        # TODO - move this
+        parse_fns = {
+            "str": clean_string,
+            "timestamp": timestamp_tzaware,
+            "height": format_inlet,
+            "latlong": parse_latlong,
+        }
+
+        parsed_metadata = {}
+        # Now parse the metadata, parsing the metadata based on the type that's in the function lookup
+        for key, value in kwargs.items():
+            # Keep bools as they are
+            if isinstance(value, bool):
+                parsed_metadata[key] = value
+                continue
+
+            if key in optional and value is None:
+                parsed_metadata[key] = self._not_set_value()
+                continue
+
+            # TODO - add check for list/tuple/dict of data, what do we do with that?
+            if key in combined:
+                try:
+                    metadata_types = combined[key]["type"]
+                except KeyError:
+                    functions = [clean_string]
+                else:
+                    functions = [parse_fns[k] for k in metadata_types]
+
+                # Now we apply those functions to the metadata in the order they
+                parsed_val = reduce(lambda res, f: f(res), functions, value)
+            else:
+                parsed_val = clean_string(value)
+
+            parsed_metadata[key] = parsed_val
+
+        # Do we want to lowercase all the metadata?
+        parsed_metadata = to_lowercase(parsed_metadata)
+
+        return parsed_metadata
+
+    def parse_attributes(**kwargs) -> Dict:
+        raise NotImplementedError
 
     def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
         raise NotImplementedError
@@ -160,6 +245,48 @@ class BaseStore:
 
         return seen, unseen
 
+    def _get_metakeys(self) -> Tuple[Dict, Dict]:
+        """Get the metakeys for this data type
+
+        Returns:
+            dict: Dictionary of required and optional metadata
+        """
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+
+        return metakeys["required"], metakeys.get("optional", {})
+
+    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+        Returns:
+            tuple: Tuple of keys
+        """
+        required, optional = self._get_metakeys()
+
+        lookup_keys = list(required)
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata)
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+            if optional:
+                for key in optional_metadata:
+                    if key in optional:
+                        lookup_keys.append(key)
+
+        return lookup_keys
+
     def assign_data(
         self,
         data: Dict,
@@ -202,6 +329,9 @@ class BaseStore:
         from openghg.store.spec import null_metadata_values
 
         uuids = {}
+
+        # Get the metadata keys for this type
+        # metakeys = self.get_metakeys()
 
         self._metastore.acquire_lock()
         try:
@@ -303,8 +433,10 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
             required_result = self._metastore.search(required_metadata)
