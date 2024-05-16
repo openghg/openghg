@@ -704,7 +704,7 @@ def test_fp_retrieved_from_species():
     Test to verify species are converted to synonym values and retrieved
     """
 
-    datapath = "/user/home/vq21425/openghg/MHD-10magl_UKV_hfo-1234zee_EUROPE_201401_test.nc"
+    datapath = get_footprint_datapath("MHD-10magl_UKV_hfo-1234zee_EUROPE_201401_test.nc")
     site = "MHD"
     inlet = "10m"
     domain = "TEST"
