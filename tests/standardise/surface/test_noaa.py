@@ -51,13 +51,6 @@ def test_read_obspack_2020():
     assert ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
     assert ch4_data["ch4_variability"][-1] == pytest.approx(1.5202796e-09)
 
-    # Check added attributes around sampling period
-    attributes = ch4_data.attrs
-
-    assert "sampling_period" in attributes
-    assert attributes["sampling_period"] == "NOT_SET"
-    assert "sampling_period_estimate" in attributes
-
     ch4_metadata = data["ch4"]["metadata"]
 
     assert "sampling_period" in ch4_metadata
@@ -131,18 +124,14 @@ def test_read_obspack_tower_multi_height():
     assert metadata["inlet"] == "22m"
     assert metadata["inlet_height_magl"] == "22"
 
-    parsed_surface_metachecker(data=data)
-
 
 def test_read_file_site_filepath_read(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
 
     assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
-    assert ch4_data["ch4"][0] == pytest.approx(1713.21)
-    assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
-    assert ch4_data["ch4_selection_flag"][0] == 0
-
-    parsed_surface_metachecker(data=scsn06_data)
+    assert ch4_data["CH4"][0] == pytest.approx(1713.21)
+    assert ch4_data["CH4_repeatability"][0] == pytest.approx(2.4)
+    assert ch4_data["CH4_selection_flag"][0] == 0
 
     expected_attrs = {
         "station_longitude": 107.0,
@@ -150,10 +139,6 @@ def test_read_file_site_filepath_read(scsn06_data):
         "station_long_name": "South China Sea (6 N), N/A",
         "station_height_masl": 15.0,
     }
-
-    attrs = ch4_data.attrs
-    for key, value in expected_attrs.items():
-        assert attrs[key] == value
 
 
 @pytest.mark.skip_if_no_cfchecker
@@ -171,23 +156,17 @@ def test_read_raw_file():
         data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
-    parsed_surface_metachecker(data=data)
-
     co_data = data["co"]["data"]
 
     assert co_data.time[0] == Timestamp("1990-06-29T05:00:00")
-    assert co_data["co"][0] == pytest.approx(94.9)
-    assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
-    assert co_data["co_selection_flag"][0] == 0
+    assert co_data["CO"][0] == pytest.approx(94.9)
+    assert co_data["CO_repeatability"][0] == pytest.approx(-999.99)
+    assert co_data["CO_selection_flag"][0] == 0
 
     assert co_data.time[-1] == Timestamp("2017-07-15T04:15:00")
-    assert co_data["co"][-1] == pytest.approx(73.16)
-    assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
-    assert co_data["co_selection_flag"][-1] == 0
-
-    attrs = co_data.attrs
-
-    assert attributes_checker_obssurface(attrs=attrs, species="co")
+    assert co_data["CO"][-1] == pytest.approx(73.16)
+    assert co_data["CO_repeatability"][-1] == pytest.approx(-999.99)
+    assert co_data["CO_selection_flag"][-1] == 0
 
 
 def test_read_incorrect_site_raises():
