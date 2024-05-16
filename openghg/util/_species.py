@@ -46,6 +46,10 @@ def synonyms(
     Included this here so this occurs in one place which can be linked to
     and changed if needed.
     """
+    # If the species value is inert it should directly return rather than going through below logic
+    if species.lower() == "inert":
+        return species.lower()
+
     # Load in the species data
     species_data = get_species_info(species_filepath=species_filepath)
 
