@@ -306,7 +306,7 @@ def test_add_edgar_database(clear_stores):
 
 
 @pytest.mark.parametrize(
-    "source", ["anthro", "edgar-annual-flux"]
+    "source", [None, "edgar-annual-total"]
 )
 def test_add_edgar_v8_database(clear_stores, source):
     """Test edgar v8.0 can be added to object store (default domain)"""
@@ -315,8 +315,10 @@ def test_add_edgar_v8_database(clear_stores, source):
 
     database = "EDGAR"
     date = "1970"
+    if source is None:
+        source = "anthro"
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
 
     default_domain = "globaledgar"
 
