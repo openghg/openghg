@@ -43,7 +43,7 @@ class ObsSurface(BaseStore):
             metadata: Metadata
             file_metadata: File metadata such as original filename
             precision_data: GCWERKS precision data
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         Returns:
             dict: Dictionary of result
@@ -145,7 +145,7 @@ class ObsSurface(BaseStore):
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
                         update_mismatch: This determines whether mismatches between the internal data
                 attributes and the supplied / derived metadata can be updated or whether
