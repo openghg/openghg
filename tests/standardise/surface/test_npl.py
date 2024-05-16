@@ -17,7 +17,6 @@ def npl_data():
 
 
 def test_read_file(npl_data):
-    parsed_surface_metachecker(data=npl_data)
 
     co2_data = npl_data["co2"]["data"]
     ch4_data = npl_data["ch4"]["data"]

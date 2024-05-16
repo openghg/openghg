@@ -447,6 +447,8 @@ def test_read_noaa_raw(bucket):
 
 
 def test_read_noaa_metastorepack(bucket):
+    clear_test_stores()
+
     data_filepath = get_surface_datapath(
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )

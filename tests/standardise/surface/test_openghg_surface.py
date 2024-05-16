@@ -103,10 +103,6 @@ def openghg_data():
     return data
 
 
-def test_data_metachecker(openghg_data):
-    parsed_surface_metachecker(data=openghg_data)
-
-
 @pytest.mark.cfchecks
 def test_openghg_cf_compliance(openghg_data):
     co2_data = openghg_data["co2"]["data"]

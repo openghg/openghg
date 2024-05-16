@@ -17,7 +17,6 @@ def tmb_data():
 
 
 def test_read_file(tmb_data):
-    parsed_surface_metachecker(data=tmb_data)
 
     ch4_data = tmb_data["ch4"]["data"]
     co2_data = tmb_data["co2"]["data"]

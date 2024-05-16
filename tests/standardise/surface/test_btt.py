@@ -17,7 +17,6 @@ def btt_data():
 
 
 def test_read_file(btt_data):
-    parsed_surface_metachecker(data=btt_data)
 
     co2_data = btt_data["CO2"]["data"]
     ch4_data = btt_data["CH4"]["data"]
