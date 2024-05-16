@@ -388,6 +388,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
+    date = "2015"
     domain = "EUROPE"
 
     proc_results = transform_flux_data(
