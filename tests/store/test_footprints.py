@@ -732,3 +732,4 @@ def test_fp_retrieved_from_species():
 
     assert footprint_obs.data is not None
     assert "hfo1234ze" in footprint_metadata["species"]
+    assert "footprints" in footprint_metadata["data_type"]
