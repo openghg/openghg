@@ -274,7 +274,6 @@ def test_add_edgar_database(clear_stores):
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
     )
@@ -290,7 +289,6 @@ def test_add_edgar_database(clear_stores):
         "source": default_source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -307,7 +305,10 @@ def test_add_edgar_database(clear_stores):
     assert metadata.items() >= expected_metadata.items()
 
 
-def test_add_edgar_v8_database(clear_stores):
+@pytest.mark.parametrize(
+    "source", ["anthro", "edgar-annual-flux"]
+)
+def test_add_edgar_v8_database(clear_stores, source):
     """Test edgar v8.0 can be added to object store (default domain)"""
     folder = "v8.0_CH4"
     test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
@@ -321,14 +322,12 @@ def test_add_edgar_v8_database(clear_stores):
 
     version = "v8.0"
     species = "ch4"
-    default_source = "anthro"
 
-    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    output_key = f"{species}_{source}_{default_domain}_{date}"
     assert output_key in proc_results
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,
         database_version=version,
     )
@@ -341,10 +340,9 @@ def test_add_edgar_v8_database(clear_stores):
     expected_metadata = {
         "species": species,
         "domain": default_domain,
-        "source": default_source,
+        "source": source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
-        "date": "1970",
         "author": "openghg cloud",
         "start_date": "1970-01-01 00:00:00+00:00",
         "end_date": "1970-12-31 23:59:59+00:00",
@@ -483,7 +481,6 @@ def test_optional_metadata():
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
     )
