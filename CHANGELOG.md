@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `source` can be passed to `transform_flux_data` with the EDGAR parser; `date` isn't stored with the transformed EDGAR data, since this is used for choosing what data to add, but doesn't describe all of the data in the object store. Fixed bug due to string split over two lines in logging message - [#PR 1010](https://github.com/openghg/openghg/pull/1010)
 - Problem where the zarr store check raised an error for empty stores, preventing new zarr stores from being created - [#PR 993](https://github.com/openghg/openghg/pull/993)
 - Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
 - Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
