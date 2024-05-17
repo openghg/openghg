@@ -315,8 +315,7 @@ def test_add_edgar_v8_database(clear_stores, source):
 
     database = "EDGAR"
     date = "1970"
-    if source is None:
-        source = "anthro"
+    expected_source = "anthro" if source is None else source
 
     proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
 
@@ -325,7 +324,7 @@ def test_add_edgar_v8_database(clear_stores, source):
     version = "v8.0"
     species = "ch4"
 
-    output_key = f"{species}_{source}_{default_domain}_{date}"
+    output_key = f"{species}_{expected_source}_{default_domain}_{date}"
     assert output_key in proc_results
 
     search_results = search_flux(
@@ -342,7 +341,7 @@ def test_add_edgar_v8_database(clear_stores, source):
     expected_metadata = {
         "species": species,
         "domain": default_domain,
-        "source": source,
+        "source": expected_source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
         "author": "openghg cloud",
