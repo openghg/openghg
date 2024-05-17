@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -36,8 +36,8 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -372,11 +372,12 @@ document.write(`
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">openghg.store.storage</span> <span class="kn">import</span> <span class="n">ChunkingSchema</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">species_lifetime</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">species_lifetime</span><span class="p">,</span> <span class="n">synonyms</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Footprints&quot;</span><span class="p">]</span>
@@ -577,6 +578,7 @@ document.write(`
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;acrg_org&quot;</span><span class="p">,</span>
         <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -587,6 +589,7 @@ document.write(`
         <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">compressor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">optional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
 <span class="sd">        the processed data has been assigned to</span>
@@ -609,8 +612,9 @@ document.write(`
 <span class="sd">            source_format : Type of data being input e.g. acrg_org</span>
 <span class="sd">            retrieve_met: Whether to also download meterological data for this footprints area</span>
 <span class="sd">            high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">            high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)</span>
+<span class="sd">            time_resolved: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                           Note this will be set to True automatically if species=&quot;co2&quot; (Carbon Dioxide).</span>
+<span class="sd">            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">            short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
 <span class="sd">                            Note this will be set to True if species has an associated lifetime.</span>
 <span class="sd">            if_exists: What to do if existing data is present.</span>
@@ -632,6 +636,7 @@ document.write(`
 <span class="sd">                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
 <span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
 <span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
+<span class="sd">            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {&quot;project&quot;:&quot;paris&quot;, &quot;baseline&quot;:&quot;Intem&quot;}</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -641,6 +646,13 @@ document.write(`
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
 
         <span class="c1"># We wanted sorted Path objects</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">])</span>
@@ -666,6 +678,7 @@ document.write(`
             <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;inert&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
         <span class="c1"># Ensure we have a clear missing value for met_model</span>
         <span class="k">if</span> <span class="n">met_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -712,9 +725,9 @@ document.write(`
         <span class="c1"># Do some housekeeping on the inputs</span>
         <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
             <span class="c1"># Expect co2 data to have high time resolution</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">high_time_resolution</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating high_time_resolution to True for co2 data&quot;</span><span class="p">)</span>
-                <span class="n">high_time_resolution</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">time_resolved</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating time_resolved to True for co2 data&quot;</span><span class="p">)</span>
+                <span class="n">time_resolved</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -740,7 +753,7 @@ document.write(`
             <span class="n">filepaths</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
             <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
             <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-            <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
+            <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
             <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -755,7 +768,7 @@ document.write(`
             <span class="s2">&quot;met_model&quot;</span><span class="p">:</span> <span class="n">met_model</span><span class="p">,</span>
             <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
             <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
-            <span class="s2">&quot;high_time_resolution&quot;</span><span class="p">:</span> <span class="n">high_time_resolution</span><span class="p">,</span>
+            <span class="s2">&quot;time_resolved&quot;</span><span class="p">:</span> <span class="n">time_resolved</span><span class="p">,</span>
             <span class="s2">&quot;high_spatial_resolution&quot;</span><span class="p">:</span> <span class="n">high_spatial_resolution</span><span class="p">,</span>
             <span class="s2">&quot;short_lifetime&quot;</span><span class="p">:</span> <span class="n">short_lifetime</span><span class="p">,</span>
             <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">,</span>
@@ -790,7 +803,7 @@ document.write(`
             <span class="n">Footprints</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span>
                 <span class="n">fp_data</span><span class="p">,</span>
                 <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-                <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
+                <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
                 <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -807,12 +820,23 @@ document.write(`
             <span class="s2">&quot;model&quot;</span><span class="p">,</span>
             <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
             <span class="s2">&quot;domain&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;high_time_resolution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_resolved&quot;</span><span class="p">,</span>
             <span class="s2">&quot;high_spatial_resolution&quot;</span><span class="p">,</span>
             <span class="s2">&quot;short_lifetime&quot;</span><span class="p">,</span>
             <span class="s2">&quot;species&quot;</span><span class="p">,</span>
             <span class="s2">&quot;met_model&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">optional_metadata</span><span class="p">:</span>
+            <span class="n">common_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">required</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">optional_metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="n">common_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The following optional metadata keys are already present in required keys: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_keys</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">parsed_data</span> <span class="ow">in</span> <span class="n">footprint_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">parsed_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
         <span class="c1"># TODO - filter options</span>
@@ -846,6 +870,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span>
         <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
@@ -855,7 +880,7 @@ document.write(`
 <span class="sd">        The returned schema depends on what the footprint represents,</span>
 <span class="sd">        indicated using the keywords.</span>
 <span class="sd">        By default, this will include &quot;fp&quot; variable but this will be superceded</span>
-<span class="sd">        if high_spatial_resolution or high_time_resolution are specified.</span>
+<span class="sd">        if high_spatial_resolution or time_resolved are specified.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            particle_locations: Include 4-directional particle location variables:</span>
@@ -865,9 +890,10 @@ document.write(`
 <span class="sd">                - &quot;fp_low&quot;</span>
 <span class="sd">                - &quot;fp_high&quot;</span>
 <span class="sd">                and include associated additional dimensions (&quot;lat_high&quot;, &quot;lon_high&quot;).</span>
-<span class="sd">            high_time_resolution : Set footprint variable to be high time resolution</span>
+<span class="sd">            time_resolved: Set footprint variable to be high time resolution</span>
 <span class="sd">                - &quot;fp_HiTRes&quot;</span>
 <span class="sd">                and include associated dimensions (&quot;H_back&quot;).</span>
+<span class="sd">            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">            short_lifetime: Include additional particle age parameters for short lived species:</span>
 <span class="sd">                - &quot;mean_age_particles_[nesw]&quot;</span>
 
@@ -892,7 +918,14 @@ document.write(`
             <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">high_time_resolution</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">high_spatial_resolution</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">time_resolved</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">high_spatial_resolution</span><span class="p">:</span>
             <span class="c1"># Includes standard footprint variable</span>
             <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)</span>
             <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
@@ -907,7 +940,7 @@ document.write(`
             <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
             <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
 
-        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">time_resolved</span><span class="p">:</span>
             <span class="c1"># Include options for high time resolution footprint (usually co2)</span>
             <span class="c1"># This includes a footprint data with an additional hourly back dimension</span>
             <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp_HiTRes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
@@ -956,6 +989,7 @@ document.write(`
         <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
         <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -974,10 +1008,16 @@ document.write(`
 <span class="sd">            Raises a ValueError with details if the input data does not adhere</span>
 <span class="sd">            to the Footprints schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
         <span class="n">data_schema</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span>
             <span class="n">particle_locations</span><span class="o">=</span><span class="n">particle_locations</span><span class="p">,</span>
             <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-            <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
+            <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
             <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
@@ -987,6 +1027,7 @@ document.write(`
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.chunking_schema">[docs]</a>
     <span class="k">def</span> <span class="nf">chunking_schema</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -995,7 +1036,8 @@ document.write(`
 <span class="sd">        Get chunking schema for footprint data.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            high_time_resolution : Set footprint variable to be high time resolution.</span>
+<span class="sd">            time_resolved : Set footprint variable to be high time resolution.</span>
+<span class="sd">            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">            high_spatial_resolution : Set footprint variables include high and low resolution options.</span>
 <span class="sd">            short_lifetime: Include additional particle age parameters for short lived species.</span>
 <span class="sd">        Returns:</span>
@@ -1008,7 +1050,14 @@ document.write(`
             <span class="p">)</span>
 
         <span class="c1"># TODO - could these defaults be changed in the object store config maybe?</span>
+
         <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
+        <span class="k">if</span> <span class="n">time_resolved</span><span class="p">:</span>
             <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;fp_HiTRes&quot;</span>
             <span class="n">time_chunk_size</span> <span class="o">=</span> <span class="mi">24</span>
             <span class="n">secondary_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;H_back&quot;</span><span class="p">]</span>

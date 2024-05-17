@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Util &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>Util &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -37,8 +37,8 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -53,7 +53,7 @@
     <link rel="prev" title="Types" href="devapi_types.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -128,8 +128,8 @@
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -415,24 +415,6 @@ document.write(`
 <section id="domain">
 <h2>Domain<a class="headerlink" href="#domain" title="Link to this heading">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.convert_longitude">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Link to this definition">#</a></dt>
-<dd><p>Convert longitude extent from (0 to 360) to (-180 to 180).
-This does <em>not</em> reorder the values.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>longitude</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ArrayLikeMatch</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>)</span>) – Valid longitude values in degrees.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Updated longitude values in the same order.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray / DataArray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
 <span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Link to this definition">#</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
@@ -712,7 +694,7 @@ Used with <code class="xref py py-obj docutils literal notranslate"><span class=
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path to file</p></li>
 <li><p><strong>comment_char</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Character that denotes a comment line</p></li>
-<li><p><strong>file</strong> (<em>at the start</em><em> of </em><em>a</em>) – </p></li>
+<li><p><strong>file</strong> (<em>at the start</em><em> of </em><em>a</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -771,7 +753,7 @@ and the start date, end date and the number of timestamps in the Dataset.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>to_hash</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</span>) – Dictionary to hash</p></li>
-<li><p><strong>as</strong> (<em>We expected this to be a dictionary such</em>) – </p></li>
+<li><p><strong>as</strong> (<em>We expected this to be a dictionary such</em>)</p></li>
 <li><p><strong>{species_key</strong> – {“data”: xr.Dataset, “metadata”: {…}}}</p></li>
 </ul>
 </dd>
@@ -1335,7 +1317,7 @@ DatetimeIndex has minute frequency.</p>
 string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>daterange</strong> (<em>pandas.DatetimeIndex</em>) – </p>
+<dd class="field-odd"><p><strong>daterange</strong> (<em>pandas.DatetimeIndex</em>)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Daterange in string format</p>
@@ -1532,7 +1514,7 @@ Timestamps</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>daterange_str</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Daterange string of the form</p></li>
 <li><p><strong>date_only</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Return only the date portion of the Timestamp, removing</p></li>
-<li><p><strong>component</strong> (<em>the hours / seconds</em>) – </p></li>
+<li><p><strong>component</strong> (<em>the hours / seconds</em>)</p></li>
 <li><p><strong>2019-01-01T00</strong> – 00:00_2019-12-31T00:00:00</p></li>
 </ul>
 </dd>
@@ -1677,9 +1659,9 @@ Timestamp.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>to_trim</strong> (<em>from</em>) – Daterange to trim down. Dates that overlap</p></li>
-<li><p><strong>to_trim</strong> – </p></li>
+<li><p><strong>to_trim</strong></p></li>
 <li><p><strong>overlap_daterange</strong> – Daterange containing dates we want to trim</p></li>
-<li><p><strong>to_trim</strong> – </p></li>
+<li><p><strong>to_trim</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1720,7 +1702,7 @@ Timestamp.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>silent</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Creates the basic configuration file with only</p></li>
-<li><p><strong>location.</strong> (<em>the user's object store in a default</em>) – </p></li>
+<li><p><strong>location.</strong> (<em>the user's object store in a default</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1921,7 +1903,6 @@ are the same</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#domain">Domain</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.convert_longitude"><code class="docutils literal notranslate"><span class="pre">convert_longitude()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.find_domain"><code class="docutils literal notranslate"><span class="pre">find_domain()</span></code></a></li>
 </ul>
 </li>

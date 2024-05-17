@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -36,8 +36,8 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -691,7 +691,7 @@ document.write(`
     <span class="n">stat</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stationId</span><span class="o">=</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">stat</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Please check you have passed a valid ICOS site.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Please check you have passed a valid ICOS site and have a working internet connection.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">data_pids</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">data_level</span><span class="p">)</span>
@@ -701,9 +701,14 @@ document.write(`
     <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
     <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_upper</span><span class="p">)))</span>
     <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
-    <span class="c1"># Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now</span>
+    <span class="c1"># We filter out any data that contains &quot;Obspack&quot; or &quot;csv&quot; in the specLabel</span>
+    <span class="c1"># Also filter out some drought files which cause trouble being read in</span>
+    <span class="c1"># For some reason they have separate station record pages that contain &quot;ATMO_&quot;</span>
     <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
-        <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
+        <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;ATMO_&quot;</span><span class="p">)</span>
     <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">filtered_sources</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -711,7 +716,11 @@ document.write(`
         <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
         <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_lower</span><span class="p">)))</span>
         <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
-        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)]</span>
+        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
+            <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>

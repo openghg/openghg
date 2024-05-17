@@ -6,8 +6,9 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.plotting._footprint &#8212; OpenGHG 0.8.1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Converting an object store &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -45,10 +46,12 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/plotting/_footprint';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Managing_object_store/Converting_a_store';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="User API" href="../../../api/index.html" />
+    <link rel="prev" title="Changing the object store path" href="Changing_object_store.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
     <meta name="docbuild:last-update" content="May 17, 2024"/>
@@ -149,8 +152,8 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -241,9 +244,7 @@ document.write(`
       
       
       
-        
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -263,8 +264,8 @@ document.write(`
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -315,6 +316,51 @@ document.write(`
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_observation_data.html">Adding observation data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Creating_data_from_databases.html">Using databases to add data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Metadata_and_attributes.html">Metadata and attributes</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Updating_existing_data.html">Updating existing data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Changing_object_store.html">Changing the object store path</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Converting an object store</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
@@ -348,9 +394,9 @@ document.write(`
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">openghg.plot...</li>
+    <li class="breadcrumb-item active" aria-current="page">Converting...</li>
   </ul>
 </nav>
 </div>
@@ -367,51 +413,70 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for openghg.plotting._footprint</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+  <section id="converting-an-object-store">
+<h1>Converting an object store<a class="headerlink" href="#converting-an-object-store" title="Link to this heading">#</a></h1>
+<p>In this tutorial we’ll convert an object store from the old-style NetCDF format
+to the new Zarr based object store format.</p>
+<p>In this example we have an old-style object store at <code class="docutils literal notranslate"><span class="pre">/home/gareth/openghg_store</span></code> and we want to convert it to the new Zarr format.
+To perform the conversion we need the path of the old old-style store and the name of the new store to write to.</p>
+<p>Let’s first add a new object store to our <code class="docutils literal notranslate"><span class="pre">openghg.conf</span></code> using <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>openghg<span class="w"> </span>--quickstart
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;plot_footprint&quot;</span><span class="p">]</span>
+OpenGHG<span class="w"> </span>configuration
+---------------------
 
+INFO:openghg.util:User<span class="w"> </span>config<span class="w"> </span>exists<span class="w"> </span>at<span class="w"> </span>/home/gareth/.openghg/openghg.conf,<span class="w"> </span>checking...<span class="w">             </span>_user.py:91
+INFO:openghg.util:Current<span class="w"> </span>user<span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span>path:<span class="w"> </span>/home/gareth/openghg_store<span class="w">                       </span>_user.py:102
+Would<span class="w"> </span>you<span class="w"> </span>like<span class="w"> </span>to<span class="w"> </span>update<span class="w"> </span>the<span class="w"> </span>path?<span class="w"> </span><span class="o">(</span>y/n<span class="o">)</span>:<span class="w"> </span>n
+Would<span class="w"> </span>you<span class="w"> </span>like<span class="w"> </span>to<span class="w"> </span>add<span class="w"> </span>another<span class="w"> </span>object<span class="w"> </span>store?<span class="w"> </span><span class="o">(</span>y/n<span class="o">)</span>:<span class="w"> </span>y
+Enter<span class="w"> </span>the<span class="w"> </span>name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>store:<span class="w"> </span>openghg_store_zarr
+Enter<span class="w"> </span>the<span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span>path:<span class="w"> </span>/home/gareth/openghg_store_zarr
 
-<div class="viewcode-block" id="plot_footprint">
-<a class="viewcode-back" href="../../../api/api_plotting.html#openghg.plotting.plot_footprint">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_footprint</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot a footprint</span>
+You<span class="w"> </span>will<span class="w"> </span>now<span class="w"> </span>be<span class="w"> </span>asked<span class="w"> </span><span class="k">for</span><span class="w"> </span>read/write<span class="w"> </span>permissions<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>store.
+For<span class="w"> </span><span class="nb">read</span><span class="w"> </span>only<span class="w"> </span>enter<span class="w"> </span>r,<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>and<span class="w"> </span>write<span class="w"> </span>enter<span class="w"> </span>rw.
 
-<span class="sd">    Args:</span>
-<span class="sd">        data: Dataset containing fp variable</span>
-<span class="sd">        label: Label for colourbar</span>
-<span class="sd">        vmin: Minimum value for colours</span>
-<span class="sd">        vmax: MinimumMax value for colours</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
-    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
-    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-
-    <span class="c1"># Plot footprints as a 2D colour map</span>
-    <span class="n">data_fp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># First time point</span>
-    <span class="n">lat</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">lat</span>
-    <span class="n">lon</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">lon</span>
-    <span class="n">footprint</span> <span class="o">=</span> <span class="n">data_fp</span><span class="o">.</span><span class="n">values</span>
-
-    <span class="n">vmin</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># min is 0 and can&#39;t use 0 for a log scale</span>
-    <span class="n">vmax</span> <span class="o">=</span> <span class="n">footprint</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
-    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
-        <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">footprint</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">),</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span>
-    <span class="p">)</span>  <span class="c1"># Put on a log scale</span>
-    <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
-        <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span></div>
-
+Enter<span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span>permissions:<span class="w"> </span>rw
+Would<span class="w"> </span>you<span class="w"> </span>like<span class="w"> </span>to<span class="w"> </span>add<span class="w"> </span>another<span class="w"> </span>object<span class="w"> </span>store?<span class="w"> </span><span class="o">(</span>y/n<span class="o">)</span>:<span class="w"> </span>n
+INFO:openghg.util:Configuration<span class="w"> </span>written<span class="w"> </span>to<span class="w"> </span>/home/gareth/.openghg/openghg.conf
 </pre></div>
+</div>
+<p>Now we have a new object store called <code class="docutils literal notranslate"><span class="pre">openghg_store_zarr</span></code> in our configuration file and the path of that object
+store is <code class="docutils literal notranslate"><span class="pre">/home/gareth/openghg_store_zarr</span></code>. We’re now ready perform the conversion.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store.storage</span> <span class="kn">import</span> <span class="n">convert_store</span>
+
+<span class="n">old_store</span> <span class="o">=</span> <span class="s2">&quot;/home/gareth/openghg_store&quot;</span>
+<span class="n">new_store</span> <span class="o">=</span> <span class="s2">&quot;openghg_store_zarr&quot;</span>
+
+<span class="n">convert_store</span><span class="p">(</span><span class="n">path_in</span><span class="o">=</span><span class="n">old_store</span><span class="p">,</span> <span class="n">store_out</span><span class="o">=</span><span class="n">new_store</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">convert_store</span></code> function iterates over each of the data storage classes (<code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> etc) and adds the data to the new object store.
+It does this by reading the metadata from the the metadata store and passing the data stored as NetCDF files to the
+appropriate <code class="docutils literal notranslate"><span class="pre">standardise_*</span></code> functions.</p>
+<p>The conversion process can take some time depending on the size of the object store. The conversion process is not
+atomic and if the process is interrupted the new object store may be broken. If the conversion
+process is interrupted it is recommended to delete the new object store and start the conversion process again.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recommend that object stores are populated using the original data, this will result in a more
+consistent store. We recommend using the conversion process only when necessary.</p>
+</div>
+<p>The conversion function will attempt to catch errors are they are raised during the conversion process.
+You may see lines such as <code class="docutils literal notranslate"><span class="pre">Error</span> <span class="pre">standardising</span> <span class="pre">record</span> <span class="pre">&lt;uuid&gt;:</span> <span class="pre">Codec</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">support</span> <span class="pre">buffers</span> <span class="pre">of</span> <span class="pre">&gt;</span> <span class="pre">2147483647</span> <span class="pre">bytes</span></code>
+in the log output. These errors mean that the chunks being written to the object store are too large and need
+to be reduced through the use of chunking.</p>
+<p>To do this we can pass a chunks dictionary and the name of the data type that was being converted during conversion to the <code class="docutils literal notranslate"><span class="pre">convert_store</span></code> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store.storage</span> <span class="kn">import</span> <span class="n">convert_store</span>
+
+<span class="n">old_store</span> <span class="o">=</span> <span class="s2">&quot;/home/gareth/openghg_store&quot;</span>
+<span class="n">new_store</span> <span class="o">=</span> <span class="s2">&quot;openghg_store_zarr&quot;</span>
+
+<span class="n">convert_store</span><span class="p">(</span><span class="n">path_in</span><span class="o">=</span><span class="n">old_store</span><span class="p">,</span> <span class="n">store_out</span><span class="o">=</span><span class="n">new_store</span><span class="p">,</span> <span class="n">to_convert</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;footprints&quot;</span><span class="p">],</span> <span class="n">chunks</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">24</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>You may need to experiment with the chunk sizes to find the optimal size for the data being converted.</p>
+</section>
+
 
                 </article>
               
@@ -422,6 +487,24 @@ document.write(`
                 <footer class="prev-next-footer">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="Changing_object_store.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Changing the object store path</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../../api/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">User API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               

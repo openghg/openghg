@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -37,8 +37,8 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="Tutorials" href="../../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -357,6 +357,9 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
 </ul>
 </div>
 </nav></div>
@@ -643,8 +646,7 @@ stored for easy future comparison.</p>
 <section id="searching-the-object-store">
 <h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Link to this heading">#</a></h3>
 <p>We can search the object store by property using the
-<code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function. This function retrieves metadata from the
-data in the object store.</p>
+<code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function. This function retrieves all of the metadata associated with the search query from the data in the object store.</p>
 <p>For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><span class="pre">species</span></code> keyword:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
@@ -699,7 +701,7 @@ several functions we can use which depend on the type of data we want to
 access.</p>
 <p>To access the surface data we have added so far we can use the
 <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function and pass keywords for the site code,
-species and inlet height to retrieve our data.</p>
+species and inlet height to retrieve our data. Using <em class="xref py py-obj">get_*</em> functions will only allow one set of data to be returned and will give details if this is not the case.</p>
 <p>In this case we want to extract the carbon dioxide (“co2”) data from the
 Tacolneston data (“TAC”) site measured at the “185m” inlet:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>

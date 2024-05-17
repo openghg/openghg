@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._domain &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>openghg.util._domain &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -36,8 +36,8 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -375,7 +375,7 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span><span class="p">,</span> <span class="n">ArrayLikeMatch</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">XrDataLike</span><span class="p">,</span> <span class="n">XrDataLikeMatch</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_domain_info&quot;</span><span class="p">,</span> <span class="s2">&quot;find_domain&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_longitude&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_domain_info&quot;</span><span class="p">,</span> <span class="s2">&quot;find_domain&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_lon_to_180&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_lon_to_360&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">get_domain_info</span><span class="p">(</span><span class="n">domain_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
@@ -513,9 +513,7 @@ document.write(`
     <span class="k">return</span> <span class="n">name</span>
 
 
-<div class="viewcode-block" id="convert_longitude">
-<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.convert_longitude">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">convert_lon_to_180</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert longitude extent from (0 to 360) to (-180 to 180).</span>
 <span class="sd">    This does *not* reorder the values.</span>
@@ -525,11 +523,28 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        ndarray / DataArray : Updated longitude values in the same order.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Check range of longitude values and convert to -180 - +180</span>
+
+    <span class="c1"># Check range of longitude values and convert to -180 to 180.</span>
     <span class="n">longitude</span> <span class="o">=</span> <span class="p">((</span><span class="n">longitude</span> <span class="o">-</span> <span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span> <span class="o">-</span> <span class="mi">180</span>
 
-    <span class="k">return</span> <span class="n">longitude</span></div>
+    <span class="k">return</span> <span class="n">longitude</span>
 
+
+<span class="k">def</span> <span class="nf">convert_lon_to_360</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert longitude extent to (0 to 360).</span>
+<span class="sd">    This does *not* reorder the values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        longitude: Valid longitude values in degrees.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray / DataArray : Updated longitude values in the same order.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check range of longitude values and convert to 0 to 360.</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">longitude</span> <span class="o">%</span> <span class="mi">360</span>
+
+    <span class="k">return</span> <span class="n">longitude</span>
 
 
 <span class="k">def</span> <span class="nf">convert_internal_longitude</span><span class="p">(</span>
@@ -553,7 +568,7 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify &#39;lon_name&#39;.&quot;</span><span class="p">)</span>
 
     <span class="n">longitude</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">lon_name</span><span class="p">]</span>
-    <span class="n">longitude</span> <span class="o">=</span> <span class="n">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">convert_lon_to_180</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="n">lon_name</span><span class="p">:</span> <span class="n">longitude</span><span class="p">})</span>
 

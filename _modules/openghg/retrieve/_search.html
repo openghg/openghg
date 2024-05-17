@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -36,8 +36,8 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -375,6 +375,7 @@ document.write(`
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">openghg.objectstore.metastore</span> <span class="kn">import</span> <span class="n">open_metastore</span>
 <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_data_types</span>
 <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_readable_buckets</span>
@@ -486,7 +487,8 @@ document.write(`
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_resolved</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># DEPRECATED: use time_resolved instead</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -501,12 +503,13 @@ document.write(`
 <span class="sd">        database_version: Name of database version (if relevant)</span>
 <span class="sd">        model: Model name (if relevant)</span>
 <span class="sd">        source_format : Type of data being input e.g. openghg (internal format)</span>
-<span class="sd">        high_time_resolution: If this is a high resolution file</span>
+<span class="sd">        time_resolved: If this is a high resolution file</span>
 <span class="sd">        period: Period of measurements. Only needed if this can not be inferred from the time coords</span>
 <span class="sd">                If specified, should be one of:</span>
 <span class="sd">                    - &quot;yearly&quot;, &quot;monthly&quot;</span>
 <span class="sd">                    - suitable pandas Offset Alias</span>
 <span class="sd">                    - tuple of (value, unit) as would be passed to pandas.Timedelta function</span>
+<span class="sd">        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
@@ -527,7 +530,7 @@ document.write(`
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-        <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span>
@@ -552,7 +555,8 @@ document.write(`
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO need to give False to get only low spatial res</span>
-    <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_resolved</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># DEPRECATED: use time_resolved instead</span>
     <span class="n">short_lifetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
@@ -571,8 +575,9 @@ document.write(`
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        retrieve_met: Whether to also download meterological data for this footprints area</span>
 <span class="sd">        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)</span>
+<span class="sd">        time_resolved: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                        Note this will be set to True automatically if species=&quot;co2&quot; (Carbon Dioxide).</span>
+<span class="sd">        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
 <span class="sd">                        Note this will be set to True if species has an associated lifetime.</span>
 <span class="sd">        kwargs: Additional search terms</span>
@@ -581,7 +586,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span>
 
-    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
         <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
         <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
@@ -594,7 +599,6 @@ document.write(`
         <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
         <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">,</span>
         <span class="s2">&quot;continuous&quot;</span><span class="p">:</span> <span class="n">continuous</span><span class="p">,</span>
-        <span class="s2">&quot;high_time_resolution&quot;</span><span class="p">:</span> <span class="n">high_time_resolution</span><span class="p">,</span>
         <span class="s2">&quot;high_spatial_resolution&quot;</span><span class="p">:</span> <span class="n">high_spatial_resolution</span><span class="p">,</span>
         <span class="s2">&quot;short_lifetime&quot;</span><span class="p">:</span> <span class="n">short_lifetime</span><span class="p">,</span>
     <span class="p">}</span>
@@ -603,6 +607,23 @@ document.write(`
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">,</span> <span class="s2">&quot;end_date&quot;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="c1"># Either (or both) of &#39;high_time_resolution&#39; and &#39;time_resolved&#39; may be in the metatore,</span>
+    <span class="c1"># so both are allowed in search but deprecation warning passed.</span>
+    <span class="c1"># - ensure passing time_resolved=True gives back all relevant footprints.</span>
+    <span class="k">if</span> <span class="n">high_time_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;The &#39;high_time_resolution&#39; argument is deprecated and will be replaced in future versions with &#39;time_resolved&#39;.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">time_resolved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
+
+    <span class="n">high_time_resolution</span> <span class="o">=</span> <span class="n">time_resolved</span>  <span class="c1"># Includes at the moment for backwards compatability</span>
+    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;option_time_resolved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;time_resolved&quot;</span><span class="p">:</span> <span class="n">time_resolved</span><span class="p">,</span>
+        <span class="s2">&quot;high_time_resolution&quot;</span><span class="p">:</span> <span class="n">high_time_resolution</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="c1"># Either (or both) of &#39;inlet&#39; and &#39;height&#39; may be in the metastore, so</span>
     <span class="c1"># both are allowed for search.</span>
@@ -754,6 +775,15 @@ document.write(`
 <span class="sd">    the function and these keywords will be used to search the metadata associated</span>
 <span class="sd">    with each Datasource.</span>
 
+<span class="sd">    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:</span>
+<span class="sd">     - None - argument will be ignored.</span>
+<span class="sd">     - list/tuple - an OR search will be created for the argument and each of the values.</span>
+<span class="sd">     - dict - an OR search will be created for the key, value pairs.</span>
+<span class="sd">       - Note: in this case the name of argument itself will be ignored.</span>
+<span class="sd">     - str/other - argument used directly.</span>
+
+<span class="sd">    All input search values are formatted (openghg.utils.clean_string).</span>
+
 <span class="sd">    This function detects the running environment and routes the call</span>
 <span class="sd">    to either the cloud or local search function.</span>
 
@@ -802,6 +832,15 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
 <span class="sd">    the function and these keywords will be used to search metadata.</span>
 
+<span class="sd">    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:</span>
+<span class="sd">     - None - argument will be ignored.</span>
+<span class="sd">     - list/tuple - an OR search will be created for the argument and each of the values.</span>
+<span class="sd">     - dict - an OR search will be created for the key, value pairs.</span>
+<span class="sd">       - Note: in this case the name of argument itself will be ignored.</span>
+<span class="sd">     - str/other - argument used directly.</span>
+
+<span class="sd">    All input search values are formatted (openghg.utils.clean_string).</span>
+
 <span class="sd">    This function will only perform a &quot;local&quot; search. It may be used either by a cloud function</span>
 <span class="sd">    or when using OpenGHG locally, it does no environment detection.</span>
 <span class="sd">    We suggest using the search function that takes care of everything for you.</span>
@@ -838,8 +877,24 @@ document.write(`
             <span class="s2">&quot;This function can&#39;t be used on the OpenGHG Hub, please use openghg.retrieve.search instead.&quot;</span>
         <span class="p">)</span>
 
-    <span class="c1"># As we might have kwargs that are None we want to get rid of those</span>
-    <span class="n">search_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="c1"># Select and format the search terms</span>
+    <span class="c1"># - ignore any kwargs which are None</span>
+    <span class="c1"># - clean search terms directly or within data structures</span>
+    <span class="n">search_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">clean_string</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>  <span class="c1"># Check empty list</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>  <span class="c1"># Check empty dict</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
     <span class="c1"># Species translation</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">)</span>
@@ -900,27 +955,33 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="k">del</span> <span class="n">search_kwargs</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span>
 
-    <span class="c1"># Here we process the kwargs and flatten out the lists so</span>
-    <span class="c1"># we create the combinations of search queries correctly</span>
-    <span class="n">a_list</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">not_a_list</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Here we process the kwargs, allowing us to create the correct combinations of search queries.</span>
+    <span class="c1"># To set this up for keywords with multiple options, lists of the (key, value) pair terms are created</span>
+    <span class="c1"># - e.g. for species = [&quot;ch4&quot;, &quot;methane&quot;], time_resolution = {&quot;time_resolved&quot;: &quot;true&quot;, &quot;high_time_resolution: &quot;true&quot;}</span>
+    <span class="c1"># - multiple_options is [[(&quot;species&quot;, &quot;ch4&quot;), (&quot;species&quot;, &quot;methane&quot;)], [(&quot;time_resolved&quot;: &quot;true&quot;), (&quot;high_time_resolution&quot;: &quot;true&quot;)]]</span>
+    <span class="c1"># - we then expect searches for all permutations across both lists.</span>
+    <span class="n">multiple_options</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">single_options</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="n">a_list</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">expand_key_values</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span><span class="p">]</span>
+            <span class="n">multiple_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expand_key_values</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">expand_key_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="n">multiple_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expand_key_values</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">not_a_list</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">single_options</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
-    <span class="c1"># If we have lists of values to find we need to flatten them out</span>
     <span class="n">expanded_search</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">a_list</span><span class="p">:</span>
-        <span class="n">keys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">a_list</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">):</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">not_a_list</span><span class="p">:</span>
-                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">not_a_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">multiple_options</span><span class="p">:</span>
+        <span class="c1"># Ensure that all permutations of the search options are created.</span>
+        <span class="k">for</span> <span class="n">kv_pair</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">multiple_options</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kv_pair</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">single_options</span><span class="p">:</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">single_options</span><span class="p">)</span>
             <span class="n">expanded_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">expanded_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">not_a_list</span><span class="p">)</span>
+        <span class="n">expanded_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_options</span><span class="p">)</span>
 
     <span class="n">general_metadata</span> <span class="o">=</span> <span class="p">{}</span>
 

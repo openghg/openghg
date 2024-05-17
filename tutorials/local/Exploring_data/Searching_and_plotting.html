@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Searching and plotting &#8212; OpenGHG 0.8.0 documentation</title>
+    <title>Searching and plotting &#8212; OpenGHG 0.8.1 documentation</title>
   
   
   
@@ -37,8 +37,8 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=486e5634"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=ec16d22d"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="Retrieving data from remote archives" href="Retrieving_remote_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
+    <meta name="docbuild:last-update" content="May 17, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.8.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.8.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -358,6 +358,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -440,46 +443,22 @@ object store.</p>
 To do this we need to know the site code (“TAC”).</p>
 <p>If we didn’t know the site code, we could find it using
 the <code class="docutils literal notranslate"><span class="pre">summary_site_codes()</span></code> function:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_site_codes</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_site_codes</span>
 
-<span class="go">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
-<span class="go"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
-<span class="gp">In [2]: </span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary_site_codes</span><span class="p">()</span>
+<span class="c1">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
+<span class="c1"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
 
-<span class="gp">In [3]: </span><span class="n">summary</span>
-<span class="gh">Out[3]: </span>
-<span class="go">          Network  ... Inlet heights</span>
-<span class="go">Site Code          ...              </span>
-<span class="go">AAO          NOAA  ...              </span>
-<span class="go">ABP          NOAA  ...              </span>
-<span class="go">ABT          NOAA  ...       [&#39;33m&#39;]</span>
-<span class="go">ACG          NOAA  ...              </span>
-<span class="go">ADR           ALE  ...       [&#39;10m&#39;]</span>
-<span class="go">...           ...  ...           ...</span>
-<span class="go">YON          NOAA  ...       [&#39;20m&#39;]</span>
-<span class="go">ZEP         AGAGE  ...       [&#39;12m&#39;]</span>
-<span class="go">ZEP          ICOS  ...       [&#39;15m&#39;]</span>
-<span class="go">ZEP          NOAA  ...              </span>
-<span class="go">ZSF          ICOS  ...        [&#39;3m&#39;]</span>
-
-<span class="go">[390 rows x 6 columns]</span>
+<span class="n">summary</span> <span class="o">=</span> <span class="n">summary_site_codes</span><span class="p">()</span>
+<span class="n">summary</span>
 </pre></div>
 </div>
 <p>The output of this function is a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe">pandas
 DataFrame</a>,
 so we can filter to find sites containing the name “Tacolneston”:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">site_long_name</span> <span class="o">=</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Long name&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">site_long_name</span> <span class="o">=</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Long name&quot;</span><span class="p">]</span>
+<span class="n">find_tacolneston</span> <span class="o">=</span> <span class="n">site_long_name</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Tacolneston&quot;</span><span class="p">)</span>
 
-<span class="gp">In [5]: </span><span class="n">find_tacolneston</span> <span class="o">=</span> <span class="n">site_long_name</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Tacolneston&quot;</span><span class="p">)</span>
-
-<span class="gp">In [6]: </span><span class="n">summary</span><span class="p">[</span><span class="n">find_tacolneston</span><span class="p">]</span>
-<span class="gh">Out[6]: </span>
-<span class="go">          Network  ...            Inlet heights</span>
-<span class="go">Site Code          ...                         </span>
-<span class="go">TAC          DECC  ...  [&#39;185m&#39;, &#39;54m&#39;, &#39;100m&#39;]</span>
-<span class="go">TAC          NOAA  ...                         </span>
-
-<span class="go">[2 rows x 6 columns]</span>
+<span class="n">summary</span><span class="p">[</span><span class="n">find_tacolneston</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>This shows us that the site code for Tacolneston is “TAC”, and also that
@@ -506,8 +485,26 @@ to extract, for example, just the methane data:</p>
 <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
+<section id="keyword-options-when-searching">
+<h3>Keyword options when searching<a class="headerlink" href="#keyword-options-when-searching" title="Link to this heading">#</a></h3>
+<p>When searching it is also possible to specify multiple options for keywords.
+If this is done using a list, then datasources which have any of the
+specified values will be found. For example if we wanted to search for methane
+at two specific inlets we could write:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+
+<span class="n">tac_surface_search</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="s2">&quot;185m&quot;</span><span class="p">])</span>
+<span class="n">tac_surface_search</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+<p>This will return results from both the 100m and 185m inlets (but not the 54m inlet).</p>
+<p>Note: it is also possible to specify a dictionary to provide an option between
+different keywords but this would most often be for backwards compatability
+(e.g. if a new keyword is introduced and a previous one retired but still
+present for some data sources) and so will not be demonstrated in this tutorial.</p>
 <p>There are also equivalent search functions for other data types
 including <code class="docutils literal notranslate"><span class="pre">search_footprints</span></code>, <code class="docutils literal notranslate"><span class="pre">search_flux</span></code> and <code class="docutils literal notranslate"><span class="pre">search_bc</span></code>.</p>
+</section>
 </section>
 <section id="plotting">
 <h2>2. Plotting<a class="headerlink" href="#plotting" title="Link to this heading">#</a></h2>
@@ -614,7 +611,10 @@ we want to compare and make a plot</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching">1. Searching</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching">1. Searching</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keyword-options-when-searching">Keyword options when searching</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting">2. Plotting</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-multiple-timeseries">Plotting multiple timeseries</a></li>
 </ul>
