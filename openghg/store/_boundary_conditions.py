@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
+from openghg.util import synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -64,6 +65,7 @@ class BoundaryConditions(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -101,6 +103,7 @@ class BoundaryConditions(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -119,6 +122,7 @@ class BoundaryConditions(BaseStore):
         from xarray import open_dataset
 
         species = clean_string(species)
+        species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
@@ -206,6 +210,17 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["metadata"] = metadata
 
             required_keys = ("species", "bc_input", "domain")
+
+            if optional_metadata:
+                common_keys = set(required_keys) & set(optional_metadata.keys())
+
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in boundary_conditions_data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources

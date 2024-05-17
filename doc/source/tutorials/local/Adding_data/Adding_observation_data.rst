@@ -19,12 +19,12 @@ Each object and piece of data in the object store is stored at a specific key, w
 Using the tutorial object store
 -------------------------------
 
-An object store is a folder with a fixed structure within which openghg 
-can read and write data. To avoid adding the example data we use in this 
-tutorial to your normal object store, we need to tell OpenGHG to use a 
-separate sandboxed object store that we'll call the tutorial store. To do 
-this we use the ``use_tutorial_store`` function from ``openghg.tutorial``. 
-This sets the ``OPENGHG_TUT_STORE`` environment variable for this session and 
+An object store is a folder with a fixed structure within which openghg
+can read and write data. To avoid adding the example data we use in this
+tutorial to your normal object store, we need to tell OpenGHG to use a
+separate sandboxed object store that we'll call the tutorial store. To do
+this we use the ``use_tutorial_store`` function from ``openghg.tutorial``.
+This sets the ``OPENGHG_TUT_STORE`` environment variable for this session and
 won't affect your use of OpenGHG outside of this tutorial.
 
 .. code:: ipython3
@@ -246,8 +246,7 @@ Searching the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can search the object store by property using the
-``search_surface(...)`` function. This function retrieves metadata from the
-data in the object store.
+``search_surface(...)`` function. This function retrieves all of the metadata associated with the search query from the data in the object store.
 
 For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the ``species`` keyword:
@@ -320,7 +319,7 @@ access.
 
 To access the surface data we have added so far we can use the
 ``get_obs_surface`` function and pass keywords for the site code,
-species and inlet height to retrieve our data.
+species and inlet height to retrieve our data. Using `get_*` functions will only allow one set of data to be returned and will give details if this is not the case.
 
 In this case we want to extract the carbon dioxide (“co2”) data from the
 Tacolneston data (“TAC”) site measured at the “185m” inlet:

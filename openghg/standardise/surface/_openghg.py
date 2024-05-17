@@ -55,7 +55,7 @@ def parse_openghg(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         kwargs: Any additional attributes to be associated with the data.
     Returns:
@@ -101,10 +101,16 @@ def parse_openghg(
             if key in attributes:
                 attributes_value = attributes[key]
                 if str(value).lower() != str(attributes_value).lower():
-                    # If inputs do not match attribute values, raise a ValueError
-                    raise ValueError(
-                        f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                    )
+                    try:
+                        # As we may have things like 1200 != 1200.0
+                        # we'll check if the floats are equal
+                        if float(value) == float(attributes_value):
+                            continue
+                    except ValueError:
+                        # If inputs do not match attribute values, raise a ValueError
+                        raise ValueError(
+                            f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                        )
 
     # Read the inlet
     if inlet is None:

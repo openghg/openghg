@@ -5,7 +5,29 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.8.1...HEAD)
+
+## [0.8.1] - 2024-05-17
+
+### Added
+
+- Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
+- Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
+- Renaming `high_time_resolution` argument to `time_resolved` in metadata as more appropriate description for footprints going forward and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
+- Added explicit backwards compatability when searching previous object stores containing the `high_time_resolution` keyword rather than `time_resolved` - [PR #990](https://github.com/openghg/openghg/pull/990)
+- Added ability to pass additional tags as optional metadata through `standardise_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
+- Check added object stores listed in the configuration which are in the previous format with a warning raised for this [PR #962](https://github.com/openghg/openghg/pull/962)
+
+### Fixed
+
+- `source` can be passed to `transform_flux_data` with the EDGAR parser; `date` isn't stored with the transformed EDGAR data, since this is used for choosing what data to add, but doesn't describe all of the data in the object store. Fixed bug due to string split over two lines in logging message - [#PR 1010](https://github.com/openghg/openghg/pull/1010)
+- Fixed problem where the zarr store check raised an error for empty stores, preventing new zarr stores from being created - [#PR 993](https://github.com/openghg/openghg/pull/993)
+- Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
+- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #904](https://github.com/openghg/openghg/pull/904)
+- Added check to verify if `obs` and `footprint` have overlapping time coordinates when creating a `ModelScenario` object, if not then raise `ValueError` - [PR #954](https://github.com/openghg/openghg/pull/954)
+- Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
+- Replace references to old `supplementary_data` repository with `openghg_defs` - [PR #999](https://github.com/openghg/openghg/pull/999)
+- Added call to synonyms for species while standardising - [PR #984](https://github.com/openghg/openghg/pull/984)
 
 ## [0.8.0] - 2024-03-19
 
@@ -28,6 +50,10 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Meterological model input renamed from `metmodel` to `met_model` [PR #957](https://github.com/openghg/openghg/pull/957).
 - Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
 
+### Added
+
+- More more explanation regarding use of `search_*` and `get_*` function in tutorial 1 [PR #952](https://github.com/openghg/openghg/pull/952)
+
 ## [0.7.1] - 2024-03-01
 
 ### Fixed
@@ -37,6 +63,9 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)
 - Bug fix for allowing a period to be specified when this cannot be inferred from the input data [PR #899](https://github.com/openghg/openghg/pull/899)
 
+### Fixed
+
+- Bug fix for passing calibration_scale as optional parameter to the parser function. [PR #872](https://github.com/openghg/openghg/pull/872)
 
 ## [0.7.0] - 2023-12-15
 

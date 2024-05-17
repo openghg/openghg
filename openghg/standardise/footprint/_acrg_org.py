@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Union
+import warnings
 from xarray import Dataset
 
 from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
@@ -24,6 +25,7 @@ def parse_acrg_org(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
+    time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     chunks: Optional[Dict] = None,
@@ -43,8 +45,9 @@ def parse_acrg_org(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
             Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
@@ -52,6 +55,13 @@ def parse_acrg_org(
     Returns:
         dict: Dictionary of data
     """
+
+    if high_time_resolution:
+        warnings.warn(
+            "This argument is deprecated and will be replaced in future versions with time_resolved.",
+            DeprecationWarning,
+        )
+        time_resolved = high_time_resolution
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
 
@@ -61,9 +71,9 @@ def parse_acrg_org(
 
     if species == "co2":
         # Expect co2 data to have high time resolution
-        if not high_time_resolution:
-            logger.info("Updating high_time_resolution to True for co2 data")
-            high_time_resolution = True
+        if not time_resolved:
+            logger.info("Updating time_resolved to True for co2 data")
+            time_resolved = True
 
     if short_lifetime:
         if species == "inert":
@@ -205,7 +215,7 @@ def parse_acrg_org(
         except KeyError:
             raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-    metadata["high_time_resolution"] = str(high_time_resolution)
+    metadata["time_resolved"] = str(time_resolved)
     metadata["high_spatial_resolution"] = str(high_spatial_resolution)
     metadata["short_lifetime"] = str(short_lifetime)
 

@@ -43,7 +43,7 @@ class ObsSurface(BaseStore):
             metadata: Metadata
             file_metadata: File metadata such as original filename
             precision_data: GCWERKS precision data
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         Returns:
             dict: Dictionary of result
@@ -124,6 +124,7 @@ class ObsSurface(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -144,7 +145,7 @@ class ObsSurface(BaseStore):
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
                         update_mismatch: This determines whether mismatches between the internal data
                 attributes and the supplied / derived metadata can be updated or whether
@@ -177,6 +178,7 @@ class ObsSurface(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -192,6 +194,7 @@ class ObsSurface(BaseStore):
             load_surface_parser,
             verify_site,
             check_if_need_new_version,
+            synonyms,
         )
 
         if not isinstance(filepath, list):
@@ -317,7 +320,7 @@ class ObsSurface(BaseStore):
 
             # Collect together optional parameters (not required but
             # may be accepted by underlying parser function)
-            optional_parameters = {"update_mismatch": update_mismatch}
+            optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
             # TODO: extend optional_parameters to include kwargs when added
 
             input_parameters = required_parameters.copy()
@@ -342,6 +345,7 @@ class ObsSurface(BaseStore):
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
                 species = key.split("_")[0]
+                species = synonyms(species)
                 try:
                     ObsSurface.validate_data(value["data"], species=species)
                 except ValueError:
@@ -375,6 +379,17 @@ class ObsSurface(BaseStore):
                 "icos_data_level",
                 "data_type",
             )
+
+            if optional_metadata:
+                common_keys = set(required_keys) & set(optional_metadata.keys())
+
+                if common_keys:
+                    raise ValueError(
+                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                    )
+                else:
+                    for key, parsed_data in data.items():
+                        parsed_data["metadata"].update(optional_metadata)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
