@@ -43,7 +43,7 @@ def get_metakey_defaults() -> Dict:
     # We use importlib here to allow us to get the path of the file independent of how OpenGHG
     # is installed
 
-    toml_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.toml")
+    toml_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.json")
     return toml.loads(toml_bytes.decode(encoding="utf-8"))
 
 
