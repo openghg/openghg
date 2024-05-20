@@ -1,11 +1,13 @@
+import json
 import logging
 import importlib
+from pprint import pformat
 from pathlib import Path
 import pkgutil
-import toml
 from typing import Dict
 
-from openghg.types import ObjectStoreError
+from openghg.objectstore import get_writable_bucket
+from openghg.types import ConfigFileError, ObjectStoreError
 from openghg.util import timestamp_now
 
 logger = logging.getLogger("openghg.objectstore")
@@ -24,14 +26,14 @@ def _get_config_folderpath(bucket: str) -> Path:
 
 
 def _get_metakeys_filepath(bucket: str) -> Path:
-    """Get the path to the metakeys TOML file
+    """Get the path from the metakeys JSON file
 
     Args:
         bucket: Object store bucket path
     Returns:
-        Path: Path to metakeys TOML
+        Path: Path to metakeys JSON
     """
-    return _get_config_folderpath(bucket=bucket) / "metadata_keys.toml"
+    return _get_config_folderpath(bucket=bucket) / "metadata_keys.json"
 
 
 def get_metakey_defaults() -> Dict:
@@ -40,11 +42,67 @@ def get_metakey_defaults() -> Dict:
     Returns:
         dict: Dictionary of defaults
     """
-    # We use importlib here to allow us to get the path of the file independent of how OpenGHG
-    # is installed
+    json_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.json")
+    return json.loads(json_bytes.decode(encoding="utf-8"))
 
-    toml_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.json")
-    return toml.loads(toml_bytes.decode(encoding="utf-8"))
+
+def check_metakeys(metakeys: Dict) -> bool:
+    """Checks the metakeys dictionary to ensure it contains all the required
+    information
+
+    Args:
+        metakeys: Dictionary of metakeys
+    Returns:
+        bool: True if valid, else False
+    Raises:
+        ValueError if data missing
+    """
+    from openghg.store import data_class_info
+
+    data_types = data_class_info()
+
+    missing_keys = set(data_types) - set(metakeys)
+    if missing_keys:
+        raise ConfigFileError(f"We require metakeys for each data type, we're missing: {missing_keys}")
+
+    total_errors = {}
+    for dtype, key_data in metakeys.items():
+        dtype_errors = []
+        try:
+            required = key_data["required"]
+        except KeyError:
+            dtype_errors.append("A required key is required")
+            # raise ConfigFileError("A required key is required")
+
+        for metakey, type_data in required.items():
+            try:
+                types = type_data["type"]
+            except KeyError:
+                dtype_errors.append("We require a type key for each metakey")
+                continue
+                # raise ConfigFileError("We require a type key for each metakey")
+
+            if not types:
+                dtype_errors.append(f"Missing types for {metakey}")
+                # raise ConfigFileError("We need a type for each key")
+
+            if not isinstance(types, list):
+                dtype_errors.append(f"The type(s) for {metakey} must be contained in a list")
+                # raise ConfigFileError("The type(s) for each metakey must be contained in a list")
+
+            # TODO - in the future add in a check to ensure they're a type we
+            # for key_type in types:
+            # pass
+
+        if dtype_errors:
+            total_errors[dtype] = dtype_errors
+
+    if total_errors:
+        logger.error("Errors found with metakeys:")
+        logger.error(pformat(total_errors))
+        return False
+
+    return True
 
 
 def create_default_config(bucket: str) -> None:
@@ -99,7 +157,7 @@ def _write_metakey_config(bucket: str, metakeys: Dict) -> None:
         logger.debug(f"Creating folder at {config_folder}")
         config_folder.mkdir(parents=True)
 
-    metakey_path.write_text(toml.dumps(config_data))
+    metakey_path.write_text(json.dumps(config_data))
 
 
 def get_metakeys(bucket: str) -> Dict[str, Dict]:
@@ -116,12 +174,13 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
         logger.debug(f"Creating default metakeys file at {metakey_path}.")
         create_default_config(bucket=bucket)
 
-    config_data = toml.loads(metakey_path.read_text())
+    config_data = json.loads(metakey_path.read_text())
     return config_data["metakeys"]
 
 
-def write_metakeys(bucket: str, metakeys: Dict) -> None:
-    """Write metadata keys to file. The keys must contain data for each
+def write_metakeys(store: str, metakeys: Dict) -> None:
+    """Write metadata keys to file. The dictionary will be checked
+    before writing and information on errros presented to the user.
 
     Args:
         store: Store name
@@ -129,16 +188,9 @@ def write_metakeys(bucket: str, metakeys: Dict) -> None:
     Returns:
         None
     """
-    from openghg.store import data_class_info
+    bucket = get_writable_bucket(name=store)
 
-    # Quickly check we have keys for each of the storage classes
-    storage_class_data = data_class_info()
-    missing_keys = set(storage_class_data) - set(metakeys)
-
-    if missing_keys:
-        raise ValueError(
-            "The metakeys dictionary must contain keys for each of the storage classes.\n"
-            + f"We're missing: {missing_keys}"
-        )
+    if not check_metakeys(metakeys=metakeys):
+        raise ConfigFileError("Invalid metakeys, see errors above.")
 
     _write_metakey_config(bucket=bucket, metakeys=metakeys)
