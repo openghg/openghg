@@ -23,64 +23,72 @@ folder of the object store. Each time a file is standardised this file is read a
 which ``Datasource`` the data should be assigned to.
 
 Say we have an object store in our home directory at ``/home/gareth/openghg_store``, you can find the config file at
-``/home/gareth/openghg_store/config/metadata_keys.toml``. Let's have a look at the default file OpenGHG creates
-when the store is first setup.
+``/home/gareth/openghg_store/config/metadata_keys.json``. Let's have a look at a section of the default file OpenGHG creates
+when the store is first setup. The block below shows the keys that will be used for the footprints data type.
 
-TODO - include the default file here!
+.. code-block:: json
 
-NOTE this is only showing the keys for the ``footprints`` data type.
-
-.. code-block:: toml
-
-    [footprints.required.site]
-    type = [ "str",]
-
-    [footprints.required.model]
-    type = [ "str",]
-
-    [footprints.required.inlet]
-    type = [ "height",]
-
-    [footprints.required.domain]
-    type = [ "str",]
-
-    [footprints.required.time_resolved]
-    type = [ "bool",]
-
-    [footprints.required.high_spatial_resolution]
-    type = [ "bool",]
-
-    [footprints.required.short_lifetime]
-    type = [ "bool",]
-
-    [footprints.required.species]
-    type = [ "str", "species",]
-
-    [footprints.required.met_model]
-    type = [ "str",]
-
-Notice that for each data type we have a ``required`` and an ``optional`` key. If you're unfamiliar with TOML the Python
-dictionary equivalent for each data type is 
-
-    .. code-block:: python
-
-        metakeys = {
-            "footprints": {
-                            "required": {"site": {"type": ["str"]},
-                                        "model": {"type": ["str"]},
-                                        "inlet": {"type": ["height"]},
-                                        "domain": {"type": ["str"]},
-                                        ...
-                                        },
-                            "optional": {},
-                          }
+    "footprints": {
+        "required": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            },
+            "inlet": {
+                "type": [
+                    "height"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            },
+            "time_resolved": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "high_spatial_resolution": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "short_lifetime": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "species": {
+                "type": [
+                    "str",
+                    "species"
+                ]
+            },
+            "met_model": {
+                "type": [
+                    "str"
+                ]
+            }
         }
+    },
 
 For each key we require a type. These types are not the standard Python types but metadata types that OpenGHG
 will read to process the data you give it. For example if you want to pass in a date value for some data that should be
 parsed as a timestamp you would give the type as ``timestamp``. For an inlet height the type would be ``height``.
 
-The list of types available:
+.. note::
+    TODO - update this section
+
+    The types are currently ignored
+
+List of types available:
 
     1. height
     2. species
@@ -92,37 +100,63 @@ The list of types available:
 Say we want to add some footprint data and we want to be able to store based on the project it's associated with.
 We'll update the TOML file and add a couple of new lines
 
-.. code-block:: toml
+.. code-block:: json
 
-    [footprints.required.site]
-    type = [ "str",]
-
-    [footprints.required.model]
-    type = [ "str",]
-
-    [footprints.required.inlet]
-    type = [ "height",]
-
-    [footprints.required.domain]
-    type = [ "str",]
-
-    [footprints.required.time_resolved]
-    type = [ "bool",]
-
-    [footprints.required.high_spatial_resolution]
-    type = [ "bool",]
-
-    [footprints.required.short_lifetime]
-    type = [ "bool",]
-
-    [footprints.required.species]
-    type = [ "str", "species",]
-
-    [footprints.required.met_model]
-    type = [ "str",]
-
-    [footprints.required.project]
-    type = ["str",]
+    "footprints": {
+        "required": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            },
+            "inlet": {
+                "type": [
+                    "height"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            },
+            "time_resolved": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "high_spatial_resolution": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "short_lifetime": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "species": {
+                "type": [
+                    "str",
+                    "species"
+                ]
+            },
+            "met_model": {
+                "type": [
+                    "str"
+                ]
+            },
+            "project": {
+                "type": [
+                    "str"
+                ]
+            }
+        }
+    },
 
 This key must now be provided when standardising data. At the moment this key must be passed in using the ``optional_metadata``
 argument to the standardisation functions. To standardise a footprint we now do
@@ -131,7 +165,7 @@ argument to the standardisation functions. To standardise a footprint we now do
 
     .. code-block:: python
 
-    
+
     result = standardise_footprint(filepath=fp_filepath,
                                     site="TAC",
                                     domain="EUROPE",
