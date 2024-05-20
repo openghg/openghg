@@ -5,23 +5,29 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.8.1...HEAD)
+
+## [0.8.1] - 2024-05-17
 
 ### Added
 
 - Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
 - Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
-- Argument `time_resolved` is added as phase 1 change for `high_time_resolution`, also metadata is updated and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
-- Added ability to pass additional tags as optional metadata through `standardising_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
-- A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
+- Renaming `high_time_resolution` argument to `time_resolved` in metadata as more appropriate description for footprints going forward and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
+- Added explicit backwards compatability when searching previous object stores containing the `high_time_resolution` keyword rather than `time_resolved` - [PR #990](https://github.com/openghg/openghg/pull/990)
+- Added ability to pass additional tags as optional metadata through `standardise_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
+- Check added object stores listed in the configuration which are in the previous format with a warning raised for this [PR #962](https://github.com/openghg/openghg/pull/962)
 
 ### Fixed
 
-- Problem where the zarr store check raised an error for empty stores, preventing new zarr stores from being created - [#PR 993](https://github.com/openghg/openghg/pull/993)
-
+- `source` can be passed to `transform_flux_data` with the EDGAR parser; `date` isn't stored with the transformed EDGAR data, since this is used for choosing what data to add, but doesn't describe all of the data in the object store. Fixed bug due to string split over two lines in logging message - [#PR 1010](https://github.com/openghg/openghg/pull/1010)
+- Fixed problem where the zarr store check raised an error for empty stores, preventing new zarr stores from being created - [#PR 993](https://github.com/openghg/openghg/pull/993)
 - Retrieval of level 1 data from the ICOS Carbon Portal now no longer tries to retrieve a large number of CSV files - [#PR 868](https://github.com/openghg/openghg/pull/868)
-- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #742](https://github.com/openghg/openghg/pull/904)
+- Added check for duplicate object store path being added under different store name, if detected raises `ValueError`. - [PR #904](https://github.com/openghg/openghg/pull/904)
 - Added check to verify if `obs` and `footprint` have overlapping time coordinates when creating a `ModelScenario` object, if not then raise `ValueError` - [PR #954](https://github.com/openghg/openghg/pull/954)
+- Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
+- Replace references to old `supplementary_data` repository with `openghg_defs` - [PR #999](https://github.com/openghg/openghg/pull/999)
+- Added call to synonyms for species while standardising - [PR #984](https://github.com/openghg/openghg/pull/984)
 
 ## [0.8.0] - 2024-03-19
 

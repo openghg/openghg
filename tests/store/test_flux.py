@@ -276,7 +276,6 @@ def test_add_edgar_database(clear_stores):
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
     )
@@ -292,7 +291,6 @@ def test_add_edgar_database(clear_stores):
         "source": default_source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -309,28 +307,30 @@ def test_add_edgar_database(clear_stores):
     assert metadata.items() >= expected_metadata.items()
 
 
-def test_add_edgar_v8_database(clear_stores):
+@pytest.mark.parametrize(
+    "source", [None, "edgar-annual-total"]
+)
+def test_add_edgar_v8_database(clear_stores, source):
     """Test edgar v8.0 can be added to object store (default domain)"""
     folder = "v8.0_CH4"
     test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "1970"
+    expected_source = "anthro" if source is None else source
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
 
     default_domain = "globaledgar"
 
     version = "v8.0"
     species = "ch4"
-    default_source = "anthro"
 
-    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    output_key = f"{species}_{expected_source}_{default_domain}_{date}"
     assert output_key in proc_results
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,
         database_version=version,
     )
@@ -343,10 +343,9 @@ def test_add_edgar_v8_database(clear_stores):
     expected_metadata = {
         "species": species,
         "domain": default_domain,
-        "source": default_source,
+        "source": expected_source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
-        "date": "1970",
         "author": "openghg cloud",
         "start_date": "1970-01-01 00:00:00+00:00",
         "end_date": "1970-12-31 23:59:59+00:00",
@@ -406,7 +405,6 @@ def test_transform_and_add_edgar_database(clear_stores):
 
     search_results = search(
         species=species,
-        date=date,
         domain=domain,
         database=database,  # would searching for lowercase not work?
         database_version=version,
@@ -425,7 +423,6 @@ def test_transform_and_add_edgar_database(clear_stores):
         "source": "anthro",
         "database": "edgar",
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -497,7 +494,6 @@ def test_optional_metadata():
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
     )
