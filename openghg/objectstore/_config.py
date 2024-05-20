@@ -65,9 +65,9 @@ def check_metakeys(metakeys: Dict) -> bool:
     if missing_keys:
         total_errors["FATAL"] = f"We require metakeys for each data type, we're missing: {missing_keys}"
 
-    def _check_keys(key_data: Dict) -> List:
+    def _check_keys(_key_data: Dict) -> List:
         errors = []
-        for metakey, type_data in required.items():
+        for metakey, type_data in _key_data.items():
             try:
                 types = type_data["type"]
             except KeyError:
