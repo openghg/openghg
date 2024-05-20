@@ -171,7 +171,7 @@ argument to the standardisation functions. To standardise a footprint we now do
                                     domain="EUROPE",
                                     model="NAME",
                                     height="100m",
-                                    met_model"UKV",
+                                    met_model="UKV",
                                     optional_metadata={"project": "project_a"})
 
     result = standardise_footprint(filepath=fp_filepath_b,
@@ -179,7 +179,7 @@ argument to the standardisation functions. To standardise a footprint we now do
                                     domain="EUROPE",
                                     model="NAME",
                                     height="100m",
-                                    met_model"UKV",
+                                    met_model="UKV",
                                     optional_metadata={"project": "project_b"})
 
 These files will now be stored separately within OpenGHG.
