@@ -86,21 +86,13 @@ def parse_gcwerks_nc(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-
     data_filepath = Path(data_filepath)
 
-    # Do some setup for processing
-    # Load site data
     gcwerks_data = load_internal_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)
-    # We don't currently do anything with inlet here as it's always read from data
-    # or taken from process_gcwerks_parameters.json
-    if inlet is not None:
-        inlet = clean_string(inlet)
-    if instrument is not None:
-        instrument = clean_string(instrument)
+    instrument = clean_string(instrument)
 
     # If we're not passed the instrument name and we can't find it raise an error
     if instrument is None:
@@ -156,7 +148,6 @@ def parse_gcwerks_nc(
         # this is a horrible bit of code but it should work. But it can't pick out
         # if there are multiple names for the units (e.g. ppt vs pmol mol-1). Currently
         # just picks out the first one.
-
         species_attributes = load_internal_json(filename="attributes.json")
         if dataset.mf.units in species_attributes["unit_interpret"].values():
             for key, value in species_attributes["unit_interpret"].items():
@@ -171,7 +162,6 @@ def parse_gcwerks_nc(
         # These .nc files do not have flags attached to them.
         # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
-
         data["mf_repeatability"] = data["mf_repeatability"].astype(float)
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
@@ -272,7 +262,6 @@ def _format_species(
         )
 
     # inlet heights are just the numbers here in Matt's files, rather than having the units attached.
-
     data_inlets = [format_inlet(i) for i in data_inlets]
 
     # Skip this species if the data is all NaNs
@@ -286,7 +275,6 @@ def _format_species(
         inlet_label = format_inlet(inlet_label)
 
         # Create a copy of metadata for local modification and give it the species-specific metadata
-
         species_metadata = metadata.copy()
         species_metadata["units"] = units[species]
 
@@ -328,7 +316,6 @@ def _format_species(
         attributes = _get_site_attributes(
             site=site, inlet=inlet_label, instrument=instrument, gc_params=gc_params
         )
-        attributes = attributes.copy()
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
