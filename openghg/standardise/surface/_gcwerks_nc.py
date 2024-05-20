@@ -1,13 +1,14 @@
-from numpy import floor
+from fnmatch import fnmatch
 from pathlib import Path
-import pandas as pd
 from typing import Dict, List, Optional, Union
+
+import pandas as pd
 import xarray as xr
-
-from openghg.standardise.meta import define_species_label
-from openghg.util import load_internal_json, clean_string
-
+from addict import Dict as aDict
+from numpy import floor
+from openghg.standardise.meta import assign_attributes, define_species_label
 from openghg.types import optionalPathType
+from openghg.util import clean_string, format_inlet, load_internal_json
 
 
 def find_files(data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Path]:
@@ -85,8 +86,6 @@ def parse_gcwerks_nc(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-
-    from openghg.standardise.meta import assign_attributes
 
     data_filepath = Path(data_filepath)
 
@@ -260,11 +259,6 @@ def _format_species(
     Returns:
         dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
     """
-    from fnmatch import fnmatch
-
-    from addict import Dict as aDict
-    from openghg.util import format_inlet
-    from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
     expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)
@@ -434,8 +428,6 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import format_inlet
-
     site = site.upper()
     instrument = instrument.lower()
 
