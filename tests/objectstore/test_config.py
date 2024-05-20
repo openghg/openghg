@@ -1,5 +1,11 @@
 import pytest
-from openghg.objectstore import get_metakey_defaults, create_default_config, get_metakeys, write_metakeys
+from openghg.objectstore import (
+    check_metakeys,
+    get_metakey_defaults,
+    create_default_config,
+    get_metakeys,
+    write_metakeys,
+)
 from openghg.store import data_class_info
 
 
@@ -42,3 +48,13 @@ def test_write_metakeys(tmp_store):
     with pytest.raises(ValueError):
         mock_metakeys = {}
         write_metakeys(bucket=tmp_store, metakeys=mock_metakeys)
+
+
+def test_check_metakeys():
+    correct = {"required": {"site": {"type": ["str"]}}}
+
+    assert check_metakeys(metakeys=correct)
+
+    incorrect = {"required": {"site": {"parrot": ["str"]}}}
+
+    assert not check_metakeys(metakeys=incorrect)

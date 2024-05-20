@@ -4,9 +4,8 @@ import importlib
 from pprint import pformat
 from pathlib import Path
 import pkgutil
-from typing import Dict
+from typing import Dict, List
 
-from openghg.objectstore import get_writable_bucket
 from openghg.types import ConfigFileError, ObjectStoreError
 from openghg.util import timestamp_now
 
@@ -61,38 +60,53 @@ def check_metakeys(metakeys: Dict) -> bool:
 
     data_types = data_class_info()
 
+    total_errors = {}
     missing_keys = set(data_types) - set(metakeys)
     if missing_keys:
-        raise ConfigFileError(f"We require metakeys for each data type, we're missing: {missing_keys}")
+        total_errors["FATAL"] = f"We require metakeys for each data type, we're missing: {missing_keys}"
 
-    total_errors = {}
+    def _check_keys(key_data: Dict) -> List:
+        errors = []
+        for metakey, type_data in required.items():
+            try:
+                types = type_data["type"]
+            except KeyError:
+                errors.append(f"Missing type data for {metakey}")
+                continue
+
+            if not types:
+                errors.append(f"Missing types for {metakey}")
+
+            if not isinstance(types, list):
+                errors.append(f"The type(s) for {metakey} must be contained in a list")
+
+            # TODO - in the future add in a check to ensure they're a type we
+            # for key_type in types:
+            # pass
+
+        return errors
+
     for dtype, key_data in metakeys.items():
         dtype_errors = []
         try:
             required = key_data["required"]
         except KeyError:
-            dtype_errors.append("A required key is required")
-            # raise ConfigFileError("A required key is required")
+            dtype_errors.append(
+                "A number of required metakeys are required, please see example, skipping further checks."
+            )
+            continue
 
-        for metakey, type_data in required.items():
-            try:
-                types = type_data["type"]
-            except KeyError:
-                dtype_errors.append("We require a type key for each metakey")
-                continue
-                # raise ConfigFileError("We require a type key for each metakey")
+        errors_required = _check_keys(required)
 
-            if not types:
-                dtype_errors.append(f"Missing types for {metakey}")
-                # raise ConfigFileError("We need a type for each key")
+        if errors_required:
+            dtype_errors.append("Required key errors:")
+            dtype_errors.extend(errors_required)
 
-            if not isinstance(types, list):
-                dtype_errors.append(f"The type(s) for {metakey} must be contained in a list")
-                # raise ConfigFileError("The type(s) for each metakey must be contained in a list")
-
-            # TODO - in the future add in a check to ensure they're a type we
-            # for key_type in types:
-            # pass
+        if "optional" in key_data:
+            errors_optional = _check_keys(key_data["optional"])
+            if errors_optional:
+                dtype_errors.append("Optional key errors:")
+                dtype_errors.extend(errors_optional)
 
         if dtype_errors:
             total_errors[dtype] = dtype_errors
@@ -178,18 +192,16 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
     return config_data["metakeys"]
 
 
-def write_metakeys(store: str, metakeys: Dict) -> None:
+def write_metakeys(bucket: str, metakeys: Dict) -> None:
     """Write metadata keys to file. The dictionary will be checked
     before writing and information on errros presented to the user.
 
     Args:
-        store: Store name
+        bucket: Path to object store
         metakeys: Dictionary of keys
     Returns:
         None
     """
-    bucket = get_writable_bucket(name=store)
-
     if not check_metakeys(metakeys=metakeys):
         raise ConfigFileError("Invalid metakeys, see errors above.")
 
