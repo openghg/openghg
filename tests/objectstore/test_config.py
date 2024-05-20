@@ -7,6 +7,7 @@ from openghg.objectstore import (
     write_metakeys,
 )
 from openghg.store import data_class_info
+from openghg.types import ConfigFileError
 
 
 @pytest.fixture
@@ -28,7 +29,7 @@ def test_create_default_config(tmp_store):
 
     create_default_config(bucket=str(tmp_store))
 
-    assert (tmp_store / "config" / "metadata_keys.toml").exists()
+    assert (tmp_store / "config" / "metadata_keys.json").exists()
 
 
 def test_get_metakeys(tmp_store):
@@ -45,16 +46,17 @@ def test_write_metakeys(tmp_store):
 
     write_metakeys(bucket=tmp_store, metakeys=mock_metakeys)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ConfigFileError):
         mock_metakeys = {}
         write_metakeys(bucket=tmp_store, metakeys=mock_metakeys)
 
 
-def test_check_metakeys():
-    correct = {"required": {"site": {"type": ["str"]}}}
+def test_check_metakeys(caplog):
+    mock_keys = {"required": {"site": {"type": ["str"]}}}
+    correct = {k: mock_keys for k in data_class_info()}
 
     assert check_metakeys(metakeys=correct)
 
-    incorrect = {"required": {"site": {"parrot": ["str"]}}}
+    incorrect = {k: mock_keys for k in ["footprints", "flux"]}
 
-    assert not check_metakeys(metakeys=incorrect)
+    assert not check_metakeys(incorrect)
