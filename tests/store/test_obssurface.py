@@ -377,6 +377,16 @@ def test_gc_attributes(gc_standardised):
 
     parsed_surface_metachecker(data=gc_data[0], species = gc_data[0].metadata["species"])
 
+    # Checking species name and other attributes are present in
+    # standardised data
+    assert gc_data[0].data["nf3"].values[0] == 1.603
+    assert gc_data[0].data["nf3_repeatability"].values[0] == 0.02531
+    assert gc_data[10].data.attrs["calibration_scale"] == "SIO-07"
+    assert gc_data[10].data.attrs["data_owner"] == "Paul Krummel"
+    assert gc_data[10].data.attrs["inlet_height_magl"] == "70"
+    assert gc_data[10].data.attrs["station_height_masl"] == 94.0
+
+
 @pytest.mark.skip(reason="Cranfield data processing will be removed.")
 def test_read_cranfield():
     clear_test_stores()
@@ -427,7 +437,11 @@ def test_read_openghg_format(bucket):
         assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
         assert co2_data["co2"][0] == 385.25
         assert co2_data["co2_variability"][0] == 0.843
-
+        assert co2_data.attrs["calibration_scale"] == "WMO-X2007"
+        assert co2_data.attrs["data_owner"] == "Simon O'Doherty"
+        assert co2_data.attrs["inlet_height_magl"] == "54"
+        assert co2_data.attrs["station_height_masl"] == 50.0
+        assert co2_data.attrs["station_longitude"] == 1.13872
 
 def test_read_noaa_raw(bucket):
     clear_test_stores()
@@ -1011,6 +1025,14 @@ def test_npl_attributes():
 
     parsed_surface_metachecker(data=npl_data[0], species=npl_data[0].metadata["species"])
 
+    assert npl_data[0].data.attrs["calibration_scale"] == "unknown"
+    assert npl_data[0].data.attrs["data_owner"] == "Tim Arnold"
+    assert npl_data[0].data.attrs["inlet_height_magl"] == "NA"
+    assert npl_data[0].data.attrs["station_height_masl"] == 0
+    assert npl_data[0].data.attrs["station_longitude"] == -0.3487
+    assert npl_data[0].data.attrs["instrument"] == "Picarro G2401"
+
+
 def test_openghg_attributes():
     """Test to verify assigned attributes are stored correctly"""
     clear_test_stores()
@@ -1024,3 +1046,10 @@ def test_openghg_attributes():
     openghg_data = search_surface().retrieve_all()
 
     parsed_surface_metachecker(data=openghg_data, species=openghg_data.metadata["species"])
+
+    assert openghg_data.data.attrs["calibration_scale"] == "WMO-X2007"
+    assert openghg_data.data.attrs["data_owner"] == "Simon O'Doherty"
+    assert openghg_data.data.attrs["inlet_height_magl"] == "54"
+    assert openghg_data.data.attrs["station_height_masl"] == 50
+    assert openghg_data.data.attrs["station_longitude"] == 1.13872
+    assert openghg_data.data.attrs["instrument"] == "picarro"
