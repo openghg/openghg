@@ -2,10 +2,8 @@ import logging
 
 import pytest
 from helpers import (
-    attributes_checker_obssurface,
     check_cf_compliance,
     get_surface_datapath,
-    parsed_surface_metachecker,
 )
 from openghg.standardise.surface import parse_noaa
 from pandas import Timestamp
@@ -132,13 +130,6 @@ def test_read_file_site_filepath_read(scsn06_data):
     assert ch4_data["CH4"][0] == pytest.approx(1713.21)
     assert ch4_data["CH4_repeatability"][0] == pytest.approx(2.4)
     assert ch4_data["CH4_selection_flag"][0] == 0
-
-    expected_attrs = {
-        "station_longitude": 107.0,
-        "station_latitude": 6.0,
-        "station_long_name": "South China Sea (6 N), N/A",
-        "station_height_masl": 15.0,
-    }
 
 
 @pytest.mark.skip_if_no_cfchecker
