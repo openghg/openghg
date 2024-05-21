@@ -74,7 +74,7 @@ delete or modify already existing data.
 .. toctree::
    :maxdepth: 1
 
-   local/Managing_object_store/Modifying_and_deleting_data
+   local/Managing_object_store/Managing_data
 
 .. toctree::
    :maxdepth: 1
