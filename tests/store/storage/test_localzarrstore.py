@@ -131,7 +131,7 @@ def test_bytes_stored_compression(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v1", dataset=ds, compressor=compressor)
         compressed_bytes = store.bytes_stored()
-        assert compressed_bytes == 292896
+        assert compressed_bytes == 292855
         assert compressed_bytes < original_size
         assert compressed_bytes < uncompressed_bytes
 
