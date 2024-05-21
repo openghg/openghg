@@ -7,7 +7,7 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import species_lifetime
+from openghg.util import species_lifetime, synonyms
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -301,6 +301,7 @@ class Footprints(BaseStore):
             species = "inert"
         else:
             species = clean_string(species)
+            species = synonyms(species)
 
         # Ensure we have a clear missing value for met_model
         if met_model is None:
