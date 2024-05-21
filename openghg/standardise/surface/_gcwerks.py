@@ -85,7 +85,6 @@ def parse_gcwerks(
     """
     from pathlib import Path
 
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json
 
     data_filepath = Path(data_filepath)
@@ -132,11 +131,6 @@ def parse_gcwerks(
         network=network,
         sampling_period=sampling_period,
         gc_params=gc_params,
-    )
-
-    # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(
-        data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
     )
 
     return gas_data

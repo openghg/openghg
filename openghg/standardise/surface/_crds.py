@@ -43,8 +43,6 @@ def parse_crds(
         dict: Dictionary of gas data
     """
     from pathlib import Path
-
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet
 
     if not isinstance(data_filepath, Path):
@@ -63,15 +61,6 @@ def parse_crds(
         sampling_period=sampling_period,
         measurement_type=measurement_type,
         drop_duplicates=drop_duplicates,
-    )
-
-    # Ensure the data is CF compliant
-    gas_data = assign_attributes(
-        data=gas_data,
-        site=site,
-        sampling_period=sampling_period,
-        update_mismatch=update_mismatch,
-        site_filepath=site_filepath,
     )
 
     return gas_data

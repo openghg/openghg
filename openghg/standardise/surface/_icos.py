@@ -46,7 +46,6 @@ def parse_icos(
     """
     from pathlib import Path
 
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, format_inlet
 
     site = clean_string(site)
@@ -81,15 +80,6 @@ def parse_icos(
             sampling_period=sampling_period,
             measurement_type=measurement_type,
         )
-
-    # Ensure the data is CF compliant
-    gas_data = assign_attributes(
-        data=gas_data,
-        site=site,
-        sampling_period=sampling_period,
-        update_mismatch=update_mismatch,
-        site_filepath=site_filepath,
-    )
 
     return gas_data
 
