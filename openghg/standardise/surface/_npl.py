@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
 from openghg.util import clean_string, load_internal_json
 from pandas import read_csv
@@ -16,6 +15,7 @@ def parse_npl(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     update_mismatch: str = "never",
+    **kwargs: str,
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -116,7 +116,5 @@ def parse_npl(
             "data": processed_data,
             "attributes": attributes,
         }
-
-    gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 
     return gas_data
