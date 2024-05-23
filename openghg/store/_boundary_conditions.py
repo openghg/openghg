@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
+from openghg.util import synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -121,6 +122,7 @@ class BoundaryConditions(BaseStore):
         from xarray import open_dataset
 
         species = clean_string(species)
+        species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
