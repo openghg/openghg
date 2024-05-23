@@ -33,7 +33,7 @@ To do this we need to know the site code ("TAC").
 If we didn't know the site code, we could find it using
 the ``summary_site_codes()`` function:
 
-.. ipython:: python
+.. code:: ipython3
 
     from openghg.standardise import summary_site_codes
 
@@ -47,7 +47,7 @@ The output of this function is a `pandas
 DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__,
 so we can filter to find sites containing the name “Tacolneston”:
 
-.. ipython:: python
+.. code:: ipython3
 
     site_long_name = summary["Long name"]
     find_tacolneston = site_long_name.str.contains("Tacolneston")
@@ -98,11 +98,19 @@ at two specific inlets we could write:
     from openghg.retrieve import search_surface
 
     tac_surface_search = search_surface(site="TAC", species="ch4", inlet=["100m", "185m"])
-    tac_surface_search.results    
+<<<<<<< HEAD
+    tac_surface_search.results
 
 This will return results from both the 100m and 185m inlets (but not the 54m inlet).
 
-Note: it is also possible to specify a dictionary to provide an option between 
+Note: it is also possible to specify a dictionary to provide an option between
+=======
+    tac_surface_search.results
+
+This will return results from both the 100m and 185m inlets (but not the 54m inlet).
+
+Note: it is also possible to specify a dictionary to provide an option between
+>>>>>>> devel
 different keywords but this would most often be for backwards compatability
 (e.g. if a new keyword is introduced and a previous one retired but still
 present for some data sources) and so will not be demonstrated in this tutorial.
