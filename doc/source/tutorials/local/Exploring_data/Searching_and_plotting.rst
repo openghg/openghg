@@ -98,19 +98,11 @@ at two specific inlets we could write:
     from openghg.retrieve import search_surface
 
     tac_surface_search = search_surface(site="TAC", species="ch4", inlet=["100m", "185m"])
-<<<<<<< HEAD
     tac_surface_search.results
 
 This will return results from both the 100m and 185m inlets (but not the 54m inlet).
 
 Note: it is also possible to specify a dictionary to provide an option between
-=======
-    tac_surface_search.results
-
-This will return results from both the 100m and 185m inlets (but not the 54m inlet).
-
-Note: it is also possible to specify a dictionary to provide an option between
->>>>>>> devel
 different keywords but this would most often be for backwards compatability
 (e.g. if a new keyword is introduced and a previous one retired but still
 present for some data sources) and so will not be demonstrated in this tutorial.
