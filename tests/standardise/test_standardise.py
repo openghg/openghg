@@ -36,8 +36,8 @@ def test_standardise_obs_two_writable_stores():
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        force=True,
         store="user",
+        force=True,
     )
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]

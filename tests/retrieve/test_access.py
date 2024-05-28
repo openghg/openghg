@@ -334,6 +334,18 @@ def test_get_flux():
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01")
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
 def test_get_flux_no_result():
     """Test sensible error message is being returned when no results are found
     with input keywords for get_flux function"""

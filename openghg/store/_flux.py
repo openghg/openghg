@@ -9,6 +9,8 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.util import synonyms
+
 from xarray import DataArray, Dataset
 
 __all__ = ["Flux"]
@@ -130,6 +132,7 @@ class Flux(BaseStore):
         )
 
         species = clean_string(species)
+        species = synonyms(species)
         source = clean_string(source)
         domain = clean_string(domain)
 
@@ -246,7 +249,7 @@ class Flux(BaseStore):
         )
 
         # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
+        self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
         self.store_original_files(hash_data=unseen_hashes)
 
         return datasource_uuids

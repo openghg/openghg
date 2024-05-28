@@ -262,14 +262,9 @@ class DataManager:
                         for file_hash in version_data:
                             file_hashes.append(file_hash)
 
-                    # Delete all the original files associated with this Datasource
-                    storage_class.delete_original_files(file_hashes=file_hashes)
-
-                    # Now remove the file hashes from the storage class
-                    unique_hashes = set(file_hashes)
-                    storage_class._file_hashes = {
-                        k: v for k, v in storage_class._file_hashes.items() if k not in unique_hashes
-                    }
+                    # Remove original files / hashes if no Datasources are associated with it
+                    # Otherwise remove record of this Datasource
+                    storage_class.delete_records(file_hashes=file_hashes, datasource_uuid=uid)
 
                     d.delete_all_data()
 

@@ -729,3 +729,39 @@ def test_optional_metadata():
 
     assert "project" in footprint_metadata
 
+
+def test_fp_retrieved_from_species():
+    """
+    Test to verify species are converted to synonym values and retrieved
+    """
+
+    datapath = get_footprint_datapath("MHD-10magl_UKV_hfo-1234zee_EUROPE_201401_test.nc")
+    site = "MHD"
+    inlet = "10m"
+    domain = "TEST"
+    model = "NAME"
+    met_model = "UKV"
+    species = "hfo-1234zee"
+
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        met_model=met_model,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+        optional_metadata={"project":"test"},
+    )
+
+    # Get the footprints data
+    footprint_results = search(species=species)
+
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_metadata = footprint_obs.metadata
+
+    assert footprint_obs.data is not None
+    assert footprint_metadata["species"] == "hfo1234zee"
+    assert "footprints" in footprint_metadata["data_type"]
+    assert species not in footprint_metadata["species"]

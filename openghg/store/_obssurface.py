@@ -43,7 +43,7 @@ class ObsSurface(BaseStore):
             metadata: Metadata
             file_metadata: File metadata such as original filename
             precision_data: GCWERKS precision data
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         Returns:
             dict: Dictionary of result
@@ -145,7 +145,7 @@ class ObsSurface(BaseStore):
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
                         update_mismatch: This determines whether mismatches between the internal data
                 attributes and the supplied / derived metadata can be updated or whether
@@ -194,6 +194,7 @@ class ObsSurface(BaseStore):
             load_surface_parser,
             verify_site,
             check_if_need_new_version,
+            synonyms,
         )
 
         if not isinstance(filepath, list):
@@ -296,9 +297,9 @@ class ObsSurface(BaseStore):
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
             file_hash = hash_file(filepath=data_filepath)
-            if file_hash in self._file_hashes and overwrite is False:
+            if file_hash in self._file_hashes and force is False:
                 logger.warning(
-                    "This file has been uploaded previously with the filename : "
+                    "This file has been uploaded previously with and assigned to these Datasources : "
                     f"{self._file_hashes[file_hash]} - skipping."
                 )
                 continue
@@ -344,6 +345,7 @@ class ObsSurface(BaseStore):
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
                 species = key.split("_")[0]
+                species = synonyms(species)
                 try:
                     ObsSurface.validate_data(value["data"], species=species)
                 except ValueError:
@@ -391,9 +393,10 @@ class ObsSurface(BaseStore):
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
+            hash_data = {file_hash: data_filepath}
             datasource_uuids = self.assign_data(
                 data=data,
-                file_hashes={file_hash: data_filepath},
+                file_hashes=hash_data,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
@@ -404,10 +407,10 @@ class ObsSurface(BaseStore):
             )
 
             results["processed"][data_filepath.name] = datasource_uuids
-            logger.info(f"Completed processing: {data_filepath.name}.")
 
-        self._file_hashes[file_hash] = data_filepath.name
-        self.store_original_file(filepath=data_filepath, file_hash=file_hash)
+            self.store_original_file(filepath=data_filepath, file_hash=file_hash)
+            self.store_hashes(hashes=hash_data, datasource_uuids=datasource_uuids)
+            logger.info(f"Completed processing: {data_filepath.name}.")
 
         return dict(results)
 
@@ -587,40 +590,24 @@ class ObsSurface(BaseStore):
         """
         from openghg.util import hash_retrieved_data
 
-        if overwrite and if_exists == "auto":
+        if (overwrite or force) and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."
                 "See documentation for details of this input and options."
             )
             if_exists = "new"
 
-        # TODO: May need to delete
-        # obs = ObsSurface.load()
-        # metastore = load_metastore(key=obs._metakey)
-
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
-        # Find the keys in data we've seen before
-        if force:
-            file_hashes_to_compare = set()
-        else:
-            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        if len(file_hashes_to_compare) == len(data):
-            logger.warning("Note: There is no new data to process.")
-            return None
-
-        keys_to_process = set(data.keys())
-        if file_hashes_to_compare:
-            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
-            keys_to_process -= file_hashes_to_compare
-
-        to_process = {k: v for k, v in data.items() if k in keys_to_process}
-        data_hashes = dict(zip(to_process.keys(), keys_to_process))
+        to_process = {}
+        data_hashes = {}
+        for data_hash, data_key in zip(hashes, data):
+            if data_hash not in self._retrieved_hashes:
+                to_process[data_key] = data[data_key]
+                data_hashes[data_hash] = data_key
+            else:
+                logger.warning(f"We've seen {data_key} with hash {data_hash} before, skipping.")
 
         if required_metakeys is None:
             required_metakeys = (
@@ -651,22 +638,9 @@ class ObsSurface(BaseStore):
             filters=filters,
         )
 
-        self.store_hashes(hashes=hashes)
+        self.store_hashes(hashes=data_hashes, datasource_uuids=datasource_uuids)
 
         return datasource_uuids
-
-    def store_hashes(self, hashes: Dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function
-        Returns:
-            None
-        """
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID
@@ -700,9 +674,3 @@ class ObsSurface(BaseStore):
 
         # Delete the UUID from the metastore
         self._metastore.delete({"uuid": uuid})
-
-    def seen_hash(self, file_hash: str) -> bool:
-        return file_hash in self._file_hashes
-
-    def set_hash(self, file_hash: str, filename: str) -> None:
-        self._file_hashes[file_hash] = filename
