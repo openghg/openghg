@@ -19,6 +19,7 @@ from openghg.standardise import standardise_from_binary_data, standardise_surfac
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.util import create_daterange_str
+from openghg.types import DataOverlapError
 from pandas import Timestamp
 
 
@@ -788,16 +789,14 @@ def test_store_icos_carbonportal_data(bucket):
 
     data["co2"]["data"] = ds
 
-    with ObsSurface(bucket=bucket) as metastore:
-        first_result = metastore.store_data(data=data)
-        second_result = metastore.store_data(data=data)
+    with ObsSurface(bucket=bucket) as obs:
+        first_result = obs.store_data(data=data)
 
     assert first_result["co2"]["new"] is True
 
-    with ObsSurface(bucket=bucket) as obs:
-        second_result = obs.store_data(data=data)
-
-    assert second_result is None
+    with pytest.raises(DataOverlapError):
+        with ObsSurface(bucket=bucket) as obs:
+            obs.store_data(data=data)
 
 
 @pytest.mark.parametrize(

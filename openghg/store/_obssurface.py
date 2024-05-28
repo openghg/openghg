@@ -590,40 +590,24 @@ class ObsSurface(BaseStore):
         """
         from openghg.util import hash_retrieved_data
 
-        if overwrite and if_exists == "auto":
+        if (overwrite or force) and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."
                 "See documentation for details of this input and options."
             )
             if_exists = "new"
 
-        # TODO: May need to delete
-        # obs = ObsSurface.load()
-        # metastore = load_metastore(key=obs._metakey)
-
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
-        # Find the keys in data we've seen before
-        if force:
-            file_hashes_to_compare = set()
-        else:
-            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        if len(file_hashes_to_compare) == len(data):
-            logger.warning("Note: There is no new data to process.")
-            return None
-
-        keys_to_process = set(data.keys())
-        if file_hashes_to_compare:
-            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
-            keys_to_process -= file_hashes_to_compare
-
-        to_process = {k: v for k, v in data.items() if k in keys_to_process}
-        data_hashes = dict(zip(to_process.keys(), keys_to_process))
+        to_process = {}
+        data_hashes = {}
+        for data_hash, data_key in zip(hashes, data):
+            if data_hash not in self._retrieved_hashes:
+                to_process[data_key] = data[data_key]
+                data_hashes[data_hash] = data_key
+            else:
+                logger.warning(f"We've seen {data_key} with hash {data_hash} before, skipping.")
 
         if required_metakeys is None:
             required_metakeys = (
