@@ -84,7 +84,9 @@ def test_delete_footprint_data(footprint_read):
 
     fp = Footprints(bucket=bucket)
 
-    assert fp._file_hashes == {"8be7399b13b47fa43cda9437540962b894f2a29d": "footprint_test.nc"}
+    assert "8be7399b13b47fa43cda9437540962b894f2a29d" in fp._file_hashes
+    assert isinstance(fp._file_hashes["8be7399b13b47fa43cda9437540962b894f2a29d"], list)
+    assert len(fp._file_hashes["8be7399b13b47fa43cda9437540962b894f2a29d"]) == 1
 
     ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()

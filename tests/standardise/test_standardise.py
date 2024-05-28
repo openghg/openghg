@@ -28,6 +28,7 @@ def test_standardise_to_read_only_store():
 
 
 def test_standardise_obs_two_writable_stores():
+    # clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
@@ -40,6 +41,7 @@ def test_standardise_obs_two_writable_stores():
         store="user",
     )
 
+    print(results)
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
 
     assert "error" not in results

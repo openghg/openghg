@@ -21,7 +21,7 @@ from openghg.objectstore import (
 )
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import DatasourceLookupError, multiPathType
+from openghg.types import DatasourceLookupError, multiPathType, ObjectStoreError
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
@@ -252,8 +252,9 @@ class BaseStore:
 
     # TODO - need a better name for this
     def delete_records(self, file_hashes: Sequence, datasource_uuid: str) -> None:
-        """Checks the number of Datasources associated with a file, if only this
-        Datasource
+        """Delete the file hashes associated with a Datasource.
+        If this is the only Datasource then we just delete the hash.
+        Otherwise we remove the Datasource UUID from the list of UUIDs.
 
         Args:
             file_hashes: Hashes of files to remove
@@ -274,6 +275,11 @@ class BaseStore:
 
                 to_delete.append(filehash)
             else:
+                logger.warning(
+                    "We currently recommend deleting all Datasources associated with this file\n"
+                    + "otherwise you may not be able to standardise the file again.\n"
+                    f"Other Datasources associated with this file are : {records}."
+                )
                 records.remove(datasource_uuid)
                 self._file_hashes[filehash] = records
 

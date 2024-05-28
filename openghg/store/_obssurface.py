@@ -393,9 +393,10 @@ class ObsSurface(BaseStore):
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
+            hash_data = {file_hash: data_filepath}
             datasource_uuids = self.assign_data(
                 data=data,
-                file_hashes={file_hash: data_filepath},
+                file_hashes=hash_data,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
@@ -406,10 +407,10 @@ class ObsSurface(BaseStore):
             )
 
             results["processed"][data_filepath.name] = datasource_uuids
-            logger.info(f"Completed processing: {data_filepath.name}.")
 
-        self._file_hashes[file_hash] = data_filepath.name
-        self.store_original_file(filepath=data_filepath, file_hash=file_hash)
+            self.store_original_file(filepath=data_filepath, file_hash=file_hash)
+            self.store_hashes(hashes=hash_data, datasource_uuids=datasource_uuids)
+            logger.info(f"Completed processing: {data_filepath.name}.")
 
         return dict(results)
 
@@ -653,22 +654,9 @@ class ObsSurface(BaseStore):
             filters=filters,
         )
 
-        self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
+        self.store_hashes(hashes=data_hashes, datasource_uuids=datasource_uuids)
 
         return datasource_uuids
-
-    def store_hashes(self, hashes: Dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function
-        Returns:
-            None
-        """
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID
