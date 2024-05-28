@@ -40,6 +40,8 @@ else:
         set_object,
         set_object_from_file,
         set_object_from_json,
+        set_compressed_file,
+        get_compressed_file,
         get_writable_bucket,
         get_writable_buckets,
         get_readable_buckets,

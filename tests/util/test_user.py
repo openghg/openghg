@@ -6,7 +6,6 @@ from unittest.mock import patch
 from openghg.types import ConfigFileError
 from openghg.util import check_config, create_config, read_local_config
 
-
 @pytest.fixture
 def tmp_config_path(tmp_path):
     return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
