@@ -116,8 +116,7 @@ def assemble_edgar_metadata(
         if species:
             if species != synonyms(metadata["species"]):
                 logger.warning(
-                    "Input species does not match species extracted from",
-                    " database filenames. Please check.",
+                    "Input species does not match species extracted from database filenames. Please check."
                 )
             metadata["species"] = species
         else:
@@ -161,8 +160,7 @@ def parse_edgar(
     domain: Optional[str] = None,
     lat_out: ArrayType = None,
     lon_out: ArrayType = None,
-    # sector: Optional[str] = None,
-    # period: Optional[Union[str, tuple]] = None,
+    source: Optional[str] = None,
     edgar_version: Optional[str] = None,
 ) -> Dict:
     """
@@ -195,6 +193,7 @@ def parse_edgar(
         domain: Domain name for new or pre-existing domain
         lat_out: Latitude values for new domain
         lon_out: Longitude values for new domain
+        source: Flux source to use; overrides the source extracted from the filename.
         edgar_version: EDGAR version in file. Will be inferred otherwise.
 
     Returns:
@@ -373,11 +372,10 @@ def parse_edgar(
     if domain is None:
         domain = raw_edgar_domain
 
-    source = edgar_file_info["source"]
+    source = source if source is not None else edgar_file_info["source"]
     metadata["species"] = species_label
     metadata["domain"] = domain
     metadata["source"] = source
-    metadata["date"] = date
     metadata["database"] = "EDGAR"
     metadata["database_version"] = edgar_file_info["version"]
     metadata["author"] = author_name
