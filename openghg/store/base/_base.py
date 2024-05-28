@@ -21,7 +21,7 @@ from openghg.objectstore import (
 )
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import DatasourceLookupError, multiPathType, ObjectStoreError
+from openghg.types import DatasourceLookupError, multiPathType
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
