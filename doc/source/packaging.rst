@@ -55,7 +55,7 @@ version. Do this using the ``git tag`` command, e.g.
    git checkout master
    git tag -a {VERSION} -m "{VERSION} release"
 
-replacing ``{VERSION}`` with the version number. For this 0.12.0 release
+replacing ``{VERSION}`` with the version number. For this 0.7.1 release
 the command would be;
 
 .. code-block:: bash
