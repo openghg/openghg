@@ -102,6 +102,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
 
     # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
     matches = process.extract(query=site_name, choices=inverted.keys())  # type:ignore
+
     highest_score = matches[0][1]
 
     if highest_score < 90:
