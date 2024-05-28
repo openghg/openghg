@@ -14,7 +14,7 @@ met model you may standardise the file by doing
                             domain="EUROPE",
                             model="NAME",
                             height="100m",
-                            met_model"UKV")
+                            met_model="UKV")
 
 
 Behind the scenes OpenGHG performs a lookup using the metadata you've passed in. We use this metadata to know where
