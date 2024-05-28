@@ -297,9 +297,9 @@ class ObsSurface(BaseStore):
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
             file_hash = hash_file(filepath=data_filepath)
-            if file_hash in self._file_hashes and overwrite is False:
+            if file_hash in self._file_hashes and force is False:
                 logger.warning(
-                    "This file has been uploaded previously with the filename : "
+                    "This file has been uploaded previously with and assigned to these Datasources : "
                     f"{self._file_hashes[file_hash]} - skipping."
                 )
                 continue
@@ -690,9 +690,3 @@ class ObsSurface(BaseStore):
 
         # Delete the UUID from the metastore
         self._metastore.delete({"uuid": uuid})
-
-    def seen_hash(self, file_hash: str) -> bool:
-        return file_hash in self._file_hashes
-
-    def set_hash(self, file_hash: str, filename: str) -> None:
-        self._file_hashes[file_hash] = filename
