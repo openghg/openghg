@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.1...HEAD)
 
+### Fixed
+
+- Catch an `AttributeError` when trying synchronise attributes and metadata and a user passes a `bool` - [PR #1029](https://github.com/openghg/openghg/pull/1029)
+
 ## [0.8.1] - 2024-05-17
 
 ### Added
