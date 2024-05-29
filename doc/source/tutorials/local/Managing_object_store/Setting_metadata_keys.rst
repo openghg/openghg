@@ -18,7 +18,7 @@ met model you may standardise the file by doing
 
 
 Behind the scenes OpenGHG performs a lookup using the metadata you've passed in. We use this metadata to know where
-to store the data. For each data type we use a set of keys that can be found in the ``metadata_keys.toml`` file in the ``config``
+to store the data. For each data type we use a set of keys that can be found in the ``metadata_keys.json`` file in the ``config``
 folder of the object store. Each time a file is standardised this file is read and the keys stored within are used to decide
 which ``Datasource`` the data should be assigned to.
 

@@ -15,7 +15,7 @@ from openghg.objectstore import get_object_from_json, exists, set_object_from_js
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file
+from openghg.util import timestamp_now, to_lowercase, hash_file, clean_string
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -160,6 +160,49 @@ class BaseStore:
 
         return seen, unseen
 
+    def _get_metakeys(self) -> Dict:
+        """Get the metakeys for this storage class
+
+        Returns:
+            dict: Dictionary of metakeys
+        """
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+        return metakeys
+
+    # TODO - move this kind of metadata handling into centralised location
+    def _add_additional_metadata(
+        self, data: Dict, additional_kwargs: Dict, optional_metadata: Optional[Dict]
+    ) -> Dict:
+        metakeys = self._get_metakeys()
+        required_keys = metakeys["required"]
+        invalid_kwargs = [k for k in additional_kwargs if k not in required_keys]
+        if invalid_kwargs:
+            raise ValueError(
+                "kwargs can only be used to pass in additional required keys.\n"
+                + f"Invalid keys: {invalid_kwargs}"
+            )
+
+        parsed_kwargs = {k: clean_string(v) for k, v in additional_kwargs.items() if v is not None}
+        if optional_metadata is not None:
+            parsed_optional = {k: clean_string(v) for k, v in optional_metadata.items() if v is not None}
+
+            invalid_optional_keys = [k for k in parsed_optional if k in required_keys]
+            if invalid_optional_keys:
+                raise ValueError(
+                    "Unable to pass in required keys in with optional metadata.\n"
+                    + f"Invalid keys: {invalid_optional_keys}"
+                )
+
+        for parsed_data in data.values():
+            if optional_metadata is not None:
+                parsed_data["metadata"].update(parsed_optional)
+            parsed_data["metadata"].update(parsed_kwargs)
+
+        return data
+
     def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
@@ -170,11 +213,7 @@ class BaseStore:
         Returns:
             tuple: Tuple of keys
         """
-        try:
-            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
-        except KeyError:
-            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-
+        metakeys = self._get_metakeys()
         required = metakeys["required"]
         # We might not get any optional keys
         optional = metakeys.get("optional", {})
@@ -238,9 +277,6 @@ class BaseStore:
         from openghg.store.spec import null_metadata_values
 
         uuids = {}
-
-        # Get the metadata keys for this type
-        # metakeys = self.get_metakeys()
 
         self._metastore.acquire_lock()
         try:

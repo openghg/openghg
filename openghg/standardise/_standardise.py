@@ -77,6 +77,7 @@ def standardise_surface(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -244,6 +245,7 @@ def standardise_surface(
             filters=filters,
             chunks=chunks,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 
@@ -268,6 +270,7 @@ def standardise_column(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Read column observation file
 
@@ -369,6 +372,7 @@ def standardise_column(
             filters=filters,
             chunks=chunks,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 
@@ -389,6 +393,7 @@ def standardise_bc(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -472,6 +477,7 @@ def standardise_bc(
             filters=filters,
             chunks=chunks,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 
@@ -505,6 +511,7 @@ def standardise_footprint(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -629,6 +636,7 @@ def standardise_footprint(
             sort=sort,
             drop_duplicates=drop_duplicates,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 
@@ -655,6 +663,7 @@ def standardise_flux(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Process flux / emissions data
 
@@ -760,6 +769,7 @@ def standardise_flux(
             compressor=compressor,
             filters=filters,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 
@@ -780,6 +790,7 @@ def standardise_eulerian(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -839,6 +850,7 @@ def standardise_eulerian(
             filters=filters,
             chunks=chunks,
             optional_metadata=optional_metadata,
+            **kwargs,
         )
 
 

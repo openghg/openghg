@@ -125,6 +125,7 @@ class ObsSurface(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -382,9 +383,9 @@ class ObsSurface(BaseStore):
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
-            if optional_metadata is not None:
-                for parsed_data in data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+            data = self._add_additional_metadata(
+                data=data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            )
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"

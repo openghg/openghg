@@ -1,9 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
-from xarray import Dataset
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -43,6 +42,7 @@ class EulerianModel(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
+        **kwargs: Any,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -78,8 +78,6 @@ class EulerianModel(BaseStore):
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
-
-        from collections import defaultdict
         from openghg.util import (
             clean_string,
             timestamp_now,
@@ -193,15 +191,13 @@ class EulerianModel(BaseStore):
 
             key = "_".join((model, species, date))
 
-            model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-            model_data[key]["data"] = em_data
-            model_data[key]["metadata"] = metadata
+            model_data = {key: {"data": em_data, "metadata": metadata}}
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
-            if optional_metadata is not None:
-                for parsed_data in model_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+            model_data = self._add_additional_metadata(
+                data=model_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            )
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
