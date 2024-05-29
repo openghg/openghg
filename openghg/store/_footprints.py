@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 import warnings
 import numpy as np
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
@@ -213,6 +214,7 @@ class Footprints(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         optional_metadata: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -435,13 +437,13 @@ class Footprints(BaseStore):
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
+        footprint_data = self._add_additional_metadata(
+            data=footprint_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+        )
+
         # TODO - we'll further tidy this up when we move the metdata parsing
         # into a centralised place
         lookup_keys = self.get_lookup_keys(optional_metadata)
-
-        if optional_metadata is not None:
-            for parsed_data in footprint_data.values():
-                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options

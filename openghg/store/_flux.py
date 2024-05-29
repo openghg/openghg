@@ -79,6 +79,7 @@ class Flux(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         optional_metadata: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> dict:
         """Read flux / emissions file
 
@@ -226,6 +227,10 @@ class Flux(BaseStore):
         # Make sure none of these are Nones
         to_add = {k: v for k, v in optional_keywords.items() if v is not None}
         optional_metadata.update(to_add)
+
+        flux_data = self._add_additional_metadata(
+            data=flux_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+        )
 
         # TODO - really we want the metadata completely formed before we perform
         # the Datasource lookup, the above is a hack to get what we have here working for now

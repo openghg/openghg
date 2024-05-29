@@ -704,19 +704,92 @@ def test_optional_metadata():
 
     assert "project" in footprint_metadata
 
-# These tests test that custom keys can be used to create unique Datasources
-@pytest.fixture()
-def mock_metakeys():
-    # TODO - implement this in a different way
-    default_keys = get_metakey_defaults()
 
+@pytest.fixture()
+def mock_metakeys_required():
+    default_keys = get_metakey_defaults()
+    default_keys["footprints"]["required"] = ["project", "special_tag"]
+
+    with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
+        yield
+
+
+@pytest.fixture()
+def mock_metakeys_optional():
+    default_keys = get_metakey_defaults()
     default_keys["footprints"]["optional"] = ["project", "special_tag"]
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield
 
 
-def test_standardise_footprints_different_datasources(mock_metakeys):
+def test_standardise_footprints_different_datasources_updated_required_keys_kwargs(mock_metakeys_required):
+    """Test that we can pass in updated required keys as kwargs to the
+    standardisation function.
+    """
+    clear_test_store(name="user")
+
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    site = "TAC"
+    domain = "EUROPE"
+    model = "UKV"
+    inlet = "100m"
+
+    res_1 = standardise_footprint(
+        filepath=file1,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        store="user",
+        project="zoo",
+        special_tag="elephant",
+    )
+
+    res_2 = standardise_footprint(
+        filepath=file2,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        store="user",
+        project="aquarium",
+        special_tag="jellyfish",
+    )
+
+    # Make sure they're different Datasources
+    assert res_1["tac_europe_UKV_100m"]["uuid"] != res_2["tac_europe_UKV_100m"]["uuid"]
+
+
+def test_standardise_footprints_different_datasources_updated_required_keys_fails_optional(
+    mock_metakeys_required,
+):
+    """These that the standardisation process fails if we pass in required keys as optional keys"""
+    clear_test_store(name="user")
+
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    site = "TAC"
+    domain = "EUROPE"
+    model = "UKV"
+    inlet = "100m"
+
+    optional_metadata = {"project": "zoo", "special_tag": "elephant"}
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            filepath=file1,
+            site=site,
+            domain=domain,
+            model=model,
+            inlet=inlet,
+            store="user",
+            optional_metadata=optional_metadata,
+        )
+
+
+def test_standardise_footprints_different_datasources(mock_metakeys_optional):
     """This tests that adding keys to the optional section of footprints
     results in data being assigned to different Datasources.
     """
@@ -778,7 +851,7 @@ def test_fp_retrieved_from_species():
         inlet=inlet,
         species=species,
         domain=domain,
-        optional_metadata={"project":"test"},
+        optional_metadata={"project": "test"},
     )
 
     # Get the footprints data
