@@ -385,4 +385,4 @@ def to_dashboard_agage(
 
     logger.info(f"\n\nComplete metadata file written to: {metadata_complete_filepath}")
     logger.info(f"Dashboard configuration file written to: {metadata_complete_filepath}")
-    logger.info(f"\nTotal size of exported data package: {file_sizes_bytes/one_MB:.2f} MB")
+    logger.info(f"\nTotal size of exported data package: {file_sizes_bytes / one_MB:.2f} MB")
