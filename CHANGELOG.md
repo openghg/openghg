@@ -11,12 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated incorrect import for data_manager within tutorial. This now shows the import from `openghg.dataobjects` not `openghg.store` - [PR #1007](https://github.com/openghg/openghg/pull/1007)
 
+### Added
+
+- Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
+
 ## [0.8.1] - 2024-05-17
 
 ### Added
 
 - Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
 - Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
+- Argument `time_resolved` is added as phase 1 change for `high_time_resolution`, also metadata is updated and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
+- Added ability to pass additional tags as optional metadata through `standardising_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
 - Renaming `high_time_resolution` argument to `time_resolved` in metadata as more appropriate description for footprints going forward and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
 - Added explicit backwards compatability when searching previous object stores containing the `high_time_resolution` keyword rather than `time_resolved` - [PR #990](https://github.com/openghg/openghg/pull/990)
 - Added ability to pass additional tags as optional metadata through `standardise_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
