@@ -160,12 +160,7 @@ class LocalZarrStore(Store):
                 dataset = dataset.chunk(chunking)
 
             dataset.to_zarr(
-                store=self._stores[version],
-                mode="a",
-                consolidated=True,
-                append_dim=append_dim,
-                compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),  # avoid race on multiple writes to same zarr chunk
+                store=self._stores[version], mode="a", consolidated=True, append_dim=append_dim, compute=True
             )
         # Otherwise we create a new zarr Store for the version
         else:
@@ -175,12 +170,7 @@ class LocalZarrStore(Store):
             self._stores[version] = zarr.storage.DirectoryStore(self.store_path(version=version))
             encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
             dataset.to_zarr(
-                store=self._stores[version],
-                mode="w",
-                encoding=encoding,
-                consolidated=True,
-                compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),  # avoid race on multiple writes to same zarr chunk
+                store=self._stores[version], mode="w", encoding=encoding, consolidated=True, compute=True
             )
 
     def get(self, version: str) -> xr.Dataset:
