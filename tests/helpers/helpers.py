@@ -153,3 +153,8 @@ def all_datasource_keys(keys: Dict) -> List[str]:
         ds_keys.extend(key_data["keys"])
 
     return ds_keys
+
+
+def get_flux_timeseries_datapath(filename: str) -> Path:
+    """Return the path to the flux_timeseries test data file"""
+    return get_datapath_base(data_type="flux_timeseries", filename=filename)
