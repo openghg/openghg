@@ -155,6 +155,10 @@ class BaseStore:
         if force:
             unseen = {**seen, **unseen}
 
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"Since 'force' is True, we're reprocerssing the following files:\n{seen_files_msg}")
+            seen = {}
+
         if seen:
             logger.warning("Skipping previously standardised files, see log for list.")
             seen_files_msg = "\n".join([str(v) for v in seen.values()])
