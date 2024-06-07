@@ -174,8 +174,21 @@ class BaseStore:
 
     # TODO - move this kind of metadata handling into centralised location
     def _add_additional_metadata(
-        self, data: Dict, additional_kwargs: Dict, optional_metadata: Optional[Dict]
-    ) -> Dict:
+        self, data: dict, additional_kwargs: dict, optional_metadata: Optional[dict]
+    ) -> dict:
+        """
+        Validate and combine "distinguishing" metadata used to categorise datasources.
+
+        Metadata passed through `additional_kwargs` and `optional_metadata` is checked to make sure it does doesn't contain any "required" metadata keys. Then the metadata input through `data` is updated first with any optional metadata, then with the additional kwargs (so additional kwargs supersede the optional metadata).
+
+        Args:
+            data: data/metadata dictionary passed to `read_file`
+            additional_kwargs: kwargs passed to `read_file`
+            optional_metadata: optional metadata passed to `read_file` (or `standardise`)
+
+        Returns:
+            dict of combined metadata
+        """
         metakeys = self._get_metakeys()
         required_keys = metakeys["required"]
         invalid_kwargs = [k for k in additional_kwargs if k not in required_keys]
