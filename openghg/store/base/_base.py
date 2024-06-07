@@ -179,7 +179,10 @@ class BaseStore:
         """
         Validate and combine "distinguishing" metadata used to categorise datasources.
 
-        Metadata passed through `additional_kwargs` and `optional_metadata` is checked to make sure it does doesn't contain any "required" metadata keys. Then the metadata input through `data` is updated first with any optional metadata, then with the additional kwargs (so additional kwargs supersede the optional metadata).
+        Metadata passed through `additional_kwargs` and `optional_metadata` is checked to make sure
+        it does doesn't contain any "required" metadata keys. Then the metadata input through `data`
+        is updated first with any optional metadata, then with the additional kwargs (so additional
+        kwargs supersede the optional metadata).
 
         Args:
             data: data/metadata dictionary from parser function
