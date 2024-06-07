@@ -19,6 +19,7 @@ dependencies:
   - numpy
   - nc-time-axis
   - openghg_defs
+  - openpyxl
   - pandas>=2.0
   - pip
   - plotly
