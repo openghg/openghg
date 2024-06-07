@@ -182,7 +182,7 @@ class BaseStore:
         Metadata passed through `additional_kwargs` and `optional_metadata` is checked to make sure it does doesn't contain any "required" metadata keys. Then the metadata input through `data` is updated first with any optional metadata, then with the additional kwargs (so additional kwargs supersede the optional metadata).
 
         Args:
-            data: data/metadata dictionary passed to `read_file`
+            data: data/metadata dictionary from parser function
             additional_kwargs: kwargs passed to `read_file`
             optional_metadata: optional metadata passed to `read_file` (or `standardise`)
 
