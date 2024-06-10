@@ -178,7 +178,7 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
     """Read the object store config
 
     Args:
-        store: Store name
+        bucket: object store bucket path
     Returns:
         dict: Configuration data
     """
@@ -194,7 +194,7 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
 
 def write_metakeys(bucket: str, metakeys: Dict) -> None:
     """Write metadata keys to file. The dictionary will be checked
-    before writing and information on errros presented to the user.
+    before writing and information on errors presented to the user.
 
     Args:
         bucket: Path to object store
