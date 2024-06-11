@@ -1,10 +1,13 @@
 from __future__ import annotations
 from collections import UserDict
 from functools import partial
-from dataclasses import dataclass, field, replace
-from typing import Any, Iterable, Literal, Mapping, Optional, Union
+from dataclasses import dataclass, replace
+from typing import Any, Callable, Iterable, Literal, Optional
+
+import xarray as xr
 
 from openghg.objectstore import get_metakeys
+from openghg.util import clean_string
 
 
 # TODO: subclasses for different types of data + subclass registry
@@ -14,27 +17,59 @@ class Metadatum:
     """A single piece of metadata.
 
     It consists of a name-value pair, as well as two flags:
-    - 'categorizing': if True, this Metadatum will be used for datasource look up
-    - 'required': if True, then 'value' must not be None.
+    - 'categorising': if True, this Metadatum will be used for datasource look up
+    - 'required': if True, then the `valid` property will return false if 'value' is None.
     """
 
-    name: str
-    value: Any
-    categorising: bool = field(default=False)
-    required: bool = field(default=False)
+    def __init__(
+        self,
+        name: str,
+        value: Any,
+        categorising: bool = False,
+        required: bool = False,
+        formatter: Optional[Callable] = None,
+    ) -> None:
+        """Create Metadatum object.
 
-    def __post_init__(self):
-        """The 'required' attribute can only be True for 'categorising' Metadatum."""
-        if self.categorising is False:
-            self.required = False
+        Note: we are using an explicit init method so we can have properties.
+        """
+        self.name = name
+        self.value = value
+        self.categorising = categorising
+
+        # The 'required' attribute can only be True for 'categorising' Metadatum:
+        self.required = required if categorising else False
+
+        self.formatter = formatter or (lambda x: x)  # default formatter does nothing
+
+    @property
+    def name(self) -> str:
+        """Names should be lowercase for comparison."""
+        return self._name.lower()
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """Store original name under _name."""
+        self._name = value
+
+    @property
+    def value(self) -> Any:
+        """Return formatted value."""
+        return self.formatter(self._value)
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        """Store original value under _value."""
+        self._value = value
 
     @property
     def valid(self) -> bool:
-        """Return False if required is True value is None."""
+        """Return False if required is True and value is None."""
         invalid = self.required and (self.value is None)
         return not invalid
 
     def update_value(self, other: Any) -> Metadatum:
+        """Return a copy of this Metadatum with its value updated via 'other'."""
         if isinstance(other, Metadatum):
             if other.name != self.name:
                 raise ValueError("Cannot update Metadatum via Metadatum with different name.")
@@ -42,7 +77,7 @@ class Metadatum:
         else:
             new_value = other
 
-        return replace(self, value=new_value)
+        return replace(self, name=self.name, value=new_value)  # pass name because property stores _name
 
 
 class Metadata(UserDict):
@@ -74,7 +109,7 @@ class Metadata(UserDict):
     """
 
     def __getitem__(self, key: str) -> Any:
-        """Return value of Metadatum with given key.
+        """Return value of Metadatum with name = key.
 
         Note: this returns the value stored by the Metadatum object with name = key.
         It does not return the underlying Metadatum object, so that it can be used as an
@@ -102,7 +137,9 @@ class Metadata(UserDict):
             metadatum = self.data[key].update_value(item)  # will raise ValueError if names differ
         elif isinstance(item, Metadatum):
             if key != item.name:
-                raise ValueError(f"Cannot store Metadatum with name {item.name} under key {key}; key and name must match.")
+                raise ValueError(
+                    f"Cannot store Metadatum with name {item.name} under key {key}; key and name must match."
+                )
             metadatum = item
         else:
             metadatum = Metadatum(name=key, value=item)
@@ -121,6 +158,30 @@ class Metadata(UserDict):
             metadata[x.name] = x
 
         return metadata
+
+    @classmethod
+    def from_dict(cls, _dict: dict[str, Any], **kwargs) -> Metadata:
+        """Create Metadata from dictionary, using kwargs to set extra Metadatum attributes.
+
+        For example, the following ways of make a Metadata object are equivalent:
+
+            >>> my_dict1 = {"my_name": "my_value"}
+            >>> md1 = Metadata.from_dict(my_dict1, categorising=True)
+
+            >>> my_dict2 = {"my_name": Metadatum(name="my_name", value="my_value", categorising=True)}
+            >>> md2 = Metadata(my_dict2)
+
+            >>> md1 == md2
+            True
+
+        Args:
+            _dict: names and values to use to create Metadatum
+            **kwargs: additional attributes applied to all Metadatum objects
+
+        Returns:
+            Metadata object
+        """
+        return cls.from_list([Metadatum(name=name, value=value, **kwargs) for name, value in _dict.items()])
 
     def insert(self, item: Metadatum) -> None:
         """Insert Metadatum object into Metadata."""
@@ -143,6 +204,7 @@ class Metadata(UserDict):
         Returns:
             list of: (key, value) pairs if what == "items", keys if what == "keys", values if what == "values"
         """
+
         def _apply_condition(item: Any, attr: str, value: Any) -> bool:
             try:
                 retrieved_value = item.__getattribute__(attr)
@@ -153,7 +215,9 @@ class Metadata(UserDict):
 
         condition_fns = [partial(_apply_condition, attr=k, value=v) for k, v in conditions.items()]
 
-        filtered_items = [(k, v.value) for k, v in self.data.items() if all(condition(v) for condition in condition_fns)]
+        filtered_items = [
+            (k, v.value) for k, v in self.data.items() if all(condition(v) for condition in condition_fns)
+        ]
 
         if what == "items":
             return filtered_items
