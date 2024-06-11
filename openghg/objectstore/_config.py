@@ -4,13 +4,13 @@ import importlib
 from pprint import pformat
 from pathlib import Path
 import pkgutil
-from typing import Dict, List
+from typing import Optional
 
 from openghg.types import ConfigFileError, ObjectStoreError
 from openghg.util import timestamp_now
 
 logger = logging.getLogger("openghg.objectstore")
-logger.setLevel(logging.INFO)  # Have to set level for logger as well as handlerF
+logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
 def _get_config_folderpath(bucket: str) -> Path:
@@ -35,7 +35,7 @@ def _get_metakeys_filepath(bucket: str) -> Path:
     return _get_config_folderpath(bucket=bucket) / "metadata_keys.json"
 
 
-def get_metakey_defaults() -> Dict:
+def get_metakey_defaults() -> dict:
     """Return the dictionary of default values for the metadata keys
 
     Returns:
@@ -45,7 +45,7 @@ def get_metakey_defaults() -> Dict:
     return json.loads(json_bytes.decode(encoding="utf-8"))
 
 
-def check_metakeys(metakeys: Dict) -> bool:
+def check_metakeys(metakeys: dict) -> bool:
     """Checks the metakeys dictionary to ensure it contains all the required
     information
 
@@ -65,7 +65,7 @@ def check_metakeys(metakeys: Dict) -> bool:
     if missing_keys:
         total_errors["FATAL"] = f"We require metakeys for each data type, we're missing: {missing_keys}"
 
-    def _check_keys(_key_data: Dict) -> List:
+    def _check_keys(_key_data: dict) -> list:
         errors = []
         for metakey, type_data in _key_data.items():
             try:
@@ -143,7 +143,7 @@ def create_default_config(bucket: str) -> None:
     _write_metakey_config(bucket=bucket, metakeys=default_keys)
 
 
-def _write_metakey_config(bucket: str, metakeys: Dict) -> None:
+def _write_metakey_config(bucket: str, metakeys: dict) -> None:
     """Write the metakeys data to file, adding the version of OpenGHG
     it was written by and a timestamp.
 
@@ -174,11 +174,13 @@ def _write_metakey_config(bucket: str, metakeys: Dict) -> None:
     metakey_path.write_text(json.dumps(config_data))
 
 
-def get_metakeys(bucket: str) -> Dict[str, Dict]:
+def get_metakeys(bucket: str, data_type: Optional[str] = None) -> dict[str, dict]:
     """Read the object store config
 
     Args:
         bucket: object store bucket path
+        data_type: if specified, only return metakeys for given data type; otherwise
+            return metakeys for all data types.
     Returns:
         dict: Configuration data
     """
@@ -189,10 +191,18 @@ def get_metakeys(bucket: str) -> Dict[str, Dict]:
         create_default_config(bucket=bucket)
 
     config_data = json.loads(metakey_path.read_text())
-    return config_data["metakeys"]
+    metakeys = config_data["metakeys"]
+
+    if data_type is not None:
+        try:
+            metakeys = metakeys[data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {data_type}, please update metakeys configuration file.")
+
+    return metakeys
 
 
-def write_metakeys(bucket: str, metakeys: Dict) -> None:
+def write_metakeys(bucket: str, metakeys: dict) -> None:
     """Write metadata keys to file. The dictionary will be checked
     before writing and information on errors presented to the user.
 
