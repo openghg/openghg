@@ -1,7 +1,13 @@
 import pytest
 
 from openghg.objectstore import create_default_config, get_metakey_defaults
-from openghg.store.base._metadata import Metadatum, Metadata, categorising_keys_valid, metadata_from_config
+from openghg.store.base._metadata import (
+    Metadatum,
+    Metadata,
+    categorising_keys_valid,
+    metadata_from_config,
+    merge_dicts,
+)
 
 
 def test_metadatum_postinit():
@@ -14,7 +20,7 @@ def test_metadatum_postinit():
 def test_metadatum_valid_check():
     """Test `valid` method of Metadatum. It should only be False for Metadatum with
     `categorising = True` and `value = None`
-     """
+    """
     valid_metadatum1 = Metadatum(name="vmd1", value=None, categorising=True, required=False)
     assert valid_metadatum1.valid
 
@@ -55,7 +61,7 @@ def test_metadata_init():
 
     metadata = Metadata.from_list([metadatum1, metadatum2, metadatum3])
 
-    assert ("md1" in metadata)  and ("md2" in metadata) and ("md3" in metadata)
+    assert ("md1" in metadata) and ("md2" in metadata) and ("md3" in metadata)
 
 
 def test_metadata_get_set():
@@ -124,7 +130,7 @@ def test_from_config(tmp_path):
 
 
 def test_metadata_processing(tmp_path):
-    """Test processing that combines user metadata """
+    """Test processing that combines user metadata"""
     create_default_config(bucket=str(tmp_path))
 
     config_metadata = metadata_from_config(bucket=str(tmp_path), data_type="flux")
@@ -169,3 +175,40 @@ def test_metadata_processing(tmp_path):
     del user_metadata_recovered["model"]
 
     assert user_metadata_recovered == user_metadata
+
+
+def test_merge_dicts():
+    dict1 = {"a": 1, "b": 2}
+    dict2 = {"a": 5, "c": 3}
+
+    # join = "union"
+    assert merge_dicts(dict1, dict2, join="union", on_conflict="left") == {"a": 1, "b": 2, "c": 3}
+    assert merge_dicts(dict1, dict2, join="union", on_conflict="right") == {"a": 5, "b": 2, "c": 3}
+    assert merge_dicts(dict1, dict2, join="union", on_conflict="drop") == {"b": 2, "c": 3}
+
+    with pytest.raises(ValueError):
+        merge_dicts(dict1, dict2, join="union", on_conflict="error")
+
+    # join = "intersection"
+    assert merge_dicts(dict1, dict2, join="intersection", on_conflict="left") == {"a": 1}
+    assert merge_dicts(dict1, dict2, join="intersection", on_conflict="right") == {"a": 5}
+    assert merge_dicts(dict1, dict2, join="intersection", on_conflict="drop") == {}
+
+    with pytest.raises(ValueError):
+        merge_dicts(dict1, dict2, join="intersection", on_conflict="error")
+
+    # join = "left"
+    assert merge_dicts(dict1, dict2, join="left", on_conflict="left") == {"a": 1, "b": 2}
+    assert merge_dicts(dict1, dict2, join="left", on_conflict="right") == {"a": 5, "b": 2}
+    assert merge_dicts(dict1, dict2, join="left", on_conflict="drop") == {"b": 2}
+
+    with pytest.raises(ValueError):
+        merge_dicts(dict1, dict2, join="left", on_conflict="error")
+
+    # join = "right"
+    assert merge_dicts(dict1, dict2, join="right", on_conflict="left") == {"a": 1, "c": 3}
+    assert merge_dicts(dict1, dict2, join="right", on_conflict="right") == {"a": 5, "c": 3}
+    assert merge_dicts(dict1, dict2, join="right", on_conflict="drop") == {"c": 3}
+
+    with pytest.raises(ValueError):
+        merge_dicts(dict1, dict2, join="right", on_conflict="error")

@@ -162,6 +162,126 @@ class Metadata(UserDict):
         else:
             return [v for _, v in filtered_items]
 
+    @staticmethod
+    def merge(
+        left: Metadata,
+        right: Metadata,
+        join: Literal["union", "intersection", "left", "right"] = "union",
+        on_conflict: Literal["left", "right", "error", "drop"] = "left",
+    ) -> Metadata:
+        """Merge two Metadata objects together.
+
+        Args:
+            left: Metadata to merge
+            right: Metadata to merge
+            join: how to combine the dictionaries
+                - "union": take the union of the keys (i.e. use all keys from both dicts)
+                - "intersection": take the intersection of the keys (i.e. use only keys that appear in both dicts)
+                - "left": use the keys from the left dictionary
+                - "right": use the keys from the right dictionary
+            on_conflict: behavior for differing values for the same key in both metadata dicts
+                - "left": take value from left
+                - "right": take value from right
+                - "error": raise error
+                - "drop": drop key
+
+        Returns:
+            merged Metadata
+        """
+        merged = merge_dicts(left.data, right.data, join=join, on_conflict=on_conflict)
+        return Metadata(merged)
+
+
+def merge_dicts(
+    left: dict,
+    right: dict,
+    join: Literal["union", "intersection", "left", "right"] = "union",
+    on_conflict: Literal["left", "right", "error", "drop"] = "left",
+) -> dict:
+    """Merge multiple metadata dictionaries together.
+
+    Args:
+        left: dictionary of metadata to merge
+        right: dictionary of metadata to merge
+        join: how to combine the dictionaries
+            - "union": take the union of the keys (i.e. use all keys from both dicts)
+            - "intersection": take the intersection of the keys (i.e. use only keys that appear in both dicts)
+            - "left": use the keys from the left dictionary
+            - "right": use the keys from the right dictionary
+        on_conflict: behavior for differing values for the same key in both metadata dicts
+            - "left": take value from left
+            - "right": take value from right
+            - "error": raise error
+            - "drop": drop key
+
+    Returns:
+        merged dictionary
+    """
+    # check case: on_conflict = "error"
+    overlap = set(left.keys()) & set(right.keys())
+    if on_conflict == "error" and overlap:
+        raise ValueError(f'Overlapping keys {overlap} and `on_conflict = "error"`.')
+
+    if join == "union":
+        if on_conflict == "left":
+            result = right.copy()
+            result.update(left)
+
+        if on_conflict in ("right", "error"):
+            # if on_conflict = "error" and no ValueError above, then keys are disjoint
+            result = left.copy()
+            result.update(right)
+
+        if on_conflict == "drop":
+            result = left.copy()
+
+            # drop conflict
+            for k in left:
+                if k in right and (left[k] != right[k]):
+                    del result[k]
+
+            # add remaining keys from right
+            for k in right:
+                if k not in left:
+                    result[k] = right[k]
+
+    elif join == "intersection":
+        if on_conflict == "left":
+            result = {k: left[k] for k in overlap}
+
+        if on_conflict == "right":
+            result = {k: right[k] for k in overlap}
+
+        if on_conflict == "drop":
+            result = {}
+
+    elif join == "left":
+        result = left.copy()
+
+        if on_conflict == "right":
+            for k in left:
+                if k in right:
+                    result[k] = right[k]
+
+        if on_conflict == "drop":
+            for k in left:
+                if k in right:
+                    del result[k]
+
+    elif join == "right":
+        result = right.copy()
+
+        if on_conflict == "left":
+            for k in right:
+                if k in left:
+                    result[k] = left[k]
+
+        if on_conflict == "drop":
+            for k in right:
+                if k in left:
+                    del result[k]
+
+    return result
 
 
 def metadata_from_config(bucket: str, data_type: str) -> Metadata:
