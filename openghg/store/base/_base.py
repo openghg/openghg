@@ -6,11 +6,13 @@ from __future__ import annotations
 import logging
 import math
 from pathlib import Path
-from pandas import Timestamp
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
+
+from pandas import Timestamp
 from xarray import open_dataset
 
+from ._metadata import MetadataDataPair
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
@@ -166,15 +168,10 @@ class BaseStore:
         Returns:
             dict: Dictionary of metakeys
         """
-        try:
-            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
-        except KeyError:
-            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-        return metakeys
+        return get_metakeys(bucket=self._bucket, data_type=self._data_type)
 
-    # TODO - move this kind of metadata handling into centralised location
     def _add_additional_metadata(
-        self, data: dict, additional_kwargs: dict, optional_metadata: Optional[dict]
+        self, data: dict, kwargs_metadata: dict, info: Optional[dict] = None
     ) -> dict:
         """
         Validate and combine "distinguishing" metadata used to categorise datasources.
@@ -194,16 +191,16 @@ class BaseStore:
         """
         metakeys = self._get_metakeys()
         required_keys = metakeys["required"]
-        invalid_kwargs = [k for k in additional_kwargs if k not in required_keys]
+        invalid_kwargs = [k for k in kwargs_metadata if k not in required_keys]
         if invalid_kwargs:
             raise ValueError(
                 "kwargs can only be used to pass in additional required keys.\n"
                 + f"Invalid keys: {invalid_kwargs}"
             )
 
-        parsed_kwargs = {k: clean_string(v) for k, v in additional_kwargs.items() if v is not None}
-        if optional_metadata is not None:
-            parsed_optional = {k: clean_string(v) for k, v in optional_metadata.items() if v is not None}
+        parsed_kwargs = {k: clean_string(v) for k, v in kwargs_metadata.items() if v is not None}
+        if info is not None:
+            parsed_optional = {k: clean_string(v) for k, v in info.items() if v is not None}
 
             invalid_optional_keys = [k for k in parsed_optional if k in required_keys]
             if invalid_optional_keys:
@@ -213,7 +210,7 @@ class BaseStore:
                 )
 
         for parsed_data in data.values():
-            if optional_metadata is not None:
+            if info is not None:
                 parsed_data["metadata"].update(parsed_optional)
             parsed_data["metadata"].update(parsed_kwargs)
 
@@ -363,8 +360,8 @@ class BaseStore:
         return uuids
 
     def datasource_lookup(
-        self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
-    ) -> Dict:
+        self, data: dict, required_keys: Sequence[str], min_keys: Optional[int] = None
+    ) -> dict:
         """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
         to be present and will require at least min_keys of these to be present when searching.
 
@@ -381,12 +378,13 @@ class BaseStore:
             dict: Dictionary of datasource information
         """
         from openghg.util import to_lowercase
+        from ._metadata import get_datasource_lookup_metadata, metadata_from_config
 
-        if min_keys is None:
-            min_keys = len(required_keys)
 
         results = {}
         for key, _data in data.items():
+            config_metadata = metadata_from_config(self._bucket, self._data_type)
+
             metadata = _data["metadata"]
 
             required_metadata = {

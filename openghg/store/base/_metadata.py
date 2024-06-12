@@ -371,23 +371,81 @@ def merge_dicts(
     return result
 
 
+@dataclass
+class MetadataDataPair:
+    """Container for data and metadata before it is added to object store."""
+    data: xr.Dataset
+    metadata: Metadata
+    key: str = ""
+
+
+def convert_parser_output(parser_output: dict) -> list[MetadataDataPair]:
+    """Band-aid function to convert parser output to more structured format.
+
+    TODO: make parser output a list of MetadataDataPair objects
+    """
+    result = []
+    for key, split_data in parser_output:
+        result.append(MetadataDataPair(key=key, **split_data))
+    return result
+
+
+def combine_metadata(
+    parser_output: list[MetadataDataPair], input_kwargs: dict, info: Optional[dict] = None
+) -> list[MetadataDataPair]:
+    """Update Metadata in parser_output with other sources of metadata.
+
+    Returns:
+        list of MetadataDataPair objects with combined metadata from parser output and user input
+    """
+    # input kwargs should be used as "categorising" metakeys
+    # NOTE: using clean_string as formatter since this is what was done in Gareth's _add_additional_metadata
+    # function
+    kwargs_metadata = Metadata.from_dict(input_kwargs, categorising=True, formatter=clean_string, origin="kwargs")
+
+    # info should not be categorising
+    # NOTE: using clean_string as formatter since this is what was done in Gareth's _add_additional_metadata
+    # function
+    if info is not None:
+        info_metadata = Metadata.from_dict(info, formatter=clean_string, origin="info")
+    else:
+        info_metadata = Metadata()
+
+    # combine, raising error if any keys from kwargs are also in info
+    try:
+        other_metadata = Metadata.merge(kwargs_metadata, info_metadata, join="union", on_conflict="error")
+    except ValueError as e:
+        raise ValueError("Duplicate keys in **kwargs and info:") from e
+
+    # NOTE: we could check that kwargs don't overlap with required metakeys here
+    # instead, this check is in datasource lookup
+
+    result = []
+    for item in parser_output:
+        parser_metadata = item.metadata
+
+        # combine, keeping parser metadata over other metadata
+        total_metadata = Metadata.merge(parser_metadata, other_metadata, join="union", on_conflict="left")
+
+        result.append(replace(item, metadata=total_metadata))  # create new item with updated metadata
+
+    return result
+
+
 def metadata_from_config(bucket: str, data_type: str) -> Metadata:
     """Make Metadata object from config file.
 
     Values will be filled with defaults or None.
 
     Args:
-        bucket: name of object store
+        bucket: path to object store (as string)
         data_type: type of data (e.g. "footprints", "surface", "flux", etc.)
 
     Returns:
         Metadata object contains required and optional keys from config file.
     """
-    try:
-        metakeys = get_metakeys(bucket=bucket)[data_type]
-    except KeyError:
-        raise ValueError(f"No metakeys for {data_type}, please update metakeys configuration file.")
 
+    metakeys = get_metakeys(bucket=bucket, data_type=data_type)
     metadata = []
 
     for name, spec in metakeys["required"].items():
@@ -405,24 +463,24 @@ def metadata_from_config(bucket: str, data_type: str) -> Metadata:
 
 def categorising_keys_valid(metadata: Metadata) -> bool:
     """Return True if all categorising items are valid."""
-    n_cat = len(metadata.select(categorising=True))
-    n_cat_valid = len(metadata.select(categorising=True, valid=True))
-    return n_cat == n_cat_valid
+    return not metadata.select(categorising=True, valid=False)
 
 
 def get_datasource_lookup_metadata(metadata: Metadata, min_keys: Optional[int] = None) -> dict[str, Any]:
     """Get metadata needed for datasource look up."""
     if not categorising_keys_valid(metadata):
-        invalid_keys = metadata.select("keys", categorising=True, valid=False)
-        valid_keys = metadata.select("keys", categorising=True, valid=True)
+        invalid_keys = metadata.select("keys", categorising=True, required=True, valid=False)
+        valid_keys = metadata.select("keys", categorising=True, required=True, valid=True)
 
         if min_keys is None:
             invalid_keys_str = "\n\t".join(invalid_keys)
-            raise ValueError(f"The following required keys are missing:{invalid_keys_str}")
+            raise ValueError(f"The following required keys are missing: {invalid_keys_str}")
 
         elif len(valid_keys) < min_keys:
+            missing = metadata.select("keys", categorising=True, required=True, valid=False)
             raise ValueError(
                 f"{min_keys} required keys necessary, but only {len(valid_keys)} required keys provided."
+                f"\nMissing keys: {missing}."
             )
 
-    return {k: v for k, v in metadata.select(categorising=True, valid=True)}  # TODO: add `if v is not None` ?
+    return dict(metadata.select(categorising=True, valid=True))

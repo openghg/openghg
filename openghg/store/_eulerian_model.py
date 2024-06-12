@@ -196,7 +196,7 @@ class EulerianModel(BaseStore):
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
             model_data = self._add_additional_metadata(
-                data=model_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+                data=model_data, kwargs_metadata=kwargs, info=optional_metadata
             )
 
             data_type = "eulerian_model"

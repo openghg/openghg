@@ -1,7 +1,8 @@
-import numpy as np
-import xarray as xr
 from pathlib import Path
 from typing import DefaultDict, Dict, List, Tuple, Union, Optional, TypeVar, NamedTuple
+
+import numpy as np
+import xarray as xr
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]

@@ -207,7 +207,7 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data = {key: {"data": bc_data, "metadata": metadata}}
 
             boundary_conditions_data = self._add_additional_metadata(
-                data=boundary_conditions_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+                data=boundary_conditions_data, kwargs_metadata=kwargs, info=optional_metadata
             )
 
             lookup_keys = self.get_lookup_keys(optional_metadata)

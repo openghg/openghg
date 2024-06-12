@@ -438,7 +438,7 @@ class Footprints(BaseStore):
             )
 
         footprint_data = self._add_additional_metadata(
-            data=footprint_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            data=footprint_data, kwargs_metadata=kwargs, info=optional_metadata
         )
 
         # TODO - we'll further tidy this up when we move the metdata parsing

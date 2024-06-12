@@ -229,7 +229,7 @@ class Flux(BaseStore):
         optional_metadata.update(to_add)
 
         flux_data = self._add_additional_metadata(
-            data=flux_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            data=flux_data, kwargs_metadata=kwargs, info=optional_metadata
         )
 
         # TODO - really we want the metadata completely formed before we perform

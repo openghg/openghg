@@ -10,7 +10,7 @@ from openghg.store.base._metadata import (
 )
 
 
-def test_metadatum_postinit():
+def test_metadatum_cat_req_validation():
     """Metadatum can only have `require = True` if `categorising = True`"""
     non_cat_metadatum = Metadatum(name="ncmd", value=None, categorising=False, required=True)
 
@@ -91,7 +91,7 @@ def test_metadata_update():
     assert metadata["species"] == "CH4"
 
 
-def test_init_vs_from_list():
+def test_metadata_from_list():
     metadatum1 = Metadatum(name="md1", value=1)
     metadatum2 = Metadatum(name="md2", value=2)
     metadatum3 = Metadatum(name="md3", value=3)
@@ -108,6 +108,20 @@ def test_init_vs_from_list():
     metadata3 = Metadata(metadatum_dict)
 
     assert metadata2 == metadata3
+
+
+def test_metadata_from_dict():
+    metadatum1 = Metadatum(name="md1", value=1, categorising=True)
+    metadatum2 = Metadatum(name="md2", value=2, categorising=True)
+    metadatum3 = Metadatum(name="md3", value=3, categorising=True)
+
+    metadata1 = Metadata.from_list([metadatum1, metadatum2, metadatum3])
+
+    _dict = {"md1": 1, "md2": 2, "md3": 3}
+
+    metadata2 = Metadata.from_dict(_dict, categorising=True)
+
+    assert metadata1 == metadata2
 
 
 def test_from_config(tmp_path):
@@ -212,3 +226,67 @@ def test_merge_dicts():
 
     with pytest.raises(ValueError):
         merge_dicts(dict1, dict2, join="right", on_conflict="error")
+
+
+def test_merge_metadata():
+    dict1 = {"a": 1, "b": 2}
+    dict2 = {"a": 5, "c": 3}
+
+    metadata1 = Metadata.from_dict(dict1, categorising=True)
+    metadata2 = Metadata.from_dict(dict2)
+
+    # join = "union"
+    assert Metadata.merge(metadata1, metadata2, join="union", on_conflict="left") == Metadata.from_dict(
+        {"a": 1, "b": 2, "c": 3}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="union", on_conflict="right") == Metadata.from_dict(
+        {"a": 5, "b": 2, "c": 3}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="union", on_conflict="drop") == Metadata.from_dict(
+        {"b": 2, "c": 3}
+    )
+
+    with pytest.raises(ValueError):
+        Metadata.merge(metadata1, metadata2, join="union", on_conflict="error")
+
+    # join = "intersection"
+    assert Metadata.merge(
+        metadata1, metadata2, join="intersection", on_conflict="left"
+    ) == Metadata.from_dict({"a": 1})
+    assert Metadata.merge(
+        metadata1, metadata2, join="intersection", on_conflict="right"
+    ) == Metadata.from_dict({"a": 5})
+    assert Metadata.merge(
+        metadata1, metadata2, join="intersection", on_conflict="drop"
+    ) == Metadata.from_dict({})
+
+    with pytest.raises(ValueError):
+        Metadata.merge(metadata1, metadata2, join="intersection", on_conflict="error")
+
+    # join = "left"
+    assert Metadata.merge(metadata1, metadata2, join="left", on_conflict="left") == Metadata.from_dict(
+        {"a": 1, "b": 2}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="left", on_conflict="right") == Metadata.from_dict(
+        {"a": 5, "b": 2}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="left", on_conflict="drop") == Metadata.from_dict(
+        {"b": 2}
+    )
+
+    with pytest.raises(ValueError):
+        Metadata.merge(metadata1, metadata2, join="left", on_conflict="error")
+
+    # join = "right"
+    assert Metadata.merge(metadata1, metadata2, join="right", on_conflict="left") == Metadata.from_dict(
+        {"a": 1, "c": 3}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="right", on_conflict="right") == Metadata.from_dict(
+        {"a": 5, "c": 3}
+    )
+    assert Metadata.merge(metadata1, metadata2, join="right", on_conflict="drop") == Metadata.from_dict(
+        {"c": 3}
+    )
+
+    with pytest.raises(ValueError):
+        Metadata.merge(metadata1, metadata2, join="right", on_conflict="error")
