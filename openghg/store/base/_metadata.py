@@ -20,6 +20,12 @@ class Metadatum:
     - 'categorising': if True, this Metadatum will be used for datasource look up
     - 'required': if True, then the `valid` property will return false if 'value' is None.
     """
+    _name: str
+    _value: Any
+    categorising: bool = False
+    required: bool = False
+    origin: Optional[str] = None
+    formatter: Optional[Callable] = None
 
     def __init__(
         self,
@@ -27,20 +33,36 @@ class Metadatum:
         value: Any,
         categorising: bool = False,
         required: bool = False,
+        origin: Optional[str] = None,
         formatter: Optional[Callable] = None,
     ) -> None:
         """Create Metadatum object.
 
-        Note: we are using an explicit init method so we can have properties.
+        Note: we are using an explicit init method so we can have properties without using `_name` and `_value`
+        in the signature of `__init__`.
+
+        The `name` variable is returned as a lower case string, with the original value saved as `self._name`.
+        The `value` variable is formatted when retrieved, with the original value saved as `self._value`.
+
+        Args:
+            name: name of Metadatum, e.g. "species", "inlet", "start_time"; automatically formatted to lower case.
+            value: value of Metadatum
+            categorising: if True, this Metadatum is used for defining and distinguishing between
+                different datasources (via "datasource lookup").
+            required: if True, this Metadatum must be present for datasource look up (or, a minimum number of
+                required keys must be present, if a minimum number is specified)
+            origin: where the Metadatum originates from (e.g. kwargs, info, parser)
+            formatter: a function that formats the Metadatum value.
+
+        Returns:
+            None
         """
         self.name = name
         self.value = value
         self.categorising = categorising
-
-        # The 'required' attribute can only be True for 'categorising' Metadatum:
-        self.required = required if categorising else False
-
-        self.formatter = formatter or (lambda x: x)  # default formatter does nothing
+        self.required = required if categorising else False  # 'required' only for 'categorising' Metadatum
+        self.origin = origin
+        self.formatter = formatter
 
     @property
     def name(self) -> str:
@@ -55,7 +77,7 @@ class Metadatum:
     @property
     def value(self) -> Any:
         """Return formatted value."""
-        return self.formatter(self._value)
+        return self.formatter(self._value) if self.formatter else self._value
 
     @value.setter
     def value(self, value: Any) -> None:
@@ -282,9 +304,10 @@ def merge_dicts(
         merged dictionary
     """
     # check case: on_conflict = "error"
+    # TODO: if the values for the overlapping keys agree, we don't necessarily need to raise an error
     overlap = set(left.keys()) & set(right.keys())
     if on_conflict == "error" and overlap:
-        raise ValueError(f'Overlapping keys {overlap} and `on_conflict = "error"`.')
+        raise ValueError(f"Overlapping keys: {overlap}.")
 
     if join == "union":
         if on_conflict == "left":
