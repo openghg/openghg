@@ -78,7 +78,7 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> dict:
         """Read flux / emissions file
@@ -121,7 +121,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -220,8 +220,8 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        if optional_metadata is None:
-            optional_metadata = {}
+        if info is None:
+            info = {}
 
         # TODO - the optional params
         # Make sure none of these are Nones
@@ -229,7 +229,7 @@ class Flux(BaseStore):
         optional_metadata.update(to_add)
 
         flux_data = self._add_additional_metadata(
-            data=flux_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            data=flux_data, kwargs_metadata=kwargs, info=info
         )
 
         # TODO - really we want the metadata completely formed before we perform
@@ -261,7 +261,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> Dict:
         """

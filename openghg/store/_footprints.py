@@ -213,7 +213,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
@@ -261,7 +261,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -438,12 +438,12 @@ class Footprints(BaseStore):
             )
 
         footprint_data = self._add_additional_metadata(
-            data=footprint_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            data=footprint_data, kwargs_metadata=kwargs, info=info
         )
 
         # TODO - we'll further tidy this up when we move the metdata parsing
         # into a centralised place
-        lookup_keys = self.get_lookup_keys(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
         data_type = "footprints"
         # TODO - filter options

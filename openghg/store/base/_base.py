@@ -175,20 +175,20 @@ class BaseStore:
 
     # TODO - move this kind of metadata handling into centralised location
     def _add_additional_metadata(
-        self, data: dict, additional_kwargs: dict, optional_metadata: dict | None
+        self, data: dict, kwargs_metadata: dict, info: dict | None
     ) -> dict:
         metakeys = self._get_metakeys()
         required_keys = metakeys["required"]
-        invalid_kwargs = [k for k in additional_kwargs if k not in required_keys]
+        invalid_kwargs = [k for k in kwargs_metadata if k not in required_keys]
         if invalid_kwargs:
             raise ValueError(
                 "kwargs can only be used to pass in additional required keys.\n"
                 + f"Invalid keys: {invalid_kwargs}"
             )
 
-        parsed_kwargs = {k: clean_string(v) for k, v in additional_kwargs.items() if v is not None}
-        if optional_metadata is not None:
-            parsed_optional = {k: clean_string(v) for k, v in optional_metadata.items() if v is not None}
+        parsed_kwargs = {k: clean_string(v) for k, v in kwargs_metadata.items() if v is not None}
+        if info is not None:
+            parsed_optional = {k: clean_string(v) for k, v in info.items() if v is not None}
 
             invalid_optional_keys = [k for k in parsed_optional if k in required_keys]
             if invalid_optional_keys:
@@ -198,7 +198,7 @@ class BaseStore:
                 )
 
         for parsed_data in data.values():
-            if optional_metadata is not None:
+            if info is not None:
                 parsed_data["metadata"].update(parsed_optional)
             parsed_data["metadata"].update(parsed_kwargs)
 
@@ -206,8 +206,9 @@ class BaseStore:
 
     def get_lookup_keys(self, optional_metadata: dict | None) -> list[str]:
         """This creates the list of keys required to perform the Datasource lookup.
-        If optional_metadata is passed in then those keys may be taken into account
-        if they exist in the list of stored optional keys.
+
+        If optional_metadata is passed in then those keys will be used for Datasource lookup,
+        even if they are not in the list of stored optional keys.
 
         Args:
             optional_metadata: Dictionary of optional metadata
@@ -230,9 +231,21 @@ class BaseStore:
                 )
 
             if optional:
+                # check for optional keys passed in on the fly
+                # and log a warning
+                not_in_config = []
                 for key in optional_metadata:
-                    if key in optional:
-                        lookup_keys.append(key)
+                    if key not in optional:
+                        not_in_config.append(key)
+
+                if not_in_config:
+                    keys_str = ", ".join(not_in_config)
+                    msg = ("The following keys were not found in the metadata keys config, "
+                           f"but will be used to distinguish datasources: {keys_str}")
+                    logger.warning(msg)
+
+                # add *all* optional metadata keys to lookup keys
+                lookup_keys.extend(optional_metadata.keys())
 
         return lookup_keys
 

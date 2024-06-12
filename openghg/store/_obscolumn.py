@@ -42,7 +42,7 @@ class ObsColumn(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> dict:
         """Read column observation file
@@ -86,7 +86,7 @@ class ObsColumn(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -163,10 +163,10 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        lookup_keys = self.get_lookup_keys(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
         obs_data = self._add_additional_metadata(
-            data=obs_data, additional_kwargs=kwargs, optional_metadata=optional_metadata
+            data=obs_data, kwargs_metadata=kwargs, info=info
         )
 
         data_type = "column"
