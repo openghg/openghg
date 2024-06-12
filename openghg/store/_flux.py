@@ -220,8 +220,7 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        if info is None:
-            info = {}
+        optional_metadata = kwargs or {}
 
         # TODO - the optional params
         # Make sure none of these are Nones
@@ -229,7 +228,7 @@ class Flux(BaseStore):
         optional_metadata.update(to_add)
 
         flux_data = self._add_additional_metadata(
-            data=flux_data, kwargs_metadata=kwargs, info=info
+            data=flux_data, kwargs_metadata=optional_metadata, info=info
         )
 
         # TODO - really we want the metadata completely formed before we perform
