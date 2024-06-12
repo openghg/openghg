@@ -174,32 +174,34 @@ class BaseStore:
         return metakeys
 
     # TODO - move this kind of metadata handling into centralised location
-    def _add_additional_metadata(
-        self, data: dict, kwargs_metadata: dict, info: dict | None
-    ) -> dict:
+    def _add_additional_metadata(self, data: dict, kwargs_metadata: dict, info: dict | None) -> dict:
         metakeys = self._get_metakeys()
         required_keys = metakeys["required"]
-        invalid_kwargs = [k for k in kwargs_metadata if k not in required_keys]
+        optional_keys = metakeys.get("optional", {})
+
+        invalid_kwargs = [k for k in kwargs_metadata if k in required_keys]
         if invalid_kwargs:
             raise ValueError(
-                "kwargs can only be used to pass in additional required keys.\n"
-                + f"Invalid keys: {invalid_kwargs}"
+                "kwargs cannot be used to pass required keys.\n" + f"Invalid keys: {invalid_kwargs}"
             )
 
         parsed_kwargs = {k: clean_string(v) for k, v in kwargs_metadata.items() if v is not None}
-        if info is not None:
-            parsed_optional = {k: clean_string(v) for k, v in info.items() if v is not None}
 
-            invalid_optional_keys = [k for k in parsed_optional if k in required_keys]
-            if invalid_optional_keys:
+        if info is not None:
+            parsed_info = {k: clean_string(v) for k, v in info.items() if v is not None}
+
+            invalid_info_keys = [
+                k for k in parsed_info if (k in required_keys or k in optional_keys or k in parsed_kwargs)
+            ]
+            if invalid_info_keys:
                 raise ValueError(
-                    "Unable to pass in required keys in with optional metadata.\n"
-                    + f"Invalid keys: {invalid_optional_keys}"
+                    "Unable to pass in keys for defining/distinguishing datasources via `info`.\n"
+                    + f"Invalid keys: {invalid_info_keys}"
                 )
 
         for parsed_data in data.values():
             if info is not None:
-                parsed_data["metadata"].update(parsed_optional)
+                parsed_data["metadata"].update(parsed_info)
             parsed_data["metadata"].update(parsed_kwargs)
 
         return data
@@ -240,8 +242,10 @@ class BaseStore:
 
                 if not_in_config:
                     keys_str = ", ".join(not_in_config)
-                    msg = ("The following keys were not found in the metadata keys config, "
-                           f"but will be used to distinguish datasources: {keys_str}")
+                    msg = (
+                        "The following keys were not found in the metadata keys config, "
+                        f"but will be used to distinguish datasources: {keys_str}"
+                    )
                     logger.warning(msg)
 
                 # add *all* optional metadata keys to lookup keys
