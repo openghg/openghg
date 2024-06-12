@@ -3,21 +3,21 @@
 """
 
 from __future__ import annotations
+
 import logging
 import math
-from pathlib import Path
-from pandas import Timestamp
-from types import TracebackType
-from typing import Any, Dict, List, Optional, TypeVar, Union, Tuple
 from collections.abc import Sequence
-from xarray import open_dataset
+from pathlib import Path
+from types import TracebackType
+from typing import Any, TypeVar
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
+from openghg.objectstore import exists, get_metakeys, get_object_from_json, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file, clean_string
-
+from openghg.util import clean_string, hash_file, timestamp_now, to_lowercase
+from pandas import Timestamp
+from xarray import open_dataset
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -424,6 +424,7 @@ class BaseStore:
         """
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
+
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
