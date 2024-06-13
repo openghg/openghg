@@ -383,9 +383,7 @@ class ObsSurface(BaseStore):
 
             lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
-            data = self._add_additional_metadata(
-                data=data, kwargs_metadata=kwargs, info=info
-            )
+            data = self._add_additional_metadata(data=data, kwargs_metadata=kwargs, info=info)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"

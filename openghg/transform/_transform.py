@@ -46,5 +46,7 @@ def transform_flux_data(
     dclass = get_data_class("flux")
 
     with dclass(bucket) as dc:
-        result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, info=info, **kwargs)
+        result = dc.transform_data(
+            datapath=datapath, database=database, overwrite=overwrite, info=info, **kwargs
+        )
     return result

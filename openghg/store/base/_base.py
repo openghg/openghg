@@ -183,7 +183,6 @@ class BaseStore:
             required_keys = metakeys["required"]
             optional_keys = metakeys.get("optional", {})
 
-
             parsed_info = {k: clean_string(v) for k, v in info.items() if v is not None}
 
             invalid_info_keys = [

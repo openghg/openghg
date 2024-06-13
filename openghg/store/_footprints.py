@@ -432,9 +432,7 @@ class Footprints(BaseStore):
                 short_lifetime=short_lifetime,
             )
 
-        footprint_data = self._add_additional_metadata(
-            data=footprint_data, kwargs_metadata=kwargs, info=info
-        )
+        footprint_data = self._add_additional_metadata(data=footprint_data, kwargs_metadata=kwargs, info=info)
 
         # TODO - we'll further tidy this up when we move the metdata parsing
         # into a centralised place

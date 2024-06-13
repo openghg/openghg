@@ -165,9 +165,7 @@ class ObsColumn(BaseStore):
 
         lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
-        obs_data = self._add_additional_metadata(
-            data=obs_data, kwargs_metadata=kwargs, info=info
-        )
+        obs_data = self._add_additional_metadata(data=obs_data, kwargs_metadata=kwargs, info=info)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
