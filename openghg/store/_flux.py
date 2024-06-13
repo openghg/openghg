@@ -291,6 +291,8 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+                e.g. {"project": "paris", "comments": "Flat prior based on EDGAR totals by country"}
             **kwargs: Inputs for underlying parser function for the database.
 
                 Necessary inputs will depend on the database being parsed.
@@ -334,18 +336,13 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        required_keys = ("species", "source", "domain")
+        # any kwargs not used by the parser will be used as "optional metadata" for
+        # categorising the data
+        optional_metadata = {k: v for k, v in kwargs.items() if k not in all_param}
 
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
+        flux_data = self._add_additional_metadata(flux_data, optional_metadata, info)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -353,7 +350,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required_keys,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
