@@ -158,7 +158,7 @@ We'll update the TOML file and add a couple of new lines
         }
     },
 
-This key must now be provided when standardising data. At the moment this key must be passed in using the ``optional_metadata``
+This key must now be provided when standardising data. At the moment this key must be passed in using the ``info``
 argument to the standardisation functions. To standardise a footprint we now do
 
 .. code-block:: python
@@ -172,7 +172,7 @@ argument to the standardisation functions. To standardise a footprint we now do
                                     model="NAME",
                                     height="100m",
                                     met_model="UKV",
-                                    optional_metadata={"project": "project_a"})
+                                    info={"project": "project_a"})
 
     result = standardise_footprint(filepath=fp_filepath_b,
                                     site="TAC",
@@ -180,6 +180,6 @@ argument to the standardisation functions. To standardise a footprint we now do
                                     model="NAME",
                                     height="100m",
                                     met_model="UKV",
-                                    optional_metadata={"project": "project_b"})
+                                    info={"project": "project_b"})
 
 These files will now be stored separately within OpenGHG.

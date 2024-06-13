@@ -636,7 +636,7 @@ def test_footprints_chunking_schema():
         )
 
 
-def test_optional_metadata_raise_error():
+def test_info_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -661,11 +661,11 @@ def test_optional_metadata_raise_error():
             inlet=inlet,
             species=species,
             domain=domain,
-            optional_metadata={"site": "test"},
+            info={"site": "test"},
         )
 
 
-def test_optional_metadata():
+def test_info():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -688,7 +688,7 @@ def test_optional_metadata():
         inlet=inlet,
         species=species,
         domain=domain,
-        optional_metadata={"project": "test"},
+        info={"project": "test"},
     )
 
     # Get the footprints data
@@ -775,7 +775,7 @@ def test_standardise_footprints_different_datasources_updated_required_keys_fail
     model = "UKV"
     inlet = "100m"
 
-    optional_metadata = {"project": "zoo", "special_tag": "elephant"}
+    info = {"project": "zoo", "special_tag": "elephant"}
 
     with pytest.raises(ValueError):
         standardise_footprint(
@@ -785,7 +785,7 @@ def test_standardise_footprints_different_datasources_updated_required_keys_fail
             model=model,
             inlet=inlet,
             store="user",
-            optional_metadata=optional_metadata,
+            info=info,
         )
 
 
