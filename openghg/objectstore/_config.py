@@ -73,8 +73,8 @@ def get_metakey_defaults() -> Dict:
 
 
 def check_metakeys(metakeys: Dict) -> bool:
-    """Checks the metakeys dictionary to ensure it contains all the required
-    information
+    """Check that the given metakeys dictionary contains a valid metakey
+    configuration.
 
     Args:
         metakeys: Dictionary of metakeys
@@ -107,7 +107,7 @@ def check_metakeys(metakeys: Dict) -> bool:
             if not isinstance(types, list):
                 errors.append(f"The type(s) for {metakey} must be contained in a list")
 
-            # TODO - in the future add in a check to ensure they're a type we
+            # TODO - in the future add in a check to ensure they're a type we recognise
             # for key_type in types:
             # pass
 
@@ -119,7 +119,7 @@ def check_metakeys(metakeys: Dict) -> bool:
             required = key_data["required"]
         except KeyError:
             dtype_errors.append(
-                "A number of required metakeys are required, please see example, skipping further checks."
+                "A non-zero number of required metakeys are required, please see example, skipping further checks."
             )
             continue
 
