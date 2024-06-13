@@ -70,6 +70,7 @@ class FluxTimeseriesTypes(Enum):
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    GCWERKS_NC = "GCWERKS_NC"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
     ICOS = "ICOS"

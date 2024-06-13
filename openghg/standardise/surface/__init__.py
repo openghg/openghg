@@ -12,3 +12,4 @@ from ._noaa import parse_noaa
 from ._npl import parse_npl
 from ._openghg import parse_openghg
 from ._thamesbarrier import parse_tmb
+from ._gcwerks_nc import parse_gcwerks_nc

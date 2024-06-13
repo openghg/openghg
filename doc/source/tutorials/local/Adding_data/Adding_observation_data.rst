@@ -158,9 +158,8 @@ AGAGE data
 
 OpenGHG can also process data from the `AGAGE network <https://agage.mit.edu/>`_.
 
-The functions that process the AGAGE data expect data to have an
-accompanying *precisions file*. For each data file we create a tuple with
-the data filename and the precisions filename.
+Historically, the AGAGE network produces output files from GCWERKS alongside a seperate *precisions file*. If you wish
+to use this form of input file, we create a tuple with the data filename and the precisions filename. For example:
 
 First we retrieve example data from the  Cape Grim station in Australia (site code "CGO"").
 
@@ -219,6 +218,21 @@ file
    'h2_70m': {'uuid': '62045a91-bac9-4b7d-84b8-696ec8484002', 'new': True},
    'co_70m': {'uuid': 'a1bd7ab9-4ae0-46aa-8570-ec961f929431', 'new': True},
    'ne_70m': {'uuid': '950e94fe-6cf9-48e3-b920-275935761885', 'new': True}}}}
+
+
+However, recently the AGAGE network has begun to also produce netCDF files, which are processed by Matt
+Rigby's `agage-archive <https://github.com/mrghg/agage-archive>`_ repository. These files are split by site, 
+species and instrument and do not need an accompanying precisions file. These can also be read in by the
+``openghg.standardise.standardise_surface`` function, with the arguments:
+
+* ``filepath``: filepath to the .nc file
+* ``site`` (site code): ``"CGO"``
+* ``source_format`` (data type): ``"GCWERKS_NC"``
+* ``network``: ``"AGAGE"``
+* ``instrument``: ``"medusa"``
+
+The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly. 
+Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible. 
 
 
 .. _note-on-datasources:
