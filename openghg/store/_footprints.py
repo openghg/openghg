@@ -354,7 +354,7 @@ class Footprints(BaseStore):
                 logger.info("Updating time_resolved to True for co2 data")
                 time_resolved = True
 
-            if sort:
+            if sort is True:
                 logger.info(
                     "Sorting high time resolution data is very memory intensive, we recommend not sorting."
                 )
@@ -430,11 +430,6 @@ class Footprints(BaseStore):
                 high_spatial_resolution=high_spatial_resolution,
                 time_resolved=time_resolved,
                 short_lifetime=short_lifetime,
-            )
-
-        if species == "co2" and sort is True:
-            logger.info(
-                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
         footprint_data = self._add_additional_metadata(
