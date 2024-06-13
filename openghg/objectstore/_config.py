@@ -25,6 +25,7 @@ The metakeys file within a specific object store can be modified so
 that more (or different) information is required to categorise datasources.
 
 """
+
 import json
 import logging
 import importlib
