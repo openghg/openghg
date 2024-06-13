@@ -175,19 +175,15 @@ class BaseStore:
 
     # TODO - move this kind of metadata handling into centralised location
     def _add_additional_metadata(self, data: dict, kwargs_metadata: dict, info: dict | None) -> dict:
-        metakeys = self._get_metakeys()
-        required_keys = metakeys["required"]
-        optional_keys = metakeys.get("optional", {})
-
-        invalid_kwargs = [k for k in kwargs_metadata if k in required_keys]
-        if invalid_kwargs:
-            raise ValueError(
-                "kwargs cannot be used to pass required keys.\n" + f"Invalid keys: {invalid_kwargs}"
-            )
-
         parsed_kwargs = {k: clean_string(v) for k, v in kwargs_metadata.items() if v is not None}
 
         if info is not None:
+            # need metakeys to check that categorising metadata isn't passed through `info`
+            metakeys = self._get_metakeys()
+            required_keys = metakeys["required"]
+            optional_keys = metakeys.get("optional", {})
+
+
             parsed_info = {k: clean_string(v) for k, v in info.items() if v is not None}
 
             invalid_info_keys = [
@@ -225,31 +221,23 @@ class BaseStore:
         lookup_keys = list(required)
         # Check if anything in optional_metadata tries to override our required keys
         if optional_metadata is not None:
-            common_keys = set(required) & set(optional_metadata)
+            # check for optional keys passed in on the fly
+            # and log a warning
+            not_in_config = []
+            for key in optional_metadata:
+                if key not in optional and key not in required:
+                    not_in_config.append(key)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+            if not_in_config:
+                keys_str = ", ".join(not_in_config)
+                msg = (
+                    "The following keys were not found in the metadata keys config, "
+                    f"but will be used to distinguish datasources: {keys_str}"
                 )
+                logger.warning(msg)
 
-            if optional:
-                # check for optional keys passed in on the fly
-                # and log a warning
-                not_in_config = []
-                for key in optional_metadata:
-                    if key not in optional:
-                        not_in_config.append(key)
-
-                if not_in_config:
-                    keys_str = ", ".join(not_in_config)
-                    msg = (
-                        "The following keys were not found in the metadata keys config, "
-                        f"but will be used to distinguish datasources: {keys_str}"
-                    )
-                    logger.warning(msg)
-
-                # add *all* optional metadata keys to lookup keys
-                lookup_keys.extend(optional_metadata.keys())
+            # add *all* optional metadata keys to lookup keys
+            lookup_keys.extend(not_in_config)
 
         return lookup_keys
 
