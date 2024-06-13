@@ -1,3 +1,30 @@
+"""
+Methods for reading, validating, and writing a config file containing "metakeys",
+which are types of metadata used to define "datasources".
+
+These keys are stored in a JSON file, which has the following form:
+
+{
+    "data_type1": {
+        "optional": {...},
+        "required": {
+            "key1": {
+            "type": <list of strings; not yet used, must be specified>,
+            "default": <optional, will be added in future>
+            }
+            "key2": { ... }
+        }
+    },
+    "data_type2" : {...}
+}
+
+A default metakeys file is packaged with OpenGHG, and is copied to
+an object store when the object store is created.
+
+The metakeys file within a specific object store can be modified so
+that more (or different) information is required to categorise datasources.
+
+"""
 import json
 import logging
 import importlib
