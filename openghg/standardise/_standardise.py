@@ -918,8 +918,8 @@ def standardise_flux_timeseries(
     filters: Optional[Any] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    optional_metadata: Optional[dict] = None,
+) -> dict:
     """Process one dimension timeseries file
 
     Args:
