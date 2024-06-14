@@ -13,7 +13,7 @@ from pandas import Timedelta
 logger = logging.getLogger("openghg.standardise")
 
 
-def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs) -> dict:
+def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> dict:
     """Generic standardise function, used by data-type specific versions.
 
     Args:
@@ -77,7 +77,7 @@ def standardise_surface(
     filters: Optional[Any] = None,
     chunks: Optional[dict] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -272,7 +272,7 @@ def standardise_column(
     filters: Optional[Any] = None,
     chunks: Optional[dict] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Read column observation file
 
@@ -397,7 +397,7 @@ def standardise_bc(
     filters: Optional[Any] = None,
     chunks: Optional[dict] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -516,7 +516,7 @@ def standardise_footprint(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -670,7 +670,7 @@ def standardise_flux(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Process flux / emissions data
 
@@ -798,7 +798,7 @@ def standardise_eulerian(
     filters: Optional[Any] = None,
     chunks: Optional[dict] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Read Eulerian model output
 
@@ -870,7 +870,7 @@ def standardise_from_binary_data(
     binary_data: bytes,
     metadata: dict,
     file_metadata: dict,
-    **kwargs,
+    **kwargs: Any,
 ) -> Optional[dict]:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
