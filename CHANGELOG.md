@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
 
+### Added
+
+- A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
+
 ## [0.8.1] - 2024-05-17
 
 ### Added
@@ -85,7 +89,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 
 ### Added
 
-- Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
+- Added `DeprecationWarning` to the functions `parse_cranfield` and `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
 - Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
 - Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 - Added `MetaStore` abstract base class as interface for metastore classes, and a `ClassicMetaStore` subclass implements the same bucket/key structure as the previous metastore.
@@ -95,7 +99,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Added config for Black to `pyproject.toml` - [PR #822](https://github.com/openghg/openghg/pull/822)
 - Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
 - Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
-has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
+  has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
 ### Fixed
 
@@ -110,7 +114,6 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
-
 
 ## [0.6.2] - 2023-08-07
 

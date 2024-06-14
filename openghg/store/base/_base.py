@@ -3,20 +3,21 @@
 """
 
 from __future__ import annotations
+
 import logging
 import math
+from collections.abc import Sequence
 from pathlib import Path
-from pandas import Timestamp
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
-from xarray import open_dataset
+from typing import Any, TypeVar
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import exists, get_metakeys, get_object_from_json, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
-from openghg.util import timestamp_now, to_lowercase, hash_file
-
+from openghg.util import clean_string, hash_file, timestamp_now, to_lowercase
+from pandas import Timestamp
+from xarray import open_dataset
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -36,9 +37,9 @@ class BaseStore:
         self._creation_datetime = str(timestamp_now())
         self._stored = False
         # Hashes of previously uploaded files
-        self._file_hashes: Dict[str, str] = {}
+        self._file_hashes: dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
-        self._retrieved_hashes: Dict[str, Dict] = {}
+        self._retrieved_hashes: dict[str, dict] = {}
         # Where we'll store this object's metastore
         self._metakey = ""
 
@@ -59,9 +60,9 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: BaseException | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
@@ -82,19 +83,19 @@ class BaseStore:
         self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
-    def to_data(self) -> Dict:
+    def to_data(self) -> dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+    def read_data(self, *args: Any, **kwargs: Any) -> dict | None:
         raise NotImplementedError
 
     def read_file(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
 
-    def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+    def store_data(self, *args: Any, **kwargs: Any) -> dict | None:
         raise NotImplementedError
 
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
@@ -103,7 +104,7 @@ class BaseStore:
     def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
 
-    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+    def store_hashes(self, hashes: dict[str, Path]) -> None:
         """Store the hashes of files we've seen before
 
         Args:
@@ -114,7 +115,7 @@ class BaseStore:
         name_only = {k: v.name for k, v in hashes.items()}
         self._file_hashes.update(name_only)
 
-    def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
+    def check_hashes(self, filepaths: multiPathType, force: bool) -> tuple[dict[str, Path], dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
         uploaded files. Two dictionaries are returned, one containing the hashes
         of files we've seen before and one containing the hashes of files we haven't.
@@ -131,8 +132,8 @@ class BaseStore:
         if not isinstance(filepaths, list):
             filepaths = [filepaths]
 
-        unseen: Dict[str, Path] = {}
-        seen: Dict[str, Path] = {}
+        unseen: dict[str, Path] = {}
+        seen: dict[str, Path] = {}
 
         for filepath in filepaths:
             file_hash = hash_file(filepath=filepath)
@@ -160,20 +161,99 @@ class BaseStore:
 
         return seen, unseen
 
+    def _get_metakeys(self) -> dict:
+        """Get the metakeys for this storage class
+
+        Returns:
+            dict: Dictionary of metakeys
+        """
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+        return metakeys
+
+    # TODO - move this kind of metadata handling into centralised location
+    def _add_additional_metadata(self, data: dict, kwargs_metadata: dict, info: dict | None) -> dict:
+        parsed_kwargs = {k: clean_string(v) for k, v in kwargs_metadata.items() if v is not None}
+
+        if info is not None:
+            # need metakeys to check that categorising metadata isn't passed through `info`
+            metakeys = self._get_metakeys()
+            required_keys = metakeys["required"]
+            optional_keys = metakeys.get("optional", {})
+
+            parsed_info = {k: clean_string(v) for k, v in info.items() if v is not None}
+
+            invalid_info_keys = [
+                k for k in parsed_info if (k in required_keys or k in optional_keys or k in parsed_kwargs)
+            ]
+            if invalid_info_keys:
+                raise ValueError(
+                    "Unable to pass in keys for defining/distinguishing datasources via `info`.\n"
+                    + f"Invalid keys: {invalid_info_keys}"
+                )
+
+        for parsed_data in data.values():
+            if info is not None:
+                parsed_data["metadata"].update(parsed_info)
+            parsed_data["metadata"].update(parsed_kwargs)
+
+        return data
+
+    def get_lookup_keys(self, optional_metadata: dict | None) -> list[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+
+        If optional_metadata is passed in then those keys will be used for Datasource lookup,
+        even if they are not in the list of stored optional keys.
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = self._get_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            # check for optional keys passed in on the fly
+            # and log a warning
+            not_in_config = []
+            for key in optional_metadata:
+                if key not in optional and key not in required:
+                    not_in_config.append(key)
+
+            if not_in_config:
+                keys_str = ", ".join(not_in_config)
+                msg = (
+                    "The following keys were not found in the metadata keys config, "
+                    f"but will be used to distinguish datasources: {keys_str}"
+                )
+                logger.warning(msg)
+
+            # add *all* optional metadata keys to lookup keys
+            lookup_keys.extend(not_in_config)
+
+        return lookup_keys
+
     def assign_data(
         self,
-        data: Dict,
+        data: dict,
         data_type: str,
         required_keys: Sequence[str],
         sort: bool = True,
         drop_duplicates: bool = True,
-        min_keys: Optional[int] = None,
-        update_keys: Optional[List] = None,
+        min_keys: int | None = None,
+        update_keys: list | None = None,
         if_exists: str = "auto",
         new_version: bool = True,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-    ) -> Dict[str, Dict]:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+    ) -> dict[str, dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
 
@@ -272,8 +352,8 @@ class BaseStore:
         return uuids
 
     def datasource_lookup(
-        self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
-    ) -> Dict:
+        self, data: dict, required_keys: Sequence[str], min_keys: int | None = None
+    ) -> dict:
         """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
         to be present and will require at least min_keys of these to be present when searching.
 
@@ -303,8 +383,10 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
             required_result = self._metastore.search(required_metadata)
@@ -326,7 +408,7 @@ class BaseStore:
         """
         return self._uuid
 
-    def datasources(self) -> List[str]:
+    def datasources(self) -> list[str]:
         """Return the list of Datasources UUIDs associated with this object
 
         Returns:
@@ -334,7 +416,7 @@ class BaseStore:
         """
         return self._datasource_uuids
 
-    def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+    def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> dict:
         """Get the rank for the given Datasource for a given date range
 
         Args:
@@ -346,6 +428,7 @@ class BaseStore:
         """
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
+
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
@@ -381,9 +464,9 @@ class BaseStore:
     def set_rank(
         self,
         uuid: str,
-        rank: Union[int, str],
-        date_range: Union[str, List[str]],
-        overwrite: Optional[bool] = False,
+        rank: int | str,
+        date_range: str | list[str],
+        overwrite: bool | None = False,
     ) -> None:
         """Set the rank of a Datasource associated with this object.
 
@@ -522,7 +605,7 @@ class BaseStore:
 
         self.save()
 
-    def rank_data(self) -> Dict:
+    def rank_data(self) -> dict:
         """Return a dictionary of rank data keyed
         by UUID
 
@@ -530,7 +613,7 @@ class BaseStore:
                 dict: Dictionary of rank data
         """
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
-        rank_dict: Dict = self._rank_data.to_dict()
+        rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
 
     def clear_datasources(self) -> None:
@@ -544,11 +627,11 @@ class BaseStore:
 
     def check_chunks(
         self,
-        filepaths: Union[str, list[str]],
-        chunks: Optional[Dict[str, int]] = None,
+        filepaths: str | list[str],
+        chunks: dict[str, int] | None = None,
         max_chunk_size: int = 300,
         **chunking_kwargs: Any,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Check the chunk size of a variable in a dataset and return the chunk size
 
         Args:

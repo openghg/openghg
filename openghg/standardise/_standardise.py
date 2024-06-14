@@ -1,19 +1,19 @@
-from pathlib import Path
-from typing import Dict, List, Optional, Union, Any
-from pandas import Timedelta
+import logging
 import warnings
+from pathlib import Path
+from typing import Any, Optional, Union
 
+from numcodecs import Blosc
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
+from openghg.types import multiPathType, optionalPathType
 from openghg.util import running_on_hub
-from openghg.types import optionalPathType, multiPathType
-from numcodecs import Blosc
-import logging
+from pandas import Timedelta
 
 logger = logging.getLogger("openghg.standardise")
 
 
-def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> Dict:
+def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> dict:
     """Generic standardise function, used by data-type specific versions.
 
     Args:
@@ -75,9 +75,10 @@ def standardise_surface(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    chunks: Optional[dict] = None,
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -126,7 +127,9 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
+        **kwargs: additional metadata used to distinguish between datasources.
     Returns:
         dict: Dictionary of result data
     """
@@ -243,7 +246,8 @@ def standardise_surface(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
@@ -266,9 +270,10 @@ def standardise_column(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    chunks: Optional[dict] = None,
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Read column observation file
 
     Args:
@@ -312,7 +317,9 @@ def standardise_column(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
+        **kwargs: additional metadata used to distinguish between datasources.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -344,7 +351,7 @@ def standardise_column(
         )
 
         fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
+        response_content: dict = fn_response["content"]
         return response_content
     else:
         return standardise(
@@ -368,7 +375,8 @@ def standardise_column(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
@@ -387,9 +395,10 @@ def standardise_bc(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    chunks: Optional[dict] = None,
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -424,7 +433,8 @@ def standardise_bc(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -451,7 +461,7 @@ def standardise_bc(
         )
 
         fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
+        response_content: dict = fn_response["content"]
         return response_content
     else:
         return standardise(
@@ -471,12 +481,13 @@ def standardise_bc(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
 def standardise_footprint(
-    filepath: Union[str, Path, List],
+    filepath: Union[str, Path, list],
     site: str,
     domain: str,
     model: str,
@@ -487,7 +498,7 @@ def standardise_footprint(
     network: Optional[str] = None,
     source_format: str = "acrg_org",
     period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    chunks: Optional[dict] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
     store: Optional[str] = None,
@@ -504,8 +515,9 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -553,7 +565,9 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
+        **kwargs: additional metadata used to distinguish between datasources.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -596,7 +610,7 @@ def standardise_footprint(
         )
 
         fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
+        response_content: dict = fn_response["content"]
         return response_content
     else:
         return standardise(
@@ -628,7 +642,8 @@ def standardise_footprint(
             filters=filters,
             sort=sort,
             drop_duplicates=drop_duplicates,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
@@ -644,7 +659,7 @@ def standardise_flux(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    chunks: Optional[dict] = None,
     continuous: bool = True,
     store: Optional[str] = None,
     if_exists: str = "auto",
@@ -654,8 +669,9 @@ def standardise_flux(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Process flux / emissions data
 
     Args:
@@ -693,7 +709,8 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -735,7 +752,7 @@ def standardise_flux(
         )
 
         fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
+        response_content: dict = fn_response["content"]
         return response_content
     else:
         return standardise(
@@ -759,7 +776,8 @@ def standardise_flux(
             compression=compression,
             compressor=compressor,
             filters=filters,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
@@ -778,9 +796,10 @@ def standardise_eulerian(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    chunks: Optional[dict] = None,
+    info: Optional[dict] = None,
+    **kwargs: Any,
+) -> dict:
     """Read Eulerian model output
 
     Args:
@@ -814,7 +833,9 @@ def standardise_eulerian(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+            e.g. {"project": "paris", "comments": "InTEM obs with baseline subtracted"}
+        **kwargs: additional metadata used to distinguish between datasources.
     Returns:
         dict: Dictionary of result data
     """
@@ -838,7 +859,8 @@ def standardise_eulerian(
             compressor=compressor,
             filters=filters,
             chunks=chunks,
-            optional_metadata=optional_metadata,
+            info=info,
+            **kwargs,
         )
 
 
@@ -849,12 +871,12 @@ def standardise_from_binary_data(
     metadata: dict,
     file_metadata: dict,
     **kwargs: Any,
-) -> Optional[Dict]:
+) -> Optional[dict]:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
 
-    args:
+    Args:
         store: Name of object store to write to, required if user has access to more than one
         writable store
         data_type: type of data to standardise
@@ -862,7 +884,7 @@ def standardise_from_binary_data(
         metadata: Metadata
         file_metadata: File metadata such as original filename
         **kwargs: data type specific arguments, see specific implementations in data classes.
-    returns:
+    Returns:
         Dictionary of result data.
     """
     from openghg.store import get_data_class
@@ -896,8 +918,8 @@ def standardise_flux_timeseries(
     filters: Optional[Any] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    optional_metadata: Optional[dict] = None,
+) -> dict:
     """Process one dimension timeseries file
 
     Args:

@@ -42,7 +42,8 @@ class ObsColumn(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> dict:
         """Read column observation file
 
@@ -85,7 +86,7 @@ class ObsColumn(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -162,18 +163,9 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in obs_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        obs_data = self._add_additional_metadata(data=obs_data, kwargs_metadata=kwargs, info=info)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
@@ -181,7 +173,7 @@ class ObsColumn(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             min_keys=3,
             compressor=compressor,
             filters=filters,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 from openghg.util import synonyms
@@ -65,7 +65,8 @@ class BoundaryConditions(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
+        **kwargs: Any,
     ) -> dict:
         """Read boundary conditions file
 
@@ -103,12 +104,10 @@ class BoundaryConditions(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from collections import defaultdict
-
         from openghg.store import (
             infer_date_range,
             update_zero_dim,
@@ -205,23 +204,13 @@ class BoundaryConditions(BaseStore):
 
             key = "_".join((species, bc_input, domain))
 
-            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-            boundary_conditions_data[key]["data"] = bc_data
-            boundary_conditions_data[key]["metadata"] = metadata
+            boundary_conditions_data = {key: {"data": bc_data, "metadata": metadata}}
 
-            required_keys = ("species", "bc_input", "domain")
+            boundary_conditions_data = self._add_additional_metadata(
+                data=boundary_conditions_data, kwargs_metadata=kwargs, info=info
+            )
 
-            if optional_metadata:
-                common_keys = set(required_keys) & set(optional_metadata.keys())
-
-                if common_keys:
-                    raise ValueError(
-                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                    )
-                else:
-                    for key, parsed_data in boundary_conditions_data.items():
-                        parsed_data["metadata"].update(optional_metadata)
-
+            lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
             # This performs the lookup and assignment of data to new or
             # existing Datasources
             datasource_uuids = self.assign_data(
@@ -229,7 +218,7 @@ class BoundaryConditions(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required_keys,
+                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

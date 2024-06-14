@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 import warnings
 import numpy as np
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
@@ -212,7 +213,8 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -259,7 +261,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -352,7 +354,7 @@ class Footprints(BaseStore):
                 logger.info("Updating time_resolved to True for co2 data")
                 time_resolved = True
 
-            if sort:
+            if sort is True:
                 logger.info(
                     "Sorting high time resolution data is very memory intensive, we recommend not sorting."
                 )
@@ -430,36 +432,11 @@ class Footprints(BaseStore):
                 short_lifetime=short_lifetime,
             )
 
-        if species == "co2" and sort is True:
-            logger.info(
-                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-            )
+        footprint_data = self._add_additional_metadata(data=footprint_data, kwargs_metadata=kwargs, info=info)
 
-        # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should provide as much detail as possible
-        # to uniquely identify a Datasource
-        required = (
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "time_resolved",
-            "high_spatial_resolution",
-            "short_lifetime",
-            "species",
-            "met_model",
-        )
-
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in footprint_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # TODO - we'll further tidy this up when we move the metdata parsing
+        # into a centralised place
+        lookup_keys = self.get_lookup_keys(optional_metadata=kwargs)
 
         data_type = "footprints"
         # TODO - filter options
@@ -468,7 +445,7 @@ class Footprints(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             sort=sort,
             drop_duplicates=drop_duplicates,
             compressor=compressor,

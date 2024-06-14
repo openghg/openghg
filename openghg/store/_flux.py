@@ -78,7 +78,8 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
+        **kwargs: Dict,
     ) -> dict:
         """Read flux / emissions file
 
@@ -120,7 +121,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -178,6 +179,7 @@ class Flux(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
+        # TODO - better match the arguments to the parser functions
         param = {
             "filepath": filepath,
             "species": species,
@@ -218,23 +220,20 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+        optional_metadata = kwargs or {}
 
-        required = tuple(min_required)
+        # TODO - the optional params
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        optional_metadata.update(to_add)
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
+        flux_data = self._add_additional_metadata(
+            data=flux_data, kwargs_metadata=optional_metadata, info=info
+        )
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # TODO - really we want the metadata completely formed before we perform
+        # the Datasource lookup, the above is a hack to get what we have here working for now
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -242,7 +241,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
@@ -261,7 +260,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        info: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -292,6 +291,8 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            info: dictionary of tags for searching or other additional information. This info is *not* used to distinguish between datasources.
+                e.g. {"project": "paris", "comments": "Flat prior based on EDGAR totals by country"}
             **kwargs: Inputs for underlying parser function for the database.
 
                 Necessary inputs will depend on the database being parsed.
@@ -335,18 +336,13 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        required_keys = ("species", "source", "domain")
+        # any kwargs not used by the parser will be used as "optional metadata" for
+        # categorising the data
+        optional_metadata = {k: v for k, v in kwargs.items() if k not in all_param}
 
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
+        flux_data = self._add_additional_metadata(flux_data, optional_metadata, info)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -354,7 +350,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required_keys,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
