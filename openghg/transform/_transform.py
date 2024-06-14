@@ -6,7 +6,7 @@ data to the object store via transformations.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from openghg.objectstore import get_writable_bucket
 from openghg.store import get_data_class
@@ -18,7 +18,7 @@ def transform_flux_data(
     overwrite: bool = False,
     store: Optional[str] = None,
     info: Optional[dict] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> dict:
     """Read and transform a flux / emissions database. This will find the appropriate
     parser function to use for the database specified. The necessary inputs
