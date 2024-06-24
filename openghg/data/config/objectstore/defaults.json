@@ -189,11 +189,6 @@
                     "str"
                 ]
             },
-            "domain": {
-                "type": [
-                    "str"
-                ]
-            },
             "model": {
                 "type": [
                     "str"
