@@ -160,6 +160,47 @@
             }
         }
     },
+    "flux_timeseries": {
+        "required": {
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "region": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {
+            "database": {
+                "type": [
+                    "str"
+                ]
+            },
+            "database_version": {
+                "type": [
+                    "str"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            }
+        }
+    },
     "surface": {
         "required": {
             "species": {
