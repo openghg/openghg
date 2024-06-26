@@ -225,6 +225,14 @@ class Flux(BaseStore):
         # TODO - the optional params
         # Make sure none of these are Nones
         to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+
+        # warn if `optional_metadata` overlaps with keyword arguments
+        overlap = [k for k in optional_metadata if k in to_add]
+        if overlap:
+            msg = (f"Values for {', '.join(overlap)} in `optional_metadata` are "
+                   "being overwritten by values passed as keyword arguments.")
+            logger.warning(msg)
+
         optional_metadata.update(to_add)
 
         # TODO - really we want the metadata completely formed before we perform
