@@ -219,10 +219,10 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
+        # combine metadata and get look-up keys
         if optional_metadata is None:
             optional_metadata = {}
 
-        # TODO - the optional params
         # Make sure none of these are Nones
         to_add = {k: v for k, v in optional_keywords.items() if v is not None}
 
@@ -233,11 +233,14 @@ class Flux(BaseStore):
                    "being overwritten by values passed as keyword arguments.")
             logger.warning(msg)
 
+        # update `optional_metadata` dict with any "optional" arguments passed to the parser
         optional_metadata.update(to_add)
 
-        # TODO - really we want the metadata completely formed before we perform
-        # the Datasource lookup, the above is a hack to get what we have here working for now
         lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # add optional metdata to parsed metadata
+        for parsed_data in flux_data.values():
+            parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(

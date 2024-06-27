@@ -195,23 +195,28 @@ class FluxTimeseries(BaseStore):
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-        min_required = ["species", "source", "region"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+            # combine metadata and get look-up keys
+        if optional_metadata is None:
+            optional_metadata = {}
 
-        required = tuple(min_required)
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
+        # warn if `optional_metadata` overlaps with keyword arguments
+        overlap = [k for k in optional_metadata if k in to_add]
+        if overlap:
+            msg = (f"Values for {', '.join(overlap)} in `optional_metadata` are "
+                   "being overwritten by values passed as keyword arguments.")
+            logger.warning(msg)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_timeseries_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # update `optional_metadata` dict with any "optional" arguments passed to the parser
+        optional_metadata.update(to_add)
+
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # add optional metdata to parsed metadata
+        for parsed_data in flux_timeseries_data.values():
+            parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
@@ -219,7 +224,7 @@ class FluxTimeseries(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
