@@ -183,3 +183,8 @@ argument to the standardisation functions. To standardise a footprint we now do
                                     optional_metadata={"project": "project_b"})
 
 These files will now be stored separately within OpenGHG.
+
+If "project" was not added to the config file before standardising these footprints, then "project" would
+be stored as "informational metadata", but it would not be used to determine if these footprints should be
+stored separately. Thus they would be stored as the same "datasource" (since their metadata agree for the
+metakeys in the default config).
