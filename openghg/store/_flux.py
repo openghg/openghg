@@ -229,8 +229,10 @@ class Flux(BaseStore):
         # warn if `optional_metadata` overlaps with keyword arguments
         overlap = [k for k in optional_metadata if k in to_add]
         if overlap:
-            msg = (f"Values for {', '.join(overlap)} in `optional_metadata` are "
-                   "being overwritten by values passed as keyword arguments.")
+            msg = (
+                f"Values for {', '.join(overlap)} in `optional_metadata` are "
+                "being overwritten by values passed as keyword arguments."
+            )
             logger.warning(msg)
 
         # update `optional_metadata` dict with any "optional" arguments passed to the parser
