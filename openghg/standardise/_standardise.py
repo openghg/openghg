@@ -56,8 +56,7 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: Optional[multiPathType] = None,
-    filepaths: Optional[multiPathType] = None,
+    filepath: Union[str, Path, List],
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -132,14 +131,8 @@ def standardise_surface(
     """
     from openghg.cloud import call_function
 
-    if filepath is None and filepaths is None:
-        raise ValueError("One of `filepath` and `filepaths` must be specified.")
-    elif filepath is None:
-        filepath = filepaths
-        warnings.warn(
-            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
-            FutureWarning,
-        )
+    if filepath is None:
+        raise ValueError("Please specify `filepath`.")
 
     if not isinstance(filepath, list):
         filepath = [filepath]
