@@ -366,20 +366,6 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            # required_keys = (
-            #     "species",
-            #     "site",
-            #     "sampling_period",
-            #     "station_long_name",
-            #     "inlet",
-            #     "instrument",
-            #     "network",
-            #     "source_format",
-            #     "data_source",
-            #     "icos_data_level",
-            #     "data_type",
-            # )
-
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
             if optional_metadata is not None:
