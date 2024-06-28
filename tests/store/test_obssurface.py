@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
+from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath, parsed_surface_metachecker
 from openghg.objectstore import (
     exists,
     get_bucket,
@@ -19,6 +19,7 @@ from openghg.standardise import standardise_from_binary_data, standardise_surfac
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.util import create_daterange_str
+from helpers import clear_test_stores
 from pandas import Timestamp
 
 
@@ -229,9 +230,10 @@ def test_read_CRDS(bucket, tmpdir):
         ch4_data.to_netcdf(tmppath)
 
 
-def test_read_GC(bucket):
-    clear_test_stores()
+@pytest.fixture
+def gc_standardised():
 
+    clear_test_stores()
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
@@ -242,6 +244,11 @@ def test_read_GC(bucket):
         site="CGO",
         network="AGAGE",
     )
+
+    return results
+
+
+def test_read_GC(bucket, gc_standardised):
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
@@ -304,10 +311,10 @@ def test_read_GC(bucket):
         "so2f2_70m",
     ]
 
-    assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
+    assert sorted(list(gc_standardised["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
+    uuid = gc_standardised["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
     hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -363,6 +370,22 @@ def test_read_GC(bucket):
         "2023-01-01-02:24:00+00:00_2023-01-31-23:52:59+00:00",
     ]
 
+def test_gc_attributes(gc_standardised):
+    """Test to verify assigned attributes are stored correctly"""
+
+    gc_data = search_surface().retrieve_all()
+
+    parsed_surface_metachecker(data=gc_data[0], species = gc_data[0].metadata["species"])
+
+    # Checking species name and other attributes are present in
+    # standardised data
+    assert gc_data[0].data["nf3"].values[0] == 1.603
+    assert gc_data[0].data["nf3_repeatability"].values[0] == 0.02531
+    assert gc_data[10].data.attrs["calibration_scale"] == "SIO-07"
+    assert gc_data[10].data.attrs["data_owner"] == "Paul Krummel"
+    assert gc_data[10].data.attrs["inlet_height_magl"] == "70"
+    assert gc_data[10].data.attrs["station_height_masl"] == 94.0
+
 
 @pytest.mark.skip(reason="Cranfield data processing will be removed.")
 def test_read_cranfield():
@@ -414,7 +437,11 @@ def test_read_openghg_format(bucket):
         assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
         assert co2_data["co2"][0] == 385.25
         assert co2_data["co2_variability"][0] == 0.843
-
+        assert co2_data.attrs["calibration_scale"] == "WMO-X2007"
+        assert co2_data.attrs["data_owner"] == "Simon O'Doherty"
+        assert co2_data.attrs["inlet_height_magl"] == "54"
+        assert co2_data.attrs["station_height_masl"] == 50.0
+        assert co2_data.attrs["station_longitude"] == 1.13872
 
 def test_read_noaa_raw(bucket):
     clear_test_stores()
@@ -447,6 +474,8 @@ def test_read_noaa_raw(bucket):
 
 
 def test_read_noaa_metastorepack(bucket):
+    clear_test_stores()
+
     data_filepath = get_surface_datapath(
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )
@@ -460,6 +489,10 @@ def test_read_noaa_metastorepack(bucket):
         network="NOAA",
         overwrite=True,
     )
+
+    noaa_data = search_surface().retrieve_all()
+
+    parsed_surface_metachecker(data=noaa_data, species = noaa_data.metadata["species"])
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
@@ -778,6 +811,9 @@ def test_store_icos_carbonportal_data(bucket):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
+
+    clear_test_stores()
+
     test_data_nc = get_surface_datapath(filename="test_toh_co2_147m.nc", source_format="ICOS")
     ds = xr.open_dataset(test_data_nc)
 
@@ -798,6 +834,11 @@ def test_store_icos_carbonportal_data(bucket):
         second_result = obs.store_data(data=data)
 
     assert second_result is None
+
+    # checking for attributes
+    icos_data = search_surface().retrieve_all()
+
+    attributes_checker_obssurface(icos_data.data.attrs, species = icos_data.metadata["species"])
 
 
 @pytest.mark.parametrize(
@@ -971,3 +1012,44 @@ def test_optional_metadata():
     rgl_ch4_metadata = rgl_ch4.metadata
 
     assert "project" in rgl_ch4_metadata
+
+def test_npl_attributes():
+    """Test to verify assigned attributes are stored correctly"""
+
+    filepath = get_surface_datapath(filename="NPL_test.csv", source_format="LGHG")
+
+    standardise_surface(filepath = filepath, source_format="NPL", site = "NPL", network = "LGHG", store="user", optional_metadata={"project":"openghg_tests"}
+    )
+
+    npl_data = search_surface().retrieve_all()
+
+    parsed_surface_metachecker(data=npl_data[0], species=npl_data[0].metadata["species"])
+
+    assert npl_data[0].data.attrs["calibration_scale"] == "unknown"
+    assert npl_data[0].data.attrs["data_owner"] == "Tim Arnold"
+    assert npl_data[0].data.attrs["inlet_height_magl"] == "NA"
+    assert npl_data[0].data.attrs["station_height_masl"] == 0
+    assert npl_data[0].data.attrs["station_longitude"] == -0.3487
+    assert npl_data[0].data.attrs["instrument"] == "Picarro G2401"
+
+
+def test_openghg_attributes():
+    """Test to verify assigned attributes are stored correctly"""
+    clear_test_stores()
+
+    datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
+
+    standardise_surface(
+        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC"
+    )
+
+    openghg_data = search_surface().retrieve_all()
+
+    parsed_surface_metachecker(data=openghg_data, species=openghg_data.metadata["species"])
+
+    assert openghg_data.data.attrs["calibration_scale"] == "WMO-X2007"
+    assert openghg_data.data.attrs["data_owner"] == "Simon O'Doherty"
+    assert openghg_data.data.attrs["inlet_height_magl"] == "54"
+    assert openghg_data.data.attrs["station_height_masl"] == 50
+    assert openghg_data.data.attrs["station_longitude"] == 1.13872
+    assert openghg_data.data.attrs["instrument"] == "picarro"

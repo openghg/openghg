@@ -27,7 +27,6 @@ def parse_btt(
         dict: Dictionary of gas data
     """
     from numpy import nan as np_nan
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json, get_site_info, format_inlet
     from pandas import Timestamp, isnull, read_csv, to_timedelta
 
@@ -104,7 +103,5 @@ def parse_btt(
             "data": processed_data,
             "attributes": site_attributes,
         }
-
-    gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 
     return gas_data

@@ -59,8 +59,6 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    # from openghg.standardise.meta import metadata_default_keys, assign_attributes
-
     data_filepath = Path(data_filepath)
 
     if data_filepath.suffix.lower() != ".nc":
@@ -265,8 +263,6 @@ def parse_openghg(
 
     # TODO: Decide if the key here should be more descriptive that just `species`
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
-
-    # gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
     return gas_data
 

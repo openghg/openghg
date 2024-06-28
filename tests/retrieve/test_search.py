@@ -10,7 +10,7 @@ from openghg.retrieve import (
 )
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
-
+from helpers import attributes_checker_obssurface
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -70,6 +70,8 @@ def test_search_surface_selects_dates():
 
     assert data_sliced.time[0] == Timestamp("2014-01-01T22:36:30")
     assert data_sliced.time[-1] == Timestamp("2014-01-07T09:17:30")
+
+    attributes_checker_obssurface(data_sliced.attrs, species="co2")
 
 
 def test_search_surface_range():

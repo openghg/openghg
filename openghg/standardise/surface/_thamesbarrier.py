@@ -38,7 +38,6 @@ def parse_tmb(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.standardise.meta import assign_attributes
     from openghg.util import (
         clean_string,
         get_site_info,
@@ -132,9 +131,5 @@ def parse_tmb(
             "data": processed_data,
             "attributes": attributes,
         }
-
-    gas_data = assign_attributes(
-        data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
-    )
 
     return gas_data
