@@ -2,7 +2,6 @@ addict
 dask
 filelock
 h5netcdf
-h5py < 3.11
 icoscp
 ipywidgets
 matplotlib

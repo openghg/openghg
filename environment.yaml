@@ -8,7 +8,6 @@ dependencies:
   - python>=3.9
   - addict
   - dask
-  - h5py<3.11
   - h5netcdf
   - filelock
   - matplotlib
