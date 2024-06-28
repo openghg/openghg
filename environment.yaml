@@ -15,7 +15,7 @@ dependencies:
   - netcdf4
   - nbformat
   - numexpr
-  - numpy
+  - numpy<2.0
   - nc-time-axis
   - openghg_defs
   - openpyxl
