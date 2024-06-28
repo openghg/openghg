@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Pinned numpy to < 2.0 and netcdf4 to <= 1.6.5. Numpy 2.0 release caused some minor bugs in OpenGHG, and netCDF4's updates to numpy 2.0 were also causing tests to fail - [PR #1043](https://github.com/openghg/openghg/pull/1043)
+
 - Updated incorrect import for data_manager within tutorial. This now shows the import from `openghg.dataobjects` not `openghg.store` - [PR #1007](https://github.com/openghg/openghg/pull/1007)
 
 - Issue causing missing data when standardising multiple files in a loop - [PR #1032](https://github.com/openghg/openghg/pull/1032)
