@@ -117,6 +117,4 @@ def parse_beaco2n(
         gas_data[mt]["metadata"] = species_metadata
         gas_data[mt]["attributes"] = site_metadata
 
-    # TODO - add CF Compliant attributes?
-
     return gas_data
