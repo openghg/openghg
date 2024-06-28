@@ -11,7 +11,7 @@ on:
     branches: [master, devel]
     paths-ignore:
       - 'CHANGELOG.md'
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   test:
