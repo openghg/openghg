@@ -9,7 +9,7 @@ msgpack
 nbformat
 numcodecs
 nc-time-axis
-netcdf4
+netcdf4 <= 1.6.5
 numexpr
 numpy < 2.0
 openghg_defs
