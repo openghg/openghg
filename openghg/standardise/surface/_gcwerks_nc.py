@@ -61,10 +61,8 @@ def parse_gcwerks_nc(
     data_filepath: Union[str, Path],
     site: str,
     network: str,
-    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
     update_mismatch: str = "from_source",
     site_filepath: optionalPathType = None,
 ) -> Dict:
@@ -75,6 +73,7 @@ def parse_gcwerks_nc(
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
+        sampling_period: sampling period for this instrument. If not supplied, will be read from the file. 
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -153,13 +152,8 @@ def parse_gcwerks_nc(
                         f"extracted from the file name of {metadata['sampling_period']} seconds."
                     )
 
-        units = {}
-        scale = {}
-
-
-        units[species] = dataset.mf.units
-
-        scale[species] = dataset.calibration_scale
+        units = dataset.mf.units
+        scale = dataset.calibration_scale
 
         # These .nc files do not have flags attached to them.
         # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
@@ -177,8 +171,6 @@ def parse_gcwerks_nc(
 
         gas_data = _format_species(
             data=data,
-            site=site,
-            species=species,
             instrument=instrument,
             metadata=metadata,
             units=units,
@@ -196,12 +188,10 @@ def parse_gcwerks_nc(
 
 def _format_species(
     data: pd.DataFrame,
-    site: str,
-    instrument: str,
     species: str,
     metadata: Dict,
-    units: Dict,
-    scale: Dict,
+    units: str,
+    scale: str,
     file_params: Dict,
 ) -> Dict:
     """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
@@ -209,13 +199,11 @@ def _format_species(
 
     Args:
         data: DataFrame of raw data
-        site: Name of site from which this data originates
-        instrument: Name of instrument
         species: species in data
         metadata: Dictionary of metadata
-        units: Dictionary of units for each species
-        scale: Dictionary of scales for each species
-        gc_params: GCWERKS parameter dictionary
+        units: units (e.g. 1e-12)
+        scale: calibration scale used
+        file_params: dictionary of metadata/attributes
     Returns:
         dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
     """
@@ -242,8 +230,8 @@ def _format_species(
         # Create a copy of metadata for local modification and give it the species-specific metadata
         species_metadata = metadata.copy()
 
-        species_metadata["units"] = units[species]
-        species_metadata["calibration_scale"] = scale[species]
+        species_metadata["units"] = units
+        species_metadata["calibration_scale"] = scale
         species_metadata["inlet"] = inlet_label
 
         # want to select the data corresponding to each inlet
@@ -308,53 +296,3 @@ def _format_species(
 
     return to_return
 
-
-def _get_inlets(site_code: str, gc_params: Dict) -> Dict:
-    """Get the inlets we expect to be at this site and create a
-    mapping dictionary so we get consistent labelling.
-
-    Args:
-        site: Site code
-        gc_params: GCWERKS parameters
-    Returns:
-        dict: Mapping dictionary of inlet and required inlet label
-    """
-    site = site_code.upper()
-    site_params = gc_params["sites"]
-
-    # Create a mapping of inlet to match to the inlet label
-    inlets = site_params[site]["inlets"]
-    try:
-        inlet_labels = site_params[site]["inlet_label"]
-    except KeyError:
-        inlet_labels = inlets
-
-    mapping_dict = {k: v for k, v in zip(inlets, inlet_labels)}
-
-    return mapping_dict
-
-
-def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict) -> Dict[str, str]:
-    """Gets the site specific attributes for writing to Datsets
-
-    Args:
-        site: Site code
-        inlet: Inlet height in metres
-        instrument: Instrument name
-        gc_params: GCWERKS parameters
-    Returns:
-        dict: Dictionary of attributes
-    """
-    site = site.upper()
-    instrument = instrument.lower()
-
-    attributes: Dict[str, str] = gc_params["sites"][site]["global_attributes"]
-
-    attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
-    try:
-        attributes["comment"] = gc_params["comment"][instrument]
-    except KeyError:
-        valid_instruments = list(gc_params["comment"].keys())
-        raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
-
-    return attributes
