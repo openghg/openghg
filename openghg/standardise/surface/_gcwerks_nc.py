@@ -6,7 +6,7 @@ import pandas as pd
 import xarray as xr
 from addict import Dict as aDict
 from numpy import floor
-from openghg.standardise.meta import assign_attributes, define_species_label
+from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys
 from openghg.types import optionalPathType
 from openghg.util import clean_string, format_inlet, load_internal_json
 
@@ -65,7 +65,7 @@ def parse_gcwerks_nc(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
-    update_mismatch: str = "never",
+    update_mismatch: str = "from_source",
     site_filepath: optionalPathType = None,
 ) -> Dict:
     """Reads a GC data file by creating a GC object and associated datasources
@@ -137,7 +137,7 @@ def parse_gcwerks_nc(
         else:
             extracted_sampling_period = "multiple"
 
-        metadata["sampling_period"] = extracted_sampling_period
+        metadata["sampling_period"] = str(extracted_sampling_period)
 
         if sampling_period is not None:
             if single_sampling_period:
@@ -244,6 +244,7 @@ def _format_species(
 
         species_metadata["units"] = units[species]
         species_metadata["calibration_scale"] = scale[species]
+        species_metadata["inlet"] = inlet_label
 
         # want to select the data corresponding to each inlet
 
@@ -256,9 +257,15 @@ def _format_species(
             continue
 
         attributes = file_params
+        
+        # need to rename the inlet height attribute:
+
+        attributes["inlet_height_magl"] = file_params["inlet_base_elevation_masl"]
+
+        metadata_keys = metadata_default_keys()
 
         for k, v in attributes.items():
-            if k not in metadata.keys():
+            if k in metadata_keys:
                 metadata[k] = v
 
         # Create a standardised / cleaned species label
