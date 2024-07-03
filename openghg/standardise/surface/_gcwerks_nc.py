@@ -1,6 +1,6 @@
-from fnmatch import fnmatch
+
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 import pandas as pd
 import xarray as xr
@@ -8,53 +8,7 @@ from addict import Dict as aDict
 from numpy import floor
 from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys
 from openghg.types import optionalPathType
-from openghg.util import clean_string, format_inlet, load_internal_json
-
-
-def find_files(data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Path]:
-    """A helper file to find new format GCWERKS .nc files in a given folder.
-    The files are of the format agage_SITE_SPECIES_version.nc, replacing the two .C data and precision files.
-
-    Please note the limited scope of this function, it will only work with
-    files that are named in the correct pattern.
-
-    Args:
-        data_path: Folder path to search
-        skip_str: String or list of strings, if found in filename these files are skipped
-    Returns:
-        list: Sorted list of filepaths
-    """
-    import re
-    from pathlib import Path
-
-    data_path = Path(data_path)
-
-    files = data_path.glob("*.nc")
-
-    if not isinstance(skip_str, list):
-        skip_str = [skip_str]
-
-    # Set the regex to match standard AGAGE data formats
-
-    data_regex = re.compile(r"agage+\_+[\w]+\_+[\w-]+\_+[\w]+.nc")
-
-    data_nc_files = []
-
-    for file in files:
-        data_match = data_regex.match(file.name)
-
-        if data_match:
-            data_filepath = data_path / data_match.group()
-
-            if any(s in data_match.group() for s in skip_str):
-                continue
-
-            if data_filepath.exists():
-                data_nc_files.append(data_filepath)
-
-    data_nc_files.sort()
-
-    return data_nc_files
+from openghg.util import clean_string, format_inlet
 
 
 def parse_gcwerks_nc(
