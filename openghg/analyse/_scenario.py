@@ -1750,7 +1750,8 @@ def combine_datasets(
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
+        # load dataset_B to avoid performance issue (see xarray issue #8945)
+        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 
