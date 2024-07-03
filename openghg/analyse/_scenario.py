@@ -1755,7 +1755,7 @@ def combine_datasets(
     merged_ds = dataset_A.merge(dataset_B_temp)
 
     if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
+        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
             flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
             merged_ds = merged_ds[dict(time=flag[0])]
 
