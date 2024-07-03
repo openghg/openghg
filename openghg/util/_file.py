@@ -139,6 +139,22 @@ def load_footprint_parser(source_format: str) -> Callable:
     return fn
 
 
+def load_flux_timeseries_parser(source_format: str) -> Callable:
+    """
+    Load a parsing object for the one dimensional timeseries data type.
+    Used with `openghg.standardise.flux_timeseries` sub-module
+
+    Args:
+        source_format: Name of the data type e.g CRF
+    Returns:
+        callable: parser_function
+    """
+    flux_timeseries_st_module_name = "openghg.standardise.flux_timeseries"
+    fn = load_parser(data_name=source_format, module_name=flux_timeseries_st_module_name)
+
+    return fn
+
+
 def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 

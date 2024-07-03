@@ -1,9 +1,14 @@
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-from pandas import DataFrame
-import xarray as xr
 
+import pandas as pd
+import xarray as xr
+from addict import Dict as aDict
+from numpy import floor
+from openghg.standardise.meta import assign_attributes, define_species_label
 from openghg.types import optionalPathType
+from openghg.util import clean_string, format_inlet, load_internal_json
 
 
 def find_files(data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Path]:
@@ -81,25 +86,13 @@ def parse_gcwerks_nc(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    from pathlib import Path
-
-    from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_internal_json
-
     data_filepath = Path(data_filepath)
 
-    # Do some setup for processing
-    # Load site data
     gcwerks_data = load_internal_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)
-    # We don't currently do anything with inlet here as it's always read from data
-    # or taken from process_gcwerks_parameters.json
-    if inlet is not None:
-        inlet = clean_string(inlet)
-    if instrument is not None:
-        instrument = clean_string(instrument)
+    instrument = clean_string(instrument)
 
     # If we're not passed the instrument name and we can't find it raise an error
     if instrument is None:
@@ -114,21 +107,89 @@ def parse_gcwerks_nc(
 
     instrument = str(instrument)
 
-    gas_data = _read_data(
-        data_filepath=data_filepath,
-        site=site,
-        instrument=instrument,
-        network=network,
-        sampling_period=sampling_period,
-        gc_params=gc_params,
-    )
+    species = str(data_filepath).split(sep="_")[-2]
+    species = define_species_label(species)[0]
 
-    # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(
-        data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
-    )
+    with xr.open_dataset(data_filepath) as dataset:
+        data = dataset.to_dataframe()
 
-    return gas_data
+        if data.empty:
+            raise ValueError("Cannot process empty file.")
+
+        # The .nc files have the DateTime object as an index already, just needs renaming
+        data.index.name = "Datetime"
+
+        # This metadata will be added to when species are split and attributes are written
+        metadata: Dict[str, str] = {
+            "instrument": instrument,
+            "site": site,
+            "network": network,
+        }
+
+        extracted_sampling_period = _get_sampling_period(instrument=instrument, gc_params=gc_params)
+        metadata["sampling_period"] = extracted_sampling_period
+
+        if sampling_period is not None:
+            # Compare input to definition within json file
+            file_sampling_period_td = pd.Timedelta(seconds=float(extracted_sampling_period))
+            sampling_period_td = pd.Timedelta(seconds=float(sampling_period))
+            comparison_seconds = abs(sampling_period_td - file_sampling_period_td).total_seconds()
+            tolerance_seconds = 1
+
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(
+                    f"Input sampling period {sampling_period} does not match to value "
+                    f"extracted from the file name of {metadata['sampling_period']} seconds."
+                )
+
+        units = {}
+        scale = {}
+
+        # this is a horrible bit of code but it should work. But it can't pick out
+        # if there are multiple names for the units (e.g. ppt vs pmol mol-1). Currently
+        # just picks out the first one.
+        species_attributes = load_internal_json(filename="attributes.json")
+        if dataset.mf.units in species_attributes["unit_interpret"].values():
+            for key, value in species_attributes["unit_interpret"].items():
+                if dataset.mf.units == value:
+                    units[species] = key
+                    break
+        else:
+            units[species] = dataset.mf.units
+
+        scale[species] = dataset.calibration_scale
+
+        # These .nc files do not have flags attached to them.
+        # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
+        # Note that there is only one species per netCDF file here as well.
+        data["mf_repeatability"] = data["mf_repeatability"].astype(float)
+
+        # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
+        # Do this based on the sampling_period recording in the file (can be time-varying)
+        # For GC-MD data the sampling_period is recorded as 1 second, but this is really instantaneous
+        # so use floor to leave these timestamps unchanged
+        data["new_time"] = data.index - pd.to_timedelta(floor(data.sampling_period / 2), unit="s")
+
+        data = data.set_index("new_time", inplace=False, drop=True)
+        data.index.name = "time"
+
+        gas_data = _format_species(
+            data=data,
+            site=site,
+            species=species,
+            instrument=instrument,
+            metadata=metadata,
+            units=units,
+            scale=scale,
+            gc_params=gc_params,
+        )
+
+        # Assign attributes to the data for CF compliant NetCDFs
+        gas_data = assign_attributes(
+            data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
+        )
+
+        return gas_data
 
 
 def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = False) -> Union[str, None]:
@@ -142,7 +203,6 @@ def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = Fals
     Returns:
         str: Instrument name
     """
-
     instrument: str = filepath.name.split("_")[0].split("-", 1)[1].lower()
     try:
         if instrument in gc_params["instruments"]:
@@ -280,7 +340,7 @@ def _read_data(
 
 
 def _format_species(
-    data: DataFrame,
+    data: pd.DataFrame,
     site: str,
     instrument: str,
     species: str,
@@ -304,11 +364,6 @@ def _format_species(
     Returns:
         dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
     """
-    from fnmatch import fnmatch
-
-    from addict import Dict as aDict
-    from openghg.util import format_inlet
-    from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
     expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)
@@ -322,7 +377,6 @@ def _format_species(
         )
 
     # inlet heights are just the numbers here in Matt's files, rather than having the units attached.
-
     data_inlets = [format_inlet(i) for i in data_inlets]
 
     # Skip this species if the data is all NaNs
@@ -336,7 +390,6 @@ def _format_species(
         inlet_label = format_inlet(inlet_label)
 
         # Create a copy of metadata for local modification and give it the species-specific metadata
-
         species_metadata = metadata.copy()
         species_metadata["units"] = units[species]
 
@@ -378,7 +431,6 @@ def _format_species(
         attributes = _get_site_attributes(
             site=site, inlet=inlet_label, instrument=instrument, gc_params=gc_params
         )
-        attributes = attributes.copy()
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
@@ -478,8 +530,6 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import format_inlet
-
     site = site.upper()
     instrument = instrument.lower()
 
