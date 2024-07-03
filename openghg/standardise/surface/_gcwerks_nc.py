@@ -61,8 +61,10 @@ def parse_gcwerks_nc(
     data_filepath: Union[str, Path],
     site: str,
     network: str,
+    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    measurement_type: Optional[str] = None,
     update_mismatch: str = "from_source",
     site_filepath: optionalPathType = None,
 ) -> Dict:
@@ -73,7 +75,9 @@ def parse_gcwerks_nc(
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
+        inlet: inlet name (optional)
         sampling_period: sampling period for this instrument. If not supplied, will be read from the file. 
+        measurement_type: measurement type
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -96,14 +100,23 @@ def parse_gcwerks_nc(
         file_params = ds.attrs
 
     # if we're not passed the instrument name, get it from the file:
+    
+    file_instrument = None
 
-    if instrument is None:
-        if "instrument" in file_params.keys():
-            instrument = file_params["instrument"]
-        else:
-            raise ValueError(
-                f"No instrument found in file metadata. Please pass explicity as argument."
-            )
+    if "instrument_type" in file_params.keys():
+        file_instrument = clean_string(file_params["instrument_type"])
+    
+    elif instrument is None:
+        raise ValueError(
+                 f"No instrument found in file metadata. Please pass explicity as argument."
+        )
+    
+    if file_instrument and instrument:
+        if file_instrument != instrument:
+             raise ValueError(
+                 f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
+             )
+
 
     instrument = str(instrument)
 
@@ -171,7 +184,7 @@ def parse_gcwerks_nc(
 
         gas_data = _format_species(
             data=data,
-            instrument=instrument,
+            species=species,
             metadata=metadata,
             units=units,
             scale=scale,
@@ -248,7 +261,7 @@ def _format_species(
         
         # need to rename the inlet height attribute:
 
-        attributes["inlet_height_magl"] = file_params["inlet_base_elevation_masl"]
+        attributes["inlet_height_magl"] = inlet
 
         metadata_keys = metadata_default_keys()
 
