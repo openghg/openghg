@@ -12,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 @pytest.fixture(scope="session")
 def thd_data():
     thd_path = get_surface_datapath(
-        filename="agage_thd_cfc-11_20240513-test.nc", source_format="GC_nc"
+        filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"
     )
 
     gas_data = parse_gcwerks_nc(data_filepath=thd_path, site="THD", instrument="gcmd", network="agage",)
@@ -23,10 +23,10 @@ def thd_data():
 @pytest.fixture(scope="session")
 def cgo_data():
     cgo_data = get_surface_datapath(
-        filename="agage_cgo_hcfc-133a_20240513-test.nc", source_format="GC_nc"
+        filename="agage_cgo_hcfc-133a_20240703-test.nc", source_format="GC_nc"
     )
 
-    gas_data = parse_gcwerks_nc(data_filepath=cgo_data, site="cgo", instrument="medusa", network="agage",)
+    gas_data = parse_gcwerks_nc(data_filepath=cgo_data, site="cgo", instrument="gcms-medusa", network="agage",)
 
     return gas_data
 
@@ -34,8 +34,8 @@ def cgo_data():
 def test_read_file_capegrim(cgo_data):
     parsed_surface_metachecker(data=cgo_data)
 
-    # Expect a single label at 70m in this test file, since only one height in the period convered
-    expected_keys = ["hcfc133a_70m"]
+    # Expect two labels at 70m and 80m in this test file, since multiple heights in the period convered
+    expected_keys = ["hcfc133a_70m", "hcfc133a_80m"]
 
     sorted_keys = sorted(list(cgo_data.keys()))
 
@@ -44,7 +44,7 @@ def test_read_file_capegrim(cgo_data):
 
 def test_read_file_thd():
     thd_path = get_surface_datapath(
-        filename="agage_thd_cfc-11_20240513-test.nc", source_format="GC_nc"
+        filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"
     )
 
     gas_data = parse_gcwerks_nc(
@@ -73,13 +73,13 @@ def test_read_file_thd():
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
-    meas_data = thd_data["cfc11_10m"]["data"]
+    meas_data = thd_data["cfc11_15m"]["data"]
     assert check_cf_compliance(dataset=meas_data)
 
 
 def test_read_invalid_instrument_raises():
     thd_path = get_surface_datapath(
-        filename="agage_thd_cfc-11_20240513-test.nc", source_format="GC_nc"
+        filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"
     )
 
     with pytest.raises(ValueError):
@@ -89,7 +89,7 @@ def test_read_invalid_instrument_raises():
 
 
 def test_expected_metadata_thd_cfc11():
-    cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240513-test.nc", source_format="GC_nc")
+    cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
     data = parse_gcwerks_nc(data_filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
 
