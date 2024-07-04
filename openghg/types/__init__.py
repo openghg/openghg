@@ -3,6 +3,7 @@ from ._enum import (
     ColumnTypes,
     ColumnSources,
     ObsTypes,
+    FluxTimeseriesTypes,
     FluxTypes,
     FluxDatabases,
     FootprintTypes,

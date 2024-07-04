@@ -1,19 +1,15 @@
+import builtins
 from pathlib import Path
 import pytest
 import toml
+from unittest.mock import patch
 from openghg.types import ConfigFileError
 from openghg.util import check_config, create_config, read_local_config
 
 
 @pytest.fixture
-def tmp_config_path(tmpdir):
-    return Path(tmpdir).joinpath("config_folder").joinpath("mock_config.conf")
-
-
-@pytest.fixture
-def tmp_home_path(tmpdir):
-    return Path(tmpdir).joinpath("tmp_home_path")
-
+def tmp_config_path(tmp_path):
+    return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
 
 @pytest.fixture
 def mock_get_user_config_path(tmp_config_path, mocker):
@@ -22,14 +18,14 @@ def mock_get_user_config_path(tmp_config_path, mocker):
 
 
 @pytest.fixture
-def write_mock_config(tmpdir, tmp_config_path):
+def write_mock_config(tmp_path, tmp_config_path):
     mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
-    mock_path = Path(tmpdir).joinpath("mock_store")
-    mock_shared_path = Path(tmpdir).joinpath("mock_shared_store")
+    mock_path = tmp_path.joinpath("mock_store")
+    mock_shared_path = tmp_path.joinpath("mock_shared_store")
     mock_conf = {
         "object_store": {
-            "user": {"path": mock_path, "permissions": "rw"},
-            "shared": {"path": mock_shared_path, "permission": "rw"},
+            "user": {"path": str(mock_path), "permissions": "rw"},
+            "shared": {"path": str(mock_shared_path), "permission": "rw"},
         },
         "user_id": mock_uuid,
     }
@@ -77,9 +73,9 @@ def test_read_config_check_old_stores(mock_get_user_config_path, write_mock_conf
         read_local_config()
 
 
-def test_create_config(monkeypatch, mocker, tmpdir):
-    monkeypatch.setenv("HOME", str(tmpdir))
-    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+def test_create_config(monkeypatch, mocker, tmp_path):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
 
     mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
     mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
@@ -116,9 +112,9 @@ def test_create_config_migrate(mocker, monkeypatch, tmp_path, caplog):
     assert mock_new_config_path.read_text() == mock_config_content
 
 
-def test_check_config(mocker, caplog, monkeypatch, tmpdir):
-    monkeypatch.setenv("HOME", str(tmpdir))
-    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+def test_check_config(mocker, caplog, monkeypatch, tmp_path):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
 
     mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
 
@@ -139,3 +135,31 @@ def test_check_config(mocker, caplog, monkeypatch, tmpdir):
     check_config()
 
     assert " /tmp/mock_store does not exist but will be created." in caplog.text
+
+
+def test_create_config_duplicates(monkeypatch, mocker, tmp_path, capsys):
+    """
+    Test simulates input values submitted after invoking the create_config method. It verifies if the value error is raised for duplicate store names and store paths.
+    """
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
+
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
+    mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
+    mocker.patch("openghg.util._user.uuid.uuid4", side_effect=mock_uuids)
+
+    create_config(silent=True)
+
+    config = toml.loads(mock_config_path.read_text())
+
+    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"])):
+        with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
+            create_config(silent=False)
+
+    exception = exc_info.value
+    captured = capsys.readouterr()
+
+    assert "Some names match those of existing stores: ['user'], please update manually" in str(captured)
+    assert "user" in str(exception)
+    assert config["object_store"]["user"]["path"] in str(exception)

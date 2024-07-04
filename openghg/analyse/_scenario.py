@@ -724,6 +724,8 @@ class ModelScenario:
         obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
 
+        if obs_data.time.size == 0 or footprint_data.time.size == 0:
+            raise ValueError("Obs data and Footprint data don't overlap")
         # Only non satellite datasets with different periods need to be resampled
         timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
         tolerance = 1e-9  # seconds
@@ -1748,12 +1750,13 @@ def combine_datasets(
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
+        # load dataset_B to avoid performance issue (see xarray issue #8945)
+        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 
     if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
+        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
             flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
             merged_ds = merged_ds[dict(time=flag[0])]
 
