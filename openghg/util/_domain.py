@@ -272,3 +272,30 @@ def cut_data_extent(
     data_cut = data_cut.sel({lat_name: lat_cut_wide_range, lon_name: lon_cut_wide_range})
 
     return data_cut
+
+def check_coord_alignment(data, domain, coord):
+
+    coords_in = data[coord].values
+
+    true_lats, true_lons = find_domain(domain)
+    if coord == 'lat':
+        true_coords = true_lats
+    elif coord == 'lon':
+        true_coords = true_lons
+
+    if len(coords_in) != len(true_coords):
+        raise ValueError(f'length of {coord} coordinates does not match those in openghg {domain} domain')
+
+    if not np.allclose(coords_in, true_coords, atol=0, rtol=0.05):
+        raise ValueError(f"input {coord} coordinates vary significantly from openghg {domain} domain. Please check correct domain and coordinates selected")
+    
+    data = data.assign_coords({coord:true_coords})
+
+    return data
+
+def align_lat_lon(data, domain):
+
+    data = check_coord_alignment(data=data, domain=domain, coord='lat')
+    data = check_coord_alignment(data=data, domain=domain, coord='lon')
+
+    return data

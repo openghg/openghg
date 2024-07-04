@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Union
 from xarray import Dataset
 
-from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
+from openghg.util import species_lifetime, timestamp_now, check_function_open_nc, align_lat_lon
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType
 
@@ -185,6 +185,10 @@ def parse_acrg_org(
     start_date, end_date, period_str = infer_date_range(
         fp_time, filepath=input_filepath, period=period, continuous=continuous
     )
+
+    # align lats and lons to the domain in openghg_defs
+
+    fp_data = align_lat_lon(data=fp_data, domain=domain)
 
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
