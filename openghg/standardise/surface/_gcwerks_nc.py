@@ -60,7 +60,7 @@ def parse_gcwerks_nc(
         file_instrument = clean_string(file_params["instrument_type"])
 
     elif instrument is None:
-        raise ValueError(f"No instrument found in file metadata. Please pass explicity as argument.")
+        raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
 
     if file_instrument and instrument:
         if file_instrument != instrument:
