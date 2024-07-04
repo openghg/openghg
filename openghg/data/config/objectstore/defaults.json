@@ -20,7 +20,6 @@
         "optional": {}
     },
     "eulerian_model": {
-        "optional": {},
         "required": {
             "model": {
                 "type": [
