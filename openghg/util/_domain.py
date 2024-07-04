@@ -273,7 +273,28 @@ def cut_data_extent(
 
     return data_cut
 
-def check_coord_alignment(data, domain, coord):
+def check_coord_alignment(
+    data: XrDataLikeMatch,
+    domain: str,
+    coord:str
+) -> XrDataLikeMatch:
+    """
+    Check that the values of a given coordinate (lat/lon) in spatial data matches the 
+    openghg_defs values for that domain. If they don't match roughly (i.e. within 5%), 
+    an exception is raised to alert the user to the fact that they may have the wrong 
+    domain altogether. An exception is also raised if the length of the arrays don't 
+    match. If the lat or lon don't match exactly, the old coordinates are replaced with 
+    the 'correct' values from openghg_defs
+
+
+    Args:
+        data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
+        domain: domain in question. Must be a valid domain in openghg_defs
+        coord: coordinate to check. Currently 'lat' or 'lon' only. 
+
+    Returns:
+        xarray.DataArray / xarray.Dataset: data with coordinate ranges aligned to openghg domain.
+    """
 
     coords_in = data[coord].values
 
@@ -293,7 +314,21 @@ def check_coord_alignment(data, domain, coord):
 
     return data
 
-def align_lat_lon(data, domain):
+def align_lat_lon(
+    data: XrDataLikeMatch,
+    domain: str
+ ) -> XrDataLikeMatch:
+    """
+    Aligns the lat and lon coordinates of a DataArray or Dataset to the openghg_defs values, according to
+    the 'check_coord_alignment' function.  
+
+    Args:
+        data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
+        domain: domain in question. Must be a valid domain in openghg_defs
+
+    Returns:
+        xarray.DataArray / xarray.Dataset: data with lat, lon ranges aligned to openghg domain.
+    """
 
     data = check_coord_alignment(data=data, domain=domain, coord='lat')
     data = check_coord_alignment(data=data, domain=domain, coord='lon')
