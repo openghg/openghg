@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+from openghg.util import align_lat_lon
 
 
 def parse_intem(
@@ -74,6 +75,9 @@ def parse_intem(
     start_date, end_date, period_str = infer_date_range(
         dataset_time, filepath=filepath, period=period, continuous=continuous
     )
+
+    # align lats and lons to the domain in openghg_defs
+    emissions_dataset = align_lat_lon(data=emissions_dataset, domain=domain)
 
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
