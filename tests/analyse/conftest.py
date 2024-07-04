@@ -62,36 +62,39 @@ def data_read():
     source1 = "anthro"
     domain = "EUROPE"
     flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
-    standardise_flux(store="user",
-                             filepath=flux_datapath1,
-                             species="ch4",
-                             source=source1,
-                             domain=domain,
-                             high_time_resolution=False,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=flux_datapath1,
+        species="ch4",
+        source=source1,
+        domain=domain,
+        high_time_resolution=False,
+    )
 
     # Waste data for CH4 (from UKGHG model)
     source2 = "waste"
     flux_datapath2 = get_flux_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
-    standardise_flux(store="user",
-                             filepath=flux_datapath2,
-                             species="ch4",
-                             source=source2,
-                             domain=domain,
-                             high_time_resolution=False,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=flux_datapath2,
+        species="ch4",
+        source=source2,
+        domain=domain,
+        high_time_resolution=False,
+    )
 
     # Natural sources for CO2 (R-total from Cardamom)
     #  - 2 hourly (high resolution?)
     source3 = "natural-rtot"
     flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
-    standardise_flux(store="user",
-                             filepath=flux_datapath3,
-                             species="co2",
-                             source=source3,
-                             domain="TEST",
-                             high_time_resolution=True,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=flux_datapath3,
+        species="co2",
+        source=source3,
+        domain="TEST",
+        high_time_resolution=True,
+    )
 
     flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
 
@@ -135,21 +138,23 @@ def data_read():
     source4 = "ocean"
     flux_datapath4a = get_flux_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
     flux_datapath4b = get_flux_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
-    standardise_flux(store="user",
-                             filepath=flux_datapath4a,
-                             species="co2",
-                             source=source4,
-                             domain="TEST",
-                             high_time_resolution=False,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=flux_datapath4a,
+        species="co2",
+        source=source4,
+        domain="TEST",
+        high_time_resolution=False,
+    )
 
-    standardise_flux(store="user",
-                             filepath=flux_datapath4b,
-                             species="co2",
-                             source=source4,
-                             domain="TEST",
-                             high_time_resolution=False,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=flux_datapath4b,
+        species="co2",
+        source=source4,
+        domain="TEST",
+        high_time_resolution=False,
+    )
 
     # Boundary conditions data
     # CH4

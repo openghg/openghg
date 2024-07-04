@@ -37,9 +37,7 @@ def write_mock_config(tmpdir, tmp_config_path):
     tmp_config_path.write_text(toml.dumps(mock_conf))
 
 
-def test_read_config_check_old_stores(
-    mock_get_user_config_path, write_mock_config, caplog
-):
+def test_read_config_check_old_stores(mock_get_user_config_path, write_mock_config, caplog):
     """This tests the read_local_config function when the user has an old store in their config file.
     This test and the _check_valid_store function may be removed once the move to the new store setup is complete.
     """

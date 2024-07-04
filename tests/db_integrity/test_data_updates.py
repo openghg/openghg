@@ -939,7 +939,9 @@ def test_standardising_footprint_met_model():
     )
 
     # Check data retrieved contains the correct concatenated date range from both 201606 and 201607 files.
-    footprint_search_no_met_model = search(site=site, domain=domain, met_model="not_set", data_type="footprints")
+    footprint_search_no_met_model = search(
+        site=site, domain=domain, met_model="not_set", data_type="footprints"
+    )
     footprint_retrieve_no_met_model = footprint_search_no_met_model.retrieve()
     footprint_data_no_met_model = footprint_retrieve_no_met_model.data
 

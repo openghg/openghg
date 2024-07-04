@@ -313,14 +313,15 @@ def test_parse_edgar_no_domain():
             },
         ),
         (
-            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc", 
-            {"version": "v8.0", 
-             "species": "HFC-43-10-mee", 
-             "year": 1994,
-             "source": "TOTALS", 
-             "resolution": None}
-        )
-
+            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc",
+            {
+                "version": "v8.0",
+                "species": "HFC-43-10-mee",
+                "year": 1994,
+                "source": "TOTALS",
+                "resolution": None,
+            },
+        ),
     ],
 )
 def test_extract_file_info(edgar_file, expected_file_info):

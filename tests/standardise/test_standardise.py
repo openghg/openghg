@@ -1,6 +1,13 @@
 from pathlib import Path
 import pytest
-from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores, clear_test_store
+from helpers import (
+    get_flux_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+    get_column_datapath,
+    clear_test_stores,
+    clear_test_store,
+)
 from openghg.retrieve import get_obs_surface, search, get_footprint
 from openghg.standardise import (
     standardise_column,
@@ -305,10 +312,10 @@ def test_standardise_align_footprint():
     datapath = get_footprint_datapath("footprint_align_test.nc")
 
     site = "JFJ"
-    network="AGAGE"
-    height="1000m"
-    domain="EUROPE"
-    model="test_model"
+    network = "AGAGE"
+    height = "1000m"
+    domain = "EUROPE"
+    model = "test_model"
 
     standardise_footprint(
         filepath=datapath,
@@ -319,21 +326,16 @@ def test_standardise_align_footprint():
         domain=domain,
         force=True,
         overwrite=True,
-        store='user'
-    ) 
-
-    data = get_footprint(
-        site=site,
-        network=network,
-        height=height,
-        domain=domain,
-        model=model
+        store="user",
     )
+
+    data = get_footprint(site=site, network=network, height=height, domain=domain, model=model)
 
     true_lats, true_lons = find_domain(domain=domain)
 
     assert np.allclose(data.data.lat.values, true_lats, rtol=0, atol=1e-15)
     assert np.allclose(data.data.lon.values, true_lons, rtol=0, atol=1e-15)
+
 
 from openghg.retrieve import search_footprints
 
@@ -396,13 +398,14 @@ def test_standardise_flux_additional_keywords():
 
     assert "ch4_anthro_globaledgar" in proc_results
 
+
 def test_standardise_non_standard_flux_domain():
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
 
     # this file is sliced, to cover only a small section of the EUROPE domain
     # assert that if we specify the domain as a non-standard domain, it standardises fine:
 
-    domain = 'europe_incomplete'
+    domain = "europe_incomplete"
 
     proc_results = standardise_flux(
         filepath=test_datapath,
@@ -417,20 +420,22 @@ def test_standardise_non_standard_flux_domain():
     assert "co2_gpp-cardamom_europe_incomplete" in proc_results
     assert "error" not in proc_results
 
+
 def test_standardise_incomplete_flux():
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
 
-    # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file, 
+    # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
     # we get an error
 
     with pytest.raises(ValueError):
-        standardise_flux(filepath=test_datapath,
-                         species="co2",
-                         source="gpp-cardamom",
-                         domain="EUROPE",
-                         high_time_resolution=False,
-                         force=True,
-                         store="user"
+        standardise_flux(
+            filepath=test_datapath,
+            species="co2",
+            source="gpp-cardamom",
+            domain="EUROPE",
+            high_time_resolution=False,
+            force=True,
+            store="user",
         )
 
 

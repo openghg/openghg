@@ -210,7 +210,7 @@ def test_match_chunking(store):
 
     # As the data we originally put in wasn't chunked then we get the full size of the time coordinate
     # which is 31 here
-    assert chunking == {'time': 31}
+    assert chunking == {"time": 31}
 
     # Now try it the other way round, add chunked data and then try to match it with unchunked data
     store.delete_all()
