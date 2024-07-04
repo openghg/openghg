@@ -248,6 +248,11 @@
                     "str"
                 ]
             },
+            "data_level": {
+                "type": [
+                    "str"
+                ]
+            },
             "data_type": {
                 "type": [
                     "str"

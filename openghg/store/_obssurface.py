@@ -111,6 +111,7 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
+        data_level: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
@@ -219,6 +220,20 @@ class ObsSurface(BaseStore):
 
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        # Ensure we have a clear missing value for data_level
+        if data_level is None:
+            # TODO: *Null* value was set somewhere in the code - may want to start moving to using this rather than explicit values like this.
+            data_level = "NOT_SET"
+        else:
+            data_level = clean_string(data_level)
+
+        # Define additional metadata which we aren't passing (are never passing?) to the parse functions
+        # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
+            # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
+        additional_metadata = {
+            "data_level": data_level
+        }
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
@@ -366,6 +381,12 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
+            # Mop up and add additional keys to metadata
+            # - TODO: this should be a function to add metadata which wasn't passed to the parse function to the metadata output
+            # - use additional_metadata defined above
+            # - include on base? Does this use self or just data output from parser_fn?
+            data = self.add_metadata_keys(data, additional_metadata)
+
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
             if optional_metadata is not None:
@@ -380,7 +401,7 @@ class ObsSurface(BaseStore):
                 new_version=new_version,
                 data_type=data_type,
                 required_keys=lookup_keys,
-                min_keys=5,
+                min_keys=5,  # TODO: In general, should this be updated to length of lookup_keys?
                 compressor=compressor,
                 filters=filters,
             )
