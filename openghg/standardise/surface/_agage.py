@@ -10,7 +10,7 @@ from openghg.types import optionalPathType
 from openghg.util import clean_string, format_inlet
 
 
-def parse_gcwerks_nc(
+def parse_agage(
     data_filepath: Union[str, Path],
     site: str,
     network: str,

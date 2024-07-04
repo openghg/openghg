@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 import pytest
 from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
-from openghg.standardise.surface import parse_gcwerks_nc
+from openghg.standardise.surface import parse_agage
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -13,7 +13,7 @@ mpl_logger.setLevel(logging.WARNING)
 def thd_data():
     thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
-    gas_data = parse_gcwerks_nc(
+    gas_data = parse_agage(
         data_filepath=thd_path,
         site="THD",
         instrument="gcmd",
@@ -27,7 +27,7 @@ def thd_data():
 def cgo_data():
     cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-test.nc", source_format="GC_nc")
 
-    gas_data = parse_gcwerks_nc(
+    gas_data = parse_agage(
         data_filepath=cgo_data,
         site="cgo",
         instrument="gcms-medusa",
@@ -51,7 +51,7 @@ def test_read_file_capegrim(cgo_data):
 def test_read_file_thd():
     thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
-    gas_data = parse_gcwerks_nc(
+    gas_data = parse_agage(
         data_filepath=thd_path,
         site="thd",
         network="agage",
@@ -85,7 +85,7 @@ def test_read_invalid_instrument_raises():
     thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
     with pytest.raises(ValueError):
-        parse_gcwerks_nc(
+        parse_agage(
             data_filepath=thd_path,
             site="THD",
             instrument="fish",
@@ -96,7 +96,7 @@ def test_read_invalid_instrument_raises():
 def test_expected_metadata_thd_cfc11():
     cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
-    data = parse_gcwerks_nc(data_filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
+    data = parse_agage(data_filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
 
     metadata = data["cfc11_15m"]["metadata"]
 

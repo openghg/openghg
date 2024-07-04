@@ -72,7 +72,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 
 ## Added
 
-- Added `GCWerks_NC` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive [git repository](https://github.com/mrghg/agage-archive).
+- Added `AGAGE` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive [git repository](https://github.com/mrghg/agage-archive).
 - Bug fix for conversion of species parameter with its synonym value inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
 - Missing requirement for filelock package added to conda environment file [PR #857](https://github.com/openghg/openghg/pull/857)
 - Missing store argument adding to search function allow searching within specific object stores [PR #859](https://github.com/openghg/openghg/pull/859)

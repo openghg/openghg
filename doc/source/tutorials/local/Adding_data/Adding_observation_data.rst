@@ -227,7 +227,7 @@ species and instrument and do not need an accompanying precisions file. These ca
 
 * ``filepath``: filepath to the .nc file
 * ``site`` (site code): ``"CGO"``
-* ``source_format`` (data type): ``"GCWERKS_NC"``
+* ``source_format`` (data type): ``"AGAGE"``
 * ``network``: ``"AGAGE"``
 * ``instrument``: ``"medusa"``
 
