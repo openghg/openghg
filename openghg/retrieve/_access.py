@@ -554,10 +554,10 @@ def get_obs_column(
 
     for dv in drop_data_vars:
         if dv in obs_data.data.data_vars:
-            obs_data.data = obs_data.data.drop(dv)
+            obs_data.data = obs_data.data.drop_vars(dv)
     for coord in drop_coords:
         if coord in obs_data.data.coords:
-            obs_data.data = obs_data.data.drop(coord)
+            obs_data.data = obs_data.data.drop_vars(coord)
 
     obs_data.data = obs_data.data.sortby("time")
 
