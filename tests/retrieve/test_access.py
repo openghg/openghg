@@ -307,14 +307,23 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
 
 def test_get_obs_column():
-    column_data = get_obs_column(species="ch4", satellite="gosat")
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10)
 
     obscolumn = column_data.data
 
-    assert "xch4" in obscolumn
+    assert "mf" in obscolumn
+    assert "mf_prior_factor" in obscolumn
+    assert "mf_prior_upper_level_factor" in obscolumn
+    assert "mf_repeatability" in obscolumn
+
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
-    assert obscolumn.attrs["species"] == "ch4"
+    assert np.isclose(obscolumn["mf"][0], 1238.2743)
+    assert obscolumn.attrs["species"] == "CH4"
+
+
+    # test max level defaults to highest if out of range
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+
 
 
 def test_get_flux():
