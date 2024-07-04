@@ -396,6 +396,43 @@ def test_standardise_flux_additional_keywords():
 
     assert "ch4_anthro_globaledgar" in proc_results
 
+def test_standardise_non_standard_flux_domain():
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # this file is sliced, to cover only a small section of the EUROPE domain
+    # assert that if we specify the domain as a non-standard domain, it standardises fine:
+
+    domain = 'europe_incomplete'
+
+    proc_results = standardise_flux(
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain=domain,
+        high_time_resolution=False,
+        force=True,
+        store="user",
+    )
+
+    assert "co2_gpp-cardamom_europe_incomplete" in proc_results
+    assert "error" not in proc_results
+
+def test_standardise_incomplete_flux():
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file, 
+    # we get an error
+
+    with pytest.raises(ValueError):
+        standardise_flux(filepath=test_datapath,
+                         species="co2",
+                         source="gpp-cardamom",
+                         domain="EUROPE",
+                         high_time_resolution=False,
+                         force=True,
+                         store="user"
+        )
+
 
 def test_cloud_standardise(monkeypatch, mocker, tmpdir):
     monkeypatch.setenv("OPENGHG_HUB", "1")
