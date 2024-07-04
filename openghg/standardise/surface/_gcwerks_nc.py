@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from typing import Dict, Optional, Union
 
@@ -30,7 +29,7 @@ def parse_gcwerks_nc(
         instrument: Instrument name
         network: Network name
         inlet: inlet name (optional)
-        sampling_period: sampling period for this instrument. If not supplied, will be read from the file. 
+        sampling_period: sampling period for this instrument. If not supplied, will be read from the file.
         measurement_type: measurement type
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
@@ -54,23 +53,20 @@ def parse_gcwerks_nc(
         file_params = ds.attrs
 
     # if we're not passed the instrument name, get it from the file:
-    
+
     file_instrument = None
 
     if "instrument_type" in file_params.keys():
         file_instrument = clean_string(file_params["instrument_type"])
-    
+
     elif instrument is None:
-        raise ValueError(
-                 f"No instrument found in file metadata. Please pass explicity as argument."
-        )
-    
+        raise ValueError(f"No instrument found in file metadata. Please pass explicity as argument.")
+
     if file_instrument and instrument:
         if file_instrument != instrument:
-             raise ValueError(
-                 f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
-             )
-
+            raise ValueError(
+                f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
+            )
 
     instrument = str(instrument)
 
@@ -93,10 +89,9 @@ def parse_gcwerks_nc(
             "network": network,
         }
 
+        # sampling period should be in the metadata of the openghg datasource as a single value.
 
-        # sampling period should be in the metadata of the openghg datasource as a single value. 
-
-        extracted_sampling_periods = data['sampling_period'].unique()
+        extracted_sampling_periods = data["sampling_period"].unique()
         if len(extracted_sampling_periods) == 1:
             extracted_sampling_period = extracted_sampling_periods[0]
             single_sampling_period = True
@@ -184,7 +179,7 @@ def _format_species(
         )
 
     # inlet heights are just the numbers here in Matt's files, rather than having the units attached.
-    data_inlets = {i:format_inlet(i) for i in data_inlets}
+    data_inlets = {i: format_inlet(i) for i in data_inlets}
 
     # Skip this species if the data is all NaNs
     if data["mf"].isnull().all():
@@ -212,7 +207,7 @@ def _format_species(
             continue
 
         attributes = file_params
-        
+
         # need to rename the inlet height attribute:
 
         attributes["inlet_height_magl"] = inlet
@@ -262,4 +257,3 @@ def _format_species(
     to_return: Dict = combined_data.to_dict()
 
     return to_return
-
