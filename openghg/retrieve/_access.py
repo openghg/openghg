@@ -510,6 +510,12 @@ def get_obs_column(
         **kwargs,
     )
 
+    if max_level > max(obs_data.data.lev.values) + 1:
+        print(
+            f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+        )
+        max_level = max(obs_data.data.lev.values) + 1
+
     ## processing taken from acrg/acrg/obs/read.py get_gosat()
     lower_levels = list(range(0, max_level))
 
