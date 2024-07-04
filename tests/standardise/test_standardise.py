@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 from helpers import get_flux_datapath, get_footprint_datapath, get_surface_datapath, get_column_datapath, clear_test_stores, clear_test_store
-from openghg.retrieve import get_obs_surface, search
+from openghg.retrieve import get_obs_surface, search, get_footprint
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -9,7 +9,8 @@ from openghg.standardise import (
     standardise_surface,
 )
 from openghg.types import AttrMismatchError, ObjectStoreError
-from openghg.util import compress
+from openghg.util import compress, find_domain
+import numpy as np
 
 
 def test_standardise_to_read_only_store():
@@ -300,6 +301,40 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
+def test_standardise_align_footprint():
+    datapath = get_footprint_datapath("footprint_align_test.nc")
+
+    site = "JFJ"
+    network="AGAGE"
+    height="1000m"
+    domain="EUROPE"
+    model="test_model"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        overwrite=True,
+        store='user'
+    ) 
+
+    data = get_footprint(
+        site=site,
+        network=network,
+        height=height,
+        domain=domain,
+        model=model
+    )
+
+    true_lats, true_lons = find_domain(domain=domain)
+
+    assert np.allclose(data.data.lat.values, true_lats, rtol=0, atol=1e-15)
+    assert np.allclose(data.data.lon.values, true_lons, rtol=0, atol=1e-15)
+
 from openghg.retrieve import search_footprints
 
 
@@ -309,7 +344,7 @@ def test_standardise_footprints_chunk(caplog):
     site = "TAC"
     network = "DECC"
     height = "185m"
-    domain = "EUROPE"
+    domain = "test_europe"
     model = "UKV-chunked"
 
     standardise_footprint(
@@ -413,7 +448,7 @@ def test_standardise_footprint_different_chunking_schemes(caplog):
     site = "TAC"
     network = "UKV"
     height = "100m"
-    domain = "EUROPE"
+    domain = "test_europe"
     model = "chunk_model"
 
     standardise_footprint(
