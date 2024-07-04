@@ -36,7 +36,7 @@ the data to here, the "user" store.
 
 .. code:: python
 
-    from openghg.store import data_manager
+    from openghg.dataobjects import data_manager
     from openghg.standardise import standardise_footprint
     from openghg.tutorial import retrieve_example_data
 

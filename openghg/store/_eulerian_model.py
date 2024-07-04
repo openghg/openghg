@@ -42,6 +42,7 @@ class EulerianModel(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -73,6 +74,7 @@ class EulerianModel(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -195,7 +197,11 @@ class EulerianModel(BaseStore):
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
-            required = ("model", "species", "date")
+            lookup_keys = self.get_lookup_keys(optional_metadata)
+
+            if optional_metadata is not None:
+                for parsed_data in model_data.values():
+                    parsed_data["metadata"].update(optional_metadata)
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
@@ -203,7 +209,7 @@ class EulerianModel(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required,
+                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

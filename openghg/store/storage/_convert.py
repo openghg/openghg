@@ -161,7 +161,7 @@ def convert_store(
                     n_converted += 1
 
             elif data_type == "footprints":
-                if standardise_kwargs["high_time_resolution"]:
+                if standardise_kwargs["time_resolved"]:
                     chunks = {"time": 24}
                 else:
                     chunks = {"time": 480}

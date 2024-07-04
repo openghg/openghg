@@ -42,6 +42,7 @@ class ObsColumn(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read column observation file
 
@@ -84,20 +85,19 @@ class ObsColumn(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import ColumnTypes
-        from openghg.util import (
-            clean_string,
-            load_column_parser,
-            check_if_need_new_version,
-        )
+        from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
         site = clean_string(site)
         species = clean_string(species)
+        if species is not None:
+            species = synonyms(species)
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)
@@ -162,7 +162,11 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        lookup_keys = self.get_lookup_keys(optional_metadata)
+
+        if optional_metadata is not None:
+            for parsed_data in obs_data.values():
+                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
@@ -170,7 +174,7 @@ class ObsColumn(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             min_keys=3,
             compressor=compressor,
             filters=filters,

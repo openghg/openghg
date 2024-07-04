@@ -647,7 +647,7 @@ def time_offset_definition() -> Dict[str, List]:
     """
     offset_naming = {
         "months": ["monthly", "months", "month", "MS"],
-        "years": ["yearly", "years", "annual", "year", "AS", "YS"],
+        "years": ["yearly", "years", "annual", "year", "AS", "YS", "YS-JAN"],
         "weeks": ["weekly", "weeks", "week", "W"],
         "days": ["daily", "days", "day", "D"],
         "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
