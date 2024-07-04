@@ -284,8 +284,11 @@ def check_coord_alignment(
     an exception is raised to alert the user to the fact that they may have the wrong 
     domain altogether. An exception is also raised if the length of the arrays don't 
     match. If the lat or lon don't match exactly, the old coordinates are replaced with 
-    the 'correct' values from openghg_defs
+    the 'correct' values from openghg_defs. 
 
+    If the domain is not one of the domains listed in openghg_defs 
+    (i.e. ARCTIC, EASTASIA, EUROPE, PACIFIC, SOUTHAFRICA, USA) then the checks are not 
+    carried out and the data is returned unaltered. 
 
     Args:
         data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
@@ -295,6 +298,11 @@ def check_coord_alignment(
     Returns:
         xarray.DataArray / xarray.Dataset: data with coordinate ranges aligned to openghg domain.
     """
+
+    known_domains = list(get_domain_info().keys())
+
+    if domain.upper() not in known_domains:
+        return data
 
     coords_in = data[coord].values
 
