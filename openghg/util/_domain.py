@@ -293,8 +293,8 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
 
     Args:
         data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
-        domain: domain in question. Must be a valid domain in openghg_defs. If 
-                this is a domain from openghg_defs this will be checked and aligned with 
+        domain: domain in question. Must be a valid domain in openghg_defs. If
+                this is a domain from openghg_defs this will be checked and aligned with
                 this definition. Otherwise, coordinates will not be changed.
         coord: coordinate to check. Currently 'lat' or 'lon' only.
 
@@ -305,7 +305,9 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
     known_domains = list(get_domain_info().keys())
 
     if domain.upper() not in known_domains:
-        logger.warning(f"Domain input: {domain} is not a standard domain within openghg_defs and so has not been standardised against this.")
+        logger.warning(
+            f"Domain input: {domain} is not a standard domain within openghg_defs and so has not been standardised against this."
+        )
         return data
 
     coords_in = data[coord].values
@@ -325,8 +327,6 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
         )
 
     data = data.assign_coords({coord: true_coords})
-
-
 
     return data
 

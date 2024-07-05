@@ -313,7 +313,7 @@ def test_standardise_footprint():
 
 def test_standardise_align_footprint():
     """
-    Tests that a footprint that is read in with slightly different lat-lon coordinates 
+    Tests that a footprint that is read in with slightly different lat-lon coordinates
     is aligned to the 'correct' coordinates in openghg_defs
     """
     datapath = get_footprint_datapath("footprint_align_test.nc")
@@ -408,7 +408,7 @@ def test_standardise_flux_additional_keywords():
 
 def test_standardise_non_standard_flux_domain():
     """
-    Checks that if a non-standard domain is used, the standardisation/alignment process throws no errors. 
+    Checks that if a non-standard domain is used, the standardisation/alignment process throws no errors.
     """
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
 
@@ -433,7 +433,7 @@ def test_standardise_non_standard_flux_domain():
 
 def test_standardise_incomplete_flux():
     """
-    Checks that if a non-standard set of lat-lons is used in the input file with 
+    Checks that if a non-standard set of lat-lons is used in the input file with
     a standard domain, we get an error
     """
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
