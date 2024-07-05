@@ -67,7 +67,7 @@ def data_read():
                              species="ch4",
                              source=source1,
                              domain=domain,
-                             high_time_resolution=False,
+                             time_resolved=False,
                              )
 
     # Waste data for CH4 (from UKGHG model)
@@ -78,7 +78,7 @@ def data_read():
                              species="ch4",
                              source=source2,
                              domain=domain,
-                             high_time_resolution=False,
+                             time_resolved=False,
                              )
 
     # Natural sources for CO2 (R-total from Cardamom)
@@ -90,7 +90,7 @@ def data_read():
                              species="co2",
                              source=source3,
                              domain="TEST",
-                             high_time_resolution=True,
+                             time_resolved=True,
                              )
 
     flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
@@ -100,7 +100,7 @@ def data_read():
         species="co2",
         source=source3,
         domain="TEST",
-        high_time_resolution=True,
+        time_resolved=True,
         store="user",
     )
 
@@ -116,7 +116,7 @@ def data_read():
         species="co2",
         source=source4,
         domain="TEST",
-        high_time_resolution=False,
+        time_resolved=False,
         period="1 month",
         store="user",
     )
@@ -126,7 +126,7 @@ def data_read():
         species="co2",
         source=source4,
         domain="TEST",
-        high_time_resolution=False,
+        time_resolved=False,
         period="1 month",
         store="user",
     )
@@ -140,7 +140,7 @@ def data_read():
                              species="co2",
                              source=source4,
                              domain="TEST",
-                             high_time_resolution=False,
+                             time_resolved=False,
                              )
 
     standardise_flux(store="user",
@@ -148,7 +148,7 @@ def data_read():
                              species="co2",
                              source=source4,
                              domain="TEST",
-                             high_time_resolution=False,
+                             time_resolved=False,
                              )
 
     # Boundary conditions data

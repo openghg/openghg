@@ -4,10 +4,13 @@ import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Optional, Tuple, Union
+import warnings
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.util import synonyms
+
 from xarray import DataArray, Dataset
 
 __all__ = ["Flux"]
@@ -64,7 +67,8 @@ class Flux(BaseStore):
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "openghg",
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: bool = False,
+        high_time_resolution: bool = False,
         period: Optional[Union[str, tuple]] = None,
         chunks: Optional[Dict] = None,
         continuous: bool = True,
@@ -74,6 +78,7 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read flux / emissions file
 
@@ -86,7 +91,8 @@ class Flux(BaseStore):
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
             source_format : Type of data being input e.g. openghg (internal format)
-            high_time_resolution: If this is a high resolution file
+            time_resolved: If this is a high resolution file
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             If specified, should be one of:
                 - "yearly", "monthly"
@@ -114,6 +120,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -125,8 +132,16 @@ class Flux(BaseStore):
         )
 
         species = clean_string(species)
+        species = synonyms(species)
         source = clean_string(source)
         domain = clean_string(domain)
+
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -163,12 +178,13 @@ class Flux(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
+        # TODO - better match the arguments to the parser functions
         param = {
             "filepath": filepath,
             "species": species,
             "domain": domain,
             "source": source,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "period": period,
             "continuous": continuous,
             "data_type": "flux",
@@ -203,12 +219,30 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+        # combine metadata and get look-up keys
+        if optional_metadata is None:
+            optional_metadata = {}
 
-        required = tuple(min_required)
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+
+        # warn if `optional_metadata` overlaps with keyword arguments
+        overlap = [k for k in optional_metadata if k in to_add]
+        if overlap:
+            msg = (
+                f"Values for {', '.join(overlap)} in `optional_metadata` are "
+                "being overwritten by values passed as keyword arguments."
+            )
+            logger.warning(msg)
+
+        # update `optional_metadata` dict with any "optional" arguments passed to the parser
+        optional_metadata.update(to_add)
+
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # add optional metdata to parsed metadata
+        for parsed_data in flux_data.values():
+            parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -216,7 +250,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
@@ -235,6 +269,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        optional_metadata: Optional[Dict] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -309,6 +344,17 @@ class Flux(BaseStore):
             Flux.validate_data(em_data)
 
         required_keys = ("species", "source", "domain")
+
+        if optional_metadata:
+            common_keys = set(required_keys) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for key, parsed_data in flux_data.items():
+                    parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(

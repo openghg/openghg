@@ -210,7 +210,7 @@ def test_match_chunking(store):
 
     # As the data we originally put in wasn't chunked then we get the full size of the time coordinate
     # which is 31 here
-    assert chunking == {'time': 31}
+    assert chunking == {"time": 31}
 
     # Now try it the other way round, add chunked data and then try to match it with unchunked data
     store.delete_all()
@@ -298,3 +298,57 @@ def test_copy_actually_copies(store):
 
     assert ds_2.equals(ds_expected)
     assert not np.sum(np.isnan(ds_2.mf.values))
+
+
+def test_for_missing_data_from_appending_in_loop():
+    """If multiple "source" chunks (e.g. from chunked data we wish to store) need to write
+    to the same "target" chunks (in the zarr store), then it is possible that the data will be
+    corrupted if multiple writes are set off in a loop.
+
+    This test tries to simulate this situation. Note that it isn't possible to write a deterministic
+    test for this, because it depends on how workers for writing the chunks are scheduled.
+
+    For adding 6 inert footprints in a loop, data loss was observed about 40% of the time for at least one
+    data variable in the footprint; however, that test is fairly slow, so we will try to recreate it with
+    artificial data here.
+
+    See GH Issue #1031 for more details.
+
+    """
+    bucket = get_writable_bucket(name="user")
+
+    # make 6 datasets that will have "ragged" start/end chunks
+    duration = 820
+    chunk_size = 403
+
+    rng = np.random.default_rng(seed=2**32 - 1)
+
+    datasets = []
+    for i in range(3):
+        ds = xr.Dataset(
+            {
+                "x": (["time"], rng.normal(0, 1, duration)),
+                "y": (["time"], rng.normal(0, 1, duration)),
+            },
+            coords={
+                "time": duration * i + np.arange(duration),
+            },
+            attrs={},
+        )
+        datasets.append(ds.chunk({"time": chunk_size}))
+
+    # add data repeatedly, testing for missing values
+    for i in range(10):
+        local_store = LocalZarrStore(bucket=bucket, datasource_uuid=f"test-local-store-123-{i}", mode="rw")
+
+        for ds in datasets:
+            local_store.add(version="v1", dataset=ds)
+
+        retrieved = local_store.get(version="v1")
+
+        missing = retrieved.isnull().sum().compute()
+        total_missing = sum(dict(missing).values())
+
+        assert total_missing == 0.0
+
+        local_store.delete_all()

@@ -9,6 +9,7 @@ from .helpers import (
     get_flux_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
+    get_flux_timeseries_datapath,
     get_info_datapath,
     get_mobile_datapath,
     get_retrieval_datapath,

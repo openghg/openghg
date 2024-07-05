@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional, Union, Any
 
 from openghg.objectstore import get_writable_bucket
-from openghg.store.base import get_data_class
+from openghg.store import get_data_class
 
 
 def transform_flux_data(
