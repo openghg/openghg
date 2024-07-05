@@ -192,8 +192,8 @@ def test_align_lat_lon():
     input_data_to_align = xr.load_dataset(input_datapath)
     aligned_data = align_lat_lon(data=input_data_to_align, domain=domain)
 
-    assert np.allclose(aligned_data["lat"].values, true_lats, rtol=0, atol=1e-15)
-    assert np.allclose(aligned_data["lon"].values, true_lons, rtol=0, atol=1e-15)
+    np.testing.assert_equal(aligned_data["lat"].values, true_lats)
+    np.testing.assert_equal(aligned_data["lon"].values, true_lons)
 
     # if the number of coordinates doesn't match expected, ensure an error is raised
     sparse_datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
