@@ -214,7 +214,7 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**input_parameters)
 
-        # Checking against expected format for Flux, and align to expected lat/lons if necessary. 
+        # Checking against expected format for Flux, and align to expected lat/lons if necessary.
         for split_data in flux_data.values():
 
             split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
