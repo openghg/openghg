@@ -11,6 +11,7 @@ from openghg.util import check_config, create_config, read_local_config
 def tmp_config_path(tmp_path):
     return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
 
+
 @pytest.fixture
 def mock_get_user_config_path(tmp_config_path, mocker):
     tmp_config_path.parent.mkdir(parents=True)
@@ -153,7 +154,11 @@ def test_create_config_duplicates(monkeypatch, mocker, tmp_path, capsys):
 
     config = toml.loads(mock_config_path.read_text())
 
-    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"])):
+    with patch.object(
+        builtins,
+        "input",
+        side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"]),
+    ):
         with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
             create_config(silent=False)
 

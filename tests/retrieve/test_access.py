@@ -337,7 +337,9 @@ def test_get_flux():
 
 def test_get_flux_range():
     """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
-    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01")
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
 
     flux = flux_data.data
 

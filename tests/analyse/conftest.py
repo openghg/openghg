@@ -85,7 +85,6 @@ def data_read():
         high_time_resolution=False,
     )
 
-
     # Natural sources for CO2 (R-total from Cardamom)
     #  - 2 hourly (high resolution?)
     source3 = "natural-rtot"
@@ -160,7 +159,6 @@ def data_read():
         domain="TEST",
         high_time_resolution=False,
     )
-
 
     # Boundary conditions data
     # CH4
