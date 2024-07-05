@@ -927,9 +927,47 @@ def test_drop_only_correct_nan():
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
 
 
+def test_obs_data_level_split():
+    """
+    Test to check data_level keyword can be used to split data into multiple datasources and be retrieved.
+    """
+
+    clear_test_stores()
+    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc",source_format="OPENGHG")
+    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+
+    data_level_1 = "L1"
+    data_level_2 = "L2"
+
+    standardise_surface(filepath=data_filepath_1,
+                        source_format="OPENGHG",
+                        site="TAC",
+                        network="DECC",
+                        data_level=data_level_1,
+                        store="group")
+
+    standardise_surface(filepath=data_filepath_2,
+                        source_format="OPENGHG",
+                        site="TAC",
+                        network="DECC",
+                        data_level=data_level_2,
+                        store="group")
+
+    tac_1 = get_obs_surface(site="tac", species="co2", data_level=data_level_1)
+    tac_2 = get_obs_surface(site="tac", species="co2", data_level=data_level_2)
+
+    assert tac_1.metadata["data_level"] == data_level_1.lower()
+    assert tac_2.metadata["data_level"] == data_level_2.lower()
+
+    # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
+    # this data has been retrieved.
+    np.testing.assert_equal(tac_1.data["mf"].values, 1)
+
+
 def test_optional_parameters():
     """Test if ValueError is raised for invalid input value to calibration_scale."""
 
+    clear_test_stores()
     data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
 
     with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
