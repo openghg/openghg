@@ -646,6 +646,10 @@ class ModelScenario:
             if platform == "satellite":
                 return obs_data, footprint_data
 
+        if resample_to is None:
+            # do not apply resampling
+            return obs_data, footprint_data
+
         # Whether sampling period is present or we need to try to infer this
         infer_sampling_period = False
         # Get the period of measurements in time
@@ -767,6 +771,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - or None, if no resample needed. No resampling is done if platform=="satellite", or if resample_to is None
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample
             cache: Cache this data after calculation. Default = True.
