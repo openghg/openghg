@@ -196,10 +196,6 @@ def parse_acrg_org(
         fp_time, filepath=input_filepath, period=period, continuous=continuous
     )
 
-    # align lats and lons to the domain in openghg_defs
-
-    fp_data = align_lat_lon(data=fp_data, domain=domain)
-
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
     metadata["time_period"] = period_str

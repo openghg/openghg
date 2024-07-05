@@ -9,7 +9,7 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.util import synonyms
+from openghg.util import synonyms, align_lat_lon
 
 from xarray import DataArray, Dataset
 
@@ -216,6 +216,9 @@ class Flux(BaseStore):
 
         # Checking against expected format for Flux
         for split_data in flux_data.values():
+
+            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
+
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
