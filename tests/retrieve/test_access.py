@@ -320,9 +320,12 @@ def test_get_obs_column():
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
 
-
-    # test max level defaults to highest if out of range
+def test_get_obs_column_max_level():
+    # test max level defaults to highest available if out of range
     column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+    obscolumn = column_data.data
+    assert np.isclose(obscolumn["mf"][0], 1818.2135)
+
 
 
 
