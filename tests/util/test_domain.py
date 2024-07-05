@@ -7,8 +7,10 @@ from openghg.util import (
     convert_lon_to_360,
     cut_data_extent,
     find_domain,
+    align_lat_lon
 )
 from openghg.util._domain import _get_coord_data
+from helpers import get_footprint_datapath
 
 
 def test_find_domain():
@@ -175,3 +177,37 @@ def test_cut_data_extent():
 
     np.testing.assert_allclose(da_cut["lat"].values, expected_lat_cut)
     np.testing.assert_allclose(da_cut["lon"].values, expected_lon_cut)
+
+def test_align_lat_lon():
+    """
+    Check that the align_lat_lon function functions as expected. 
+    """
+
+    true_lats, true_lons = find_domain('europe')
+
+    # if the domain is known, assert that the output is aligned to the correct coordinates
+
+    input_datapath = get_footprint_datapath("footprint_align_test.nc")
+    domain = 'europe'
+    input_data_to_align = xr.load_dataset(input_datapath)
+
+    aligned_data = align_lat_lon(data=input_data_to_align, domain=domain)
+
+    assert np.allclose(aligned_data['lat'].values, true_lats, rtol=0, atol=1e-15)
+    assert np.allclose(aligned_data['lon'].values, true_lons, rtol=0, atol=1e-15) 
+
+    # if the number of coordinates doesn't match expected, ensure an error is raised
+
+    sparse_datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    sparse_data = xr.load_dataset(sparse_datapath)
+
+    with pytest.raises(ValueError):
+        align_lat_lon(data=sparse_data, domain=domain)
+
+    # if the domain is very off (i.e. everything off by 10 degrees), ensure an error is raised
+        
+    shifted_data = input_data_to_align.assign_coords(lat=(input_data_to_align.lat + 10))
+
+    with pytest.raises(ValueError):
+        align_lat_lon(data=shifted_data, domain=domain)
+                                                     
