@@ -65,32 +65,37 @@ def pytest_sessionfinish(session, exitstatus):
 
 def pytest_addoption(parser):
     parser.addoption("--run-cfchecks", action="store_true", default=False, help="run CF compliance tests")
+    parser.addoption("--run-icos", action="store_true", default=False, help="run ICOS tests")
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "cfchecks: mark mark test as needing CF related libs to run")
+    config.addinivalue_line("markers", "cfchecks: mark test as needing CF related libs to run")
     config.addinivalue_line(
         "markers",
         "skip_if_no_cfchecker: skip test is cfchecker is not installed",
     )
+    config.addinivalue_line("markers", "icos: retrieve data from ICOS online portal")
 
 
 def pytest_collection_modifyitems(config, items):
-    messge_str = "need --run-cfchecks option to run"
+    cf_msg = "Pass --run-cfchecks to run CF compliance tests"
 
-    try:
-        import cfchecker  # noqa
+    run_cftests = config.getoption("--run-cfchecks")
+    if run_cftests:
+        try:
+            import cfchecker  # noqa
+        except ImportError:
+            cf_msg = "cfchecker not installed, skipping CF compliance tests"
+            run_cftests = False
 
-        cfchecker_imported = True
-    except (FileNotFoundError, ImportError) as e:
-        cfchecker_imported = False
-        messge_str = f"Cannot import CFChecker - {e}"
-
-    if config.getoption("--run-cfchecks") and cfchecker_imported:
-        # --run-cfchecks given in cli: do not skip cfchecks tests
-        return
-
-    skip_cf = pytest.mark.skip(reason=messge_str)
+    # TODO - could tidy this up with the user of item.iter_markers to
+    # check for the actual marker instead of the string match in the name
+    run_icos_tests = config.getoption("--run-icos")
     for item in items:
-        if "cfchecks" in item.keywords:
-            item.add_marker(skip_cf)
+        if not run_cftests and "cfchecks" in item.keywords:
+            item.add_marker(pytest.mark.skip(reason=cf_msg))
+
+        if not run_icos_tests and "icos" in item.keywords:
+            markers = [mark for mark in item.iter_markers() if mark.name == "icos"]
+            if markers:
+                item.add_marker(pytest.mark.skip(reason="Requires --run-icos option to run"))

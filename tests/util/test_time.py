@@ -24,6 +24,7 @@ from openghg.util import (
     time_offset,
     timestamp_tzaware,
     trim_daterange,
+    dates_in_range,
 )
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import Dataset
@@ -175,14 +176,6 @@ def test_combining_overlapping_dateranges():
     dateranges = [daterange_1, daterange_2, daterange_3, daterange_4, daterange_5, daterange_6]
 
     combined = combine_dateranges(dateranges=dateranges)
-
-    combined = [
-        "2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00",
-        "2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00",
-        "2007-04-01-00:00:00_2007-09-01-00:00:00",
-    ]
-
-    return False
 
     assert combined == [
         "2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00",
@@ -443,6 +436,9 @@ def test_relative_time_offset(kwargs, expected):
     assert relative_time_offset(**kwargs) == expected
 
 
+def test_relative_time_offset_with_vaies():
+    print(relative_time_offset)
+
 def test_in_daterange():
     start_a = timestamp_tzaware("2021-01-01")
     end_a = timestamp_tzaware("2021-06-01")
@@ -456,3 +452,42 @@ def test_in_daterange():
     end_b = timestamp_tzaware("1980-01-01")
 
     assert not in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)
+
+
+def test_dates_in_range():
+    keys = [
+        "2022-01-01_2022-01-07",
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+        "2022-02-26_2022-03-04",
+        "2022-03-05_2022-03-11",
+    ]
+
+    start_date = pd.Timestamp(2022, 1, 10)
+    end_date = pd.Timestamp(2022, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    expected_result = [
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+    ]
+
+    assert result == expected_result
+
+    start_date = pd.Timestamp(2024, 1, 10)
+    end_date = pd.Timestamp(2024, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    assert not result

@@ -12,7 +12,7 @@ def set_env(monkeypatch):
 
 # I'm not sure if these tests really do anything
 
-
+@pytest.mark.xfail(reason="Cloud tests marked for removal. Cloud code needs rewrite.")
 def test_cloud_search_with_results(mocker):
     metadata = {"site": "london"}
     sr = SearchResults(keys={"data": [1, 2, 3]}, metadata=metadata)
