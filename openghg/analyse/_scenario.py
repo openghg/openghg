@@ -791,6 +791,22 @@ class ModelScenario:
         tolerance = None
         if platform is None:
             platform = self._get_platform()
+        accepted_platforms = ["satellite", "aircraft", "ship"]
+        if platform is not None and platform not in accepted_platforms:
+            logger.warning(
+                f"Passed platform {platform} is not in the list of accepted platforms ({accepted_platforms})"
+            )
+
+        # check if platform is satellite but has not been set correctly, due to either the "platform" parameter being passed incorrectly, or the site not being present in the site_info.json file
+        try:
+            if "GOSAT" in self.site or "TROPOMI" in self.site:
+                logger.warning(
+                    f"Passed platform {platform} is not satellite but it seems you are using GOSAT or TROPOMI data. Changing platform to 'satellite'"
+                )
+                platform = "satellite"
+        except AttributeError:
+            # check cannot be done if self.site does not exist, but this should not be the case if obs and footprints have been correctly added
+            pass
 
         # Align and merge the observation and footprint Datasets
         aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
