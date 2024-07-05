@@ -566,10 +566,10 @@ def get_obs_column(
 
     obs_data.data.attrs["max_level"] = max_level
     if species.upper() == "CH4":
-        obs_data.data.mf.attrs["units"] = "1e-9"
+        # obs_data.data.mf.attrs["units"] = "1e-9"
         obs_data.data.attrs["species"] = "CH4"
     if species.upper() == "CO2":
-        obs_data.data.mf.attrs["units"] = "1e-6"
+        # obs_data.data.mf.attrs["units"] = "1e-6"
         obs_data.data.attrs["species"] = "CO2"
 
     # obs_data.data.attrs["scale"] = "GOSAT"
