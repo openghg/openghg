@@ -100,7 +100,6 @@ def parse_openghg(
         em_time, filepath=filepath, period=period, continuous=continuous
     )
 
-
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
 

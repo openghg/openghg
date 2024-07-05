@@ -85,7 +85,6 @@ def parse_intem(
         dataset_time, filepath=filepath, period=period, continuous=continuous
     )
 
-
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
     metadata["max_longitude"] = round(float(emissions_dataset["lon"].max()), 5)
