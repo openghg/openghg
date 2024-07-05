@@ -1,4 +1,5 @@
 import pytest
+import os
 from helpers import clear_test_stores, get_flux_datapath
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
@@ -26,7 +27,7 @@ def test_read_binary_data(mocker, clear_stores):
         "species": "co2",
         "source": "gpp-cardamom",
         "domain": "europe",
-        "high_time_resolution": False,
+        "time_resolved": False,
     }
 
     sha1_hash = hash_bytes(data=binary_data)
@@ -48,14 +49,15 @@ def test_read_binary_data(mocker, clear_stores):
 def test_read_file():
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
-    proc_results = standardise_flux(store="user",
-                                    filepath=test_datapath,
-                                    species="co2",
-                                    source="gpp-cardamom",
-                                    domain="europe",
-                                    high_time_resolution=False,
-                                    force=True,  # For ease, make sure we can add the same data.
-                                    )
+    proc_results = standardise_flux(
+        store="user",
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+        time_resolved=False,
+        force=True,  # For ease, make sure we can add the same data.
+    )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
@@ -272,7 +274,6 @@ def test_add_edgar_database(clear_stores):
 
     search_results = search_flux(
         species=species,
-        date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
     )
@@ -288,7 +289,6 @@ def test_add_edgar_database(clear_stores):
         "source": default_source,
         "database": database.lower(),
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -303,6 +303,76 @@ def test_add_edgar_database(clear_stores):
     }
 
     assert metadata.items() >= expected_metadata.items()
+
+
+@pytest.mark.parametrize(
+    "source", [None, "edgar-annual-total"]
+)
+def test_add_edgar_v8_database(clear_stores, source):
+    """Test edgar v8.0 can be added to object store (default domain)"""
+    folder = "v8.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "1970"
+    expected_source = "anthro" if source is None else source
+
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
+
+    default_domain = "globaledgar"
+
+    version = "v8.0"
+    species = "ch4"
+
+    output_key = f"{species}_{expected_source}_{default_domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search_flux(
+        species=species,
+        database=database,
+        database_version=version,
+    )
+
+    assert search_results
+
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
+
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": expected_source,
+        "database": database.lower(),
+        "database_version": version.replace(".", ""),
+        "author": "openghg cloud",
+        "start_date": "1970-01-01 00:00:00+00:00",
+        "end_date": "1970-12-31 23:59:59+00:00",
+        "min_longitude": -179.95,
+        "max_longitude": 179.95,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
+def test_edgar_v8_raises_error():
+    """
+    Test to check if incorrect data variable is present in processing file then it should raise value error for v8.0 file
+    """
+    with pytest.raises(
+        ValueError,
+        match="Data variable fluxes not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0",
+    ):
+        folder = "v8.0_CH4"
+        test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+        modified_datapath = os.path.join(test_datapath, "false_data")
+        database = "EDGAR"
+        date = "1970"
+
+        transform_flux_data(store="user", datapath=modified_datapath, database=database, date=date)
 
 
 def test_transform_and_add_edgar_database(clear_stores):
@@ -320,7 +390,9 @@ def test_transform_and_add_edgar_database(clear_stores):
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_flux_data(
+        store="user", datapath=test_datapath, database=database, date=date, domain=domain
+    )
 
     version = "v6.0"
     species = "ch4"
@@ -331,7 +403,6 @@ def test_transform_and_add_edgar_database(clear_stores):
 
     search_results = search(
         species=species,
-        date=date,
         domain=domain,
         database=database,  # would searching for lowercase not work?
         database_version=version,
@@ -350,7 +421,6 @@ def test_transform_and_add_edgar_database(clear_stores):
         "source": "anthro",
         "database": "edgar",
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -377,3 +447,45 @@ def test_flux_schema():
     assert "lon" in data_vars["flux"]
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_optional_metadata_raise_error(clear_stores):
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+    folder = "v6.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    with pytest.raises(ValueError):
+        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
+
+
+def test_optional_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+    folder = "v6.0_CH4"
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"project":"openghg_tests", "tag":"tests"})
+
+    version = "v6.0"
+    species = "ch4"
+
+    search_results = search_flux(
+        species=species,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+    )
+
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
+
+    assert "project" in metadata
+    assert "tag" in metadata
