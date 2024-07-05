@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
 
+### Added
+
+- Added interactive plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953)
+
 ## [0.8.2] - 2024-06-06
 
 ### Fixed
