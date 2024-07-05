@@ -140,7 +140,7 @@ this is displayed:
 
 .. raw:: html
 
-   <iframe src="images/tac_surface_185m.html" width="100%" height="400"></iframe>
+   <iframe src="../../../_static/tac_surface_185m.html" width="100%" height="400"></iframe>
 
 Plotting multiple timeseries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +166,7 @@ and and responsive, even with relatively large amounts of data.
 
 .. raw:: html
 
-   <iframe src="images/tac_surface_all.html" width="100%" height="400"></iframe>
+   <iframe src=".../../../_static/tac_surface_all.html" width="100%" height="400"></iframe>
 
 3. Comparing different sites
 ----------------------------
@@ -194,6 +194,6 @@ we want to compare and make a plot
 
 .. raw:: html
 
-   <iframe src="images/bsd_tac_ch4.html" width="100%" height="400"></iframe>
+   <iframe src="../../../_static/bsd_tac_ch4.html" width="100%" height="400"></iframe>
 
 
