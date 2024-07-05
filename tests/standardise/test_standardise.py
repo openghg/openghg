@@ -312,6 +312,10 @@ def test_standardise_footprint():
 
 
 def test_standardise_align_footprint():
+    """
+    Tests that a footprint that is read in with slightly different lat-lon coordinates 
+    is aligned to the 'correct' coordinates in openghg_defs
+    """
     datapath = get_footprint_datapath("footprint_align_test.nc")
 
     site = "JFJ"
@@ -349,7 +353,7 @@ def test_standardise_footprints_chunk(caplog):
     site = "TAC"
     network = "DECC"
     height = "185m"
-    domain = "test_europe"
+    domain = "TEST"
     model = "UKV-chunked"
 
     standardise_footprint(
@@ -403,12 +407,15 @@ def test_standardise_flux_additional_keywords():
 
 
 def test_standardise_non_standard_flux_domain():
+    """
+    Checks that if a non-standard domain is used, the standardisation/alignment process throws no errors. 
+    """
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
 
     # this file is sliced, to cover only a small section of the EUROPE domain
     # assert that if we specify the domain as a non-standard domain, it standardises fine:
 
-    domain = "europe_incomplete"
+    domain = "TEST"
 
     proc_results = standardise_flux(
         filepath=test_datapath,
@@ -420,11 +427,15 @@ def test_standardise_non_standard_flux_domain():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_europe_incomplete" in proc_results
+    assert "co2_gpp-cardamom_test" in proc_results
     assert "error" not in proc_results
 
 
 def test_standardise_incomplete_flux():
+    """
+    Checks that if a non-standard set of lat-lons is used in the input file with 
+    a standard domain, we get an error
+    """
     test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
 
     # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
@@ -493,7 +504,7 @@ def test_standardise_footprint_different_chunking_schemes(caplog):
     site = "TAC"
     network = "UKV"
     height = "100m"
-    domain = "test_europe"
+    domain = "TEST"
     model = "chunk_model"
 
     standardise_footprint(

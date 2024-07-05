@@ -727,7 +727,7 @@ def test_standardise_footprints_different_datasources(mock_metakeys):
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
     site = "TAC"
-    domain = "EUROPE-test"
+    domain = "TEST"
     model = "UKV"
     inlet = "100m"
 
@@ -754,4 +754,4 @@ def test_standardise_footprints_different_datasources(mock_metakeys):
     )
 
     # Make sure they're different Datasources
-    assert res_1["tac_europe-test_UKV_100m"]["uuid"] != res_2["tac_europe-test_UKV_100m"]["uuid"]
+    assert res_1["tac_test_UKV_100m"]["uuid"] != res_2["tac_test_UKV_100m"]["uuid"]
