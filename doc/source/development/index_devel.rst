@@ -28,7 +28,7 @@ Covers how we develop OpenGHG and the standards we adhere to
 Packaging & Release
 -------------------
 
-Covers steps to create a OpenGHG release and packaging steps
+Covers OpenGHG packaging and release
 
 .. toctree::
    :maxdepth: 1
