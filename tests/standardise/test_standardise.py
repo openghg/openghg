@@ -340,8 +340,8 @@ def test_standardise_align_footprint():
 
     true_lats, true_lons = find_domain(domain=domain)
 
-    assert np.allclose(data.data.lat.values, true_lats, rtol=0, atol=1e-15)
-    assert np.allclose(data.data.lon.values, true_lons, rtol=0, atol=1e-15)
+    assert np.array_equal(data.data.lat.values, true_lats)
+    assert np.array_equal(data.data.lon.values, true_lons)
 
 
 from openghg.retrieve import search_footprints
