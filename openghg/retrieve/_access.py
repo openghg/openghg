@@ -3,6 +3,9 @@ import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
 from openghg.types import SearchError
+import logging
+
+logger = logging.getLogger("openghg.retrieve.access")
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -511,7 +514,7 @@ def get_obs_column(
     )
 
     if max_level > max(obs_data.data.lev.values) + 1:
-        print(
+        logger.warning(
             f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
         )
         max_level = max(obs_data.data.lev.values) + 1
@@ -569,9 +572,11 @@ def get_obs_column(
         obs_data.data.mf.attrs["units"] = "1e-6"
         obs_data.data.attrs["species"] = "CO2"
 
-    obs_data.data.attrs["scale"] = "GOSAT"
+    # obs_data.data.attrs["scale"] = "GOSAT"
 
-    obs_data.metadata["transforms"] = "Applied mf transforms"
+    obs_data.metadata["transforms"] = (
+        f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
+    )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
