@@ -58,6 +58,8 @@ def parse_agage(
 
     if "instrument_type" in file_params.keys():
         file_instrument = clean_string(file_params["instrument_type"])
+        if instrument is None:
+            instrument=file_instrument
 
     elif instrument is None:
         raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
@@ -78,9 +80,6 @@ def parse_agage(
 
         if data.empty:
             raise ValueError("Cannot process empty file.")
-
-        # The .nc files have the DateTime object as an index already, just needs renaming
-        data.index.name = "Datetime"
 
         # This metadata will be added to when species are split and attributes are written
         metadata: Dict[str, str] = {
@@ -121,15 +120,6 @@ def parse_agage(
         # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
         data["mf_repeatability"] = data["mf_repeatability"].astype(float)
-
-        # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        # Do this based on the sampling_period recording in the file (can be time-varying)
-        # For GC-MD data the sampling_period is recorded as 1 second, but this is really instantaneous
-        # so use floor to leave these timestamps unchanged
-        data["new_time"] = data.index - pd.to_timedelta(floor(data.sampling_period / 2), unit="s")
-
-        data = data.set_index("new_time", inplace=False, drop=True)
-        data.index.name = "time"
 
         gas_data = _format_species(
             data=data,
@@ -188,13 +178,13 @@ def _format_species(
     combined_data = aDict()
 
     for inlet, inlet_label in data_inlets.items():  # iterates through the two pairs above
-
         # Create a copy of metadata for local modification and give it the species-specific metadata
         species_metadata = metadata.copy()
 
         species_metadata["units"] = units
         species_metadata["calibration_scale"] = scale
         species_metadata["inlet"] = inlet_label
+        species_metadata["inlet_height_magl"] = inlet
 
         # want to select the data corresponding to each inlet
 
@@ -207,12 +197,13 @@ def _format_species(
             continue
 
         attributes = file_params
-
-        # need to rename the inlet height attribute:
-
-        attributes["inlet_height_magl"] = inlet
+        # Need to stop the "instrument" attr from being overwritten in combined files
+        attributes["instrument"] = metadata["instrument"]
 
         metadata_keys = metadata_default_keys()
+
+        # JP hack to stop instrument getting overwritten for multi-instrument files
+        instrument = metadata["instrument"]
 
         for k, v in attributes.items():
             if k in metadata_keys:
