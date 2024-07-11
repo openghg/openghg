@@ -137,8 +137,8 @@ source openghg_env/bin/activate
 Run the following lines to link the Python virtual environment to the installed dependencies, doing so by installing the `esmpy` Python wrapper (a dependency of `xesmf`):
 ```bash
 ESMFVERSION='v'$(conda list -n openghg_add esmf | tail -n1 | awk '{print $2}')
-$ export ESMFMKFILE="$(conda env list | grep openghg_add | awk '{print $2}')/lib/esmf.mk"
-$ pip install "git+https://github.com/esmf-org/esmf.git@${ESMFVERSION}#subdirectory=src/addon/ESMPy/"
+export ESMFMKFILE="$(conda env list | grep openghg_add | awk '{print $2}')/lib/esmf.mk"
+pip install "git+https://github.com/esmf-org/esmf.git@${ESMFVERSION}#subdirectory=src/addon/esmpy/"
 ```
 
 **Note**: The pip install command above for `esmf` module may produce an AttributeError. At present (19/07/2022) an error of this type is expected and may not mean the `xesmf` module cannot be installed. This error will be fixed if [PR #49](https://github.com/esmf-org/esmf/pull/49) is merged.
