@@ -309,6 +309,7 @@ def _get_species_and_dobjs_url(
             dobj = Dobj(url)
             names = dobj.colNames
         except:
+            return pd.Series({"species": None, "units": None, "measurement_type": None})
 
         if names is None:
             return pd.Series({"species": None, "units": None, "measurement_type": None})
