@@ -111,6 +111,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_icos"
         post_data["search_terms"] = kwargs
@@ -405,7 +406,7 @@ def _retrieve_remote(
     stat = station.get(stationId=site.upper())
 
     if not stat.valid:
-        logger.error("Please check you have passed a valid ICOS site.")
+        logger.error("Please check you have passed a valid ICOS site and have a working internet connection.")
         return None
 
     # data_pids = stat.data(level=data_level)

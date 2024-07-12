@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from ._basedata import _BaseData
 
 __all__ = ["ObsColumnData"]
 
 
-@dataclass(frozen=True)
 class ObsColumnData(_BaseData):
     """This class is used to return observations data from the get_obs_column function
 

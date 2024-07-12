@@ -3,6 +3,9 @@ import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
 from openghg.types import SearchError
+import logging
+
+logger = logging.getLogger("openghg.retrieve.access")
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -52,8 +55,18 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
 
+    if sort:
+        logger.warning(
+            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
+        )
+
+    if elevate_inlets:
+        logger.warning(
+            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
+        )
+
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    retrieved_data: Any = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -127,6 +140,7 @@ def get_obs_surface(
     inlet = format_inlet(inlet)
 
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         to_post: Dict[str, Union[str, Dict]] = {}
 
         to_post["function"] = "get_obs_surface"
@@ -236,11 +250,15 @@ def get_obs_surface_local(
     from openghg.retrieve import search_surface
     from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
     from pandas import Timedelta
+    from openghg.util import synonyms
 
     if running_on_hub():
         raise ValueError(
             "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
         )
+
+    if species is not None:
+        species = synonyms(species)
 
     data_type = "surface"
 
@@ -312,6 +330,9 @@ def get_obs_surface_local(
         return None
 
     if average is not None:
+        # We need to compute the value here for the operations done further down
+        logger.info("Loading Dataset data into memory for resampling operations.")
+        data = data.compute()
         # GJ - 2021-03-09
         # TODO - check by RT
 
@@ -450,6 +471,7 @@ def get_obs_surface_local(
 
 def get_obs_column(
     species: str,
+    max_level: int,
     satellite: Optional[str] = None,
     domain: Optional[str] = None,
     selection: Optional[str] = None,
@@ -489,6 +511,71 @@ def get_obs_column(
         end_date=end_date,
         data_type="column",
         **kwargs,
+    )
+
+    if max_level > max(obs_data.data.lev.values) + 1:
+        logger.warning(
+            f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+        )
+        max_level = max(obs_data.data.lev.values) + 1
+
+    ## processing taken from acrg/acrg/obs/read.py get_gosat()
+    lower_levels = list(range(0, max_level))
+
+    prior_factor = (
+        obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
+        * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
+        * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+    ).sum(dim="lev")
+
+    upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
+    prior_upper_level_factor = (
+        obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
+        * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+    ).sum(dim="lev")
+
+    obs_data.data["mf_prior_factor"] = prior_factor
+    obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
+    obs_data.data["mf"] = (
+        obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+    )
+    obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+
+    # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
+    drop_data_vars = [
+        "xch4",
+        "xch4_uncertainty",
+        "lon",
+        "lat",
+        "ch4_profile_apriori",
+        "xch4_averaging_kernel",
+        "pressure_levels",
+        "pressure_weights",
+        "exposure_id",
+    ]
+    drop_coords = ["lev", "id"]
+
+    for dv in drop_data_vars:
+        if dv in obs_data.data.data_vars:
+            obs_data.data = obs_data.data.drop_vars(dv)
+    for coord in drop_coords:
+        if coord in obs_data.data.coords:
+            obs_data.data = obs_data.data.drop_vars(coord)
+
+    obs_data.data = obs_data.data.sortby("time")
+
+    obs_data.data.attrs["max_level"] = max_level
+    if species.upper() == "CH4":
+        # obs_data.data.mf.attrs["units"] = "1e-9"
+        obs_data.data.attrs["species"] = "CH4"
+    if species.upper() == "CO2":
+        # obs_data.data.mf.attrs["units"] = "1e-6"
+        obs_data.data.attrs["species"] = "CO2"
+
+    # obs_data.data.attrs["scale"] = "GOSAT"
+
+    obs_data.metadata["transforms"] = (
+        f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
     )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
@@ -533,7 +620,7 @@ def get_flux(
         time_resolution=time_resolution,
         start_date=start_date,
         end_date=end_date,
-        data_type="emissions",
+        data_type="flux",
         **kwargs,
     )
 

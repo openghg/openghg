@@ -5,7 +5,11 @@ from numpy import ndarray
 
 from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
-__all__ = ["get_domain_info", "find_domain", "convert_longitude"]
+import logging
+
+logger = logging.getLogger("openghg.util.domain")
+
+__all__ = ["get_domain_info", "find_domain", "convert_lon_to_180", "convert_lon_to_360"]
 
 
 def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
@@ -140,7 +144,7 @@ def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
     return name
 
 
-def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
+def convert_lon_to_180(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     """
     Convert longitude extent from (0 to 360) to (-180 to 180).
     This does *not* reorder the values.
@@ -150,8 +154,26 @@ def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     Returns:
         ndarray / DataArray : Updated longitude values in the same order.
     """
-    # Check range of longitude values and convert to -180 - +180
+
+    # Check range of longitude values and convert to -180 to 180.
     longitude = ((longitude - 180) % 360) - 180
+
+    return longitude
+
+
+def convert_lon_to_360(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
+    """
+    Convert longitude extent to (0 to 360).
+    This does *not* reorder the values.
+
+    Args:
+        longitude: Valid longitude values in degrees.
+    Returns:
+        ndarray / DataArray : Updated longitude values in the same order.
+    """
+
+    # Check range of longitude values and convert to 0 to 360.
+    longitude = longitude % 360
 
     return longitude
 
@@ -177,7 +199,7 @@ def convert_internal_longitude(
             raise ValueError("Please specify 'lon_name'.")
 
     longitude = data[lon_name]
-    longitude = convert_longitude(longitude)
+    longitude = convert_lon_to_180(longitude)
 
     data = data.assign_coords({lon_name: longitude})
 
@@ -254,3 +276,75 @@ def cut_data_extent(
     data_cut = data_cut.sel({lat_name: lat_cut_wide_range, lon_name: lon_cut_wide_range})
 
     return data_cut
+
+
+def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrDataLikeMatch:
+    """
+    Check that the values of a given coordinate (lat/lon) in spatial data matches the
+    openghg_defs values for that domain. If they don't match roughly (i.e. within 5%),
+    an exception is raised to alert the user to the fact that they may have the wrong
+    domain altogether. An exception is also raised if the length of the arrays don't
+    match. If the lat or lon don't match exactly, the old coordinates are replaced with
+    the 'correct' values from openghg_defs.
+
+    If the domain is not one of the domains listed in openghg_defs
+    (i.e. ARCTIC, EASTASIA, EUROPE, PACIFIC, SOUTHAFRICA, USA) then the checks are not
+    carried out and the data is returned unaltered.
+
+    Args:
+        data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
+        domain: domain in question. Must be a valid domain in openghg_defs. If
+                this is a domain from openghg_defs this will be checked and aligned with
+                this definition. Otherwise, coordinates will not be changed.
+        coord: coordinate to check. Currently 'lat' or 'lon' only.
+
+    Returns:
+        xarray.DataArray / xarray.Dataset: data with coordinate ranges aligned to openghg domain.
+    """
+
+    known_domains = list(get_domain_info().keys())
+
+    if domain.upper() not in known_domains:
+        logger.warning(
+            f"Domain input: {domain} is not a standard domain within openghg_defs and so has not been standardised against this."
+        )
+        return data
+
+    coords_in = data[coord].values
+
+    true_lats, true_lons = find_domain(domain)
+    if coord == "lat":
+        true_coords = true_lats
+    elif coord == "lon":
+        true_coords = true_lons
+
+    if len(coords_in) != len(true_coords):
+        raise ValueError(f"length of {coord} coordinates does not match those in openghg {domain} domain")
+
+    if not np.allclose(coords_in, true_coords, atol=0, rtol=0.05):
+        raise ValueError(
+            f"input {coord} coordinates vary significantly from openghg {domain} domain. Please check correct domain and coordinates selected"
+        )
+
+    data = data.assign_coords({coord: true_coords})
+
+    return data
+
+
+def align_lat_lon(data: XrDataLikeMatch, domain: str) -> XrDataLikeMatch:
+    """
+    Aligns the lat and lon coordinates of a DataArray or Dataset to the openghg_defs values, according to
+    the 'check_coord_alignment' function.
+
+    Args:
+        data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
+        domain: domain in question. Must be a valid domain in openghg_defs
+
+    Returns:
+        xarray.DataArray / xarray.Dataset: data with lat, lon ranges aligned to openghg domain.
+    """
+
+    data = check_coord_alignment(data=data, domain=domain, coord="lat")
+    data = check_coord_alignment(data=data, domain=domain, coord="lon")
+
+    return data

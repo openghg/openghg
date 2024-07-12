@@ -49,12 +49,24 @@ class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
 
 
+class DataOverlapError(OpenGHGError):
+    """New data overlaps with current data stored"""
+
+
 class ConfigFileError(OpenGHGError):
-    """Raised for errors with configuraion file"""
+    """Raised for errors with configuration file"""
 
 
 class MetastoreError(OpenGHGError):
     """Raised for errors with the metadata store"""
+
+
+class ZarrStoreError(OpenGHGError):
+    """Raised for errors with the zarr store"""
+
+
+class KeyExistsError(ZarrStoreError):
+    """Raised if key already exists in zarr store"""
 
 
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:

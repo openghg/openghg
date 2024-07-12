@@ -10,14 +10,16 @@ dependencies:
   - addict
   - dask
   - h5netcdf
+  - filelock
   - matplotlib
   - msgpack-python
-  - netcdf4
+  - netcdf4<=1.6.5
   - nbformat
   - numexpr
-  - numpy
+  - numpy<2.0
   - nc-time-axis
   - openghg_defs
+  - openpyxl
   - pandas>=2.0
   - pip
   - plotly
@@ -33,6 +35,8 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
+  - zarr
+  - numcodecs
   - git
   - flake8
   - pre-commit
@@ -50,3 +54,4 @@ dependencies:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types
       - icoscp
+      - pytest-timeout
