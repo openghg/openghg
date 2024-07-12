@@ -305,9 +305,12 @@ def _get_species_and_dobjs_url(
     # extract species, unit, measurement_type from dobj metadata
     def get_species_from_col_names(url: str, species: list[str]) -> pd.Series:
         """Get species, unit, and measurement type given "dobj" url."""
-        dobj = Dobj(url)
+        try:
+            dobj = Dobj(url)
+            names = dobj.colNames
+        except:
+            return pd.Series({"species": None, "units": None, "measurement_type": None})
 
-        names = dobj.colNames
         if names is None:
             return pd.Series({"species": None, "units": None, "measurement_type": None})
 
