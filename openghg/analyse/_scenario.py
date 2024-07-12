@@ -1282,16 +1282,16 @@ class ModelScenario:
         fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
         flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
 
+        # Extract flux data from dataset
+        flux_high_freq = flux_ds_high_freq.flux
+        flux_low_freq = flux_ds_low_freq.flux
 
-        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_ds_high_freq: xr.Dataset, flux_ds_low_freq: xr.Dataset) -> da.Array:
+        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray) -> da.Array:
             # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
             fpXflux = da.zeros((nlat, nlon, ntime))
 
-
-
             # Extract footprints array to use in numba loop
             fp_HiTRes = da.array(fp_HiTRes)
-
 
             # Iterate through the time coord to get the total mf at each time step using the H back coord
             # at each release time we disaggregate the particles backwards over the previous 24hrs
@@ -1311,13 +1311,10 @@ class ModelScenario:
                 fp_high_freq = fp_time[:, :, 1:]
                 fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
 
-                # Extract flux data from dataset
-                flux_high_freq = flux_ds_high_freq.flux
-                flux_low_freq = flux_ds_low_freq.flux
 
                 # Define high and low frequency fluxes based on inputs
                 # Allow for variable frequency within 24 hours
-                flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
+                flux_low_freq_tmp = flux_low_freq[:, :, tt_low : tt_low + 1]
                 if flux_res_H <= 24:
                     # Define indices to correctly select matching date range from flux data
                     # This will depend on the various frequencies of the inputs
@@ -1327,26 +1324,26 @@ class ModelScenario:
                     selection = int(time_hf_res_H / highest_res_H)
 
                     # Extract matching time range from whole flux array
-                    flux_high_freq = flux_high_freq[..., tt_start:tt_end]
+                    flux_high_freq_tmp = flux_high_freq[..., tt_start:tt_end]
                     if selection > 1:
                         # If flux frequency does not match to the high frequency (hf, H_back)
                         # dimension, select entries which do. Reversed to make sure
                         # entries matching to the correct times are selected
-                        flux_high_freq = flux_high_freq[..., ::-selection]
-                        flux_high_freq = flux_high_freq[..., ::-1]
+                        flux_high_freq_tmp = flux_high_freq_tmp[..., ::-selection]
+                        flux_high_freq_tmp = flux_high_freq_tmp[..., ::-1]
                 else:
-                    flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
+                    flux_high_freq_tmp = flux_high_freq[:, :, tt_low : tt_low + 1]
 
                 # convert to array to use in numba loop
-                flux_high_freq = da.array(flux_high_freq)
-                flux_low_freq = da.array(flux_low_freq)
+                flux_high_freq_tmp = da.array(flux_high_freq_tmp)
+                flux_low_freq_tmp = da.array(flux_low_freq_tmp)
 
                 # Multiply the HiTRes footprints with the HiTRes emissions to give mf
                 # Multiply residual footprints by low frequency emissions data to give residual mf
                 # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
                 # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
-                fpXflux_time = flux_high_freq * fp_high_freq
-                fpXflux_residual = flux_low_freq * fp_residual
+                fpXflux_time = flux_high_freq_tmp * fp_high_freq
+                fpXflux_residual = flux_low_freq_tmp * fp_residual
 
                 # append the residual emissions
                 fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
@@ -1357,7 +1354,7 @@ class ModelScenario:
             return fpXflux
 
 
-        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_ds_high_freq, flux_ds_low_freq)
+        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_high_freq, flux_low_freq)
 
         if output_TS:
             timeseries = da.zeros(ntime)
