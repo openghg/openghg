@@ -1286,26 +1286,29 @@ class ModelScenario:
         flux_high_freq = flux_ds_high_freq.flux
         flux_low_freq = flux_ds_low_freq.flux
 
-        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray, start: dict) -> da.Array:
+        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray) -> da.Array:
             # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
             fpXflux = da.zeros((nlat, nlon, ntime))
+
+            # ffill low res flux
+            flux_low_freq = flux_low_freq.reindex_like(fp_HiTRes.isel(H_back=-1, drop=True), method="ffill") # forward fill times
+            flux_low_freq = da.array(flux_low_freq)
 
             # Extract footprints array to use in numba loop
             fp_HiTRes = da.array(fp_HiTRes)
 
             # do low res calculation
             fp_residual = fp_HiTRes[:, :, :, -1]  # take last H_back value
-            fpXflux_residual = da.array(flux_low_freq) * fp_residual
+            fpXflux_residual = flux_low_freq * fp_residual
 
             # get high freq fp
-            # get 4 dimensional chunk of high time res footprints for this timestep
             # units : mol/mol/mol/m2/s
             # reverse the time coordinate to be chronological
             fp_high_freq = fp_HiTRes[:, :, :, -2::-1]
 
             # if flux_res_H > 24, then flux_high_freq = flux_low_freq, so we don't need a loop
             if flux_res_H > 24:
-                fpXflux = (da.array(flux_high_freq) * fp_high_freq).sum(axis=-1)
+                fpXflux = (flux_low_freq * fp_high_freq).sum(axis=-1)
 
             else:
                 # Iterate through the time coord to get the total mf at each time step using the H back coord
@@ -1313,14 +1316,8 @@ class ModelScenario:
                 # The final value then contains the 29-day integrated residual footprints
                 logger.info("Calculating modelled timeseries comparison:")
                 iters = track(time_array.values)
-                for tt, time in enumerate(iters):
-                    # Get correct index for low resolution data based on start and current date
-                    current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
-                    tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
-
-                    # get 4 dimensional chunk of high time res footprints for this timestep
-                    # units : mol/mol/mol/m2/s
-                    # reverse the time coordinate to be chronological
+                for tt, _ in enumerate(iters):
+                    # get 3 dimensional chunk of high time res footprints for this timestep
                     fp_high_freq_tt = fp_high_freq[:, :, tt, :]
 
                     # Allow for variable frequency within 24 hours
@@ -1356,7 +1353,7 @@ class ModelScenario:
             return fpXflux + fpXflux_residual
 
 
-        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_high_freq, flux_low_freq, start)
+        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_high_freq, flux_low_freq)
 
         if output_TS:
             timeseries = da.zeros(ntime)
