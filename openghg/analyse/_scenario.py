@@ -63,6 +63,7 @@ from openghg.retrieve import (
 from openghg.util import synonyms
 from openghg.types import SearchError
 from pandas import Timestamp
+import xarray as xr
 from xarray import DataArray, Dataset
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
@@ -1277,78 +1278,86 @@ class ModelScenario:
 
         # TODO: Add check to make sure time values are exactly aligned based on date range
 
-        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
-        fpXflux = da.zeros((nlat, nlon, ntime))
-
         # Make sure the dimensions match the expected order for indexing
         fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
         flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
 
 
-        # Extract footprints array to use in numba loop
-        fp_HiTRes = da.array(fp_HiTRes)
+        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_ds_high_freq: xr.Dataset, flux_ds_low_freq: xr.Dataset) -> da.Array:
+            # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
+            fpXflux = da.zeros((nlat, nlon, ntime))
 
 
-        # Iterate through the time coord to get the total mf at each time step using the H back coord
-        # at each release time we disaggregate the particles backwards over the previous 24hrs
-        # The final value then contains the 29-day integrated residual footprints
-        logger.info("Calculating modelled timeseries comparison:")
-        iters = track(time_array.values)
-        for tt, time in enumerate(iters):
-            # Get correct index for low resolution data based on start and current date
-            current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
-            tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
 
-            # get 4 dimensional chunk of high time res footprints for this timestep
-            # units : mol/mol/mol/m2/s
-            # reverse the time coordinate to be chronological
-            fp_time = fp_HiTRes[:, :, tt, ::-1]
+            # Extract footprints array to use in numba loop
+            fp_HiTRes = da.array(fp_HiTRes)
 
-            fp_high_freq = fp_time[:, :, 1:]
-            fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
 
-            # Extract flux data from dataset
-            flux_high_freq = flux_ds_high_freq.flux
-            flux_low_freq = flux_ds_low_freq.flux
+            # Iterate through the time coord to get the total mf at each time step using the H back coord
+            # at each release time we disaggregate the particles backwards over the previous 24hrs
+            # The final value then contains the 29-day integrated residual footprints
+            logger.info("Calculating modelled timeseries comparison:")
+            iters = track(time_array.values)
+            for tt, time in enumerate(iters):
+                # Get correct index for low resolution data based on start and current date
+                current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
+                tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
 
-            # Define high and low frequency fluxes based on inputs
-            # Allow for variable frequency within 24 hours
-            flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
-            if flux_res_H <= 24:
-                # Define indices to correctly select matching date range from flux data
-                # This will depend on the various frequencies of the inputs
-                # At present, highest_res_H matches the flux frequency
-                tt_start = tt * int(time_res_H / highest_res_H) + 1
-                tt_end = tt_start + int(max_h_back / highest_res_H)
-                selection = int(time_hf_res_H / highest_res_H)
+                # get 4 dimensional chunk of high time res footprints for this timestep
+                # units : mol/mol/mol/m2/s
+                # reverse the time coordinate to be chronological
+                fp_time = fp_HiTRes[:, :, tt, ::-1]
 
-                # Extract matching time range from whole flux array
-                flux_high_freq = flux_high_freq[..., tt_start:tt_end]
-                if selection > 1:
-                    # If flux frequency does not match to the high frequency (hf, H_back)
-                    # dimension, select entries which do. Reversed to make sure
-                    # entries matching to the correct times are selected
-                    flux_high_freq = flux_high_freq[..., ::-selection]
-                    flux_high_freq = flux_high_freq[..., ::-1]
-            else:
-                flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
+                fp_high_freq = fp_time[:, :, 1:]
+                fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
 
-            # convert to array to use in numba loop
-            flux_high_freq = da.array(flux_high_freq)
-            flux_low_freq = da.array(flux_low_freq)
+                # Extract flux data from dataset
+                flux_high_freq = flux_ds_high_freq.flux
+                flux_low_freq = flux_ds_low_freq.flux
 
-            # Multiply the HiTRes footprints with the HiTRes emissions to give mf
-            # Multiply residual footprints by low frequency emissions data to give residual mf
-            # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
-            # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
-            fpXflux_time = flux_high_freq * fp_high_freq
-            fpXflux_residual = flux_low_freq * fp_residual
+                # Define high and low frequency fluxes based on inputs
+                # Allow for variable frequency within 24 hours
+                flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
+                if flux_res_H <= 24:
+                    # Define indices to correctly select matching date range from flux data
+                    # This will depend on the various frequencies of the inputs
+                    # At present, highest_res_H matches the flux frequency
+                    tt_start = tt * int(time_res_H / highest_res_H) + 1
+                    tt_end = tt_start + int(max_h_back / highest_res_H)
+                    selection = int(time_hf_res_H / highest_res_H)
 
-            # append the residual emissions
-            fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
+                    # Extract matching time range from whole flux array
+                    flux_high_freq = flux_high_freq[..., tt_start:tt_end]
+                    if selection > 1:
+                        # If flux frequency does not match to the high frequency (hf, H_back)
+                        # dimension, select entries which do. Reversed to make sure
+                        # entries matching to the correct times are selected
+                        flux_high_freq = flux_high_freq[..., ::-selection]
+                        flux_high_freq = flux_high_freq[..., ::-1]
+                else:
+                    flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
 
-            # Sum over time (H back) to give the total mf at this timestep
-            fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
+                # convert to array to use in numba loop
+                flux_high_freq = da.array(flux_high_freq)
+                flux_low_freq = da.array(flux_low_freq)
+
+                # Multiply the HiTRes footprints with the HiTRes emissions to give mf
+                # Multiply residual footprints by low frequency emissions data to give residual mf
+                # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
+                # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
+                fpXflux_time = flux_high_freq * fp_high_freq
+                fpXflux_residual = flux_low_freq * fp_residual
+
+                # append the residual emissions
+                fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
+
+                # Sum over time (H back) to give the total mf at this timestep
+                fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
+
+            return fpXflux
+
+
+        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_ds_high_freq, flux_ds_low_freq)
 
         if output_TS:
             timeseries = da.zeros(ntime)
