@@ -309,7 +309,6 @@ def _get_species_and_dobjs_url(
             dobj = Dobj(url)
             names = dobj.colNames
         except:
-            return pd.Series({"species": None, "units": None, "measurement_type": None})
 
         if names is None:
             return pd.Series({"species": None, "units": None, "measurement_type": None})
@@ -623,6 +622,7 @@ def _retrieve_remote(
         #     dataframe = dataframe.astype({flag_str: str})
         try:
             dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+
             dataframe.index.name = "time"
             dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
         except KeyError:
@@ -630,7 +630,6 @@ def _retrieve_remote(
             dataframe = dataframe.rename(columns=rename_cols).set_index("samplingstart")
             dataframe.index.name = "time"
             dataframe.index = to_datetime(dataframe.index, unit="ms")
-
 
 
         dataset = dataframe.to_xarray()
