@@ -1277,19 +1277,17 @@ class ModelScenario:
 
         # TODO: Add check to make sure time values are exactly aligned based on date range
 
+        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
+        fpXflux = da.zeros((nlat, nlon, ntime))
+
         # Make sure the dimensions match the expected order for indexing
         fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
         flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
 
+
         # Extract footprints array to use in numba loop
         fp_HiTRes = da.array(fp_HiTRes)
 
-        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
-        if output_fpXflux:
-            fpXflux = da.zeros((nlat, nlon, ntime))
-
-        if output_TS:
-            timeseries = da.zeros(ntime)
 
         # Iterate through the time coord to get the total mf at each time step using the H back coord
         # at each release time we disaggregate the particles backwards over the previous 24hrs
@@ -1349,13 +1347,13 @@ class ModelScenario:
             # append the residual emissions
             fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
 
-            if output_fpXflux:
-                # Sum over time (H back) to give the total mf at this timestep
-                fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
+            # Sum over time (H back) to give the total mf at this timestep
+            fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
 
-            if output_TS:
-                # work out timeseries by summing over lat, lon (24 hrs)
-                timeseries[tt] = fpXflux_time.sum()
+        if output_TS:
+            timeseries = da.zeros(ntime)
+            # work out timeseries by summing over lat, lon (24 hrs)
+            timeseries = fpXflux.sum(axis=(0, 1))
 
         # TODO: Add details about units to output
 
