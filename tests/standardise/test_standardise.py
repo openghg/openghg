@@ -1,21 +1,26 @@
 from pathlib import Path
-
 import pytest
 from helpers import (
-    get_column_datapath,
-    get_emissions_datapath,
+    get_flux_datapath,
     get_footprint_datapath,
     get_surface_datapath,
+    get_column_datapath,
+    get_flux_timeseries_datapath,
+    clear_test_stores,
+    clear_test_store,
 )
-from openghg.retrieve import get_obs_surface, search
+from openghg.retrieve import get_obs_surface, search, get_footprint
+
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
     standardise_footprint,
     standardise_surface,
+    standardise_flux_timeseries,
 )
 from openghg.types import AttrMismatchError, ObjectStoreError
-from openghg.util import compress
+from openghg.util import compress, find_domain
+import numpy as np
 
 
 def test_standardise_to_read_only_store():
@@ -42,7 +47,7 @@ def test_standardise_obs_two_writable_stores():
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -66,7 +71,6 @@ def test_standardise_obs_two_writable_stores():
         instrument="g2401",
         network="ICOS",
         source_format="ICOS",
-        overwrite=True,
         store="group",
     )
 
@@ -85,6 +89,7 @@ def test_standardise_obs_openghg():
      - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
      - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
     """
+    clear_test_store("user")
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
@@ -97,7 +102,7 @@ def test_standardise_obs_openghg():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -196,7 +201,6 @@ def test_local_obs_metadata_mismatch_meta():
         source_format="openghg",
         sampling_period="1H",
         update_mismatch=update_mismatch,
-        overwrite=True,
         store="user",
     )
 
@@ -231,13 +235,16 @@ def test_local_obs_metadata_mismatch_fail():
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
+    from helpers import clear_test_stores
+
+    clear_test_stores()
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
     )
 
     with pytest.raises(AttrMismatchError) as e_info:
         standardise_surface(
-            filepaths=filepath,
+            filepath=filepath,
             site="TAC",
             network="DECC",
             inlet="999m",
@@ -245,7 +252,7 @@ def test_local_obs_metadata_mismatch_fail():
             source_format="openghg",
             sampling_period="1H",
             update_mismatch="never",
-            overwrite=True,
+            force=True,
             store="user",
         )
 
@@ -270,7 +277,7 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -294,6 +301,7 @@ def test_standardise_footprint():
         network=network,
         height=height,
         domain=domain,
+        force=True,
         high_spatial_resolution=True,
         overwrite=True,
         store="user",
@@ -303,42 +311,87 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
+def test_standardise_align_footprint():
+    """
+    Tests that a footprint that is read in with slightly different lat-lon coordinates
+    is aligned to the 'correct' coordinates in openghg_defs
+    """
+    datapath = get_footprint_datapath("footprint_align_test.nc")
+
+    site = "JFJ"
+    network = "AGAGE"
+    height = "1000m"
+    domain = "EUROPE"
+    model = "test_model"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        overwrite=True,
+        store="user",
+    )
+
+    data = get_footprint(site=site, network=network, height=height, domain=domain, model=model)
+
+    true_lats, true_lons = find_domain(domain=domain)
+
+    assert np.array_equal(data.data.lat.values, true_lats)
+    assert np.array_equal(data.data.lon.values, true_lons)
+
+
+from openghg.retrieve import search_footprints
+
+
+def test_standardise_footprints_chunk(caplog):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+
+    site = "TAC"
+    network = "DECC"
+    height = "185m"
+    domain = "TEST"
+    model = "UKV-chunked"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    search_results = search_footprints(model="UKV-chunked", store="user")
+    fp_data = search_results.retrieve_all()
+
+    assert dict(fp_data.data.chunks) == {"time": (2, 1), "lat": (12,), "lon": (12,), "height": (20,)}
+
+
 def test_standardise_flux():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
         filepath=test_datapath,
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        high_time_resolution=False,
-        overwrite=True,
+        time_resolved=False,
+        force=True,
         store="user",
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
 
-def test_standardise_flux_intem():
-    test_datapath = get_emissions_datapath("ch4_intem.nc")
-
-    proc_results = standardise_flux(
-        filepath=test_datapath,
-        species="ch4",
-        source="total",
-        source_format="intem",
-        domain="europe",
-        high_time_resolution=False,
-        overwrite=True,
-        store="user",
-    )
-
-    print(proc_results)
-    assert "ch4_total_europe" in proc_results
-
-
 def test_standardise_flux_additional_keywords():
-    test_datapath = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+    test_datapath = get_flux_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
     proc_results = standardise_flux(
         filepath=test_datapath,
@@ -351,6 +404,53 @@ def test_standardise_flux_additional_keywords():
     )
 
     assert "ch4_anthro_globaledgar" in proc_results
+
+
+def test_standardise_non_standard_flux_domain():
+    """
+    Checks that if a non-standard domain is used, the standardisation/alignment process throws no errors.
+    """
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # this file is sliced, to cover only a small section of the EUROPE domain
+    # assert that if we specify the domain as a non-standard domain, it standardises fine:
+
+    domain = "TEST"
+
+    proc_results = standardise_flux(
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain=domain,
+        high_time_resolution=False,
+        force=True,
+        store="user",
+    )
+
+    assert "co2_gpp-cardamom_test" in proc_results
+    assert "error" not in proc_results
+
+
+def test_standardise_incomplete_flux():
+    """
+    Checks that if a non-standard set of lat-lons is used in the input file with
+    a standard domain, we get an error
+    """
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
+    # we get an error
+
+    with pytest.raises(ValueError):
+        standardise_flux(
+            filepath=test_datapath,
+            species="co2",
+            source="gpp-cardamom",
+            domain="EUROPE",
+            high_time_resolution=False,
+            force=True,
+            store="user",
+        )
 
 
 def test_cloud_standardise(monkeypatch, mocker, tmpdir):
@@ -370,7 +470,6 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
         source_format="crds",
         sampling_period="1m",
         instrument="picarro",
-        overwrite=True,
     )
 
     assert call_fn_mock.call_args == mocker.call(
@@ -394,3 +493,65 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
+
+
+def test_standardise_footprint_different_chunking_schemes(caplog):
+    datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    clear_test_stores()
+
+    site = "TAC"
+    network = "UKV"
+    height = "100m"
+    domain = "TEST"
+    model = "chunk_model"
+
+    standardise_footprint(
+        filepath=datapath_a,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2},
+    )
+
+    standardise_footprint(
+        filepath=datapath_b,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        store="user",
+        chunks={"time": 2, "lat": 5, "lon": 5},
+    )
+
+    search_results = search(data_type="footprints", model="chunk_model", store="user")
+    fp_data = search_results.retrieve_all()
+
+    # Check that the chunking scheme is what was specified with the first standardise call
+    assert dict(fp_data.data.chunks) == {"time": (2, 2, 2), "lat": (12,), "lon": (12,), "height": (20,)}
+
+
+def test_incompatible_species_for_flux_timeseries():
+    """This function tests if incompatible species values is supplied to standardise"""
+
+    data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
+    with pytest.raises(ValueError):
+        standardise_flux_timeseries(
+            filepath=data_path, species="hfc123", source="crf", period="years", continuous=False, store="user"
+        )
+
+
+def test_standardise_flux_timeseries():
+    """This function tests flux_timeseries standardisation function"""
+
+    data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
+    flux_results = standardise_flux_timeseries(
+        filepath=data_path, species="ch4", source="crf", period="years", continuous=False, store="user"
+    )
+
+    assert "ch4_crf_uk" in flux_results

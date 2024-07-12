@@ -1,4 +1,3 @@
-from ._basedata import _BaseData
 from ._bc_data import BoundaryConditionsData
 from ._flux_data import FluxData
 from ._footprint_data import FootprintData

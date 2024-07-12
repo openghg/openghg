@@ -42,7 +42,7 @@ def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, st
                 failures = []
                 for uid in datasource_uuids:
                     try:
-                        Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                        Datasource(bucket=bucket, uuid=uid).integrity_check()
                     except ObjectStoreError:
                         failures.append(uid)
 
@@ -52,8 +52,8 @@ def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, st
     if failed_datasources:
         if raise_error:
             raise ObjectStoreError(
-                "The following Datasources failed their integriy checks:"
-                + f"\n{failed_datasources}"
+                "The following Datasources failed their integrity checks:"
+                + f"\n{dict(failed_datasources)}"
                 + "\nYour object store is corrupt. Please remove these Datasources."
             )
         return failed_datasources

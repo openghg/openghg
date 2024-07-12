@@ -10,13 +10,14 @@ package:
 
 source:
   git_url: https://github.com/openghg/openghg.git
-  git_rev: {{ GIT_DESCRIBE_TAG }}
-  git_depth: 1
+  git_rev: {{ GIT_TAG }}
 
 build:
   noarch: python
   preserve_egg_dir: True
   script: "{{ PYTHON }} -m pip install . -vv"
+  script_env:
+    GIT_TAG
 
 requirements:
   host:

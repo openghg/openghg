@@ -224,6 +224,16 @@
           "data_owner_email": "rfweiss@ucsd.edu"
         }
       },
+      "TOB" : {
+        "gcwerks_site_name": "taunus",
+        "long_name": "Taunus Observatory, Germany",
+        "inlets": ["any"],
+        "inlet_label": ["12m"],
+        "global_attributes": {
+          "data_owner": "Andreas Engel",
+          "data_owner_email": "an.engel@iau.uni-frankfurt.de"
+        }
+      },
       "TTA": {
         "gcwerks_site_name": "angus",
         "long_name": "Angus Tower, UK",

@@ -25,7 +25,7 @@ Now we'll add some data to the tutorial store.
     populate_surface_data()
 
 1. Searching
--------------
+------------
 
 Let's search for all the methane data from Tacolneston.
 To do this we need to know the site code ("TAC").
@@ -33,7 +33,7 @@ To do this we need to know the site code ("TAC").
 If we didn't know the site code, we could find it using
 the ``summary_site_codes()`` function:
 
-.. ipython:: python
+.. code:: ipython3
 
     from openghg.standardise import summary_site_codes
 
@@ -47,7 +47,7 @@ The output of this function is a `pandas
 DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__,
 so we can filter to find sites containing the name “Tacolneston”:
 
-.. ipython:: python
+.. code:: ipython3
 
     site_long_name = summary["Long name"]
     find_tacolneston = site_long_name.str.contains("Tacolneston")
@@ -85,11 +85,33 @@ to extract, for example, just the methane data:
     tac_surface_search = search_surface(site="TAC", species="ch4")
     tac_surface_search.results
 
+Keyword options when searching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When searching it is also possible to specify multiple options for keywords.
+If this is done using a list, then datasources which have any of the
+specified values will be found. For example if we wanted to search for methane
+at two specific inlets we could write:
+
+.. code:: ipython3
+
+    from openghg.retrieve import search_surface
+
+    tac_surface_search = search_surface(site="TAC", species="ch4", inlet=["100m", "185m"])
+    tac_surface_search.results
+
+This will return results from both the 100m and 185m inlets (but not the 54m inlet).
+
+Note: it is also possible to specify a dictionary to provide an option between
+different keywords but this would most often be for backwards compatability
+(e.g. if a new keyword is introduced and a previous one retired but still
+present for some data sources) and so will not be demonstrated in this tutorial.
+
 There are also equivalent search functions for other data types
-including ``search_footprints``, ``search_emissions`` and ``search_bc``.
+including ``search_footprints``, ``search_flux`` and ``search_bc``.
 
 2. Plotting
------------------
+-----------
 
 If we want to take a look at the data from the 185m inlet we can first
 retrieve the data from the object store and then create a quick
@@ -139,7 +161,7 @@ and and responsive, even with relatively large amounts of data.
     plot_timeseries(data=all_ch4_tac, units="ppb")
 
 3. Comparing different sites
------------------------------
+----------------------------
 
 We can easily compare data for the same species from different sites by
 doing a quick search to see what's available

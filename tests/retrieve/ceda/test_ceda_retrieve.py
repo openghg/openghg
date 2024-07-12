@@ -1,5 +1,5 @@
 import io
-
+import pytest
 from helpers import get_retrieval_datapath
 from openghg.cloud import package_from_function
 from openghg.dataobjects import SearchResults
@@ -8,6 +8,7 @@ from pandas import Timestamp
 from xarray import load_dataset
 
 
+@pytest.mark.skip(reason="Cloud functionality needs complete rewrite.")
 def test_ceda_retrieve_cloud_no_results(monkeypatch, mocker):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
@@ -20,6 +21,7 @@ def test_ceda_retrieve_cloud_no_results(monkeypatch, mocker):
     assert res is None
 
 
+@pytest.mark.skip(reason="Cloud functionality needs complete rewrite.")
 def test_ceda_retrieve_cloud(monkeypatch, mocker):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 

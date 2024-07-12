@@ -15,6 +15,7 @@ UUIDs are managed by ObjectStore objects, so they are not part of
 the MetaStore interface.
 
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

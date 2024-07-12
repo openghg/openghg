@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from ._basedata import _BaseData
 
 __all__ = ["FootprintData"]
 
 
-@dataclass(frozen=True)
 class FootprintData(_BaseData):
     """This class is used to return observations data from the get_footprint function
 

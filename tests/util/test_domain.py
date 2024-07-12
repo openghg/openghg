@@ -1,8 +1,16 @@
 import numpy as np
 import pytest
 import xarray as xr
-from openghg.util import convert_internal_longitude, convert_longitude, cut_data_extent, find_domain
+from openghg.util import (
+    convert_internal_longitude,
+    convert_lon_to_180,
+    convert_lon_to_360,
+    cut_data_extent,
+    find_domain,
+    align_lat_lon,
+)
 from openghg.util._domain import _get_coord_data
+from helpers import get_footprint_datapath
 
 
 def test_find_domain():
@@ -54,7 +62,21 @@ def test_create_coord():
 )
 def test_convert_longitude(lon_in, expected_lon_out):
     """Test expected longitude conversion for individual values and range."""
-    lon_out = convert_longitude(lon_in)
+    lon_out = convert_lon_to_180(lon_in)
+    np.testing.assert_allclose(lon_out, expected_lon_out)
+
+
+@pytest.mark.parametrize(
+    "lon_in,expected_lon_out",
+    [
+        (np.array([360.0]), np.array([0.0])),
+        (np.array([181.0]), np.array([181.0])),
+        (np.array([-180.0, 0.0, 179.9]), np.array([180.0, 0.0, 179.9])),
+        (np.arange(1, 360, 1), np.arange(1, 360, 1)),
+    ],
+)
+def test_convert_longitude_scale(lon_in, expected_lon_out):
+    lon_out = convert_lon_to_360(lon_in)
     np.testing.assert_allclose(lon_out, expected_lon_out)
 
 
@@ -155,3 +177,31 @@ def test_cut_data_extent():
 
     np.testing.assert_allclose(da_cut["lat"].values, expected_lat_cut)
     np.testing.assert_allclose(da_cut["lon"].values, expected_lon_cut)
+
+
+def test_align_lat_lon():
+    """
+    Check that the align_lat_lon function functions as expected.
+    """
+
+    true_lats, true_lons = find_domain("europe")
+
+    # if the domain is known, assert that the output is aligned to the correct coordinates
+    input_datapath = get_footprint_datapath("footprint_align_test.nc")
+    domain = "europe"
+    input_data_to_align = xr.load_dataset(input_datapath)
+    aligned_data = align_lat_lon(data=input_data_to_align, domain=domain)
+
+    np.testing.assert_equal(aligned_data["lat"].values, true_lats)
+    np.testing.assert_equal(aligned_data["lon"].values, true_lons)
+
+    # if the number of coordinates doesn't match expected, ensure an error is raised
+    sparse_datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    sparse_data = xr.load_dataset(sparse_datapath)
+    with pytest.raises(ValueError):
+        align_lat_lon(data=sparse_data, domain=domain)
+
+    # if the domain is very off (i.e. everything off by 10 degrees), ensure an error is raised
+    shifted_data = input_data_to_align.assign_coords(lat=(input_data_to_align.lat + 10))
+    with pytest.raises(ValueError):
+        align_lat_lon(data=shifted_data, domain=domain)
