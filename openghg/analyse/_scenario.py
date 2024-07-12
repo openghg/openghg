@@ -1297,6 +1297,12 @@ class ModelScenario:
             fp_residual = fp_HiTRes[:, :, :, -1]  # take last H_back value
             fpXflux_residual = flux_low_freq * fp_residual
 
+            # get high freq fp
+            # get 4 dimensional chunk of high time res footprints for this timestep
+            # units : mol/mol/mol/m2/s
+            # reverse the time coordinate to be chronological
+            fp_high_freq = fp_HiTRes[:, :, :, -2::-1]
+
             # Iterate through the time coord to get the total mf at each time step using the H back coord
             # at each release time we disaggregate the particles backwards over the previous 24hrs
             # The final value then contains the 29-day integrated residual footprints
@@ -1310,10 +1316,7 @@ class ModelScenario:
                 # get 4 dimensional chunk of high time res footprints for this timestep
                 # units : mol/mol/mol/m2/s
                 # reverse the time coordinate to be chronological
-                fp_time = fp_HiTRes[:, :, tt, ::-1]
-
-                fp_high_freq = fp_time[:, :, 1:]
-
+                fp_high_freq_tt = fp_high_freq[:, :, tt, :]
 
                 # Define high and low frequency fluxes based on inputs
                 # Allow for variable frequency within 24 hours
@@ -1343,7 +1346,7 @@ class ModelScenario:
                 # Multiply residual footprints by low frequency emissions data to give residual mf
                 # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
                 # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
-                fpXflux_hi_freq_tt = flux_high_freq_tmp * fp_high_freq
+                fpXflux_hi_freq_tt = flux_high_freq_tmp * fp_high_freq_tt
 
                 # Sum over time (H back) to give the total mf at this timestep
                 fpXflux[:, :, tt] = fpXflux_hi_freq_tt.sum(axis=2)
