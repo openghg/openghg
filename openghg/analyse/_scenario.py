@@ -1177,12 +1177,25 @@ class ModelScenario:
         fp_HiTRes = fp_HiTRes.fillna(0.0)
         flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
 
-        # Calculate time resolution for both the flux and footprints data
-        nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-        flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-        fp_res_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
 
-        fp_res_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
+        def calc_hourly_freq(times: xr.DataArray, input_nanoseconds: bool = False) -> int:
+            """Infer frequency of DataArray of times.
+
+            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
+            Otherwise times are assumed to be in terms of hours.
+            """
+            nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
+
+            if input_nanoseconds:
+                return int(times.diff(dim="time").values.mean() * nanosecond_to_hour)
+            else:
+                return int(times.diff(dim="time").values.mean())
+
+        # Calculate time resolution for both the flux and footprints data
+        flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
+        fp_res_time_H = calc_hourly_freq(fp_HiTRes.time, input_nanoseconds=True)
+
+        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"])
 
         # Define resolution on time dimension in number in hours
         if averaging:
