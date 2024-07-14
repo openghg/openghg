@@ -1286,12 +1286,16 @@ class ModelScenario:
         flux_high_freq = flux_ds_high_freq.flux
         flux_low_freq = flux_ds_low_freq.flux
 
-        def compute_fp_x_flux(fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray) -> da.Array:
+        def compute_fp_x_flux(
+            fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray
+        ) -> da.Array:
             # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
             fpXflux = da.zeros((nlat, nlon, ntime))
 
             # ffill low res flux
-            flux_low_freq = flux_low_freq.reindex_like(fp_HiTRes.isel(H_back=-1, drop=True), method="ffill") # forward fill times
+            flux_low_freq = flux_low_freq.reindex_like(
+                fp_HiTRes.isel(H_back=-1, drop=True), method="ffill"
+            )  # forward fill times
             flux_low_freq = da.array(flux_low_freq)
 
             # Extract footprints array to use in numba loop
@@ -1351,7 +1355,6 @@ class ModelScenario:
                     fpXflux[:, :, tt] = fpXflux_hi_freq_tt.sum(axis=2)
 
             return fpXflux + fpXflux_residual
-
 
         fpXflux = compute_fp_x_flux(fp_HiTRes, flux_high_freq, flux_low_freq)
 
