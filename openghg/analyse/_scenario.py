@@ -1287,7 +1287,13 @@ class ModelScenario:
         flux_low_freq = flux_ds_low_freq.flux
 
         def compute_fp_x_flux(
-            fp_HiTRes: xr.Dataset, flux_high_freq: xr.DataArray, flux_low_freq: xr.DataArray
+            fp_HiTRes: xr.Dataset,
+            flux_high_freq: xr.DataArray,
+            flux_low_freq: xr.DataArray,
+            highest_res_H: int,
+            time_res_H: int,
+            max_h_back: int,
+            time_hf_res_H: int,
         ) -> da.Array:
             # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
             fpXflux = da.zeros((nlat, nlon, ntime))
@@ -1356,7 +1362,9 @@ class ModelScenario:
 
             return fpXflux + fpXflux_residual
 
-        fpXflux = compute_fp_x_flux(fp_HiTRes, flux_high_freq, flux_low_freq)
+        fpXflux = compute_fp_x_flux(
+            fp_HiTRes, flux_high_freq, flux_low_freq, highest_res_H, time_hf_res_H, max_h_back, time_hf_res_H
+        )
 
         if output_TS:
             timeseries = da.zeros(ntime)
