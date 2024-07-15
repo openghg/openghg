@@ -1299,6 +1299,7 @@ class ModelScenario:
             print("flux_hf_rolling")
             print(flux_hf_rolling)
             print(flux_hf_rolling.H_back.values)
+            print(flux_hf_rolling.time.values)
 
             # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
             flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
