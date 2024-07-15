@@ -1175,7 +1175,7 @@ class ModelScenario:
         fp_HiTRes = fp_HiTRes.fillna(0.0)
         flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
 
-        def calc_hourly_freq(times: xr.DataArray, input_nanoseconds: bool = False) -> int:
+        def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
             """Infer frequency of DataArray of times.
 
             Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
@@ -1192,7 +1192,7 @@ class ModelScenario:
         flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
         fp_res_time_H = calc_hourly_freq(fp_HiTRes.time, input_nanoseconds=True)
 
-        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"])
+        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"], dim="H_back")
 
         # Define resolution on time dimension in number in hours
         if averaging:
