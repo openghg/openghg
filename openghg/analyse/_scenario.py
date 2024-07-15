@@ -1247,10 +1247,6 @@ class ModelScenario:
             date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
         ).to_numpy()
 
-        for k, v in locals().items():
-            if str(k).endswith("_H"):
-                print(k, v)
-
         # Create low frequency flux data (monthly)
         flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
         flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
@@ -1300,10 +1296,6 @@ class ModelScenario:
             flux_hf_rolling = flux_hf_rolling.assign_coords(
                 {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=h_back_type)[::-1]}
             )
-            print("flux_hf_rolling")
-            print(flux_hf_rolling)
-            print(flux_hf_rolling.H_back.values)
-            print(flux_hf_rolling.time.values)
 
             # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
             flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
