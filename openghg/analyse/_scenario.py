@@ -1184,9 +1184,9 @@ class ModelScenario:
             nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
 
             if input_nanoseconds:
-                return int(times.diff(dim="time").values.mean() * nanosecond_to_hour)
+                return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
             else:
-                return int(times.diff(dim="time").values.mean())
+                return int(times.diff(dim=dim).values.mean())
 
         # Calculate time resolution for both the flux and footprints data
         flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
