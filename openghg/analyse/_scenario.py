@@ -1292,8 +1292,9 @@ class ModelScenario:
             flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
 
             # set H_back coordinates using highest_res_H frequency
+            h_back_type = fp_high_time_res.H_back.dtype
             flux_hf_rolling = flux_hf_rolling.assign_coords(
-                {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=int)[::-1]}
+                {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=h_back_type)[::-1]}
             )
 
             # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
