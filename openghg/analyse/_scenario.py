@@ -1296,6 +1296,8 @@ class ModelScenario:
                 {"H_back": np.arange(0, max_h_back, highest_res_H)[::-1]}
             )
 
+            print(flux_hf_rolling.H_back)
+
             # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
             flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
 
