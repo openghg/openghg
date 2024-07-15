@@ -45,7 +45,6 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
@@ -1159,8 +1158,6 @@ class ModelScenario:
         included as Any for now.
         """
         from math import gcd
-
-        import dask.array as da  # type: ignore
         from pandas import date_range
 
         # TODO: Need to work out how this fits in with high time resolution method
@@ -1236,17 +1233,9 @@ class ModelScenario:
         # create time array to loop through, with the required resolution
         # fp_HiTRes.time is the release time of particles into the model
         time_array = fp_HiTRes["time"]
-        lat = fp_HiTRes["lat"]
-        lon = fp_HiTRes["lon"]
-        hback = fp_HiTRes["H_back"]
-
-        ntime = len(time_array)
-        nlat = len(lat)
-        nlon = len(lon)
-        # nh_back = len(hback)
 
         # Define maximum hour back
-        max_h_back = int(hback.values[-1])
+        max_h_back = int(fp_HiTRes.H_back.max().values)
 
         # Define full range of dates to select from the flux input
         date_start = time_array[0]
@@ -1286,10 +1275,6 @@ class ModelScenario:
             flux_ds_high_freq = flux_ds_low_freq
 
         # TODO: Add check to make sure time values are exactly aligned based on date range
-
-        # Make sure the dimensions match the expected order for indexing
-        fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
-        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
 
         # Extract flux data from dataset
         flux_high_freq = flux_ds_high_freq.flux
@@ -1331,13 +1316,11 @@ class ModelScenario:
             fpXflux_residual = flux_low_freq * fp_residual
 
             # get high freq fp
-            # units : mol/mol/mol/m2/s
-            # reverse the time coordinate to be chronological
             fp_high_freq = fp_HiTRes.where(fp_HiTRes.H_back != fp_HiTRes.H_back.max(), drop=True)
 
-            # if flux_res_H > 24, then flux_high_freq = flux_low_freq, so we don't need a loop
+            # if flux_res_H > 24, then flux_high_freq = flux_low_freq, and we don't take a sum over windows of flux_high_freq
             if flux_res_H > 24:
-                fpXflux = (flux_low_freq * fp_high_freq).sum(axis=-1)
+                fpXflux = (flux_low_freq * fp_high_freq).sum("H_back")
             else:
                 flux_high_freq = make_hf_flux_rolling_avg_array(
                     flux_high_freq, fp_high_freq, highest_res_H, max_h_back
