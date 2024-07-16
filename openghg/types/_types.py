@@ -1,7 +1,18 @@
 import numpy as np
 import xarray as xr
 from pathlib import Path
-from typing import DefaultDict, Dict, List, Tuple, Union, Optional, TypeVar, NamedTuple, Protocol, runtime_checkable
+from typing import (
+    DefaultDict,
+    Dict,
+    List,
+    Tuple,
+    Union,
+    Optional,
+    TypeVar,
+    NamedTuple,
+    Protocol,
+    runtime_checkable,
+)
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
@@ -23,6 +34,7 @@ class TimePeriod(NamedTuple):
 
 class MetadataAndData(NamedTuple):
     """A very simple implementation of the `HasMetadataAndData` protocol."""
+
     metadata: dict
     data: xr.Dataset
 
@@ -32,6 +44,7 @@ class HasMetadataAndData(Protocol):
     """Protocol that includes _BaseData and its subclasses, as well as
     other containers of data and metadata.
     """
+
     metadata: dict
     data: xr.Dataset
 

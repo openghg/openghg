@@ -55,6 +55,7 @@ def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] =
 
 # metadata combination methods
 
+
 def _add_dim_from_metadata(
     data_object: T,
     new_dim: str,
@@ -181,7 +182,7 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
     def inlet_formatter(inlet: str) -> float:
         inlet_pat = re.compile(r"\d+(\.)?\d*")  # find decimal number
 
-        if (m := inlet_pat.search(inlet)):
+        if m := inlet_pat.search(inlet):
             return float(m.group(0))
 
         return np.nan
