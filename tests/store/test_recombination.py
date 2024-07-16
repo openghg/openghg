@@ -74,3 +74,5 @@ def test_combine_data_objects_preprocess(make_obs_data):
     expected_values = np.concatenate([x * np.ones(len(ds.data.time.values)) for x, ds in zip([10.0, 11.0, 12.0, 10.0], data_objects)])
 
     np.testing.assert_equal(result.data.inlet.values, expected_values)
+
+    assert "inlet" not in result.metadata
