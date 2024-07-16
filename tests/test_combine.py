@@ -7,7 +7,7 @@ import pytest
 import xarray as xr
 
 from openghg.dataobjects import ObsData
-from openghg.combine import combine_data_objects
+from openghg.combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
 
 
 def make_obs_dataset(start: str, end: str) -> xr.Dataset:
@@ -49,27 +49,7 @@ def test_combine_data_objects(make_obs_data):
 def test_combine_data_objects_by_inlet(make_obs_data):
     data_objects = list(make_obs_data)
 
-
-    def preprocess(x: ObsData) -> ObsData:
-        inlet_pat = re.compile(r"\d+(\.)?\d*")  # find decimal number
-
-        m = inlet_pat.search(x.metadata.get("inlet", ""))
-        if m:
-            try:
-                inlet_height = float(m.group(0))
-            except TypeError:
-                inlet_height = np.nan
-        else:
-            inlet_height = np.nan
-
-        new_da = (inlet_height * xr.ones_like(x.data.mf)).rename("inlet")
-        new_ds = xr.merge([x.data, new_da])
-
-        new_metadata = {k: v for k, v in x.metadata.items() if k != "inlet"}
-
-        return ObsData(new_metadata, new_ds)
-
-    result = combine_data_objects(data_objects, preprocess=preprocess)
+    result = combine_and_elevate_inlet(data_objects)
 
     expected_values = np.concatenate([x * np.ones(len(ds.data.time.values)) for x, ds in zip([10.0, 11.0, 12.0, 10.0], data_objects)])
 
@@ -81,13 +61,7 @@ def test_combine_data_objects_by_inlet(make_obs_data):
 def test_combine_data_objects_by_site():
     data_objects = [make_obs_data_object("2024-01-01", "2024-02-01", metadata={"site": x}) for x in "abcd"]
 
-
-    def preprocess(x: ObsData) -> ObsData:
-        new_ds = x.data.expand_dims({"site": [x.metadata["site"]]})
-        new_metadata = {}
-        return ObsData(new_metadata, new_ds)
-
-    result = combine_data_objects(data_objects, preprocess=preprocess)
+    result = combine_multisite(data_objects)
 
     expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, "abcd")], dim="site")
 
