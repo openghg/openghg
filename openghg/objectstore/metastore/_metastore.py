@@ -19,6 +19,7 @@ the MetaStore interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from functools import reduce
 from typing import Any, Dict, List, Optional, Union
 
 import tinydb
@@ -154,6 +155,10 @@ class TinyDBMetaStore(MetaStore):
         """
         self._db = database
 
+    def _format_key(self, key: str) -> str:
+        """Format metadata keys by making them lowercase."""
+        return key.lower()
+
     def _format_metadata(self, metadata: MetaData) -> MetaData:
         """Convert all keys to lowercase.
 
@@ -162,7 +167,7 @@ class TinyDBMetaStore(MetaStore):
         Returns:
             formatted metadata.
         """
-        return {k.lower(): v for k, v in metadata.items()}
+        return {self._format_key(k): v for k, v in metadata.items()}
 
     def _get_query(self, metadata: MetaData) -> tinydb.queries.QueryInstance:
         """Return a TinyDB query that searches for all records whose metadata
@@ -176,7 +181,41 @@ class TinyDBMetaStore(MetaStore):
         """
         return tinydb.Query().fragment(self._format_metadata(metadata))
 
-    def search(self, search_terms: Optional[MetaData] = None) -> QueryResults:
+    def _get_range_query(self, search_ranges: dict[str, tuple]) -> tinydb.queries.QueryInstance:
+        """Return a TinyDB query that searches for all records whose metadata
+        contains the values for the given keys within the range for that key..
+
+        Args:
+            search_ranges: key-value pairs to search by; the values must be tuples (lower, upper).
+                The condition: `lower <= val <= upper` will be applied to values `val` corresponding
+                to the given key.
+        Returns:
+            TinyDB QueryInstance that requires all of the range options to be true
+        """
+        search_ranges = self._format_metadata(search_ranges)
+        queries = [tinydb.Query()[k].test((lambda x: v[0] <= x <= v[1])) for k, v in search_ranges.items()]
+        return reduce(lambda x, y: (x & y), queries)
+
+    def _get_negative_lookup_query(self, negative_lookup_keys: list[str]) -> tinydb.queries.QueryInstance:
+        """Return a TinyDB query that searches for all records that do not contain the given keys.
+
+        Args:
+            negative_lookup_keys: list of keys that will will be tested to see if they are *not* present
+                in a metadata record.
+
+        Returns:
+            TinyDB QueryInstance that requires all of the given keys to *not* be present
+        """
+        negative_lookup_keys = [self._format_key(k) for k in negative_lookup_keys]
+        queries = [~(tinydb.Query()[k].exists()) for k in negative_lookup_keys]
+        return reduce(lambda x, y: (x & y), queries)
+
+    def search(
+        self,
+        search_terms: Optional[MetaData] = None,
+        search_ranges: Optional[dict[str, tuple]] = None,
+        negative_lookup_keys: Optional[list[str]] = None,
+    ) -> QueryResults:
         """Search metastore using a dictionary of search terms.
 
         Args:
@@ -189,8 +228,17 @@ class TinyDBMetaStore(MetaStore):
         """
         if not search_terms:
             search_terms = {}
-        query = self._get_query(search_terms)
-        return list(self._db.search(query))
+        _query = self._get_query(search_terms)
+
+        if search_ranges:
+            _range_query = self._get_range_query(search_ranges)
+            _query = _query & _range_query
+
+        if negative_lookup_keys:
+            _neg_query = self._get_negative_lookup_query(negative_lookup_keys)
+            _query = _query & _neg_query
+
+        return list(self._db.search(_query))
 
     def insert(self, metadata: MetaData) -> None:
         """Add new metadata to the metastore.
@@ -224,14 +272,14 @@ class TinyDBMetaStore(MetaStore):
             MetastoreError if more than one record matches the metadata in `where`.
         """
         super().update(where, to_update, to_delete)  # Error handling
-        query = self._get_query(where)
+        _query = self._get_query(where)
         if to_update:
-            self._db.update(to_update, query)
+            self._db.update(to_update, _query)
         if to_delete:
             if not isinstance(to_delete, list):
                 to_delete = [to_delete]
             for key in to_delete:
-                self._db.update(tinydb_delete(key), query)
+                self._db.update(tinydb_delete(key), _query)
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
@@ -256,5 +304,5 @@ class TinyDBMetaStore(MetaStore):
                 be deleted.
         """
         super().delete(metadata, delete_one)  # Error handling
-        query = self._get_query(metadata)
-        self._db.remove(query)
+        _query = self._get_query(metadata)
+        self._db.remove(_query)
