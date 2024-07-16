@@ -84,6 +84,24 @@ def test_infer_period_from_frequency_ignore_input(time_monthly):
 
 
 @pytest.fixture(scope="module")
+def time_yearly():
+    """Create yearly time data"""
+    np_time = np.array(["2012-01-01", "2013-01-01", "2014-01-01"], dtype="datetime64[ns]")
+    time = DataArray(np_time, dims=("time"), coords={"time": np_time})
+
+    return time
+
+
+def test_infer_period_from_frequency(time_yearly):
+    """Test period can be inferred from time data"""
+    start_date, end_date, period_str = infer_date_range(time_yearly)
+
+    assert start_date == timestamp_tzaware("2012-01-01")
+    assert end_date == timestamp_tzaware("2015-01-01") - Timedelta(seconds=1)
+    assert period_str == "1 year"
+
+
+@pytest.fixture(scope="module")
 def time_varies():
     """Create data with no standard frequency"""
     np_time = np.array(["2012-02-01", "2012-03-31", "2012-05-21"], dtype="datetime64[ns]")

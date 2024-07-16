@@ -1,3 +1,4 @@
+import dataclasses
 from multiprocessing.sharedctypes import Value
 
 import numpy as np
@@ -378,7 +379,7 @@ def test_parse_period(test_input, expected):
     This function reads in different "period" inputs and converts them
     to something which can be used to create a Timedelta or DateOffset object
     """
-    assert parse_period(test_input) == expected
+    assert dataclasses.astuple(parse_period(test_input)) == expected
 
 
 @pytest.mark.parametrize(
