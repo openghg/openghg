@@ -46,7 +46,7 @@ def test_combine_data_objects(make_obs_data):
     assert (result.data.time.values == pd.date_range("2024-01-01", "2024-05-01", inclusive="left").values).all()
 
 
-def test_combine_data_objects_preprocess(make_obs_data):
+def test_combine_data_objects_by_inlet(make_obs_data):
     data_objects = list(make_obs_data)
 
 
@@ -76,3 +76,21 @@ def test_combine_data_objects_preprocess(make_obs_data):
     np.testing.assert_equal(result.data.inlet.values, expected_values)
 
     assert "inlet" not in result.metadata
+
+
+def test_combine_data_objects_by_site():
+    data_objects = [make_obs_data_object("2024-01-01", "2024-02-01", metadata={"site": x}) for x in "abcd"]
+
+
+    def preprocess(x: ObsData) -> ObsData:
+        new_ds = x.data.expand_dims({"site": [x.metadata["site"]]})
+
+        new_metadata = {}
+
+        return ObsData(new_metadata, new_ds)
+
+    result = combine_data_objects(data_objects, preprocess=preprocess)
+
+    expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, "abcd")], dim="site")
+
+    xr.testing.assert_equal(result.data, expected_dataset)
