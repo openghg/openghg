@@ -4,7 +4,7 @@ Combine multiple data objects (subclasses of _BaseData) into one.
 
 from functools import partial
 import re
-from typing import Any, Callable, cast, Mapping, Optional, TypeVar, Union
+from typing import Any, Callable, cast, Hashable, Mapping, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
@@ -108,7 +108,7 @@ def combine_multisite(data_objects: list[T]) -> T:
 
 
 def _data_array_from_value(
-    value: Any, coords: Union[xr.Coordinates, Mapping[str, xr.DataArray]], name: Optional[str] = None
+    value: Any, coords: Union[xr.Coordinates, Mapping[Hashable, xr.DataArray]], name: Optional[str] = None
 ) -> xr.DataArray:
     """Create xr.DataArray with single value and given coords and name.
 
@@ -149,7 +149,7 @@ def add_variable_from_metadata(
         value, and whose metadata is the same, possibly with the value of the new dimension removed.
     """
     value = data_object.metadata.get(metadata_key, None)
-    if value and formatter:
+    if value and formatter is not None:
         value = formatter(value)
 
     if isinstance(dims, str):
