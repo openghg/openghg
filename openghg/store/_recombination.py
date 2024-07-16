@@ -3,7 +3,7 @@
 
 """
 
-from typing import Callable, Optional, TypeVar, Union
+from typing import Callable, cast, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
@@ -17,17 +17,26 @@ __all__ = ["recombine_multisite", "recombine_datasets"]
 T = TypeVar("T", bound=_BaseData)  # generic type for subclasses of _basedata
 
 
+def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] = None) -> T:
+    """Combine multiple data objects with optional preprocessing step.
 
+    Args:
+        data_objects: list of data objects (subclasses of _BaseData, e.g. ObsData or FluxData)
+        preprocess: optional function to call on data objects; must accept type T and return xr.Dataset
 
-def open_multiple_data_objects(data_objects: list[T], preprocess: Optional[Callable] = None) -> T:
+    Returns:
+        single dataset with data from each object combined by coordinates, with optional preprocessing applied.
+    """
     if not data_objects:
         raise ValueError("`data_objects` must be a non-empty list.")
 
-    # the following code clearly violates the encapuslation of _BaseData and LocalZarrStore...
-    zarr_stores = [do._zarrstore._stores[do._version] for do in data_objects]
+    if preprocess:
+        datasets = [preprocess(do) for do in data_objects]
+    else:
+        datasets = [do.data for do in data_objects]
 
-    # open multiple zarr stores
-    new_data = xr.open_mfdataset(zarr_stores, preprocess=preprocess, engine="zarr")
+    # combine by coordinates (this is what is used by xr.open_mfdataset by default; it combines and sorts)
+    new_data = cast(xr.Dataset, xr.combine_by_coords(datasets))
 
     # make a new data object of same type as input
     old_metadata = data_objects[0].metadata

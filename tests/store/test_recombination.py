@@ -1,26 +1,13 @@
-from collections import namedtuple
+import re
 from typing import Optional
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from zarr.storage import MemoryStore
 
 from openghg.dataobjects import ObsData
-from openghg.store._recombination import open_multiple_data_objects
-from openghg.store.storage import LocalZarrStore
-
-
-class FakeLocalZarrStore:
-    def __init__(self, stores_dict: dict):
-        self._stores = stores_dict
-
-
-def make_mem_store(ds: xr.Dataset) -> MemoryStore:
-    ms = MemoryStore()
-    ds.to_zarr(store=ms)
-    return ms
+from openghg.store._recombination import combine_data_objects
 
 
 def make_obs_dataset(start: str, end: str) -> xr.Dataset:
@@ -30,41 +17,57 @@ def make_obs_dataset(start: str, end: str) -> xr.Dataset:
     return xr.Dataset({"mf": (["time"], values)}, coords={"time": times})
 
 
-def test_open_mfdataset_zarr_from_memory_store():
-    """Just check that our basic set-up works"""
-    ds1 = make_obs_dataset("2024-01-01", "2024-02-01")
-    ds2 = make_obs_dataset("2024-02-01", "2024-03-01")
-
-    ms1 = make_mem_store(ds1)
-    ms2 = make_mem_store(ds2)
-
-    ds3 = xr.open_mfdataset([ms1, ms2], engine="zarr")
-
-    assert (ds3.time.values == pd.date_range("2024-01-01", "2024-03-01", inclusive="left").values).all()
-
-
 def make_obs_data_object(start: str, end: str, metadata: Optional[dict] = None) -> ObsData:
     data = make_obs_dataset(start, end)
-    mem_store = make_mem_store(data)
 
     if metadata is None:
         metadata = {}
 
     obs_dat = ObsData(metadata=metadata, data=data)
 
-    # make a named tuple with a ._stores attribute to fake a LocalZarrStore
-    fake_store = FakeLocalZarrStore({"v1": mem_store})
-    obs_dat._zarrstore = fake_store
-    obs_dat._version = "v1"
-
     return obs_dat
 
 
-def test_open_multiple_data_objects():
-    obs_dat1 = make_obs_data_object("2024-01-01", "2024-02-01", metadata={"test": 1})
-    obs_dat2 = make_obs_data_object("2024-02-01", "2024-03-01", metadata={"test": 2})
+@pytest.fixture()
+def make_obs_data():
+    obs_dat1 = make_obs_data_object("2024-01-01", "2024-02-01", metadata={"test": 1, "inlet": "10m"})
+    obs_dat2 = make_obs_data_object("2024-02-01", "2024-03-01", metadata={"test": 2, "inlet": "11m"})
+    obs_dat3 = make_obs_data_object("2024-03-01", "2024-04-01", metadata={"test": 3, "inlet": "12m"})
+    obs_dat4 = make_obs_data_object("2024-04-01", "2024-05-01", metadata={"test": 4, "inlet": "10m"})
 
-    result = open_multiple_data_objects([obs_dat1, obs_dat2])
+    return obs_dat1, obs_dat2, obs_dat3, obs_dat4
+
+
+def test_combine_data_objects(make_obs_data):
+    data_objects = list(make_obs_data)
+    result = combine_data_objects(data_objects)
 
     assert result.metadata == {"test": 1}
-    assert (result.data.time.values == pd.date_range("2024-01-01", "2024-03-01", inclusive="left").values).all()
+    assert (result.data.time.values == pd.date_range("2024-01-01", "2024-05-01", inclusive="left").values).all()
+
+
+def test_combine_data_objects_preprocess(make_obs_data):
+    data_objects = list(make_obs_data)
+
+
+    def preprocess(x: ObsData) -> xr.Dataset:
+        inlet_pat = re.compile(r"\d+(\.)?\d*")  # find decimal number
+
+        m = inlet_pat.search(x.metadata.get("inlet", ""))
+        if m:
+            try:
+                inlet_height = float(m.group(0))
+            except TypeError:
+                inlet_height = np.nan
+        else:
+            inlet_height = np.nan
+
+        new_da = (inlet_height * xr.ones_like(x.data.mf)).rename("inlet")
+
+        return xr.merge([x.data, new_da])
+
+    result = combine_data_objects(data_objects, preprocess=preprocess)
+
+    expected_values = np.concatenate([x * np.ones(len(ds.data.time.values)) for x, ds in zip([10.0, 11.0, 12.0, 10.0], data_objects)])
+
+    np.testing.assert_equal(result.data.inlet.values, expected_values)
