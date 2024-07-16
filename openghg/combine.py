@@ -1,17 +1,15 @@
 """
 Combine multiple data objects (subclasses of _BaseData) into one.
 """
-
 from typing import Callable, cast, Optional, TypeVar
 
 import xarray as xr
 
-from openghg.dataobjects._basedata import _BaseData
+from openghg.types import HasMetadataAndData
 
 
-T = TypeVar("T", bound=_BaseData)  # generic type for subclasses of _basedata
+T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .metadata and .data attributes
 
-# TODO: replace _BaseData by type with metadata and data attributes
 
 # TODO: make metdata combination methods
 
