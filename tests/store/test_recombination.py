@@ -42,7 +42,7 @@ def test_combine_data_objects(make_obs_data):
     data_objects = list(make_obs_data)
     result = combine_data_objects(data_objects)
 
-    assert result.metadata == {"test": 1}
+    assert result.metadata == {"test": 1, "inlet": "10m"}
     assert (result.data.time.values == pd.date_range("2024-01-01", "2024-05-01", inclusive="left").values).all()
 
 
@@ -50,7 +50,7 @@ def test_combine_data_objects_preprocess(make_obs_data):
     data_objects = list(make_obs_data)
 
 
-    def preprocess(x: ObsData) -> xr.Dataset:
+    def preprocess(x: ObsData) -> ObsData:
         inlet_pat = re.compile(r"\d+(\.)?\d*")  # find decimal number
 
         m = inlet_pat.search(x.metadata.get("inlet", ""))
@@ -63,8 +63,11 @@ def test_combine_data_objects_preprocess(make_obs_data):
             inlet_height = np.nan
 
         new_da = (inlet_height * xr.ones_like(x.data.mf)).rename("inlet")
+        new_ds = xr.merge([x.data, new_da])
 
-        return xr.merge([x.data, new_da])
+        new_metadata = {k: v for k, v in x.metadata.items() if k != "inlet"}
+
+        return ObsData(new_metadata, new_ds)
 
     result = combine_data_objects(data_objects, preprocess=preprocess)
 
