@@ -3,6 +3,7 @@
 """
 
 from ._cli import cli
+from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
 from ._domain import (
     get_domain_info,
     find_domain,

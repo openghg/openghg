@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 import numpy as np
@@ -9,7 +8,7 @@ import xarray as xr
 from openghg.dataobjects import ObsData
 from openghg.standardise import standardise_surface
 from openghg.retrieve import search_surface
-from openghg.combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
+from openghg.util import combine_and_elevate_inlet, combine_data_objects, combine_multisite
 
 from helpers import clear_test_stores, get_surface_datapath
 
