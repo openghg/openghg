@@ -18,13 +18,15 @@ T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .met
 # TODO: do we need to add options to use dask.delayed like xr.open_mfdataset?
 
 
-def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] = None) -> T:
+def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] = None, concat_dim: Optional[str] = None) -> T:
     """Combine multiple data objects with optional preprocessing step.
 
     Args:
         data_objects: list of data objects (e.g. ObsData or FluxData, or any object with .metadata
             and .data attributes)
         preprocess: optional function to call on data objects; must accept type T and return type T
+        concat_dim: optional dimension to specify concatenation along; if not specified, this is inferred via
+            xr.combine_by_coords
 
     Returns:
         single data object with data from each object combined by coordinates, with optional preprocessing applied.
@@ -38,7 +40,12 @@ def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] =
 
     # combine data by coordinates (this is what is used by xr.open_mfdataset by default; it combines and sorts)
     datasets = [do.data for do in data_objects]
-    new_data = xr.combine_by_coords(datasets)
+
+    if concat_dim is not None:
+        new_data = xr.concat(datasets, dim=concat_dim, combine_attrs="drop_conflicts", fill_value=np.nan)
+    else:
+        new_data = xr.combine_by_coords(datasets, combine_attrs="drop_conflicts", fill_value=np.nan)
+
     new_data = cast(xr.Dataset, new_data)  # mypy thinks this is an xr.DataArray instead of xr.Dataset
 
 
@@ -104,7 +111,7 @@ def combine_multisite(data_objects: list[T]) -> T:
     stored in each object's metadata.
     """
     preprocess = partial(_add_dim_from_metadata, new_dim="site")
-    return combine_data_objects(data_objects, preprocess=preprocess)
+    return combine_data_objects(data_objects, preprocess=preprocess, concat_dim="site")
 
 
 def _data_array_from_value(

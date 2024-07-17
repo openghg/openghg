@@ -90,6 +90,9 @@ def surface_data():
 
 
 def test_combine_by_site_on_real_data(surface_data):
-    data_objects = search_surface(store="user", species="co2", site = ["hfd", "tac", "bsd"]).retrieve_all()
+    data_objects = search_surface(store="user", species="co2", site=["hfd", "tac", "bsd"]).retrieve_all()
 
+    expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, ["hfd", "tac", "bsd"])], dim="site")
     result = combine_multisite(data_objects)
+
+    xr.testing.assert_equal(expected_dataset, result.data)
