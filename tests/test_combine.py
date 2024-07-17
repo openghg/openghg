@@ -96,3 +96,23 @@ def test_combine_by_site_on_real_data(surface_data):
     result = combine_multisite(data_objects)
 
     xr.testing.assert_equal(expected_dataset, result.data)
+
+
+def test_combine_and_elevate_inlet_on_real_data(surface_data):
+    """Test combining non-overlapping data for same site with different inlet values"""
+    data_object = search_surface(store="user", species="co2", site="hfd").retrieve_all()
+
+    n_times = len(data_object.data.time)
+    step = n_times // 3
+
+    # split obs data into 3 pieces, and change the inlet height
+    data_objects = []
+    for i in range(3):
+        md = data_object.metadata.copy()
+        md["inlet"] = f"1{i}m"
+        ds = data_object.data.isel(time=slice(i * step, (i + 1) * step), drop=True)
+        data_objects.append(ObsData(md, ds))
+
+    result = combine_and_elevate_inlet(data_objects)
+
+    np.testing.assert_array_equal(result.data.inlet.values, np.array([10.0] * step + [11.0] * step + [12.0] * step))
