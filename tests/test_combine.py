@@ -7,8 +7,11 @@ import pytest
 import xarray as xr
 
 from openghg.dataobjects import ObsData
+from openghg.standardise import standardise_surface
+from openghg.retrieve import search_surface
 from openghg.combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
 
+from helpers import clear_test_stores, get_surface_datapath
 
 def make_obs_dataset(start: str, end: str) -> xr.Dataset:
     times = pd.date_range(start, end, inclusive="left")  # daily frequency
@@ -66,3 +69,27 @@ def test_combine_data_objects_by_site():
     expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, "abcd")], dim="site")
 
     xr.testing.assert_equal(result.data, expected_dataset)
+
+
+@pytest.fixture()
+def surface_data():
+    clear_test_stores()
+
+    # DECC network sites
+    network = "DECC"
+    bsd_42_path = get_surface_datapath(filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
+
+    standardise_surface(store="user", filepath=bsd_42_path, source_format="CRDS", site="bsd", network=network)
+
+    hfd_100_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
+
+    standardise_surface(store="user", filepath=hfd_100_path, source_format="CRDS", site="hfd", network=network)
+
+    tac_path = get_surface_datapath(filename="tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    standardise_surface(store="user", filepath=tac_path, source_format="CRDS", site="tac", network=network)
+
+
+def test_combine_by_site_on_real_data(surface_data):
+    data_objects = search_surface(store="user", species="co2", site = ["hfd", "tac", "bsd"]).retrieve_all()
+
+    result = combine_multisite(data_objects)
