@@ -1,10 +1,10 @@
 """
-Combine multiple data objects (subclasses of _BaseData) into one.
+Combine multiple data objects (objects with .metadata and .data attributes) into one.
 """
 
 from functools import partial
 import re
-from typing import Any, Callable, cast, Hashable, Mapping, Optional, TypeVar, Union
+from typing import Any, Callable, cast, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
@@ -23,7 +23,8 @@ def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] =
     """Combine multiple data objects with optional preprocessing step.
 
     Args:
-        data_objects: list of data objects (subclasses of _BaseData, e.g. ObsData or FluxData)
+        data_objects: list of data objects (e.g. ObsData or FluxData, or any object with .metadata
+            and .data attributes)
         preprocess: optional function to call on data objects; must accept type T and return type T
 
     Returns:
@@ -38,9 +39,9 @@ def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] =
 
     # combine data by coordinates (this is what is used by xr.open_mfdataset by default; it combines and sorts)
     datasets = [do.data for do in data_objects]
-    new_data = cast(
-        xr.Dataset, xr.combine_by_coords(datasets)
-    )  # mypy thinks this is an xr.DataArray instead of xr.Dataset
+    new_data = xr.combine_by_coords(datasets)
+    new_data = cast(xr.Dataset, new_data)  # mypy thinks this is an xr.DataArray instead of xr.Dataset
+
 
     # combine metadata
     metadatas = [do.metadata for do in data_objects]
@@ -108,7 +109,7 @@ def combine_multisite(data_objects: list[T]) -> T:
 
 
 def _data_array_from_value(
-    value: Any, coords: Union[xr.Coordinates, Mapping[Hashable, xr.DataArray]], name: Optional[str] = None
+    value: Any, coords: xr.Coordinates, name: Optional[str] = None
 ) -> xr.DataArray:
     """Create xr.DataArray with single value and given coords and name.
 
@@ -133,8 +134,8 @@ def add_variable_from_metadata(
     drop_metadata_key: bool = True,
     name: Optional[str] = None,
 ) -> T:
-    """Add a data variable `new_dim `to the data of T using the value corresponding
-    to the key `new_dim` in the metadata of T.
+    """Add a data variable to the data of data_object using the value corresponding
+    to the key `metadata_key` in the metadata of data_object.
 
     Args:
         data_object: object to modify (the metadata is copied; the data is a view?)
@@ -145,8 +146,8 @@ def add_variable_from_metadata(
         name: name for the new variable; if `None` then `metadata_key` will be used.
 
     Returns:
-        object of same type as `data_object` whose data has an data variable with given coordinates and constant
-        value, and whose metadata is the same, possibly with the value of the new dimension removed.
+        object of same type as `data_object` whose data has an data variable with given coordinates and
+         constant value, and whose metadata is the same, possibly with the value of the new dimension removed.
     """
     value = data_object.metadata.get(metadata_key, None)
     if value and formatter is not None:
@@ -155,7 +156,7 @@ def add_variable_from_metadata(
     if isinstance(dims, str):
         dims = [dims]
 
-    coords = {k: v for k, v in data_object.data.coords.items() if k in dims}
+    coords = xr.Coordinates({k: v for k, v in data_object.data.coords.items() if k in dims})
     if name is None:
         name = metadata_key
     new_da = _data_array_from_value(value, coords, name)
