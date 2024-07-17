@@ -1,15 +1,14 @@
 """
 Combine multiple data objects (objects with .metadata and .data attributes) into one.
 """
-
 from functools import partial
-import re
 from typing import Any, Callable, cast, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
 
 from openghg.types import HasMetadataAndData
+from openghg.util import extract_float
 
 
 T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .metadata and .data attributes
@@ -181,12 +180,12 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
     """
 
     def inlet_formatter(inlet: str) -> float:
-        inlet_pat = re.compile(r"\d+(\.)?\d*")  # find decimal number
-
-        if m := inlet_pat.search(inlet):
-            return float(m.group(0))
-
-        return np.nan
+        try:
+            result = extract_float(inlet)
+        except ValueError:
+            return np.nan
+        else:
+            return result
 
     preprocess = partial(add_variable_from_metadata, metadata_key="inlet", formatter=inlet_formatter)
     return combine_data_objects(data_objects, preprocess=preprocess)
