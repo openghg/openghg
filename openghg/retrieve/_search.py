@@ -4,7 +4,8 @@
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+import re
+from typing import Any, Callable, Dict, List, Optional, Union
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
@@ -437,6 +438,69 @@ def search(**kwargs: Any) -> SearchResults:
     return sr
 
 
+def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
+    """Convert slice to a function that checks if values are in the interval specified by the slice.
+
+    Args:
+        s: slice specifying interval of values
+        key: optional metadata key, used to choose value formatting
+
+    Returns:
+        function that returns True if values are in the slice interval
+    """
+    if key == "inlet":
+        # TODO: use utility function once it is available
+        decimal_pat = re.compile(r"\d+(\.)?\d*")
+
+        def _formatter(v: Union[str, int, float, None]) -> Optional[float]:
+            if isinstance(v, (int, float)):
+                return v
+            if isinstance(v, str) and (m := decimal_pat.search(v)):
+                return float(m.group(0))
+            return None
+        formatter = _formatter
+    else:
+        formatter = lambda x: x
+
+    start = formatter(s.start)
+    stop = formatter(s.stop)
+
+    def test(x) -> bool:
+        """Return True if start <= formatter(x) <= stop.
+
+        NOTE: we're ignoring types for now. We would need to use a generic function that
+        matches the return type of the formatter to the values stored in the slice.
+        It will probably become easier to do this once we have metadata formatting set up.
+        """
+        if start is None and stop is None:
+            return False
+        elif start is None:
+            return formatter(x) <= stop  # type: ignore
+        elif stop is None:
+            return formatter(x) >= start  # type: ignore
+        else:
+            return start <= formatter(x) <= stop  # type: ignore
+
+    return test
+
+
+def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET_FLAG") -> dict:
+    """Separate range queries and negative lookup keys from normal search terms"""
+    _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
+    search_tests = {}
+    negative_lookup_keys = []
+
+    for k, v in search_terms.items():
+        if isinstance(v, slice):
+            search_tests[k] = _convert_slice_to_test(v, key=k)
+            del _search_terms[k]
+        elif v == neg_lookup_flag:
+            negative_lookup_keys.append(k)
+            del _search_terms[k]
+
+    return {"search_terms": _search_terms, "search_tests": search_tests, "negative_lookup_keys": negative_lookup_keys}
+
+
 def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
@@ -564,34 +628,41 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         del search_kwargs["end_date"]
 
-    # Here we process the kwargs, allowing us to create the correct combinations of search queries.
-    # To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
-    # - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
-    # - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
-    # - we then expect searches for all permutations across both lists.
-    multiple_options = []
-    single_options = {}
-    for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
-            expand_key_values = [(k, value) for value in v]
-            multiple_options.append(expand_key_values)
-        elif isinstance(v, dict):
-            expand_key_values = list(v.items())
-            multiple_options.append(expand_key_values)
+    def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
+        """
+        Process search kwargs into list flat dictionaries with the correct combinations of search queries.
+
+        To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
+        - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
+        - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
+        - we then expect searches for all permutations across both lists.
+        """
+        multiple_options = []
+        single_options = {}
+        for k, v in search_kwargs.items():
+            if isinstance(v, (list, tuple)):
+                expand_key_values = [(k, value) for value in v]
+                multiple_options.append(expand_key_values)
+            elif isinstance(v, dict):
+                expand_key_values = list(v.items())
+                multiple_options.append(expand_key_values)
+            else:
+                single_options[k] = v
+
+        expanded_search = []
+        if multiple_options:
+            # Ensure that all permutations of the search options are created.
+            for kv_pair in itertools.product(*multiple_options):
+                d = dict(kv_pair)
+                if single_options:
+                    d.update(single_options)
+                expanded_search.append(d)
         else:
-            single_options[k] = v
+            expanded_search.append(single_options)
 
-    expanded_search = []
-    if multiple_options:
-        # Ensure that all permutations of the search options are created.
-        for kv_pair in itertools.product(*multiple_options):
-            d = dict(kv_pair)
-            if single_options:
-                d.update(single_options)
-            expanded_search.append(d)
-    else:
-        expanded_search.append(single_options)
+        return expanded_search
 
+    expanded_search = parse_search_kwargs(search_kwargs)
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
@@ -599,7 +670,8 @@ def _base_search(**kwargs: Any) -> SearchResults:
         for data_type in types_to_search:
             with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
                 for v in expanded_search:
-                    res = metastore.search(v)
+                    v_parsed = _process_special_queries(v)
+                    res = metastore.search(**v_parsed)
                     if res:
                         metastore_records.extend(res)
 

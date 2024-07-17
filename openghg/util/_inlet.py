@@ -26,12 +26,21 @@ def format_inlet(
 ) -> None: ...
 
 
+@overload
 def format_inlet(
-    inlet: Optional[str],
+    inlet: slice,
     units: str = "m",
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
-) -> Optional[str]:
+) -> slice: ...
+
+
+def format_inlet(
+    inlet: Union[str, slice, None],
+    units: str = "m",
+    key_name: Optional[str] = None,
+    special_keywords: Optional[list] = None,
+) -> Union[str, slice, None]:
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -75,8 +84,8 @@ def format_inlet(
         >>> format_inlet("10m", key_name="station_height_masl")
             "10"
     """
-    if inlet is None:
-        return None
+    if inlet is None or isinstance(inlet, slice):
+        return inlet
 
     # By default the special keyword is "multiple" for data containing multiple inlets.
     # This will be included if data is a combined object from the object store.

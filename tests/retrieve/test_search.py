@@ -20,6 +20,9 @@ from pandas import Timestamp
         ("inlet", "50magl"),
         ("inlet", "50"),
         ("inlet", 50),  # May remove this later as really we expect a string here
+        ("inlet", slice(40, 60.0)),
+        ("inlet", slice("40m", "60.0m")),
+        ("inlet", slice("50m", "50.0m")),
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
