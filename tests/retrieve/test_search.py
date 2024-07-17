@@ -303,7 +303,7 @@ def test_search_footprints_multiple():
         - 2016-08-01 (3 time points)
     """
     res = search_footprints(
-        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", time_resolved=False
+        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", high_time_resolution=False
     )
 
     key = next(iter(res.metadata))
