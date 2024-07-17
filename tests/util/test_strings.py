@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import clean_string, is_number
+from openghg.util import clean_string, extract_float, is_number
 
 
 def test_clean_string():
@@ -36,3 +36,25 @@ def test_is_number():
     assert not is_number(False)
 
     assert not is_number(["999"])
+
+
+@pytest.mark.parametrize(
+    "string_val, float_val",
+    [
+        ("1234", 1234.0),
+        ("1_2_3.4", 123.4),
+        ("nan", float("nan")),
+        ("banana", float("nan")),  # oops..
+        ("123.456", 123.456),
+        (".1", .1),
+        ("123 bananas", 123.0),
+        ("+1.23", 1.23),
+        ("-1.23", -1.23),
+        ("1e-2", 1e-2),
+        ("1e2", 1e2),
+        ("100m", 100.0),
+        ("100magl", 100.0)
+    ],
+)
+def test_extract_float(string_val, float_val):
+    assert extract_float(string_val) == float_val
