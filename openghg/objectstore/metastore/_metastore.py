@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import tinydb
 from tinydb.operations import delete as tinydb_delete
@@ -181,19 +181,23 @@ class TinyDBMetaStore(MetaStore):
         """
         return tinydb.Query().fragment(self._format_metadata(metadata))
 
-    def _get_range_query(self, search_ranges: dict[str, tuple]) -> tinydb.queries.QueryInstance:
+    def _get_test_query(self, search_tests: dict[str, Callable]) -> tinydb.queries.QueryInstance:
         """Return a TinyDB query that searches for all records whose metadata
-        contains the values for the given keys within the range for that key..
+        contains the values that pass the "test function" for that key.
+
+        For instance, if search_tests = {"inlet": (lambda x: float(x[:-1]) > 100.0)}, then the query returned
+        will search for data where the inlet height is above 100 meters. Notice that the function includes
+        formatting for the values stored in the metastore.
 
         Args:
-            search_ranges: key-value pairs to search by; the values must be tuples (lower, upper).
-                The condition: `lower <= val <= upper` will be applied to values `val` corresponding
-                to the given key.
+            search_ranges: key-value pairs to search by; the values are functions, which
+                are applied to the metadata records in the metastore: `v(metadata_record[k])`,
+                and the query tests if the result is `True`.
         Returns:
             TinyDB QueryInstance that requires all of the range options to be true
         """
-        search_ranges = self._format_metadata(search_ranges)
-        queries = [tinydb.Query()[k].test((lambda x: v[0] <= x <= v[1])) for k, v in search_ranges.items()]
+        search_tests = self._format_metadata(search_tests)
+        queries = [tinydb.Query()[k].test(v) for k, v in search_tests.items()]
         return reduce(lambda x, y: (x & y), queries)
 
     def _get_negative_lookup_query(self, negative_lookup_keys: list[str]) -> tinydb.queries.QueryInstance:
@@ -213,7 +217,7 @@ class TinyDBMetaStore(MetaStore):
     def search(
         self,
         search_terms: Optional[MetaData] = None,
-        search_ranges: Optional[dict[str, tuple]] = None,
+        search_tests: Optional[dict[str, Callable]] = None,
         negative_lookup_keys: Optional[list[str]] = None,
     ) -> QueryResults:
         """Search metastore using a dictionary of search terms.
@@ -230,9 +234,9 @@ class TinyDBMetaStore(MetaStore):
             search_terms = {}
         _query = self._get_query(search_terms)
 
-        if search_ranges:
-            _range_query = self._get_range_query(search_ranges)
-            _query = _query & _range_query
+        if search_tests:
+            _test_query = self._get_test_query(search_tests)
+            _query = _query & _test_query
 
         if negative_lookup_keys:
             _neg_query = self._get_negative_lookup_query(negative_lookup_keys)
