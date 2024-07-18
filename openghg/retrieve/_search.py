@@ -498,7 +498,11 @@ def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET
             negative_lookup_keys.append(k)
             del _search_terms[k]
 
-    return {"search_terms": _search_terms, "search_tests": search_tests, "negative_lookup_keys": negative_lookup_keys}
+    return {
+        "search_terms": _search_terms,
+        "search_tests": search_tests,
+        "negative_lookup_keys": negative_lookup_keys,
+    }
 
 
 def _base_search(**kwargs: Any) -> SearchResults:
