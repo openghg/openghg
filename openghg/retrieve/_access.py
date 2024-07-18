@@ -3,7 +3,7 @@ import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
 
-from openghg.dataobjects._basedata import _BaseData
+from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
     FluxData,
