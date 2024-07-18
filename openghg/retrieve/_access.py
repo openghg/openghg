@@ -2,11 +2,8 @@ import json
 import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
-from openghg.types import SearchError
-import logging
 
-logger = logging.getLogger("openghg.retrieve.access")
-
+from openghg.dataobjects._basedata import _BaseData
 from openghg.dataobjects import (
     BoundaryConditionsData,
     FluxData,
@@ -14,7 +11,8 @@ from openghg.dataobjects import (
     ObsColumnData,
     ObsData,
 )
-from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.types import SearchError
+from openghg.util import combine_and_elevate_inlet, decompress, decompress_str, hash_bytes, running_on_hub
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
 
@@ -32,7 +30,7 @@ def _get_generic(
     elevate_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
-) -> Any:
+) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
 
     Args:
@@ -59,7 +57,7 @@ def _get_generic(
         raise SearchError(err_msg)
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all()
+    retrieved_data  = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -67,7 +65,7 @@ def _get_generic(
         raise SearchError(err_msg)
     elif isinstance(retrieved_data, list) and len(retrieved_data) > 1:
         if combine_multiple_inlets:
-            pass
+            result = combine_and_elevate_inlet(retrieved_data)
         else:
             param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
             err_msg = f"""
@@ -79,7 +77,9 @@ def _get_generic(
             logger.exception(err_msg)
             raise SearchError(err_msg)
     elif isinstance(retrieved_data, list):
-        retrieved_data = retrieved_data[0]
+        result = retrieved_data[0]
+    else:
+        result = retrieved_data
 
     # TODO: Included output of this as Any for now because we there are many
     # options for types returned but can update this
@@ -87,7 +87,7 @@ def _get_generic(
     # We can only get a single data object back here but mypy doesn't understand that
     # retrieved_data = cast(ObsData, retrieved_data)
 
-    return retrieved_data
+    return result
 
 
 def get_obs_surface(
@@ -244,9 +244,15 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
+    from openghg.util import (
+        clean_string,
+        format_inlet,
+        get_site_info,
+        load_json,
+        synonyms,
+        timestamp_tzaware,
+    )
     from pandas import Timedelta
-    from openghg.util import synonyms
 
     if running_on_hub():
         raise ValueError(
@@ -701,7 +707,7 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.util import clean_string, synonyms, format_inlet
+    from openghg.util import clean_string, format_inlet, synonyms
 
     # Find the correct synonym for the passed species
     if species is not None:
