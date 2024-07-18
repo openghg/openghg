@@ -4,13 +4,13 @@
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, cast, Callable, Dict, List, Optional, TypeVar, Union
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, extract_float, running_on_hub
-from openghg.types import ObjectStoreError
+from openghg.types import Comparable, ObjectStoreError
 from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
@@ -437,6 +437,22 @@ def search(**kwargs: Any) -> SearchResults:
     return sr
 
 
+T = TypeVar("T", bound=Comparable)
+
+
+def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
+    if start is None and stop is None:
+        return False
+    elif start is None:
+        stop = cast(T, stop)  # to appease mypy
+        return x <= stop
+    elif stop is None:
+        return x >= start
+    else:
+        return start <= x <= stop
+
+
+
 def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
     """Convert slice to a function that checks if values are in the interval specified by the slice.
 
@@ -460,26 +476,11 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
                 else:
                     return result
             return None
-
         return x  # key != "inlet"
 
-    start = formatter(s.start)
-    stop = formatter(s.stop)
-
     def test_func(x) -> bool:
-        """Return True if start <= formatter(x) <= stop.
-
-        NOTE: we're ignoring types for now. We would need to use a generic function that
-        matches the return type of the formatter to the values stored in the slice.
-        It will probably become easier to do this once we have metadata formatting set up.
-        """
-        if start is None and stop is None:
-            return False
-        if start is None:
-            return formatter(x) <= stop  # type: ignore
-        if stop is None:
-            return formatter(x) >= start  # type: ignore
-        return start <= formatter(x) <= stop  # type: ignore
+        """Return True if start <= formatter(x) <= stop."""
+        return _in_interval(formatter(x), formatter(s.start), formatter(s.stop))  # type: ignore
 
     return test_func
 

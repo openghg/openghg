@@ -41,4 +41,5 @@ from ._types import (
     TimePeriod,
     HasMetadataAndData,
     MetadataAndData,
+    Comparable,
 )
