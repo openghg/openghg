@@ -2,17 +2,16 @@
     the object store
 
 """
-
-import itertools
 import logging
-from typing import Any, cast, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, Union
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, extract_float, running_on_hub
-from openghg.types import Comparable, ObjectStoreError
+from openghg.util import decompress, running_on_hub
+from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
+from ._search_helpers import parse_search_kwargs, process_special_queries
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -438,135 +437,6 @@ def search(**kwargs: Any) -> SearchResults:
     return sr
 
 
-T = TypeVar("T", bound=Comparable)  # types with <=
-
-
-def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
-    """Return True if start <= x <= stop; if either start or stop is None, omit
-    the corresponding bound.
-
-    Args:
-        x: value to test for inclusion in the interval [start, stop]
-        start: start of the interval
-        stop: end of the interval
-
-    Returns:
-        True if start <= x <= stop, False otherwise
-    """
-    if start is None and stop is None:
-        return False
-    elif start is None:
-        stop = cast(T, stop)  # to appease mypy
-        return x <= stop
-    elif stop is None:
-        return x >= start
-    else:
-        return start <= x <= stop
-
-
-def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
-    """Convert slice to a function that checks if values are in the interval specified by the slice.
-
-    Args:
-        s: slice specifying interval of values
-        key: optional metadata key, used to choose value formatting
-
-    Returns:
-        function that returns True if values are in the slice interval
-    """
-
-    def formatter(x: Any) -> Any:
-        """Formatting if key == 'inlet': try to extract float from strings."""
-        if key == "inlet":
-            if isinstance(x, (int, float)):
-                return x
-            if isinstance(x, str):
-                try:
-                    result = extract_float(x)
-                except ValueError:
-                    return None
-                else:
-                    return result
-            return None
-        return x  # key != "inlet"
-
-    def test_func(x: Any) -> bool:
-        """Return True if start <= formatter(x) <= stop."""
-        return _in_interval(formatter(x), formatter(s.start), formatter(s.stop))  # type: ignore
-
-    return test_func
-
-
-def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET_FLAG") -> dict:
-    """Separate test queries and negative lookup keys from normal search terms.
-
-    Args:
-        search_terms: dict of search terms
-        neg_lookup_flag: flag value used to indicate negative lookup on a key
-
-    Returns:
-        dict containing search_terms dict, search_tests dict, and negative_lookup_keys list, which
-        are the parameters for TinyDBMetastore.search
-    """
-    _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
-    search_tests = {}
-    negative_lookup_keys = []
-
-    for k, v in search_terms.items():
-        if isinstance(v, slice):
-            search_tests[k] = _convert_slice_to_test(v, key=k)
-            del _search_terms[k]
-        elif v == neg_lookup_flag:
-            negative_lookup_keys.append(k)
-            del _search_terms[k]
-
-    return {
-        "search_terms": _search_terms,
-        "search_tests": search_tests,
-        "negative_lookup_keys": negative_lookup_keys,
-    }
-
-
-def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
-    """
-    Process search kwargs into list flat dictionaries with the correct combinations of search queries.
-
-    To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
-    - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
-    - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
-    - we then expect searches for all permutations across both lists.
-
-    Args:
-        search_kwargs: dictionary of search terms
-
-    Returns:
-        list of flat dictionaries containing all combinations of search terms from (nested) input search terms
-    """
-    multiple_options = []
-    single_options = {}
-    for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
-            expand_key_values = [(k, value) for value in v]
-            multiple_options.append(expand_key_values)
-        elif isinstance(v, dict):
-            expand_key_values = list(v.items())
-            multiple_options.append(expand_key_values)
-        else:
-            single_options[k] = v
-
-    expanded_search = []
-    if multiple_options:
-        # Ensure that all permutations of the search options are created.
-        for kv_pair in itertools.product(*multiple_options):
-            d = dict(kv_pair)
-            if single_options:
-                d.update(single_options)
-            expanded_search.append(d)
-    else:
-        expanded_search.append(single_options)
-
-    return expanded_search
-
 
 def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
@@ -685,7 +555,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
         for data_type in types_to_search:
             with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
                 for v in expanded_search:
-                    v_parsed = _process_special_queries(v)
+                    v_parsed = process_special_queries(v)
                     res = metastore.search(**v_parsed)
                     if res:
                         metastore_records.extend(res)
