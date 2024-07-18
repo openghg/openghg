@@ -492,7 +492,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     # - clean search terms directly or within data structures
     search_kwargs = {}
     for k, v in kwargs.items():
-        if k.lower() in ["inlet", "height"]:
+        if k.lower() in ["inlet", "height", "inlet_height_magl", "station_height_masl"]:
             v = format_inlet(v)
         elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
