@@ -2,6 +2,7 @@
     the object store
 
 """
+
 import logging
 from typing import Any, Dict, List, Optional, Union
 import warnings
@@ -435,7 +436,6 @@ def search(**kwargs: Any) -> SearchResults:
         sr = _base_search(**kwargs)
 
     return sr
-
 
 
 def _base_search(**kwargs: Any) -> SearchResults:
