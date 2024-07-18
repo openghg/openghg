@@ -1,6 +1,7 @@
 """
 Combine multiple data objects (objects with .metadata and .data attributes) into one.
 """
+
 from functools import partial
 from typing import Any, Callable, cast, Optional, TypeVar, Union
 
@@ -17,7 +18,9 @@ T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .met
 # TODO: do we need to add options to use dask.delayed like xr.open_mfdataset?
 
 
-def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] = None, concat_dim: Optional[str] = None) -> T:
+def combine_data_objects(
+    data_objects: list[T], preprocess: Optional[Callable] = None, concat_dim: Optional[str] = None
+) -> T:
     """Combine multiple data objects with optional preprocessing step.
 
     Args:
@@ -46,7 +49,6 @@ def combine_data_objects(data_objects: list[T], preprocess: Optional[Callable] =
         new_data = xr.combine_by_coords(datasets, combine_attrs="drop_conflicts", fill_value=np.nan)
 
     new_data = cast(xr.Dataset, new_data)  # mypy thinks this is an xr.DataArray instead of xr.Dataset
-
 
     # combine metadata
     metadatas = [do.metadata for do in data_objects]
@@ -113,9 +115,7 @@ def combine_multisite(data_objects: list[T]) -> T:
     return combine_data_objects(data_objects, preprocess=preprocess, concat_dim="site")
 
 
-def _data_array_from_value(
-    value: Any, coords: xr.Coordinates, name: Optional[str] = None
-) -> xr.DataArray:
+def _data_array_from_value(value: Any, coords: xr.Coordinates, name: Optional[str] = None) -> xr.DataArray:
     """Create xr.DataArray with single value and given coords and name.
 
     Args:
@@ -203,5 +203,10 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
         else:
             return result
 
-    preprocess = partial(add_variable_from_metadata, metadata_key="inlet", formatter=inlet_formatter, new_metadata_value="multiple")
+    preprocess = partial(
+        add_variable_from_metadata,
+        metadata_key="inlet",
+        formatter=inlet_formatter,
+        new_metadata_value="multiple",
+    )
     return combine_data_objects(data_objects, preprocess=preprocess)
