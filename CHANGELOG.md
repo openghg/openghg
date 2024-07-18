@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Utility functions to combine multiple "data objects" (e.g. `ObsData`, or anything with `.data` and `.metadata` attributes) - [PR #1063](https://github.com/openghg/openghg/pull/1063) 
+
 - Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
 
 ## [0.8.1] - 2024-05-17
