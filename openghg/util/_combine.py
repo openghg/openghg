@@ -8,7 +8,6 @@ import numpy as np
 import xarray as xr
 
 from openghg.types import HasMetadataAndData
-from openghg.util import extract_float
 
 
 T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .metadata and .data attributes
