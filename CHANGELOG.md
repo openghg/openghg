@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Error reporting for `BaseStore` context manager. [PR #1059](https://github.com/openghg/openghg/pull/1059)
+
 - Test for zarr compression `test_bytes_stored_compression` that was failing due to a slight mismatch between actual and expected values. The test now uses a bound on relative error - [PR #1065](https://github.com/openghg/openghg/pull/1065)
 
 - Typo and possible performance issue in `analysis._scenario.combine_datasets` - [PR #1047](https://github.com/openghg/openghg/pull/1047)
