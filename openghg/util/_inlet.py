@@ -26,12 +26,21 @@ def format_inlet(
 ) -> None: ...
 
 
+@overload
 def format_inlet(
-    inlet: Optional[str],
+    inlet: list[Optional[str]],
     units: str = "m",
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
-) -> Optional[str]:
+) -> list[Optional[str]]: ...
+
+
+def format_inlet(
+    inlet: Union[Optional[str], list[Optional[str]]],
+    units: str = "m",
+    key_name: Optional[str] = None,
+    special_keywords: Optional[list] = None,
+) -> Union[Optional[str], list[Optional[str]]]:
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -75,6 +84,9 @@ def format_inlet(
         >>> format_inlet("10m", key_name="station_height_masl")
             "10"
     """
+    if isinstance(inlet, list):
+        return [format_inlet(x) for x in inlet]
+
     if inlet is None:
         return None
 
