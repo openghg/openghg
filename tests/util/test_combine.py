@@ -37,11 +37,11 @@ def make_obs_data():
     obs_dat3 = make_obs_data_object("2024-03-01", "2024-04-01", metadata={"test": 3, "inlet": "12m"})
     obs_dat4 = make_obs_data_object("2024-04-01", "2024-05-01", metadata={"test": 4, "inlet": "10m"})
 
-    return obs_dat1, obs_dat2, obs_dat3, obs_dat4
+    return [obs_dat1, obs_dat2, obs_dat3, obs_dat4]
 
 
 def test_combine_data_objects(make_obs_data):
-    data_objects = list(make_obs_data)
+    data_objects = make_obs_data
     result = combine_data_objects(data_objects)
 
     assert result.metadata == {"test": 1, "inlet": "10m"}
@@ -49,7 +49,7 @@ def test_combine_data_objects(make_obs_data):
 
 
 def test_combine_data_objects_by_inlet(make_obs_data):
-    data_objects = list(make_obs_data)
+    data_objects = make_obs_data
 
     result = combine_and_elevate_inlet(data_objects)
 
