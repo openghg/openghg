@@ -44,11 +44,11 @@ def combine_data_objects(
     datasets = [do.data for do in data_objects]
 
     if concat_dim is not None:
-        new_data = xr.concat(datasets, dim=concat_dim, combine_attrs="drop_conflicts", fill_value=np.nan)
+        new_data = cast(xr.Dataset, xr.concat(datasets, dim=concat_dim, combine_attrs="drop_conflicts", fill_value=np.nan))
     else:
-        new_data = xr.combine_by_coords(datasets, combine_attrs="drop_conflicts", fill_value=np.nan)
+        new_data = cast(xr.Dataset, xr.combine_by_coords(datasets, combine_attrs="drop_conflicts", fill_value=np.nan))
 
-    new_data = cast(xr.Dataset, new_data)  # mypy thinks this is an xr.DataArray instead of xr.Dataset
+
 
     # combine metadata
     metadatas = [do.metadata for do in data_objects]
