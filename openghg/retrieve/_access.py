@@ -46,7 +46,9 @@ def _get_generic(
 
     if elevate_inlets is True:
         combine_multiple_inlets = True
-        logger.warning("`elevate_inlets` is deprecated, use `combine_multiple_inlets` instead.", DeprecationWarning)
+        logger.warning(
+            "`elevate_inlets` is deprecated, use `combine_multiple_inlets` instead.", DeprecationWarning
+        )
 
     results = search(**kwargs)
 
@@ -57,7 +59,7 @@ def _get_generic(
         raise SearchError(err_msg)
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data  = results.retrieve_all()
+    retrieved_data = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -67,7 +69,9 @@ def _get_generic(
         if combine_multiple_inlets:
             result = combine_and_elevate_inlet(retrieved_data)
         else:
-            param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
+            param_diff_formatted = _metadata_difference_formatted(
+                data=retrieved_data, params=ambig_check_params
+            )
             err_msg = f"""
             Multiple entries found for input parameters for {keyword_string}.
             Parameter differences:
