@@ -2,7 +2,7 @@
     the object store
 
 """
-
+import itertools
 import logging
 from typing import Any, cast, Callable, Dict, List, Optional, TypeVar, Union
 import warnings
@@ -506,6 +506,41 @@ def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET
     }
 
 
+def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
+    """
+    Process search kwargs into list flat dictionaries with the correct combinations of search queries.
+
+    To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
+    - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
+    - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
+    - we then expect searches for all permutations across both lists.
+    """
+    multiple_options = []
+    single_options = {}
+    for k, v in search_kwargs.items():
+        if isinstance(v, (list, tuple)):
+            expand_key_values = [(k, value) for value in v]
+            multiple_options.append(expand_key_values)
+        elif isinstance(v, dict):
+            expand_key_values = list(v.items())
+            multiple_options.append(expand_key_values)
+        else:
+            single_options[k] = v
+
+    expanded_search = []
+    if multiple_options:
+        # Ensure that all permutations of the search options are created.
+        for kv_pair in itertools.product(*multiple_options):
+            d = dict(kv_pair)
+            if single_options:
+                d.update(single_options)
+            expanded_search.append(d)
+    else:
+        expanded_search.append(single_options)
+
+    return expanded_search
+
+
 def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
@@ -538,7 +573,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    import itertools
     from openghg.util import (
         clean_string,
         dates_overlap,
@@ -615,41 +649,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     start_date = search_kwargs.pop("start_date", None)
     end_date = search_kwargs.pop("end_date", None)
-
-
-    def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
-        """
-        Process search kwargs into list flat dictionaries with the correct combinations of search queries.
-
-        To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
-        - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
-        - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
-        - we then expect searches for all permutations across both lists.
-        """
-        multiple_options = []
-        single_options = {}
-        for k, v in search_kwargs.items():
-            if isinstance(v, (list, tuple)):
-                expand_key_values = [(k, value) for value in v]
-                multiple_options.append(expand_key_values)
-            elif isinstance(v, dict):
-                expand_key_values = list(v.items())
-                multiple_options.append(expand_key_values)
-            else:
-                single_options[k] = v
-
-        expanded_search = []
-        if multiple_options:
-            # Ensure that all permutations of the search options are created.
-            for kv_pair in itertools.product(*multiple_options):
-                d = dict(kv_pair)
-                if single_options:
-                    d.update(single_options)
-                expanded_search.append(d)
-        else:
-            expanded_search.append(single_options)
-
-        return expanded_search
 
     expanded_search = parse_search_kwargs(search_kwargs)
     general_metadata = {}
