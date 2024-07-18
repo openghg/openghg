@@ -2,6 +2,7 @@
     the object store
 
 """
+
 import itertools
 import logging
 from typing import Any, cast, Callable, Dict, List, Optional, TypeVar, Union
@@ -452,7 +453,6 @@ def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
         return start <= x <= stop
 
 
-
 def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
     """Convert slice to a function that checks if values are in the interval specified by the slice.
 
@@ -463,6 +463,7 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
     Returns:
         function that returns True if values are in the slice interval
     """
+
     def formatter(x):
         """Formatting if key == 'inlet': try to extract float from strings."""
         if key == "inlet":

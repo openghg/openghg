@@ -55,11 +55,13 @@ class HasMetadataAndData(Protocol):
 
 CT = TypeVar("CT", bound="Comparable")
 
+
 class Comparable(Protocol):
     """Type for checking if objects can be compared.
 
     Based on https://github.com/python/typing/issues/59
     """
+
     def __eq__(self: CT, other: CT) -> bool: ...
 
     def __lt__(self: CT, other: CT) -> bool: ...
@@ -71,4 +73,4 @@ class Comparable(Protocol):
         return self < other or self == other
 
     def __ge__(self: CT, other: CT) -> bool:
-        return (not self < other)
+        return not self < other
