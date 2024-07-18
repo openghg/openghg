@@ -81,12 +81,6 @@ def _get_generic(
     else:
         result = retrieved_data
 
-    # TODO: Included output of this as Any for now because we there are many
-    # options for types returned but can update this
-
-    # We can only get a single data object back here but mypy doesn't understand that
-    # retrieved_data = cast(ObsData, retrieved_data)
-
     return result
 
 
