@@ -4,13 +4,12 @@
 """
 
 import logging
-import re
 from typing import Any, Callable, Dict, List, Optional, Union
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, running_on_hub
+from openghg.util import decompress, extract_float, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
 
@@ -448,24 +447,26 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
     Returns:
         function that returns True if values are in the slice interval
     """
-    if key == "inlet":
-        # TODO: use utility function once it is available
-        decimal_pat = re.compile(r"\d+(\.)?\d*")
-
-        def _formatter(v: Union[str, int, float, None]) -> Optional[float]:
-            if isinstance(v, (int, float)):
-                return v
-            if isinstance(v, str) and (m := decimal_pat.search(v)):
-                return float(m.group(0))
+    def formatter(x):
+        """Formatting if key == 'inlet': try to extract float from strings."""
+        if key == "inlet":
+            if isinstance(x, (int, float)):
+                return x
+            if isinstance(x, str):
+                try:
+                    result = extract_float(x)
+                except ValueError:
+                    return None
+                else:
+                    return result
             return None
-        formatter = _formatter
-    else:
-        formatter = lambda x: x
+
+        return x  # key != "inlet"
 
     start = formatter(s.start)
     stop = formatter(s.stop)
 
-    def test(x) -> bool:
+    def test_func(x) -> bool:
         """Return True if start <= formatter(x) <= stop.
 
         NOTE: we're ignoring types for now. We would need to use a generic function that
@@ -474,14 +475,13 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
         """
         if start is None and stop is None:
             return False
-        elif start is None:
+        if start is None:
             return formatter(x) <= stop  # type: ignore
-        elif stop is None:
+        if stop is None:
             return formatter(x) >= start  # type: ignore
-        else:
-            return start <= formatter(x) <= stop  # type: ignore
+        return start <= formatter(x) <= stop  # type: ignore
 
-    return test
+    return test_func
 
 
 def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET_FLAG") -> dict:
@@ -538,7 +538,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-    from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
         dates_overlap,
