@@ -28,7 +28,6 @@ multDataTypes = Union[
 
 
 def _get_generic(
-    sort: bool = True,
     elevate_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
@@ -45,7 +44,6 @@ def _get_generic(
         dataclass
     """
     from openghg.retrieve import search
-    from openghg.store.spec import define_data_type_classes
 
     results = search(**kwargs)
 
@@ -54,16 +52,6 @@ def _get_generic(
         err_msg = f"Unable to find results for {keyword_string}"
         logger.exception(err_msg)
         raise SearchError(err_msg)
-
-    if sort:
-        logger.warning(
-            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
-        )
-
-    if elevate_inlets:
-        logger.warning(
-            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
-        )
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
     retrieved_data: Any = results.retrieve_all()
