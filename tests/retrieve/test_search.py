@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from openghg.retrieve import (
     search,
@@ -10,6 +12,8 @@ from openghg.retrieve import (
 )
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
+
+from tests.helpers.helpers import clear_test_stores
 
 
 @pytest.mark.parametrize(
@@ -606,3 +610,20 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+
+def test_search_for_float_inlet(tmp_path):
+    """Test searching for a decimal valued inlet"""
+    from openghg.objectstore.metastore import open_metastore
+
+    bucket = str(tmp_path / "_metastore._data")
+
+    with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
+        metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
+
+    with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
+        print(search(store="temp", data_type="surface"))
+        result = search(inlet="12.3m", data_type="surface", store="temp")
+
+    assert result
