@@ -181,7 +181,7 @@ def add_variable_from_metadata(
             del new_data.attrs[metadata_key]
 
     if new_metadata_value is not None:
-        new_metadata_value[metadata_key] = new_metadata_value
+        new_metadata[metadata_key] = new_metadata_value
         new_data.attrs[metadata_key] = new_metadata_value
 
     # make a new data object of same type as input

@@ -57,7 +57,7 @@ def test_combine_data_objects_by_inlet(make_obs_data):
 
     np.testing.assert_equal(result.data.inlet.values, expected_values)
 
-    assert "inlet" not in result.metadata
+    assert result.metadata["inlet"] == "multiple"
 
 
 def test_combine_data_objects_by_site():
