@@ -28,6 +28,7 @@ multDataTypes = Union[
 
 
 def _get_generic(
+    combine_multiple_inlets: bool = True,
     elevate_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
@@ -45,6 +46,10 @@ def _get_generic(
     """
     from openghg.retrieve import search
 
+    if elevate_inlets is True:
+        combine_multiple_inlets = True
+        logger.warning("`elevate_inlets` is deprecated, use `combine_multiple_inlets` instead.", DeprecationWarning)
+
     results = search(**kwargs)
 
     keyword_string = _create_keyword_string(**kwargs)
@@ -61,15 +66,18 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
     elif isinstance(retrieved_data, list) and len(retrieved_data) > 1:
-        param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
-        err_msg = f"""
-        Multiple entries found for input parameters for {keyword_string}.
-        Parameter differences:
-        {param_diff_formatted}
-        Please supply additional parameters or set ranking.
-        """
-        logger.exception(err_msg)
-        raise SearchError(err_msg)
+        if combine_multiple_inlets:
+            pass
+        else:
+            param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
+            err_msg = f"""
+            Multiple entries found for input parameters for {keyword_string}.
+            Parameter differences:
+            {param_diff_formatted}
+            Please supply additional parameters or set ranking.
+            """
+            logger.exception(err_msg)
+            raise SearchError(err_msg)
     elif isinstance(retrieved_data, list):
         retrieved_data = retrieved_data[0]
 
