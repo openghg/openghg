@@ -438,10 +438,21 @@ def search(**kwargs: Any) -> SearchResults:
     return sr
 
 
-T = TypeVar("T", bound=Comparable)
+T = TypeVar("T", bound=Comparable)  # types with <=
 
 
 def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
+    """Return True if start <= x <= stop; if either start or stop is None, omit
+    the corresponding bound.
+
+    Args:
+        x: value to test for inclusion in the interval [start, stop]
+        start: start of the interval
+        stop: end of the interval
+
+    Returns:
+        True if start <= x <= stop, False otherwise
+    """
     if start is None and stop is None:
         return False
     elif start is None:
@@ -487,7 +498,16 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
 
 
 def _process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET_FLAG") -> dict:
-    """Separate range queries and negative lookup keys from normal search terms"""
+    """Separate test queries and negative lookup keys from normal search terms.
+
+    Args:
+        search_terms: dict of search terms
+        neg_lookup_flag: flag value used to indicate negative lookup on a key
+
+    Returns:
+        dict containing search_terms dict, search_tests dict, and negative_lookup_keys list, which
+        are the parameters for TinyDBMetastore.search
+    """
     _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
     search_tests = {}
     negative_lookup_keys = []
@@ -515,6 +535,12 @@ def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
     - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
     - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
     - we then expect searches for all permutations across both lists.
+
+    Args:
+        search_kwargs: dictionary of search terms
+
+    Returns:
+        list of flat dictionaries containing all combinations of search terms from (nested) input search terms
     """
     multiple_options = []
     single_options = {}
