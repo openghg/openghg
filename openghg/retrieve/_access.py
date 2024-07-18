@@ -288,6 +288,7 @@ def get_obs_surface_local(
     retrieved_data = _get_generic(
         sort=True,
         elevate_inlets=False,
+        combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
         **surface_keywords,  # type: ignore
     )
