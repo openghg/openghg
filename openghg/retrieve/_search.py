@@ -464,7 +464,7 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
         function that returns True if values are in the slice interval
     """
 
-    def formatter(x):
+    def formatter(x: Any) -> Any:
         """Formatting if key == 'inlet': try to extract float from strings."""
         if key == "inlet":
             if isinstance(x, (int, float)):
@@ -479,7 +479,7 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
             return None
         return x  # key != "inlet"
 
-    def test_func(x) -> bool:
+    def test_func(x: Any) -> bool:
         """Return True if start <= formatter(x) <= stop."""
         return _in_interval(formatter(x), formatter(s.start), formatter(s.stop))  # type: ignore
 

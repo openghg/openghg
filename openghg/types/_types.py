@@ -4,6 +4,7 @@ import numpy as np
 import xarray as xr
 from pathlib import Path
 from typing import (
+    Any,
     DefaultDict,
     Dict,
     List,
@@ -62,7 +63,7 @@ class Comparable(Protocol):
     Based on https://github.com/python/typing/issues/59
     """
 
-    def __eq__(self: CT, other: CT) -> bool: ...
+    def __eq__(self, other: Any) -> bool: ...
 
     def __lt__(self: CT, other: CT) -> bool: ...
 
