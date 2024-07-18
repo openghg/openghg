@@ -26,7 +26,7 @@ multDataTypes = Union[
 
 
 def _get_generic(
-    combine_multiple_inlets: bool = True,
+    combine_multiple_inlets: bool = False,
     elevate_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
@@ -35,7 +35,6 @@ def _get_generic(
 
     Args:
         data_class: Type of dataobject to create
-        sort: Sort Dataset during recombination
         elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
         ambig_check_params: Parameters to check and print if result is ambiguous.
         kwargs: Additional search terms
@@ -290,7 +289,6 @@ def get_obs_surface_local(
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
     retrieved_data = _get_generic(
-        sort=True,
         elevate_inlets=False,
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
@@ -499,7 +497,6 @@ def get_obs_column(
         ObsColumnData: ObsColumnData object
     """
     obs_data = _get_generic(
-        sort=False,
         species=species,
         satellite=satellite,
         domain=domain,
@@ -611,7 +608,6 @@ def get_flux(
         FluxData: FluxData object
     """
     em_data = _get_generic(
-        sort=False,
         species=species,
         source=source,
         domain=domain,
@@ -659,7 +655,6 @@ def get_bc(
         BoundaryConditionsData: BoundaryConditionsData object
     """
     bc_data = _get_generic(
-        sort=False,
         species=species,
         bc_input=bc_input,
         domain=domain,
