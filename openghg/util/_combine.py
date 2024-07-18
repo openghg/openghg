@@ -185,6 +185,7 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
     """Combine multiple data objects into a single data object, elevating
     the inlet value in their metadata to a data variable with a time dimension.
     """
+    from openghg.util import extract_float
 
     def inlet_formatter(inlet: str) -> float:
         try:
