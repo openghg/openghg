@@ -136,7 +136,8 @@ def add_variable_from_metadata(
     metadata_key: str,
     dims: Union[str, list[str]] = "time",
     formatter: Callable = str,
-    drop_metadata_key: bool = True,
+    drop_metadata_key: bool = False,
+    new_metadata_value: Any = None,
     name: Optional[str] = None,
 ) -> T:
     """Add a data variable to the data of data_object using the value corresponding
@@ -148,6 +149,7 @@ def add_variable_from_metadata(
         dims: dimension or list of dimensions the new variable should have
         formatter: function to apply to retrieved metadata value. Only applied if value is not None.
         drop_metadata_key: if True, del `metadata_key` from the metadata of the returned object.
+        new_metadata_value: value to save for metadata_key
         name: name for the new variable; if `None` then `metadata_key` will be used.
 
     Returns:
@@ -170,8 +172,15 @@ def add_variable_from_metadata(
 
     new_metadata = data_object.metadata.copy()
 
-    if drop_metadata_key and metadata_key in new_metadata:
-        del new_metadata[metadata_key]
+    if drop_metadata_key:
+        if metadata_key in new_metadata:
+            del new_metadata[metadata_key]
+        if metadata_key in new_data.attrs:
+            del new_data.attrs[metadata_key]
+
+    if new_metadata_value is not None:
+        new_metadata_value[metadata_key] = new_metadata_value
+        new_data.attrs[metadata_key] = new_metadata_value
 
     # make a new data object of same type as input
     cls = type(data_object)
@@ -194,5 +203,5 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
         else:
             return result
 
-    preprocess = partial(add_variable_from_metadata, metadata_key="inlet", formatter=inlet_formatter)
+    preprocess = partial(add_variable_from_metadata, metadata_key="inlet", formatter=inlet_formatter, new_metadata_value="multiple")
     return combine_data_objects(data_objects, preprocess=preprocess)
