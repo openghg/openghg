@@ -606,31 +606,16 @@ def _base_search(**kwargs: Any) -> SearchResults:
     readable_buckets = get_readable_buckets()
 
     # If we're given a store then we'll just read from that one
-    try:
-        store = search_kwargs["store"]
-    except KeyError:
-        pass
-    else:
-        del search_kwargs["store"]
-
+    store = search_kwargs.pop("store", None)
+    if store:
         try:
             readable_buckets = {store: readable_buckets[store]}
         except KeyError:
             raise ObjectStoreError(f"Invalid store: {store}")
 
-    try:
-        start_date = search_kwargs["start_date"]
-    except KeyError:
-        start_date = None
-    else:
-        del search_kwargs["start_date"]
+    start_date = search_kwargs.pop("start_date", None)
+    end_date = search_kwargs.pop("end_date", None)
 
-    try:
-        end_date = search_kwargs["end_date"]
-    except KeyError:
-        end_date = None
-    else:
-        del search_kwargs["end_date"]
 
     def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
         """
