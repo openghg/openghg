@@ -75,6 +75,8 @@ def format_inlet(
             "10m"
         >>> format_inlet("10.111")
             "10.1m"
+        >>> format_inlet(["10", 100])
+            ["10m", "100m"]
         >>> format_inlet("multiple")
             "multiple"
         >>> format_inlet("10m", key_name="inlet")
