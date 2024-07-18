@@ -13,8 +13,6 @@ from openghg.retrieve import (
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
 
-from tests.helpers.helpers import clear_test_stores
-
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
