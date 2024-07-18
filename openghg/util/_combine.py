@@ -138,7 +138,7 @@ def add_variable_from_metadata(
     metadata_key: str,
     dims: Union[str, list[str]] = "time",
     formatter: Callable = str,
-    drop_metadata_key: bool = False,
+    drop_metadata_key: bool = True,
     new_metadata_value: Any = None,
     name: Optional[str] = None,
 ) -> T:
