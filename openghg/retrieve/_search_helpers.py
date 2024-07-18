@@ -1,6 +1,7 @@
 """
 Helper functions for processing search input into form accepted by `Metastore.search`
 """
+
 import itertools
 from typing import Any, cast, Callable, Optional, TypeVar
 from openghg.util import extract_float
