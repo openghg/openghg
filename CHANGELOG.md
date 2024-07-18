@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
+
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
 
 ### Updated
