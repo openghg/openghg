@@ -1,4 +1,7 @@
+import math
+
 import pytest
+
 from openghg.util import clean_string, extract_float, is_number
 
 
@@ -44,17 +47,35 @@ def test_is_number():
         ("1234", 1234.0),
         ("1_2_3.4", 123.4),
         ("nan", float("nan")),
-        ("banana", float("nan")),  # oops..
         ("123.456", 123.456),
-        (".1", .1),
+        (".1", 0.1),
         ("123 bananas", 123.0),
         ("+1.23", 1.23),
         ("-1.23", -1.23),
         ("1e-2", 1e-2),
         ("1e2", 1e2),
         ("100m", 100.0),
-        ("100magl", 100.0)
+        ("100magl", 100.0),
+        ("to +inf and beyond", float("inf"))
     ],
 )
 def test_extract_float(string_val, float_val):
-    assert extract_float(string_val) == float_val
+    if string_val != "nan":
+        assert extract_float(string_val) == float_val
+    else:
+        assert math.isnan(extract_float(string_val))
+
+
+def test_extract_float_exclude_bad_nan_inf():
+    """Exclude cases where nan or inf occur inside a word."""
+    with pytest.raises(ValueError):
+        extract_float("banana")
+
+    with pytest.raises(ValueError):
+        extract_float("gainful")
+
+    with pytest.raises(ValueError):
+        extract_float("inferno")
+
+    with pytest.raises(ValueError):
+        extract_float("nana")
