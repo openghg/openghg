@@ -34,5 +34,5 @@ def test_files_checked_and_hashed():
 
     seen, unseen = b.check_hashes(filepaths=filepaths, force=True)
 
-    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in seen
-    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in seen
+    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in unseen
+    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in unseen

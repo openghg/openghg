@@ -5,14 +5,51 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.8.1...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
+
+### Added
+
+- Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
+
+- A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
+
+### Updated
+
+- Updated `get_obs_column` to output mole fraction details. This involves using the apriori level data above a maximum level and applying a correction to the column data (aligned with this process within [acrg code](https://github.com/ACRG-Bristol/acrg)). [PR #1050](https://github.com/openghg/openghg/pull/1050)
+
+## [0.8.2] - 2024-06-06
+
+### Fixed
+
+- Error reporting for `BaseStore` context manager. [PR #1059](https://github.com/openghg/openghg/pull/1059)
+
+- Formatting of `inlet` (and related keys) in search, so that float values of inlet can be retrieved - [PR #1057](https://github.com/openghg/openghg/pull/1057)
+
+- Test for zarr compression `test_bytes_stored_compression` that was failing due to a slight mismatch between actual and expected values. The test now uses a bound on relative error - [PR #1065](https://github.com/openghg/openghg/pull/1065)
+
+- Typo and possible performance issue in `analysis._scenario.combine_datasets` - [PR #1047](https://github.com/openghg/openghg/pull/1047)
+
+- Pinned numpy to < 2.0 and netcdf4 to <= 1.6.5. Numpy 2.0 release caused some minor bugs in OpenGHG, and netCDF4's updates to numpy 2.0 were also causing tests to fail - [PR #1043](https://github.com/openghg/openghg/pull/1043)
+
+- Updated incorrect import for data_manager within tutorial. This now shows the import from `openghg.dataobjects` not `openghg.store` - [PR #1007](https://github.com/openghg/openghg/pull/1007)
+
+- Issue causing missing data when standardising multiple files in a loop - [PR #1032](https://github.com/openghg/openghg/pull/1032)
+
+### Added
+
+- Utility functions to combine multiple "data objects" (e.g. `ObsData`, or anything with `.data` and `.metadata` attributes) - [PR #1063](https://github.com/openghg/openghg/pull/1063) 
+
+- Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
 
 ## [0.8.1] - 2024-05-17
+
 
 ### Added
 
 - Ability to convert from an old style NetCDF object store to the new Zarr based store format - [PR #967](https://github.com/openghg/openghg/pull/967)
 - Updated `parse_edgar` function to handle processing of v8.0 Edgar datasets. [PR #965](https://github.com/openghg/openghg/pull/965)
+- Argument `time_resolved` is added as phase 1 change for `high_time_resolution`, also metadata is updated and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
+- Added ability to pass additional tags as optional metadata through `standardising_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
 - Renaming `high_time_resolution` argument to `time_resolved` in metadata as more appropriate description for footprints going forward and added deprecation warning. - [PR #968](https://github.com/openghg/openghg/pull/968)
 - Added explicit backwards compatability when searching previous object stores containing the `high_time_resolution` keyword rather than `time_resolved` - [PR #990](https://github.com/openghg/openghg/pull/990)
 - Added ability to pass additional tags as optional metadata through `standardise_*` and `transform_flux_data functions`. [PR #981](https://github.com/openghg/openghg/pull/981)
@@ -28,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
 - Replace references to old `supplementary_data` repository with `openghg_defs` - [PR #999](https://github.com/openghg/openghg/pull/999)
 - Added call to synonyms for species while standardising - [PR #984](https://github.com/openghg/openghg/pull/984)
+- Fixed bug where slightly different latitude and longitude values were being standardised and not aligned later down the line. These are now all fixed to the openghg_defs domain definitions where applicable upon standardisation. [PR #1049](https://github.com/openghg/openghg/pull/1049) 
 
 ## [0.8.0] - 2024-03-19
 
@@ -71,7 +109,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 
 ### Added
 
-- Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
+- Added `DeprecationWarning` to the functions `parse_cranfield` and `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
 - Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
 - Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 - Added `MetaStore` abstract base class as interface for metastore classes, and a `ClassicMetaStore` subclass implements the same bucket/key structure as the previous metastore.
@@ -81,7 +119,7 @@ This version brings a breaking change with the move to use the [Zarr](https://za
 - Added config for Black to `pyproject.toml` - [PR #822](https://github.com/openghg/openghg/pull/822)
 - Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
 - Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
-has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
+  has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
 ### Fixed
 
@@ -96,7 +134,6 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
-
 
 ## [0.6.2] - 2023-08-07
 

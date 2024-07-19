@@ -60,14 +60,16 @@ else:
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
-fileFormatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(message)s")
+fileFormatter = logging.Formatter(
+    "%(asctime)s:%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
+)
 fileHandler.setFormatter(fileFormatter)
 fileHandler.setLevel(logging.DEBUG)
 logger.addHandler(fileHandler)
 
 # Create console handler - set to WARNING (lower level)
 consoleHandler = _RichHandler()
-consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
 consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)

@@ -128,7 +128,8 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data
+            data_type: Type of data, one of ["boundary_conditions", "column", "emissions", "flux",
+                "flux_timeseries", "footprints", "surface", "eulerian_model"].
             file_hashes: Hashes of original data files
             sort: Sort data in time dimension
             drop_duplicates: Drop duplicate timestamps, keeping the first value

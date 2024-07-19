@@ -3,6 +3,7 @@ from ._enum import (
     ColumnTypes,
     ColumnSources,
     ObsTypes,
+    FluxTimeseriesTypes,
     FluxTypes,
     FluxDatabases,
     FootprintTypes,
@@ -38,4 +39,6 @@ from ._types import (
     XrDataLike,
     XrDataLikeMatch,
     TimePeriod,
+    HasMetadataAndData,
+    MetadataAndData,
 )
