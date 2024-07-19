@@ -3,6 +3,7 @@
 """
 
 from ._cli import cli
+from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
 from ._domain import (
     get_domain_info,
     find_domain,
@@ -11,6 +12,7 @@ from ._domain import (
     convert_lon_to_360,
     convert_internal_longitude,
     cut_data_extent,
+    align_lat_lon,
 )
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
@@ -41,6 +43,7 @@ from ._site import get_site_info, sites_in_network
 from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
 from ._strings import (
     clean_string,
+    extract_float,
     is_number,
     remove_punctuation,
     to_lowercase,

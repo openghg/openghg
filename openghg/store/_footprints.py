@@ -7,7 +7,7 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import species_lifetime, synonyms
+from openghg.util import species_lifetime, synonyms, align_lat_lon
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -425,7 +425,11 @@ class Footprints(BaseStore):
 
         # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
+        # Also check for alignment of domain coordinates
         for split_data in footprint_data.values():
+
+            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
+
             fp_data = split_data["data"]
             Footprints.validate_data(
                 fp_data,

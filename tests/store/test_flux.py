@@ -307,9 +307,7 @@ def test_add_edgar_database(clear_stores):
     assert metadata.items() >= expected_metadata.items()
 
 
-@pytest.mark.parametrize(
-    "source", [None, "edgar-annual-total"]
-)
+@pytest.mark.parametrize("source", [None, "edgar-annual-total"])
 def test_add_edgar_v8_database(clear_stores, source):
     """Test edgar v8.0 can be added to object store (default domain)"""
     folder = "v8.0_CH4"
@@ -319,7 +317,9 @@ def test_add_edgar_v8_database(clear_stores, source):
     date = "1970"
     expected_source = "anthro" if source is None else source
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
+    proc_results = transform_flux_data(
+        store="user", datapath=test_datapath, database=database, date=date, source=source
+    )
 
     default_domain = "globaledgar"
 

@@ -59,12 +59,12 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg="", exc_info=exc_val)
         else:
             self.save()
 

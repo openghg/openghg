@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from helpers import get_bc_datapath,clear_test_store
+from helpers import get_bc_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
@@ -249,7 +249,7 @@ def test_optional_metadata_raise_error():
             species=species,
             bc_input=bc_input,
             domain=domain,
-            optional_metadata={"purpose":"openghg_tests", "species":"co2"},
+            optional_metadata={"purpose": "openghg_tests", "species": "co2"},
         )
 
 
@@ -269,7 +269,7 @@ def test_optional_metadata():
         species=species,
         bc_input=bc_input,
         domain=domain,
-        optional_metadata={"project":"openghg_test", "tag":"tests"}
+        optional_metadata={"project": "openghg_test", "tag": "tests"},
     )
 
     search_results = search(

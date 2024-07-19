@@ -9,11 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
+
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
+
+### Updated
+
+- Updated `get_obs_column` to output mole fraction details. This involves using the apriori level data above a maximum level and applying a correction to the column data (aligned with this process within [acrg code](https://github.com/ACRG-Bristol/acrg)). [PR #1050](https://github.com/openghg/openghg/pull/1050)
 
 ## [0.8.2] - 2024-06-06
 
 ### Fixed
+
+- Error reporting for `BaseStore` context manager. [PR #1059](https://github.com/openghg/openghg/pull/1059)
+
+- Formatting of `inlet` (and related keys) in search, so that float values of inlet can be retrieved - [PR #1057](https://github.com/openghg/openghg/pull/1057)
+
+- Test for zarr compression `test_bytes_stored_compression` that was failing due to a slight mismatch between actual and expected values. The test now uses a bound on relative error - [PR #1065](https://github.com/openghg/openghg/pull/1065)
 
 - Typo and possible performance issue in `analysis._scenario.combine_datasets` - [PR #1047](https://github.com/openghg/openghg/pull/1047)
 
@@ -25,9 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Utility functions to combine multiple "data objects" (e.g. `ObsData`, or anything with `.data` and `.metadata` attributes) - [PR #1063](https://github.com/openghg/openghg/pull/1063) 
+
 - Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
 
 ## [0.8.1] - 2024-05-17
+
 
 ### Added
 
@@ -50,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
 - Replace references to old `supplementary_data` repository with `openghg_defs` - [PR #999](https://github.com/openghg/openghg/pull/999)
 - Added call to synonyms for species while standardising - [PR #984](https://github.com/openghg/openghg/pull/984)
+- Fixed bug where slightly different latitude and longitude values were being standardised and not aligned later down the line. These are now all fixed to the openghg_defs domain definitions where applicable upon standardisation. [PR #1049](https://github.com/openghg/openghg/pull/1049) 
 
 ## [0.8.0] - 2024-03-19
 

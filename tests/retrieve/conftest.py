@@ -8,7 +8,14 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
+from openghg.standardise import (
+    standardise_surface,
+    standardise_footprint,
+    standardise_flux,
+    standardise_bc,
+    standardise_column,
+    standardise_eulerian,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)

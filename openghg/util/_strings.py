@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, overload
 
 __all__ = ["clean_string", "to_lowercase"]
@@ -132,6 +133,43 @@ def remove_punctuation(s: str) -> str:
 
     s = s.lower()
     return re.sub(r"[^\w\s]", "", s)
+
+
+def extract_float(s: str) -> float:
+    """Extract float from string.
+
+    This extends the built-in `float` function to find floats within a larger string.
+
+    Args:
+        s: string to extract float from
+
+    Returns:
+        first float value found in given string
+
+    Raises:
+        ValueError if no floats found
+    """
+    # construct regex for float following Python's float grammar:
+    # https://docs.python.org/3/library/functions.html#grammar-token-float-floatvalue
+    sign = r"[+-]?"  # optional sign
+    letter_neg_lookbehind = r"(?<![a-zA-Z])"  # negative lookbehind assertion for letters
+    letter_neg_lookahead = r"(?![a-zA-Z])"  # negative lookahead assertion for letters
+    infinity = letter_neg_lookbehind + r"(Infinity|inf)" + letter_neg_lookahead
+    nan = letter_neg_lookbehind + "nan" + letter_neg_lookahead
+    digit_part = r"(\d(_?\d)*)"  # underscores ignored
+    number = (
+        rf"({digit_part}?\.{digit_part}|{digit_part}\.?)"  # at least 1 number before or after decimal place
+    )
+    exponent = r"([eE]?[+-]?\d+)?"  # optional exponent
+    float_number = number + exponent
+    abs_float_value = "(" + "|".join([float_number, infinity, nan]) + ")"
+
+    float_pat = re.compile(sign + abs_float_value, re.IGNORECASE)
+
+    if m := float_pat.search(s):
+        return float(m.group(0))
+
+    raise ValueError(f"No float values found in '{s}'")
 
 
 def check_and_set_null_variable(param: Union[str, None], null_value: Optional[str] = None) -> str:
