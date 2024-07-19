@@ -254,6 +254,11 @@
                     "str"
                 ]
             },
+            "data_sublevel": {
+                "type": [
+                    "str"
+                ]
+            },
             "data_type": {
                 "type": [
                     "str"

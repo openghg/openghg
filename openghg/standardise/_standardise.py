@@ -62,6 +62,7 @@ def standardise_surface(
     height: Optional[str] = None,
     instrument: Optional[str] = None,
     data_level: Optional[str] = None,
+    data_sublevel: Optional[str] = None,
     sampling_period: Optional[Union[Timedelta, str]] = None,
     calibration_scale: Optional[str] = None,
     measurement_type: str = "insitu",
@@ -91,6 +92,14 @@ def standardise_surface(
             extract this from the file.
         height: Alias for inlet.
         instrument: Instrument name
+        data_level: The level of quality control which has been applied to the data.
+            This should follow the convention of:
+                - "L0": raw sensor output
+                - "L1": automated quality assurance (QA) performed
+                - "L2": final data set
+                - "L3": elaborated data products using the data
+        data_sublevel: Typically used for "L1" data depending on different QA performed
+            before data is finalised.
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
         measurement_type: Type of measurement e.g. insitu, flask
@@ -231,6 +240,7 @@ def standardise_surface(
             height=height,
             instrument=instrument,
             data_level=data_level,
+            data_sublevel=data_sublevel,
             sampling_period=sampling_period,
             calibration_scale=calibration_scale,
             measurement_type=measurement_type,
