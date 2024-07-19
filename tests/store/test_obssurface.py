@@ -927,6 +927,50 @@ def test_drop_only_correct_nan():
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
 
 
+@pytest.mark.parametrize(
+    "data_keyword,data_value_1,data_value_2",
+    [
+        ("data_level", "L1", "L2"),
+        ("data_sublevel", "1.1", "1.2"),
+    ],
+)
+def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
+    """
+    Test to check keywords can be used to split data into multiple datasources and be retrieved.
+    """
+
+    clear_test_stores()
+    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc",source_format="OPENGHG")
+    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+
+    data_labels_1 = {data_keyword: data_value_1}
+    data_labels_2 = {data_keyword: data_value_2}
+
+    standardise_surface(filepath=data_filepath_1,
+                        source_format="OPENGHG",
+                        site="TAC",
+                        network="DECC",
+                        store="group",
+                        **data_labels_1)
+
+    standardise_surface(filepath=data_filepath_2,
+                        source_format="OPENGHG",
+                        site="TAC",
+                        network="DECC",
+                        store="group",
+                        **data_labels_2)
+
+    tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
+    tac_2 = get_obs_surface(site="tac", species="co2", **data_labels_2)
+
+    assert tac_1.metadata[data_keyword] == data_value_1.lower()
+    assert tac_2.metadata[data_keyword] == data_value_2.lower()
+
+    # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
+    # this data has been retrieved.
+    np.testing.assert_equal(tac_1.data["mf"].values, 1)
+
+
 def test_obs_data_level_split():
     """
     Test to check data_level keyword can be used to split data into multiple datasources and be retrieved.

@@ -9,7 +9,7 @@ from helpers import (
     clear_test_stores,
     clear_test_store,
 )
-from openghg.retrieve import get_obs_surface, search
+from openghg.retrieve import get_obs_surface, search, search_footprints
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -307,9 +307,6 @@ def test_standardise_footprint():
 
     assert "error" not in results
     assert "tmb_europe_test_model_10m" in results
-
-
-from openghg.retrieve import search_footprints
 
 
 def test_standardise_footprints_chunk(caplog):
