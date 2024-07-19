@@ -38,21 +38,21 @@ def format_data_level(data_level: Optional[str]) -> Optional[str]:
     Returns:
         str: Formatted
     """
+    from openghg.util import is_number
 
     msg_expected = "Expect: '0', '1', '2', '3' (or decimal to indicate sub-level)"
 
     if data_level is not None:
-        data_level = str(data_level)
-        try:
-            number = float(data_level)
-        except (ValueError, TypeError):
+        data_level = str(data_level)  # in case a int/float is passed - cast to str
+        if not is_number(data_level):
             msg = f"Unable to interpret data_level input: {data_level}. " + msg_expected
             logger.error(msg)
             raise MetadataFormatError(msg)
-        else:
-            if number >= 4:
-                msg = "data_level input contains a number > 3: {data_level}. " + msg_expected
-                logger.error(msg)
-                raise MetadataFormatError(msg)
+
+        number = float(data_level)
+        if number >= 4:
+            msg = "data_level input contains a number > 3: {data_level}. " + msg_expected
+            logger.error(msg)
+            raise MetadataFormatError(msg)
 
     return data_level
