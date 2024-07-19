@@ -11,6 +11,7 @@ from openghg.util import check_config, create_config, read_local_config
 def tmp_config_path(tmp_path):
     return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
 
+
 @pytest.fixture
 def mock_get_user_config_path(tmp_config_path, mocker):
     tmp_config_path.parent.mkdir(parents=True)
@@ -33,9 +34,7 @@ def write_mock_config(tmp_path, tmp_config_path):
     tmp_config_path.write_text(toml.dumps(mock_conf))
 
 
-def test_read_config_check_old_stores(
-    mock_get_user_config_path, write_mock_config, caplog
-):
+def test_read_config_check_old_stores(mock_get_user_config_path, write_mock_config, caplog):
     """This tests the read_local_config function when the user has an old store in their config file.
     This test and the _check_valid_store function may be removed once the move to the new store setup is complete.
     """
@@ -155,7 +154,11 @@ def test_create_config_duplicates(monkeypatch, mocker, tmp_path, capsys):
 
     config = toml.loads(mock_config_path.read_text())
 
-    with patch.object(builtins, 'input', side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"])):
+    with patch.object(
+        builtins,
+        "input",
+        side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"]),
+    ):
         with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
             create_config(silent=False)
 

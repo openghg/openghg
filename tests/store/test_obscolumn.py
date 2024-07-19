@@ -68,8 +68,8 @@ def test_optional_metadata_raise_error():
             satellite=satellite,
             domain=domain,
             species=species,
-            optional_metadata={"domain":"openghg_test"}
-     )
+            optional_metadata={"domain": "openghg_test"},
+        )
 
 
 def test_optional_metadata():
@@ -90,7 +90,7 @@ def test_optional_metadata():
         satellite=satellite,
         domain=domain,
         species=species,
-        optional_metadata={"project":"openghg_test"}
+        optional_metadata={"project": "openghg_test"},
     )
     col_data = search_column(species="ch4").retrieve_all()
     metadata = col_data.metadata
