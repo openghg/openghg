@@ -134,8 +134,7 @@ def remove_punctuation(s: str) -> str:
     return re.sub(r"[^\w\s]", "", s)
 
 
-def check_and_set_null_variable(param: Union[str, None],
-                                null_value: Optional[str] = None) -> str:
+def check_and_set_null_variable(param: Union[str, None], null_value: Optional[str] = None) -> str:
     """
     Check whether a variable is set to None and if so replace this with
     the defined string to define a null variable.
@@ -156,5 +155,5 @@ def check_and_set_null_variable(param: Union[str, None],
 
     if param is None:
         param = null_value
-    
+
     return param
