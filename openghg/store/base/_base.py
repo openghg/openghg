@@ -59,12 +59,12 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg="", exc_info=exc_val)
         else:
             self.save()
 
@@ -160,11 +160,19 @@ class BaseStore:
 
         return seen, unseen
 
-    def add_metadata_keys(self, data: dict, additional_metadata: dict):
+    def add_metadata_keys(self, data: Dict, additional_metadata: dict) -> dict:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: Dictionary containing data and metadata for species
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            dict: data dictionary with metadata keys added
+        """
 
         # Basic implemntation of this
-        # TODO: Move this somewhere else? Don't think this needs self but does need to understand form of data.
-        # TODO: May want to add checks to make sure we're not overwriting anything important!
+        # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
+        # TODO: May want to add checks to make sure we're not overwriting anything important.
         for parsed_data in data.values():
             parsed_data["metadata"].update(additional_metadata)
 

@@ -49,6 +49,10 @@ class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
 
 
+class MetadataFormatError(OpenGHGError):
+    """Metadata value not within expected format"""
+
+
 class DataOverlapError(OpenGHGError):
     """New data overlaps with current data stored"""
 

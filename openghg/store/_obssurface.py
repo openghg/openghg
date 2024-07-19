@@ -112,6 +112,7 @@ class ObsSurface(BaseStore):
         height: Optional[str] = None,
         instrument: Optional[str] = None,
         data_level: Optional[str] = None,
+        data_sublevel: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
@@ -143,7 +144,15 @@ class ObsSurface(BaseStore):
             height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+        data_level: The level of quality control which has been applied to the data.
+            This should follow the convention of:
+                - "0": raw sensor output
+                - "1": automated quality assurance (QA) performed
+                - "2": final data set
+                - "3": elaborated data products using the data
+        data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
+            before data is finalised.
+        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
@@ -191,6 +200,8 @@ class ObsSurface(BaseStore):
         from openghg.util import (
             clean_string,
             format_inlet,
+            format_data_level,
+            check_and_set_null_variable,
             hash_file,
             load_surface_parser,
             verify_site,
@@ -221,17 +232,19 @@ class ObsSurface(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
 
-        # Ensure we have a clear missing value for data_level
-        if data_level is None:
-            # TODO: *Null* value was set somewhere in the code - may want to start moving to using this rather than explicit values like this.
-            data_level = "NOT_SET"
-        else:
-            data_level = clean_string(data_level)
+        # Ensure we have a clear missing value for data_level, data_sublevel
+        data_level = format_data_level(data_level)
+
+        data_level = check_and_set_null_variable(data_level)
+        data_sublevel = check_and_set_null_variable(data_sublevel)
+
+        data_level = clean_string(data_level)
+        data_sublevel = clean_string(data_sublevel)
 
         # Define additional metadata which we aren't passing (are never passing?) to the parse functions
         # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
         # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
-        additional_metadata = {"data_level": data_level}
+        additional_metadata = {"data_level": data_level, "data_sublevel": data_sublevel}
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
@@ -400,10 +413,7 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            # Mop up and add additional keys to metadata
-            # - TODO: this should be a function to add metadata which wasn't passed to the parse function to the metadata output
-            # - use additional_metadata defined above
-            # - include on base? Does this use self or just data output from parser_fn?
+            # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.add_metadata_keys(data, additional_metadata)
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
