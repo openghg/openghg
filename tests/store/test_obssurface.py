@@ -930,7 +930,7 @@ def test_drop_only_correct_nan():
 @pytest.mark.parametrize(
     "data_keyword,data_value_1,data_value_2",
     [
-        ("data_level", "L1", "L2"),
+        ("data_level", "1", "2"),
         ("data_sublevel", "1.1", "1.2"),
     ],
 )
@@ -965,43 +965,6 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
 
     assert tac_1.metadata[data_keyword] == data_value_1.lower()
     assert tac_2.metadata[data_keyword] == data_value_2.lower()
-
-    # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
-    # this data has been retrieved.
-    np.testing.assert_equal(tac_1.data["mf"].values, 1)
-
-
-def test_obs_data_level_split():
-    """
-    Test to check data_level keyword can be used to split data into multiple datasources and be retrieved.
-    """
-
-    clear_test_stores()
-    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc",source_format="OPENGHG")
-    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
-
-    data_level_1 = "L1"
-    data_level_2 = "L2"
-
-    standardise_surface(filepath=data_filepath_1,
-                        source_format="OPENGHG",
-                        site="TAC",
-                        network="DECC",
-                        data_level=data_level_1,
-                        store="group")
-
-    standardise_surface(filepath=data_filepath_2,
-                        source_format="OPENGHG",
-                        site="TAC",
-                        network="DECC",
-                        data_level=data_level_2,
-                        store="group")
-
-    tac_1 = get_obs_surface(site="tac", species="co2", data_level=data_level_1)
-    tac_2 = get_obs_surface(site="tac", species="co2", data_level=data_level_2)
-
-    assert tac_1.metadata["data_level"] == data_level_1.lower()
-    assert tac_2.metadata["data_level"] == data_level_2.lower()
 
     # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
     # this data has been retrieved.

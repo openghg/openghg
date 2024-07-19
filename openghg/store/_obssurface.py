@@ -146,10 +146,10 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
         data_level: The level of quality control which has been applied to the data.
             This should follow the convention of:
-                - "L0": raw sensor output
-                - "L1": automated quality assurance (QA) performed
-                - "L2": final data set
-                - "L3": elaborated data products using the data
+                - "0": raw sensor output
+                - "1": automated quality assurance (QA) performed
+                - "2": final data set
+                - "3": elaborated data products using the data
         data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
             before data is finalised.
         sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
@@ -200,6 +200,7 @@ class ObsSurface(BaseStore):
         from openghg.util import (
             clean_string,
             format_inlet,
+            format_data_level,
             check_and_set_null_variable,
             hash_file,
             load_surface_parser,
@@ -232,24 +233,13 @@ class ObsSurface(BaseStore):
         instrument = clean_string(instrument)
 
         # Ensure we have a clear missing value for data_level, data_sublevel
+        data_level = format_data_level(data_level)
+
         data_level = check_and_set_null_variable(data_level)
         data_sublevel = check_and_set_null_variable(data_sublevel)
 
         data_level = clean_string(data_level)
         data_sublevel = clean_string(data_sublevel)
-
-        if data_level is None:
-            # TODO: *Null* value was set somewhere in the code - may want to start moving to using this rather than explicit values like this.
-            data_level = "NOT_SET"
-        else:
-            data_level = clean_string(data_level)
-
-        # Ensure we have a clear missing value for data_sublevel
-        if data_sublevel is None:
-            # TODO: *Null* value was set somewhere in the code - may want to start moving to using this rather than explicit values like this.
-            data_sublevel = "NOT_SET"
-        else:
-            data_sublevel = clean_string(data_sublevel)
 
         # Define additional metadata which we aren't passing (are never passing?) to the parse functions
         # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
