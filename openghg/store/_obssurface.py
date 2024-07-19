@@ -392,7 +392,7 @@ class ObsSurface(BaseStore):
                     data[key]["data"] = value["data"].chunk(chunks)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            data = self.add_metadata_keys(data, additional_metadata)
+            data = self.update_metadata(data, additional_metadata)
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
