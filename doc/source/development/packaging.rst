@@ -91,7 +91,7 @@ Again, it should work as this tag was taken from your fully-tested
 Completing the release
 ----------------------
 
-Once you are satisfied that all workflows have run successfully check the latest version of the ``OpenGHG`` is live on both `PyPi <https://pypi.org/project/openghg/>`_ as well as `Anaconda <https://anaconda.org/openghg/openghg>`_.
+Once you are satisfied that all workflows have run successfully, check that the latest version of the ``OpenGHG`` is live on both `PyPi <https://pypi.org/project/openghg/>`_ as well as `Anaconda <https://anaconda.org/openghg/openghg>`_.
 
 Now merge PR for `devel into master` using the github option of ``Merge Pull Request``.
 
