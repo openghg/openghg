@@ -5,7 +5,7 @@ Packaging releases
 OpenGHG is now fully tested and deployed using GitHub actions.
 The most updated developer code lies in the `OpenGHG repository <https://github.com/openghg/openghg>`_
 
-The development process should be;
+The development process should be:
 
 #. New changes to any section of the code base should always be made using feature branches.
     .. code-block:: bash
