@@ -27,7 +27,7 @@ version should not be used for production runs.
 Defining a release
 ------------------
 
-Releases aim to be backwards compatible and capable of being used for production runs, at least for
+Releases aim to be backwards compatible (unless otherwise stated) and capable of being used for production runs, at least for
 the functionality that is fully described in the tutorial.
 
 We use `semantic versioning <https://semver.org>`__ and take care
