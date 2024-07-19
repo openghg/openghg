@@ -35,12 +35,22 @@ def format_inlet(
 ) -> slice: ...
 
 
+@overload
 def format_inlet(
-    inlet: Union[str, slice, None],
+    inlet: list[Union[str, slice, None]],
     units: str = "m",
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
-) -> Union[str, slice, None]:
+) -> list[Union[str, slice, None]]: ...
+
+
+def format_inlet(
+    inlet: Union[str, slice, None, list[Union[str, slice, None]]],
+    units: str = "m",
+    key_name: Optional[str] = None,
+    special_keywords: Optional[list] = None,
+) -> Union[str, slice, None, list[Union[str, slice, None]]]:
+
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -64,7 +74,7 @@ def format_inlet(
             If so do not apply any formatting.
             If this is not set a special keyword of "multiple" and "column" will still be allowed.
     Returns:
-        str: formatted inlet string / None
+        same type as input, with all strings formatted
 
     Usage:
         >>> format_inlet("10")
@@ -75,6 +85,8 @@ def format_inlet(
             "10m"
         >>> format_inlet("10.111")
             "10.1m"
+        >>> format_inlet(["10", 100])
+            ["10m", "100m"]
         >>> format_inlet("multiple")
             "multiple"
         >>> format_inlet("10m", key_name="inlet")
@@ -84,6 +96,11 @@ def format_inlet(
         >>> format_inlet("10m", key_name="station_height_masl")
             "10"
     """
+    # process list recursively
+    if isinstance(inlet, list):
+        return [format_inlet(x) for x in inlet]
+
+    # pass through None and slice
     if inlet is None or isinstance(inlet, slice):
         return inlet
 

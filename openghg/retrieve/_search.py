@@ -473,6 +473,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     from openghg.util import (
         clean_string,
         dates_overlap,
+        format_inlet,
         synonyms,
         timestamp_epoch,
         timestamp_now,
@@ -490,7 +491,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
     # - clean search terms directly or within data structures
     search_kwargs = {}
     for k, v in kwargs.items():
-        if isinstance(v, (list, tuple)):
+        if k.lower() in ["inlet", "height", "inlet_height_magl", "station_height_masl"]:
+            v = format_inlet(v)
+        elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list
                 v = None
