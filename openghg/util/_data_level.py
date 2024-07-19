@@ -31,6 +31,7 @@ def format_data_level(data_level: Optional[str]) -> Optional[str]:
     msg_expected = "Expect: '0', '1', '2', '3' (or decimal to indicate sub-level)"
 
     if data_level is not None:
+        data_level = str(data_level)
         try:
             number = float(data_level)
         except (ValueError, TypeError):
