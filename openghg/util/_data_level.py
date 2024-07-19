@@ -1,6 +1,5 @@
-from typing import Optional
+from typing import Optional, overload
 import logging
-import re
 from openghg.types import MetadataFormatError
 
 __all__ = ["format_data_level"]
@@ -9,10 +8,22 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
+@overload
+def format_data_level(
+    data_level: str,
+) -> str: ...
+
+
+@overload
+def format_data_level(
+    data_level: None,
+) -> None: ...
+
+
 def format_data_level(data_level: Optional[str]) -> Optional[str]:
     """
     Check the input data_level to ensure this is in the expected format.
-    
+
     This should follow the convention of:
         - "0": raw sensor output
         - "1": automated quality assurance (QA) performed
@@ -35,7 +46,7 @@ def format_data_level(data_level: Optional[str]) -> Optional[str]:
         try:
             number = float(data_level)
         except (ValueError, TypeError):
-            msg = f"Unable to interpret data_level input: {data_level}. " + msg_expected 
+            msg = f"Unable to interpret data_level input: {data_level}. " + msg_expected
             logger.error(msg)
             raise MetadataFormatError(msg)
         else:
