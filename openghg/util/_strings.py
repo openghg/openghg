@@ -132,3 +132,29 @@ def remove_punctuation(s: str) -> str:
 
     s = s.lower()
     return re.sub(r"[^\w\s]", "", s)
+
+
+def check_and_set_null_variable(param: Union[str, None],
+                                null_value: Optional[str] = None) -> str:
+    """
+    Check whether a variable is set to None and if so replace this with
+    the defined string to define a null variable.
+    This is typically: "not_set"
+
+    Args:
+        param: variable to check
+        null_value: Optional value to replace if None. Otherwise details
+            from openghg.store.spec.null_metadata_values will be used.
+    Returns:
+        str: Original string or null value
+    """
+    from openghg.store.spec import null_metadata_values
+
+    if null_value is None:
+        null_values = null_metadata_values()
+        null_value = null_values[0]
+
+    if param is None:
+        param = null_value
+    
+    return param

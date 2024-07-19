@@ -200,6 +200,7 @@ class ObsSurface(BaseStore):
         from openghg.util import (
             clean_string,
             format_inlet,
+            check_and_set_null_variable,
             hash_file,
             load_surface_parser,
             verify_site,
@@ -230,7 +231,13 @@ class ObsSurface(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
 
-        # Ensure we have a clear missing value for data_level
+        # Ensure we have a clear missing value for data_level, data_sublevel
+        data_level = check_and_set_null_variable(data_level)
+        data_sublevel = check_and_set_null_variable(data_sublevel)
+
+        data_level = clean_string(data_level)
+        data_sublevel = clean_string(data_sublevel)
+
         if data_level is None:
             # TODO: *Null* value was set somewhere in the code - may want to start moving to using this rather than explicit values like this.
             data_level = "NOT_SET"

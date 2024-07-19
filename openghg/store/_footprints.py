@@ -265,7 +265,13 @@ class Footprints(BaseStore):
         """
         from openghg.types import FootprintTypes
 
-        from openghg.util import clean_string, format_inlet, check_if_need_new_version, load_footprint_parser
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            check_and_set_null_variable,
+            check_if_need_new_version,
+            load_footprint_parser,
+        )
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -304,10 +310,8 @@ class Footprints(BaseStore):
             species = synonyms(species)
 
         # Ensure we have a clear missing value for met_model
-        if met_model is None:
-            met_model = "NOT_SET"
-        else:
-            met_model = clean_string(met_model)
+        met_model = check_and_set_null_variable(met_model)
+        met_model = clean_string(met_model)
 
         if network is not None:
             network = clean_string(network)
