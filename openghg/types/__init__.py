@@ -22,6 +22,7 @@ from ._errors import (
     RequestBucketError,
     SearchError,
     AttrMismatchError,
+    MetadataFormatError,
     DataOverlapError,
     ConfigFileError,
     MetastoreError,
