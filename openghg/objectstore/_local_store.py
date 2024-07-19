@@ -1,5 +1,6 @@
 from __future__ import annotations
 import glob
+import gzip
 import json
 import os
 import threading
@@ -100,6 +101,7 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
 
 def get_tutorial_store_path() -> Path:
     """Get the path to the local tutorial store
+    in the user's home directory.
 
     Returns:
         pathlib.Path: Path of tutorial store
@@ -333,6 +335,44 @@ def set_object(bucket: str, key: str, data: bytes) -> None:
 
             with open(filename, "wb") as f:
                 f.write(data)
+
+
+def set_compressed_file(bucket: str, key: str, filepath: Path) -> None:
+    """Compress file and store in object store
+
+    Args:
+        bucket: Bucket path
+        key: Key for data in bucket
+        filepath: Path to file
+    Returns:
+        None
+    """
+    filename = Path(f"{bucket}/{key}._data.gz")
+    filename.parent.mkdir(exist_ok=True, parents=True)
+
+    # We shouldn't hit this but this but it might help us catch some logic errors
+    if exists(bucket=bucket, key=key):
+        raise ObjectStoreError("A compressed version of this file already exists.")
+
+    with open(filepath, "rb") as f_in:
+        with gzip.open(filename, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+
+def get_compressed_file(bucket: str, key: str, output_filepath: Path) -> None:
+    """Get compressed file from object store and write to out_filepath
+
+    Args:
+        bucket: Bucket path
+        key: Key for data in bucket
+        out_filepath: Path to write file to
+    Returns:
+        None
+    """
+    filename = f"{bucket}/{key}._data.gz"
+
+    with gzip.open(filename, "rb") as f_in, open(output_filepath, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
 
 def set_object_from_json(bucket: str, key: str, data: Union[str, Dict]) -> None:

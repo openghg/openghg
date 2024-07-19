@@ -44,7 +44,7 @@ class Datasource:
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
-            self._metadata: Dict[str, Union[str, List, Dict]] = {}
+            self._metadata: Dict = {}
             self._start_date = None
             self._end_date = None
             self._status: Optional[Dict] = None
@@ -113,6 +113,7 @@ class Datasource:
         metadata: Dict,
         data: xr.Dataset,
         data_type: str,
+        file_hashes: Dict,
         sort: bool = False,
         drop_duplicates: bool = False,
         skip_keys: Optional[List] = None,
@@ -127,7 +128,9 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["boundary_conditions", "column", "emissions", "flux", "flux_timeseries", "footprints", "surface", "eulerian_model"].
+            data_type: Type of data, one of ["boundary_conditions", "column", "emissions", "flux",
+                "flux_timeseries", "footprints", "surface", "eulerian_model"].
+            file_hashes: Hashes of original data files
             sort: Sort data in time dimension
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
@@ -155,6 +158,7 @@ class Datasource:
             return self.add_timed_data(
                 data=data,
                 data_type=data_type,
+                file_hashes=file_hashes,
                 sort=sort,
                 drop_duplicates=drop_duplicates,
                 new_version=new_version,
@@ -169,6 +173,7 @@ class Datasource:
         self,
         data: xr.Dataset,
         data_type: str,
+        file_hashes: Dict,
         sort: bool,
         drop_duplicates: bool,
         new_version: bool = True,
@@ -182,6 +187,7 @@ class Datasource:
             data: An xarray.Dataset
             data_type: Name of data_type defined by
                 openghg.store.spec.define_data_types()
+            file_hashes: Hashes of original data files
             sort: If True sort by time, may load all data into memory
             drop_duplicates: If True drop duplicates, keeping first found duplicate
             new_version: Create a new version of the data
@@ -211,6 +217,9 @@ class Datasource:
             version_str = self._latest_version
         else:
             version_str = f"v{str(len(self._data_keys) + 1)}"
+
+        # Add the hashes of the original data files
+        self.add_hashes(version=version_str, file_hashes=file_hashes)
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
@@ -364,10 +373,37 @@ class Datasource:
 
         self._last_updated = timestamp_str_now
 
+    def add_hashes(self, version: str, file_hashes: Dict) -> None:
+        """Add hashes of original data files to metadata
+
+        Args:
+            version: Version
+            file_hashes: SHA1 file hash
+        Returns:
+            None
+        """
+        # We'll filepaths in the file_hashes dictionary
+        filename_only = {}
+        for file_hash, filepath in file_hashes.items():
+            try:
+                filename = filepath.name
+            except AttributeError:
+                filename = filepath
+
+            filename_only[file_hash] = filename
+
+        if "original_file_hashes" not in self._metadata:
+            self._metadata["original_file_hashes"] = {version: filename_only}
+        else:
+            if version in self._metadata["original_file_hashes"]:
+                self._metadata["original_file_hashes"][version].update(filename_only)
+            else:
+                self._metadata["original_file_hashes"][version] = filename_only
+
     def delete_all_data(self) -> None:
         """Delete the zarr store that contains all the data
         associated with this Datasource and clear out all keys
-        stored in this Datasource.=
+        stored in this Datasource.
 
         Returns:
             None

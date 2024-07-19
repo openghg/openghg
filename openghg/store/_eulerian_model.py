@@ -206,6 +206,7 @@ class EulerianModel(BaseStore):
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
                 data=model_data,
+                file_hashes=unseen_hashes,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
@@ -225,6 +226,7 @@ class EulerianModel(BaseStore):
             # )
 
             # Record the file hash in case we see this file again
-            self.store_hashes(unseen_hashes)
+            self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
+            self.store_original_files(hash_data=unseen_hashes)
 
             return datasource_uuids

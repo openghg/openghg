@@ -451,6 +451,7 @@ class Footprints(BaseStore):
         # TODO - filter options
         datasource_uuids = self.assign_data(
             data=footprint_data,
+            file_hashes=unseen_hashes,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -467,8 +468,15 @@ class Footprints(BaseStore):
         #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
         # )
 
+        # Here we'll make the possibly dangerous assumption that for footprints
+        # we'll only have a single Datasource
+        # TODO - remove after testing complete
+        if len(datasource_uuids) > 1:
+            raise ValueError("More than one Datasource created for this standardisation run")
+
         # Record the file hash in case we see the file(s) again
-        self.store_hashes(unseen_hashes)
+        self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
+        self.store_original_files(hash_data=unseen_hashes)
 
         return datasource_uuids
 

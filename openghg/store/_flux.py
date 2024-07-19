@@ -250,6 +250,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
+            file_hashes=unseen_hashes,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -259,7 +260,8 @@ class Flux(BaseStore):
         )
 
         # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
+        self.store_hashes(hashes=unseen_hashes, datasource_uuids=datasource_uuids)
+        self.store_original_files(hash_data=unseen_hashes)
 
         return datasource_uuids
 
@@ -335,6 +337,13 @@ class Flux(BaseStore):
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
 
+        # Let's use the size of the directory and database version
+        edgar_database_size = str(sum(f.stat().st_size for f in datapath.glob("**/*") if f.is_file()))
+        edgar_name = f"edgar_{database}"
+        # Now this isn't the hashes of the files but could serve a similar purpose
+        # We don't need to hash all the files in the database
+        database_identifier = {edgar_name: edgar_database_size}
+
         # Define parameters to pass to the parser function from kwargs
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
@@ -362,6 +371,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
+            file_hashes=database_identifier,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

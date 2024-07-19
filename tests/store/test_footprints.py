@@ -4,7 +4,7 @@ from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket, get_metakey_defaults
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
-from openghg.util import hash_bytes
+from openghg.util import hash_bytes, hash_file
 import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
@@ -634,6 +634,37 @@ def test_footprints_chunking_schema():
             time_resolved=False,
             short_lifetime=False,
         )
+
+
+def test_store_and_retrieve_original_files(tmp_path):
+    clear_test_store(name="group")
+
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    bucket = get_writable_bucket(name="group")
+
+    f = Footprints(bucket=bucket)
+
+    seen, unseen = f.check_hashes(filepaths=[file1, file2], force=False)
+
+    assert not seen
+
+    f.store_original_files(hash_data=unseen)
+
+    output_folder = tmp_path / "original_files"
+    output_folder.mkdir()
+
+    filenames_only = {h: f.name for h, f in unseen.items()}
+
+    f.get_original_files(hash_data=filenames_only, output_folder=output_folder)
+
+    original_files = list(output_folder.iterdir())
+    assert len(original_files) == 2
+
+    # Let's make sure they're exactly the same files
+    for filepath in original_files:
+        assert hash_file(filepath) in unseen
 
 
 def test_optional_metadata_raise_error():

@@ -11,7 +11,15 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
+from openghg.objectstore import (
+    get_object_from_json,
+    exists,
+    set_object_from_json,
+    set_compressed_file,
+    get_compressed_file,
+    delete_objects,
+    get_metakeys,
+)
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -36,7 +44,7 @@ class BaseStore:
         self._creation_datetime = str(timestamp_now())
         self._stored = False
         # Hashes of previously uploaded files
-        self._file_hashes: Dict[str, str] = {}
+        self._file_hashes: Dict[str, List] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
         # Where we'll store this object's metastore
@@ -103,16 +111,20 @@ class BaseStore:
     def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
 
-    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+    def store_hashes(self, hashes: Dict[str, Path], datasource_uuids: Dict) -> None:
         """Store the hashes of files we've seen before
 
         Args:
             hahes: Dictionary of hashes
+            datasource_uuids: UUIDs of Datasources these files have been added to
         Returns:
             None
         """
-        name_only = {k: v.name for k, v in hashes.items()}
-        self._file_hashes.update(name_only)
+        hash_data = {}
+        for filehash in hashes:
+            hash_data[filehash] = [v["uuid"] for v in datasource_uuids.values()]
+
+        self._file_hashes.update(hash_data)
 
     def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
@@ -144,6 +156,10 @@ class BaseStore:
         if force:
             unseen = {**seen, **unseen}
 
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"Since 'force' is True, we're reprocessing the following files:\n{seen_files_msg}")
+            seen = {}
+
         if seen:
             logger.warning("Skipping previously standardised files, see log for list.")
             seen_files_msg = "\n".join([str(v) for v in seen.values()])
@@ -159,6 +175,124 @@ class BaseStore:
             logger.info("No new files to process.")
 
         return seen, unseen
+
+    def get_original_file(self, file_hash: str, filename: str, output_folder: Path) -> None:
+        """Retrieve a compressed original file from the object store
+        and export to the output folder
+
+        Args:
+            file_hash: Hash of file
+            filename: Name of file
+            output_folder: Folder to export file to
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}/{filename}"
+        output_filepath = Path(output_folder, filename)
+        get_compressed_file(bucket=self._bucket, key=key, output_filepath=output_filepath)
+
+    def get_original_files(self, hash_data: Dict, output_folder: Union[str, Path]) -> None:
+        """Retrieve original files from the object store
+
+        Args:
+            hash_data: Hash data from Datasource metadata
+            output_folder: Folder to export files to
+        Returns:
+            None
+        """
+        output_folder = Path(output_folder)
+
+        if not output_folder.exists():
+            raise FileNotFoundError(f"Output folder {output_folder} does not exist.")
+
+        for file_hash, filename in hash_data.items():
+            self.get_original_file(file_hash=file_hash, filename=filename, output_folder=output_folder)
+
+    def store_original_file(self, file_hash: str, filepath: Path) -> None:
+        """Store a compressed version of the original data file in the object store
+
+        Args:
+            file_hash: SHA1 hash of file
+            filepath: Path to file
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}/{filepath.name}"
+        set_compressed_file(bucket=self._bucket, key=key, filepath=filepath)
+
+    def store_original_files(self, hash_data: Dict[str, Path]) -> None:
+        """Store compressed versions of the original data files in the object store.
+        This expects a dictionary of file hashes and file paths created by the
+        BaseStore.check_hashes function.
+
+        Args:
+            hash_data: Dictionary of SHA1 hash: filepath key values
+        Returns:
+            None
+        """
+        for file_hash, filepath in hash_data.items():
+            self.store_original_file(file_hash=file_hash, filepath=filepath)
+
+    def delete_original_file(self, file_hash: str) -> None:
+        """Delete original files stored in the object store
+
+        Args:
+            file_hash: Hash of file to delete
+        Returns:
+            None
+        """
+        key = f"{self._root}/original_files/{file_hash}"
+        delete_objects(bucket=self._bucket, prefix=key)
+
+    def delete_original_files(self, file_hashes: Sequence) -> None:
+        """Delete original files stored in the object store
+
+        Args:
+            file_hashes: List of file hashes for files to delete
+        Returns:
+            None
+        """
+        for file_hash in file_hashes:
+            self.delete_original_file(file_hash)
+
+    # TODO - need a better name for this
+    def delete_records(self, file_hashes: Sequence, datasource_uuid: str) -> None:
+        """Delete the file hashes associated with a Datasource.
+        If this is the only Datasource then we just delete the hash.
+        Otherwise we remove the Datasource UUID from the list of UUIDs.
+
+        Args:
+            file_hashes: Hashes of files to remove
+            datasource_uuid: UUID of Datasource associated with files
+        Returns:
+            None
+        """
+        to_delete = []
+        for filehash in file_hashes:
+            records = self._file_hashes[filehash].copy()
+            if len(records) == 1:
+                # We shouldn't hit this but we'll check
+                if datasource_uuid not in records:
+                    raise ValueError(
+                        "Mismatch in UUID of Datasource stored for this"
+                        + f"filehash ({next(iter(records))} and the one given {datasource_uuid})"
+                    )
+
+                to_delete.append(filehash)
+            else:
+                logger.warning(
+                    "We currently recommend deleting all Datasources associated with this file\n"
+                    + "otherwise you may not be able to standardise the file again.\n"
+                    f"Other Datasources associated with this file are : {records}."
+                )
+                records.remove(datasource_uuid)
+                self._file_hashes[filehash] = records
+
+        for filehash in to_delete:
+            self._file_hashes.pop(filehash)
+            # We only delete the original file if there are no longer
+            # any Datasources containing its data
+            self.delete_original_file(filehash)
 
     def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
@@ -200,6 +334,7 @@ class BaseStore:
         self,
         data: Dict,
         data_type: str,
+        file_hashes: Dict,
         required_keys: Sequence[str],
         sort: bool = True,
         drop_duplicates: bool = True,
@@ -217,6 +352,7 @@ class BaseStore:
                 data: Dictionary containing data and metadata for species
                 overwrite: If True overwrite current data stored
                 data_type: Type of data, timeseries etc
+                file_hashes: Hashes of original data files
                 required_keys: Required minimum keys to lookup unique Datasource
                 sort: Sort data in time dimension
                 drop_duplicates: Drop duplicate timestamps, keeping the first value
@@ -282,12 +418,13 @@ class BaseStore:
                 datasource.add_data(
                     metadata=meta_copy,
                     data=dataset,
+                    data_type=data_type,
+                    file_hashes=file_hashes,
                     sort=sort,
                     drop_duplicates=drop_duplicates,
                     skip_keys=skip_keys,
                     new_version=new_version,
                     if_exists=if_exists,
-                    data_type=data_type,
                     compressor=compressor,
                     filters=filters,
                 )

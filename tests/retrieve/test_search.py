@@ -511,6 +511,23 @@ def test_search_flux():
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
+def test_search_flux_retrieve_original_files():
+    """Ensure we can retrieve the original files from the data
+    returned by the search result.
+    """
+    res = search_flux(
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+    )
+
+    uid = next(iter(res.metadata))
+
+    hashes = res.metadata[uid]["original_file_hashes"]["v1"]
+    assert "9ff6de082836e1735d2b2dea2dbbc69b2dc89229" in hashes
+    assert "9554a94b439317770b99c3877a1b17941bb19255" in hashes
+
+
 def test_search_flux_select():
     """
     Test limited date range can be searched for footprint source.
