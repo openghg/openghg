@@ -930,16 +930,21 @@ def test_drop_only_correct_nan():
 def test_optional_parameters():
     """Test if ValueError is raised for invalid input value to calibration_scale."""
 
-    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
-    with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
-        standardise_surface(filepath=data_filepath,
-                        source_format="OPENGHG",
-                        site="TAC",
-                        network="DECC",
-                        calibration_scale="unknown",
-                        instrument='picarro',
-                        store="group" )
+    with pytest.raises(
+        ValueError,
+        match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007",
+    ):
+        standardise_surface(
+            filepath=data_filepath,
+            source_format="OPENGHG",
+            site="TAC",
+            network="DECC",
+            calibration_scale="unknown",
+            instrument="picarro",
+            store="group",
+        )
 
 
 def test_optional_metadata_raise_error():
@@ -952,7 +957,12 @@ def test_optional_metadata_raise_error():
 
     with pytest.raises(ValueError):
         standardise_surface(
-            filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"species":"openghg_tests"}
+            filepath=rgl_filepath,
+            source_format="CRDS",
+            network="DECC",
+            site="RGL",
+            store="group",
+            optional_metadata={"species": "openghg_tests"},
         )
 
 
@@ -964,7 +974,12 @@ def test_optional_metadata():
     rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
 
     standardise_surface(
-        filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"project":"openghg_tests"}
+        filepath=rgl_filepath,
+        source_format="CRDS",
+        network="DECC",
+        site="RGL",
+        store="group",
+        optional_metadata={"project": "openghg_tests"},
     )
 
     rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")
