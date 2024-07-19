@@ -50,7 +50,6 @@ def format_inlet(
     key_name: Optional[str] = None,
     special_keywords: Optional[list] = None,
 ) -> Union[str, slice, None, list[Union[str, slice, None]]]:
-
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
