@@ -295,6 +295,8 @@ class ObsSurface(BaseStore):
         if chunks is None:
             chunks = {}
 
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -317,40 +319,59 @@ class ObsSurface(BaseStore):
                 )
                 continue
 
-            # Define required input parameters for parser function
-            required_parameters = {
-                "data_filepath": data_filepath,
-                "site": site,
-                "network": network,
-                "inlet": inlet,
-                "instrument": instrument,
-                "sampling_period": sampling_period_seconds,
-                "measurement_type": measurement_type,
-                "site_filepath": site_filepath,
-            }
-            if source_format == "GCWERKS":
-                required_parameters["precision_filepath"] = precision_filepath
+            # # Define required input parameters for parser function
+            # required_parameters = {
+            #     "data_filepath": data_filepath,
+            #     "site": site,
+            #     "network": network,
+            #     "inlet": inlet,
+            #     "instrument": instrument,
+            #     "sampling_period": sampling_period_seconds,
+            #     "measurement_type": measurement_type,
+            #     "site_filepath": site_filepath,
+            # }
+            # if source_format == "GCWERKS":
+            #     required_parameters["precision_filepath"] = precision_filepath
 
-            # Collect together optional parameters (not required but
-            # may be accepted by underlying parser function)
-            optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
-            # TODO: extend optional_parameters to include kwargs when added
+            # # Collect together optional parameters (not required but
+            # # may be accepted by underlying parser function)
+            # optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
+            # # TODO: extend optional_parameters to include kwargs when added
 
-            input_parameters = required_parameters.copy()
+            # input_parameters = required_parameters.copy()
 
-            # Find parameters that parser_fn accepts (must accept all required arguments already)
+            # # Find parameters that parser_fn accepts (must accept all required arguments already)
             signature = inspect.signature(parser_fn)
-            fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+            parser_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-            # Check if optional parameters are present in function call and only use those which are.
-            for param, param_value in optional_parameters.items():
-                if param in fn_accepted_parameters:
+            # # Check if optional parameters are present in function call and only use those which are.
+            # for param, param_value in optional_parameters.items():
+            #     if param in fn_accepted_parameters:
+            #         input_parameters[param] = param_value
+            #     else:
+            #         logger.warning(
+            #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+            #             f"This is not accepted by the current standardisation function: {parser_fn}"
+            #         )
+
+            # translate_keys = {"sampling_period": "sample_period_seconds"}
+            # fn_input_parameters
+
+            # Add details defined within the function that the parser needs
+            input_parameters = {"data_filepath": data_filepath}
+            if source_format == "GCWERKS":
+                input_parameters["precision_filepath"] = precision_filepath
+            
+            for param, param_value in fn_input_parameters.items():
+                if param in parser_accepted_parameters:
                     input_parameters[param] = param_value
-                else:
-                    logger.warning(
-                        f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                        f"This is not accepted by the current standardisation function: {parser_fn}"
-                    )
+                # else:
+                #     logger.warning(
+                #         f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                #         f"This is not accepted by the current standardisation function: {parser_fn}"
+                #     )
+
+            input_parameters["sampling_period"] = sampling_period_seconds
 
             # Call appropriate standardisation function with input parameters
             data = parser_fn(**input_parameters)
