@@ -205,8 +205,8 @@ def _format_species(
 
         attributes = file_params
         # Need to stop the "instrument" attr from being overwritten in combined files
-        attributes["instrument_name"] = attributes.pop("instrument")
-        attributes["instrument_name"] = metadata["instrument"]
+        if "instrument" in attributes.keys():
+            attributes["instrument_name"] = attributes.pop("instrument")
 
         metadata_keys = metadata_default_keys()
 
