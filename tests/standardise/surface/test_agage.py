@@ -25,12 +25,12 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-test.nc", source_format="GC_nc")
+    cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
         data_filepath=cgo_data,
         site="cgo",
-        instrument="gcms-medusa",
+        instrument="GCMS-Medusa/GCMS",
         network="agage",
     )
 
