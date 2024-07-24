@@ -57,18 +57,25 @@ def parse_agage(
     file_instrument = None
 
     if "instrument_type" in file_params.keys():
-        file_instrument = clean_string(file_params["instrument_type"])
-        if instrument is None:
-            instrument=file_instrument
+        # For multiple values in instrument_type of file updating the instrument metadata to multiple
+        instrument_number = len(file_params["instrument_type"].split("/"))
+        if instrument_number > 1:
+            file_instrument = "multiple"
+            instrument = file_instrument
+        else:
+            file_instrument = clean_string(file_params["instrument_type"])
+            if instrument is None:
+                instrument=file_instrument
 
     elif instrument is None:
         raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
 
-    if file_instrument and instrument:
-        if file_instrument != instrument:
-            raise ValueError(
-                f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
-            )
+    if instrument != "multiple":
+        if file_instrument and instrument:
+            if file_instrument != instrument:
+                raise ValueError(
+                    f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
+                )
 
     instrument = str(instrument)
 
