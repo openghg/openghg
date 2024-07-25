@@ -1,10 +1,12 @@
 """
 Functions for formatting metadata.
 """
+
 from typing import cast, Optional
 
-from ._strings import clean_string
 from ._inlet import format_inlet as _format_inlet
+from ._species import synonyms
+from ._strings import check_and_set_null_variable, clean_string
 
 
 def format_site(site: str) -> str:
@@ -58,6 +60,7 @@ def format_species(species: Optional[str]) -> str:
         species = "inert"
     else:
         species = clean_string(species)
+        species = synonyms(species)
 
     return species
 
@@ -65,10 +68,8 @@ def format_species(species: Optional[str]) -> str:
 def format_met_model(met_model: Optional[str]) -> str:
     """Originally from Footprints.read_file"""
     # Ensure we have a clear missing value for met_model
-    if met_model is None:
-        met_model = "NOT_SET"
-    else:
-        met_model = clean_string(met_model)
+    met_model = check_and_set_null_variable(met_model)
+    met_model = clean_string(met_model)
 
     return met_model
 

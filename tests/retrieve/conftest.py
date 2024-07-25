@@ -8,7 +8,14 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
+from openghg.standardise import (
+    standardise_surface,
+    standardise_footprint,
+    standardise_flux,
+    standardise_bc,
+    standardise_column,
+    standardise_eulerian,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -100,8 +107,9 @@ def data_read():
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
-    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
-    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    # Note: added out of order to check this can still be retrieved
+    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     species = "co2"
     source = "gpp-cardamom"

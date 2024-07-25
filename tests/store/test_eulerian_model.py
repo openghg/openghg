@@ -58,7 +58,13 @@ def test_optional_metadata_raise_error():
     with pytest.raises(ValueError):
         test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-        proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4", optional_metadata={"species":"ch4", "tag":"tests"})
+        proc_results = standardise_eulerian(
+            store="user",
+            filepath=test_datapath,
+            model="GEOSChem",
+            species="ch4",
+            optional_metadata={"species": "ch4", "tag": "tests"},
+        )
 
 
 def test_optional_metadata():
@@ -67,7 +73,13 @@ def test_optional_metadata():
     """
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4", optional_metadata={"project":"openghg_tests", "tag":"tests"})
+    proc_results = standardise_eulerian(
+        store="user",
+        filepath=test_datapath,
+        model="GEOSChem",
+        species="ch4",
+        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+    )
 
     search_results = search(
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"

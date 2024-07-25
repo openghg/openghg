@@ -4,6 +4,7 @@ Tests for the TinyDB based metastore.
 It should be possible to use these tests with any metastore,
 provided the fixtures are changed.
 """
+
 import pytest
 import tinydb
 from openghg.objectstore.metastore import TinyDBMetaStore

@@ -11,7 +11,7 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from xarray import open_dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -59,12 +59,12 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg="", exc_info=exc_val)
         else:
             self.save()
 
@@ -160,6 +160,60 @@ class BaseStore:
 
         return seen, unseen
 
+    def update_metadata(self, data: Dict, additional_metadata: Dict) -> Dict:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: Dictionary containing data and metadata for species
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            dict: data dictionary with metadata keys added
+        """
+
+        # Basic implemntation of this
+        # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
+        # TODO: May want to add checks to make sure we're not overwriting anything important.
+        for parsed_data in data.values():
+            parsed_data["metadata"].update(additional_metadata)
+
+        return data
+
+    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            optional_metadata: Dictionary of optional metadata
+        Returns:
+            tuple: Tuple of keys
+        """
+        try:
+            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+        except KeyError:
+            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata)
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+            if optional:
+                for key in optional_metadata:
+                    if key in optional:
+                        lookup_keys.append(key)
+
+        return lookup_keys
+
     def assign_data(
         self,
         data: Dict,
@@ -202,6 +256,9 @@ class BaseStore:
         from openghg.store.spec import null_metadata_values
 
         uuids = {}
+
+        # Get the metadata keys for this type
+        # metakeys = self.get_metakeys()
 
         self._metastore.acquire_lock()
         try:
@@ -303,8 +360,10 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
             required_result = self._metastore.search(required_metadata)

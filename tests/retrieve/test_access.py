@@ -268,6 +268,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[0] == 1849.814
     assert sliced_mhd_data.mf[-1] == 1891.094
 
+
 @pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
@@ -307,14 +308,26 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
 
 def test_get_obs_column():
-    column_data = get_obs_column(species="ch4", satellite="gosat")
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10)
 
     obscolumn = column_data.data
 
-    assert "xch4" in obscolumn
+    assert "mf" in obscolumn
+    assert "mf_prior_factor" in obscolumn
+    assert "mf_prior_upper_level_factor" in obscolumn
+    assert "mf_repeatability" in obscolumn
+
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
-    assert obscolumn.attrs["species"] == "ch4"
+    assert np.isclose(obscolumn["mf"][0], 1238.2743)
+    assert obscolumn.attrs["species"] == "CH4"
+
+def test_get_obs_column_max_level():
+    # test max level defaults to highest available if out of range
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+    obscolumn = column_data.data
+    assert np.isclose(obscolumn["mf"][0], 1818.2135)
+
+
 
 
 def test_get_flux():
@@ -332,6 +345,20 @@ def test_get_flux():
     time = flux["time"]
     assert time[0] == Timestamp("2012-01-01T00:00:00")
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
