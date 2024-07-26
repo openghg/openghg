@@ -9,7 +9,7 @@ from pathlib import Path
 from pandas import Timestamp
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
-from xarray import open_dataset
+import xarray as xr
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
@@ -603,7 +603,7 @@ class BaseStore:
 
     def check_chunks(
         self,
-        filepaths: Union[str, list[str]],
+        ds: xr.Dataset,
         chunks: Optional[Dict[str, int]] = None,
         max_chunk_size: int = 300,
         **chunking_kwargs: Any,
@@ -611,7 +611,7 @@ class BaseStore:
         """Check the chunk size of a variable in a dataset and return the chunk size
 
         Args:
-            filepaths: List of file paths
+            ds: dataset to check
             variable: Name of the variable that we want to check for max chunksize
             chunk_dimension: Dimension to chunk over
             secondary_dimensions: List of secondary dimensions to chunk over
@@ -619,9 +619,6 @@ class BaseStore:
         Returns:
             Dict: Dictionary of chunk sizes
         """
-        if not isinstance(filepaths, list):
-            filepaths = [filepaths]
-
         try:
             default_schema = self.chunking_schema(**chunking_kwargs)
         except NotImplementedError:
@@ -632,14 +629,13 @@ class BaseStore:
         default_chunks = default_schema.chunks
         secondary_dimensions = default_schema.secondary_dims
 
-        with open_dataset(filepaths[0]) as ds:
-            dim_sizes = dict(ds[variable].sizes)
-            var_dtype_bytes = ds[variable].dtype.itemsize
+        dim_sizes = dict(ds[variable].sizes)
+        var_dtype_bytes = ds[variable].dtype.itemsize
 
         if secondary_dimensions is not None:
             missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
             if missing_dims:
-                raise ValueError(f"File {filepaths[0]} is missing the following dimensions: {missing_dims}")
+                raise ValueError(f"The following dimensions are missing: {missing_dims}")
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks
