@@ -376,14 +376,6 @@ class Footprints(BaseStore):
                     logger.info("Updating short_lifetime to True since species has an associated lifetime")
                     short_lifetime = True
 
-        chunks = self.check_chunks(
-            filepaths=filepath,
-            chunks=chunks,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            short_lifetime=short_lifetime,
-        )
-
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
         param = {
@@ -400,7 +392,7 @@ class Footprints(BaseStore):
             "short_lifetime": short_lifetime,
             "period": period,
             "continuous": continuous,
-            "chunks": chunks,
+            # "chunks": chunks,
         }
 
         input_parameters: dict[Any, Any] = param.copy()
@@ -423,11 +415,20 @@ class Footprints(BaseStore):
 
         footprint_data = parser_fn(**input_parameters)
 
+        chunks = self.check_chunks(
+            ds=list(footprint_data.values())[0]["data"],
+            chunks=chunks,
+            high_spatial_resolution=high_spatial_resolution,
+            time_resolved=time_resolved,
+            short_lifetime=short_lifetime,
+        )
+
         # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
         # Also check for alignment of domain coordinates
         for split_data in footprint_data.values():
 
+            split_data["data"] = split_data["data"].chunk(chunks)
             split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
 
             fp_data = split_data["data"]
