@@ -12,7 +12,7 @@ from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
-from ._search_helpers import parse_search_kwargs, process_special_queries
+from ._search_helpers import flatten_search_kwargs, process_special_queries
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -563,7 +563,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     start_date = search_kwargs.pop("start_date", None)
     end_date = search_kwargs.pop("end_date", None)
 
-    expanded_search = parse_search_kwargs(search_kwargs)
+    expanded_search = flatten_search_kwargs(search_kwargs)
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
