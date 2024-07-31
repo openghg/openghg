@@ -181,23 +181,22 @@ class TinyDBMetaStore(MetaStore):
         """
         return tinydb.Query().fragment(self._format_metadata(metadata))
 
-    def _get_test_query(self, search_tests: dict[str, Callable]) -> tinydb.queries.QueryInstance:
-        """Return a TinyDB query that searches for all records whose metadata
-        contains the values that pass the "test function" for that key.
+    def _get_function_query(self, search_functions: dict[str, Callable]) -> tinydb.queries.QueryInstance:
+        """Return a TinyDB query for all records whose values that pass the "test function" for that key.
 
-        For instance, if search_tests = {"inlet": (lambda x: float(x[:-1]) > 100.0)}, then the query returned
+        For instance, if search_functions = {"inlet": (lambda x: float(x[:-1]) > 100.0)}, then the query returned
         will search for data where the inlet height is above 100 meters. Notice that the function includes
         formatting for the values stored in the metastore.
 
         Args:
-            search_ranges: key-value pairs to search by; the values are functions, which
+            search_functions: key-value pairs to search by; the values are functions, which
                 are applied to the metadata records in the metastore: `v(metadata_record[k])`,
                 and the query tests if the result is `True`.
         Returns:
-            TinyDB QueryInstance that requires all of the range options to be true
+            TinyDB QueryInstance that requires all of the functions to evaluate to true
         """
-        search_tests = self._format_metadata(search_tests)
-        queries = [tinydb.Query()[k].test(v) for k, v in search_tests.items()]
+        search_functions = self._format_metadata(search_functions)
+        queries = [tinydb.Query()[k].test(v) for k, v in search_functions.items()]
         return reduce(lambda x, y: (x & y), queries)
 
     def _get_negative_lookup_query(self, negative_lookup_keys: list[str]) -> tinydb.queries.QueryInstance:
@@ -235,7 +234,7 @@ class TinyDBMetaStore(MetaStore):
         _query = self._get_query(search_terms)
 
         if search_tests:
-            _test_query = self._get_test_query(search_tests)
+            _test_query = self._get_function_query(search_tests)
             _query = _query & _test_query
 
         if negative_lookup_keys:
