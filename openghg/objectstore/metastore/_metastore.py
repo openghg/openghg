@@ -216,7 +216,7 @@ class TinyDBMetaStore(MetaStore):
     def search(
         self,
         search_terms: Optional[MetaData] = None,
-        search_tests: Optional[dict[str, Callable]] = None,
+        search_functions: Optional[dict[str, Callable]] = None,
         negative_lookup_keys: Optional[list[str]] = None,
     ) -> QueryResults:
         """Search metastore using a dictionary of search terms.
@@ -225,6 +225,10 @@ class TinyDBMetaStore(MetaStore):
             search_terms: dictionary of key-value pairs to search by.
                 For instance search_terms = {'site': 'TAC'} will find all results
                 whose site is 'TAC'.
+            search_functions: dictionary of key-function pairs to search by.
+                See `_get_function_query` docstring for examples.
+            negative_lookup_keys: list of keys that should *not* be present in the
+                results.
 
         Returns:
             list: list of records in the metastore matching the given search terms.
@@ -233,9 +237,9 @@ class TinyDBMetaStore(MetaStore):
             search_terms = {}
         _query = self._get_query(search_terms)
 
-        if search_tests:
-            _test_query = self._get_function_query(search_tests)
-            _query = _query & _test_query
+        if search_functions:
+            _function_query = self._get_function_query(search_functions)
+            _query = _query & _function_query
 
         if negative_lookup_keys:
             _neg_query = self._get_negative_lookup_query(negative_lookup_keys)
