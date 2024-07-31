@@ -24,7 +24,7 @@ def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
         True if start <= x <= stop, False otherwise
     """
     if start is None and stop is None:
-        return False
+        return True
     elif start is None:
         stop = cast(T, stop)  # to appease mypy
         return x <= stop
