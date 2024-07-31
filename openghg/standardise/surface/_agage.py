@@ -4,7 +4,6 @@ from typing import Dict, Optional, Union
 import pandas as pd
 import xarray as xr
 from addict import Dict as aDict
-from numpy import floor
 from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys
 from openghg.types import optionalPathType
 from openghg.util import clean_string, format_inlet
@@ -211,7 +210,7 @@ def _format_species(
         metadata_keys = metadata_default_keys()
 
         # JP hack to stop instrument getting overwritten for multi-instrument files
-        instrument = metadata["instrument"]
+        # instrument = metadata["instrument"]
 
         for k, v in attributes.items():
             if k in metadata_keys:
