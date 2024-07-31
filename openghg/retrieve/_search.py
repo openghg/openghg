@@ -264,6 +264,8 @@ def search_surface(
     inlet: Union[str, List[str], None] = None,
     height: Union[str, List[str], None] = None,
     instrument: Union[str, List[str], None] = None,
+    data_level: Union[str, List[str], None] = None,
+    data_sublevel: Union[str, List[str], None] = None,
     measurement_type: Union[str, List[str], None] = None,
     source_format: Union[str, List[str], None] = None,
     network: Union[str, List[str], None] = None,
@@ -283,6 +285,9 @@ def search_surface(
         inlet: Inlet height above ground level in metres
         height: Alias for inlet
         instrument: Instrument name
+        data_level: Data quality assurance level (0-3)
+        data_sublevel: Typically used for "L1" data depending on different QA
+            performed before data is finalised.
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
@@ -297,7 +302,7 @@ def search_surface(
     Returns:
         SearchResults: SearchResults object
     """
-    from openghg.util import format_inlet
+    from openghg.util import format_inlet, format_data_level
 
     if start_date is not None:
         start_date = str(start_date)
@@ -313,11 +318,19 @@ def search_surface(
     else:
         inlet = format_inlet(inlet)
 
+    # Ensure data_level input is formatted
+    if isinstance(data_level, list):
+        data_level = [format_data_level(value) for value in data_level]
+    else:
+        data_level = format_data_level(data_level)
+
     results = search(
         species=species,
         site=site,
         inlet=inlet,
         instrument=instrument,
+        data_level=data_level,
+        data_sublevel=data_sublevel,
         measurement_type=measurement_type,
         data_type="surface",
         source_format=source_format,

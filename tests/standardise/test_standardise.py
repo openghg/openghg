@@ -9,8 +9,7 @@ from helpers import (
     clear_test_stores,
     clear_test_store,
 )
-from openghg.retrieve import get_obs_surface, search, get_footprint
-
+from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -342,9 +341,6 @@ def test_standardise_align_footprint():
 
     assert np.array_equal(data.data.lat.values, true_lats)
     assert np.array_equal(data.data.lon.values, true_lons)
-
-
-from openghg.retrieve import search_footprints
 
 
 def test_standardise_footprints_chunk(caplog):

@@ -160,6 +160,24 @@ class BaseStore:
 
         return seen, unseen
 
+    def update_metadata(self, data: Dict, additional_metadata: Dict) -> Dict:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: Dictionary containing data and metadata for species
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            dict: data dictionary with metadata keys added
+        """
+
+        # Basic implemntation of this
+        # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
+        # TODO: May want to add checks to make sure we're not overwriting anything important.
+        for parsed_data in data.values():
+            parsed_data["metadata"].update(additional_metadata)
+
+        return data
+
     def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
