@@ -111,10 +111,18 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     """
     Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
 
-    To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
-    - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
-    - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
-    - we then expect searches for all permutations across both lists.
+    To set this up for keywords with multiple options, lists of the (key, value) pair terms are created.
+
+    For instance, if
+
+        species = ["ch4", "methane"]
+
+    and
+
+        time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
+
+    we expect this to create search options to look for: "species" as "ch4" OR "methane" AND
+    either "time_resolved" as "true" OR "high_time_resolution" as "true".
 
     Args:
         search_kwargs: dictionary of search terms
@@ -122,8 +130,14 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     Returns:
         list of flat dictionaries containing all combinations of search terms from (nested) input search terms
     """
-    multiple_options = []
     single_options = {}
+
+    # multiple_options will contain tuple pairs for the options we wish to search for. e.g. for
+    # species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
+    # multiple_options is: [[("species", "ch4"), ("species", "methane")],
+    #                       [("time_resolved": "true"), ("high_time_resolution": "true")]]
+    multiple_options = []
+
     for k, v in search_kwargs.items():
         if isinstance(v, (list, tuple)):
             expand_key_values = [(k, value) for value in v]
