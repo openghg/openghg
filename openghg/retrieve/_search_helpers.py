@@ -1,6 +1,4 @@
-"""
-Helper functions for processing search input into form accepted by `Metastore.search`
-"""
+"""Helper functions for processing search input into form accepted by `Metastore.search`."""
 
 import itertools
 from typing import Any, cast, Callable, Optional, TypeVar
@@ -71,7 +69,7 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
 
 
 def _is_neg_lookup_flag(x: Any) -> bool:
-    """Check if x matches the `neg_lookup_flag`"""
+    """Check if x matches the `neg_lookup_flag`."""
     return bool(np.isnan(x))
 
 
@@ -108,8 +106,7 @@ def process_special_queries(search_terms: dict) -> dict:
 
 
 def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
-    """
-    Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
+    """Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
 
     To set this up for keywords with multiple options, lists of the (key, value) pair terms are created.
 
