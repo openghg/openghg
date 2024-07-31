@@ -107,7 +107,7 @@ def process_special_queries(search_terms: dict) -> dict:
     }
 
 
-def parse_search_kwargs(search_kwargs: dict) -> list[dict]:
+def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     """
     Process search kwargs into list flat dictionaries with the correct combinations of search queries.
 
