@@ -70,7 +70,11 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
 
 def _is_neg_lookup_flag(x: Any) -> bool:
     """Check if x matches the `neg_lookup_flag`."""
-    return bool(np.isnan(x))
+    try:
+        result = bool(np.isnan(x))
+    except TypeError:
+        return False
+    return result
 
 
 def process_special_queries(search_terms: dict) -> dict:
