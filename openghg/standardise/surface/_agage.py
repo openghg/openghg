@@ -65,7 +65,7 @@ def parse_agage(
         else:
             file_instrument = clean_string(file_params["instrument_type"])
             if instrument is None:
-                instrument=file_instrument
+                instrument = file_instrument
 
     elif instrument is None:
         raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
