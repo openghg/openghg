@@ -1,5 +1,4 @@
-"""
-This module defines an interface for metastores.
+"""This module defines an interface for metastores.
 
 Metastores store metadata that is used to search an
 object store for data.
@@ -20,15 +19,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable
 
 import tinydb
 from tinydb.operations import delete as tinydb_delete
 
 from openghg.types import MetastoreError
 
-MetaData = Dict[str, Any]
-QueryResults = List[Dict[str, Any]]  # ...to avoid clashes with `SearchResults` object
+MetaData = dict[str, Any]
+QueryResults = list[dict[str, Any]]  # ...to avoid clashes with `SearchResults` object
 Bucket = str
 
 
@@ -44,7 +43,7 @@ class MetaStore(ABC):
     """
 
     @abstractmethod
-    def search(self, search_terms: Optional[MetaData] = None) -> QueryResults:
+    def search(self, search_terms: MetaData | None = None) -> QueryResults:
         """Search for data using a dictionary of search terms.
 
         Args:
@@ -84,19 +83,18 @@ class MetaStore(ABC):
             MetastoreError if delete_one=True and multiple records will
                 be deleted.
         """
-        if delete_one:
-            if not self._uniquely_identifies(metadata):
-                raise MetastoreError(
-                    "Multiple records found matching metadata. "
-                    "Pass `delete_one=False` to delete multiple records."
-                )
+        if delete_one and not self._uniquely_identifies(metadata):
+            raise MetastoreError(
+                "Multiple records found matching metadata. "
+                "Pass `delete_one=False` to delete multiple records."
+            )
 
     @abstractmethod
     def update(
         self,
         where: MetaData,
-        to_update: Optional[MetaData] = None,
-        to_delete: Optional[Union[str, list[str]]] = None,
+        to_update: MetaData | None = None,
+        to_delete: str | list[str] | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
@@ -105,6 +103,7 @@ class MetaStore(ABC):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
+
         Returns:
             None
 
@@ -116,20 +115,19 @@ class MetaStore(ABC):
                 "Multiple records found matching metadata. `where` must identify a single record."
             )
 
-    def select(self, key: str) -> List[Any]:
+    def select(self, key: str) -> list[Any]:
         """Select the values stored in all records for given key.
 
         Args:
             key: key to select.
+
         Returns:
             list: list of values stored at that key, over all records in the metastore.
-
         """
         return [result[key] for result in self.search()]
 
     def _uniquely_identifies(self, metadata: MetaData) -> bool:
-        """Return true if the given metadata identifies a single record
-        in the metastore.
+        """Return true if the given metadata identifies a single record in the metastore.
 
         Args:
             metadata: metadata to test to see if it identifies a single record.
@@ -155,7 +153,8 @@ class TinyDBMetaStore(MetaStore):
         """
         self._db = database
 
-    def _format_key(self, key: str) -> str:
+    @staticmethod
+    def _format_key(key: str) -> str:
         """Format metadata keys by making them lowercase."""
         return key.lower()
 
@@ -164,14 +163,14 @@ class TinyDBMetaStore(MetaStore):
 
         Args:
             metadata: metadata to format.
+
         Returns:
             formatted metadata.
         """
         return {self._format_key(k): v for k, v in metadata.items()}
 
     def _get_query(self, metadata: MetaData) -> tinydb.queries.QueryInstance:
-        """Return a TinyDB query that searches for all records whose metadata
-        contains the given metadata.
+        """Return a TinyDB query for all records that contain the given metadata.
 
         Args:
             metadata: key-value pairs to search by
@@ -192,6 +191,7 @@ class TinyDBMetaStore(MetaStore):
             search_functions: key-value pairs to search by; the values are functions, which
                 are applied to the metadata records in the metastore: `v(metadata_record[k])`,
                 and the query tests if the result is `True`.
+
         Returns:
             TinyDB QueryInstance that requires all of the functions to evaluate to true
         """
@@ -215,9 +215,9 @@ class TinyDBMetaStore(MetaStore):
 
     def search(
         self,
-        search_terms: Optional[MetaData] = None,
-        search_functions: Optional[dict[str, Callable]] = None,
-        negative_lookup_keys: Optional[list[str]] = None,
+        search_terms: MetaData | None = None,
+        search_functions: dict[str, Callable] | None = None,
+        negative_lookup_keys: list[str] | None = None,
     ) -> QueryResults:
         """Search metastore using a dictionary of search terms.
 
@@ -239,11 +239,11 @@ class TinyDBMetaStore(MetaStore):
 
         if search_functions:
             _function_query = self._get_function_query(search_functions)
-            _query = _query & _function_query
+            _query &= _function_query
 
         if negative_lookup_keys:
             _neg_query = self._get_negative_lookup_query(negative_lookup_keys)
-            _query = _query & _neg_query
+            _query &= _neg_query
 
         return list(self._db.search(_query))
 
@@ -261,8 +261,8 @@ class TinyDBMetaStore(MetaStore):
     def update(
         self,
         where: MetaData,
-        to_update: Optional[MetaData] = None,
-        to_delete: Optional[Union[str, list[str]]] = None,
+        to_update: MetaData | None = None,
+        to_delete: str | list[str] | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
