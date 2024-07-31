@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
 
 ### Added
+- Added packaging and release documentation. [PR #961](https://github.com/openghg/openghg/pull/961)
 
 - Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
 

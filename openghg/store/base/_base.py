@@ -160,7 +160,7 @@ class BaseStore:
 
         return seen, unseen
 
-    def add_metadata_keys(self, data: Dict, additional_metadata: dict) -> dict:
+    def update_metadata(self, data: Dict, additional_metadata: Dict) -> Dict:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
