@@ -109,7 +109,7 @@ def process_special_queries(search_terms: dict) -> dict:
 
 def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     """
-    Process search kwargs into list flat dictionaries with the correct combinations of search queries.
+    Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
 
     To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
     - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
