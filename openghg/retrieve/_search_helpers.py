@@ -4,6 +4,9 @@ Helper functions for processing search input into form accepted by `Metastore.se
 
 import itertools
 from typing import Any, cast, Callable, Optional, TypeVar
+
+import numpy as np
+
 from openghg.util import extract_float
 from openghg.types import Comparable
 
@@ -67,32 +70,39 @@ def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
     return test_func
 
 
-def process_special_queries(search_terms: dict, neg_lookup_flag: Any = "NOT_SET_FLAG") -> dict:
-    """Separate test queries and negative lookup keys from normal search terms.
+def _is_neg_lookup_flag(x: Any) -> bool:
+    """Check if x matches the `neg_lookup_flag`"""
+    return bool(np.isnan(x))
+
+
+def process_special_queries(search_terms: dict) -> dict:
+    """Separate 'function queries' and 'negative lookup keys' from normal search terms.
+
+    Function queries apply a function to the value stored at a given key.
+    Negative lookup keys are keys whose value is np.nan (or `float("nan")`).
 
     Args:
         search_terms: dict of search terms
-        neg_lookup_flag: flag value used to indicate negative lookup on a key
 
     Returns:
-        dict containing search_terms dict, search_tests dict, and negative_lookup_keys list, which
+        dict containing search_terms dict, search_functions dict, and negative_lookup_keys list, which
         are the parameters for TinyDBMetastore.search
     """
     _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
-    search_tests = {}
+    search_functions = {}
     negative_lookup_keys = []
 
     for k, v in search_terms.items():
         if isinstance(v, slice):
-            search_tests[k] = _convert_slice_to_test(v, key=k)
+            search_functions[k] = _convert_slice_to_test(v, key=k)
             del _search_terms[k]
-        elif v == neg_lookup_flag:
+        elif _is_neg_lookup_flag(v):
             negative_lookup_keys.append(k)
             del _search_terms[k]
 
     return {
         "search_terms": _search_terms,
-        "search_tests": search_tests,
+        "search_functions": search_functions,
         "negative_lookup_keys": negative_lookup_keys,
     }
 
