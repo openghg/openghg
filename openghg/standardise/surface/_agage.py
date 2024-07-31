@@ -207,6 +207,8 @@ def _format_species(
         if "instrument" in attributes.keys():
             attributes["instrument_name"] = attributes.pop("instrument")
 
+        attributes["inlet_height_magl"] = species_metadata["inlet_height_magl"]
+
         metadata_keys = metadata_default_keys()
 
         # JP hack to stop instrument getting overwritten for multi-instrument files
