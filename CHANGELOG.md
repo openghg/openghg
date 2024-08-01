@@ -8,12 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
 
 ### Added
+- Added packaging and release documentation. [PR #961](https://github.com/openghg/openghg/pull/961)
+
+- Added options to search metastore by "negative lookup" and by "test functions"; the latter is used to implement 
+  searching by a `slice` object to find a range of values - [PR #1064](https://github.com/openghg/openghg/pull/1064)
 
 - Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
 
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
 
+- Adds `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
+
 ### Updated
+
+- Updated `base` to `offset` in `resample` due to xarray deprecation. [PR #1073](https://github.com/openghg/openghg/pull/1073)
 
 - Updated `get_obs_column` to output mole fraction details. This involves using the apriori level data above a maximum level and applying a correction to the column data (aligned with this process within [acrg code](https://github.com/ACRG-Bristol/acrg)). [PR #1050](https://github.com/openghg/openghg/pull/1050)
 
