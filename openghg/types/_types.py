@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
 import xarray as xr
 from pathlib import Path
 from typing import (
+    Any,
     DefaultDict,
     Dict,
     List,
@@ -49,3 +52,26 @@ class HasMetadataAndData(Protocol):
     data: xr.Dataset
 
     def __init__(self, metadata: dict, data: xr.Dataset) -> None: ...
+
+
+CT = TypeVar("CT", bound="Comparable")
+
+
+class Comparable(Protocol):
+    """Type for checking if objects can be compared.
+
+    Based on https://github.com/python/typing/issues/59
+    """
+
+    def __eq__(self, other: Any) -> bool: ...
+
+    def __lt__(self: CT, other: CT) -> bool: ...
+
+    def __gt__(self: CT, other: CT) -> bool:
+        return (not self < other) and self != other
+
+    def __le__(self: CT, other: CT) -> bool:
+        return self < other or self == other
+
+    def __ge__(self: CT, other: CT) -> bool:
+        return not self < other
