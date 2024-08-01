@@ -209,9 +209,6 @@ class ObsSurface(BaseStore):
             synonyms,
         )
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-
         try:
             source_format = SurfaceTypes[source_format.upper()].value
         except KeyError:

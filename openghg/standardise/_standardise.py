@@ -40,6 +40,25 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
         logger.info("Compression disabled")
         compressor = None
 
+    if data_type == "surface" and kwargs["source_format"].lower() != "gcwerks":
+        if not isinstance(filepath, list):
+            filepath = [filepath]
+            filepath = sorted([Path(f) for f in filepath])
+        else:
+            # We wanted sorted Path objects
+            filepath = sorted([Path(f) for f in filepath])
+        logger.info("Files are sorted according to dates")
+
+    elif data_type == "footprints":
+        if not isinstance(filepath, list):
+            filepath = [filepath]
+            filepath = sorted([Path(f) for f in filepath])
+        else:
+            # We wanted sorted Path objects
+            filepath = sorted([Path(f) for f in filepath])
+        logger.info("Files are sorted according to dates")
+
+
     kwargs["compressor"] = compressor
 
     try:
