@@ -730,12 +730,16 @@ class ModelScenario:
         tolerance = 1e-9  # seconds
 
         if timeperiod_diff_s >= tolerance or force_resample:
-            offset = pd.Timedelta(hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0)
+            offset = pd.Timedelta(
+                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            )
             offset = cast(pd.Timedelta, offset)
 
             if resample_to == "obs":
                 resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, offset=offset).mean()
+                footprint_data = footprint_data.resample(
+                    indexer={"time": resample_period}, offset=offset
+                ).mean()
 
             elif resample_to == "footprint":
                 resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
@@ -743,7 +747,9 @@ class ModelScenario:
 
             else:
                 resample_period = resample_to
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, offset=offset).mean()
+                footprint_data = footprint_data.resample(
+                    indexer={"time": resample_period}, offset=offset
+                ).mean()
                 obs_data = obs_data.resample(indexer={"time": resample_period}, offset=offset).mean()
 
         return obs_data, footprint_data
@@ -915,7 +921,9 @@ class ModelScenario:
             footprint_data = footprint.data
             time = footprint_data["time"].values
             start_date = Timestamp(time[0])
-            offset = pd.Timedelta(hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0)
+            offset = pd.Timedelta(
+                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            )
             offset = cast(pd.Timedelta, offset)  # mypy thinks this could be NaT
             footprint_data = footprint_data.resample(indexer={"time": resample_to}, offset=offset).mean()
             return footprint_data
@@ -1257,15 +1265,17 @@ class ModelScenario:
         # Select and align high frequency flux data
         flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
         if flux_res_H <= 24:
-            offset = pd.Timedelta(hours=
-                date_start_back.dt.hour.data
+            offset = pd.Timedelta(
+                hours=date_start_back.dt.hour.data
                 + date_start_back.dt.minute.data / 60.0
                 + date_start_back.dt.second.data / 3600.0
             )
             offset = cast(pd.Timedelta, offset)
             if flux_res_H <= highest_res_H:
                 # Downsample flux to match to footprints frequency
-                flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, offset=offset).mean()
+                flux_ds_high_freq = flux_ds_high_freq.resample(
+                    {"time": highest_resolution}, offset=offset
+                ).mean()
             elif flux_res_H > highest_res_H:
                 # Upsample flux to match footprints frequency and forward fill
                 flux_ds_high_freq = flux_ds_high_freq.resample(
