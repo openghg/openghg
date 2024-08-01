@@ -58,7 +58,6 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
             filepath = sorted([Path(f) for f in filepath])
         logger.info("Files are sorted according to dates")
 
-
     kwargs["compressor"] = compressor
 
     try:
