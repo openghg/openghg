@@ -249,6 +249,16 @@
                     "str"
                 ]
             },
+            "data_level": {
+                "type": [
+                    "str"
+                ]
+            },
+            "data_sublevel": {
+                "type": [
+                    "str"
+                ]
+            },
             "data_type": {
                 "type": [
                     "str"
