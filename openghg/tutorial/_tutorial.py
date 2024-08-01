@@ -240,10 +240,10 @@ def populate_surface_data() -> None:
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                standardise_surface(filepaths=bsd_paths, source_format="crds", site="bsd", network="decc")
-                standardise_surface(filepaths=tac_paths, source_format="crds", site="tac", network="decc")
+                standardise_surface(filepath=bsd_paths, source_format="crds", site="bsd", network="decc")
+                standardise_surface(filepath=tac_paths, source_format="crds", site="tac", network="decc")
                 standardise_surface(
-                    filepaths=capegrim_tuple,
+                    filepath=capegrim_tuple,
                     instrument="medusa",
                     source_format="gcwerks",
                     site="cgo",
