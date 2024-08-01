@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added packaging and release documentation. [PR #961](https://github.com/openghg/openghg/pull/961)
 
+- Added options to search metastore by "negative lookup" and by "test functions"; the latter is used to implement 
+  searching by a `slice` object to find a range of values - [PR #1064](https://github.com/openghg/openghg/pull/1064)
+
 - Added code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
 
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
