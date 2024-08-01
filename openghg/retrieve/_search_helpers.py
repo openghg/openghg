@@ -161,3 +161,9 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
         expanded_search.append(single_options)
 
     return expanded_search
+
+
+def process_search_kwargs(search_kwargs: dict) -> list[dict]:
+    """Flatten search kwargs and process species queries."""
+    expanded_search = flatten_search_kwargs(search_kwargs)
+    return [process_special_queries(x) for x in expanded_search]
