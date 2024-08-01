@@ -1,6 +1,4 @@
-"""
-Combine multiple data objects (objects with .metadata and .data attributes) into one.
-"""
+"""Combine multiple data objects (objects with .metadata and .data attributes) into one."""
 
 from functools import partial
 from typing import Any, Callable, cast, Optional, TypeVar, Union
@@ -232,5 +230,7 @@ def combine_and_elevate_inlet(data_objects: list[T], override_on_conflict: bool 
     )
 
     if override_on_conflict:
-        return combine_data_objects(data_objects, preprocess=preprocess, concat_dim="time", drop_duplicates="time")
+        return combine_data_objects(
+            data_objects, preprocess=preprocess, concat_dim="time", drop_duplicates="time"
+        )
     return combine_data_objects(data_objects, preprocess=preprocess)

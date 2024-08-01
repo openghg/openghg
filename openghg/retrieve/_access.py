@@ -1,7 +1,7 @@
 import json
 import logging
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
@@ -21,7 +21,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 DataTypes = Union[BoundaryConditionsData, FluxData, FootprintData, ObsColumnData, ObsData]
 multDataTypes = Union[
-    List[BoundaryConditionsData], List[FluxData], List[FootprintData], List[ObsColumnData], List[ObsData]
+    list[BoundaryConditionsData], list[FluxData], list[FootprintData], list[ObsColumnData], list[ObsData]
 ]
 
 
@@ -134,7 +134,7 @@ def get_obs_surface(
 
     if running_on_hub():
         raise NotImplementedError("Cloud functionality marked for rewrite.")
-        to_post: Dict[str, Union[str, Dict]] = {}
+        to_post: dict[str, Union[str, dict]] = {}
 
         to_post["function"] = "get_obs_surface"
 
@@ -240,12 +240,9 @@ def get_obs_surface_local(
         ObsData or None: ObsData object if data found, else None
     """
     import numpy as np
-    from openghg.retrieve import search_surface
     from openghg.util import (
-        clean_string,
         format_inlet,
         get_site_info,
-        load_json,
         synonyms,
         timestamp_tzaware,
     )
@@ -375,7 +372,7 @@ def get_obs_surface_local(
         ds_resampled.attrs["averaged_period_str"] = average
 
         # For some variables, need a different type of resampling
-        data_variables: List[str] = [str(v) for v in data.variables]
+        data_variables: list[str] = [str(v) for v in data.variables]
 
         for var in data_variables:
             if "repeatability" in var:
@@ -417,7 +414,7 @@ def get_obs_surface_local(
         data = ds_resampled
 
     # Rename variables
-    rename: Dict[str, str] = {}
+    rename: dict[str, str] = {}
 
     data_variables = [str(v) for v in data.variables]
     for var in data_variables:
@@ -482,8 +479,7 @@ def get_obs_column(
     end_date: Optional[Union[str, Timestamp]] = None,
     **kwargs: Any,
 ) -> ObsColumnData:
-    """
-    Extract available column data from the object store using keywords.
+    """Extract available column data from the object store using keywords.
 
     Args:
         species: Species name
@@ -591,8 +587,7 @@ def get_flux(
     time_resolution: Optional[str] = None,
     **kwargs: Any,
 ) -> FluxData:
-    """
-    The flux function reads in all flux files for the domain and species as an xarray Dataset.
+    """The flux function reads in all flux files for the domain and species as an xarray Dataset.
     Note that at present ALL flux data is read in per species per domain or by emissions name.
     To be consistent with the footprints, fluxes should be in mol/m2/s.
 
@@ -640,8 +635,7 @@ def get_bc(
     end_date: Optional[Union[str, Timestamp]] = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
-    """
-    Get boundary conditions for a given species, domain and bc_input name.
+    """Get boundary conditions for a given species, domain and bc_input name.
 
     Args:
         species: Species name
@@ -678,8 +672,7 @@ def get_footprint(
     species: Optional[str] = None,
     **kwargs: Any,
 ) -> FootprintData:
-    """
-    Get footprints from one site.
+    """Get footprints from one site.
 
     Args:
         site: The name of the site given in the footprints. This often matches
@@ -769,10 +762,7 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
 
     converter = scale_converter.loc[row]
 
-    if to_scale == converter["scale1"]:
-        direction = "2to1"
-    else:
-        direction = "1to2"
+    direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
     # flake8: noqa: F841
     # scale_convert file has variable X in equations, so let's create it
@@ -786,8 +776,7 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
 
 
 def _create_keyword_string(**kwargs: Any) -> str:
-    """
-    Create a formatted string for supplied keyword values. This will ignore
+    """Create a formatted string for supplied keyword values. This will ignore
     keywords where the value is None.
     This is used for printing details of keywords passed to the search functions.
     """
@@ -799,7 +788,7 @@ def _create_keyword_string(**kwargs: Any) -> str:
 
 def _metadata_difference(
     data: multDataTypes, params: Optional[list] = None, print_output: bool = True
-) -> Dict[str, list]:
+) -> dict[str, list]:
     """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
 
@@ -807,6 +796,7 @@ def _metadata_difference(
         data: Multiple data objects e.g. multiple ObsData as a list
         params: Specific metadata parameters to check. If None all parameters will be checked
         print_output: Summarise and print output to screen.
+
     Returns:
         Dict[str, list]: Keys and lists of values from the metadata with differences.
     """
@@ -854,16 +844,13 @@ def _metadata_difference(
     #         continue
 
     # - Collate summary of differences as a dictionary which maps as param: list of values
-    summary_difference: Dict[str, list] = {}
+    summary_difference: dict[str, list] = {}
     for param in param_difference:
         summary_difference[param] = []
         if print_output:
             logger.info(f" {param}: ")
         for m in metadata:
-            if param in m:
-                value = m[param]
-            else:
-                value = "NOT PRESENT"
+            value = m.get(param, "NOT PRESENT")
             summary_difference[param].append(value)
             if print_output:
                 logger.info(f" '{value}', ")
@@ -884,8 +871,7 @@ def _metadata_difference(
 def _metadata_difference_formatted(
     data: multDataTypes, params: Optional[list] = None, print_output: bool = True
 ) -> str:
-    """
-    Create formatted string for the difference in metadata between input objects.
+    """Create formatted string for the difference in metadata between input objects.
 
     Args:
         data : Multiple data objects e.g. multiple ObsData as a list
