@@ -572,8 +572,8 @@ class Footprints(BaseStore):
             dtypes["particle_locations_w"] = np.floating
 
         # TODO: Could also add check for meteorological + other data
-        # "pressure", "wind_speed", "wind_direction", "PBLH"
-        # "release_lon", "release_lat"
+        # "air_temperature", "air_pressure", "wind_speed", "wind_from_direction",
+        # "atmosphere_boundary_layer_thickness", "release_lon", "release_lat"
 
         # Include options for short lifetime footprints (short-lived species)
         # This includes additional particle ages (allow calculation of decay based on particle lifetimes)
