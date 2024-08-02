@@ -5,7 +5,12 @@ from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
 
-from openghg.util import check_species_time_resolved, check_species_lifetime, timestamp_now, check_function_open_nc
+from openghg.util import (
+    check_species_time_resolved,
+    check_species_lifetime,
+    timestamp_now,
+    check_function_open_nc,
+)
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType
 

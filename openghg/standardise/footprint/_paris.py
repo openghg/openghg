@@ -5,7 +5,12 @@ from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
 
-from openghg.util import check_species_time_resolved, check_species_lifetime, timestamp_now, check_function_open_nc
+from openghg.util import (
+    check_species_time_resolved,
+    check_species_lifetime,
+    timestamp_now,
+    check_function_open_nc,
+)
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType
 
@@ -78,7 +83,7 @@ def parse_paris(
 
     # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
     fp_data = fp_data.rename(**dv_rename)  # type: ignore
-    fp_data = fp_data.rename(**dim_rename) 
+    fp_data = fp_data.rename(**dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
 

@@ -355,7 +355,7 @@ class Footprints(BaseStore):
         if time_resolved and sort:
             logger.info(
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-            )            
+            )
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.

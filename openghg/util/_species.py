@@ -5,16 +5,19 @@ from openghg.util import load_json
 from openghg.types import optionalPathType
 
 
-__all__ = ["get_species_info",
-           "synonyms",
-           "species_lifetime",
-           "check_lifetime_monthly",
-           "check_species_lifetime",
-           "check_species_time_resolved",
-           "molar_mass"]
+__all__ = [
+    "get_species_info",
+    "synonyms",
+    "species_lifetime",
+    "check_lifetime_monthly",
+    "check_species_lifetime",
+    "check_species_time_resolved",
+    "molar_mass",
+]
 
 
 logger = logging.getLogger("openghg.util.species")
+
 
 def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
@@ -171,8 +174,8 @@ def check_species_lifetime(species: str, short_lifetime: bool = False) -> bool:
         if lifetime is not None:
             # TODO: May want to add a check on length of lifetime here
             short_lifetime = True
-            logger.info("Updating short_lifetime to True since species has an associated lifetime")            
-    
+            logger.info("Updating short_lifetime to True since species has an associated lifetime")
+
     return short_lifetime
 
 

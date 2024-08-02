@@ -49,7 +49,6 @@ from ._species import (
     check_species_lifetime,
     check_species_time_resolved,
     molar_mass,
-
 )
 from ._strings import (
     clean_string,
