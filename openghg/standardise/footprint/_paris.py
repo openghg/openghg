@@ -28,7 +28,6 @@ def parse_paris(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-    chunks: Optional[Dict] = None,
 ) -> Dict:
     """
     Read and parse input footprints data in "paris" format.
@@ -50,8 +49,6 @@ def parse_paris(
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
     Returns:
         dict: Dictionary of data
     """
@@ -65,9 +62,8 @@ def parse_paris(
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
 
-    with xr_open_fn(filepath).chunk(chunks) as fp_data:
-        if chunks:
-            logger.info(f"Rechunking with chunks={chunks}")
+    with xr_open_fn(filepath) as temp:
+        fp_data = temp
 
     if species == "co2":
         # Expect co2 data to have high time resolution

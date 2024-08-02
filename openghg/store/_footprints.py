@@ -228,7 +228,6 @@ class Footprints(BaseStore):
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
-            chunks: Chunking schema to use when storing data.
             continuous: Whether time stamps have to be continuous.
             chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
@@ -392,7 +391,6 @@ class Footprints(BaseStore):
             "short_lifetime": short_lifetime,
             "period": period,
             "continuous": continuous,
-            # "chunks": chunks,
         }
 
         input_parameters: dict[Any, Any] = param.copy()
@@ -422,6 +420,8 @@ class Footprints(BaseStore):
             time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
 
         # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
