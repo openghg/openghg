@@ -1,10 +1,20 @@
+import logging
 from typing import List, Optional, Union, Dict, Any
 
 from openghg.util import load_json
 from openghg.types import optionalPathType
 
-__all__ = ["get_species_info", "synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 
+__all__ = ["get_species_info",
+           "synonyms",
+           "species_lifetime",
+           "check_lifetime_monthly",
+           "check_species_lifetime",
+           "check_species_time_resolved",
+           "molar_mass"]
+
+
+logger = logging.getLogger("openghg.util.species")
 
 def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
@@ -137,6 +147,51 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
             raise ValueError(f"Invalid input for lifetime: {lifetime}")
     else:
         return False
+
+
+def check_species_lifetime(species: str, short_lifetime: bool = False) -> bool:
+    """
+    Check whether a species has a [short] lifetime (relevant for footprint types).
+    Args:
+        species: Name of species
+        short_lifetime: Flag for whether this species has a short lifetime
+            (and so requires a specific footprint with this taken into account)
+    Returns:
+        bool : The short_lifetime flag
+    """
+    if species == "inert":
+        if short_lifetime is True:
+            raise ValueError(
+                "When indicating footprint is for short lived species, 'species' input must be included"
+            )
+        short_lifetime = False
+        lifetime = None
+    else:
+        lifetime = species_lifetime(species)
+        if lifetime is not None:
+            # TODO: May want to add a check on length of lifetime here
+            short_lifetime = True
+            logger.info("Updating short_lifetime to True since species has an associated lifetime")            
+    
+    return short_lifetime
+
+
+def check_species_time_resolved(species, time_resolved: bool = False) -> bool:
+    """
+    Check whether a species requires a time_resolved footprint.
+    Note: at the moment this is only relevant for "co2".
+    Args:
+        species: Name of species
+    Returns:
+        bool: The time_resolved flag
+    """
+    species = synonyms(species, lower=True, allow_new_species=True)
+    if species == "co2":
+        if not time_resolved:
+            time_resolved = True
+            logger.info("Updating time_resolved to True for CO2 data")
+
+    return time_resolved
 
 
 def molar_mass(species: str, species_filepath: optionalPathType = None) -> float:

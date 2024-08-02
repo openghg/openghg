@@ -5,7 +5,7 @@ from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
 
-from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
+from openghg.util import check_species_time_resolved, check_species_lifetime, timestamp_now, check_function_open_nc
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType
 
@@ -69,26 +69,8 @@ def parse_acrg_org(
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
 
-    if species == "co2":
-        # Expect co2 data to have high time resolution
-        if not time_resolved:
-            logger.info("Updating time_resolved to True for co2 data")
-            time_resolved = True
-
-    if short_lifetime:
-        if species == "inert":
-            raise ValueError(
-                "When indicating footprint is for short lived species, 'species' input must be included"
-            )
-    else:
-        if species == "inert":
-            lifetime = None
-        else:
-            lifetime = species_lifetime(species)
-            if lifetime is not None:
-                # TODO: May want to add a check on length of lifetime here
-                logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                short_lifetime = True
+    time_resolved = check_species_time_resolved(species, time_resolved)
+    short_lifetime = check_species_lifetime(species, short_lifetime)
 
     dv_rename = {
         # "fp": "srr",
@@ -98,7 +80,7 @@ def parse_acrg_org(
         "PBLH": "atmosphere_boundary_layer_thickness",
     }
 
-    attribute_rename = {"fp_output_units": "lpdm_native_output_units"}
+    attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
 
     # # Removed for now - this renaming to match to PARIS would mean the dimension names
     # # were inconsistent between data types/
