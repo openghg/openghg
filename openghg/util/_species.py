@@ -179,7 +179,7 @@ def check_species_lifetime(species: str, short_lifetime: bool = False) -> bool:
     return short_lifetime
 
 
-def check_species_time_resolved(species, time_resolved: bool = False) -> bool:
+def check_species_time_resolved(species: str, time_resolved: bool = False) -> bool:
     """
     Check whether a species requires a time_resolved footprint.
     Note: at the moment this is only relevant for "co2".
