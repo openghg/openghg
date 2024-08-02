@@ -206,3 +206,31 @@ def test_update_error_if_not_unique(metastore):
 
     with pytest.raises(MetastoreError):
         metastore.update(where={"key": 123}, to_update={"key2": 234})
+
+
+def test_search_range_via(metastore):
+    """Check if we can search by a range of values."""
+    metastore.insert({"key": 1})
+
+    def test_fn(v):
+        """Check if v is in the range 0 to 2"""
+        return 0 <= v <= 2
+
+    result = metastore.search(search_functions={"KEY": test_fn})
+
+    assert result is not None
+
+    metastore.insert({"key": 1.5})
+
+    result = metastore.search(search_functions={"KEY": test_fn})
+
+    assert len(result) == 2
+
+
+def test_negative_lookup(metastore):
+    metastore.insert({"key": 1})
+    metastore.insert({"key": 1, "extra_key": 2})
+
+    result = metastore.search(negative_lookup_keys=["extra_KEY"])
+
+    assert len(result) == 1
