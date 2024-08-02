@@ -51,7 +51,7 @@ class FootprintTypes(Enum):
 
     # OPENGHG = "OPENGHG"  # To be implemented
     ACRG_ORG = "ACRG_ORG"
-    FLEXPART = "FLEXPART"
+    PARIS = "PARIS"
 
 
 class ObsTypes(Enum):

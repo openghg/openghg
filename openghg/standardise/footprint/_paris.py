@@ -13,7 +13,7 @@ logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_flexpart(
+def parse_paris(
     filepath: multiPathType,
     site: str,
     domain: str,
@@ -31,7 +31,7 @@ def parse_flexpart(
     chunks: Optional[Dict] = None,
 ) -> Dict:
     """
-    Read and parse input footprints data in original FLEXPART format.
+    Read and parse input footprints data in "paris" format.
 
     Args:
         filepath: Path of file to load
