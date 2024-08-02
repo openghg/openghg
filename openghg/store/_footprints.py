@@ -7,7 +7,7 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import species_lifetime, synonyms, align_lat_lon
+from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms, align_lat_lon
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -349,31 +349,13 @@ class Footprints(BaseStore):
             return {}
 
         # Do some housekeeping on the inputs
-        if species == "co2":
-            # Expect co2 data to have high time resolution
-            if not time_resolved:
-                logger.info("Updating time_resolved to True for co2 data")
-                time_resolved = True
+        time_resolved = check_species_time_resolved(species, time_resolved)
+        short_lifetime = check_species_lifetime(species, short_lifetime)
 
-            if sort:
-                logger.info(
-                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-                )
-
-        if short_lifetime:
-            if species == "inert":
-                raise ValueError(
-                    "When indicating footprint is for short lived species, 'species' input must be included"
-                )
-        else:
-            if species == "inert":
-                lifetime = None
-            else:
-                lifetime = species_lifetime(species)
-                if lifetime is not None:
-                    # TODO: May want to add a check on length of lifetime here
-                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                    short_lifetime = True
+        if time_resolved and sort:
+            logger.info(
+                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+            )            
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
