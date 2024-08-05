@@ -140,7 +140,6 @@ def parse_acrg_org(
         logger.exception(msg)
         raise ParseError(msg)
 
-    fp_data = fp_data.rename(**dv_rename)  # type: ignore
     # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
 
     fp_data = fp_data.drop_dims(dim_drop)
