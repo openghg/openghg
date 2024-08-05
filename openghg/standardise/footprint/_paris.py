@@ -173,3 +173,6 @@ def parse_paris(
     footprint_data[key]["metadata"] = metadata
 
     return footprint_data
+
+
+parse_flexpart = parse_paris
