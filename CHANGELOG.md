@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `base` to `offset` in `resample` due to xarray deprecation. [PR #1073](https://github.com/openghg/openghg/pull/1073)
 - Updated `get_obs_column` to output mole fraction details. This involves using the apriori level data above a maximum level and applying a correction to the column data (aligned with this process within [acrg code](https://github.com/ACRG-Bristol/acrg)). [PR #1050](https://github.com/openghg/openghg/pull/1050)
 - The `data_source` keyword is now included as "internal" when using `standardise_surface` to distinguish this from data retrieved from external sources (e.g. "icos", "noaa_obspack"). [PR #1083](https://github.com/openghg/openghg/pull/1083)
- 
+- Added interactive timeseries plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953) 
+
 ## [0.8.2] - 2024-06-06
 
 ### Fixed
