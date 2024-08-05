@@ -310,6 +310,40 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
+@pytest.mark.parametrize("source_format", ["paris","flexpart"])
+def test_standardise_footprint_flexpart(source_format):
+    """
+    Checking FLEXPART footprints can be added using either "paris" or "flexpart"
+    source_format where "flexpart" is an alias for "paris".
+    Both should use the same parse_paris function.
+    """
+    # clear_test_stores()
+
+    datapath = get_footprint_datapath("MHD-10magl_FLEXPART_ECMWFHRES_TEST_inert_201809.nc")
+
+    site = "mhd"
+    inlet = "10m"
+    domain = "test"
+    model = "FLEXPART"
+    met_model = "ecmwfhres"
+
+    results = standardise_footprint(
+        filepath=datapath,
+        site=site,
+        inlet=inlet,
+        domain=domain,
+        model=model,
+        met_model=met_model,
+        source_format=source_format,
+        force=True,
+        if_exists="new",
+        store="user",
+    )
+
+    assert "error" not in results
+    assert "mhd_test_FLEXPART_10m" in results
+
+
 def test_standardise_align_footprint():
     """
     Tests that a footprint that is read in with slightly different lat-lon coordinates

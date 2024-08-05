@@ -18,7 +18,7 @@ logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_acrg_org(
+def parse_paris(
     filepath: multiPathType,
     site: str,
     domain: str,
@@ -35,7 +35,7 @@ def parse_acrg_org(
     short_lifetime: bool = False,
 ) -> Dict:
     """
-    Read and parse input emissions data in original ACRG format.
+    Read and parse input footprints data in "paris" format.
 
     Args:
         filepath: Path of file to load
@@ -72,81 +72,31 @@ def parse_acrg_org(
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
-    dv_rename = {
-        # "fp": "srr",
-        "temperature": "air_temperature",
-        "pressure": "air_pressure",
-        "wind_direction": "wind_from_direction",
-        "PBLH": "atmosphere_boundary_layer_thickness",
-    }
+    dv_rename = {"srr": "fp"}
 
     attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
 
-    # # Removed for now - this renaming to match to PARIS would mean the dimension names
-    # # were inconsistent between data types/
-    # dim_rename = {"lat": "latitude", "lon": "longitude"}
-
-    dim_drop = "lev"
+    dim_rename = {"latitude": "lat", "longitude": "lon"}
 
     dim_reorder = ("time", "height", "lat", "lon")
-
-    dv_attribute_updates: Dict[str, Dict[str, str]] = {}
-    variable_names = [
-        # "srr",
-        "fp",
-        "air_temperature",
-        "air_pressure",
-        "wind_speed",
-        "wind_from_direction",
-        "atmosphere_boundary_layer_thickness",
-        "release_lon",
-        "release_lat",
-    ]
-
-    for dv in variable_names:
-        dv_attribute_updates[dv] = {}
-
-    # dv_attribute_updates["srr"]["long_name"] = "source_receptor_relationship"
-    dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
-    dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
-    dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
-    dv_attribute_updates["atmosphere_boundary_layer_thickness"][
-        "long_name"
-    ] = "atmospheric boundary layer thickness at release"
-
-    dv_attribute_updates["wind_speed"]["units"] = "m s-1"
-    dv_attribute_updates["wind_speed"]["long_name"] = "wind speed at release"
-
-    dv_attribute_updates["wind_from_direction"]["units"] = "degree"
-    dv_attribute_updates["wind_from_direction"]["long_name"] = "wind direction at release"
-
-    dv_attribute_updates["release_lon"]["units"] = "degree_east"
-    dv_attribute_updates["release_lon"]["long_name"] = "Release longitude"
-    dv_attribute_updates["release_lat"]["units"] = "degree_north"
-    dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
         fp_data = fp_data.rename(**dv_rename)  # type: ignore
     except ValueError:
-        msg = "Unable to parse input data using source_format='acrg_org' (default). "
-        if "srr" in fp_data:
-            msg += "May need to use source_format='paris' ('srr' data variable is present)"
+        msg = "Unable to parse input data using source_format='paris'. "
+        if "fp" in fp_data:
+            msg += "May need to use source_format='acrg_org' ('fp' data variable is present)"
         logger.exception(msg)
         raise ParseError(msg)
 
-    # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
+    fp_data = fp_data.rename(**dim_rename)
 
-    fp_data = fp_data.drop_dims(dim_drop)
     fp_data = fp_data.transpose(*dim_reorder, ...)
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
             fp_data.attrs[new_attr] = fp_data.attrs.pop(attr)
-
-    for dv, attr_details in dv_attribute_updates.items():
-        for key, value in attr_details.items():
-            fp_data[dv].attrs[key] = value
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
@@ -172,7 +122,7 @@ def parse_acrg_org(
     if "time" in fp_data.coords:
         fp_data = update_zero_dim(fp_data, dim="time")
     else:
-        msg = "Expect 'time' coordinate within footprint data for source_format='acrg_org'"
+        msg = "Expect 'time' coordinate within footprint data for source_format='paris'"
         logger.exception(msg)
         raise ParseError(msg)
 
@@ -234,3 +184,7 @@ def parse_acrg_org(
     footprint_data[key]["metadata"] = metadata
 
     return footprint_data
+
+
+# Adding "flexpart" as an alias for "paris"
+parse_flexpart = parse_paris
