@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
 
-- Added interactive plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953)
+- Added interactive timeseries plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953)
 
 ## [0.8.2] - 2024-06-06
 
