@@ -136,7 +136,11 @@ this is displayed:
 
     from openghg.plotting import plot_timeseries
 
-    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm")
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_185m.html" width="100%" height="400"></iframe>
 
 Plotting multiple timeseries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -159,6 +163,10 @@ and and responsive, even with relatively large amounts of data.
 .. code:: ipython3
 
     plot_timeseries(data=all_ch4_tac, units="ppb")
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_all.html" width="100%" height="400"></iframe>
 
 3. Comparing different sites
 ----------------------------
@@ -183,3 +191,9 @@ we want to compare and make a plot
 .. code:: ipython3
 
     plot_timeseries(data=[bsd_data, tac_data], title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+
+.. raw:: html
+
+   <iframe src="../../../_static/bsd_tac_ch4.html" width="100%" height="400"></iframe>
+
+
