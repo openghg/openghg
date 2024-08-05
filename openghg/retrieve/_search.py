@@ -258,7 +258,7 @@ def search_footprints(
 def search_surface(
     species: Union[str, list[str], None] = None,
     site: Union[str, list[str], None] = None,
-    inlet: Union[str, list[str], None] = None,
+    inlet: Union[str, list[Union[str, slice]], slice, None] = None,
     height: Union[str, list[str], None] = None,
     instrument: Union[str, list[str], None] = None,
     data_level: Union[str, list[str], None] = None,
@@ -279,7 +279,9 @@ def search_surface(
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         instrument: Instrument name
         data_level: Data quality assurance level (0-3)

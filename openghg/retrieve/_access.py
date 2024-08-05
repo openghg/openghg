@@ -90,7 +90,7 @@ def _get_generic(
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[str] = None,
+    inlet: Optional[Union[str, slice]] = None,
     height: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
@@ -111,7 +111,9 @@ def get_obs_surface(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
@@ -204,7 +206,7 @@ def get_obs_surface(
 def get_obs_surface_local(
     site: str,
     species: str,
-    inlet: Optional[str] = None,
+    inlet: Optional[Union[str, slice]] = None,
     height: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
@@ -227,7 +229,9 @@ def get_obs_surface_local(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
