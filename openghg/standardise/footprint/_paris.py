@@ -67,8 +67,7 @@ def parse_paris(
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
 
-    with xr_open_fn(filepath) as temp:
-        fp_data = temp
+    fp_data = xr_open_fn(filepath)
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
