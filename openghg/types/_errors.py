@@ -48,6 +48,7 @@ class SearchError(OpenGHGError):
 class ParseError(OpenGHGError):
     """Data is not in correct format for requested parse function"""
 
+
 class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
 
