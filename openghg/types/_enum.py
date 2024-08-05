@@ -49,8 +49,9 @@ class FluxDatabases(Enum):
 class FootprintTypes(Enum):
     """For standardising footprint inputs"""
 
-    # OPENGHG = "OPENGHG"  # To be implemented
     ACRG_ORG = "ACRG_ORG"
+    PARIS = "PARIS"
+    FLEXPART = "FLEXPART"  # This is an alias for PARIS
 
 
 class ObsTypes(Enum):

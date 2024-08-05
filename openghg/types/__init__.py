@@ -21,6 +21,7 @@ from ._errors import (
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    ParseError,
     AttrMismatchError,
     MetadataFormatError,
     DataOverlapError,
@@ -42,4 +43,5 @@ from ._types import (
     TimePeriod,
     HasMetadataAndData,
     MetadataAndData,
+    Comparable,
 )

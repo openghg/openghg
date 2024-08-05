@@ -41,7 +41,15 @@ from ._file import (
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet, extract_height_name
 from ._site import get_site_info, sites_in_network
-from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
+from ._species import (
+    get_species_info,
+    synonyms,
+    species_lifetime,
+    check_lifetime_monthly,
+    check_species_lifetime,
+    check_species_time_resolved,
+    molar_mass,
+)
 from ._strings import (
     clean_string,
     extract_float,
