@@ -239,22 +239,27 @@
                     "str"
                 ]
             },
-            "data_source": {
-                "type": [
-                    "str"
-                ]
-            },
-            "icos_data_level": {
-                "type": [
-                    "str"
-                ]
-            },
             "data_level": {
                 "type": [
                     "str"
                 ]
             },
             "data_sublevel": {
+                "type": [
+                    "str"
+                ]
+            },
+            "dataset_source": {
+                "type": [
+                    "str"
+                ]                
+            },
+            "data_source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "icos_data_level": {
                 "type": [
                     "str"
                 ]
