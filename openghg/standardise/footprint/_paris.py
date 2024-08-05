@@ -12,7 +12,7 @@ from openghg.util import (
     check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
-from openghg.types import multiPathType
+from openghg.types import multiPathType, ParseError
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -81,8 +81,16 @@ def parse_paris(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
-    fp_data = fp_data.rename(**dv_rename)  # type: ignore
+    try:
+        # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
+        fp_data = fp_data.rename(**dv_rename)  # type: ignore
+    except ValueError:
+        msg = "Unable to parse input data using source_format='paris'. "
+        if "fp" in fp_data:
+            msg += "May need to use source_format='acrg_org' ('fp' data variable is present)"
+        logger.exception(msg)
+        raise ParseError(msg)
+
     fp_data = fp_data.rename(**dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
@@ -175,4 +183,5 @@ def parse_paris(
     return footprint_data
 
 
+# Adding "flexpart" as an alias for "paris"
 parse_flexpart = parse_paris

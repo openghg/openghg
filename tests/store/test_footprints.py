@@ -434,6 +434,7 @@ def test_read_footprint_short_lived():
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
 
+
 @pytest.mark.parametrize(
     "site,inlet,model,met_model,start,end,filename",
     [

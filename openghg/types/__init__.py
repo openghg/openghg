@@ -21,6 +21,7 @@ from ._errors import (
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    ParseError,
     AttrMismatchError,
     MetadataFormatError,
     DataOverlapError,

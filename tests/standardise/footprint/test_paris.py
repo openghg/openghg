@@ -1,6 +1,8 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.standardise.footprint import parse_paris
+from openghg.types import ParseError
+
 
 @pytest.mark.parametrize(
     "site,inlet,model,met_model,filename",
@@ -56,3 +58,29 @@ def test_paris_footprint(site,inlet,model,met_model,filename):
     assert metadata.items() >= expected_metadata.items()
 
     # TODO: Add data checks as required (may not be able to easily parameterize)
+
+
+def test_paris_footprint_fail_message():
+    """
+    Test the parse_paris function raises a ParseError and advises using "acrg_org"
+    source_format if 'fp' variable is detected.
+    """
+    fp_filepath = get_footprint_datapath("footprint_test.nc")
+
+    site = "TMB"
+    inlet = "10m"
+    domain = "EUROPE"
+    model = "test_model"
+    species = "inert"
+
+    with pytest.raises(ParseError) as exc:
+
+        parse_paris(filepath = fp_filepath,
+                    site = site,
+                    domain = domain,
+                    inlet = inlet,
+                    model = model,
+                    species=species,
+        )
+
+        assert "need to use source_format='acrg_org'" in exc
