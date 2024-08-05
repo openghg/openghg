@@ -122,6 +122,10 @@ def parse_paris(
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
         fp_data = update_zero_dim(fp_data, dim="time")
+    else:
+        msg = "Expect 'time' coordinate within footprint data for source_format='paris'"
+        logger.exception(msg)
+        raise ParseError(msg)
 
     fp_time = fp_data["time"]
 
