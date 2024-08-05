@@ -96,7 +96,7 @@ def parse_agage(
         }
 
         # fetching all instrument_n values from the file
-        pattern = re.compile(r'^instrument_(\d+)$')
+        pattern = re.compile(r"^instrument_(\d+)$")
 
         for key in file_params:
             match = pattern.match(key)

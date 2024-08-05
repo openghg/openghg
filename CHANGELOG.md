@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 - New keywords `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 - Footprint parser for "paris" footprint format which includes the new format used for both the NAME and FLEXPART LPDM models - [PR #1070](https://github.com/openghg/openghg/pull/1070)
-- Added `AGAGE` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive [git repository](https://github.com/mrghg/agage-archive).
+- Added `AGAGE` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive - [PR #912](https://github.com/openghg/openghg/pull/912)
 
 ### Updated
 
