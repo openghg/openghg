@@ -245,12 +245,17 @@ class ObsSurface(BaseStore):
         data_sublevel = clean_string(data_sublevel)
         dataset_source = clean_string(dataset_source)
 
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"  
+
         # Define additional metadata which we aren't passing (are never passing?) to the parse functions
         # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
         # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
         additional_metadata = {"data_level": data_level,
                                "data_sublevel": data_sublevel,
-                               "dataset_source": dataset_source}
+                               "dataset_source": dataset_source,
+                               "data_source": data_source}
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
