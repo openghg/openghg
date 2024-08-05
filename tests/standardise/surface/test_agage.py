@@ -120,3 +120,10 @@ def test_expected_metadata_thd_cfc11():
     }
 
     assert metadata == expected_metadata
+def test_instrument_metadata(cgo_data):
+    """
+    This test checks for instrument and instrument_name_number metadata.
+    """
+
+    assert cgo_data["hcfc133a_70m"]["metadata"]["instrument"] == "multiple"
+    assert cgo_data["hcfc133a_70m"]["metadata"]["instrument_name_1"] == "agilent_5973"

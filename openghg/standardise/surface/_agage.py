@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import pandas as pd
+import re
 import xarray as xr
 from addict import Dict as aDict
 from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys
@@ -93,6 +94,16 @@ def parse_agage(
             "site": site,
             "network": network,
         }
+
+        # fetching all instrument_n values from the file
+        pattern = re.compile(r'^instrument_(\d+)$')
+
+        for key in file_params:
+            match = pattern.match(key)
+            if match:
+                number = match.group(1)
+                new_key = f"instrument_name_{number}"
+                metadata[new_key] = file_params[key]
 
         # sampling period should be in the metadata of the openghg datasource as a single value.
 
