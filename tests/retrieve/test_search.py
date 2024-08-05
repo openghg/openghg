@@ -103,6 +103,26 @@ def test_search_surface_range():
 
     assert res.metadata[key].items() >= partial_metdata.items()
 
+@pytest.mark.parametrize(
+    "keyword,value", [
+        ("data_type", "surface"),
+        ("data_source", "internal"),
+    ],
+)
+def test_search_internal_key_present(keyword, value):
+    """
+    Check keys which weren't specified in standardise function have been
+    added correctly to the metadata.
+    Currently testing for search_surface but could expand to other data_types.
+    """
+
+    res = search_surface(site="hfd", inlet="50m", species="co2")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert keyword in metadata
+    assert metadata[keyword] == value
+
 
 def test_search_site():
     res = search(site="bsd", species="co2", inlet="42m")
