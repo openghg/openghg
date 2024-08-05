@@ -160,21 +160,68 @@ class BaseStore:
 
         return seen, unseen
 
-    def update_metadata(self, data: Dict, additional_metadata: Dict) -> Dict:
+    def add_metakeys(self, force: bool = False) -> dict:
+        """
+
+        """
+        if not hasattr(self, "metakeys") or force:
+            try:
+                metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+            except KeyError:
+                raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
+    
+            self.metakeys = metakeys
+
+        return self.metakeys
+
+    def update_metadata(self, data: dict, input_parameters: dict, additional_metadata: dict) -> dict:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
             data: Dictionary containing data and metadata for species
+            input_parameters: Input parameters from read_file...
             additional_metadata: Keys to add to the metadata dictionary
         Returns:
             dict: data dictionary with metadata keys added
         """
 
-        # Basic implemntation of this
-        # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
-        # TODO: May want to add checks to make sure we're not overwriting anything important.
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        optional = metakeys.get("optional", {})
+
+        # Still a basic implementation - needs steps to be more clear - could split out?
+        # TODO: Decide on logic and add checks for cases where keys are already
+        # present and don't match.
+
         for parsed_data in data.values():
-            parsed_data["metadata"].update(additional_metadata)
+            metadata = parsed_data["metadata"]
+            required_missing = set(required) - set(metadata)
+            required_not_found = []
+            if required_missing:
+                for key in required_missing:
+                    if key in input_parameters:
+                        metadata[key] = input_parameters[key]
+                    elif additional_metadata and key in additional_metadata:
+                        metadata[key] = additional_metadata[key]
+                # # TODO: Add this back in once we've fixed inconsitencies with required keys
+                # # Namely: data_source missing from standardise and icos_data_level not being universal.
+                #     else:
+                #         required_not_found.append(key)
+                # if required_not_found:
+                #     raise ValueError(f"The following required keys are missing: {', '.join(required_not_found)}. Please specify.")
+
+            optional_matched = set(optional) & set(input_parameters)
+            if optional_matched:
+                for key in optional_matched:
+                    metadata[key] = input_parameters[key]
+
+            if additional_metadata:
+                metadata.update(additional_metadata)
+
+        # Basic implemntation of this
+        # TODO: May want to add checks to make sure we're not overwriting anything important.
+        # for parsed_data in data.values():
+        #     parsed_data["metadata"].update(additional_metadata)
 
         return data
 
@@ -188,6 +235,7 @@ class BaseStore:
         Returns:
             tuple: Tuple of keys
         """
+        metakeys = self.add_metakeys()
         try:
             metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
         except KeyError:

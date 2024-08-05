@@ -244,7 +244,7 @@ class ObsSurface(BaseStore):
         # Define additional metadata which we aren't passing (are never passing?) to the parse functions
         # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
         # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
-        additional_metadata = {"data_level": data_level, "data_sublevel": data_sublevel}
+        # additional_metadata = {"data_level": data_level, "data_sublevel": data_sublevel}
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
@@ -413,8 +413,11 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
+            #### 
+            additional_metadata = optional_metadata
+
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            data = self.update_metadata(data, additional_metadata)
+            data = self.update_metadata(data, fn_input_parameters, additional_metadata)
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
