@@ -33,7 +33,6 @@ def parse_acrg_org(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-    chunks: Optional[Dict] = None,
 ) -> Dict:
     """
     Read and parse input emissions data in original ACRG format.
@@ -55,8 +54,6 @@ def parse_acrg_org(
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
     Returns:
         dict: Dictionary of data
     """
@@ -70,9 +67,7 @@ def parse_acrg_org(
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
 
-    with xr_open_fn(filepath).chunk(chunks) as fp_data:
-        if chunks:
-            logger.info(f"Rechunking with chunks={chunks}")
+    fp_data = xr_open_fn(filepath)
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
