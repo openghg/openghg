@@ -9,7 +9,7 @@ from helpers import (
     clear_test_stores,
     clear_test_store,
 )
-from openghg.retrieve import get_obs_surface, search
+from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -18,7 +18,8 @@ from openghg.standardise import (
     standardise_flux_timeseries,
 )
 from openghg.types import AttrMismatchError, ObjectStoreError
-from openghg.util import compress
+from openghg.util import compress, find_domain
+import numpy as np
 
 
 def test_standardise_to_read_only_store():
@@ -309,7 +310,71 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
-from openghg.retrieve import search_footprints
+@pytest.mark.parametrize("source_format", ["paris","flexpart"])
+def test_standardise_footprint_flexpart(source_format):
+    """
+    Checking FLEXPART footprints can be added using either "paris" or "flexpart"
+    source_format where "flexpart" is an alias for "paris".
+    Both should use the same parse_paris function.
+    """
+    # clear_test_stores()
+
+    datapath = get_footprint_datapath("MHD-10magl_FLEXPART_ECMWFHRES_TEST_inert_201809.nc")
+
+    site = "mhd"
+    inlet = "10m"
+    domain = "test"
+    model = "FLEXPART"
+    met_model = "ecmwfhres"
+
+    results = standardise_footprint(
+        filepath=datapath,
+        site=site,
+        inlet=inlet,
+        domain=domain,
+        model=model,
+        met_model=met_model,
+        source_format=source_format,
+        force=True,
+        if_exists="new",
+        store="user",
+    )
+
+    assert "error" not in results
+    assert "mhd_test_FLEXPART_10m" in results
+
+
+def test_standardise_align_footprint():
+    """
+    Tests that a footprint that is read in with slightly different lat-lon coordinates
+    is aligned to the 'correct' coordinates in openghg_defs
+    """
+    datapath = get_footprint_datapath("footprint_align_test.nc")
+
+    site = "JFJ"
+    network = "AGAGE"
+    height = "1000m"
+    domain = "EUROPE"
+    model = "test_model"
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        force=True,
+        overwrite=True,
+        store="user",
+    )
+
+    data = get_footprint(site=site, network=network, height=height, domain=domain, model=model)
+
+    true_lats, true_lons = find_domain(domain=domain)
+
+    assert np.array_equal(data.data.lat.values, true_lats)
+    assert np.array_equal(data.data.lon.values, true_lons)
 
 
 def test_standardise_footprints_chunk(caplog):
@@ -318,7 +383,7 @@ def test_standardise_footprints_chunk(caplog):
     site = "TAC"
     network = "DECC"
     height = "185m"
-    domain = "EUROPE"
+    domain = "TEST"
     model = "UKV-chunked"
 
     standardise_footprint(
@@ -369,6 +434,53 @@ def test_standardise_flux_additional_keywords():
     )
 
     assert "ch4_anthro_globaledgar" in proc_results
+
+
+def test_standardise_non_standard_flux_domain():
+    """
+    Checks that if a non-standard domain is used, the standardisation/alignment process throws no errors.
+    """
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # this file is sliced, to cover only a small section of the EUROPE domain
+    # assert that if we specify the domain as a non-standard domain, it standardises fine:
+
+    domain = "TEST"
+
+    proc_results = standardise_flux(
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain=domain,
+        high_time_resolution=False,
+        force=True,
+        store="user",
+    )
+
+    assert "co2_gpp-cardamom_test" in proc_results
+    assert "error" not in proc_results
+
+
+def test_standardise_incomplete_flux():
+    """
+    Checks that if a non-standard set of lat-lons is used in the input file with
+    a standard domain, we get an error
+    """
+    test_datapath = get_flux_datapath("co2-gpp-cardamom-EUROPE_2012-incomplete.nc")
+
+    # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
+    # we get an error
+
+    with pytest.raises(ValueError):
+        standardise_flux(
+            filepath=test_datapath,
+            species="co2",
+            source="gpp-cardamom",
+            domain="EUROPE",
+            high_time_resolution=False,
+            force=True,
+            store="user",
+        )
 
 
 def test_cloud_standardise(monkeypatch, mocker, tmpdir):
@@ -422,7 +534,7 @@ def test_standardise_footprint_different_chunking_schemes(caplog):
     site = "TAC"
     network = "UKV"
     height = "100m"
-    domain = "EUROPE"
+    domain = "TEST"
     model = "chunk_model"
 
     standardise_footprint(

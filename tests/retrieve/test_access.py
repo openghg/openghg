@@ -268,6 +268,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[0] == 1849.814
     assert sliced_mhd_data.mf[-1] == 1891.094
 
+
 @pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
@@ -348,7 +349,9 @@ def test_get_flux():
 
 def test_get_flux_range():
     """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
-    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01")
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
 
     flux = flux_data.data
 

@@ -21,7 +21,9 @@ from ._errors import (
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    ParseError,
     AttrMismatchError,
+    MetadataFormatError,
     DataOverlapError,
     ConfigFileError,
     MetastoreError,
@@ -39,4 +41,7 @@ from ._types import (
     XrDataLike,
     XrDataLikeMatch,
     TimePeriod,
+    HasMetadataAndData,
+    MetadataAndData,
+    Comparable,
 )

@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from openghg.retrieve import (
     search,
@@ -20,6 +22,9 @@ from pandas import Timestamp
         ("inlet", "50magl"),
         ("inlet", "50"),
         ("inlet", 50),  # May remove this later as really we expect a string here
+        ("inlet", slice(40, 60.0)),
+        ("inlet", slice("40m", "60.0m")),
+        ("inlet", slice("50m", "50.0m")),
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -303,7 +308,7 @@ def test_search_footprints_multiple():
         - 2016-08-01 (3 time points)
     """
     res = search_footprints(
-        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", time_resolved=False
+        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", high_time_resolution=False
     )
 
     key = next(iter(res.metadata))
@@ -606,3 +611,20 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+
+def test_search_for_float_inlet(tmp_path):
+    """Test searching for a decimal valued inlet"""
+    from openghg.objectstore.metastore import open_metastore
+
+    bucket = str(tmp_path / "_metastore._data")
+
+    with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
+        metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
+
+    with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
+        print(search(store="temp", data_type="surface"))
+        result = search(inlet="12.3m", data_type="surface", store="temp")
+
+    assert result
