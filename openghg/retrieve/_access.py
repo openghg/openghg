@@ -27,7 +27,6 @@ multDataTypes = Union[
 
 def _get_generic(
     combine_multiple_inlets: bool = False,
-    elevate_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
 ) -> _BaseData:
@@ -42,12 +41,6 @@ def _get_generic(
         dataclass
     """
     from openghg.retrieve import search
-
-    if elevate_inlets is True:
-        combine_multiple_inlets = True
-        logger.warning(
-            "`elevate_inlets` is deprecated, use `combine_multiple_inlets` instead.", DeprecationWarning
-        )
 
     results = search(**kwargs)
 
@@ -111,8 +104,8 @@ def get_obs_surface(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
-            search for a range of values. `lower` and `upper` can be int, float, or strings
+        inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
+            can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
             such as '100m'.
         height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
@@ -229,8 +222,8 @@ def get_obs_surface_local(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
-            search for a range of values. `lower` and `upper` can be int, float, or strings
+        inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
+            can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
             such as '100m'.
         height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
@@ -290,7 +283,6 @@ def get_obs_surface_local(
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
     retrieved_data = _get_generic(
-        elevate_inlets=False,
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
         **surface_keywords,  # type: ignore
