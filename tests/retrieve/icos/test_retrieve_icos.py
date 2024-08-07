@@ -144,7 +144,7 @@ def mock_retrieve_remote(mocker):
     )
 
 
-@pytest.mark.icos
+# @pytest.mark.icos
 def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
     """Test if retrieving the same data twice issues a warning the second time."""
     clear_test_stores()
@@ -156,7 +156,7 @@ def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
     assert "There is no new data to process." in caplog.text
 
 
-@pytest.mark.icos
+# @pytest.mark.icos
 def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
     """Test if retrieving the same data twice does *not* issue a warning if
     `force=True` is passed to `retrieve_atmospheric` (and hence propegated down
