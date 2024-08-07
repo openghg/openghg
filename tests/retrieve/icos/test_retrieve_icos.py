@@ -39,7 +39,7 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
     assert first_obs.metadata == expected_metadata
 
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     # We patch this here so we can make sure we're getting the result from retrieve_all and not from
     # search
