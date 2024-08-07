@@ -258,8 +258,8 @@ def search_footprints(
 def search_surface(
     species: Union[str, list[str], None] = None,
     site: Union[str, list[str], None] = None,
-    inlet: Union[str, list[str], None] = None,
-    height: Union[str, list[str], None] = None,
+    inlet: Union[str, slice, None, list[Union[str, slice, None]]] = None,
+    height: Union[str, slice, None, list[Union[str, slice, None]]] = None,
     instrument: Union[str, list[str], None] = None,
     data_level: Union[str, list[str], None] = None,
     data_sublevel: Union[str, list[str], None] = None,
@@ -279,7 +279,9 @@ def search_surface(
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         instrument: Instrument name
         data_level: Data quality assurance level (0-3)
@@ -312,7 +314,7 @@ def search_surface(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    inlet = [format_inlet(value) for value in inlet] if isinstance(inlet, list) else format_inlet(inlet)
+    inlet = format_inlet(inlet)
 
     # Ensure data_level input is formatted
     if isinstance(data_level, list):
