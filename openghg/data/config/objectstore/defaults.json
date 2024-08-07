@@ -259,11 +259,6 @@
                     "str"
                 ]
             },
-            "icos_data_level": {
-                "type": [
-                    "str"
-                ]
-            },
             "data_type": {
                 "type": [
                     "str"
