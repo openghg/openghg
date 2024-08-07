@@ -1,12 +1,11 @@
-"""
-Combine multiple data objects (objects with .metadata and .data attributes) into one.
-"""
+"""Combine multiple data objects (objects with .metadata and .data attributes) into one."""
 
 from functools import partial
 from typing import Any, Callable, cast, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
+from xarray.core.types import CompatOptions
 
 from openghg.types import HasMetadataAndData
 
@@ -16,10 +15,12 @@ T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .met
 
 # TODO: review copying vs. mutating data. Is this handled nicely by xarray and dask?
 # TODO: do we need to add options to use dask.delayed like xr.open_mfdataset?
-
-
 def combine_data_objects(
-    data_objects: list[T], preprocess: Optional[Callable] = None, concat_dim: Optional[str] = None
+    data_objects: list[T],
+    preprocess: Optional[Callable] = None,
+    concat_dim: Optional[str] = None,
+    compat: Optional[CompatOptions] = None,
+    drop_duplicates: Optional[str] = None,
 ) -> T:
     """Combine multiple data objects with optional preprocessing step.
 
@@ -29,6 +30,8 @@ def combine_data_objects(
         preprocess: optional function to call on data objects; must accept type T and return type T
         concat_dim: optional dimension to specify concatenation along; if not specified, this is inferred via
             xr.combine_by_coords
+        compat: 'compat' option to be passed to xr.concat or xr.combine_by_coords. See docs there.
+        drop_duplicates: optional dimension to drop duplicates along, after combining.
 
     Returns:
         single data object with data from each object combined by coordinates, with optional preprocessing applied.
@@ -44,13 +47,20 @@ def combine_data_objects(
     datasets = [do.data for do in data_objects]
 
     if concat_dim is not None:
+        if compat is None:
+            compat = "equals"
         new_data = cast(
             xr.Dataset, xr.concat(datasets, dim=concat_dim, combine_attrs="drop_conflicts", fill_value=np.nan)
         )
     else:
+        if compat is None:
+            compat = "no_conflicts"
         new_data = cast(
             xr.Dataset, xr.combine_by_coords(datasets, combine_attrs="drop_conflicts", fill_value=np.nan)
         )
+
+    if drop_duplicates is not None:
+        new_data = new_data.drop_duplicates(drop_duplicates)
 
     # combine metadata
     metadatas = [do.metadata for do in data_objects]
@@ -191,9 +201,16 @@ def add_variable_from_metadata(
     return result
 
 
-def combine_and_elevate_inlet(data_objects: list[T]) -> T:
-    """Combine multiple data objects into a single data object, elevating
-    the inlet value in their metadata to a data variable with a time dimension.
+def combine_and_elevate_inlet(data_objects: list[T], override_on_conflict: bool = True) -> T:
+    """Combine multiple data objects, elevating inlet from metadata to data variable with a time dimension.
+
+    Args:
+        data_objects: list of data objects to combine
+        override_on_confict: if True, when the same time is present in multiple data objects,
+            choose the value from the first data object where it occurs.
+
+    Returns:
+        data object of same type as input list, with added "inlet" data variable.
     """
     from openghg.util import extract_float
 
@@ -211,4 +228,9 @@ def combine_and_elevate_inlet(data_objects: list[T]) -> T:
         formatter=inlet_formatter,
         new_metadata_value="multiple",
     )
+
+    if override_on_conflict:
+        return combine_data_objects(
+            data_objects, preprocess=preprocess, concat_dim="time", drop_duplicates="time"
+        )
     return combine_data_objects(data_objects, preprocess=preprocess)
