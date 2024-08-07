@@ -74,7 +74,7 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: Union[str, Path, List],
+    filepath: Union[str, Path, List, tuple],
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
