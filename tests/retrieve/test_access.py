@@ -427,3 +427,12 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
+
+
+def test_get_obs_surface_elevate_inlets():
+    """Test if searching by range for multiple inlets returns a combined dataset with
+    an "inlet" data variable.
+     """
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
+
+    assert "inlet"in result.data.data_vars

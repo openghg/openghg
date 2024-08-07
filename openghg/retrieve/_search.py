@@ -258,20 +258,20 @@ def search_footprints(
 def search_surface(
     species: Union[str, list[str], None] = None,
     site: Union[str, list[str], None] = None,
-    inlet: Union[str, list[str], None] = None,
-    height: Union[str, list[str], None] = None,
+    inlet: Union[str, slice, None, list[Union[str, slice, None]]] = None,
+    height: Union[str, slice, None, list[Union[str, slice, None]]] = None,
     instrument: Union[str, list[str], None] = None,
     data_level: Union[str, list[str], None] = None,
     data_sublevel: Union[str, list[str], None] = None,
+    dataset_source: Optional[str] = None,
+    data_source: Optional[str] = None,
     measurement_type: Union[str, list[str], None] = None,
     source_format: Union[str, list[str], None] = None,
     network: Union[str, list[str], None] = None,
     start_date: Union[str, list[str], None] = None,
     end_date: Union[str, list[str], None] = None,
-    data_source: Optional[str] = None,
     sampling_height: Optional[str] = None,
     icos_data_level: Optional[int] = None,
-    dataset_source: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search.
@@ -279,22 +279,26 @@ def search_surface(
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         instrument: Instrument name
         data_level: Data quality assurance level (0-3)
         data_sublevel: Typically used for "L1" data depending on different QA
             performed before data is finalised.
+        data_source: Where data was retrieved from (used especially when retrieved from external archives)
+            e.g. "internal", "noaa_obspack", "icoscp", "ceda_archive". This
+            argument only needs to be used to narrow the search to data solely from retrieval methods.
+        dataset_source: External name applied to source of the dataset,
+            for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
-        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
-        argument only needs to be used to narrow the search to data solely from these sources.
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
-        dataset_source: For ICOS data only: dataset source name, for example ICOS, InGOS, European ObsPack
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
@@ -310,7 +314,7 @@ def search_surface(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    inlet = [format_inlet(value) for value in inlet] if isinstance(inlet, list) else format_inlet(inlet)
+    inlet = format_inlet(inlet)
 
     # Ensure data_level input is formatted
     if isinstance(data_level, list):
@@ -325,16 +329,16 @@ def search_surface(
         instrument=instrument,
         data_level=data_level,
         data_sublevel=data_sublevel,
+        data_source=data_source,
+        dataset_source=dataset_source,
         measurement_type=measurement_type,
         data_type="surface",
         source_format=source_format,
         start_date=start_date,
         end_date=end_date,
-        data_source=data_source,
         network=network,
         sampling_height=sampling_height,
         icos_data_level=icos_data_level,
-        dataset_source=dataset_source,
         **kwargs,
     )
 
