@@ -24,11 +24,12 @@ def data_read():
 
     # DECC network sites
     network = "DECC"
+    bsd_250_path = get_surface_datapath(filename="bsd.picarro.1minute.250m.min.dat", source_format="CRDS")  # fake, for elevate inlets
     bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     bsd_108_path = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_42_path = get_surface_datapath(filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
 
-    bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
+    bsd_paths = [bsd_250_path, bsd_248_path, bsd_108_path, bsd_42_path]
 
     standardise_surface(store="user", filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
 

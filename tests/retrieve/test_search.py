@@ -222,11 +222,11 @@ def test_multi_type_search():
 
     res = search(species="ch4", data_type=["surface"])
 
-    assert len(res.metadata) == 7
+    assert len(res.metadata) == 8
 
     res = search(species="co2", data_type=["surface", "flux"])
 
-    assert len(res.metadata) == 8
+    assert len(res.metadata) == 9
 
 
 def test_many_term_search():

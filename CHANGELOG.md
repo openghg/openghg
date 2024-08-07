@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
 
 ### Added
+
+- In `get_obs_surface`, if `inlet` is passed a slice and multiple search results are found, they will be combined into a single `ObsData` object with a "inlet" data variable. [PR #1066](https://github.com/openghg/openghg/pull/1066)
 - Packaging and release documentation. [PR #961](https://github.com/openghg/openghg/pull/961)
 - Options to search metastore by "negative lookup" and by "test functions"; the latter is used to implement 
   searching by a `slice` object to find a range of values - [PR #1064](https://github.com/openghg/openghg/pull/1064)
