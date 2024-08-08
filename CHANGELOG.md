@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
 - A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
 - New keywords `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
-- The `dataset_source` keyword previously used for retrieved data is now available when using `standardise_surface`. This allow an origin key for the dataset to be included e.g. "InGOS", "European ObsPack". [PR #1083](https://github.com/openghg/openghg/pull/1083)
+- The `dataset_source` keyword previously only used for retrieved data is now available when using `standardise_surface` as well. This allows an origin key for the dataset to be included e.g. "InGOS", "European ObsPack". [PR #1083](https://github.com/openghg/openghg/pull/1083)
 - Footprint parser for "paris" footprint format which includes the new format used for both the NAME and FLEXPART LPDM models - [PR #1070](https://github.com/openghg/openghg/pull/1070)
 
 ### Updated
@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `data_source` keyword is now included as "internal" when using `standardise_surface` to distinguish this from data retrieved from external sources (e.g. "icos", "noaa_obspack"). [PR #1083](https://github.com/openghg/openghg/pull/1083)
 - Added interactive timeseries plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953) 
 - Pinned the `icoscp` version within requirements to 0.1.17 based on new authentication requirements. [PR #1084](https://github.com/openghg/openghg/pull/1084)
+- Removing 'station_long_name' and 'data_type' as required keys from the metadata config file as these do not need to be used as keys to distinguish datasources when adding new data. [PR #1088](https://github.com/openghg/openghg/pull/1088)
 - The sort flag can now be passed via the SearchResults.retrieve interfaces to choose whether the data is returned sorted along the time axis. [PR #1090](https://github.com/openghg/openghg/pull/1090)
 
 ### Fixed

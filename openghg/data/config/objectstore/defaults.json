@@ -214,11 +214,6 @@
                     "str"
                 ]
             },
-            "station_long_name": {
-                "type": [
-                    "str"
-                ]
-            },
             "inlet": {
                 "type": [
                     "str"
@@ -260,11 +255,6 @@
                 ]
             },
             "icos_data_level": {
-                "type": [
-                    "str"
-                ]
-            },
-            "data_type": {
                 "type": [
                     "str"
                 ]
