@@ -55,6 +55,11 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     data1 = data_first_retrieval[0].data
     meta1 = data_first_retrieval[0].metadata
 
+    # Previous results from ICOS (pre-07/08/2024) contained
+    #     "instrument": "ftir",
+    #     "station_height_masl": 31.0,
+
+    # Results from ICOS on 07/08/2024    
     expected_metadata = {
         "station_long_name": "weybourne observatory, uk",
         "station_latitude": 52.95042,
@@ -68,12 +73,12 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "site": "wao",
         "inlet": "10m",
         "inlet_height_magl": "10",
-        "instrument": "ftir",
+        "instrument": "multiple",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
         "data_owner": "andrew manning",
         "data_owner_email": "a.manning@uea.ac.uk",
-        "station_height_masl": 31.0,
+        "station_height_masl": 17.0,
         "dataset_source": "ICOS",
     }
 
