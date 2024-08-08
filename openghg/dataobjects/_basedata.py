@@ -85,7 +85,7 @@ class _BaseData:
                 # If slicing by time, this must be sorted along the time dimension
                 if sort is False:
                     logger.warning(
-                        "Ignoring sort={sort} input as it is necessary to sort the data when extracting a start and end date range."
+                        f"Ignoring sort={sort} input as it is necessary to sort the data when extracting a start and end date range."
                     )
 
                 self.data = self.data.sortby("time")
