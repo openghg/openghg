@@ -1,10 +1,10 @@
-""" Generic search functions that can be used to find data in
-    the object store
+"""Generic search functions that can be used to find data in
+the object store.
 
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
@@ -12,6 +12,7 @@ from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
+from ._search_helpers import process_search_kwargs
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -27,7 +28,7 @@ def search_bc(
     continuous: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for boundary condition data
+    """Search for boundary condition data.
 
     Args:
         species: Species name
@@ -47,7 +48,6 @@ def search_bc(
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -73,7 +73,7 @@ def search_eulerian(
     end_date: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for eulerian data
+    """Search for eulerian data.
 
     Args:
         model: Eulerian model name
@@ -84,7 +84,6 @@ def search_eulerian(
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -115,7 +114,7 @@ def search_flux(
     continuous: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for flux / emissions data
+    """Search for flux / emissions data.
 
     Args:
         species: Species name
@@ -137,7 +136,6 @@ def search_flux(
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -179,7 +177,7 @@ def search_footprints(
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for footprints data
+    """Search for footprints data.
 
     Args:
         site: Site name
@@ -205,7 +203,7 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    args: Dict[str, Any] = {
+    args: dict[str, Any] = {
         "site": site,
         "inlet": inlet,
         "height": height,
@@ -258,45 +256,54 @@ def search_footprints(
 
 
 def search_surface(
-    species: Union[str, List[str], None] = None,
-    site: Union[str, List[str], None] = None,
-    inlet: Union[str, List[str], None] = None,
-    height: Union[str, List[str], None] = None,
-    instrument: Union[str, List[str], None] = None,
-    measurement_type: Union[str, List[str], None] = None,
-    source_format: Union[str, List[str], None] = None,
-    network: Union[str, List[str], None] = None,
-    start_date: Union[str, List[str], None] = None,
-    end_date: Union[str, List[str], None] = None,
+    species: Union[str, list[str], None] = None,
+    site: Union[str, list[str], None] = None,
+    inlet: Union[str, slice, None, list[Union[str, slice, None]]] = None,
+    height: Union[str, slice, None, list[Union[str, slice, None]]] = None,
+    instrument: Union[str, list[str], None] = None,
+    data_level: Union[str, list[str], None] = None,
+    data_sublevel: Union[str, list[str], None] = None,
+    dataset_source: Optional[str] = None,
     data_source: Optional[str] = None,
+    measurement_type: Union[str, list[str], None] = None,
+    source_format: Union[str, list[str], None] = None,
+    network: Union[str, list[str], None] = None,
+    start_date: Union[str, list[str], None] = None,
+    end_date: Union[str, list[str], None] = None,
     sampling_height: Optional[str] = None,
     icos_data_level: Optional[int] = None,
-    dataset_source: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Cloud object store search
+    """Cloud object store search.
 
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         instrument: Instrument name
+        data_level: Data quality assurance level (0-3)
+        data_sublevel: Typically used for "L1" data depending on different QA
+            performed before data is finalised.
+        data_source: Where data was retrieved from (used especially when retrieved from external archives)
+            e.g. "internal", "noaa_obspack", "icoscp", "ceda_archive". This
+            argument only needs to be used to narrow the search to data solely from retrieval methods.
+        dataset_source: External name applied to source of the dataset,
+            for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
-        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
-        argument only needs to be used to narrow the search to data solely from these sources.
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
-        dataset_source: For ICOS data only: dataset source name, for example ICOS, InGOS, European ObsPack
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
-    from openghg.util import format_inlet
+    from openghg.util import format_inlet, format_data_level
 
     if start_date is not None:
         start_date = str(start_date)
@@ -307,26 +314,31 @@ def search_surface(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    if isinstance(inlet, list):
-        inlet = [format_inlet(value) for value in inlet]
+    inlet = format_inlet(inlet)
+
+    # Ensure data_level input is formatted
+    if isinstance(data_level, list):
+        data_level = [format_data_level(value) for value in data_level]
     else:
-        inlet = format_inlet(inlet)
+        data_level = format_data_level(data_level)
 
     results = search(
         species=species,
         site=site,
         inlet=inlet,
         instrument=instrument,
+        data_level=data_level,
+        data_sublevel=data_sublevel,
+        data_source=data_source,
+        dataset_source=dataset_source,
         measurement_type=measurement_type,
         data_type="surface",
         source_format=source_format,
         start_date=start_date,
         end_date=end_date,
-        data_source=data_source,
         network=network,
         sampling_height=sampling_height,
         icos_data_level=icos_data_level,
-        dataset_source=dataset_source,
         **kwargs,
     )
 
@@ -344,7 +356,7 @@ def search_column(
     platform: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search column data
+    """Search column data.
 
     Args:
         satellite: Name of satellite (if relevant)
@@ -415,7 +427,7 @@ def search(**kwargs: Any) -> SearchResults:
     from openghg.cloud import call_function
 
     if running_on_hub():
-        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data: dict[str, Union[str, dict]] = {}
         post_data["function"] = "search"
         post_data["search_terms"] = kwargs
 
@@ -469,11 +481,10 @@ def _base_search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    import itertools
-    from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
         dates_overlap,
+        format_inlet,
         synonyms,
         timestamp_epoch,
         timestamp_now,
@@ -491,7 +502,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
     # - clean search terms directly or within data structures
     search_kwargs = {}
     for k, v in kwargs.items():
-        if isinstance(v, (list, tuple)):
+        if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
+            v = format_inlet(v)
+        elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list
                 v = None
@@ -538,60 +551,17 @@ def _base_search(**kwargs: Any) -> SearchResults:
     readable_buckets = get_readable_buckets()
 
     # If we're given a store then we'll just read from that one
-    try:
-        store = search_kwargs["store"]
-    except KeyError:
-        pass
-    else:
-        del search_kwargs["store"]
-
+    store = search_kwargs.pop("store", None)
+    if store:
         try:
             readable_buckets = {store: readable_buckets[store]}
         except KeyError:
             raise ObjectStoreError(f"Invalid store: {store}")
 
-    try:
-        start_date = search_kwargs["start_date"]
-    except KeyError:
-        start_date = None
-    else:
-        del search_kwargs["start_date"]
+    start_date = search_kwargs.pop("start_date", None)
+    end_date = search_kwargs.pop("end_date", None)
 
-    try:
-        end_date = search_kwargs["end_date"]
-    except KeyError:
-        end_date = None
-    else:
-        del search_kwargs["end_date"]
-
-    # Here we process the kwargs, allowing us to create the correct combinations of search queries.
-    # To set this up for keywords with multiple options, lists of the (key, value) pair terms are created
-    # - e.g. for species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
-    # - multiple_options is [[("species", "ch4"), ("species", "methane")], [("time_resolved": "true"), ("high_time_resolution": "true")]]
-    # - we then expect searches for all permutations across both lists.
-    multiple_options = []
-    single_options = {}
-    for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
-            expand_key_values = [(k, value) for value in v]
-            multiple_options.append(expand_key_values)
-        elif isinstance(v, dict):
-            expand_key_values = list(v.items())
-            multiple_options.append(expand_key_values)
-        else:
-            single_options[k] = v
-
-    expanded_search = []
-    if multiple_options:
-        # Ensure that all permutations of the search options are created.
-        for kv_pair in itertools.product(*multiple_options):
-            d = dict(kv_pair)
-            if single_options:
-                d.update(single_options)
-            expanded_search.append(d)
-    else:
-        expanded_search.append(single_options)
-
+    expanded_search = process_search_kwargs(search_kwargs)
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
@@ -599,7 +569,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
         for data_type in types_to_search:
             with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
                 for v in expanded_search:
-                    res = metastore.search(v)
+                    res = metastore.search(**v)
                     if res:
                         metastore_records.extend(res)
 

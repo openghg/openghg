@@ -12,12 +12,13 @@ dependencies:
   - filelock
   - matplotlib
   - msgpack-python
-  - netcdf4
+  - netcdf4<=1.6.5
   - nbformat
   - numexpr
-  - numpy
+  - numpy<2.0
   - nc-time-axis
   - openghg_defs
+  - openpyxl
   - pandas>=2.0
   - pip
   - plotly

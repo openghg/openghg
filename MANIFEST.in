@@ -3,6 +3,8 @@ include MANIFEST.in
 include setup.py
 include requirements*.txt
 include py.typed
+include versioneer.py
+include openghg/_version.py
 
 graft openghg
 
@@ -10,5 +12,3 @@ global-exclude *.pickle
 global-exclude *.pyc
 global-exclude *.pyd
 global-exclude .git*
-include versioneer.py
-include openghg/_version.py

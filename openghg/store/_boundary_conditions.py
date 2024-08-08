@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
+from openghg.util import synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -121,6 +122,7 @@ class BoundaryConditions(BaseStore):
         from xarray import open_dataset
 
         species = clean_string(species)
+        species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
@@ -207,18 +209,11 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            required_keys = ("species", "bc_input", "domain")
+            lookup_keys = self.get_lookup_keys(optional_metadata)
 
-            if optional_metadata:
-                common_keys = set(required_keys) & set(optional_metadata.keys())
-
-                if common_keys:
-                    raise ValueError(
-                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                    )
-                else:
-                    for key, parsed_data in boundary_conditions_data.items():
-                        parsed_data["metadata"].update(optional_metadata)
+            if optional_metadata is not None:
+                for parsed_data in boundary_conditions_data.values():
+                    parsed_data["metadata"].update(optional_metadata)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
@@ -227,7 +222,7 @@ class BoundaryConditions(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required_keys,
+                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )
