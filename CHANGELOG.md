@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added interactive timeseries plots in Search and Plotting tutorial. [PR #953](https://github.com/openghg/openghg/pull/953) 
 - Pinned the `icoscp` version within requirements to 0.1.17 based on new authentication requirements. [PR #1084](https://github.com/openghg/openghg/pull/1084)
 - The `icos_data_level` metadata keyword is now retired and replaced with `data_level` when using the `retrieve.icos.retrieve_atmopsheric` workflow to access data from the ICOS Carbon Portal. [PR #1087](https://github.com/openghg/openghg/pull/1087)
+- The sort flag can now be passed via the SearchResults.retrieve interfaces to choose whether the data is returned sorted along the time axis. [PR #1090](https://github.com/openghg/openghg/pull/1090)
+
+### Fixed
+
+- Bug in test when checking customised chunks were stored correctly in the zarr store. dask v2024.8 now changed the chunk shape after this was sorted was test was updated to ensure this didn't sort when retrieving the data. [PR #1090](https://github.com/openghg/openghg/pull/1090)
 
 ## [0.8.2] - 2024-06-06
 
