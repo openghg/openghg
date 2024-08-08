@@ -37,7 +37,7 @@ class _BaseData:
             version: Version of data requested from Datasource
             start_date: Start date of data to retrieve
             end_date: End date of data to retrieve
-            sort: Sort the resulting Dataset by the time dimension, defaults to False
+            sort: Sort the resulting Dataset by the time dimension, defaults to True
             elevate_inlet: Force the elevation of the inlet attribute
             attrs_to_check: Attributes to check for duplicates. If duplicates are present
                 a new data variable will be created containing the values from each dataset
@@ -83,6 +83,11 @@ class _BaseData:
             self.data = self._zarrstore.get(version=version)
             if slice_time:
                 # If slicing by time, this must be sorted along the time dimension
+                if sort is False:
+                    logger.warning(
+                        "Ignoring sort={sort} input as it is necessary to sort the data when extracting a start and end date range."
+                    )
+
                 self.data = self.data.sortby("time")
                 sorted = True
 
