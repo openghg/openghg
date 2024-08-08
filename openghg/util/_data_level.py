@@ -1,4 +1,4 @@
-from typing import Optional, Union, cast, overload
+from typing import Optional, Union, overload
 import logging
 from openghg.types import MetadataFormatError
 
