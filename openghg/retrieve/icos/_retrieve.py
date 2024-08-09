@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub, load_json
+from openghg.types import MetadataFormatError
 import openghg_defs
 import logging
 
@@ -192,7 +193,9 @@ def local_retrieve(
 
     # ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])
     if not 1 <= int(data_level) <= 2:
-        logger.error("Error: for ICOS data the data level must be 1 or 2.")
+        msg = "Error: for ICOS data the data level must be 1 or 2."
+        logger.exception(msg)
+        raise MetadataFormatError(msg)
 
     if sampling_height and inlet is None:
         inlet = sampling_height
