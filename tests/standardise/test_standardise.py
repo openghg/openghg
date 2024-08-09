@@ -551,3 +551,24 @@ def test_standardise_flux_timeseries():
     )
 
     assert "ch4_crf_uk" in flux_results
+
+def test_standardise_sorting():
+    """ Testing only the sorting of files here"""
+
+    filepaths = [
+        "/Users/vq21425/openghg/tests/data/proc_test_data/OPENGHG/DECC-picarro_TAC_20130131_co2-185m-20220929.nc",
+        "/Users/vq21425/openghg/tests/data/proc_test_data/OPENGHG/DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+        ]
+
+    standardise_surface(
+        store="user",
+        filepath=filepaths,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+        update_mismatch="attributes",
+        if_exists="new"
+    )
+
