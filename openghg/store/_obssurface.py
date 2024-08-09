@@ -111,8 +111,8 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
-        data_level: Optional[str] = None,
-        data_sublevel: Optional[str] = None,
+        data_level: Optional[Union[str, int, float]] = None,
+        data_sublevel: Optional[Union[str, float]] = None,
         dataset_source: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
@@ -236,6 +236,8 @@ class ObsSurface(BaseStore):
 
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
+        if data_sublevel is not None:
+            data_sublevel = str(data_sublevel)
 
         data_level = check_and_set_null_variable(data_level)
         data_sublevel = check_and_set_null_variable(data_sublevel)

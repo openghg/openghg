@@ -24,8 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `base` to `offset` in `resample` due to xarray deprecation. [PR #1073](https://github.com/openghg/openghg/pull/1073)
 - Updated `get_obs_column` to output mole fraction details. This involves using the apriori level data above a maximum level and applying a correction to the column data (aligned with this process within [acrg code](https://github.com/ACRG-Bristol/acrg)). [PR #1050](https://github.com/openghg/openghg/pull/1050)
 - The `data_source` keyword is now included as "internal" when using `standardise_surface` to distinguish this from data retrieved from external sources (e.g. "icos", "noaa_obspack"). [PR #1083](https://github.com/openghg/openghg/pull/1083)
-- Added interactive timeseries plots in Search and Plotting tutorial. - [PR #953](https://github.com/openghg/openghg/pull/953) 
+- Added interactive timeseries plots in Search and Plotting tutorial. [PR #953](https://github.com/openghg/openghg/pull/953) 
 - Pinned the `icoscp` version within requirements to 0.1.17 based on new authentication requirements. [PR #1084](https://github.com/openghg/openghg/pull/1084)
+- The `icos_data_level` metadata keyword is now retired and replaced with `data_level` when using the `retrieve.icos.retrieve_atmopsheric` workflow to access data from the ICOS Carbon Portal. [PR #1087](https://github.com/openghg/openghg/pull/1087)
 - Removing 'station_long_name' and 'data_type' as required keys from the metadata config file as these do not need to be used as keys to distinguish datasources when adding new data. [PR #1088](https://github.com/openghg/openghg/pull/1088)
 - The sort flag can now be passed via the SearchResults.retrieve interfaces to choose whether the data is returned sorted along the time axis. [PR #1090](https://github.com/openghg/openghg/pull/1090)
 
