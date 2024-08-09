@@ -238,7 +238,7 @@ def multiple_inlets(site: str) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: Union[list[Path] | str]) -> Union[list[Path] | str]:
+def sort_by_filenames(filepath: Union[list[Path], str]) -> Union[list[Path], str]:
     """
     Sorting time on filename basis
 
