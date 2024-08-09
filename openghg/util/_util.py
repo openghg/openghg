@@ -240,7 +240,7 @@ def multiple_inlets(site: str) -> bool:
 
 
 def sort_by_filenames(
-    filepath: list[Path] | str, data_type: object = None, source_format: object = None
+    filepath: list[Path] | str, data_type: str = None, source_format: str = None
 ) -> list[Path] | str:
     """
     Sorting time on filename basis
