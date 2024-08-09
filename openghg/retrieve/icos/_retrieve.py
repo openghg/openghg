@@ -201,26 +201,29 @@ def local_retrieve(
 
     # Search for data_level OR icos_data_level keyword within current data.
     # - icos_data_level is no longer added but this is included for backwards compatability.
-    data_level_keywords = ["data_level", "icos_data_level"]
-    for dl in data_level_keywords:
-        search_keywords: dict[str, Any] = {
-            "site": site,
-            "species": species,
-            "inlet": inlet,
-            "network": "ICOS",
-            "data_source": "icoscp",
-            "start_date": start_date,
-            "end_date": end_date,
-            "dataset_source": dataset_source,
-            "store": store,
-        }
+    data_level_keywords = {
+        "data_level": format_data_level(data_level),
+        "icos_data_level": format_data_level(data_level),
+    }
 
-        search_keywords[dl] = format_data_level(data_level)
+    search_keywords: dict[str, Any] = {
+        "site": site,
+        "species": species,
+        "inlet": inlet,
+        "network": "ICOS",
+        "data_source": "icoscp",
+        "start_date": start_date,
+        "end_date": end_date,
+        "dataset_source": dataset_source,
+        "store": store,
+        "data_level": data_level_keywords,
+    }
 
-        results = search_surface(**search_keywords)
-        if results and not force_retrieval:
-            obs_data = results.retrieve_all()
-            break
+    results = search_surface(**search_keywords)
+
+    if results and not force_retrieval:
+        obs_data = results.retrieve_all()
+        # break
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(
