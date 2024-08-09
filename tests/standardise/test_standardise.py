@@ -556,9 +556,8 @@ def test_standardise_sorting():
     """ Testing only the sorting of files here"""
 
     filepaths = [
-        "/Users/vq21425/openghg/tests/data/proc_test_data/OPENGHG/DECC-picarro_TAC_20130131_co2-185m-20220929.nc",
-        "/Users/vq21425/openghg/tests/data/proc_test_data/OPENGHG/DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
-        ]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format = "openghg"),
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
 
     standardise_surface(
         store="user",

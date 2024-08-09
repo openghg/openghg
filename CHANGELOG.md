@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adds `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 
+- Added feature of file sorting at standardise level before processing - [PR #1074](https://github.com/openghg/openghg/pull/1074)
+
 ### Updated
 
 - Updated `base` to `offset` in `resample` due to xarray deprecation. [PR #1073](https://github.com/openghg/openghg/pull/1073)
