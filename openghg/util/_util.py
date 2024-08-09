@@ -4,9 +4,8 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple
+from typing import Any, Dict, Iterator, Optional, Tuple, Union
 import logging
-
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -240,26 +239,18 @@ def multiple_inlets(site: str) -> bool:
 
 
 def sort_by_filenames(
-    filepath: list[Path] | str, data_type: str = None, source_format: str = None
-) -> list[Path] | str:
+        filepath: Union[list[Path] | str]) -> list[Path] | str:
     """
     Sorting time on filename basis
 
     Args:
-        filepath (str or Path): Path to the file
-        data_type (str, optional): Type of data to sort. Defaults to None.
-        kwargs (dict, optional): Keyword arguments to pass to the sort function
+        filepath: Path to the fil
 
     Returns:
         list[Path]: List of sorted paths
     """
 
-    if data_type == "surface" and source_format.lower() != "gcwerks":
-        filepath = sorted([Path(f) for f in filepath])
-        logger.info("Files are sorted according to dates")
-
-    elif data_type == "footprints":
-        filepath = sorted([Path(f) for f in filepath])
-        logger.info("Files are sorted according to dates")
+    filepath = sorted([Path(f) for f in filepath])
+    logger.info("Files are sorted according to dates")
 
     return filepath
