@@ -144,10 +144,8 @@ def standardise_surface(
     if filepath is None:
         raise ValueError("Please specify `filepath`.")
 
-    if source_format.lower() != "gcwerks":
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-        filepath = sort_by_filenames(filepath=filepath)
+    if not isinstance(filepath, list):
+        filepath = [filepath]
 
     if running_on_hub():
         # TODO: Use input for site_filepath here? How to include this?
@@ -224,6 +222,10 @@ def standardise_surface(
 
         return responses
     else:
+
+        if source_format.lower() != "gcwerks":
+            filepath = sort_by_filenames(filepath=filepath)
+
         return standardise(
             store=store,
             data_type="surface",
