@@ -147,10 +147,7 @@ def standardise_surface(
     if not isinstance(filepath, list):
         filepath = [filepath]
 
-    filepath = sort_by_filenames(filepath=filepath,
-                                 data_type="surface",
-                                 source_format=source_format
-                                 )
+    filepath = sort_by_filenames(filepath=filepath, data_type="surface", source_format=source_format)
 
     if running_on_hub():
         # TODO: Use input for site_filepath here? How to include this?
@@ -580,9 +577,10 @@ def standardise_footprint(
     if not isinstance(filepath, list):
         filepath = [filepath]
 
-    filepath = sort_by_filenames(filepath= filepath,
-                                 data_type="footprints",
-                                 )
+    filepath = sort_by_filenames(
+        filepath=filepath,
+        data_type="footprints",
+    )
 
     if running_on_hub():
         raise NotImplementedError("Cloud support not yet implemented.")
