@@ -96,6 +96,7 @@ from ._util import (
     running_locally,
     running_on_hub,
     site_code_finder,
+    sort_by_filenames,
     unanimous,
     verify_site,
 )

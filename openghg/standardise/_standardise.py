@@ -5,7 +5,7 @@ import warnings
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub
+from openghg.util import running_on_hub, sort_by_filenames
 from openghg.types import optionalPathType, multiPathType
 from numcodecs import Blosc
 import logging
@@ -39,24 +39,6 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
     else:
         logger.info("Compression disabled")
         compressor = None
-
-    if data_type == "surface" and kwargs["source_format"].lower() != "gcwerks":
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-            filepath = sorted([Path(f) for f in filepath])
-        else:
-            # We wanted sorted Path objects
-            filepath = sorted([Path(f) for f in filepath])
-        logger.info("Files are sorted according to dates")
-
-    elif data_type == "footprints":
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-            filepath = sorted([Path(f) for f in filepath])
-        else:
-            # We wanted sorted Path objects
-            filepath = sorted([Path(f) for f in filepath])
-        logger.info("Files are sorted according to dates")
 
     kwargs["compressor"] = compressor
 
@@ -164,6 +146,11 @@ def standardise_surface(
 
     if not isinstance(filepath, list):
         filepath = [filepath]
+
+    filepath = sort_by_filenames(filepath=filepath,
+                                 data_type="surface",
+                                 source_format=source_format
+                                 )
 
     if running_on_hub():
         # TODO: Use input for site_filepath here? How to include this?
@@ -589,6 +576,13 @@ def standardise_footprint(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    filepath = sort_by_filenames(filepath= filepath,
+                                 data_type="footprints",
+                                 )
 
     if running_on_hub():
         raise NotImplementedError("Cloud support not yet implemented.")
