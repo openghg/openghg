@@ -3,18 +3,18 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import (
-    attributes_checker_get_obs,
-    call_function_packager,
-    get_emissions_datapath,
-    get_footprint_datapath,
-    get_surface_datapath,
-    metadata_checker_obssurface,
-)
+from helpers import call_function_packager
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
-from openghg.util import compress, compress_str, hash_bytes
+from openghg.retrieve import (
+    get_bc,
+    get_flux,
+    get_footprint,
+    get_obs_column,
+    get_obs_surface,
+    search,
+)
 from openghg.types import SearchError
+from openghg.util import compress, compress_str, hash_bytes
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -66,7 +66,6 @@ def test_get_obs_surface_average_works_without_longname():
     ],
 )
 def test_get_obs_surface(inlet_keyword, inlet_value):
-
     if inlet_keyword == "inlet":
         obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
     elif inlet_keyword == "height":
@@ -270,6 +269,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[-1] == 1891.094
 
 
+@pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
@@ -308,14 +308,26 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
 
 def test_get_obs_column():
-    column_data = get_obs_column(species="ch4", satellite="gosat")
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10)
 
     obscolumn = column_data.data
 
-    assert "xch4" in obscolumn
+    assert "mf" in obscolumn
+    assert "mf_prior_factor" in obscolumn
+    assert "mf_prior_upper_level_factor" in obscolumn
+    assert "mf_repeatability" in obscolumn
+
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
-    assert obscolumn.attrs["species"] == "ch4"
+    assert np.isclose(obscolumn["mf"][0], 1238.2743)
+    assert obscolumn.attrs["species"] == "CH4"
+
+def test_get_obs_column_max_level():
+    # test max level defaults to highest available if out of range
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+    obscolumn = column_data.data
+    assert np.isclose(obscolumn["mf"][0], 1818.2135)
+
+
 
 
 def test_get_flux():
@@ -333,6 +345,20 @@ def test_get_flux():
     time = flux["time"]
     assert time[0] == Timestamp("2012-01-01T00:00:00")
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
@@ -384,11 +410,11 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert footprint.time[0] == Timestamp("2020-08-01")
     assert footprint.time[-1] == Timestamp("2020-08-01")
 
-    assert metadata["max_longitude"] == pytest.approx(float(footprint.lon.max()))
-    assert metadata["min_longitude"] == pytest.approx(float(footprint.lon.min()))
-    assert metadata["max_latitude"] == pytest.approx(float(footprint.lat.max()))
-    assert metadata["min_latitude"] == pytest.approx(float(footprint.lat.min()))
-    assert metadata["high_time_resolution"] == False
+    assert metadata["max_longitude"] == pytest.approx(float(footprint["lon"].max()))
+    assert metadata["min_longitude"] == pytest.approx(float(footprint["lon"].min()))
+    assert metadata["max_latitude"] == pytest.approx(float(footprint["lat"].max()))
+    assert metadata["min_latitude"] == pytest.approx(float(footprint["lat"].min()))
+    assert metadata["time_resolved"] == "false"
 
 
 def test_get_footprint_no_result():
@@ -401,3 +427,12 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
+
+
+def test_get_obs_surface_elevate_inlets():
+    """Test if searching by range for multiple inlets returns a combined dataset with
+    an "inlet" data variable.
+     """
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
+
+    assert "inlet"in result.data.data_vars

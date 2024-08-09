@@ -117,11 +117,11 @@ class DataManager:
             self.metadata[uuid] = backup
 
             metastore.delete({"uuid": uuid})
-            metastore.add(backup)
+            metastore.insert(backup)
 
-            d = Datasource.load(bucket=self._bucket, uuid=uuid)
+            d = Datasource(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
-            d.save(bucket=self._bucket)
+            d.save()
 
     def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
         """View backed-up metadata for all Datasources
@@ -148,7 +148,8 @@ class DataManager:
         to_delete: Union[str, List, None] = None,
     ) -> None:
         """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. If you want to delete some metadata
+        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
+        To delete metadata pass in a list of keys to delete.
 
         Args:
             uuid: UUID(s) of Datasources to be updated.
@@ -169,7 +170,7 @@ class DataManager:
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for u in uuid:
                 updated = False
-                d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
+                d = Datasource(bucket=self._bucket, uuid=u)
                 # Save a backup of the metadata for now
                 found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
@@ -215,13 +216,13 @@ class DataManager:
                     updated = True
 
                 if updated:
-                    d.save(bucket=self._bucket)
+                    d.save()
                     # Update the metadata stored internally so we're up to date
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
-        """Delete a Datasource in the object store.
+        """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
         NOTE: Make sure you really want to delete the Datasource(s)
@@ -244,13 +245,13 @@ class DataManager:
                 # First remove the data from the metadata store
                 metastore.delete({"uuid": uid})
 
-                # Delete all the data associated with a Datasource
-                d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
+                # Delete all the data associated with a Datasource and the
+                # data in its zarr store.
+                d = Datasource(bucket=self._bucket, uuid=uid)
                 d.delete_all_data()
 
                 # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
+                delete_object(bucket=self._bucket, key=d.key())
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
 
@@ -273,6 +274,6 @@ def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
     if store not in writable_stores:
         raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
 
-    res = search(data_type=data_type, **kwargs)
+    res = search(data_type=data_type, store=store, **kwargs)
     metadata = res.metadata
     return DataManager(metadata=metadata, store=store)

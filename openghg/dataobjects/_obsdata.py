@@ -1,24 +1,12 @@
-from collections import abc
-from dataclasses import dataclass
-from json import dumps
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, Union, Optional
+from ._basedata import _BaseData
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
-
-from ._basedata import _BaseData
-
-__all__ = ["ObsData"]
+from typing import Any, Iterator, Optional
 
 
-@dataclass(frozen=True)
-class ObsData(_BaseData, abc.Mapping):
-    """This class is used to return observations data from the get_observations function
-
-    Args:
-        data: Dictionary of xarray Dataframes
-        metadata: Dictionary of metadata
+class ObsData(_BaseData):
+    """This class is used to return observations data. It be created with a preloaded xarray Dataset or
+    with a UUID and version number to retrieve data from Datasource zarr store.
     """
 
     # Compatability layer for legacy format - mimicking the behaviour of a dictionary
@@ -60,23 +48,10 @@ class ObsData(_BaseData, abc.Mapping):
         if not isinstance(other, ObsData):
             return NotImplemented
 
+        if self.data is None or other.data is None:
+            raise ValueError("Cannot compare data if it is not loaded")
+
         return self.data.equals(other.data) and self.metadata == other.metadata
-
-    def to_data(self) -> Dict:
-        """Creates a dictionary package of this ObsData's metadata and data.
-
-        Returns:
-            dict: Dictionary of metadata and bytes
-        """
-        to_transfer: Dict[str, Union[str, bytes]] = {}
-        to_transfer["metadata"] = dumps(self.metadata)
-
-        # TODO - get better bytes
-        with NamedTemporaryFile() as tmpfile:
-            self.data.to_netcdf(tmpfile.name)
-            to_transfer["data"] = Path(tmpfile.name).read_bytes()
-
-        return to_transfer
 
     def plot_timeseries(
         self,

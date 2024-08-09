@@ -1,6 +1,7 @@
 """ Helper functions to provide datapaths etc used in the tutorial notebooks
 
 """
+
 import contextlib
 import os
 import shutil
@@ -80,7 +81,7 @@ def populate_footprint_co2() -> None:
                 # height = "185m"
                 inlet = "185m"
                 model = "NAME"
-                metmodel = "UKV"
+                met_model = "UKV"
 
                 standardise_footprint(
                     filepath=tac_co2_path,
@@ -88,7 +89,7 @@ def populate_footprint_co2() -> None:
                     inlet=inlet,
                     domain=domain,
                     model=model,
-                    metmodel=metmodel,
+                    met_model=met_model,
                     species=species,
                 )
 
@@ -131,7 +132,7 @@ def populate_flux_co2() -> None:
         species=species,
         source=source_natural,
         domain=domain,
-        high_time_resolution=True,
+        time_resolved=True,
     )
     standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain)
 

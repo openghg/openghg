@@ -22,6 +22,7 @@ def test_call_hub(monkeypatch, requests_mock):
     assert result["content"] == to_send
     assert result["status"] == 200
 
+
 def test_incorrect_call_raises_functionerror(requests_mock):
     requests_mock.post("https://localhost/t/openghg", status_code=400, content=b"Error")
 

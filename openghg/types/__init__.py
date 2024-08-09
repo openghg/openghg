@@ -3,8 +3,10 @@ from ._enum import (
     ColumnTypes,
     ColumnSources,
     ObsTypes,
-    EmissionsTypes,
-    EmissionsDatabases,
+    FluxTimeseriesTypes,
+    FluxTypes,
+    FluxDatabases,
+    FootprintTypes,
     DataTypes,
 )
 from ._errors import (
@@ -19,9 +21,14 @@ from ._errors import (
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    ParseError,
     AttrMismatchError,
+    MetadataFormatError,
+    DataOverlapError,
     ConfigFileError,
     MetastoreError,
+    ZarrStoreError,
+    KeyExistsError,
     construct_xesmf_import_error,
 )
 from ._types import (
@@ -33,4 +40,8 @@ from ._types import (
     ArrayLikeMatch,
     XrDataLike,
     XrDataLikeMatch,
+    TimePeriod,
+    HasMetadataAndData,
+    MetadataAndData,
+    Comparable,
 )

@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import warnings
 
 
 def parse_btt(
@@ -35,6 +36,7 @@ def parse_btt(
 
     data_filepath = Path(data_filepath)
 
+    warnings.warn("This function will be removed in a future release", DeprecationWarning)
     site = "BTT"
 
     # Rename these columns

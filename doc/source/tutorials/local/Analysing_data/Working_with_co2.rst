@@ -10,7 +10,7 @@ observations.
 In order to compare our measurements to modelled data for carbon dioxide,
 we need high frequency inputs for both the
 footprint and flux files. For NAME footprints these should contain an
-additional “H_back” dimension to store hourly footprints overall an
+additional “H_back” dimension to store hourly footprints over an
 initial time period for each release time. For any natural flux data to
 compare against, this should have a frequency of less than 24 hours.
 

@@ -126,8 +126,23 @@ def create_config(silent: bool = False) -> None:
 
         if new_shared_stores:
             existing = [k for k in new_shared_stores if k in stores]
+
+            existing_paths = [path_data["path"] for path_data in stores.values()]
+
+            # Here it checks if newly entered paths are already present in config file.
+            duplicate_paths_with_store_name = {
+                store_name: path_data
+                for store_name, path_data in new_shared_stores.items()
+                if path_data["path"] in existing_paths
+            }
+
             if existing:
                 print(f"Some names match those of existing stores: {existing}, please update manually.")
+
+            if duplicate_paths_with_store_name:
+                raise ValueError(
+                    f"Paths of the following new stores match those of existing store: {duplicate_paths_with_store_name}"
+                )
 
             stores.update(new_shared_stores)
 
@@ -259,6 +274,30 @@ def read_local_config() -> Dict:
                 or run openghg --quickstart"
         )
 
+    # Check see is the store uses the new zarr storage format
+    # for OpenGHG >= 0.8.0
+    valid_stores = {}
+    for name, store_data in config["object_store"].items():
+        store_path = Path(store_data["path"])
+        # If it doesn't exist or its empty then we expect it to be created / populated
+        if not store_path.exists() or not any(store_path.iterdir()):
+            valid_stores[name] = store_data
+        # Otherwise we check an existing store to see if it's the correct format
+        else:
+            if _check_valid_store(store_path):
+                valid_stores[name] = store_data
+            else:
+                logger.warning(
+                    f"Object store {name} does not use the new Zarr storage format and will be ignored."
+                )
+
+    if not valid_stores:
+        raise ConfigFileError(
+            "We've only detected old (non-Zarr) object stores. Please update your configuration to add a new path."
+        )
+
+    config["object_store"] = valid_stores
+
     return config
 
 
@@ -322,3 +361,30 @@ def _migrate_config() -> None:
         shutil.rmtree(old_config_path.parent)  # remove "openghg" dir from ~/.config
     else:
         raise FileNotFoundError("Configuration file not found.")
+
+
+def _check_valid_store(store_path: Path) -> bool:
+    """Checks if the store is a valid object store using the new Zarr storage
+    format. If it is return True, otherwise False.
+
+    TODO - remove this when users have all moved to the new object store format.
+
+    Args:
+        store_path: Object store path
+    Returns:
+        bool: True if valid, False if not
+    """
+    data_dir = Path(store_path).joinpath("data")
+    # Now check if there's a zarr folder in the data directory
+    store_dirs = list(data_dir.glob("*"))
+    # Let's take the first data directory and see if there's a zarr folder in it
+    if not store_dirs:
+        logger.info(
+            f"No data found in the object store {store_path}, "
+            "so we are treating this empty store as a zarr store."
+        )
+        return True
+
+    store_data_dir = store_dirs[0]
+
+    return store_data_dir.joinpath("zarr").exists()

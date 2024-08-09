@@ -4,13 +4,14 @@ import pytest
 from openghg.types import InvalidSiteError
 from openghg.util import (
     read_header,
+    read_local_config,
     running_in_cloud,
     running_locally,
     running_on_hub,
     site_code_finder,
+    synonyms,
     to_lowercase,
     verify_site,
-    read_local_config,
 )
 
 
@@ -97,3 +98,14 @@ def test_site_code_finder():
     assert site_code_finder("jungfraujoch") == "jfj"
 
     assert site_code_finder("nonsensical") is None
+
+
+def test_synonyms():
+    """Test to check is species value is passed as Inert it should return the same"""
+
+    species = synonyms("Inert")
+
+    assert species == "inert"
+
+    with pytest.raises(ValueError):
+        synonyms(species="openghg", allow_new_species=False)

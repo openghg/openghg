@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+import warnings
 
 
 def parse_cranfield(
@@ -24,6 +25,8 @@ def parse_cranfield(
     """
     from openghg.util import clean_string, format_inlet
     from pandas import read_csv
+
+    warnings.warn("This function will be removed in a future release", DeprecationWarning)
 
     if sampling_period is None:
         sampling_period = "NOT_SET"

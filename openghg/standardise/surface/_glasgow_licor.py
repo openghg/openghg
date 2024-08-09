@@ -20,7 +20,7 @@ def parse_glasow_licor(filepath: Path, sampling_period: Optional[str] = None, **
         filepath,
         parse_dates=date_index,
         na_values=nan_values,
-        infer_datetime_format=True,
+        dayfirst=True,
         index_col="time",
         usecols=use_cols,
     )

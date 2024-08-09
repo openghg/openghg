@@ -1,14 +1,16 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
-from typing import Optional
 import pytest
 import xarray as xr
-from pandas import Timedelta, Timestamp
-from xarray import Dataset
-
+from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.dataobjects import ObsData
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from helpers import clear_test_stores
+from pandas import Timedelta, Timestamp
+from xarray import Dataset
 
 
 def test_scenario_direct_objects():
@@ -102,13 +104,18 @@ def test_scenario_infer_inputs_ch4():
     assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
 
     # Obs data - values
-    obs_mf = obs_data["mf"]
+    obs_mf = obs_data["mf"].compute()
+
     assert np.isclose(obs_mf[0], 1915.11)
     assert np.isclose(obs_mf[-1], 1942.41)
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
+
+    print(model_scenario.footprint.data.time[0])
+    print(model_scenario.footprint.data.time[-1])
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2012-08-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2012-08-31T22:00:00")
 
@@ -187,6 +194,7 @@ def test_scenario_infer_inputs_co2():
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2014-07-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2014-07-04T00:00:00")  # Test file - reduced time axis
 
@@ -327,7 +335,13 @@ def test_scenario_uses_fp_inlet():
     fp_inlet = "999m"  # Incorrect inlet
 
     model_scenario = ModelScenario(
-        site=site, species=species, inlet=inlet, domain=domain, fp_inlet=fp_inlet, start_date=start_date, end_date=end_date
+        site=site,
+        species=species,
+        inlet=inlet,
+        domain=domain,
+        fp_inlet=fp_inlet,
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # Expect observation data to be found
@@ -365,7 +379,7 @@ def test_scenario_matches_fp_inlet():
         site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
     )
 
-    expected_obs_inlet = inlet # inlet for observation data
+    expected_obs_inlet = inlet  # inlet for observation data
     expected_fp_inlet = "20m"  # inlet for footprint data
 
     # Check obs and footprint data is found and inlets are expected values
@@ -501,7 +515,6 @@ def test_add_multiple_flux(model_scenario_1):
     expected_sources = ["anthro", source]
 
     for source in expected_sources:
-
         assert source in model_scenario_1.fluxes
 
         metadata = model_scenario_1.fluxes[source].metadata
@@ -550,6 +563,36 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
 
+def test_combine_obs_sampling_period_infer():
+    """
+    If the sampling_period is "NOT_SET" then when combining obs and footprints
+    this should infer the sampling period from the frequency of the data but this
+    was raising a value error. Reported as part of Issue #620.
+
+    Test to ensure this functionality is now working.
+     - sampling_period attribute for WAO data file is "NOT_SET"
+    """
+    start_date = "2021-12-01"
+    end_date = "2022-01-01"
+
+    site = "wao"
+    domain = "TEST"
+    species = "rn"
+    inlet = "10m"
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+    )
+
+    obs_data_1 = model_scenario.obs.data
+    assert obs_data_1.attrs["sampling_period"] == "NOT_SET"
+
+    model_scenario.combine_obs_footprint()  # Check operation can be run
+
+    obs_data_2 = model_scenario.obs.data
+    assert obs_data_2.attrs["sampling_period_estimate"] == "3600.0"
+
+
 # TODO: Dummy tests included below but may want to add checks which use real
 # data for short-lived species (different footprint)
 # - species with single lifetime (e.g. "Rn")
@@ -557,7 +600,7 @@ def test_footprints_data_merge(model_scenario_1):
 # - species with monthly lifetime (e.g. "HFO-1234zee")
 #    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
 
-#%% Test method functionality with dummy data (CH4)
+# %% Test method functionality with dummy data (CH4)
 
 
 @pytest.fixture
@@ -568,7 +611,6 @@ def obs_ch4_dummy():
      - Hourly frequency for 2012-01-01 - 2012-01-02 (48 time points)
      - "mf" values are from 1, 48
     """
-    from openghg.dataobjects import ObsData
 
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
 
@@ -580,7 +622,12 @@ def obs_ch4_dummy():
     inlet = "10m"
     sampling_period = "60.0"
 
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
@@ -589,6 +636,7 @@ def obs_ch4_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -799,8 +847,43 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
-def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
+def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
+    """Tests if disjoint timeseries are existing in obs and footprint data
+    It raises error"""
 
+    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="H")
+
+    ntime = len(time)
+    values = np.arange(0, ntime, 1)
+
+    species = "ch4"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
+
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+
+    metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
+
+    obsdata = ObsData(data=data, metadata=metadata)
+
+    model_scenario = ModelScenario(
+        obs=obsdata, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
+    )
+
+    with pytest.raises(ValueError):
+        model_scenario.combine_obs_footprint()
+
+
+def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
@@ -857,7 +940,7 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
-#%% Test method functionality with dummy data (CO2)
+# %% Test method functionality with dummy data (CO2)
 
 
 @pytest.fixture
@@ -868,7 +951,6 @@ def obs_co2_dummy():
      - 30-min frequency for 2012-01-01 (48 time points)
      - "mf" values are from 1, 48
     """
-    from openghg.dataobjects import ObsData
 
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-01T23:30:00", freq="30min")
 
@@ -889,6 +971,7 @@ def obs_co2_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -1071,7 +1154,7 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
 
 
-#%% Test baseline calculation for short-lived species
+# %% Test baseline calculation for short-lived species
 # Radon (Rn) - currently has one lifetime value defined
 # HFO-1234zee - currently has monthly lifetimes defined
 # - see openghg/data/acrg_species_info.json for details
@@ -1277,7 +1360,7 @@ def test_modelled_baseline_short_life(
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
-#%% Test generic dataset functions
+# %% Test generic dataset functions
 
 
 @pytest.fixture
@@ -1445,6 +1528,24 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
+def test_scenario_infer_flux_source_ch4():
+    """
+    Test ModelScenario can find the source of a flux
+    if only a single flux matches the given metadata
+    and source is in the flux metadata.
+    """
+    from openghg.objectstore import get_readable_buckets
+    from openghg.retrieve import get_flux
+
+    result = get_flux(species="ch4", domain="europe", source="waste")
+
+    model_scenario = ModelScenario()
+    model_scenario.add_flux(flux=result)
+
+    # expect 'waste' to be found in flux metadata:
+    assert "waste" in model_scenario.fluxes
+
+
 def test_modelscenario_doesnt_error_empty_objectstore():
     clear_test_stores()
 
@@ -1456,12 +1557,17 @@ def test_modelscenario_doesnt_error_empty_objectstore():
     start_date = "2017-07-01"
     end_date = "2017-07-07"
 
-    scenario = ModelScenario(site=site,
-                        inlet=height,
-                        domain=domain,
-                        species=species,
-                        source=source_natural,
-                        start_date=start_date,
-                        end_date=end_date)
+    scenario = ModelScenario(
+        site=site,
+        inlet=height,
+        domain=domain,
+        species=species,
+        source=source_natural,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     assert not scenario
+
+
+# NOTE: the test store is modified by the last two tests

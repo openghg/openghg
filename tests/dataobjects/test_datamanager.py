@@ -1,26 +1,22 @@
-from openghg.dataobjects import data_manager
-from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import search_surface
-from openghg.standardise import standardise_surface, standardise_footprint
-from openghg.objectstore import get_writable_bucket
-from openghg.dataobjects import DataManager
-
 import pytest
 from helpers import (
-    get_surface_datapath,
     clear_test_stores,
-    key_to_local_filepath,
-    all_datasource_keys,
     get_footprint_datapath,
+    get_surface_datapath,
+    key_to_local_filepath,
 )
+from openghg.dataobjects import DataManager, data_manager
+from openghg.objectstore import get_writable_bucket, exists
+from openghg.objectstore.metastore import open_metastore
+from openghg.retrieve import search_surface
+from openghg.standardise import standardise_footprint, standardise_surface
+from openghg.store.base import Datasource
+from openghg.types import ObjectStoreError
 
 
 @pytest.fixture(autouse=True)
 def add_data(mocker):
     clear_test_stores()
-    mock_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
-    mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
     standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS", store="user")
@@ -30,10 +26,6 @@ def add_data(mocker):
 def footprint_read(mocker):
     clear_test_stores()
     datapath = get_footprint_datapath("footprint_test.nc")
-
-    mock_uuids = [f"test-uuid-{n}" for n in range(100, 188)]
-    mocker.patch("uuid.uuid4", side_effect=mock_uuids)
-    # model_params = {"simulation_params": "123"}
 
     site = "TMB"
     network = "LGHG"
@@ -86,31 +78,32 @@ def test_delete_footprint_data(footprint_read):
 
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uuid = metastore.select('uuid')[0]
+        uuid = metastore.select("uuid")[0]
 
-    ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
+    ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
 
     assert datasource_path[0].exists()
 
-    all_keys = all_datasource_keys(keys=ds._data_keys)
-    filepaths = key_to_local_filepath(key=all_keys)
-    for k in filepaths:
-        assert k.exists()
+    # Assert there are files in the zarr store
+    assert ds._store
+
+    zarr_store_key = ds._store.store_key(version="v1")
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid})
+        assert metastore.search({"uuid": uuid})
 
     res.delete_datasource(uuid=uuid)
 
-    assert not datasource_path[0].exists()
+    # Let's open the Datasource again and make sure we get a new empty object
+    with pytest.raises(ObjectStoreError):
+        Datasource(bucket=bucket, uuid=uuid)
 
-    for k in filepaths:
-        assert not k.exists()
+    assert not exists(bucket=bucket, key=zarr_store_key)
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid}) == []
+        assert metastore.search({"uuid": uuid}) == []
 
 
 def test_object_store_not_in_metadata():
@@ -153,10 +146,10 @@ def test_find_modify_metadata():
         "station_latitude": 52.51775,
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
-        "uuid": "test-uuid-105",
+        "latest_version": "v1",
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
-        "latest_version": "v1",
+        "versions": {"v1": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
     }
 
     assert search_res.metadata[uuid].items() >= start_metadata.items()
@@ -227,17 +220,17 @@ def test_delete_metadata_keys():
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
         "latest_version": "v1",
-        "uuid": "test-uuid-100",
     }
 
-    assert res.metadata["test-uuid-100"].items() >= expected.items()
+    uuid = next(iter(res.metadata))
+    assert res.metadata[uuid].items() >= expected.items()
 
     # Delete a key giving it a string
-    res.update_metadata(uuid="test-uuid-100", to_delete="species")
+    res.update_metadata(uuid=uuid, to_delete="species")
 
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
-    assert "species" not in res.metadata["test-uuid-100"]
+    assert "species" not in res.metadata[uuid]
 
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
 
@@ -246,24 +239,25 @@ def test_delete_metadata_keys():
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
     # Delete keys passing in a list
-    res.update_metadata(uuid="test-uuid-100", to_delete=["site", "inlet"])
+    res.update_metadata(uuid=uuid, to_delete=["site", "inlet"])
 
     res.refresh()
 
-    assert "site" not in res.metadata["test-uuid-100"]
-    assert "inlet" not in res.metadata["test-uuid-100"]
+    assert "site" not in res.metadata[uuid]
+    assert "inlet" not in res.metadata[uuid]
 
 
 def test_delete_and_modify_keys():
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
+    uuid = next(iter(res.metadata))
 
     to_delete = ["station_longitude", "station_latitude"]
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=to_delete)
+    res.update_metadata(uuid=uuid, to_delete=to_delete)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
-    fresh_metadata = search_res.metadata["test-uuid-100"]
+    fresh_metadata = search_res.metadata[uuid]
 
     assert "station_longitude" not in fresh_metadata
     assert "station_latitide" not in fresh_metadata
@@ -274,15 +268,15 @@ def test_delete_and_modify_keys():
 
     # We've already deleted these keys
     with pytest.raises(KeyError):
-        res.update_metadata(uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
+        res.update_metadata(uuid=uuid, to_delete=to_delete, to_update=to_update)
 
     to_delete = ["long_name"]
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
+    res.update_metadata(uuid=uuid, to_delete=to_delete, to_update=to_update)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
-    freshest_metadata = search_res.metadata["test-uuid-100"]
+    freshest_metadata = search_res.metadata[uuid]
 
     assert "long_name" not in freshest_metadata
 
@@ -293,8 +287,10 @@ def test_delete_and_modify_keys():
 def test_try_delete_none_modify_none_changes_nothing():
     res = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    res.update_metadata(uuid="test-uuid-100")
-    res.update_metadata(uuid="test-uuid-100", to_update={}, to_delete=[])
+    uuid = next(iter(res.metadata))
+
+    res.update_metadata(uuid=uuid)
+    res.update_metadata(uuid=uuid, to_update={}, to_delete=[])
 
     res2 = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
@@ -307,33 +303,24 @@ def test_delete_data():
     uid = next(iter(res.metadata))
 
     bucket = get_writable_bucket(name="user")
-    d = Datasource.load(bucket=bucket, uuid=uid)
+    d = Datasource(bucket=bucket, uuid=uid)
     key = d.key()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid})
+        assert metastore.search({"uuid": uid})
 
-    datasource_path = key_to_local_filepath(key=key)[0]
+    assert d._data_keys
+    assert d._store
 
-    ds_keys = d._data_keys
-
-    assert datasource_path.exists()
-
-    all_keys = all_datasource_keys(keys=ds_keys)
-    key_paths = key_to_local_filepath(key=all_keys)
-
-    for k in key_paths:
-        assert k.exists()
+    zarr_store_path = d._store.store_path(version="v1")
 
     res.delete_datasource(uuid=uid)
 
-    assert not datasource_path.exists()
-
-    for k in key_paths:
-        assert not k.exists()
+    assert not zarr_store_path.exists()
+    assert not exists(bucket=bucket, key=key)
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid}) == []
+        assert metastore.search({"uuid": uid}) == []
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

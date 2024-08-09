@@ -33,7 +33,7 @@ def parse_tmb(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         list: UUIDs of Datasources data has been assigned to
@@ -53,7 +53,7 @@ def parse_tmb(
 
     data_filepath = Path(data_filepath)
 
-    data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
+    data = pd_read_csv(data_filepath, parse_dates={"time": [0]}, index_col=0)
     # Drop NaNs from the data
     data = data.dropna(axis="rows", how="all")
     # Drop a column if it's all NaNs
@@ -64,7 +64,6 @@ def parse_tmb(
         rename_dict["Methane"] = "CH4"
 
     data = data.rename(columns=rename_dict)
-    data.index.name = "time"
 
     site_upper = site.upper()
     network_upper = network.upper()
