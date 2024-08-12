@@ -63,7 +63,6 @@ def parse_agage(
         if instrument_number > 1:
             file_instrument = "multiple"
             instrument = file_instrument
-            instrument_name_0 = clean_string(file_params["instrument_type"])
         else:
             file_instrument = clean_string(file_params["instrument_type"])
             if instrument is None:
@@ -97,8 +96,7 @@ def parse_agage(
             "network": network,
         }
 
-        if metadata["instrument"] == "multiple":
-            metadata["instrument_name_0"] = instrument_name_0
+        metadata["instrument_name_0"] = clean_string(file_params["instrument"])
 
         # fetching all instrument_n values from the file
         pattern = re.compile(r"^instrument_(\d+)$")
