@@ -7,7 +7,7 @@ class SurfaceTypes(Enum):
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
-    GCWERKS_NC = "GCWERKS_NC"
+    AGAGE = "AGAGE"
     ICOS = "ICOS"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
@@ -71,6 +71,7 @@ class FluxTimeseriesTypes(Enum):
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    AGAGE = "AGAGE"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
     ICOS = "ICOS"
