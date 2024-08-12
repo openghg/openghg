@@ -1,4 +1,4 @@
-from typing import Optional, overload
+from typing import Optional, Union, overload
 import logging
 from openghg.types import MetadataFormatError
 
@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 @overload
 def format_data_level(
-    data_level: str,
+    data_level: Union[str, int, float],
 ) -> str: ...
 
 
@@ -20,7 +20,7 @@ def format_data_level(
 ) -> None: ...
 
 
-def format_data_level(data_level: Optional[str]) -> Optional[str]:
+def format_data_level(data_level: Optional[Union[str, int, float]]) -> Optional[str]:
     """
     Check the input data_level to ensure this is in the expected format.
 
@@ -43,16 +43,17 @@ def format_data_level(data_level: Optional[str]) -> Optional[str]:
     msg_expected = "Expect: '0', '1', '2', '3' (or decimal to indicate sub-level)"
 
     if data_level is not None:
-        data_level = str(data_level)  # in case a int/float is passed - cast to str
         if not is_number(data_level):
             msg = f"Unable to interpret data_level input: {data_level}. " + msg_expected
             logger.error(msg)
             raise MetadataFormatError(msg)
 
-        number = float(data_level)
-        if number >= 4:
-            msg = "data_level input contains a number > 3: {data_level}. " + msg_expected
+        data_level_check = float(data_level)
+        if data_level_check < 0 or data_level_check >= 4:
+            msg = f"Invalid input for data_level: {data_level}. " + msg_expected
             logger.error(msg)
             raise MetadataFormatError(msg)
+
+        data_level = str(data_level)
 
     return data_level

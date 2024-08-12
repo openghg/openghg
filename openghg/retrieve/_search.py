@@ -271,7 +271,7 @@ def search_surface(
     start_date: Union[str, list[str], None] = None,
     end_date: Union[str, list[str], None] = None,
     sampling_height: Optional[str] = None,
-    icos_data_level: Optional[int] = None,
+    icos_data_level: Union[int, str, None] = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search.
@@ -321,6 +321,14 @@ def search_surface(
         data_level = [format_data_level(value) for value in data_level]
     else:
         data_level = format_data_level(data_level)
+
+    # The icos_data_level keyword may be present but for all newly retrieved ICOS data this
+    # will be replaced with just data_level.
+    if icos_data_level is not None:
+        warnings.warn(
+            "The 'icos_data_level' argument is deprecated and will be replaced in future versions with 'data_level'.",
+            DeprecationWarning,
+        )
 
     results = search(
         species=species,

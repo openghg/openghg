@@ -2,7 +2,7 @@ addict
 dask
 filelock
 h5netcdf
-icoscp
+icoscp <= 0.1.17
 ipywidgets
 matplotlib
 msgpack
