@@ -215,12 +215,10 @@ def _format_species(
         if species_data.empty:
             continue
 
-        attributes = file_params
+        attributes = file_params.copy()
         # Need to stop the "instrument" attr from being overwritten in combined files
         if "instrument" in attributes.keys():
             attributes["instrument_name"] = attributes.pop("instrument")
-
-        attributes["inlet_height_magl"] = species_metadata["inlet_height_magl"]
 
         metadata_keys = metadata_default_keys()
 
@@ -230,6 +228,8 @@ def _format_species(
         for k, v in attributes.items():
             if k in metadata_keys:
                 metadata[k] = v
+
+        attributes["inlet_height_magl"] = species_metadata["inlet_height_magl"]
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
