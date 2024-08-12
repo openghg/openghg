@@ -55,7 +55,6 @@ def parse_agage(
     # if we're not passed the instrument name, get it from the file:
 
     file_instrument = None
-    instrument_name_0 = None
 
     if "instrument_type" in file_params.keys():
         # For multiple values in instrument_type of file updating the instrument metadata to multiple
