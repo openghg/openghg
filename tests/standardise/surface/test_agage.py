@@ -103,6 +103,7 @@ def test_expected_metadata_thd_cfc11():
     expected_metadata = {
         "data_type": "surface",
         "instrument": "gcmd",
+        'instrument_name_0': 'gcmd',
         "site": "THD",
         "network": "agage",
         "sampling_period": "1.0",
