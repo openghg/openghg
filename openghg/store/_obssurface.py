@@ -111,8 +111,9 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
-        data_level: Optional[str] = None,
-        data_sublevel: Optional[str] = None,
+        data_level: Optional[Union[str, int, float]] = None,
+        data_sublevel: Optional[Union[str, float]] = None,
+        dataset_source: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
@@ -152,6 +153,7 @@ class ObsSurface(BaseStore):
                 - "3": elaborated data products using the data
         data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
             before data is finalised.
+        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
         sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
@@ -234,17 +236,31 @@ class ObsSurface(BaseStore):
 
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
+        if data_sublevel is not None:
+            data_sublevel = str(data_sublevel)
 
         data_level = check_and_set_null_variable(data_level)
         data_sublevel = check_and_set_null_variable(data_sublevel)
+        dataset_source = check_and_set_null_variable(dataset_source)
 
         data_level = clean_string(data_level)
         data_sublevel = clean_string(data_sublevel)
+        dataset_source = clean_string(dataset_source)
+
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
 
         # Define additional metadata which we aren't passing (are never passing?) to the parse functions
         # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
         # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
-        # additional_metadata = {"data_level": data_level, "data_sublevel": data_sublevel}
+
+        # additional_metadata = {
+        #     "data_level": data_level,
+        #     "data_sublevel": data_sublevel,
+        #     "dataset_source": dataset_source,
+        #     "data_source": data_source,
+        # }
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:

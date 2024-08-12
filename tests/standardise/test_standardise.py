@@ -399,7 +399,10 @@ def test_standardise_footprints_chunk(caplog):
     )
 
     search_results = search_footprints(model="UKV-chunked", store="user")
-    fp_data = search_results.retrieve_all()
+
+    # Note: have to pass sort=False here for dask>=2024.8 as this returns different
+    # chunks for time (1, 1, 1) rather than original chunks we're trying to check.
+    fp_data = search_results.retrieve_all(sort=False)
 
     assert dict(fp_data.data.chunks) == {"time": (2, 1), "lat": (12,), "lon": (12,), "height": (20,)}
 

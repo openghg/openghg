@@ -18,7 +18,7 @@ from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
-from openghg.util import create_daterange_str
+from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
 
@@ -932,6 +932,7 @@ def test_drop_only_correct_nan():
     [
         ("data_level", "1", "2"),
         ("data_sublevel", "1.1", "1.2"),
+        ("dataset_source", "InGOS", "European ObsPack"),
     ],
 )
 def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
@@ -963,8 +964,10 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
     tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
     tac_2 = get_obs_surface(site="tac", species="co2", **data_labels_2)
 
-    assert tac_1.metadata[data_keyword] == data_value_1.lower()
-    assert tac_2.metadata[data_keyword] == data_value_2.lower()
+    # assert tac_1.metadata[data_keyword] == data_value_1.lower()
+    # assert tac_2.metadata[data_keyword] == data_value_2.lower()
+    assert tac_1.metadata[data_keyword] == clean_string(data_value_1)
+    assert tac_2.metadata[data_keyword] == clean_string(data_value_2)
 
     # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
     # this data has been retrieved.

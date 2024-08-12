@@ -61,8 +61,9 @@ def standardise_surface(
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
-    data_level: Optional[str] = None,
-    data_sublevel: Optional[str] = None,
+    data_level: Union[str, int, float, None] = None,
+    data_sublevel: Union[str, float, None] = None,
+    dataset_source: Optional[str] = None,
     sampling_period: Optional[Union[Timedelta, str]] = None,
     calibration_scale: Optional[str] = None,
     measurement_type: str = "insitu",
@@ -100,6 +101,7 @@ def standardise_surface(
                 - "3": elaborated data products using the data
         data_sublevel: Typically used for "L1" data depending on different QA performed
             before data is finalised.
+        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06".
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
         measurement_type: Type of measurement e.g. insitu, flask
@@ -241,6 +243,7 @@ def standardise_surface(
             instrument=instrument,
             data_level=data_level,
             data_sublevel=data_sublevel,
+            dataset_source=dataset_source,
             sampling_period=sampling_period,
             calibration_scale=calibration_scale,
             measurement_type=measurement_type,

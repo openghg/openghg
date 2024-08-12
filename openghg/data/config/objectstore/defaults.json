@@ -214,11 +214,6 @@
                     "str"
                 ]
             },
-            "station_long_name": {
-                "type": [
-                    "str"
-                ]
-            },
             "inlet": {
                 "type": [
                     "str"
@@ -239,16 +234,6 @@
                     "str"
                 ]
             },
-            "data_source": {
-                "type": [
-                    "str"
-                ]
-            },
-            "icos_data_level": {
-                "type": [
-                    "str"
-                ]
-            },
             "data_level": {
                 "type": [
                     "str"
@@ -259,7 +244,12 @@
                     "str"
                 ]
             },
-            "data_type": {
+            "dataset_source": {
+                "type": [
+                    "str"
+                ]                
+            },
+            "data_source": {
                 "type": [
                     "str"
                 ]
