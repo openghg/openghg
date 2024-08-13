@@ -311,7 +311,7 @@ class Flux(BaseStore):
         """
         import inspect
         from openghg.types import FluxDatabases
-        from openghg.util import load_flux_database_parser, check_if_need_new_version
+        from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -330,7 +330,7 @@ class Flux(BaseStore):
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_database_parser(database=database)
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
