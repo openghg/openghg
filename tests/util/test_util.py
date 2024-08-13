@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 from openghg.types import InvalidSiteError
@@ -12,6 +13,7 @@ from openghg.util import (
     synonyms,
     to_lowercase,
     verify_site,
+    sort_by_filenames
 )
 
 
@@ -109,3 +111,29 @@ def test_synonyms():
 
     with pytest.raises(ValueError):
         synonyms(species="openghg", allow_new_species=False)
+
+
+def test_file_sorting_false():
+    """
+    Testing sorting of filenames
+    """
+
+    filepaths = [
+        "DECC-picarro_TAC_20130131_co2-185m-20220929.nc",
+        "DECC-picarro_TAC_20130131_co2-185m-20220928.nc"]
+
+    sorted_filepaths = sort_by_filenames(filepaths)
+
+    assert sorted_filepaths[1] == Path(filepaths[0])
+
+
+def test_sorting_with_str():
+    """
+    Testing if only string value is passed
+    """
+
+    filepaths = "DECC-picarro_TAC_20130131_co2-185m-20220929.nc"
+
+    sorted_file = sort_by_filenames(filepaths)
+
+    assert isinstance(sorted_file, list)
