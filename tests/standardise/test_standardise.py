@@ -552,6 +552,7 @@ def test_standardise_flux_timeseries():
 
     assert "ch4_crf_uk" in flux_results
 
+
 def test_standardise_sorting():
     """ Testing only the sorting of files here"""
 
@@ -568,6 +569,6 @@ def test_standardise_sorting():
         instrument="picarro",
         sampling_period="1H",
         update_mismatch="attributes",
-        if_exists="new"
+        if_exists="new",
+        sort_files=True
     )
-
