@@ -185,8 +185,10 @@ class BaseStore:
             dict: data dictionary with metadata keys added
         """
 
+        # Get defined metakeys from the config setup
         metakeys = self.add_metakeys()
         required = metakeys["required"]
+        # We might not get any optional keys
         optional = metakeys.get("optional", {})
 
         # Still a basic implementation - needs steps to be more clear - could split out?
@@ -195,33 +197,30 @@ class BaseStore:
 
         for parsed_data in data.values():
             metadata = parsed_data["metadata"]
-            required_missing = set(required) - set(metadata)
+
+            # Check required keys are present in metadata and attempt to add
+            required_to_add = set(required) - set(metadata)
             required_not_found = []
-            if required_missing:
-                for key in required_missing:
+            if required_to_add:
+                for key in required_to_add:
                     if key in input_parameters:
                         metadata[key] = input_parameters[key]
                     elif additional_metadata and key in additional_metadata:
                         metadata[key] = additional_metadata[key]
-                # # TODO: Add this back in once we've fixed inconsitencies with required keys
-                # # Namely: data_source missing from standardise and icos_data_level not being universal.
-                #     else:
-                #         required_not_found.append(key)
-                # if required_not_found:
-                #     raise ValueError(f"The following required keys are missing: {', '.join(required_not_found)}. Please specify.")
+                    else:
+                        required_not_found.append(key)
+                if required_not_found:
+                    raise ValueError(f"The following required keys are missing: {', '.join(required_not_found)}. Please specify.")
 
+            # Check if named optional keys are included in the input_parameters and add
             optional_matched = set(optional) & set(input_parameters)
             if optional_matched:
                 for key in optional_matched:
                     metadata[key] = input_parameters[key]
 
+            # Add all additional metadata keys
             if additional_metadata:
                 metadata.update(additional_metadata)
-
-        # Basic implemntation of this
-        # TODO: May want to add checks to make sure we're not overwriting anything important.
-        # for parsed_data in data.values():
-        #     parsed_data["metadata"].update(additional_metadata)
 
         return data
 
