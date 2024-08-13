@@ -205,7 +205,7 @@ class ObsSurface(BaseStore):
             format_data_level,
             check_and_set_null_variable,
             hash_file,
-            load_surface_parser,
+            load_standardise_parser,
             verify_site,
             check_if_need_new_version,
             synonyms,
@@ -316,7 +316,7 @@ class ObsSurface(BaseStore):
             # TODO: May want to add check for NaT or NaN
 
         # Load the data retrieve object
-        parser_fn = load_surface_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         results: resultsType = defaultdict(dict)
 
