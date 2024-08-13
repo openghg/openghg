@@ -262,7 +262,7 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        from openghg.types import FootprintTypes
+        from openghg.store.spec import define_standardise_parsers
 
         from openghg.util import (
             clean_string,
@@ -315,8 +315,10 @@ class Footprints(BaseStore):
         if network is not None:
             network = clean_string(network)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = FootprintTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
