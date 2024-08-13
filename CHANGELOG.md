@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adds `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 
-- Added feature of file sorting at standardise level before processing - [PR #1074](https://github.com/openghg/openghg/pull/1074)
+- Added feature of file sorting at standardise level before processing and remove `filepaths` input option - [PR #1074](https://github.com/openghg/openghg/pull/1074)
 
 ### Updated
 
