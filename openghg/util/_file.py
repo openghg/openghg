@@ -89,7 +89,7 @@ def load_transform_parser(data_type: str, source_format: str) -> Callable:
         source_format: Name given to the input data. Could be a database or
             a format e.g EDGAR
     Returns:
-        callable: parser_function   
+        callable: parser_function
     """
     transform_module_name = "openghg.transform"
     data_type_st_module_name = f"{transform_module_name}.{data_type}"
