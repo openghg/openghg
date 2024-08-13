@@ -4,7 +4,7 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple
+from typing import Any, Dict, Iterator, Optional, Tuple, Union
 import logging
 
 from openghg.types import multiPathType
@@ -240,7 +240,7 @@ def multiple_inlets(site: str) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: multiPathType) -> list[Path]:
+def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
     """
     Sorting time on filename basis
 
@@ -250,12 +250,14 @@ def sort_by_filenames(filepath: multiPathType) -> list[Path]:
     Returns:
         list[Path]: List of sorted paths
     """
-
     if isinstance(filepath, str):
-        filepath = Path(filepath)
+        filepath = [Path(filepath)]
+    elif isinstance(filepath, Path):
         filepath = [filepath]
+    elif isinstance(filepath, (tuple, list)):
+        filepath = [Path(f) for f in filepath]
+    else:
+        raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
-    filepath = sorted([Path(f) for f in filepath])
-    logger.info("Files are sorted according to dates")
+    return sorted(filepath)
 
-    return filepath
