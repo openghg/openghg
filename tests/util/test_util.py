@@ -113,7 +113,7 @@ def test_synonyms():
         synonyms(species="openghg", allow_new_species=False)
 
 
-def test_file_sorting_false():
+def test_file_sorting():
     """
     Testing sorting of filenames
     """
