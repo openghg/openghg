@@ -209,7 +209,7 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            lookup_keys = self.get_lookup_keys(optional_metadata)
+            lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
             if optional_metadata is not None:
                 for parsed_data in boundary_conditions_data.values():

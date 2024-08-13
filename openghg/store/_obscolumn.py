@@ -162,7 +162,7 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        lookup_keys = self.get_lookup_keys(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         if optional_metadata is not None:
             for parsed_data in obs_data.values():

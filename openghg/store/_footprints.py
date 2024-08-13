@@ -428,7 +428,7 @@ class Footprints(BaseStore):
 
         # TODO - we'll further tidy this up when we move the metdata parsing
         # into a centralised place
-        lookup_keys = self.get_lookup_keys(optional_metadata)
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         if optional_metadata is not None:
             for parsed_data in footprint_data.values():
