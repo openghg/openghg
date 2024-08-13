@@ -250,6 +250,8 @@ def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
     Returns:
         list[Path]: List of sorted paths
     """
+
+    # This code is to stop mypy complaints regarding file types
     if isinstance(filepath, str):
         filepath = [Path(filepath)]
     elif isinstance(filepath, Path):
