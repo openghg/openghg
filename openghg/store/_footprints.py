@@ -272,18 +272,12 @@ class Footprints(BaseStore):
             load_footprint_parser,
         )
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-
         if high_time_resolution:
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
             )
             time_resolved = high_time_resolution
-
-        # We wanted sorted Path objects
-        filepath = sorted([Path(f) for f in filepath])
 
         site = clean_string(site)
         network = clean_string(network)
