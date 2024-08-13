@@ -4,7 +4,7 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, Optional, Tuple
 import logging
 
 from openghg.types import multiPathType
