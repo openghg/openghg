@@ -581,6 +581,7 @@ def test_standardise_sorting_true(caplog):
 def test_standardise_sorting_false(caplog):
     """ Testing only the sorting of files here"""
 
+    clear_test_stores()
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
@@ -601,4 +602,3 @@ def test_standardise_sorting_false(caplog):
     log_messages = [record.message for record in caplog.records]
 
     assert "20220928.nc" in log_messages[-1]
-    
