@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, Optional, Tuple, Union
 import logging
 
+from openghg.types import multiPathType
+
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -238,18 +240,24 @@ def multiple_inlets(site: str) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: Union[list[Path], str]) -> Union[list[Path], str]:
+def sort_by_filenames(filepath: multiPathType) -> list[Path]:
     """
     Sorting time on filename basis
 
     Args:
-        filepath: Path to the fil
+        filepath: Path to the file
 
     Returns:
         list[Path]: List of sorted paths
     """
 
+    if isinstance(filepath, str):
+        filepath = Path(filepath)
+        filepath = [filepath]
+
     filepath = sorted([Path(f) for f in filepath])
     logger.info("Files are sorted according to dates")
 
     return filepath
+
+
