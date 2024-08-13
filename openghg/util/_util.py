@@ -260,4 +260,3 @@ def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
     return sorted(filepath)
-
