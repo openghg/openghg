@@ -211,9 +211,6 @@ class ObsSurface(BaseStore):
             synonyms,
         )
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
-
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
         try:
@@ -325,6 +322,8 @@ class ObsSurface(BaseStore):
         if chunks is None:
             chunks = {}
 
+        if not isinstance(filepath, list):
+            filepath = [filepath]
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
