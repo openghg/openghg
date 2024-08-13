@@ -259,5 +259,3 @@ def sort_by_filenames(filepath: multiPathType) -> list[Path]:
     logger.info("Files are sorted according to dates")
 
     return filepath
-
-
