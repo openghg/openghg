@@ -140,5 +140,5 @@ jobs:
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
           anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
-          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN_EXP_2025_08_14 }}
           GIT_TAG: ${{ github.ref_name }}
