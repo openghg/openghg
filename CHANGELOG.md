@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.9.0...HEAD)
+
+## [0.9.0] - 2024-08-14
 
 ### Added
 
@@ -20,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `dataset_source` keyword previously only used for retrieved data is now available when using `standardise_surface` as well. This allows an origin key for the dataset to be included e.g. "InGOS", "European ObsPack". [PR #1083](https://github.com/openghg/openghg/pull/1083)
 - Footprint parser for "paris" footprint format which includes the new format used for both the NAME and FLEXPART LPDM models - [PR #1070](https://github.com/openghg/openghg/pull/1070)
 - Added `AGAGE` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive - [PR #912](https://github.com/openghg/openghg/pull/912)
-
 - Added feature of file sorting at standardise level before processing and remove `filepaths` input option - [PR #1074](https://github.com/openghg/openghg/pull/1074)
 
 ### Updated
