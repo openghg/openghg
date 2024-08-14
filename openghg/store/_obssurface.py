@@ -111,6 +111,9 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
+        data_level: Optional[Union[str, int, float]] = None,
+        data_sublevel: Optional[Union[str, float]] = None,
+        dataset_source: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
@@ -142,7 +145,16 @@ class ObsSurface(BaseStore):
             height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+        data_level: The level of quality control which has been applied to the data.
+            This should follow the convention of:
+                - "0": raw sensor output
+                - "1": automated quality assurance (QA) performed
+                - "2": final data set
+                - "3": elaborated data products using the data
+        data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
+            before data is finalised.
+        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
@@ -190,15 +202,14 @@ class ObsSurface(BaseStore):
         from openghg.util import (
             clean_string,
             format_inlet,
+            format_data_level,
+            check_and_set_null_variable,
             hash_file,
             load_surface_parser,
             verify_site,
             check_if_need_new_version,
             synonyms,
         )
-
-        if not isinstance(filepath, list):
-            filepath = [filepath]
 
         try:
             source_format = SurfaceTypes[source_format.upper()].value
@@ -219,6 +230,33 @@ class ObsSurface(BaseStore):
 
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        # Ensure we have a clear missing value for data_level, data_sublevel
+        data_level = format_data_level(data_level)
+        if data_sublevel is not None:
+            data_sublevel = str(data_sublevel)
+
+        data_level = check_and_set_null_variable(data_level)
+        data_sublevel = check_and_set_null_variable(data_sublevel)
+        dataset_source = check_and_set_null_variable(dataset_source)
+
+        data_level = clean_string(data_level)
+        data_sublevel = clean_string(data_sublevel)
+        dataset_source = clean_string(dataset_source)
+
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
+
+        # Define additional metadata which we aren't passing (are never passing?) to the parse functions
+        # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
+        # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
+        additional_metadata = {
+            "data_level": data_level,
+            "data_sublevel": data_sublevel,
+            "dataset_source": dataset_source,
+            "data_source": data_source,
+        }
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
@@ -282,6 +320,8 @@ class ObsSurface(BaseStore):
         if chunks is None:
             chunks = {}
 
+        if not isinstance(filepath, list):
+            filepath = [filepath]
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -321,7 +361,6 @@ class ObsSurface(BaseStore):
             # Collect together optional parameters (not required but
             # may be accepted by underlying parser function)
             optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
-            # TODO: extend optional_parameters to include kwargs when added
 
             input_parameters = required_parameters.copy()
 
@@ -366,30 +405,14 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            required_keys = (
-                "species",
-                "site",
-                "sampling_period",
-                "station_long_name",
-                "inlet",
-                "instrument",
-                "network",
-                "source_format",
-                "data_source",
-                "icos_data_level",
-                "data_type",
-            )
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            data = self.update_metadata(data, additional_metadata)
 
-            if optional_metadata:
-                common_keys = set(required_keys) & set(optional_metadata.keys())
+            lookup_keys = self.get_lookup_keys(optional_metadata)
 
-                if common_keys:
-                    raise ValueError(
-                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                    )
-                else:
-                    for key, parsed_data in data.items():
-                        parsed_data["metadata"].update(optional_metadata)
+            if optional_metadata is not None:
+                for parsed_data in data.values():
+                    parsed_data["metadata"].update(optional_metadata)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
@@ -398,8 +421,8 @@ class ObsSurface(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required_keys,
-                min_keys=5,
+                required_keys=lookup_keys,
+                min_keys=5,  # TODO: In general, should this be updated to length of lookup_keys?
                 compressor=compressor,
                 filters=filters,
             )

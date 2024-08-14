@@ -5,9 +5,14 @@ from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
 
-from openghg.util import species_lifetime, timestamp_now, check_function_open_nc
+from openghg.util import (
+    check_species_time_resolved,
+    check_species_lifetime,
+    timestamp_now,
+    check_function_open_nc,
+)
 from openghg.store import infer_date_range, update_zero_dim
-from openghg.types import multiPathType
+from openghg.types import multiPathType, ParseError
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -28,7 +33,6 @@ def parse_acrg_org(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-    chunks: Optional[Dict] = None,
 ) -> Dict:
     """
     Read and parse input emissions data in original ACRG format.
@@ -50,8 +54,6 @@ def parse_acrg_org(
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
-        chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
     Returns:
         dict: Dictionary of data
     """
@@ -65,30 +67,10 @@ def parse_acrg_org(
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
 
-    with xr_open_fn(filepath).chunk(chunks) as fp_data:
-        if chunks:
-            logger.info(f"Rechunking with chunks={chunks}")
+    fp_data = xr_open_fn(filepath)
 
-    if species == "co2":
-        # Expect co2 data to have high time resolution
-        if not time_resolved:
-            logger.info("Updating time_resolved to True for co2 data")
-            time_resolved = True
-
-    if short_lifetime:
-        if species == "inert":
-            raise ValueError(
-                "When indicating footprint is for short lived species, 'species' input must be included"
-            )
-    else:
-        if species == "inert":
-            lifetime = None
-        else:
-            lifetime = species_lifetime(species)
-            if lifetime is not None:
-                # TODO: May want to add a check on length of lifetime here
-                logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                short_lifetime = True
+    time_resolved = check_species_time_resolved(species, time_resolved)
+    short_lifetime = check_species_lifetime(species, short_lifetime)
 
     dv_rename = {
         # "fp": "srr",
@@ -98,7 +80,7 @@ def parse_acrg_org(
         "PBLH": "atmosphere_boundary_layer_thickness",
     }
 
-    attribute_rename = {"fp_output_units": "lpdm_native_output_units"}
+    attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
 
     # # Removed for now - this renaming to match to PARIS would mean the dimension names
     # # were inconsistent between data types/
@@ -143,8 +125,16 @@ def parse_acrg_org(
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
-    # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
-    fp_data = fp_data.rename(**dv_rename)  # type: ignore
+    try:
+        # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
+        fp_data = fp_data.rename(**dv_rename)  # type: ignore
+    except ValueError:
+        msg = "Unable to parse input data using source_format='acrg_org' (default). "
+        if "srr" in fp_data:
+            msg += "May need to use source_format='paris' ('srr' data variable is present)"
+        logger.exception(msg)
+        raise ParseError(msg)
+
     # fp_data = fp_data.rename(**dim_rename)  # removed for now - see above
 
     fp_data = fp_data.drop_dims(dim_drop)
@@ -181,6 +171,10 @@ def parse_acrg_org(
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
         fp_data = update_zero_dim(fp_data, dim="time")
+    else:
+        msg = "Expect 'time' coordinate within footprint data for source_format='acrg_org'"
+        logger.exception(msg)
+        raise ParseError(msg)
 
     fp_time = fp_data["time"]
 

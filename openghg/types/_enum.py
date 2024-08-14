@@ -7,7 +7,7 @@ class SurfaceTypes(Enum):
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
-    GCWERKS_NC = "GCWERKS_NC"
+    AGAGE = "AGAGE"
     ICOS = "ICOS"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
@@ -49,8 +49,9 @@ class FluxDatabases(Enum):
 class FootprintTypes(Enum):
     """For standardising footprint inputs"""
 
-    # OPENGHG = "OPENGHG"  # To be implemented
     ACRG_ORG = "ACRG_ORG"
+    PARIS = "PARIS"
+    FLEXPART = "FLEXPART"  # This is an alias for PARIS
 
 
 class ObsTypes(Enum):
@@ -70,6 +71,7 @@ class FluxTimeseriesTypes(Enum):
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    AGAGE = "AGAGE"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
     ICOS = "ICOS"

@@ -18,7 +18,7 @@ from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
-from openghg.util import create_daterange_str
+from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
 
@@ -927,19 +927,72 @@ def test_drop_only_correct_nan():
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
 
 
-def test_optional_parameters():
-    """Test if ValueError is raised for invalid input value to calibration_scale."""
+@pytest.mark.parametrize(
+    "data_keyword,data_value_1,data_value_2",
+    [
+        ("data_level", "1", "2"),
+        ("data_sublevel", "1.1", "1.2"),
+        ("dataset_source", "InGOS", "European ObsPack"),
+    ],
+)
+def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
+    """
+    Test to check keywords can be used to split data into multiple datasources and be retrieved.
+    """
 
-    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+    clear_test_stores()
+    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc",source_format="OPENGHG")
+    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
 
-    with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
-        standardise_surface(filepath=data_filepath,
+    data_labels_1 = {data_keyword: data_value_1}
+    data_labels_2 = {data_keyword: data_value_2}
+
+    standardise_surface(filepath=data_filepath_1,
                         source_format="OPENGHG",
                         site="TAC",
                         network="DECC",
-                        calibration_scale="unknown",
-                        instrument='picarro',
-                        store="group" )
+                        store="group",
+                        **data_labels_1)
+
+    standardise_surface(filepath=data_filepath_2,
+                        source_format="OPENGHG",
+                        site="TAC",
+                        network="DECC",
+                        store="group",
+                        **data_labels_2)
+
+    tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
+    tac_2 = get_obs_surface(site="tac", species="co2", **data_labels_2)
+
+    # assert tac_1.metadata[data_keyword] == data_value_1.lower()
+    # assert tac_2.metadata[data_keyword] == data_value_2.lower()
+    assert tac_1.metadata[data_keyword] == clean_string(data_value_1)
+    assert tac_2.metadata[data_keyword] == clean_string(data_value_2)
+
+    # All values within "tac_co2_openghg_dummy-ones.nc" have been set to a value of 1, so check
+    # this data has been retrieved.
+    np.testing.assert_equal(tac_1.data["mf"].values, 1)
+
+
+def test_optional_parameters():
+    """Test if ValueError is raised for invalid input value to calibration_scale."""
+
+    clear_test_stores()
+    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+
+    with pytest.raises(
+        ValueError,
+        match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007",
+    ):
+        standardise_surface(
+            filepath=data_filepath,
+            source_format="OPENGHG",
+            site="TAC",
+            network="DECC",
+            calibration_scale="unknown",
+            instrument="picarro",
+            store="group",
+        )
 
 
 def test_optional_metadata_raise_error():
@@ -952,7 +1005,12 @@ def test_optional_metadata_raise_error():
 
     with pytest.raises(ValueError):
         standardise_surface(
-            filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"species":"openghg_tests"}
+            filepath=rgl_filepath,
+            source_format="CRDS",
+            network="DECC",
+            site="RGL",
+            store="group",
+            optional_metadata={"species": "openghg_tests"},
         )
 
 
@@ -964,7 +1022,12 @@ def test_optional_metadata():
     rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
 
     standardise_surface(
-        filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group", optional_metadata={"project":"openghg_tests"}
+        filepath=rgl_filepath,
+        source_format="CRDS",
+        network="DECC",
+        site="RGL",
+        store="group",
+        optional_metadata={"project": "openghg_tests"},
     )
 
     rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")

@@ -1,7 +1,17 @@
+import os
 from pathlib import Path
 
+import pytest
+from openghg.tutorial import retrieve_example_data, retrieve_example_obspack, use_tutorial_store, clear_tutorial_store
+
 from helpers import get_surface_datapath
-from openghg.tutorial import retrieve_example_data, retrieve_example_obspack
+
+@pytest.fixture(scope="module", autouse=True)
+def tutorial_store_fixture():
+    use_tutorial_store()
+    yield
+    clear_tutorial_store()
+    del os.environ["OPENGHG_TUT_STORE"]
 
 
 def test_retrieve_example_data(requests_mock, mocker):
