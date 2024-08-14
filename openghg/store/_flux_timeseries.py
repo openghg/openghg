@@ -117,6 +117,7 @@ class FluxTimeseries(BaseStore):
             clean_string,
             load_flux_timeseries_parser,
             check_if_need_new_version,
+            match_function_inputs,
         )
 
         species = clean_string(species)
@@ -124,6 +125,9 @@ class FluxTimeseries(BaseStore):
         region = clean_string(region)
         if domain:
             domain = clean_string(domain)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -148,6 +152,9 @@ class FluxTimeseries(BaseStore):
         # Load the data retrieve object
         parser_fn = load_flux_timeseries_parser(source_format=source_format)
 
+        # TODO: Update inputs to parser below to use this
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -155,70 +162,85 @@ class FluxTimeseries(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "species": species,
-            "region": region,
-            "source": source,
-            "data_type": "flux_timeseries",
-            "period": period,
-            "continuous": continuous,
-        }
+        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
-        optional_keywords: dict[Any, Any] = {
-            "database": database,
-            "database_version": database_version,
-            "model": model,
-        }
+        # # Define parameters to pass to the parser function
+        # # TODO: Update this to match against inputs for parser function.
+        # param = {
+        #     "filepath": filepath,
+        #     "species": species,
+        #     "region": region,
+        #     "source": source,
+        #     "data_type": "flux_timeseries",
+        #     "period": period,
+        #     "continuous": continuous,
+        # }
 
-        signature = inspect.signature(parser_fn)
-        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+        # optional_keywords: dict[Any, Any] = {
+        #     "database": database,
+        #     "database_version": database_version,
+        #     "model": model,
+        # }
 
-        input_parameters: dict[Any, Any] = param.copy()
+        # signature = inspect.signature(parser_fn)
+        # fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        for param, param_value in optional_keywords.items():
-            if param in fn_accepted_parameters:
-                input_parameters[param] = param_value
-            else:
-                logger.warning(
-                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                    f"This is not accepted by the current standardisation function: {parser_fn}"
-                )
+        # input_parameters: dict[Any, Any] = param.copy()
 
-        flux_timeseries_data = parser_fn(**input_parameters)
+        # # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
+        # for param, param_value in optional_keywords.items():
+        #     if param in fn_accepted_parameters:
+        #         input_parameters[param] = param_value
+        #     else:
+        #         logger.warning(
+        #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+        #             f"This is not accepted by the current standardisation function: {parser_fn}"
+        #         )
+
+        flux_timeseries_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux
         for split_data in flux_timeseries_data.values():
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-            # combine metadata and get look-up keys
+        # combine metadata and get look-up keys
         if optional_metadata is None:
             optional_metadata = {}
 
-        # Make sure none of these are Nones
-        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        # # Make sure none of these are Nones
+        # to_add = {k: v for k, v in optional_keywords.items() if v is not None}
 
-        # warn if `optional_metadata` overlaps with keyword arguments
-        overlap = [k for k in optional_metadata if k in to_add]
-        if overlap:
-            msg = (
-                f"Values for {', '.join(overlap)} in `optional_metadata` are "
-                "being overwritten by values passed as keyword arguments."
-            )
-            logger.warning(msg)
+        # # warn if `optional_metadata` overlaps with keyword arguments
+        # overlap = [k for k in optional_metadata if k in to_add]
+        # if overlap:
+        #     msg = (
+        #         f"Values for {', '.join(overlap)} in `optional_metadata` are "
+        #         "being overwritten by values passed as keyword arguments."
+        #     )
+        #     logger.warning(msg)
 
-        # update `optional_metadata` dict with any "optional" arguments passed to the parser
-        optional_metadata.update(to_add)
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        flux_timeseries_data = self.update_metadata(
+            flux_timeseries_data, fn_input_parameters, additional_metadata
+        )
 
-        # add optional metdata to parsed metadata
-        for parsed_data in flux_timeseries_data.values():
-            parsed_data["metadata"].update(optional_metadata)
+        # Use config and latest metadata to create lookup keys
+        lookup_keys = self.get_lookup_keys(flux_timeseries_data)
+
+        # # update `optional_metadata` dict with any "optional" arguments passed to the parser
+        # optional_metadata.update(to_add)
+
+        # lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # # add optional metdata to parsed metadata
+        # for parsed_data in flux_timeseries_data.values():
+        #     parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
