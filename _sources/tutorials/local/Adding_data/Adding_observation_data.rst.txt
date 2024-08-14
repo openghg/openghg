@@ -49,7 +49,9 @@ including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
 The process of adding data to the object store is called *standardisation*.
 
 To standardise a new data file, you must specify the *source format* and
-other details about the data.
+other keywords for the data. Which keywords need to be specified may be dependent
+on the source format itself as some details can be inferred from the data or may
+not be relevant.
 For the full list of accepted observation inputs and source formats, call
 the function ``summary_source_formats``:
 
@@ -107,8 +109,8 @@ following arguments:
 
 * ``filepaths``: list of paths to ``.dat`` files
 * ``site``:  ``"TAC"``, the site code for Tacolneston
-* ``source_format``: ``"CRDS"``, the type of data we want to process
 * ``network``: ``"DECC"``
+* ``source_format``: ``"CRDS"``, the type of data we want to process
 
 .. ipython::
 
@@ -125,7 +127,8 @@ following arguments:
 
 
 This extracts the data and metadata from the files,
-standardises them, and adds them to our object store.
+standardises them, and adds them to our object store. The keywords of ``site`` and ``network``,
+along with details extracted from the data itself allow us to uniquely store the data.
 
 The returned ``decc_results`` dictionary shows how the data
 has been stored: each file has been split into several entries, each with a unique ID (UUID).
@@ -135,6 +138,20 @@ The ``decc_results`` output includes details of the processed data and tells
 us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.
+
+Other keywords
+~~~~~~~~~~~~~~
+
+When adding data in this way there are other keywords which can be used to 
+distinguish between different data sets as required including:
+
+* ``instrument``: Name of the instrument
+* ``sampling_period``: The time taken for each measurement to be sampled
+* ``data_level``: The level of quality control which has been applied to the data.
+* ``data_sublevel``:  Optional level to include between data levels. Typically for level 1 data where multiple steps of initial QA may have been applied.
+* ``dataset_source``: Name of the dataset if data is taken from a larger source e.g. from an ObsPack
+
+See the `standardise_surface` documentation for a full list of inputs.
 
 Multiple stores
 ~~~~~~~~~~~~~~~
@@ -158,9 +175,8 @@ AGAGE data
 
 OpenGHG can also process data from the `AGAGE network <https://agage.mit.edu/>`_.
 
-The functions that process the AGAGE data expect data to have an
-accompanying *precisions file*. For each data file we create a tuple with
-the data filename and the precisions filename.
+Historically, the AGAGE network produces output files from GCWERKS alongside a seperate *precisions file*. If you wish
+to use this form of input file, we create a tuple with the data filename and the precisions filename. For example:
 
 First we retrieve example data from the  Cape Grim station in Australia (site code "CGO"").
 
@@ -188,9 +204,9 @@ data by including the right arguments:
 
 * ``filepaths``: tuple (or list of tuples) with paths to data and precision files
 * ``site`` (site code): ``"CGO"``
-* ``source_format`` (data type): ``"GCWERKS"``
 * ``network``: ``"AGAGE"``
 * ``instrument``: ``"medusa"``
+* ``source_format`` (data type): ``"GCWERKS"``
 
 .. code:: ipython3
 
@@ -221,7 +237,26 @@ file
    'ne_70m': {'uuid': '950e94fe-6cf9-48e3-b920-275935761885', 'new': True}}}}
 
 
+However, recently the AGAGE network has begun to also produce netCDF files, which are processed by Matt
+Rigby's `agage-archive <https://github.com/mrghg/agage-archive>`_ repository. These files are split by site, 
+species and instrument and do not need an accompanying precisions file. These can also be read in by the
+``openghg.standardise.standardise_surface`` function, with the arguments:
+
+* ``filepath``: filepath to the .nc file
+* ``site`` (site code): ``"CGO"``
+* ``source_format`` (data type): ``"AGAGE"``
+* ``network``: ``"AGAGE"``
+* ``instrument``: ``"medusa"``
+
+The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly. 
+Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible. 
+
+
 .. _note-on-datasources:
+
+
+
+
 
 Note on Datasources
 ^^^^^^^^^^^^^^^^^^^
