@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.8.2...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.9.0...HEAD)
+
+## [0.9.0] - 2024-08-14
 
 ### Added
 
@@ -14,12 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Options to search metastore by "negative lookup" and by "test functions"; the latter is used to implement 
   searching by a `slice` object to find a range of values - [PR #1064](https://github.com/openghg/openghg/pull/1064)
 - Code to combine multiple data objects - [PR #1063](https://github.com/openghg/openghg/pull/1063)
-- A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #983](https://github.com/openghg/openghg/pull/983)
+- A new object store config file to allow customisation of metadata keys used to store data in unique Datasources - [PR #1041](https://github.com/openghg/openghg/pull/1041)
 - Adds `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 - New keywords `data_level` and `data_sublevel` as additional keys which can be used to distinguish observation surface data - [PR #1051](https://github.com/openghg/openghg/pull/1051)
 - The `dataset_source` keyword previously only used for retrieved data is now available when using `standardise_surface` as well. This allows an origin key for the dataset to be included e.g. "InGOS", "European ObsPack". [PR #1083](https://github.com/openghg/openghg/pull/1083)
 - Footprint parser for "paris" footprint format which includes the new format used for both the NAME and FLEXPART LPDM models - [PR #1070](https://github.com/openghg/openghg/pull/1070)
 - Added `AGAGE` as a source format in the `standardise_surface` function, and associated parser functions and tests. Reads in output files from Matt Rigby's agage-archive - [PR #912](https://github.com/openghg/openghg/pull/912)
+- Added feature of file sorting at standardise level before processing and remove `filepaths` input option - [PR #1074](https://github.com/openghg/openghg/pull/1074)
+- Utility functions to combine multiple "data objects" (e.g. `ObsData`, or anything with `.data` and `.metadata` attributes) - [PR #1063](https://github.com/openghg/openghg/pull/1063) 
 
 ### Updated
 
@@ -35,22 +39,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bug in test when checking customised chunks were stored correctly in the zarr store. dask v2024.8 now changed the chunk shape after this was sorted was test was updated to ensure this didn't sort when retrieving the data. [PR #1090](https://github.com/openghg/openghg/pull/1090)
-
-## [0.8.2] - 2024-06-06
-
-### Fixed
-
 - Error reporting for `BaseStore` context manager. [PR #1059](https://github.com/openghg/openghg/pull/1059)
 - Formatting of `inlet` (and related keys) in search, so that float values of inlet can be retrieved - [PR #1057](https://github.com/openghg/openghg/pull/1057)
 - Test for zarr compression `test_bytes_stored_compression` that was failing due to a slight mismatch between actual and expected values. The test now uses a bound on relative error - [PR #1065](https://github.com/openghg/openghg/pull/1065)
 - Typo and possible performance issue in `analysis._scenario.combine_datasets` - [PR #1047](https://github.com/openghg/openghg/pull/1047)
 - Pinned numpy to < 2.0 and netcdf4 to <= 1.6.5. Numpy 2.0 release caused some minor bugs in OpenGHG, and netCDF4's updates to numpy 2.0 were also causing tests to fail - [PR #1043](https://github.com/openghg/openghg/pull/1043)
+- Fixed bug where slightly different latitude and longitude values were being standardised and not aligned later down the line. These are now all fixed to the openghg_defs domain definitions where applicable upon standardisation. [PR #1049](https://github.com/openghg/openghg/pull/1049) 
+
+## [0.8.2] - 2024-06-06
+
+### Fixed
+
 - Updated incorrect import for data_manager within tutorial. This now shows the import from `openghg.dataobjects` not `openghg.store` - [PR #1007](https://github.com/openghg/openghg/pull/1007)
 - Issue causing missing data when standardising multiple files in a loop - [PR #1032](https://github.com/openghg/openghg/pull/1032)
 
 ### Added
 
-- Utility functions to combine multiple "data objects" (e.g. `ObsData`, or anything with `.data` and `.metadata` attributes) - [PR #1063](https://github.com/openghg/openghg/pull/1063) 
 - Added ability to process CRF data as `flux_timeseries` datatype (one dimensional data) - [PR #870](https://github.com/openghg/openghg/pull/870)
 
 ## [0.8.1] - 2024-05-17
@@ -76,7 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added fix to make sure data could be returned within a date range when the data had been added non-sequentially to an object store - [PR #997](https://github.com/openghg/openghg/pull/997)
 - Replace references to old `supplementary_data` repository with `openghg_defs` - [PR #999](https://github.com/openghg/openghg/pull/999)
 - Added call to synonyms for species while standardising - [PR #984](https://github.com/openghg/openghg/pull/984)
-- Fixed bug where slightly different latitude and longitude values were being standardised and not aligned later down the line. These are now all fixed to the openghg_defs domain definitions where applicable upon standardisation. [PR #1049](https://github.com/openghg/openghg/pull/1049) 
 
 ## [0.8.0] - 2024-03-19
 

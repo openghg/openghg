@@ -124,7 +124,7 @@ class Flux(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import FluxTypes
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
             load_standardise_parser,
@@ -158,8 +158,10 @@ class Flux(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = FluxTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
@@ -310,7 +312,7 @@ class Flux(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.types import FluxDatabases
+        from openghg.store.spec import define_transform_parsers
         from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
@@ -324,8 +326,10 @@ class Flux(BaseStore):
 
         datapath = Path(datapath)
 
+        transform_parsers = define_transform_parsers()[self._data_type]
+
         try:
-            data_type = FluxDatabases[database.upper()].value
+            data_type = transform_parsers[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 

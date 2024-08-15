@@ -111,7 +111,7 @@ class FluxTimeseries(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import FluxTimeseriesTypes
+        from openghg.store.spec import define_standardise_parsers
 
         from openghg.util import (
             clean_string,
@@ -140,8 +140,10 @@ class FluxTimeseries(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = FluxTimeseriesTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
