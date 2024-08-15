@@ -162,7 +162,8 @@ class BaseStore:
 
     def add_metakeys(self, force: bool = False) -> dict:
         """
-
+        Check metakeys are included from relevant config file and add as the `.metakeys`
+        attributes if not.
         """
         if not hasattr(self, "metakeys") or force:
             try:
@@ -178,7 +179,7 @@ class BaseStore:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
-            data: Dictionary containing data and metadata for species
+            data: Dictionary containing data and metadata for datasource
             input_parameters: Input parameters from read_file...
             additional_metadata: Keys to add to the metadata dictionary
         Returns:
@@ -190,6 +191,8 @@ class BaseStore:
         required = metakeys["required"]
         # We might not get any optional keys
         optional = metakeys.get("optional", {})
+
+        ignore_values = [None]
 
         # Still a basic implementation - needs steps to be more clear - could split out?
         # TODO: Decide on logic and add checks for cases where keys are already
@@ -210,13 +213,16 @@ class BaseStore:
                     else:
                         required_not_found.append(key)
                 if required_not_found:
-                    raise ValueError(f"The following required keys are missing: {', '.join(required_not_found)}. Please specify.")
+                    raise ValueError(
+                        f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                    )
 
             # Check if named optional keys are included in the input_parameters and add
             optional_matched = set(optional) & set(input_parameters)
             if optional_matched:
                 for key in optional_matched:
-                    metadata[key] = input_parameters[key]
+                    if input_parameters[key] not in ignore_values:
+                        metadata[key] = input_parameters[key]
 
             # Add all additional metadata keys
             if additional_metadata:
@@ -224,27 +230,20 @@ class BaseStore:
 
         return data
 
-    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
-        """This creates the list of keys required to perform the Datasource lookup.
-        If optional_metadata is passed in then those keys may be taken into account
-        if they exist in the list of stored optional keys.
+    def check_info_keys(self, optional_metadata: Optional[Dict]) -> None:
+        """Check the informational metadata is not being used to set required keys.
 
         Args:
-            optional_metadata: Dictionary of optional metadata
+            optional_metadata: Additional informational metadata
+
         Returns:
-            tuple: Tuple of keys
+            None
+            Raises ValueError if any keys within optional_metadata are
+                within the required set of keys.
         """
         metakeys = self.add_metakeys()
-        try:
-            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
-        except KeyError:
-            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-
         required = metakeys["required"]
-        # We might not get any optional keys
-        optional = metakeys.get("optional", {})
 
-        lookup_keys = list(required)
         # Check if anything in optional_metadata tries to override our required keys
         if optional_metadata is not None:
             common_keys = set(required) & set(optional_metadata)
@@ -254,10 +253,33 @@ class BaseStore:
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
 
-            if optional:
-                for key in optional_metadata:
-                    if key in optional:
-                        lookup_keys.append(key)
+    def get_lookup_keys(self, data) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+
+        # Note: Just grabbing the first entry in data at the moment
+        # In principle the metadata should have the same keys for all entries
+        # but should check that assumption is reasonable
+        parsed_data_representative = list(data.values())[0]
+        metadata = parsed_data_representative["metadata"]
+
+        # Matching between potential optional keys and those present in the metadata
+        optional_lookup = set(optional) & set(metadata.keys())
+        lookup_keys.extend(list(optional_lookup))
 
         return lookup_keys
 

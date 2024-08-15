@@ -152,7 +152,6 @@ class FluxTimeseries(BaseStore):
         # Load the data retrieve object
         parser_fn = load_flux_timeseries_parser(source_format=source_format)
 
-        # TODO: Update inputs to parser below to use this
         fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
@@ -164,39 +163,7 @@ class FluxTimeseries(BaseStore):
 
         parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
-        # # Define parameters to pass to the parser function
-        # # TODO: Update this to match against inputs for parser function.
-        # param = {
-        #     "filepath": filepath,
-        #     "species": species,
-        #     "region": region,
-        #     "source": source,
-        #     "data_type": "flux_timeseries",
-        #     "period": period,
-        #     "continuous": continuous,
-        # }
-
-        # optional_keywords: dict[Any, Any] = {
-        #     "database": database,
-        #     "database_version": database_version,
-        #     "model": model,
-        # }
-
-        # signature = inspect.signature(parser_fn)
-        # fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-        # input_parameters: dict[Any, Any] = param.copy()
-
-        # # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        # for param, param_value in optional_keywords.items():
-        #     if param in fn_accepted_parameters:
-        #         input_parameters[param] = param_value
-        #     else:
-        #         logger.warning(
-        #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-        #             f"This is not accepted by the current standardisation function: {parser_fn}"
-        #         )
-
+        # Define parameters to pass to the parser function
         flux_timeseries_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux
@@ -207,18 +174,6 @@ class FluxTimeseries(BaseStore):
         # combine metadata and get look-up keys
         if optional_metadata is None:
             optional_metadata = {}
-
-        # # Make sure none of these are Nones
-        # to_add = {k: v for k, v in optional_keywords.items() if v is not None}
-
-        # # warn if `optional_metadata` overlaps with keyword arguments
-        # overlap = [k for k in optional_metadata if k in to_add]
-        # if overlap:
-        #     msg = (
-        #         f"Values for {', '.join(overlap)} in `optional_metadata` are "
-        #         "being overwritten by values passed as keyword arguments."
-        #     )
-        #     logger.warning(msg)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
@@ -232,15 +187,6 @@ class FluxTimeseries(BaseStore):
 
         # Use config and latest metadata to create lookup keys
         lookup_keys = self.get_lookup_keys(flux_timeseries_data)
-
-        # # update `optional_metadata` dict with any "optional" arguments passed to the parser
-        # optional_metadata.update(to_add)
-
-        # lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # # add optional metdata to parsed metadata
-        # for parsed_data in flux_timeseries_data.values():
-        #     parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(

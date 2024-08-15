@@ -95,6 +95,9 @@ class EulerianModel(BaseStore):
         end_date = clean_string(end_date)
         setup = clean_string(setup)
 
+        # Specify any additional metadata to be added
+        additional_metadata = {}
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
@@ -119,6 +122,8 @@ class EulerianModel(BaseStore):
 
         if chunks is None:
             chunks = {}
+
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
         with open_dataset(filepath).chunk(chunks) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
@@ -197,11 +202,16 @@ class EulerianModel(BaseStore):
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
-            lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
             if optional_metadata is not None:
-                for parsed_data in model_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+                additional_metadata.update(optional_metadata)
+
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            model_data = self.update_metadata(model_data, fn_input_parameters, additional_metadata)
+
+            # Use config and latest metadata to create lookup keys
+            lookup_keys = self.get_lookup_keys(model_data)
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(

@@ -208,6 +208,7 @@ class ObsSurface(BaseStore):
             load_surface_parser,
             verify_site,
             check_if_need_new_version,
+            match_function_inputs,
             synonyms,
         )
 
@@ -247,18 +248,6 @@ class ObsSurface(BaseStore):
         data_sublevel = clean_string(data_sublevel)
         dataset_source = clean_string(dataset_source)
 
-        # Would like to rename `data_source` to `retrieved_from` but
-        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
-        data_source = "internal"
-
-        # Define additional metadata which we aren't passing (are never passing?) to the parse functions
-        # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
-        # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
-
-        additional_metadata = {
-            "data_source": data_source,
-        }
-
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
             inlet = height
@@ -266,6 +255,15 @@ class ObsSurface(BaseStore):
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
         inlet = format_inlet(inlet)
+
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
+
+        # Define additional metadata which is not being passed to the parse functions
+        additional_metadata = {
+            "data_source": data_source,
+        }
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -325,6 +323,9 @@ class ObsSurface(BaseStore):
 
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
+
+            parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
+
             if source_format == "GCWERKS":
                 if not isinstance(fp, tuple):
                     raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
@@ -345,62 +346,15 @@ class ObsSurface(BaseStore):
                 )
                 continue
 
-            # # Define required input parameters for parser function
-            # required_parameters = {
-            #     "data_filepath": data_filepath,
-            #     "site": site,
-            #     "network": network,
-            #     "inlet": inlet,
-            #     "instrument": instrument,
-            #     "sampling_period": sampling_period_seconds,
-            #     "measurement_type": measurement_type,
-            #     "site_filepath": site_filepath,
-            # }
-            # if source_format == "GCWERKS":
-            #     required_parameters["precision_filepath"] = precision_filepath
-
-            # # Collect together optional parameters (not required but
-            # # may be accepted by underlying parser function)
-            # optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
-            # # TODO: extend optional_parameters to include kwargs when added
-
-            # input_parameters = required_parameters.copy()
-
-            # # Find parameters that parser_fn accepts (must accept all required arguments already)
-            signature = inspect.signature(parser_fn)
-            parser_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-            # # Check if optional parameters are present in function call and only use those which are.
-            # for param, param_value in optional_parameters.items():
-            #     if param in fn_accepted_parameters:
-            #         input_parameters[param] = param_value
-            #     else:
-            #         logger.warning(
-            #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-            #             f"This is not accepted by the current standardisation function: {parser_fn}"
-            #         )
-
-            # translate_keys = {"sampling_period": "sample_period_seconds"}
-            # fn_input_parameters
-
-            # Add details defined within the function that the parser needs
-            input_parameters = {"data_filepath": data_filepath}
+            # Adding additional inputs that the parser needs
+            parser_input_parameters["data_filepath"] = data_filepath
             if source_format == "GCWERKS":
-                input_parameters["precision_filepath"] = precision_filepath
-            
-            for param, param_value in fn_input_parameters.items():
-                if param in parser_accepted_parameters:
-                    input_parameters[param] = param_value
-                # else:
-                #     logger.warning(
-                #         f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                #         f"This is not accepted by the current standardisation function: {parser_fn}"
-                #     )
+                parser_input_parameters["precision_filepath"] = precision_filepath
 
-            input_parameters["sampling_period"] = sampling_period_seconds
+            parser_input_parameters["sampling_period"] = sampling_period_seconds
 
             # Call appropriate standardisation function with input parameters
-            data = parser_fn(**input_parameters)
+            data = parser_fn(**parser_input_parameters)
 
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
@@ -426,22 +380,17 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            ####
-            # Note: if you do this that means required metadata could have come
-            # through optional_metadata dict - check we're ok with that.
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            # before adding details
+            self.check_info_keys(optional_metadata)
             if optional_metadata is not None:
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.update_metadata(data, fn_input_parameters, additional_metadata)
 
-            ## TODO: This needs updating to use latest metadata when creating lookup keys
-            # - may not want to pass optional_metadata here at all
-            lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-            if optional_metadata is not None:
-                for parsed_data in data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+            # Use config and latest metadata to create lookup keys
+            lookup_keys = self.get_lookup_keys(data)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"

@@ -126,6 +126,9 @@ class BoundaryConditions(BaseStore):
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
+        # Specify any additional metadata to be added
+        additional_metadata = {}
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
@@ -150,6 +153,8 @@ class BoundaryConditions(BaseStore):
 
         if chunks is None:
             chunks = {}
+
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
         with open_dataset(filepath).chunk(chunks) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them
@@ -209,11 +214,19 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
 
             if optional_metadata is not None:
-                for parsed_data in boundary_conditions_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+                additional_metadata.update(optional_metadata)
+
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            boundary_conditions_data = self.update_metadata(
+                boundary_conditions_data, fn_input_parameters, additional_metadata
+            )
+
+            # Use config and latest metadata to create lookup keys
+            lookup_keys = self.get_lookup_keys(boundary_conditions_data)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources

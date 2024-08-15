@@ -90,7 +90,7 @@ class ObsColumn(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import ColumnTypes
-        from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms
+        from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms, match_function_inputs
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -102,6 +102,9 @@ class ObsColumn(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
         platform = clean_string(platform)
+        
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -126,6 +129,8 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -136,21 +141,11 @@ class ObsColumn(BaseStore):
         if chunks is None:
             chunks = {}
 
-        # Define parameters to pass to the parser function
-        param = {
-            "data_filepath": filepath,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "species": species,
-            "network": network,
-            "instrument": instrument,
-            "platform": platform,
-            "chunks": chunks,
-        }
+        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
-        obs_data = parser_fn(**param)
+        parser_input_parameters["data_filepath"] = filepath
+
+        obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
         # # Checking against expected format for ObsColumn
@@ -162,11 +157,18 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
-            for parsed_data in obs_data.values():
-                parsed_data["metadata"].update(optional_metadata)
+            additional_metadata.update(optional_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        obs_data = self.update_metadata(
+            obs_data, fn_input_parameters, additional_metadata
+        )
+
+        # Use config and latest metadata to create lookup keys
+        lookup_keys = self.get_lookup_keys(obs_data)
 
         data_type = "column"
         datasource_uuids = self.assign_data(

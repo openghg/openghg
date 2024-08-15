@@ -129,6 +129,7 @@ class Flux(BaseStore):
             clean_string,
             load_flux_parser,
             check_if_need_new_version,
+            match_function_inputs,
         )
 
         species = clean_string(species)
@@ -142,6 +143,9 @@ class Flux(BaseStore):
                 DeprecationWarning,
             )
             time_resolved = high_time_resolution
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -176,43 +180,13 @@ class Flux(BaseStore):
         if chunks is None:
             chunks = {}
 
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        # TODO - better match the arguments to the parser functions
-        param = {
-            "filepath": filepath,
-            "species": species,
-            "domain": domain,
-            "source": source,
-            "time_resolved": time_resolved,
-            "period": period,
-            "continuous": continuous,
-            "data_type": "flux",
-            "chunks": chunks,
-        }
+        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
-        optional_keywords: dict[Any, Any] = {
-            "database": database,
-            "database_version": database_version,
-            "model": model,
-        }
+        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
-        signature = inspect.signature(parser_fn)
-        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+        parser_input_parameters["data_type"] = self._data_type
 
-        input_parameters: dict[Any, Any] = param.copy()
-
-        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        for param, param_value in optional_keywords.items():
-            if param in fn_accepted_parameters:
-                input_parameters[param] = param_value
-            else:
-                logger.warning(
-                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                    f"This is not accepted by the current standardisation function: {parser_fn}"
-                )
-
-        flux_data = parser_fn(**input_parameters)
+        flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
         for split_data in flux_data.values():
@@ -226,26 +200,17 @@ class Flux(BaseStore):
         if optional_metadata is None:
             optional_metadata = {}
 
-        # Make sure none of these are Nones
-        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-        # warn if `optional_metadata` overlaps with keyword arguments
-        overlap = [k for k in optional_metadata if k in to_add]
-        if overlap:
-            msg = (
-                f"Values for {', '.join(overlap)} in `optional_metadata` are "
-                "being overwritten by values passed as keyword arguments."
-            )
-            logger.warning(msg)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        flux_data = self.update_metadata(
+            flux_data, fn_input_parameters, additional_metadata
+        )
 
-        # update `optional_metadata` dict with any "optional" arguments passed to the parser
-        optional_metadata.update(to_add)
-
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # add optional metdata to parsed metadata
-        for parsed_data in flux_data.values():
-            parsed_data["metadata"].update(optional_metadata)
+        lookup_keys = self.get_lookup_keys(flux_data)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
