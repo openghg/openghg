@@ -209,6 +209,7 @@ class BoundaryConditions(BaseStore):
             key = "_".join((species, bc_input, domain))
 
             boundary_conditions_data: dict[str, dict] = {}
+            boundary_conditions_data[key] = {}
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 

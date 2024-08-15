@@ -197,6 +197,7 @@ class EulerianModel(BaseStore):
             key = "_".join((model, species, date))
 
             model_data: dict[str, dict] = {}
+            model_data[key] = {}
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
