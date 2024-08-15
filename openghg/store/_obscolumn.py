@@ -89,7 +89,7 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import ColumnTypes
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms
 
         # TODO: Evaluate which inputs need cleaning (if any)
@@ -118,8 +118,10 @@ class ObsColumn(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = ColumnTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
