@@ -1,6 +1,5 @@
 from __future__ import annotations
 import logging
-import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Optional, Tuple, Union
@@ -208,9 +207,7 @@ class Flux(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        flux_data = self.update_metadata(
-            flux_data, fn_input_parameters, additional_metadata
-        )
+        flux_data = self.update_metadata(flux_data, fn_input_parameters, additional_metadata)
 
         lookup_keys = self.get_lookup_keys(flux_data)
 

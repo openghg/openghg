@@ -6,7 +6,6 @@ from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
-import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType

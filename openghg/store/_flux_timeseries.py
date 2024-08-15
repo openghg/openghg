@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np

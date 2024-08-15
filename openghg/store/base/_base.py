@@ -169,8 +169,10 @@ class BaseStore:
             try:
                 metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
             except KeyError:
-                raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-    
+                raise ValueError(
+                    f"No metakeys for {self._data_type}, please update metakeys configuration file."
+                )
+
             self.metakeys = metakeys
 
         return self.metakeys
@@ -253,7 +255,7 @@ class BaseStore:
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
 
-    def get_lookup_keys(self, data) -> List[str]:
+    def get_lookup_keys(self, data: dict) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
         if they exist in the list of stored optional keys.

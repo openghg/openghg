@@ -90,7 +90,13 @@ class ObsColumn(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.store.spec import define_standardise_parsers
-        from openghg.util import clean_string, load_standardise_parser, match_function_inputs, check_if_need_new_version, synonyms
+        from openghg.util import (
+            clean_string,
+            load_standardise_parser,
+            match_function_inputs,
+            check_if_need_new_version,
+            synonyms,
+        )
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -102,7 +108,7 @@ class ObsColumn(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
         platform = clean_string(platform)
-        
+
         # Specify any additional metadata to be added
         additional_metadata = {}
 
@@ -165,9 +171,7 @@ class ObsColumn(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        obs_data = self.update_metadata(
-            obs_data, fn_input_parameters, additional_metadata
-        )
+        obs_data = self.update_metadata(obs_data, fn_input_parameters, additional_metadata)
 
         # Use config and latest metadata to create lookup keys
         lookup_keys = self.get_lookup_keys(obs_data)
