@@ -90,7 +90,7 @@ class ObsColumn(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.store.spec import define_standardise_parsers
-        from openghg.util import clean_string, load_column_parser, match_function_inputs, check_if_need_new_version, synonyms
+        from openghg.util import clean_string, load_standardise_parser, match_function_inputs, check_if_need_new_version, synonyms
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -129,7 +129,7 @@ class ObsColumn(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 

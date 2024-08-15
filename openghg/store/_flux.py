@@ -127,7 +127,7 @@ class Flux(BaseStore):
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
-            load_flux_parser,
+            load_standardise_parser,
             check_if_need_new_version,
             match_function_inputs,
         )
@@ -170,7 +170,7 @@ class Flux(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
@@ -278,7 +278,7 @@ class Flux(BaseStore):
         """
         import inspect
         from openghg.store.spec import define_transform_parsers
-        from openghg.util import load_flux_database_parser, check_if_need_new_version
+        from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -299,7 +299,7 @@ class Flux(BaseStore):
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_database_parser(database=database)
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())

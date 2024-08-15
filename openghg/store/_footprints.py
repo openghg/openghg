@@ -263,14 +263,13 @@ class Footprints(BaseStore):
             dict: UUIDs of Datasources data has been assigned to
         """
         from openghg.store.spec import define_standardise_parsers
-
         from openghg.util import (
             clean_string,
             format_inlet,
             check_and_set_null_variable,
             check_if_need_new_version,
             match_function_inputs,
-            load_footprint_parser,
+            load_standardise_parser,
         )
 
         if high_time_resolution:
@@ -320,7 +319,7 @@ class Footprints(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_footprint_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
