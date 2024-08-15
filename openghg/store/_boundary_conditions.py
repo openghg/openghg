@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 from openghg.util import synonyms
@@ -107,8 +107,6 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from collections import defaultdict
-
         from openghg.store import (
             infer_date_range,
             update_zero_dim,
@@ -210,7 +208,7 @@ class BoundaryConditions(BaseStore):
 
             key = "_".join((species, bc_input, domain))
 
-            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            boundary_conditions_data: dict[str, dict] = {}
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
