@@ -1,6 +1,20 @@
 from typing import Any, Tuple, Dict, List
+from openghg.types import (
+    SurfaceTypes,
+    ColumnTypes,
+    FluxTypes,
+    FootprintTypes,
+    FluxTimeseriesTypes,
+    FluxDatabases,
+)
 
-__all__ = ["define_data_types", "define_data_type_classes"]
+__all__ = [
+    "define_data_types",
+    "define_data_type_classes",
+    "define_standardise_parsers",
+    "define_transform_parsers",
+    "null_metadata_values",
+]
 
 
 def define_data_types() -> Tuple[str, ...]:
@@ -47,6 +61,39 @@ def define_data_type_classes() -> Dict[str, Any]:
     }
 
     return data_type_classes
+
+
+def define_standardise_parsers() -> Dict[str, Any]:
+    """
+    Define mapping between data_types and standardise parser details
+    """
+
+    # TODO: May want to move away from representing these parser details as classes
+    data_type_parsers = {
+        "surface": SurfaceTypes,
+        "column": ColumnTypes,
+        "flux": FluxTypes,
+        "flux_timeseries": FluxTimeseriesTypes,
+        "footprints": FootprintTypes,
+        # "boundary_conditions": ,
+        # "eulerian_model": EulerianModel,
+        # "met": ???,
+    }
+
+    return data_type_parsers
+
+
+def define_transform_parsers() -> Dict[str, Any]:
+    """
+    Define mapping between data_types and transform parser details
+    """
+
+    # TODO: May want to move away from representing these parser details as classes
+    data_type_parsers = {
+        "flux": FluxDatabases,
+    }
+
+    return data_type_parsers
 
 
 def null_metadata_values() -> List:

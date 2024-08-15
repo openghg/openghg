@@ -5,7 +5,7 @@ import warnings
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub
+from openghg.util import running_on_hub, sort_by_filenames
 from openghg.types import optionalPathType, multiPathType
 from numcodecs import Blosc
 import logging
@@ -56,8 +56,7 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: Optional[multiPathType] = None,
-    filepaths: Optional[multiPathType] = None,
+    filepath: multiPathType,
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -80,6 +79,7 @@ def standardise_surface(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    sort_files: bool = False,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -139,19 +139,11 @@ def standardise_surface(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        sort_files: Sorts multiple files date-wise.
     Returns:
         dict: Dictionary of result data
     """
     from openghg.cloud import call_function
-
-    if filepath is None and filepaths is None:
-        raise ValueError("One of `filepath` and `filepaths` must be specified.")
-    elif filepath is None:
-        filepath = filepaths
-        warnings.warn(
-            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
-            FutureWarning,
-        )
 
     if not isinstance(filepath, list):
         filepath = [filepath]
@@ -231,6 +223,11 @@ def standardise_surface(
 
         return responses
     else:
+
+        if sort_files:
+            if source_format.lower() != "gcwerks":
+                filepath = sort_by_filenames(filepath=filepath)
+
         return standardise(
             store=store,
             data_type="surface",
@@ -520,6 +517,7 @@ def standardise_footprint(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
+    sort_files: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -569,6 +567,7 @@ def standardise_footprint(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        sort_files: Sort multiple files datewise
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -581,6 +580,12 @@ def standardise_footprint(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    if sort_files:
+        filepath = sort_by_filenames(filepath=filepath)
 
     if running_on_hub():
         raise NotImplementedError("Cloud support not yet implemented.")
@@ -679,7 +684,7 @@ def standardise_flux(
         source: Flux / Emissions source
         domain: Flux / Emissions domain
         source_format: Data format, for example openghg, intem
-        date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+        date: Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
         time_resolved: If this is a high resolution file
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
@@ -959,7 +964,8 @@ def standardise_flux_timeseries(
 
     if domain is not None:
         logger.warning(
-            "Geographic domain, default is 'None'. Instead region is used to identify area, Please supply region in future instances"
+            "Geographic domain, default is 'None'. Instead region is used to identify area,"
+            "Please supply region in future instances"
         )
         region = domain
     if running_on_hub():

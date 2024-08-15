@@ -198,7 +198,7 @@ class ObsSurface(BaseStore):
         with ModelScenario and ObsColumn?
         """
         from collections import defaultdict
-        from openghg.types import SurfaceTypes
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
             format_inlet,
@@ -212,11 +212,10 @@ class ObsSurface(BaseStore):
             synonyms,
         )
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
+        standardise_parsers = define_standardise_parsers()[self._data_type]
 
         try:
-            source_format = SurfaceTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
@@ -318,6 +317,9 @@ class ObsSurface(BaseStore):
 
         if chunks is None:
             chunks = {}
+
+        if not isinstance(filepath, list):
+            filepath = [filepath]
 
         fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
