@@ -409,7 +409,7 @@ class ObsSurface(BaseStore):
             results["processed"][data_filepath.name] = datasource_uuids
             logger.info(f"Completed processing: {data_filepath.name}.")
 
-        self._file_hashes[file_hash] = data_filepath.name
+            self._file_hashes[file_hash] = data_filepath.name
 
         return dict(results)
 
