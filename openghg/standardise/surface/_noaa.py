@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_noaa(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     measurement_type: str,
     inlet: Optional[str] = None,
@@ -24,7 +24,7 @@ def parse_noaa(
     """Read NOAA data from raw text file or ObsPack NetCDF
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         site: Three letter site code
         inlet: Inlet height (as value unit e.g. "10m")
         measurement_type: One of ("flask", "insitu", "pfp")
@@ -47,11 +47,11 @@ def parse_noaa(
 
     sampling_period = str(sampling_period)
 
-    file_extension = Path(data_filepath).suffix
+    file_extension = Path(filepath).suffix
 
     if file_extension == ".nc":
         return _read_obspack(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -62,7 +62,7 @@ def parse_noaa(
         )
     else:
         return _read_raw_file(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -270,7 +270,7 @@ def _split_inlets(
 
 
 def _read_obspack(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
@@ -282,7 +282,7 @@ def _read_obspack(
     """Read NOAA ObsPack NetCDF files
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -307,7 +307,7 @@ def _read_obspack(
     if measurement_type not in valid_types:
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
-    with xr.open_dataset(data_filepath) as temp:
+    with xr.open_dataset(filepath) as temp:
         obspack_ds = temp
         orig_attrs = temp.attrs
 
@@ -414,7 +414,7 @@ def _read_obspack(
 
 
 def _read_raw_file(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
@@ -427,7 +427,7 @@ def _read_raw_file(
     data and metadata.
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -452,16 +452,16 @@ def _read_raw_file(
     if inlet is None:
         raise ValueError("Inlet must be specified to derive data from NOAA raw (txt) files.")
 
-    data_filepath = Path(data_filepath)
-    filename = data_filepath.name
+    filepath = Path(filepath)
+    filename = filepath.name
 
     species = filename.split("_")[0].lower()
 
-    source_name = data_filepath.stem
+    source_name = filepath.stem
     source_name = source_name.split("-")[0]
 
     gas_data = _read_raw_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         inlet=inlet,
         species=species,
         measurement_type=measurement_type,
@@ -476,7 +476,7 @@ def _read_raw_file(
 
 
 def _read_raw_data(
-    data_filepath: Path,
+    filepath: Path,
     species: str,
     inlet: str,
     sampling_period: str,
@@ -488,7 +488,7 @@ def _read_raw_data(
     dataframes
 
     Args:
-        data_filepath: Path of datafile
+        filepath: Path of datafile
         species: Species string such as CH4, CO
         measurement_type: Type of measurements e.g. flask
     Returns:
@@ -497,7 +497,7 @@ def _read_raw_data(
     from openghg.util import clean_string, get_site_info, load_internal_json, read_header
     from pandas import read_csv
 
-    header = read_header(filepath=data_filepath)
+    header = read_header(filepath=filepath)
 
     column_names = header[-1][14:].split()
 
@@ -514,7 +514,7 @@ def _read_raw_data(
     ]
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
         names=column_names,
         sep=r"\s+",
@@ -537,7 +537,7 @@ def _read_raw_data(
     site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
-        site = str(data_filepath.name).split("_")[1].upper()
+        site = str(filepath.name).split("_")[1].upper()
 
         if site not in site_data:
             raise ValueError(f"The site {site} is not recognized.")

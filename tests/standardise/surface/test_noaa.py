@@ -24,7 +24,7 @@ def scsn06_data():
     )
 
     data = parse_noaa(
-        data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
+        filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
     )
 
     return data
@@ -37,7 +37,7 @@ def test_read_obspack_2020():
     )
 
     data = parse_noaa(
-        data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
+        filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
     )
 
     ch4_data = data["ch4"]["data"]
@@ -73,7 +73,7 @@ def test_read_obspack_flask_2021():
     filepath = get_surface_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", source_format="NOAA")
 
     data = parse_noaa(
-        data_filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
+        filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
     )
 
     # TODO: Replace this test data example when possible.
@@ -117,7 +117,7 @@ def test_read_obspack_tower_multi_height():
     """
     filepath = get_surface_datapath(filename="ch4_bao_tower-insitu_1_ccgg_all.nc", source_format="NOAA")
 
-    data = parse_noaa(data_filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA")
+    data = parse_noaa(filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA")
 
     # Check number of entries extracted - should be three inlet heights: 22m, 100m, 300m
     num_keys = len(data.keys())
@@ -179,7 +179,7 @@ def test_read_raw_file():
     filepath = get_surface_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     data = parse_noaa(
-        data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
+        filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
     parsed_surface_metachecker(data=data)
@@ -207,4 +207,4 @@ def test_read_incorrect_site_raises():
     )
 
     with pytest.raises(ValueError):
-        data = parse_noaa(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")
+        data = parse_noaa(filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")

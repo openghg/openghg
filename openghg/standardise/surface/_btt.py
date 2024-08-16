@@ -4,7 +4,7 @@ import warnings
 
 
 def parse_btt(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: Optional[str] = "BTT",
     network: Optional[str] = "LGHG",
     inlet: Optional[str] = None,
@@ -15,7 +15,7 @@ def parse_btt(
     the processed data has been assigned to
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
@@ -34,7 +34,7 @@ def parse_btt(
     # TODO: Decide what to do about inputs which aren't use anywhere
     # at present - inlet, instrument, sampling_period, measurement_type
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     warnings.warn("This function will be removed in a future release", DeprecationWarning)
     site = "BTT"
@@ -71,7 +71,7 @@ def parse_btt(
     attributes["inlet_height_magl"] = format_inlet(network_params["inlet"], key_name="inlet_height_magl")
     attributes.update(metadata)
 
-    data = read_csv(data_filepath)
+    data = read_csv(filepath)
     data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
     data["time"] = data["time"].dt.round(sampling_period_seconds)
     data = data[~isnull(data.time)]

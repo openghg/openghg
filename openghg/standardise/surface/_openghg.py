@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
@@ -64,12 +64,12 @@ def parse_openghg(
     from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     try:
-        data = xr.open_dataset(data_filepath)  # Change this to with statement?
+        data = xr.open_dataset(filepath)  # Change this to with statement?
     except ValueError as e:
-        raise ValueError(f"Input file {data_filepath.name} could not be opened by xarray.") from e
+        raise ValueError(f"Input file {filepath.name} could not be opened by xarray.") from e
 
     # Extract current attributes from input data
     attributes = data.attrs

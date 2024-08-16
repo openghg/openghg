@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 
 def parse_eurocom(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     sampling_period: str,
     network: Optional[str] = None,
@@ -14,7 +14,7 @@ def parse_eurocom(
     """Parses EUROCOM data files into a format expected by OpenGHG
 
     Args:
-        data_filepath: Path of file to read
+        filepath: Path of file to read
         site: Site code
         sampling_period: Sampling period in seconds
         network: Network name
@@ -33,17 +33,17 @@ def parse_eurocom(
     from openghg.util import load_internal_json, read_header, format_inlet
     from pandas import read_csv
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     if site is None:
-        site = data_filepath.stem.split("_")[0]
+        site = filepath.stem.split("_")[0]
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
-    filename = data_filepath.name
+    filename = filepath.name
     inlet_height = filename.split("_")[1]
 
     if "m" not in inlet_height:
@@ -53,7 +53,7 @@ def parse_eurocom(
     combined_data = {}
 
     # Read the header as lines starting with #
-    header = read_header(data_filepath, comment_char="#")
+    header = read_header(filepath, comment_char="#")
     n_skip = len(header) - 1
     species = "co2"
 
@@ -78,7 +78,7 @@ def parse_eurocom(
     }
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
         parse_dates=datetime_columns,
         date_format="%Y %m %d %H %M",

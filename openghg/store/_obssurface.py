@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from pandas import Timedelta
@@ -323,22 +323,29 @@ class ObsSurface(BaseStore):
             chunks = {}
 
         if not isinstance(filepath, list):
-            filepath = [filepath]
-        # Create a progress bar object using the filepaths, iterate over this below
-        for fp in filepath:
-            if source_format == "GCWERKS":
-                if not isinstance(fp, tuple):
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+            filepaths = [filepath]
+        else:
+            filepaths = filepath
 
-                data_filepath = Path(fp[0])
-                precision_filepath = Path(fp[1])
+        # Create a progress bar object using the filepaths, iterate over this below
+        for fp in filepaths:
+            if source_format == "GCWERKS":
+                if isinstance(fp, tuple):
+                    filepath = Path(fp[0])
+                    precision_filepath = Path(fp[1])
+                else:
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
             else:
-                data_filepath = Path(fp)
+                filepath = fp
+
+            # Cast so it's clear we no longer expect a tuple
+            filepath = cast(Union[str, Path], filepath)
+            filepath = Path(filepath)
 
             # This hasn't been updated to use the new check_hashes function due to
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
-            file_hash = hash_file(filepath=data_filepath)
+            file_hash = hash_file(filepath=filepath)
             if file_hash in self._file_hashes and overwrite is False:
                 logger.warning(
                     "This file has been uploaded previously with the filename : "
@@ -348,7 +355,7 @@ class ObsSurface(BaseStore):
 
             # Define required input parameters for parser function
             required_parameters = {
-                "data_filepath": data_filepath,
+                "filepath": filepath,
                 "site": site,
                 "network": network,
                 "inlet": inlet,
@@ -391,7 +398,7 @@ class ObsSurface(BaseStore):
                     ObsSurface.validate_data(value["data"], species=species)
                 except ValueError:
                     logger.error(
-                        f"Unable to validate and store data from file: {data_filepath.name}.",
+                        f"Unable to validate and store data from file: {filepath.name}.",
                         f" Problem with species: {species}\n",
                     )
                     validated = False
@@ -429,16 +436,16 @@ class ObsSurface(BaseStore):
                 filters=filters,
             )
 
-            results["processed"][data_filepath.name] = datasource_uuids
-            logger.info(f"Completed processing: {data_filepath.name}.")
+            results["processed"][filepath.name] = datasource_uuids
+            logger.info(f"Completed processing: {filepath.name}.")
 
-        self._file_hashes[file_hash] = data_filepath.name
+            self._file_hashes[file_hash] = filepath.name
 
         return dict(results)
 
     def read_multisite_aqmesh(
         self,
-        data_filepath: pathType,
+        filepath: pathType,
         metadata_filepath: pathType,
         network: str = "aqmesh_glasgow",
         instrument: str = "aqmesh",
@@ -462,7 +469,7 @@ class ObsSurface(BaseStore):
         # from openghg.store import assign_data
         # from openghg.util import hash_file
 
-        # data_filepath = Path(data_filepath)
+        # filepath = Path(filepath)
         # metadata_filepath = Path(metadata_filepath)
 
         # if overwrite and if_exists == "auto":
@@ -473,14 +480,14 @@ class ObsSurface(BaseStore):
         #     if_exists = "new"
 
         # # Get a dict of data and metadata
-        # processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+        # processed_data = parse_aqmesh(filepath=filepath, metadata_filepath=metadata_filepath)
 
         # results: resultsType = defaultdict(dict)
         # for site, site_data in processed_data.items():
         #     metadata = site_data["metadata"]
         #     measurement_data = site_data["data"]
 
-        #     file_hash = hash_file(filepath=data_filepath)
+        #     file_hash = hash_file(filepath=filepath)
 
         #     if self.seen_hash(file_hash=file_hash) and not force:
         #         raise ValueError(
@@ -524,7 +531,7 @@ class ObsSurface(BaseStore):
 
         #     # Store the hash as the key for easy searching, store the filename as well for
         #     # ease of checking by user
-        #     self.set_hash(file_hash=file_hash, filename=data_filepath.name)
+        #     self.set_hash(file_hash=file_hash, filename=filepath.name)
 
         # return results
 

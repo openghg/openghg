@@ -39,13 +39,13 @@ def find_files(
 
         if data_match:
             prec_filepath = data_path / Path(Path(file).stem + ".precisions.C")
-            data_filepath = data_path / data_match.group()
+            filepath = data_path / data_match.group()
 
             if any(s in data_match.group() for s in skip_str):
                 continue
 
             if prec_filepath.exists():
-                data_precision_tuples.append((data_filepath, prec_filepath))
+                data_precision_tuples.append((filepath, prec_filepath))
 
     data_precision_tuples.sort()
 
@@ -53,7 +53,7 @@ def find_files(
 
 
 def parse_gcwerks(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     precision_filepath: Union[str, Path],
     site: str,
     network: str,
@@ -67,7 +67,7 @@ def parse_gcwerks(
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
-        data_filepath: Path of data file
+        filepath: Path of data file
         precision_filepath: Path of precision file
         site: Three letter code or name for site
         instrument: Instrument name
@@ -88,7 +88,7 @@ def parse_gcwerks(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
     precision_filepath = Path(precision_filepath)
 
     # Do some setup for processing
@@ -106,16 +106,16 @@ def parse_gcwerks(
 
     # Check if the site code passed matches that read from the filename
     site = _check_site(
-        filepath=data_filepath,
+        filepath=filepath,
         site_code=site,
         gc_params=gc_params,
     )
 
     # If we're not passed the instrument name and we can't find it raise an error
     if instrument is None:
-        instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=True)
+        instrument = _check_instrument(filepath=filepath, gc_params=gc_params, should_raise=True)
     else:
-        fname_instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=False)
+        fname_instrument = _check_instrument(filepath=filepath, gc_params=gc_params, should_raise=False)
 
         if fname_instrument is not None and instrument != fname_instrument:
             raise ValueError(
@@ -125,7 +125,7 @@ def parse_gcwerks(
     instrument = str(instrument)
 
     gas_data = _read_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         precision_filepath=precision_filepath,
         site=site,
         instrument=instrument,
@@ -211,7 +211,7 @@ def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = Fals
 
 
 def _read_data(
-    data_filepath: Path,
+    filepath: Path,
     precision_filepath: Path,
     site: str,
     instrument: str,
@@ -222,7 +222,7 @@ def _read_data(
     """Read data from the data and precision files
 
     Args:
-        data_filepath: Path of data file
+        filepath: Path of data file
         precision_filepath: Path of precision file
         site: Name of site
         instrument: Instrument name
@@ -237,12 +237,12 @@ def _read_data(
     from pandas import read_csv
 
     # Read header
-    header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
+    header = read_csv(filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=4,
         sep=r"\s+",
         parse_dates={"Datetime": [1, 2, 3, 4, 5]},

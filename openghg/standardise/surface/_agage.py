@@ -11,7 +11,7 @@ from openghg.util import clean_string, format_inlet
 
 
 def parse_agage(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -24,7 +24,7 @@ def parse_agage(
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
-        data_filepath: Path of .nc data file
+        filepath: Path of .nc data file
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
@@ -42,14 +42,14 @@ def parse_agage(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     network = clean_string(network)
     instrument = clean_string(instrument)
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    with xr.load_dataset(data_filepath) as ds:
+    with xr.load_dataset(filepath) as ds:
         file_params = ds.attrs
 
     # if we're not passed the instrument name, get it from the file:
@@ -79,10 +79,10 @@ def parse_agage(
 
     instrument = str(instrument)
 
-    species = str(data_filepath).split(sep="_")[-2]
+    species = str(filepath).split(sep="_")[-2]
     species = define_species_label(species)[0]
 
-    with xr.open_dataset(data_filepath) as dataset:
+    with xr.open_dataset(filepath) as dataset:
         data = dataset.to_dataframe()
 
         if data.empty:
