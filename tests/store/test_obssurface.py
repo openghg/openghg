@@ -19,7 +19,6 @@ from openghg.standardise import standardise_from_binary_data, standardise_surfac
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.util import create_daterange_str, clean_string
-from openghg.types import DataOverlapError
 from pandas import Timestamp
 
 
@@ -1077,11 +1076,3 @@ def test_optional_metadata():
     rgl_ch4_metadata = rgl_ch4.metadata
 
     assert "project" in rgl_ch4_metadata
-
-
-
-
-
-
-
-
