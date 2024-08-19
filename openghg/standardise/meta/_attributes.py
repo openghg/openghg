@@ -50,8 +50,8 @@ def assign_attributes(
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
     from openghg.standardise.meta import sync_surface_metadata
-
     for _, gas_data in data.items():
+
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
@@ -149,23 +149,8 @@ def get_attributes(
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
 
-    # TODO - could I just cast ds.variables as as type for mypy instead of doing this?
-    # variable_names = [str(v) for v in ds.variables]
-    # Is this better?
-    variable_names = cast(Dict[str, Any], ds.variables)
-    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
-    to_underscores.pop("time")  # Added to remove warning around resetting time index.
-    ds = ds.rename(to_underscores)  # type: ignore
-
     species_lower = species.lower()
     species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
-
-    variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var]
-
-    # If we don't have any variables to rename, raise an error
-    if not matched_keys:
-        raise NameError(f"Cannot find species {species_search} in Dataset variables")
 
     # Load attributes files
     species_attrs = get_species_info()
@@ -178,12 +163,6 @@ def get_attributes(
     # Extract both label to use for species and key for attributes
     # Typically species_label will be the lower case version of species_key
     species_label, species_key = define_species_label(species, species_filepath)
-
-    species_rename = {}
-    for var in matched_keys:
-        species_rename[var] = var.replace(species_search, species_label)
-
-    ds = ds.rename(species_rename)  # type: ignore
 
     # Global attributes
     global_attributes_default = {
