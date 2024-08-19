@@ -4,10 +4,12 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, Optional, Tuple, Union, cast
+from xarray import Dataset
+
 import logging
 
-from openghg.types import multiPathType
+from openghg.types import multiPathType, optionalPathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -262,3 +264,45 @@ def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
     return sorted(filepath)
+
+
+def dataset_formatter(data: Dict,
+                      species: str,
+                      species_label=None,
+                      ):
+    """
+    Formats species/variables from the dataset by removing the whitespaces
+    with underscores and species to lower case
+
+    Args:
+        data: Dict containing dataset information(gas_data)
+        species: species name
+        species_label: species label
+
+    Returns:
+        Dict: Dictionary of source_name : data, metadata, attributes
+    """
+    for _, gas_data in data.items():
+        ds = gas_data['data']
+        variable_names = cast(Dict[str, Any], ds.variables)
+        to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+        to_underscores.pop("time")  # Added to remove warning around resetting time index.
+        ds = ds.rename(to_underscores)  # type: ignore
+
+        species_lower = species.lower()
+        species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
+
+        variable_names = cast(Dict[str, Any], ds.variables)
+        matched_keys = [var for var in variable_names if species_search in var]
+
+        # If we don't have any variables to rename, raise an error
+        if not matched_keys:
+            raise NameError(f"Cannot find species {species_search} in Dataset variables")
+
+        species_rename = {}
+        for var in matched_keys:
+            species_rename[var] = var.replace(species_search, species_label)
+
+        ds = ds.rename(species_rename)
+
+    return data

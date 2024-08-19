@@ -107,5 +107,6 @@ from ._util import (
     sort_by_filenames,
     unanimous,
     verify_site,
+    dataset_formatter
 )
 from ._versions import show_versions, check_if_need_new_version
