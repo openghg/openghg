@@ -135,7 +135,7 @@ def parse_eurocom(
         "attributes": global_attributes,
     }
 
-    gas_data = dataset_formatter(data=gas_data)
+    combined_data = dataset_formatter(data=combined_data)
 
     combined_data = assign_attributes(
         data=combined_data, site=site, sampling_period=sampling_period, update_mismatch=update_mismatch
