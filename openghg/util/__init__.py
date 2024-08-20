@@ -36,6 +36,13 @@ from ._file import (
 from ._function_inputs import match_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet, extract_height_name
+from ._metadata_util import (
+    check_number_match,
+    check_str_match,
+    check_value_match,
+    check_overlap_keys,
+    remove_keys_null,
+)
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,
