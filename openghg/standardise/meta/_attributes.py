@@ -582,3 +582,63 @@ def get_flux_attributes(
     ds.attrs = global_attributes
 
     return ds
+
+
+def dataset_formatter(data: Dict,
+                      ):
+    """
+    Formats species/variables from the dataset by removing the whitespaces
+    with underscores and species to lower case
+
+    Args:
+        data: Dict containing dataset information(gas_data)
+
+    Returns:
+        Dict: Dictionary of source_name : data, metadata, attributes
+    """
+    for _, gas_data in data.items():
+        species = gas_data["metadata"]["species"]
+        species_label, species_key = define_species_label(species)
+        gas_data["data"] = data_variable_formatter(ds=gas_data["data"],
+                                                   species=species,
+                                                   species_label=species_label)
+
+    return data
+
+
+def data_variable_formatter(ds: Dataset, species: str, species_label: Optional[str]):
+    """
+    Formats variables from the dataset by removing the whitespaces
+    with underscores and species data var to lower case
+
+    Args:
+        ds: Should contain variables such as "ch4", "ch4 repeatability".
+            Must have a "time" dimension.
+        species: Species name
+        species_label: Species label
+
+    Returns:
+        ds: xarray dataset
+    """
+    variable_names = cast(Dict[str, Any], ds.variables)
+    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores.pop("time")  # Added to remove warning around resetting time index.
+    ds = ds.rename(to_underscores)  # type: ignore
+
+    species_lower = species.lower()
+    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
+
+    variable_names = cast(Dict[str, Any], ds.variables)
+    matched_keys = [var for var in variable_names if species_search in var]
+
+    # If we don't have any variables to rename, raise an error
+    if not matched_keys:
+        raise NameError(f"Cannot find species {species_search} in Dataset variables")
+
+    species_rename = {}
+    for var in matched_keys:
+        species_rename[var] = var.replace(species_search, species_label)
+
+    ds = ds.rename(species_rename)
+
+    return ds
