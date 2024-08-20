@@ -1,20 +1,22 @@
 import tempfile
 
 import pytest
-from openghg.util import load_surface_parser, read_header
+from openghg.util import load_standardise_parser, read_header
 
 
-def test_load_surface_parser():
-    f = load_surface_parser(source_format="crds")
-
+def test_load_standardise_parser():
+    f = load_standardise_parser(data_type="surface", source_format="crds")
     assert f
 
-    f = load_surface_parser(source_format="CRDS")
 
+def test_load_standardise_parser_upper():
+    f = load_standardise_parser(data_type="surface", source_format="CRDS")
     assert f
 
+
+def test_load_standardise_parser_cannot_find():
     with pytest.raises(AttributeError):
-        load_surface_parser(source_format="spam")
+        load_standardise_parser(data_type="surface", source_format="spam")
 
 
 def test_read_header():
