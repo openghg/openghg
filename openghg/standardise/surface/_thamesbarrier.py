@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.standardise.meta import define_species_label
 from openghg.types import pathType, optionalPathType
 
 

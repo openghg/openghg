@@ -224,7 +224,6 @@ def get_attributes(
     ancillary_variables = []
 
     variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]

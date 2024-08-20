@@ -4,12 +4,10 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple, Union, cast
-from xarray import Dataset
-
+from typing import Any, Dict, Iterator, Optional, Tuple, Union
 import logging
 
-from openghg.types import multiPathType, optionalPathType
+from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
