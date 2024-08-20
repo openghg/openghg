@@ -150,7 +150,6 @@ def get_attributes(
     # Here variable names are also made lowercase to enable easier matching below
 
     species_lower = species.lower()
-    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
 
     # Load attributes files
     species_attrs = get_species_info()
