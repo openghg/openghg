@@ -578,7 +578,7 @@ def get_flux_attributes(
 
 def dataset_formatter(
     data: Dict,
-):
+) -> Dict:
     """
     Formats species/variables from the dataset by removing the whitespaces
     with underscores and species to lower case
@@ -599,7 +599,7 @@ def dataset_formatter(
     return data
 
 
-def data_variable_formatter(ds: Dataset, species: str, species_label: Optional[str]):
+def data_variable_formatter(ds: Dataset, species: str, species_label: str) -> Dataset:
     """
     Formats variables from the dataset by removing the whitespaces
     with underscores and species data var to lower case
