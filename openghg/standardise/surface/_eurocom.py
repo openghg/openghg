@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+from openghg.standardise.meta import dataset_formatter
+
 
 def parse_eurocom(
     data_filepath: Union[str, Path],
@@ -132,6 +134,8 @@ def parse_eurocom(
         "data": gas_data,
         "attributes": global_attributes,
     }
+
+    gas_data = dataset_formatter(data=gas_data)
 
     combined_data = assign_attributes(
         data=combined_data, site=site, sampling_period=sampling_period, update_mismatch=update_mismatch

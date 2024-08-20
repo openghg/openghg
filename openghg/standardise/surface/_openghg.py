@@ -4,7 +4,6 @@ import logging
 import xarray as xr
 
 from openghg.types import optionalPathType
-from openghg.util import dataset_formatter
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -63,7 +62,8 @@ def parse_openghg(
         Dict: Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
-    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
+    from openghg.standardise.meta import (metadata_default_keys, define_species_label, assign_attributes,
+                                          dataset_formatter)
 
     data_filepath = Path(data_filepath)
 
@@ -224,12 +224,7 @@ def parse_openghg(
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
-    species_label, species_key = define_species_label(species)
-
-    gas_data = dataset_formatter(data=gas_data,
-                             species=species,
-                             species_label=species_label,
-                            )
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data,
