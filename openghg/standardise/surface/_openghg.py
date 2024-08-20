@@ -226,7 +226,7 @@ def parse_openghg(
 
     species_label, species_key = define_species_label(species)
 
-    data = dataset_formatter(data=gas_data,
+    gas_data = dataset_formatter(data=gas_data,
                              species=species,
                              species_label=species_label,
                             )
