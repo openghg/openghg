@@ -112,8 +112,8 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
-        data_level: Optional[str] = None,
-        data_sublevel: Optional[str] = None,
+        data_level: Optional[Union[str, int, float]] = None,
+        data_sublevel: Optional[Union[str, float]] = None,
         dataset_source: Optional[str] = None,
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
@@ -199,24 +199,23 @@ class ObsSurface(BaseStore):
         with ModelScenario and ObsColumn?
         """
         from collections import defaultdict
-        from openghg.types import SurfaceTypes
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
             format_inlet,
             format_data_level,
             check_and_set_null_variable,
             hash_file,
-            load_surface_parser,
+            load_standardise_parser,
             verify_site,
             check_if_need_new_version,
             synonyms,
         )
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
+        standardise_parsers = define_standardise_parsers()[self._data_type]
 
         try:
-            source_format = SurfaceTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
@@ -237,6 +236,8 @@ class ObsSurface(BaseStore):
 
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
+        if data_sublevel is not None:
+            data_sublevel = str(data_sublevel)
 
         data_level = check_and_set_null_variable(data_level)
         data_sublevel = check_and_set_null_variable(data_sublevel)
@@ -315,13 +316,15 @@ class ObsSurface(BaseStore):
             # TODO: May want to add check for NaT or NaN
 
         # Load the data retrieve object
-        parser_fn = load_surface_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         results: resultsType = defaultdict(dict)
 
         if chunks is None:
             chunks = {}
 
+        if not isinstance(filepath, list):
+            filepath = [filepath]
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -436,7 +439,7 @@ class ObsSurface(BaseStore):
             results["processed"][data_filepath.name] = datasource_uuids
             logger.info(f"Completed processing: {data_filepath.name}.")
 
-        self._file_hashes[file_hash] = data_filepath.name
+            self._file_hashes[file_hash] = data_filepath.name
 
         return dict(results)
 

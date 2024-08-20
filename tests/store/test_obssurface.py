@@ -846,6 +846,48 @@ def test_check_obssurface_same_file_skips():
     assert not results
 
 
+def test_check_obssurface_multi_file_same_skip():
+    """
+    BUGFIX: Previously only the last file in the filepath list was saved
+    as a hash. This is to check that when multiple files are passed to
+    standardise_surface, check that the first file
+    """
+
+    clear_test_stores()
+
+    filepaths = [
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+
+    results = standardise_surface(
+        store="user",
+        filepath=filepaths,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+        if_exists="new",
+    )
+
+    assert results
+
+    filepath_repeat = get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg")
+
+    results = standardise_surface(
+        store="user",
+        filepath=filepath_repeat,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+        if_exists="new",
+    )
+
+    assert not results
+
+
 def test_gcwerks_fp_not_a_tuple_raises():
     filepath = "/tmp/test_filepath.txt"
 

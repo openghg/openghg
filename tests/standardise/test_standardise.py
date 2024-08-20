@@ -27,7 +27,7 @@ def test_standardise_to_read_only_store():
 
     with pytest.raises(ObjectStoreError):
         standardise_surface(
-            filepaths=hfd_path,
+            filepath=hfd_path,
             site="hfd",
             instrument="picarro",
             network="DECC",
@@ -38,10 +38,12 @@ def test_standardise_to_read_only_store():
 
 
 def test_standardise_obs_two_writable_stores():
+
+    clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
-        filepaths=hfd_path,
+        filepath=hfd_path,
         site="hfd",
         instrument="picarro",
         network="DECC",
@@ -64,7 +66,7 @@ def test_standardise_obs_two_writable_stores():
     mhd_path = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     results = standardise_surface(
-        filepaths=mhd_path,
+        filepath=mhd_path,
         site="mhd",
         inlet="15m",
         instrument="g2401",
@@ -94,7 +96,7 @@ def test_standardise_obs_openghg():
     )
 
     results = standardise_surface(
-        filepaths=filepath,
+        filepath=filepath,
         site="TAC",
         network="DECC",
         inlet=185,
@@ -133,7 +135,7 @@ def test_standardise_obs_metadata_mismatch():
     update_mismatch = "from_source"
 
     results = standardise_surface(
-        filepaths=filepath,
+        filepath=filepath,
         site="TAC",
         network="DECC",
         inlet="999m",
@@ -192,7 +194,7 @@ def test_local_obs_metadata_mismatch_meta():
     update_mismatch = "from_definition"
 
     results = standardise_surface(
-        filepaths=filepath,
+        filepath=filepath,
         site="TAC",
         network="DECC",
         inlet="998m",
@@ -399,7 +401,10 @@ def test_standardise_footprints_chunk(caplog):
     )
 
     search_results = search_footprints(model="UKV-chunked", store="user")
-    fp_data = search_results.retrieve_all()
+
+    # Note: have to pass sort=False here for dask>=2024.8 as this returns different
+    # chunks for time (1, 1, 1) rather than original chunks we're trying to check.
+    fp_data = search_results.retrieve_all(sort=False)
 
     assert dict(fp_data.data.chunks) == {"time": (2, 1), "lat": (12,), "lon": (12,), "height": (20,)}
 
@@ -493,7 +498,7 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
     packed = compress((tmppath.read_bytes()))
 
     standardise_surface(
-        filepaths=tmppath,
+        filepath=tmppath,
         site="bsd",
         inlet="248m",
         network="decc",
@@ -585,3 +590,54 @@ def test_standardise_flux_timeseries():
     )
 
     assert "ch4_crf_uk" in flux_results
+
+
+def test_standardise_sorting_true(caplog):
+    """ Testing only the sorting of files here"""
+
+    filepaths = [
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+
+    standardise_surface(
+        store="user",
+        filepath=filepaths,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+        update_mismatch="attributes",
+        if_exists="new",
+        sort_files=True
+    )
+
+    log_messages = [record.message for record in caplog.records]
+
+    assert "20220928.nc" in log_messages[0]
+
+
+def test_standardise_sorting_false(caplog):
+    """ Testing only the sorting of files here"""
+
+    clear_test_stores()
+    filepaths = [
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+
+    standardise_surface(
+        store="user",
+        filepath=filepaths,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+        update_mismatch="attributes",
+        if_exists="new",
+        sort_files=False
+    )
+
+    log_messages = [record.message for record in caplog.records]
+
+    assert "20220928.nc" in log_messages[-1]
