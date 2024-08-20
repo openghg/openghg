@@ -145,12 +145,6 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.8) demand that valid variable names
-    # begin with a letter and be composed of letters, digits and underscores
-    # Here variable names are also made lowercase to enable easier matching below
-
-    species_lower = species.lower()
-
     # Load attributes files
     species_attrs = get_species_info()
     attributes_data = load_internal_json(filename="attributes.json")
