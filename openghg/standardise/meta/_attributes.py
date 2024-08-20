@@ -619,7 +619,7 @@ def data_variable_formatter(ds: Dataset, species: str, species_label: str) -> Da
     ds = ds.rename(to_underscores)  # type: ignore
 
     species_lower = species.lower()
-    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
+    species_search = species_lower.replace(" ", "_")
 
     variable_names = cast(Dict[str, Any], ds.variables)
     matched_keys = [var for var in variable_names if species_search in var]
