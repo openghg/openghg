@@ -5,7 +5,12 @@ import pandas as pd
 import re
 import xarray as xr
 from addict import Dict as aDict
-from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys, dataset_formatter
+from openghg.standardise.meta import (
+    assign_attributes,
+    define_species_label,
+    metadata_default_keys,
+    dataset_formatter,
+)
 from openghg.types import optionalPathType
 from openghg.util import clean_string, format_inlet
 

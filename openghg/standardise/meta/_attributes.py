@@ -50,8 +50,8 @@ def assign_attributes(
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
     from openghg.standardise.meta import sync_surface_metadata
-    for _, gas_data in data.items():
 
+    for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
@@ -584,8 +584,9 @@ def get_flux_attributes(
     return ds
 
 
-def dataset_formatter(data: Dict,
-                      ):
+def dataset_formatter(
+    data: Dict,
+):
     """
     Formats species/variables from the dataset by removing the whitespaces
     with underscores and species to lower case
@@ -599,9 +600,9 @@ def dataset_formatter(data: Dict,
     for _, gas_data in data.items():
         species = gas_data["metadata"]["species"]
         species_label, species_key = define_species_label(species)
-        gas_data["data"] = data_variable_formatter(ds=gas_data["data"],
-                                                   species=species,
-                                                   species_label=species_label)
+        gas_data["data"] = data_variable_formatter(
+            ds=gas_data["data"], species=species, species_label=species_label
+        )
 
     return data
 
