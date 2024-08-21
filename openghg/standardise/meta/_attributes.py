@@ -9,6 +9,8 @@ __all__ = [
     "define_species_label",
     "assign_flux_attributes",
     "get_flux_attributes",
+    "dataset_formatter",
+    "data_variable_formatter"
 ]
 
 logger = logging.getLogger("openghg.standardise")

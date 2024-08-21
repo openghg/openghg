@@ -1,7 +1,7 @@
 import logging
 
 import pytest
-from openghg.standardise.meta import get_attributes, dataset_formatter
+from openghg.standardise.meta import get_attributes, data_variable_formatter
 
 # flake8: noqa
 
