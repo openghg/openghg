@@ -40,7 +40,8 @@ from ._metadata_util import (
     check_number_match,
     check_str_match,
     check_value_match,
-    check_overlap_keys,
+    get_overlap_keys,
+    merge_dict,
     remove_keys_null,
 )
 from ._site import get_site_info, sites_in_network
