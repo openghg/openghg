@@ -107,6 +107,10 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store import (
             infer_date_range,
             update_zero_dim,
@@ -152,7 +156,9 @@ class BoundaryConditions(BaseStore):
         if chunks is None:
             chunks = {}
 
-        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         with open_dataset(filepath).chunk(chunks) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them

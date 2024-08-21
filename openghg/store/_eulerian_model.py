@@ -75,8 +75,9 @@ class EulerianModel(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         """
-        # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
-        # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
 
         from openghg.util import (
             clean_string,
@@ -121,7 +122,9 @@ class EulerianModel(BaseStore):
         if chunks is None:
             chunks = {}
 
-        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         with open_dataset(filepath).chunk(chunks) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)

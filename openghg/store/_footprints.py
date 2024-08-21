@@ -262,6 +262,10 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
@@ -321,7 +325,9 @@ class Footprints(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         # file_hash = hash_file(filepath=filepath)
         # if file_hash in self._file_hashes and not overwrite:

@@ -144,16 +144,16 @@ class ObsSurface(BaseStore):
             height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
-        data_level: The level of quality control which has been applied to the data.
-            This should follow the convention of:
-                - "0": raw sensor output
-                - "1": automated quality assurance (QA) performed
-                - "2": final data set
-                - "3": elaborated data products using the data
-        data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
-            before data is finalised.
-        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
-        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+            data_level: The level of quality control which has been applied to the data.
+                This should follow the convention of:
+                    - "0": raw sensor output
+                    - "1": automated quality assurance (QA) performed
+                    - "2": final data set
+                    - "3": elaborated data products using the data
+            data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
+                before data is finalised.
+            dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
@@ -196,6 +196,10 @@ class ObsSurface(BaseStore):
         TODO: Should "measurement_type" be changed to "platform" to align
         with ModelScenario and ObsColumn?
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from collections import defaultdict
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
@@ -309,6 +313,10 @@ class ObsSurface(BaseStore):
 
             # TODO: May want to add check for NaT or NaN
 
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
+
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
@@ -319,8 +327,6 @@ class ObsSurface(BaseStore):
 
         if not isinstance(filepath, list):
             filepath = [filepath]
-
-        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
 
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:

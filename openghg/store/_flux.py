@@ -123,6 +123,10 @@ class Flux(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
@@ -181,7 +185,9 @@ class Flux(BaseStore):
         if chunks is None:
             chunks = {}
 
-        fn_input_parameters = {**locals()}  # Make a copy of parameters passed to function
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
