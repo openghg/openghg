@@ -41,6 +41,18 @@
     },
     "column": {
         "required": {
+            "species": {
+                "type": [
+                    "species"
+                ]
+            },
+            "platform": {
+                "type": [
+                    "platform"
+                ]                
+            }
+        },
+        "optional": {
             "satellite": {
                 "type": [
                     "str"
@@ -61,18 +73,12 @@
                     "str"
                 ]
             },
-            "species": {
-                "type": [
-                    "species"
-                ]
-            },
             "network": {
                 "type": [
                     "str"
                 ]
             }
-        },
-        "optional": {}
+        }
     },
     "footprints": {
         "required": {
