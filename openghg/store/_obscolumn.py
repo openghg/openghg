@@ -26,14 +26,14 @@ class ObsColumn(BaseStore):
     def read_file(
         self,
         filepath: Union[str, Path],
+        species: str,
+        platform: str = "satellite",
         satellite: Optional[str] = None,
         domain: Optional[str] = None,
         selection: Optional[str] = None,
         site: Optional[str] = None,
-        species: Optional[str] = None,
         network: Optional[str] = None,
         instrument: Optional[str] = None,
-        platform: str = "satellite",
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -48,7 +48,11 @@ class ObsColumn(BaseStore):
 
         Args:
             filepath: Path of observation file
-            satellite: Name of satellite (if relevant)
+            species: Species name or synonym e.g. "ch4"
+            platform: Type of platform. Should be one of:
+                - "satellite"
+                - "site"
+            satellite: Name of satellite (if relevant). Should include satellite OR site.
             domain: For satellite only. If data has been selected on an area include the
                 identifier name for domain covered. This can map to previously defined domains
                 (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -56,13 +60,9 @@ class ObsColumn(BaseStore):
                 performed on satellite data. This can be based on any form of filtering, binning etc.
                 but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
                 If not specified, domain will be used.
-            site : Site code/name (if relevant). Can include satellite OR site.
-            species: Species name or synonym e.g. "ch4"
+            site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-            platform: Type of platform. Should be one of:
-                - "satellite"
-                - "site"
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -103,15 +103,20 @@ class ObsColumn(BaseStore):
         )
 
         # TODO: Evaluate which inputs need cleaning (if any)
-        satellite = clean_string(satellite)
-        site = clean_string(site)
         species = clean_string(species)
-        if species is not None:
-            species = synonyms(species)
+        species = synonyms(species)
+        platform = clean_string(platform)
+
+        if site is None and satellite is None:
+            raise ValueError("One of 'site' or 'satellite' must be specified")
+        elif site is not None and satellite is not None:
+            raise ValueError("Only one of 'site' or 'satellite' should be specified")
+
+        site = clean_string(site)
+        satellite = clean_string(satellite)
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)
-        platform = clean_string(platform)
 
         # Specify any additional metadata to be added
         additional_metadata = {}
@@ -189,7 +194,6 @@ class ObsColumn(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=lookup_keys,
-            min_keys=3,
             compressor=compressor,
             filters=filters,
         )

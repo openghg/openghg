@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 from pandas import DataFrame, Timedelta
 
@@ -64,6 +65,8 @@ def parse_crds(
         measurement_type=measurement_type,
         drop_duplicates=drop_duplicates,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(
