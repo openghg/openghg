@@ -187,6 +187,7 @@ class BaseStore:
         Returns:
             dict: data dictionary with metadata keys added
         """
+        from openghg.util import remove_keys_null
 
         # Get defined metakeys from the config setup
         metakeys = self.add_metakeys()
@@ -195,6 +196,10 @@ class BaseStore:
         optional = metakeys.get("optional", {})
 
         ignore_values = [None]
+
+        input_parameters = remove_keys_null(input_parameters, ignore_values)
+        if additional_metadata:
+            additional_metadata = remove_keys_null(additional_metadata, ignore_values)
 
         # Still a basic implementation - needs steps to be more clear - could split out?
         # TODO: Decide on logic and add checks for cases where keys are already
