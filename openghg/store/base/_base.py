@@ -187,7 +187,7 @@ class BaseStore:
         Returns:
             dict: data dictionary with metadata keys added
         """
-        from openghg.util import remove_keys_null
+        from openghg.util import merge_dict, remove_keys_null
 
         # Get defined metakeys from the config setup
         metakeys = self.add_metakeys()
@@ -201,39 +201,35 @@ class BaseStore:
         if additional_metadata:
             additional_metadata = remove_keys_null(additional_metadata, ignore_values)
 
-        # Still a basic implementation - needs steps to be more clear - could split out?
-        # TODO: Decide on logic and add checks for cases where keys are already
-        # present and don't match.
-
         for parsed_data in data.values():
             metadata = parsed_data["metadata"]
 
-            # Check required keys are present in metadata and attempt to add
-            required_to_add = set(required) - set(metadata)
-            required_not_found = []
-            if required_to_add:
-                for key in required_to_add:
-                    if key in input_parameters:
-                        metadata[key] = input_parameters[key]
-                    elif additional_metadata and key in additional_metadata:
-                        metadata[key] = additional_metadata[key]
-                    else:
-                        required_not_found.append(key)
-                if required_not_found:
-                    raise ValueError(
-                        f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
-                    )
+            # Sources of additional metadata - order in list is order of preference.
+            sources = [input_parameters, additional_metadata]
+            for source in sources:
+                # Check required keys are present in metadata
+                required_to_add = set(required) - set(metadata.keys())
+
+                # Add required keys which are present in the metadata source
+                metadata = merge_dict(metadata, source, keys_dict2=required_to_add)
+
+            required_not_found = set(required) - set(metadata.keys())
+            if required_not_found:
+                raise ValueError(
+                    f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                )
 
             # Check if named optional keys are included in the input_parameters and add
-            optional_matched = set(optional) & set(input_parameters)
-            if optional_matched:
-                for key in optional_matched:
-                    if input_parameters[key] not in ignore_values:
-                        metadata[key] = input_parameters[key]
+            optional_matched = set(optional) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_dict2=optional_matched)
 
-            # Add all additional metadata keys
+            # Add additional metadata keys
             if additional_metadata:
-                metadata.update(additional_metadata)
+                # Ensure required keys aren't added again (or clash with values from input_parameters)
+                additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
+                metadata = merge_dict(metadata, additional_metadata, keys_dict2=additional_metadata_to_add)
+
+            parsed_data["metadata"] = metadata
 
         return data
 
