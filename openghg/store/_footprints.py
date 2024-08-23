@@ -313,6 +313,15 @@ class Footprints(BaseStore):
         if network is not None:
             network = clean_string(network)
 
+        # Do some housekeeping on the inputs
+        time_resolved = check_species_time_resolved(species, time_resolved)
+        short_lifetime = check_species_lifetime(species, short_lifetime)
+
+        if time_resolved and sort:
+            logger.info(
+                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+            )
+
         # Specify any additional metadata to be added
         additional_metadata = {}
 
@@ -353,15 +362,6 @@ class Footprints(BaseStore):
 
         if not filepath:
             return {}
-
-        # Do some housekeeping on the inputs
-        time_resolved = check_species_time_resolved(species, time_resolved)
-        short_lifetime = check_species_lifetime(species, short_lifetime)
-
-        if time_resolved and sort:
-            logger.info(
-                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-            )
 
         # Define parameters to pass to the parser function
         parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)

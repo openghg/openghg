@@ -75,6 +75,9 @@ class EulerianModel(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         """
+        # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
+        # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
+
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()

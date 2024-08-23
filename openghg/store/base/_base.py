@@ -249,7 +249,7 @@ class BaseStore:
 
         # Check if anything in optional_metadata tries to override our required keys
         if optional_metadata is not None:
-            common_keys = set(required) & set(optional_metadata)
+            common_keys = set(required) & set(optional_metadata.keys())
 
             if common_keys:
                 raise ValueError(
