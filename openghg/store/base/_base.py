@@ -130,7 +130,7 @@ class BaseStore:
         """
         if not isinstance(filepaths, list):
             filepaths = [filepaths]
-        
+
         filepaths = [Path(filepath) for filepath in filepaths]
 
         unseen: Dict[str, Path] = {}
