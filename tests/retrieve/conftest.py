@@ -91,7 +91,7 @@ def data_read():
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
     )
 
     # Obs Column data
