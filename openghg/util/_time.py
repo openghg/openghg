@@ -945,10 +945,10 @@ def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -
         # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
         try:
             sampling_period_td = Timedelta(sampling_period)
-        except ValueError:
+        except ValueError as e:
             raise ValueError(
                 f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
-            )
+            ) from e
 
         sampling_period = str(float(sampling_period_td.total_seconds()))
 
