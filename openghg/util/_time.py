@@ -1,9 +1,10 @@
 from datetime import date
 from typing import Dict, List, Optional, Tuple, Union
-from openghg.types import TimePeriod
-
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
+import re
+
+from openghg.types import TimePeriod
 
 __all__ = [
     "timestamp_tzaware",
@@ -931,13 +932,13 @@ def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -
     # If we have a sampling period passed we want the number of seconds
     if sampling_period is not None:
 
-        # Check value passed is not just a number with no units
-        try:
-            float(sampling_period)
-        except (ValueError, TypeError):
-            # If this cannot be evaluated to a float assume this is correct form.
-            pass
-        else:
+        # Check format of input string matches expected
+        sampling_period = str(sampling_period)
+        re_sampling_period = re.compile(r"\d+[.]?\d*\s*[a-zA-Z]+")
+        check_format = re_sampling_period.search(sampling_period)
+
+        # If pattern is not matched this returns a None - indicating string is in incorrect form
+        if check_format is None:
             raise ValueError(
                 f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
             )
@@ -945,10 +946,10 @@ def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -
         # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
         try:
             sampling_period_td = Timedelta(sampling_period)
-        except ValueError:
+        except ValueError as e:
             raise ValueError(
                 f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
-            )
+            ) from e
 
         sampling_period = str(float(sampling_period_td.total_seconds()))
 
