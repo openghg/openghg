@@ -66,6 +66,7 @@ from ._time import (
     daterange_overlap,
     dates_overlap,
     daterange_to_str,
+    evaluate_sampling_period,
     find_daterange_gaps,
     find_duplicate_timestamps,
     first_last_dates,
