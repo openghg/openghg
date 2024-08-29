@@ -14,7 +14,7 @@ def thd_data():
     thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
-        data_filepath=thd_path,
+        filepath=thd_path,
         site="THD",
         instrument="gcmd",
         network="agage",
@@ -28,7 +28,7 @@ def cgo_data():
     cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
-        data_filepath=cgo_data,
+        filepath=cgo_data,
         site="cgo",
         instrument="GCMS-Medusa/GCMS",
         network="agage",
@@ -52,7 +52,7 @@ def test_read_file_thd():
     thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
-        data_filepath=thd_path,
+        filepath=thd_path,
         site="thd",
         network="agage",
         instrument="gcmd",
@@ -86,7 +86,7 @@ def test_read_invalid_instrument_raises():
 
     with pytest.raises(ValueError):
         parse_agage(
-            data_filepath=thd_path,
+            filepath=thd_path,
             site="THD",
             instrument="fish",
             network="agage",
@@ -96,7 +96,7 @@ def test_read_invalid_instrument_raises():
 def test_expected_metadata_thd_cfc11():
     cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
 
-    data = parse_agage(data_filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
+    data = parse_agage(filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
 
     metadata = data["cfc11_15m"]["metadata"]
 

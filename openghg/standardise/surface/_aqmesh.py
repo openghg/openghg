@@ -5,7 +5,7 @@ pathType = Union[str, Path]
 
 
 def parse_aqmesh(
-    data_filepath: pathType,
+    filepath: pathType,
     metadata_filepath: pathType,
     sampling_period: Optional[str] = None,
     **kwargs: Dict,
@@ -13,7 +13,7 @@ def parse_aqmesh(
     """Read AQMesh data files
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         metadata_filepath: Metadata filepath
         sampling_period: Measurement sampling period (str)
     Returns:
@@ -30,7 +30,7 @@ def parse_aqmesh(
     na_values = [-999, -999.0]
 
     df = read_csv(
-        data_filepath,
+        filepath,
         index_col="time",
         usecols=use_cols,
         parse_dates=datetime_cols,
