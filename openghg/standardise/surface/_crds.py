@@ -7,7 +7,7 @@ from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -23,7 +23,7 @@ def parse_crds(
     ready for storage in the object store.
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -48,15 +48,15 @@ def parse_crds(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet
 
-    if not isinstance(data_filepath, Path):
-        data_filepath = Path(data_filepath)
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
 
     inlet = format_inlet(inlet)
 
     # This may seem like an almost pointless function as this is all we do
     # but it makes it a lot easier to test assign_attributes
     gas_data = _read_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         site=site,
         network=network,
         inlet=inlet,
@@ -81,7 +81,7 @@ def parse_crds(
 
 
 def _read_data(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -94,7 +94,7 @@ def _read_data(
     """Read the datafile passed in and extract the data we require.
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -111,7 +111,7 @@ def _read_data(
     from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
     from pandas import RangeIndex, read_csv, to_datetime
 
-    split_fname = data_filepath.stem.split(".")
+    split_fname = filepath.stem.split(".")
     site = site.lower()
 
     try:
@@ -138,7 +138,7 @@ def _read_data(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         data = read_csv(
-            data_filepath,
+            filepath,
             header=None,
             skiprows=1,
             sep=r"\s+",
@@ -159,7 +159,7 @@ def _read_data(
     header = data.head(2)
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-    metadata = _read_metadata(filepath=data_filepath, data=data)
+    metadata = _read_metadata(filepath=filepath, data=data)
 
     if network is not None:
         metadata["network"] = network

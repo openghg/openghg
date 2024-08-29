@@ -7,7 +7,7 @@ __all__ = ["parse_beaco2n"]
 
 
 def parse_beaco2n(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: str,
@@ -18,7 +18,7 @@ def parse_beaco2n(
     """Read BEACO2N data files
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         site: Site name
         network: Network name
         inlet: Inlet height in metres
@@ -35,7 +35,7 @@ def parse_beaco2n(
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
     datetime_columns = {"time": ["datetime"]}
     use_cols = [1, 5, 6, 7, 8, 9, 10]
     na_values = [-999.0]
@@ -44,7 +44,7 @@ def parse_beaco2n(
 
     try:
         data = pd.read_csv(
-            data_filepath,
+            filepath,
             index_col="time",
             usecols=use_cols,
             parse_dates=datetime_columns,

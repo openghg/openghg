@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_icos(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     inlet: str,
     instrument: str,
@@ -25,7 +25,7 @@ def parse_icos(
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -59,12 +59,12 @@ def parse_icos(
     inlet = clean_string(inlet)
     inlet = format_inlet(inlet)
 
-    if not isinstance(data_filepath, Path):
-        data_filepath = Path(data_filepath)
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
 
     if header_type == "large":
         gas_data = _read_data_large_header(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             network=network,
@@ -74,7 +74,7 @@ def parse_icos(
         )
     else:
         gas_data = _read_data_small_header(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             network=network,
@@ -98,7 +98,7 @@ def parse_icos(
 
 
 def _read_data_large_header(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     inlet: str,
     network: str,
@@ -110,7 +110,7 @@ def _read_data_large_header(
     """Parses ICOS files with the larger (~40) line header
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -125,7 +125,7 @@ def _read_data_large_header(
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
-    split_filename = data_filepath.name.split(".")
+    split_filename = filepath.name.split(".")
 
     try:
         site_fname = split_filename[0]
@@ -149,7 +149,7 @@ def _read_data_large_header(
         raise ValueError("Mismatch between instrument passed and that in filename.")
 
     # Read the header and check its length
-    header = read_header(filepath=data_filepath)
+    header = read_header(filepath=filepath)
     len_header = len(header)
 
     if len_header != 40:
@@ -174,7 +174,7 @@ def _read_data_large_header(
     }
 
     df = read_csv(
-        data_filepath,
+        filepath,
         header=len_header - 1,
         sep=";",
         parse_dates={"time": [2, 3, 4, 5, 6]},
@@ -273,7 +273,7 @@ def _read_data_large_header(
 
 
 def _read_data_small_header(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     inlet: str,
     network: str,
@@ -284,7 +284,7 @@ def _read_data_small_header(
     """Parses ICOS files with a single line header
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -298,7 +298,7 @@ def _read_data_small_header(
     from pandas import read_csv
 
     # Read some metadata from the filename
-    split_filename = data_filepath.name.split(".")
+    split_filename = filepath.name.split(".")
 
     try:
         site_fname = split_filename[0]
@@ -310,8 +310,8 @@ def _read_data_small_header(
             "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
         )
 
-    # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
-    header = read_header(filepath=data_filepath)
+    # metadata = read_metadata(filepath=filepath, data=data, data_type="ICOS")
+    header = read_header(filepath=filepath)
     n_skip = len(header) - 1
 
     datetime_columns = ["Year", "Month", "Day", "Hour", "Minute"]
@@ -335,7 +335,7 @@ def _read_data_small_header(
     }
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
         sep=" ",
         usecols=use_cols,

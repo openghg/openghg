@@ -15,7 +15,7 @@ def thd_data():
     thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=thd_path,
+        filepath=thd_path,
         precision_filepath=thd_prec_path,
         site="THD",
         instrument="gcmd",
@@ -31,7 +31,7 @@ def cgo_data():
     cgo_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=cgo_data,
+        filepath=cgo_data,
         precision_filepath=cgo_prec,
         site="cgo",
         instrument="medusa",
@@ -69,7 +69,7 @@ def test_read_file_thd():
     thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=thd_path,
+        filepath=thd_path,
         precision_filepath=thd_prec_path,
         site="thd",
         network="agage",
@@ -114,7 +114,7 @@ def test_read_invalid_instrument_raises():
 
     with pytest.raises(ValueError):
         parse_gcwerks(
-            data_filepath=thd_path,
+            filepath=thd_path,
             precision_filepath=thd_prec_path,
             site="CGO",
             instrument="fish",
@@ -130,7 +130,7 @@ def test_no_precisions_species_raises():
 
     with pytest.raises(ValueError):
         parse_gcwerks(
-            data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
+            filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
         )
 
 
@@ -139,7 +139,7 @@ def test_read_ridgehill_window_inlet_all_NaNs():
     prec_path = get_surface_datapath(filename="ridgehill-md.11.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
+        filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
     )
 
     assert not res
@@ -150,7 +150,7 @@ def test_read_thd_window_inlet():
     prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
+        filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
     )
 
     parsed_surface_metachecker(data=res)
@@ -175,7 +175,7 @@ def test_read_shangdianzi_ASM_inlet():
     prec_path = get_surface_datapath(filename="shangdianzi-medusa.18.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path,
+        filepath=data_path,
         precision_filepath=prec_path,
         site="sdz",
         instrument="medusa",
