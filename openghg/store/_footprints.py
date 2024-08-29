@@ -410,7 +410,9 @@ class Footprints(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        footprint_data = self.update_metadata(footprint_data, additional_input_parameters, additional_metadata)
+        footprint_data = self.update_metadata(
+            footprint_data, additional_input_parameters, additional_metadata
+        )
 
         lookup_keys = self.get_lookup_keys(footprint_data)
 

@@ -37,12 +37,15 @@ from ._function_inputs import match_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet, extract_height_name
 from ._metadata_util import (
+    null_metadata_values,
+    not_set_metadata_values,
+    remove_null_keys,
     check_number_match,
     check_str_match,
     check_value_match,
+    check_not_set_value,
     get_overlap_keys,
     merge_dict,
-    remove_keys_null,
 )
 from ._site import get_site_info, sites_in_network
 from ._species import (

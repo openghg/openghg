@@ -1,19 +1,62 @@
-from typing import Any, Union, Iterable, Optional
+from typing import Any, Union, Iterable, List, Optional
 import logging
 import math
 
+
 __all__ = [
+    "null_metadata_values",
+    "not_set_metadata_values",
+    "remove_null_keys",
     "check_number_match",
     "check_str_match",
     "check_value_match",
+    "check_not_set_value",
     "get_overlap_keys",
     "merge_dict",
-    "remove_keys_null",
 ]
 
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
+
+
+def null_metadata_values() -> List:
+    """
+    Defines values which indicate metadata key should be ignored and not retained within
+    the metadata (or added to the metastore).
+
+    Returns:
+        list: values to be seen as null
+    """
+    null_values = [None]
+
+    return null_values
+
+
+def not_set_metadata_values() -> List:
+    """
+    Defines values which indicate metadata value has not been explicitly specified
+    but that we still want to retain within the metadata (and metastore) so the key is present.
+
+    Returns:
+        list: values which indicate key has not been set
+    """
+    # TODO: Depending on how this is implemented, may want to update this to include np.nan values
+    not_set_values = ["not_set", "NOT_SET"]
+
+    return not_set_values
+
+
+def remove_null_keys(dictionary: dict, null_values: Iterable = null_metadata_values()) -> dict:
+    """
+    Remove keys from a dictionary for values which we want to ignore. By default,
+    ignore_values is (None, ).
+
+    Returns:
+        dict: Copy of dictionary with key: null value pairs removed.
+    """
+    dictionary = {key: value for key, value in dictionary.items() if value not in null_values}
+    return dictionary
 
 
 def check_number_match(
@@ -83,6 +126,31 @@ def check_value_match(value1: Any, value2: Any, relative_tolerance: float = 1e-3
         return check_str_match(value1, value2, lower)
 
 
+def check_not_set_value(
+    value1: Any, value2: Any, not_set_values: Iterable = not_set_metadata_values()
+) -> Any:
+    """
+    Check whether either value is in the list of null values and if so return the other
+    value in preference.
+    Not set values are sometimes needed if we want to include a key but need a string to indicate
+    this value has not been specified by the user.
+
+    Args:
+        value1, value2: Input values for comparison
+        not_set_values: List of values which indicate value has not been explicitly set. (e.g. "not_set")
+            By default this is defined by null_metadata_values() function
+    Returns:
+        value: if one value is null (value1 checked first) returns the other value
+        None: if neither value is null.
+    """
+    if value1 in not_set_values:
+        return value2
+    elif value2 in not_set_values:
+        return value1
+    else:
+        return None
+
+
 def get_overlap_keys(dict1: dict, dict2: dict) -> list:
     """
     Find the keys which match between two dictionaries. Return list of these keys.
@@ -98,17 +166,22 @@ def merge_dict(
     keys: Optional[Iterable] = None,
     keys_dict1: Optional[Iterable] = None,
     keys_dict2: Optional[Iterable] = None,
+    remove_null: bool = True,
+    null_values: Iterable = null_metadata_values(),
     check_value: bool = True,
     relative_tolerance: float = 1e-3,
     lower: bool = True,
+    not_set_values: Iterable = not_set_metadata_values(),
     resolve_mismatch: bool = False,
 ) -> dict:
     """
     The merge_dict function merges the key:value pairs of two dictionaries checking for
     overlap between them.
 
-    Depending on the choice of inputs, if the same keys are present in both dictionaries
-    the value from dict1 gets preference in the merged dictionary.
+    Depending on the choice of inputs, if the same keys are present in both dictionaries:
+        - if one of the two values is identified as a null value (e.g. "not_set") the
+          other value will be used in preference.
+        - otherwise, the value from dict1 gets preference in the merged dictionary.
 
     Args:
         dict1, dict2 : Dictionaries to compare and merge
@@ -118,16 +191,23 @@ def merge_dict(
             See check_value_match() function for rules of matching.
         relative_tolerance: Tolerance between two numbers when checking values.
         lower: Whether to apply lower case to the two input values as strings when checking values.
-        resolve_mismatch: If keys overlap and values do not match, use value from
-            dict1 and raise a warning. This will raise an error if set to False.
+        not_set_values: Values which indicate this value has not been specified.
+            See null_metadata_values() function for list of default values.
+        resolve_mismatch: If keys overlap, values do not match and neither is null,
+            use value from dict1 and raise a warning. This will raise an error if set to False.
     Returns:
         dict: Merged dictionary
 
         if check_value is False:
             raises ValueError if any keys overlap
         if resolve_mismatch is False:
-            raises ValueError if values for overlapping keys don't match
+            raises ValueError if values for overlapping keys don't match (and neither matched null_values)
     """
+    # Remove null values
+    if remove_null:
+        dict1 = remove_null_keys(dict1, null_values)
+        dict2 = remove_null_keys(dict2, null_values)
+
     # Filter dictionaries based on any input key selections
     if keys is not None:
         dict1 = {key: value for key, value in dict1.items() if key in keys}
@@ -151,11 +231,18 @@ def merge_dict(
         for key in overlapping_keys:
             value1 = dict1[key]
             value2 = dict2[key]
+
+            # Check whether either one of the values indicates this is null.
+            # - if so this prefer the other value if there is a difference
+            value_present = check_not_set_value(value1, value2, not_set_values)
             if check_value_match(value1, value2, relative_tolerance, lower):
-                logger.warning(
-                    f"Same key '{key}' supplied from different sources. Error not raised because values match: '{value1}' (1), '{value2}' (2)."
-                )
+                if value_present is None:
+                    logger.warning(
+                        f"Same key '{key}' supplied from different sources. Error not raised because values match: '{value1}' (1), '{value2}' (2)."
+                    )
                 merged_dict[key] = value1
+            elif value_present is not None:
+                merged_dict[key] = value_present
             else:
                 if resolve_mismatch:
                     merged_dict[key] = value1
@@ -178,15 +265,3 @@ def merge_dict(
         raise ValueError(msg)
 
     return merged_dict
-
-
-def remove_keys_null(dictionary: dict, null_values: Iterable = (None,)) -> dict:
-    """
-    Remove keys from a dictionary which are indicated to be null. By default,
-    null_values is None.
-
-    Returns:
-        dict: Copy of dictionary with key: null value pairs removed.
-    """
-    dictionary = {key: value for key, value in dictionary.items() if value not in null_values}
-    return dictionary

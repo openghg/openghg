@@ -189,19 +189,13 @@ class BaseStore:
         Returns:
             dict: data dictionary with metadata keys added
         """
-        from openghg.util import merge_dict, remove_keys_null
+        from openghg.util import merge_dict
 
         # Get defined metakeys from the config setup
         metakeys = self.add_metakeys()
         required = metakeys["required"]
         # We might not get any optional keys
         optional = metakeys.get("optional", {})
-
-        ignore_values = [None]
-
-        input_parameters = remove_keys_null(input_parameters, ignore_values)
-        if additional_metadata:
-            additional_metadata = remove_keys_null(additional_metadata, ignore_values)
 
         for parsed_data in data.values():
             metadata = parsed_data["metadata"]
