@@ -321,7 +321,7 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        from openghg.store.spec import null_metadata_values
+        from openghg.util import not_set_metadata_values
 
         uuids = {}
 
@@ -342,7 +342,7 @@ class BaseStore:
                 # Our lookup results and gas data have the same keys
                 uuid = lookup_results[key]
 
-                ignore_values = null_metadata_values()
+                ignore_values = not_set_metadata_values()
 
                 # Do we want all the metadata in the Dataset attributes?
                 to_add = {

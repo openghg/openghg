@@ -1,5 +1,7 @@
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, overload
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, Iterable, overload
+
+from openghg.util import not_set_metadata_values, null_metadata_values
 
 __all__ = ["clean_string", "to_lowercase"]
 
@@ -172,26 +174,32 @@ def extract_float(s: str) -> float:
     raise ValueError(f"No float values found in '{s}'")
 
 
-def check_and_set_null_variable(param: Union[str, None], null_value: Optional[str] = None) -> str:
+def check_and_set_null_variable(
+    param: Union[str, None],
+    not_set_value: Optional[str] = None,
+    null_values: Iterable = null_metadata_values(),
+) -> Union[str, None]:
     """
-    Check whether a variable is set to None and if so replace this with
-    the defined string to define a null variable.
+    Check whether a variable is set to a null value (e.g. None) and if so replace this with
+    a defined string used to indicate the variable has not been set.
     This is typically: "not_set"
 
     Args:
         param: variable to check
-        null_value: Optional value to replace if None. Otherwise details
-            from openghg.store.spec.null_metadata_values will be used.
+        not_set_value: Optional value to replace if None. By default details
+            from openghg.util.not_set_metadata_values() will be used.
+        null_values: Values to identify as null. By default details
+            from openghg.util.null_metadata_values() will be used.
     Returns:
-        str: Original string or null value
+        str: Original string or value to indicate this is not set
+        None: Only returned if value is None and None is not included as one of the null_values.
     """
-    from openghg.store.spec import null_metadata_values
 
-    if null_value is None:
-        null_values = null_metadata_values()
-        null_value = null_values[0]
+    if not_set_value is None:
+        not_set_values = not_set_metadata_values()
+        not_set_value = not_set_values[0]
 
-    if param is None:
-        param = null_value
+    if param in null_values:
+        param = not_set_value
 
     return param
