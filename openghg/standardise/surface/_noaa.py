@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
@@ -362,7 +361,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
-    metadata["data_source"] = "noaa_obspack"
+    metadata["dataset_source"] = "noaa_obspack"
     metadata["data_type"] = "surface"
 
     # Add additional sampling_period_estimate if sampling_period is not set
