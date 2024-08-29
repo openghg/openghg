@@ -164,6 +164,11 @@ class ObsColumn(BaseStore):
 
         parser_input_parameters["data_filepath"] = filepath
 
+        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+        additional_input_parameters = {
+            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+        }
+
         obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
@@ -182,7 +187,7 @@ class ObsColumn(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        obs_data = self.update_metadata(obs_data, fn_input_parameters, additional_metadata)
+        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
         # Use config and latest metadata to create lookup keys
         lookup_keys = self.get_lookup_keys(obs_data)

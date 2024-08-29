@@ -170,6 +170,11 @@ class FluxTimeseries(BaseStore):
 
         parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
+        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+        additional_input_parameters = {
+            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+        }
+
         # Define parameters to pass to the parser function
         flux_timeseries_data = parser_fn(**parser_input_parameters)
 
@@ -189,7 +194,7 @@ class FluxTimeseries(BaseStore):
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_timeseries_data = self.update_metadata(
-            flux_timeseries_data, fn_input_parameters, additional_metadata
+            flux_timeseries_data, additional_input_parameters, additional_metadata
         )
 
         # Use config and latest metadata to create lookup keys

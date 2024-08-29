@@ -207,13 +207,18 @@ class EulerianModel(BaseStore):
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
+            matched_keys = set(metadata) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
+
             # Check to ensure no required keys are being passed through optional_metadata dict
             self.check_info_keys(optional_metadata)
             if optional_metadata is not None:
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            model_data = self.update_metadata(model_data, fn_input_parameters, additional_metadata)
+            model_data = self.update_metadata(model_data, additional_input_parameters, additional_metadata)
 
             # Use config and latest metadata to create lookup keys
             lookup_keys = self.get_lookup_keys(model_data)

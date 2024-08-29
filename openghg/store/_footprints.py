@@ -366,6 +366,11 @@ class Footprints(BaseStore):
         # Define parameters to pass to the parser function
         parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
+        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+        additional_input_parameters = {
+            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+        }
+
         footprint_data = parser_fn(**parser_input_parameters)
 
         chunks = self.check_chunks(
@@ -405,7 +410,7 @@ class Footprints(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        footprint_data = self.update_metadata(footprint_data, fn_input_parameters, additional_metadata)
+        footprint_data = self.update_metadata(footprint_data, additional_input_parameters, additional_metadata)
 
         lookup_keys = self.get_lookup_keys(footprint_data)
 

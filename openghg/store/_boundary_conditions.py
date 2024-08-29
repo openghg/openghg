@@ -219,6 +219,11 @@ class BoundaryConditions(BaseStore):
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
+            matched_keys = set(metadata) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
+
             # Check to ensure no required keys are being passed through optional_metadata dict
             self.check_info_keys(optional_metadata)
 
@@ -227,7 +232,7 @@ class BoundaryConditions(BaseStore):
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             boundary_conditions_data = self.update_metadata(
-                boundary_conditions_data, fn_input_parameters, additional_metadata
+                boundary_conditions_data, additional_input_parameters, additional_metadata
             )
 
             # Use config and latest metadata to create lookup keys

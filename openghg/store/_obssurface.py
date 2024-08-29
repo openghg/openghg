@@ -297,8 +297,8 @@ class ObsSurface(BaseStore):
             filepaths = filepath
 
         # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
+        current_parameters = locals().copy()
+        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
 
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepaths:
@@ -318,6 +318,11 @@ class ObsSurface(BaseStore):
             fn_input_parameters["filepath"] = filepath
             parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
 
+            matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
+
             # This hasn't been updated to use the new check_hashes function due to
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
@@ -332,10 +337,11 @@ class ObsSurface(BaseStore):
             if source_format == "GCWERKS":
                 parser_input_parameters["precision_filepath"] = precision_filepath
 
-            parser_input_parameters["sampling_period"] = sampling_period
-
             # Call appropriate standardisation function with input parameters
             data = parser_fn(**parser_input_parameters)
+
+            # Check keys and update default
+
 
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
@@ -368,7 +374,7 @@ class ObsSurface(BaseStore):
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            data = self.update_metadata(data, fn_input_parameters, additional_metadata)
+            data = self.update_metadata(data, additional_input_parameters, additional_metadata)
 
             # Use config and latest metadata to create lookup keys
             lookup_keys = self.get_lookup_keys(data)

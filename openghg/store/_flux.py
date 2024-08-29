@@ -193,6 +193,11 @@ class Flux(BaseStore):
 
         parser_input_parameters["data_type"] = self._data_type
 
+        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+        additional_input_parameters = {
+            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+        }
+
         flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
@@ -213,7 +218,7 @@ class Flux(BaseStore):
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        flux_data = self.update_metadata(flux_data, fn_input_parameters, additional_metadata)
+        flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
 
         lookup_keys = self.get_lookup_keys(flux_data)
 
