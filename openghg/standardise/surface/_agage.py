@@ -5,7 +5,12 @@ import pandas as pd
 import re
 import xarray as xr
 from addict import Dict as aDict
-from openghg.standardise.meta import assign_attributes, define_species_label, metadata_default_keys
+from openghg.standardise.meta import (
+    assign_attributes,
+    define_species_label,
+    metadata_default_keys,
+    dataset_formatter,
+)
 from openghg.types import optionalPathType
 from openghg.util import clean_string, format_inlet
 
@@ -148,6 +153,8 @@ def parse_agage(
             scale=scale,
             file_params=file_params,
         )
+
+        gas_data = dataset_formatter(data=gas_data)
 
         # Assign attributes to the data for CF compliant NetCDFs
         gas_data = assign_attributes(

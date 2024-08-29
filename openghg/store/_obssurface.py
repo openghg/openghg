@@ -203,9 +203,10 @@ class ObsSurface(BaseStore):
             clean_string,
             format_inlet,
             format_data_level,
+            evaluate_sampling_period,
             check_and_set_null_variable,
             hash_file,
-            load_surface_parser,
+            load_standardise_parser,
             verify_site,
             check_if_need_new_version,
             synonyms,
@@ -232,6 +233,8 @@ class ObsSurface(BaseStore):
 
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        sampling_period = evaluate_sampling_period(sampling_period)
 
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
@@ -281,41 +284,8 @@ class ObsSurface(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        sampling_period_seconds: Union[str, None] = None
-        # If we have a sampling period passed we want the number of seconds
-        if sampling_period is not None:
-            # Check value passed is not just a number with no units
-            try:
-                float(sampling_period)
-            except (ValueError, TypeError):
-                # If this cannot be evaluated to a float assume this is correct form.
-                pass
-            else:
-                raise ValueError(
-                    f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
-                )
-
-            # Check string passed can be evaluated as a Timedelta object
-            # and extract this in seconds.
-            try:
-                sampling_period_td = Timedelta(sampling_period)
-            except ValueError:
-                raise ValueError(
-                    f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
-                )
-
-            sampling_period_seconds = str(float(sampling_period_td.total_seconds()))
-
-            # Check if sampling period has resolved to 0 seconds.
-            if sampling_period_seconds == "0.0":
-                raise ValueError(
-                    f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
-                )
-
-            # TODO: May want to add check for NaT or NaN
-
         # Load the data retrieve object
-        parser_fn = load_surface_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         results: resultsType = defaultdict(dict)
 
@@ -360,7 +330,7 @@ class ObsSurface(BaseStore):
                 "network": network,
                 "inlet": inlet,
                 "instrument": instrument,
-                "sampling_period": sampling_period_seconds,
+                "sampling_period": sampling_period,
                 "measurement_type": measurement_type,
                 "site_filepath": site_filepath,
             }

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 from pandas import DataFrame
 
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 
 
@@ -133,6 +134,8 @@ def parse_gcwerks(
         sampling_period=sampling_period,
         gc_params=gc_params,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Assign attributes to the data for CF compliant NetCDFs
     gas_data = assign_attributes(

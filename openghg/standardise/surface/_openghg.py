@@ -62,7 +62,12 @@ def parse_openghg(
         Dict: Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
-    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
+    from openghg.standardise.meta import (
+        metadata_default_keys,
+        define_species_label,
+        assign_attributes,
+        dataset_formatter,
+    )
 
     filepath = Path(filepath)
 
@@ -222,6 +227,8 @@ def parse_openghg(
             )
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data,

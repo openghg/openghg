@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
 
 import xarray as xr
+
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -402,6 +404,8 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
+    gas_data = dataset_formatter(data=gas_data)
+
     gas_data = assign_attributes(
         data=gas_data,
         site=site,
@@ -467,6 +471,8 @@ def _read_raw_file(
         measurement_type=measurement_type,
         sampling_period=sampling_period,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data, site=site, network="NOAA", update_mismatch=update_mismatch, site_filepath=site_filepath

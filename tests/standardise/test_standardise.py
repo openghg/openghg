@@ -102,7 +102,7 @@ def test_standardise_obs_openghg():
         inlet=185,
         instrument="picarro",
         source_format="openghg",
-        sampling_period="1H",
+        sampling_period="1h",
         force=True,
         store="user",
     )
@@ -141,7 +141,7 @@ def test_standardise_obs_metadata_mismatch():
         inlet="999m",
         instrument="picarro",
         source_format="openghg",
-        sampling_period="1H",
+        sampling_period="1h",
         update_mismatch=update_mismatch,
         overwrite=True,
         store="user",
@@ -200,7 +200,7 @@ def test_local_obs_metadata_mismatch_meta():
         inlet="998m",
         instrument="picarro",
         source_format="openghg",
-        sampling_period="1H",
+        sampling_period="1h",
         update_mismatch=update_mismatch,
         store="user",
     )
@@ -251,7 +251,7 @@ def test_local_obs_metadata_mismatch_fail():
             inlet="999m",
             instrument="picarro",
             source_format="openghg",
-            sampling_period="1H",
+            sampling_period="1h",
             update_mismatch="never",
             force=True,
             store="user",
@@ -606,7 +606,7 @@ def test_standardise_sorting_true(caplog):
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
         sort_files=True
@@ -632,7 +632,7 @@ def test_standardise_sorting_false(caplog):
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
         sort_files=False

@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Updated parse_* functions for surface data type to accept `filepath` rather than `data_filepath`. This maps better to the `standardise_surface` input and makes this consistent with the other data types. [PR #1101](https://github.com/openghg/openghg/pull/1101)
+- Separated data variable formatting from assign attributes function into dataset_formatter function.- [PR #1102](https://github.com/openghg/openghg/pull/1102)
+- Required and optional keys for "column" data type were updated to reflect the two sources of this data (site, satellite) [PR #1104](https://github.com/openghg/openghg/pull/1104)
 
 ### Fixed
 
 - Bug where an input filepath list to standardise_surface was only storing the last file hash. This allowed for some files to bypass the check for the same files depending on where they were in the original filepath list. [PR #1100](https://github.com/openghg/openghg/pull/1100)
+- Bug where filepath needed to be a Path object when storing the file hash values. [PR #1108](https://github.com/openghg/openghg/pull/1108)
 
 ## [0.9.0] - 2024-08-14
 

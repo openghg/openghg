@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import logging
 
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -81,6 +82,8 @@ def parse_icos(
             sampling_period=sampling_period,
             measurement_type=measurement_type,
         )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(

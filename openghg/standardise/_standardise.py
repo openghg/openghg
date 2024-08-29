@@ -261,14 +261,14 @@ def standardise_surface(
 
 def standardise_column(
     filepath: Union[str, Path],
+    species: str,
+    platform: str = "satellite",
+    site: Optional[str] = None,
     satellite: Optional[str] = None,
     domain: Optional[str] = None,
     selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
     network: Optional[str] = None,
     instrument: Optional[str] = None,
-    platform: str = "satellite",
     source_format: str = "openghg",
     store: Optional[str] = None,
     if_exists: str = "auto",
@@ -285,7 +285,11 @@ def standardise_column(
 
     Args:
         filepath: Path of observation file
-        satellite: Name of satellite (if relevant)
+        species: Species name or synonym e.g. "ch4"
+        platform: Type of platform. Should be one of:
+            - "satellite"
+            - "site"
+        satellite: Name of satellite (if relevant). Should include satellite OR site.
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
             (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -293,14 +297,9 @@ def standardise_column(
             performed on satellite data. This can be based on any form of filtering, binning etc.
             but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
             If not specified, domain will be used.
-        site : Site code/name (if relevant). Can include satellite OR site.
-        species: Species name or synonym e.g. "ch4"
+        site : Site code/name (if relevant). Should include satellite OR site.
         instrument: Instrument name e.g. "TANSO-FTS"
-        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-        platform: Type of platform. Should be one of:
-            - "satellite"
-            - "site"
-        source_format : Type of data being input e.g. openghg (internal format)
+        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"        source_format : Type of data being input e.g. openghg (internal format)
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -336,15 +335,15 @@ def standardise_column(
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
+            "species": species,
+            "platform": platform,
             "site": site,
             "satellite": satellite,
             "domain": domain,
             "selection": selection,
             "site": site,
-            "species": species,
             "network": network,
             "instrument": instrument,
-            "platform": platform,
             "source_format": source_format,
             "overwrite": overwrite,
         }
@@ -363,14 +362,14 @@ def standardise_column(
             store=store,
             data_type="column",
             filepath=filepath,
+            species=species,
+            platform=platform,
             satellite=satellite,
             domain=domain,
             selection=selection,
             site=site,
-            species=species,
             network=network,
             instrument=instrument,
-            platform=platform,
             source_format=source_format,
             overwrite=overwrite,
             if_exists=if_exists,

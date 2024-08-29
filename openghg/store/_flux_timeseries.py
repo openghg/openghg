@@ -115,7 +115,7 @@ class FluxTimeseries(BaseStore):
 
         from openghg.util import (
             clean_string,
-            load_flux_timeseries_parser,
+            load_standardise_parser,
             check_if_need_new_version,
         )
 
@@ -148,7 +148,7 @@ class FluxTimeseries(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_timeseries_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 

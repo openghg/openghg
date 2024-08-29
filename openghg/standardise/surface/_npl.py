@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.standardise.meta import assign_attributes
+from openghg.standardise.meta import assign_attributes, dataset_formatter
 from openghg.types import pathType
 from openghg.util import clean_string, load_internal_json
 from pandas import read_csv
@@ -116,6 +116,8 @@ def parse_npl(
             "data": processed_data,
             "attributes": attributes,
         }
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 

@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import warnings
 
+from openghg.standardise.meta import dataset_formatter
+
 
 def parse_btt(
     filepath: Union[str, Path],
@@ -104,6 +106,7 @@ def parse_btt(
             "data": processed_data,
             "attributes": site_attributes,
         }
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 

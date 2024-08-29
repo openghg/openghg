@@ -38,7 +38,7 @@ def parse_tmb(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.standardise.meta import assign_attributes
+    from openghg.standardise.meta import assign_attributes, dataset_formatter
     from openghg.util import (
         clean_string,
         get_site_info,
@@ -89,7 +89,6 @@ def parse_tmb(
         print(f"WARNING: inlet value of '{inlet}' does not match to known inlet values")
 
     gas_data = {}
-
     for species_column in data.columns:
         processed_data = data.loc[:, [species_column]].sort_index().to_xarray()
 
@@ -132,6 +131,8 @@ def parse_tmb(
             "data": processed_data,
             "attributes": attributes,
         }
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath

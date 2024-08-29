@@ -269,7 +269,7 @@ class Footprints(BaseStore):
             format_inlet,
             check_and_set_null_variable,
             check_if_need_new_version,
-            load_footprint_parser,
+            load_standardise_parser,
         )
 
         if high_time_resolution:
@@ -317,7 +317,7 @@ class Footprints(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_footprint_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         # file_hash = hash_file(filepath=filepath)
         # if file_hash in self._file_hashes and not overwrite:

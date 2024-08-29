@@ -866,7 +866,7 @@ def test_check_obssurface_multi_file_same_skip():
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
         if_exists="new",
     )
 
@@ -881,7 +881,7 @@ def test_check_obssurface_multi_file_same_skip():
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
         if_exists="new",
     )
 
