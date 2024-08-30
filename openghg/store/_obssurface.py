@@ -340,9 +340,6 @@ class ObsSurface(BaseStore):
             # Call appropriate standardisation function with input parameters
             data = parser_fn(**parser_input_parameters)
 
-            # Check keys and update default
-
-
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
                 species = key.split("_")[0]
