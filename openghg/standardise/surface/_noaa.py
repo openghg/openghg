@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
+from openghg.store.spec import null_metadata_values
 from openghg.types import optionalPathType
+from openghg.util import check_and_set_null_variable
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -45,7 +46,7 @@ def parse_noaa(
         dict: Dictionary of data and metadata
     """
     if sampling_period is None:
-        sampling_period = "NOT_SET"
+        sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
 
@@ -340,7 +341,8 @@ def _read_obspack(
     processed_ds = processed_ds.set_coords(["time"])
 
     # Estimate sampling period using metadata and midpoint time
-    if sampling_period == "NOT_SET":
+    not_set_values = null_metadata_values()
+    if sampling_period in not_set_values:
         sampling_period_estimate = _estimate_sampling_period(obspack_ds)
     else:
         sampling_period_estimate = -1.0
@@ -362,7 +364,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
-    metadata["data_source"] = "noaa_obspack"
+    metadata["dataset_source"] = "noaa_obspack"
     metadata["data_type"] = "surface"
 
     # Add additional sampling_period_estimate if sampling_period is not set
@@ -371,18 +373,21 @@ def _read_obspack(
             sampling_period_estimate
         )  # convert to string to keep consistent with "sampling_period"
 
+    # Define not_set value to use as a default
+    not_set_value = not_set_values[0]
+
     # Add instrument if present
     if instrument is not None:
         metadata["instrument"] = instrument
     else:
-        metadata["instrument"] = orig_attrs.get("instrument", "NOT_SET")
+        metadata["instrument"] = orig_attrs.get("instrument", not_set_value)
 
     # Add data owner details, station position and calibration scale, if present
-    metadata["data_owner"] = orig_attrs.get("provider_1_name", "NOT_SET")
-    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", "NOT_SET")
-    metadata["station_longitude"] = orig_attrs.get("site_longitude", "NOT_SET")
-    metadata["station_latitude"] = orig_attrs.get("site_latitude", "NOT_SET")
-    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
+    metadata["data_owner"] = orig_attrs.get("provider_1_name", not_set_value)
+    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", not_set_value)
+    metadata["station_longitude"] = orig_attrs.get("site_longitude", not_set_value)
+    metadata["station_latitude"] = orig_attrs.get("site_latitude", not_set_value)
+    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", not_set_value)
 
     # Create attributes with copy of metadata values
     attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
