@@ -7,7 +7,7 @@ from openghg.standardise.surface import parse_cranfield
 @pytest.mark.xfail(reason="Bug: No attributes for Cranfield - see #201")
 def test_read_file():
     filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
-    data = parse_cranfield(data_filepath=filepath, sampling_period="1200")
+    data = parse_cranfield(filepath=filepath, sampling_period="1200")
 
     assert sorted(list(data.keys())) == sorted(["co2", "co", "ch4"])
 

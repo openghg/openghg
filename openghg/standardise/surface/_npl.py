@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.standardise.meta import assign_attributes
+from openghg.standardise.meta import assign_attributes, dataset_formatter
 from openghg.types import pathType
 from openghg.util import clean_string, load_internal_json
 from pandas import read_csv
 
 
 def parse_npl(
-    data_filepath: pathType,
+    filepath: pathType,
     site: str = "NPL",
     network: str = "LGHG",
     inlet: Optional[str] = None,
@@ -21,7 +21,7 @@ def parse_npl(
     the processed data has been assigned to
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         network: Network, defaults to LGHG
         inlet: Inlet height. Will be inferred if not specified
@@ -42,7 +42,7 @@ def parse_npl(
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     site_upper = site.upper()
     network_upper = network.upper()
@@ -53,7 +53,7 @@ def parse_npl(
     site_data = get_site_info()
     site_info = site_data[site_upper][network_upper]
 
-    data = read_csv(data_filepath, parse_dates={"time": [0]}, index_col=0, date_format="%d/%m/%Y %H:%M")
+    data = read_csv(filepath, parse_dates={"time": [0]}, index_col=0, date_format="%d/%m/%Y %H:%M")
 
     # Drop the NaT/NaNs
     data = data.loc[data.index.dropna()]
@@ -116,6 +116,8 @@ def parse_npl(
             "data": processed_data,
             "attributes": attributes,
         }
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 

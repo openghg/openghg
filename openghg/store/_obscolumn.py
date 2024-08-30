@@ -26,14 +26,14 @@ class ObsColumn(BaseStore):
     def read_file(
         self,
         filepath: Union[str, Path],
+        species: str,
+        platform: str = "satellite",
         satellite: Optional[str] = None,
         domain: Optional[str] = None,
         selection: Optional[str] = None,
         site: Optional[str] = None,
-        species: Optional[str] = None,
         network: Optional[str] = None,
         instrument: Optional[str] = None,
-        platform: str = "satellite",
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -48,7 +48,11 @@ class ObsColumn(BaseStore):
 
         Args:
             filepath: Path of observation file
-            satellite: Name of satellite (if relevant)
+            species: Species name or synonym e.g. "ch4"
+            platform: Type of platform. Should be one of:
+                - "satellite"
+                - "site"
+            satellite: Name of satellite (if relevant). Should include satellite OR site.
             domain: For satellite only. If data has been selected on an area include the
                 identifier name for domain covered. This can map to previously defined domains
                 (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -56,13 +60,9 @@ class ObsColumn(BaseStore):
                 performed on satellite data. This can be based on any form of filtering, binning etc.
                 but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
                 If not specified, domain will be used.
-            site : Site code/name (if relevant). Can include satellite OR site.
-            species: Species name or synonym e.g. "ch4"
+            site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-            platform: Type of platform. Should be one of:
-                - "satellite"
-                - "site"
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -89,19 +89,24 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import ColumnTypes
-        from openghg.util import clean_string, load_column_parser, check_if_need_new_version, synonyms
+        from openghg.store.spec import define_standardise_parsers
+        from openghg.util import clean_string, load_standardise_parser, check_if_need_new_version, synonyms
 
         # TODO: Evaluate which inputs need cleaning (if any)
-        satellite = clean_string(satellite)
-        site = clean_string(site)
         species = clean_string(species)
-        if species is not None:
-            species = synonyms(species)
+        species = synonyms(species)
+        platform = clean_string(platform)
+
+        if site is None and satellite is None:
+            raise ValueError("One of 'site' or 'satellite' must be specified")
+        elif site is not None and satellite is not None:
+            raise ValueError("Only one of 'site' or 'satellite' should be specified")
+
+        site = clean_string(site)
+        satellite = clean_string(satellite)
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)
-        platform = clean_string(platform)
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -118,13 +123,15 @@ class ObsColumn(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = ColumnTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
@@ -162,18 +169,11 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        lookup_keys = self.get_lookup_keys(optional_metadata)
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in obs_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        if optional_metadata is not None:
+            for parsed_data in obs_data.values():
+                parsed_data["metadata"].update(optional_metadata)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
@@ -181,8 +181,7 @@ class ObsColumn(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
-            min_keys=3,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )

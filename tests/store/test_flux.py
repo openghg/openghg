@@ -1,6 +1,7 @@
 import pytest
 import os
 from helpers import clear_test_stores, get_flux_datapath
+from openghg.objectstore import get_metakey_defaults
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
@@ -9,6 +10,7 @@ from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
 from typing import Any, Union
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -305,9 +307,7 @@ def test_add_edgar_database(clear_stores):
     assert metadata.items() >= expected_metadata.items()
 
 
-@pytest.mark.parametrize(
-    "source", [None, "edgar-annual-total"]
-)
+@pytest.mark.parametrize("source", [None, "edgar-annual-total"])
 def test_add_edgar_v8_database(clear_stores, source):
     """Test edgar v8.0 can be added to object store (default domain)"""
     folder = "v8.0_CH4"
@@ -317,7 +317,9 @@ def test_add_edgar_v8_database(clear_stores, source):
     date = "1970"
     expected_source = "anthro" if source is None else source
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, source=source)
+    proc_results = transform_flux_data(
+        store="user", datapath=test_datapath, database=database, date=date, source=source
+    )
 
     default_domain = "globaledgar"
 
@@ -460,7 +462,13 @@ def test_optional_metadata_raise_error(clear_stores):
     date = "2015"
 
     with pytest.raises(ValueError):
-        proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"domain":"openghg_tests"})
+        proc_results = transform_flux_data(
+            store="user",
+            datapath=test_datapath,
+            database=database,
+            date=date,
+            optional_metadata={"domain": "openghg_tests"},
+        )
 
 
 def test_optional_metadata():
@@ -473,7 +481,13 @@ def test_optional_metadata():
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, optional_metadata={"project":"openghg_tests", "tag":"tests"})
+    proc_results = transform_flux_data(
+        store="user",
+        datapath=test_datapath,
+        database=database,
+        date=date,
+        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+    )
 
     version = "v6.0"
     species = "ch4"

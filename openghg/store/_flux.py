@@ -9,7 +9,7 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.util import synonyms
+from openghg.util import synonyms, align_lat_lon
 
 from xarray import DataArray, Dataset
 
@@ -124,10 +124,10 @@ class Flux(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import FluxTypes
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
-            load_flux_parser,
+            load_standardise_parser,
             check_if_need_new_version,
         )
 
@@ -158,13 +158,15 @@ class Flux(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = FluxTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
@@ -178,6 +180,7 @@ class Flux(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
+        # TODO - better match the arguments to the parser functions
         param = {
             "filepath": filepath,
             "species": species,
@@ -213,28 +216,38 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**input_parameters)
 
-        # Checking against expected format for Flux
+        # Checking against expected format for Flux, and align to expected lat/lons if necessary.
         for split_data in flux_data.values():
+
+            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
+
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
+        # combine metadata and get look-up keys
+        if optional_metadata is None:
+            optional_metadata = {}
 
-        required = tuple(min_required)
+        # Make sure none of these are Nones
+        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
+        # warn if `optional_metadata` overlaps with keyword arguments
+        overlap = [k for k in optional_metadata if k in to_add]
+        if overlap:
+            msg = (
+                f"Values for {', '.join(overlap)} in `optional_metadata` are "
+                "being overwritten by values passed as keyword arguments."
+            )
+            logger.warning(msg)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # update `optional_metadata` dict with any "optional" arguments passed to the parser
+        optional_metadata.update(to_add)
+
+        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # add optional metdata to parsed metadata
+        for parsed_data in flux_data.values():
+            parsed_data["metadata"].update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -242,7 +255,7 @@ class Flux(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
+            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
@@ -299,8 +312,8 @@ class Flux(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.types import FluxDatabases
-        from openghg.util import load_flux_database_parser, check_if_need_new_version
+        from openghg.store.spec import define_transform_parsers
+        from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -313,13 +326,15 @@ class Flux(BaseStore):
 
         datapath = Path(datapath)
 
+        transform_parsers = define_transform_parsers()[self._data_type]
+
         try:
-            data_type = FluxDatabases[database.upper()].value
+            data_type = transform_parsers[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_database_parser(database=database)
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())

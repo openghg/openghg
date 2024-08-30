@@ -12,7 +12,7 @@ def test_read_icos_large_header():
     filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     data = parse_icos(
-        data_filepath=filepath, site="mhd", instrument="g2401", header_type="large", inlet="15m"
+        filepath=filepath, site="mhd", instrument="g2401", header_type="large", inlet="15m"
     )
 
     expected_metadata = {
@@ -46,7 +46,7 @@ def test_read_icos_large_header_incorrect_site_raises():
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
             instrument="g2401",
             header_type="large",
@@ -59,7 +59,7 @@ def test_read_icos_large_header_incorrect_instrument_raises():
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
             instrument="sparrow",
             header_type="large",
@@ -72,7 +72,7 @@ def test_read_icos_large_header_incorrect_inlet_raises():
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
             instrument="sparrow",
             header_type="large",
@@ -84,7 +84,7 @@ def test_read_icos_small_header_file():
     filepath = get_surface_datapath(filename="tta.co2.1minute.222m.min.dat", source_format="ICOS")
 
     data = parse_icos(
-        data_filepath=filepath,
+        filepath=filepath,
         site="tta",
         network="ICOS",
         instrument="test_instrument",

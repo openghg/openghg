@@ -3,8 +3,11 @@
 """
 
 from collections.abc import Iterable
-from typing import Any, Dict, Iterator, Optional, Tuple
+from pathlib import Path
+from typing import Any, Dict, Iterator, Optional, Tuple, Union
 import logging
+
+from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -102,6 +105,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
 
     # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
     matches = process.extract(query=site_name, choices=inverted.keys())  # type:ignore
+
     highest_score = matches[0][1]
 
     if highest_score < 90:
@@ -234,3 +238,27 @@ def multiple_inlets(site: str) -> bool:
             return True
 
     return len(heights) > 1
+
+
+def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
+    """
+    Sorting time on filename basis
+
+    Args:
+        filepath: Path to the file
+
+    Returns:
+        list[Path]: List of sorted paths
+    """
+
+    # This code is to stop mypy complaints regarding file types
+    if isinstance(filepath, str):
+        filepath = [Path(filepath)]
+    elif isinstance(filepath, Path):
+        filepath = [filepath]
+    elif isinstance(filepath, (tuple, list)):
+        filepath = [Path(f) for f in filepath]
+    else:
+        raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
+
+    return sorted(filepath)

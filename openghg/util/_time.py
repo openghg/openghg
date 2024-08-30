@@ -1,9 +1,10 @@
 from datetime import date
 from typing import Dict, List, Optional, Tuple, Union
-from openghg.types import TimePeriod
-
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
+import re
+
+from openghg.types import TimePeriod
 
 __all__ = [
     "timestamp_tzaware",
@@ -33,6 +34,7 @@ __all__ = [
     "relative_time_offset",
     "find_duplicate_timestamps",
     "in_daterange",
+    "evaluate_sampling_period",
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
@@ -647,7 +649,7 @@ def time_offset_definition() -> Dict[str, List]:
     """
     offset_naming = {
         "months": ["monthly", "months", "month", "MS"],
-        "years": ["yearly", "years", "annual", "year", "AS", "YS"],
+        "years": ["yearly", "years", "annual", "year", "AS", "YS", "YS-JAN"],
         "weeks": ["weekly", "weeks", "week", "W"],
         "days": ["daily", "days", "day", "D"],
         "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
@@ -728,6 +730,7 @@ def create_frequency_str(
     value: Optional[Union[int, float]] = None,
     unit: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
+    include_units: bool = True,
 ) -> str:
     """
     Create a suitable frequency string based either a value and unit pair
@@ -911,3 +914,51 @@ def dates_in_range(
             in_date.append(key)
 
     return in_date
+
+
+def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -> Optional[str]:
+    """
+    Check the sampling period input and convert this into a string containing the
+    sampling period in seconds.
+
+    Args:
+        sampling_period: str or Timedelta value for the time to sample.
+
+    Returns:
+        str : Sampling period as a string containing the number of seconds.
+
+    TODO: Integrate sampling_period handling into logic for time_period (if practical)
+    """
+    # If we have a sampling period passed we want the number of seconds
+    if sampling_period is not None:
+
+        # Check format of input string matches expected
+        sampling_period = str(sampling_period)
+        re_sampling_period = re.compile(r"\d+[.]?\d*\s*[a-zA-Z]+")
+        check_format = re_sampling_period.search(sampling_period)
+
+        # If pattern is not matched this returns a None - indicating string is in incorrect form
+        if check_format is None:
+            raise ValueError(
+                f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
+            )
+
+        # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
+        try:
+            sampling_period_td = Timedelta(sampling_period)
+        except ValueError as e:
+            raise ValueError(
+                f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
+            ) from e
+
+        sampling_period = str(float(sampling_period_td.total_seconds()))
+
+        # Check if sampling period has resolved to 0 seconds.
+        if sampling_period == "0.0":
+            raise ValueError(
+                f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
+            )
+
+        # TODO: May want to add check for NaT or NaN
+
+    return sampling_period

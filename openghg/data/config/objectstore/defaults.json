@@ -1,0 +1,266 @@
+{
+    "boundary_conditions": {
+        "required": {
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "bc_input": {
+                "type": [
+                    "str"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {}
+    },
+    "eulerian_model": {
+        "required": {
+            "model": {
+                "type": [
+                    "str"
+                ]
+            },
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "date": {
+                "type": [
+                    "timestamp"
+                ]
+            }
+        },
+        "optional": {}
+    },
+    "column": {
+        "required": {
+            "species": {
+                "type": [
+                    "species"
+                ]
+            },
+            "platform": {
+                "type": [
+                    "platform"
+                ]                
+            }
+        },
+        "optional": {
+            "satellite": {
+                "type": [
+                    "str"
+                ]
+            },
+            "selection": {
+                "type": [
+                    "str"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            },
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "network": {
+                "type": [
+                    "str"
+                ]
+            }
+        }
+    },
+    "footprints": {
+        "required": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            },
+            "inlet": {
+                "type": [
+                    "height"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            },
+            "time_resolved": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "high_spatial_resolution": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "short_lifetime": {
+                "type": [
+                    "bool"
+                ]
+            },
+            "species": {
+                "type": [
+                    "str",
+                    "species"
+                ]
+            },
+            "met_model": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {}
+    },
+    "flux": {
+        "required": {
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "domain": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {
+            "database": {
+                "type": [
+                    "str"
+                ]
+            },
+            "database_version": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            }
+        }
+    },
+    "flux_timeseries": {
+        "required": {
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "region": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {
+            "database": {
+                "type": [
+                    "str"
+                ]
+            },
+            "database_version": {
+                "type": [
+                    "str"
+                ]
+            },
+            "model": {
+                "type": [
+                    "str"
+                ]
+            }
+        }
+    },
+    "surface": {
+        "required": {
+            "species": {
+                "type": [
+                    "str"
+                ]
+            },
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "sampling_period": {
+                "type": [
+                    "str"
+                ]
+            },
+            "inlet": {
+                "type": [
+                    "str"
+                ]
+            },
+            "instrument": {
+                "type": [
+                    "str"
+                ]
+            },
+            "network": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source_format": {
+                "type": [
+                    "str"
+                ]
+            },
+            "data_level": {
+                "type": [
+                    "str"
+                ]
+            },
+            "data_sublevel": {
+                "type": [
+                    "str"
+                ]
+            },
+            "dataset_source": {
+                "type": [
+                    "str"
+                ]                
+            },
+            "data_source": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {}
+    }
+}

@@ -5,7 +5,7 @@ import warnings
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub
+from openghg.util import running_on_hub, sort_by_filenames
 from openghg.types import optionalPathType, multiPathType
 from numcodecs import Blosc
 import logging
@@ -56,11 +56,13 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: Optional[multiPathType] = None,
-    filepaths: Optional[multiPathType] = None,
+    filepath: multiPathType,
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
+    data_level: Union[str, int, float, None] = None,
+    data_sublevel: Union[str, float, None] = None,
+    dataset_source: Optional[str] = None,
     sampling_period: Optional[Union[Timedelta, str]] = None,
     calibration_scale: Optional[str] = None,
     measurement_type: str = "insitu",
@@ -77,6 +79,7 @@ def standardise_surface(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
+    sort_files: bool = False,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -90,6 +93,15 @@ def standardise_surface(
             extract this from the file.
         height: Alias for inlet.
         instrument: Instrument name
+        data_level: The level of quality control which has been applied to the data.
+            This should follow the convention of:
+                - "0": raw sensor output
+                - "1": automated quality assurance (QA) performed
+                - "2": final data set
+                - "3": elaborated data products using the data
+        data_sublevel: Typically used for "L1" data depending on different QA performed
+            before data is finalised.
+        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06".
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
         measurement_type: Type of measurement e.g. insitu, flask
@@ -127,19 +139,11 @@ def standardise_surface(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        sort_files: Sorts multiple files date-wise.
     Returns:
         dict: Dictionary of result data
     """
     from openghg.cloud import call_function
-
-    if filepath is None and filepaths is None:
-        raise ValueError("One of `filepath` and `filepaths` must be specified.")
-    elif filepath is None:
-        filepath = filepaths
-        warnings.warn(
-            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
-            FutureWarning,
-        )
 
     if not isinstance(filepath, list):
         filepath = [filepath]
@@ -219,6 +223,11 @@ def standardise_surface(
 
         return responses
     else:
+
+        if sort_files:
+            if source_format.lower() != "gcwerks":
+                filepath = sort_by_filenames(filepath=filepath)
+
         return standardise(
             store=store,
             data_type="surface",
@@ -229,6 +238,9 @@ def standardise_surface(
             inlet=inlet,
             height=height,
             instrument=instrument,
+            data_level=data_level,
+            data_sublevel=data_sublevel,
+            dataset_source=dataset_source,
             sampling_period=sampling_period,
             calibration_scale=calibration_scale,
             measurement_type=measurement_type,
@@ -249,14 +261,14 @@ def standardise_surface(
 
 def standardise_column(
     filepath: Union[str, Path],
+    species: str,
+    platform: str = "satellite",
+    site: Optional[str] = None,
     satellite: Optional[str] = None,
     domain: Optional[str] = None,
     selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
     network: Optional[str] = None,
     instrument: Optional[str] = None,
-    platform: str = "satellite",
     source_format: str = "openghg",
     store: Optional[str] = None,
     if_exists: str = "auto",
@@ -273,7 +285,11 @@ def standardise_column(
 
     Args:
         filepath: Path of observation file
-        satellite: Name of satellite (if relevant)
+        species: Species name or synonym e.g. "ch4"
+        platform: Type of platform. Should be one of:
+            - "satellite"
+            - "site"
+        satellite: Name of satellite (if relevant). Should include satellite OR site.
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
             (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -281,14 +297,9 @@ def standardise_column(
             performed on satellite data. This can be based on any form of filtering, binning etc.
             but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
             If not specified, domain will be used.
-        site : Site code/name (if relevant). Can include satellite OR site.
-        species: Species name or synonym e.g. "ch4"
+        site : Site code/name (if relevant). Should include satellite OR site.
         instrument: Instrument name e.g. "TANSO-FTS"
-        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-        platform: Type of platform. Should be one of:
-            - "satellite"
-            - "site"
-        source_format : Type of data being input e.g. openghg (internal format)
+        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"        source_format : Type of data being input e.g. openghg (internal format)
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -324,15 +335,15 @@ def standardise_column(
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
+            "species": species,
+            "platform": platform,
             "site": site,
             "satellite": satellite,
             "domain": domain,
             "selection": selection,
             "site": site,
-            "species": species,
             "network": network,
             "instrument": instrument,
-            "platform": platform,
             "source_format": source_format,
             "overwrite": overwrite,
         }
@@ -351,14 +362,14 @@ def standardise_column(
             store=store,
             data_type="column",
             filepath=filepath,
+            species=species,
+            platform=platform,
             satellite=satellite,
             domain=domain,
             selection=selection,
             site=site,
-            species=species,
             network=network,
             instrument=instrument,
-            platform=platform,
             source_format=source_format,
             overwrite=overwrite,
             if_exists=if_exists,
@@ -505,6 +516,7 @@ def standardise_footprint(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
+    sort_files: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -554,6 +566,7 @@ def standardise_footprint(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        sort_files: Sort multiple files datewise
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -566,6 +579,12 @@ def standardise_footprint(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    if sort_files:
+        filepath = sort_by_filenames(filepath=filepath)
 
     if running_on_hub():
         raise NotImplementedError("Cloud support not yet implemented.")
@@ -664,7 +683,7 @@ def standardise_flux(
         source: Flux / Emissions source
         domain: Flux / Emissions domain
         source_format: Data format, for example openghg, intem
-        date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+        date: Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
         time_resolved: If this is a high resolution file
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
@@ -875,3 +894,100 @@ def standardise_from_binary_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
     return result
+
+
+def standardise_flux_timeseries(
+    filepath: Union[str, Path],
+    species: str,
+    source: str,
+    region: str = "UK",
+    source_format: str = "crf",
+    domain: Optional[str] = None,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    store: Optional[str] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
+    overwrite: bool = False,
+    force: bool = False,
+    compressor: Optional[Any] = None,
+    filters: Optional[Any] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: Optional[bool] = None,
+    optional_metadata: Optional[Dict] = None,
+) -> Dict:
+    """Process one dimension timeseries file
+
+    Args:
+        filepath: Path of flux timeseries file
+        species: Species name
+        source: Flux / Emissions source
+        region: Region/Country of the CRF data
+        source_format : Type of data being input e.g. openghg (internal format)
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        domain: If flux is related to pre-existing domain (e.g. "EUROPE") with defined latitude-longitude bounds this can be used to flag that. Otherwise, use `region` input to describe the name of a region (e.g. "UK").
+        database: Name of database source for this input (if relevant)
+        database_version: Name of database version (if relevant)
+        model: Model name (if relevant)
+        If specified, should be one of:
+            - "yearly", "monthly"
+            - suitable pandas Offset Alias
+            - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
+        continuous: Whether time stamps have to be continuous.
+        if_exists: What to do if existing data is present.
+            - "auto" - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "combine" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+            - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
+        force: Force adding of data even if this is identical to data stored.
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+    Returns:
+        dict: Dictionary of datasource UUIDs data assigned to
+    """
+
+    if domain is not None:
+        logger.warning(
+            "Geographic domain, default is 'None'. Instead region is used to identify area,"
+            "Please supply region in future instances"
+        )
+        region = domain
+    if running_on_hub():
+        raise NotImplementedError("Serverless not implemented yet for Flux timeseries model.")
+    return standardise(
+        data_type="flux_timeseries",
+        store=store,
+        filepath=filepath,
+        species=species,
+        source=source,
+        source_format=source_format,
+        domain=domain,
+        region=region,
+        database=database,
+        database_version=database_version,
+        model=model,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compressor=compressor,
+        filters=filters,
+        period=period,
+        continuous=continuous,
+        optional_metadata=optional_metadata,
+    )

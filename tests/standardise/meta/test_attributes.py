@@ -1,7 +1,7 @@
 import logging
 
 import pytest
-from openghg.standardise.meta import get_attributes
+from openghg.standardise.meta import get_attributes, data_variable_formatter
 
 # flake8: noqa
 
@@ -46,7 +46,8 @@ def test_species_attributes(species, name, long_name, units):
 
     site = "mhd"
     ds = make_dummy_dataset(species)
-    ds_updated = get_attributes(ds, species, site)
+    ds_updated = data_variable_formatter(ds, species, species_label=name)
+    ds_updated = get_attributes(ds_updated, species, site)
 
     assert name in ds_updated
 
@@ -66,10 +67,12 @@ def test_species_attributes_isotopologue():
 
     species = "CH4C13"
     site = "mhd"
-    ds = make_dummy_dataset(species)
-    ds_updated = get_attributes(ds, species, site)
-
     name = "dch4c13"
+    ds = make_dummy_dataset(species)
+    ds_updated = data_variable_formatter(ds, species, species_label=name)
+    ds_updated = get_attributes(ds_updated, species, site)
+
+
     long_name = "delta_ch4_c13"
     units = "1"
     units_non_standard = "per mil"
