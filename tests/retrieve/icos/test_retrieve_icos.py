@@ -4,6 +4,7 @@ import pytest
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
 from openghg.retrieve.icos import retrieve_atmospheric
+from openghg.types import AttrMismatchError
 
 
 @pytest.mark.icos
@@ -167,3 +168,12 @@ def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
 
     retrieve_atmospheric(site="tac", store="user", force=True)
     assert "There is no new data to process." not in caplog.text
+
+
+@pytest.mark.icos
+def test_retrieve_sac_data_update_attrs_with_bool():
+    with pytest.raises(AttrMismatchError):
+        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m")
+
+    with pytest.raises(ValueError):
+        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", update_mismatch=True)
