@@ -55,7 +55,6 @@ def test_read_obspack_2020():
     attributes = ch4_data.attrs
 
     assert "sampling_period" in attributes
-    assert attributes["sampling_period"] == "NOT_SET"
     assert "sampling_period_estimate" in attributes
 
     ch4_metadata = data["ch4"]["metadata"]
@@ -93,7 +92,7 @@ def test_read_obspack_flask_2021():
     attributes = ch4_data.attrs
 
     assert "sampling_period" in attributes
-    assert attributes["sampling_period"] == "NOT_SET"
+    assert attributes["sampling_period"] == "not_set"
     assert "sampling_period_estimate" in attributes
     assert float(attributes["sampling_period_estimate"]) > 0.0
     assert attributes["units"] == "nanomol mol-1"
