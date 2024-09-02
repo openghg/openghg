@@ -6,7 +6,6 @@ from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cas
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
-import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
@@ -197,6 +196,10 @@ class ObsSurface(BaseStore):
         TODO: Should "measurement_type" be changed to "platform" to align
         with ModelScenario and ObsColumn?
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from collections import defaultdict
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
@@ -209,6 +212,7 @@ class ObsSurface(BaseStore):
             load_standardise_parser,
             verify_site,
             check_if_need_new_version,
+            match_function_inputs,
             synonyms,
         )
 
@@ -249,20 +253,6 @@ class ObsSurface(BaseStore):
         data_sublevel = clean_string(data_sublevel)
         dataset_source = clean_string(dataset_source)
 
-        # Would like to rename `data_source` to `retrieved_from` but
-        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
-        data_source = "internal"
-
-        # Define additional metadata which we aren't passing (are never passing?) to the parse functions
-        # TODO: May actually want to include more dynamic checks of this - whatever is needed but not passed to parse?
-        # - how are we determining "whatever is needed" at the moment? Presumably set by the config file - may even be the get_lookup_keys (or need some variant on this)?
-        additional_metadata = {
-            "data_level": data_level,
-            "data_sublevel": data_sublevel,
-            "dataset_source": dataset_source,
-            "data_source": data_source,
-        }
-
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
             inlet = height
@@ -270,6 +260,15 @@ class ObsSurface(BaseStore):
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
         inlet = format_inlet(inlet)
+
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
+
+        # Define additional metadata which is not being passed to the parse functions
+        additional_metadata = {
+            "data_source": data_source,
+        }
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -297,6 +296,10 @@ class ObsSurface(BaseStore):
         else:
             filepaths = filepath
 
+        # Get current parameter values and filter to only include function inputs
+        current_parameters = locals().copy()
+        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
+
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepaths:
             if source_format == "GCWERKS":
@@ -312,6 +315,14 @@ class ObsSurface(BaseStore):
             filepath = cast(Union[str, Path], filepath)
             filepath = Path(filepath)
 
+            fn_input_parameters["filepath"] = filepath
+            parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
+
+            matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
+
             # This hasn't been updated to use the new check_hashes function due to
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
@@ -323,42 +334,11 @@ class ObsSurface(BaseStore):
                 )
                 continue
 
-            # Define required input parameters for parser function
-            required_parameters = {
-                "filepath": filepath,
-                "site": site,
-                "network": network,
-                "inlet": inlet,
-                "instrument": instrument,
-                "sampling_period": sampling_period,
-                "measurement_type": measurement_type,
-                "site_filepath": site_filepath,
-            }
             if source_format == "GCWERKS":
-                required_parameters["precision_filepath"] = precision_filepath
-
-            # Collect together optional parameters (not required but
-            # may be accepted by underlying parser function)
-            optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
-
-            input_parameters = required_parameters.copy()
-
-            # Find parameters that parser_fn accepts (must accept all required arguments already)
-            signature = inspect.signature(parser_fn)
-            fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-            # Check if optional parameters are present in function call and only use those which are.
-            for param, param_value in optional_parameters.items():
-                if param in fn_accepted_parameters:
-                    input_parameters[param] = param_value
-                else:
-                    logger.warning(
-                        f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                        f"This is not accepted by the current standardisation function: {parser_fn}"
-                    )
+                parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
-            data = parser_fn(**input_parameters)
+            data = parser_fn(**parser_input_parameters)
 
             # Current workflow: if any species fails, whole filepath fails
             for key, value in data.items():
@@ -384,8 +364,13 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            # before adding details
+            if optional_metadata is not None:
+                additional_metadata.update(optional_metadata)
+
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            data = self.update_metadata(data, additional_metadata)
+            data = self.update_metadata(data, additional_input_parameters, additional_metadata)
 
             lookup_keys = self.get_lookup_keys(optional_metadata)
 
