@@ -224,6 +224,9 @@ class BoundaryConditions(BaseStore):
                 key: value for key, value in fn_input_parameters.items() if key not in matched_keys
             }
 
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
+
             if optional_metadata is not None:
                 additional_metadata.update(optional_metadata)
 
@@ -232,11 +235,8 @@ class BoundaryConditions(BaseStore):
                 boundary_conditions_data, additional_input_parameters, additional_metadata
             )
 
-            lookup_keys = self.get_lookup_keys(optional_metadata)
-
-            if optional_metadata is not None:
-                for parsed_data in boundary_conditions_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+            # Use config and latest metadata to create lookup keys
+            lookup_keys = self.get_lookup_keys(boundary_conditions_data)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources

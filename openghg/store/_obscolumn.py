@@ -181,17 +181,16 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
-        lookup_keys = self.get_lookup_keys(optional_metadata)
-
-        if optional_metadata is not None:
-            for parsed_data in obs_data.values():
-                parsed_data["metadata"].update(optional_metadata)
+        # Use config and latest metadata to create lookup keys
+        lookup_keys = self.get_lookup_keys(obs_data)
 
         data_type = "column"
         datasource_uuids = self.assign_data(

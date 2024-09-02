@@ -267,7 +267,6 @@ class Footprints(BaseStore):
         fn_input_parameters = locals().copy()
 
         from openghg.store.spec import define_standardise_parsers
-
         from openghg.util import (
             clean_string,
             format_inlet,
@@ -405,6 +404,8 @@ class Footprints(BaseStore):
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
             additional_metadata.update(optional_metadata)
 
@@ -413,13 +414,15 @@ class Footprints(BaseStore):
             footprint_data, additional_input_parameters, additional_metadata
         )
 
-        # TODO - we'll further tidy this up when we move the metdata parsing
-        # into a centralised place
-        lookup_keys = self.get_lookup_keys(optional_metadata)
+        lookup_keys = self.get_lookup_keys(footprint_data)
 
-        if optional_metadata is not None:
-            for parsed_data in footprint_data.values():
-                parsed_data["metadata"].update(optional_metadata)
+        # # TODO - we'll further tidy this up when we move the metdata parsing
+        # # into a centralised place
+        # lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
+
+        # if optional_metadata is not None:
+        #     for parsed_data in footprint_data.values():
+        #         parsed_data["metadata"].update(optional_metadata)
 
         data_type = "footprints"
         # TODO - filter options

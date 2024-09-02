@@ -204,13 +204,37 @@ class BaseStore:
 
         return data
 
-    def get_lookup_keys(self, optional_metadata: Optional[Dict]) -> List[str]:
+    def check_info_keys(self, optional_metadata: Optional[Dict]) -> None:
+        """Check the informational metadata is not being used to set required keys.
+
+        Args:
+            optional_metadata: Additional informational metadata
+
+        Returns:
+            None
+            Raises ValueError if any keys within optional_metadata are
+                within the required set of keys.
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+    def get_lookup_keys(self, data: dict) -> List[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
         if they exist in the list of stored optional keys.
 
         Args:
-            optional_metadata: Dictionary of optional metadata
+            data: Dictionary containing data and metadata for datasource
+
         Returns:
             tuple: Tuple of keys
         """
@@ -220,19 +244,16 @@ class BaseStore:
         optional = metakeys.get("optional", {})
 
         lookup_keys = list(required)
-        # Check if anything in optional_metadata tries to override our required keys
-        if optional_metadata is not None:
-            common_keys = set(required) & set(optional_metadata)
 
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
+        # Note: Just grabbing the first entry in data at the moment
+        # In principle the metadata should have the same keys for all entries
+        # but should check that assumption is reasonable
+        parsed_data_representative = list(data.values())[0]
+        metadata = parsed_data_representative["metadata"]
 
-            if optional:
-                for key in optional_metadata:
-                    if key in optional:
-                        lookup_keys.append(key)
+        # Matching between potential optional keys and those present in the metadata
+        optional_lookup = set(optional) & set(metadata.keys())
+        lookup_keys.extend(list(optional_lookup))
 
         return lookup_keys
 

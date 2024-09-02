@@ -187,6 +187,8 @@ class FluxTimeseries(BaseStore):
         if optional_metadata is None:
             optional_metadata = {}
 
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
             additional_metadata.update(optional_metadata)
 
@@ -196,11 +198,7 @@ class FluxTimeseries(BaseStore):
         )
 
         # Use config and latest metadata to create lookup keys
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # add optional metdata to parsed metadata
-        for parsed_data in flux_timeseries_data.values():
-            parsed_data["metadata"].update(optional_metadata)
+        lookup_keys = self.get_lookup_keys(flux_timeseries_data)
 
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(

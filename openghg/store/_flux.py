@@ -212,29 +212,15 @@ class Flux(BaseStore):
         if optional_metadata is None:
             optional_metadata = {}
 
-        # TODO: REMOVE ONCE OPTIONAL KEYS CAN BE TAKEN FROM OTHER INPUTS THAN OPTIONAL_METADATA
-        optional_keywords: dict[Any, Any] = {
-            "database": database,
-            "database_version": database_version,
-            "model": model,
-        }
-
-        to_add = {key: value for key, value in optional_keywords.items() if value is not None}
-        optional_metadata.update(to_add)
-        ######
-
         # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
             additional_metadata.update(optional_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
 
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # add optional metdata to parsed metadata
-        for parsed_data in flux_data.values():
-            parsed_data["metadata"].update(optional_metadata)
+        lookup_keys = self.get_lookup_keys(flux_data)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(

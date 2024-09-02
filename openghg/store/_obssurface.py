@@ -144,16 +144,16 @@ class ObsSurface(BaseStore):
             height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
-        data_level: The level of quality control which has been applied to the data.
-            This should follow the convention of:
-                - "0": raw sensor output
-                - "1": automated quality assurance (QA) performed
-                - "2": final data set
-                - "3": elaborated data products using the data
-        data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
-            before data is finalised.
-        dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
-        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+            data_level: The level of quality control which has been applied to the data.
+                This should follow the convention of:
+                    - "0": raw sensor output
+                    - "1": automated quality assurance (QA) performed
+                    - "2": final data set
+                    - "3": elaborated data products using the data
+            data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
+                before data is finalised.
+            dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
@@ -366,17 +366,15 @@ class ObsSurface(BaseStore):
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
+            self.check_info_keys(optional_metadata)
             if optional_metadata is not None:
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.update_metadata(data, additional_input_parameters, additional_metadata)
 
-            lookup_keys = self.get_lookup_keys(optional_metadata)
-
-            if optional_metadata is not None:
-                for parsed_data in data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+            # Use config and latest metadata to create lookup keys
+            lookup_keys = self.get_lookup_keys(data)
 
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
