@@ -162,20 +162,44 @@ class BaseStore:
 
         return seen, unseen
 
-    def update_metadata(self, data: Dict, additional_metadata: Dict) -> Dict:
+    def add_metakeys(self, force: bool = False) -> dict:
+        """
+        Check metakeys are included from relevant config file and add as the `.metakeys`
+        attributes if not.
+        """
+        if not hasattr(self, "metakeys") or force:
+            try:
+                metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+            except KeyError:
+                raise ValueError(
+                    f"No metakeys for {self._data_type}, please update metakeys configuration file."
+                )
+
+            self.metakeys = metakeys
+
+        return self.metakeys
+
+    def update_metadata(self, data: Dict, input_parameters: dict, additional_metadata: Dict) -> Dict:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
             data: Dictionary containing data and metadata for species
+            input_parameters: Input parameters from read_file.
             additional_metadata: Keys to add to the metadata dictionary
         Returns:
             dict: data dictionary with metadata keys added
         """
+        # Get defined metakeys from the config setup
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+
+        input_parameters_required = {key: value for key, value in input_parameters.items() if key in required}
 
         # Basic implemntation of this
         # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
         # TODO: May want to add checks to make sure we're not overwriting anything important.
         for parsed_data in data.values():
+            parsed_data["metadata"].update(input_parameters_required)
             parsed_data["metadata"].update(additional_metadata)
 
         return data
@@ -190,11 +214,7 @@ class BaseStore:
         Returns:
             tuple: Tuple of keys
         """
-        try:
-            metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
-        except KeyError:
-            raise ValueError(f"No metakeys for {self._data_type}, please update metakeys configuration file.")
-
+        metakeys = self.add_metakeys()
         required = metakeys["required"]
         # We might not get any optional keys
         optional = metakeys.get("optional", {})

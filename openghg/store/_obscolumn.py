@@ -89,8 +89,18 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store.spec import define_standardise_parsers
-        from openghg.util import clean_string, load_standardise_parser, check_if_need_new_version, synonyms
+        from openghg.util import (
+            clean_string,
+            load_standardise_parser,
+            split_function_inputs,
+            check_if_need_new_version,
+            synonyms,
+        )
 
         # TODO: Evaluate which inputs need cleaning (if any)
         species = clean_string(species)
@@ -107,6 +117,9 @@ class ObsColumn(BaseStore):
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -133,6 +146,10 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -143,21 +160,14 @@ class ObsColumn(BaseStore):
         if chunks is None:
             chunks = {}
 
-        # Define parameters to pass to the parser function
-        param = {
-            "data_filepath": filepath,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "species": species,
-            "network": network,
-            "instrument": instrument,
-            "platform": platform,
-            "chunks": chunks,
-        }
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        obs_data = parser_fn(**param)
+        parser_input_parameters["data_filepath"] = filepath
+
+        obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
         # # Checking against expected format for ObsColumn
@@ -168,6 +178,12 @@ class ObsColumn(BaseStore):
         # TODO: Do we need to do include a split here of some kind, since
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
+
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
         lookup_keys = self.get_lookup_keys(optional_metadata)
 

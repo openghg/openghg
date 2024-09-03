@@ -262,6 +262,10 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store.spec import define_standardise_parsers
 
         from openghg.util import (
@@ -269,6 +273,7 @@ class Footprints(BaseStore):
             format_inlet,
             check_and_set_null_variable,
             check_if_need_new_version,
+            split_function_inputs,
             load_standardise_parser,
         )
 
@@ -309,8 +314,19 @@ class Footprints(BaseStore):
         if network is not None:
             network = clean_string(network)
 
-        standardise_parsers = define_standardise_parsers()[self._data_type]
+        # Do some housekeeping on the inputs
+        time_resolved = check_species_time_resolved(species, time_resolved)
+        short_lifetime = check_species_lifetime(species, short_lifetime)
 
+        if time_resolved and sort:
+            logger.info(
+                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+            )
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
+
+        standardise_parsers = define_standardise_parsers()[self._data_type]
         try:
             source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
@@ -318,6 +334,10 @@ class Footprints(BaseStore):
 
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         # file_hash = hash_file(filepath=filepath)
         # if file_hash in self._file_hashes and not overwrite:
@@ -344,52 +364,12 @@ class Footprints(BaseStore):
         if not filepath:
             return {}
 
-        # Do some housekeeping on the inputs
-        time_resolved = check_species_time_resolved(species, time_resolved)
-        short_lifetime = check_species_lifetime(species, short_lifetime)
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        if time_resolved and sort:
-            logger.info(
-                "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-            )
-
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "site": site,
-            "domain": domain,
-            "model": model,
-            "inlet": inlet,
-            "met_model": met_model,
-            "species": species,
-            "network": network,
-            "time_resolved": time_resolved,
-            "high_spatial_resolution": high_spatial_resolution,
-            "short_lifetime": short_lifetime,
-            "period": period,
-            "continuous": continuous,
-        }
-
-        input_parameters: dict[Any, Any] = param.copy()
-
-        # # TODO: Decide if we want to include details below / switch any parameters to be optional.
-        # optional_keywords: dict[Any, Any] = {}
-
-        # signature = inspect.signature(parser_fn)
-        # fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-        # # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        # for param, param_value in optional_keywords.items():
-        #     if param in fn_accepted_parameters:
-        #         input_parameters[param] = param_value
-        #     else:
-        #         logger.warning(
-        #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-        #             f"This is not accepted by the current standardisation function: {parser_fn}"
-        #         )
-
-        footprint_data = parser_fn(**input_parameters)
+        footprint_data = parser_fn(**parser_input_parameters)
 
         chunks = self.check_chunks(
             ds=list(footprint_data.values())[0]["data"],
@@ -421,6 +401,14 @@ class Footprints(BaseStore):
             logger.info(
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
+
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        footprint_data = self.update_metadata(
+            footprint_data, additional_input_parameters, additional_metadata
+        )
 
         # TODO - we'll further tidy this up when we move the metdata parsing
         # into a centralised place

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
@@ -111,12 +110,17 @@ class FluxTimeseries(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.store.spec import define_standardise_parsers
 
         from openghg.util import (
             clean_string,
             load_standardise_parser,
             check_if_need_new_version,
+            split_function_inputs,
         )
 
         species = clean_string(species)
@@ -124,6 +128,9 @@ class FluxTimeseries(BaseStore):
         region = clean_string(region)
         if domain:
             domain = clean_string(domain)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -150,6 +157,10 @@ class FluxTimeseries(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -157,65 +168,31 @@ class FluxTimeseries(BaseStore):
 
         filepath = next(iter(unseen_hashes.values()))
 
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "species": species,
-            "region": region,
-            "source": source,
-            "data_type": "flux_timeseries",
-            "period": period,
-            "continuous": continuous,
-        }
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        optional_keywords: dict[Any, Any] = {
-            "database": database,
-            "database_version": database_version,
-            "model": model,
-        }
-
-        signature = inspect.signature(parser_fn)
-        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-        input_parameters: dict[Any, Any] = param.copy()
-
-        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        for param, param_value in optional_keywords.items():
-            if param in fn_accepted_parameters:
-                input_parameters[param] = param_value
-            else:
-                logger.warning(
-                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                    f"This is not accepted by the current standardisation function: {parser_fn}"
-                )
-
-        flux_timeseries_data = parser_fn(**input_parameters)
+        flux_timeseries_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux
         for split_data in flux_timeseries_data.values():
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-            # combine metadata and get look-up keys
+        # combine metadata and get look-up keys
         if optional_metadata is None:
             optional_metadata = {}
 
-        # Make sure none of these are Nones
-        to_add = {k: v for k, v in optional_keywords.items() if v is not None}
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-        # warn if `optional_metadata` overlaps with keyword arguments
-        overlap = [k for k in optional_metadata if k in to_add]
-        if overlap:
-            msg = (
-                f"Values for {', '.join(overlap)} in `optional_metadata` are "
-                "being overwritten by values passed as keyword arguments."
-            )
-            logger.warning(msg)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        flux_timeseries_data = self.update_metadata(
+            flux_timeseries_data, additional_input_parameters, additional_metadata
+        )
 
-        # update `optional_metadata` dict with any "optional" arguments passed to the parser
-        optional_metadata.update(to_add)
-
+        # Use config and latest metadata to create lookup keys
         lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
 
         # add optional metdata to parsed metadata
