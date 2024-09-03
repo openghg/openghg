@@ -97,7 +97,7 @@ class ObsColumn(BaseStore):
         from openghg.util import (
             clean_string,
             load_standardise_parser,
-            match_function_inputs,
+            split_function_inputs,
             check_if_need_new_version,
             synonyms,
         )
@@ -160,14 +160,12 @@ class ObsColumn(BaseStore):
         if chunks is None:
             chunks = {}
 
-        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
         parser_input_parameters["data_filepath"] = filepath
-
-        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
-        additional_input_parameters = {
-            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-        }
 
         obs_data = parser_fn(**parser_input_parameters)
 
