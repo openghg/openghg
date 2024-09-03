@@ -132,7 +132,7 @@ class Flux(BaseStore):
             clean_string,
             load_standardise_parser,
             check_if_need_new_version,
-            match_function_inputs,
+            split_function_inputs,
         )
 
         species = clean_string(species)
@@ -189,14 +189,12 @@ class Flux(BaseStore):
         fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
-        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
         parser_input_parameters["data_type"] = self._data_type
-
-        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
-        additional_input_parameters = {
-            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-        }
 
         flux_data = parser_fn(**parser_input_parameters)
 

@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import match_function_inputs
+from openghg.util import split_function_inputs
 
 
 def fn(site, inlet, species, return_values=True):
@@ -14,7 +14,7 @@ def fn(site, inlet, species, return_values=True):
         return site, inlet, species
 
 
-def test_match_function_inputs():
+def test_split_function_inputs():
     """
     Check correct parameters can be selected for function and function
     can be called correctly
@@ -25,10 +25,11 @@ def test_match_function_inputs():
                   "species": "ch4",
                   "return_values": False}
     
-    fn_inputs = match_function_inputs(parameters, fn)
+    fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
     
     # Expect all parameters to be found and included in dictionary
     assert fn_inputs == parameters
+    assert remaining_inputs == {}
 
     output = fn(**fn_inputs)
 
@@ -36,7 +37,7 @@ def test_match_function_inputs():
     assert output is None
 
 
-def test_match_function_inputs_default():
+def test_split_function_inputs_default():
     """
     Check correct parameters can be selected for function when
     not all input keywords are specified. 
@@ -47,10 +48,11 @@ def test_match_function_inputs_default():
                   "inlet": "10m",
                   "species": "ch4"}
     
-    fn_inputs = match_function_inputs(parameters, fn)
+    fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     # Expect selected parameters to be found and included in dictionary
     assert fn_inputs == parameters
+    assert remaining_inputs == {}
 
     output = fn(**fn_inputs)
 
@@ -58,7 +60,7 @@ def test_match_function_inputs_default():
     assert output == ("tac", "10m", "ch4")
 
 
-def test_match_function_inputs_extra():
+def test_split_function_inputs_extra():
     """
     Check correct parameters can be selected for function when
     additional keywords are specified.
@@ -70,34 +72,39 @@ def test_match_function_inputs_extra():
                   "species": "ch4",
                   "additional_key": "not_needed"}
     
-    fn_inputs = match_function_inputs(parameters, fn)
+    fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     # Remove key which does not match to the function call for checking
-    parameters.pop("additional_key")
+    expected_parameters = parameters.copy()
+    expected_parameters.pop("additional_key")
+
+    expected_remaining = {"additional_key": "not_needed"}
 
     # Expect selected parameters to be found and included in dictionary
-    assert fn_inputs == parameters
+    assert fn_inputs == expected_parameters
+    assert remaining_inputs == expected_remaining
 
     output = fn(**fn_inputs)
 
     assert output == ("tac", "10m", "ch4")
 
 
-def test_match_function_inputs_not_all():
+def test_split_function_inputs_not_all():
     """
     Check correct parameters can be selected for function even when
     required keys are missing.
     Check this raises expected TypeError when function is called.
 
-    Note: in match_function_inputs could be updated to catch this but may
+    Note: in split_function_inputs could be updated to catch this but may
     be easier to let function itself raise relevant error message.
     """
 
     parameters = {"species": "ch4"}
     
-    fn_inputs = match_function_inputs(parameters, fn)
+    fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     assert fn_inputs == parameters
+    assert remaining_inputs == {}
 
     with pytest.raises(TypeError) as excinfo:
         fn(**fn_inputs)

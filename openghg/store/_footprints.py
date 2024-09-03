@@ -272,7 +272,7 @@ class Footprints(BaseStore):
             format_inlet,
             check_and_set_null_variable,
             check_if_need_new_version,
-            match_function_inputs,
+            split_function_inputs,
             load_standardise_parser,
         )
 
@@ -363,13 +363,10 @@ class Footprints(BaseStore):
         if not filepath:
             return {}
 
-        # Define parameters to pass to the parser function
-        parser_input_parameters = match_function_inputs(fn_input_parameters, parser_fn)
-
-        matched_keys = set(parser_input_parameters) & set(fn_input_parameters)
-        additional_input_parameters = {
-            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-        }
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
         footprint_data = parser_fn(**parser_input_parameters)
 
