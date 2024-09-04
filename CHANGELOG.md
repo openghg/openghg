@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated data variable formatting from assign attributes function into dataset_formatter function.- [PR #1102](https://github.com/openghg/openghg/pull/1102)
 - Required and optional keys for "column" data type were updated to reflect the two sources of this data (site, satellite) [PR #1104](https://github.com/openghg/openghg/pull/1104)
 - Ensure metadata keywords for NOAA obspack are consistent with wider definitions including renaming data_source to dataset_source (data_source would be "internal"). [PR #1110](https://github.com/openghg/openghg/pull/1110)
+- When adding new data sources, updated how lookup keys add optional keys. This used to only extract these from the optional_metadata input but this now allows keys to be added through any metadata. [PR #1112](https://github.com/openghg/openghg/pull/1112)
 
 ### Fixed
 

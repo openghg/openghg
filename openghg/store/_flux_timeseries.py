@@ -180,10 +180,8 @@ class FluxTimeseries(BaseStore):
             em_data = split_data["data"]
             FluxTimeseries.validate_data(em_data)
 
-        # combine metadata and get look-up keys
-        if optional_metadata is None:
-            optional_metadata = {}
-
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
             additional_metadata.update(optional_metadata)
 
@@ -192,20 +190,12 @@ class FluxTimeseries(BaseStore):
             flux_timeseries_data, additional_input_parameters, additional_metadata
         )
 
-        # Use config and latest metadata to create lookup keys
-        lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # add optional metdata to parsed metadata
-        for parsed_data in flux_timeseries_data.values():
-            parsed_data["metadata"].update(optional_metadata)
-
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
             data=flux_timeseries_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
