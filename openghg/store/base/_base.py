@@ -209,11 +209,10 @@ class BaseStore:
 
         Args:
             optional_metadata: Additional informational metadata
-
         Returns:
             None
-            Raises ValueError if any keys within optional_metadata are
-                within the required set of keys.
+        Raises:
+            ValueError: if any keys within optional_metadata are within the required set of keys.
         """
         metakeys = self.add_metakeys()
         required = metakeys["required"]
