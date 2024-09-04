@@ -179,11 +179,11 @@ def merge_dict(
     keys_dict2: Optional[Iterable] = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
-    on_conflict: Literal["check_value", "error"] = "check_value",
+    on_overlap: Literal["check_value", "error"] = "check_value",
+    on_conflict: Literal["left", "right", "drop", "error"] = "left",
     relative_tolerance: float = 1e-3,
     lower: bool = True,
     not_set_values: Iterable = not_set_metadata_values(),
-    resolve_mismatch: bool = False,
 ) -> dict:
     """
     The merge_dict function merges the key:value pairs of two dictionaries checking for
@@ -234,14 +234,17 @@ def merge_dict(
 
     overlapping_keys = get_overlap_keys(dict1, dict2)
 
+    if on_overlap == "error":
+        raise ValueError(f"Unable to merge dictionaries with overlapping keys: {','.join(overlapping_keys)}")
+
     dict1_non_overlap = {key: value for key, value in dict1.items() if key not in overlapping_keys}
     dict2_not_overlap = {key: value for key, value in dict2.items() if key not in overlapping_keys}
 
     # Merge the two dictionaries for the keys we know don't overlap
     merged_dict = dict1_non_overlap | dict2_not_overlap
 
-    if on_conflict == "check_value":
-        overlap_values_not_matching = {}
+    if on_overlap == "check_value":
+        values_not_matching = {}
         for key in overlapping_keys:
             value1 = dict1[key]
             value2 = dict2[key]
@@ -258,20 +261,24 @@ def merge_dict(
             elif value_present is not None:
                 merged_dict[key] = value_present
             else:
-                if resolve_mismatch:
-                    merged_dict[key] = value1
-                    logger.warning(
-                        f"Values do not match between dictionaries. Updating to {key} = {value1} (not {value2})"
-                    )
-                else:
-                    overlap_values_not_matching[key] = (value1, value2)
-    elif on_conflict == "error":
-        raise ValueError(f"Unable to merge dictionaries with overlapping keys: {','.join(overlapping_keys)}")
+                if on_conflict in ["left", "right", "drop"]:
+                    msg = f"Values do not match between dictionaries. "
+                    if on_conflict == "left":
+                        merged_dict[key] = value1
+                        msg += f"Updating to '{on_conflict}' {key} = {value1} (not {value2})."
+                    elif on_conflict == "right":
+                        merged_dict[key] = value2
+                        msg += f"Updating to '{on_conflict}' {key} = {value2} (not {value1})."
+                    elif on_conflict == "drop":
+                        msg += f"Dropping {key} from merged dictionary."
+                    logger.warning(msg)
+                elif on_conflict == "error":
+                    values_not_matching[key] = (value1, value2)
 
-    if overlap_values_not_matching:
+    if values_not_matching:
         mismatch_details = [
             f" - '{key}', dict1: {values[0]}, dict2: {values[1]}"
-            for key, values in overlap_values_not_matching.items()
+            for key, values in values_not_matching.items()
         ]
         mismatch_str = "\n".join(mismatch_details)
         msg = f"Same key(s) supplied from different sources:\n{mismatch_str}"

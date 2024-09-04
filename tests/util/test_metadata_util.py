@@ -110,30 +110,52 @@ def test_merge_dict_raises_no_value_check():
     dict2 = {"site": "bsd"}
 
     with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, on_conflict="error")
+        merge_dict(dict1, dict2, on_overlap="error")
 
     assert "Unable to merge dictionaries with overlapping keys" in str(excinfo.value)
 
 
+@pytest.mark.parametrize(
+    "on_conflict,dict1,dict2,expected_output",
+    [
+        (
+            "left",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "TAC"},
+            {"site": "bsd", "inlet": "10m"},
+        ),
+        (
+            "right",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "TAC"},
+            {"site": "TAC", "inlet": "10m"},
+        ),
+        (
+            "drop",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "TAC"},
+            {"inlet": "10m"},
+        ),      
+    ],
+)
+def test_merge_dict_mismatch(dict1, dict2, on_conflict, expected_output):
+    """
+    Test value mismatch can be updated in the correct way for the on_conflict input.
+    (1) "left", (2) "right", (3) "drop".
+    """
+    output = merge_dict(dict1, dict2, on_conflict=on_conflict)
+    assert output == expected_output
+
+
 def test_merge_dict_raises_mismatch():
-    """Test error is raised when there is an overlapping key and value doesn't match"""
+    """Test error can be raised when there is an overlapping key and value doesn't match"""
     dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
     dict2 = {"site": "TAC"}
 
     with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2)
+        merge_dict(dict1, dict2, on_conflict="error")
 
     assert "Same key(s) supplied from different sources:" in str(excinfo.value)
-
-
-def test_merge_dict_mismatch():
-    """Test value mismatch can be updated using value from dict1 when flag is passed"""
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"inlet": "90m"}
-    expected_output = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-
-    output = merge_dict(dict1, dict2, resolve_mismatch=True)
-    assert output == expected_output
 
 
 def test_merge_specific_keys():
@@ -183,13 +205,12 @@ def test_merge_not_set_values():
 def test_merge_not_set_values_ignore():
     """Test default not_set_values can be ignored."""
     not_set_values = []
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": "not_set", "data_level": "1"}
+    dict1 = {"site": "not_set", "inlet": "10m", "species": "ch4"}
+    dict2 = {"site": "bsd", "data_level": "1"}
+    expected_output = {"site": "not_set", "inlet": "10m", "species": "ch4", "data_level": "1"}
 
-    with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, not_set_values=not_set_values)
-    
-    assert "Same key(s) supplied from different sources:" in str(excinfo.value)
+    output = merge_dict(dict1, dict2, not_set_values=not_set_values)
+    assert output == expected_output
 
 
 def test_merge_null_values():
@@ -204,12 +225,11 @@ def test_merge_null_values():
 
 
 def test_merge_null_values_ignore():
-    """Test error is raised if remove_null is set to False."""
+    """Test null values can be made to remain if remove_null is set to False."""
     remove_null = False
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": None, "data_level": "1"}
-
-    with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, remove_null=remove_null)
+    dict1 = {"site": None, "inlet": "10m"}
+    dict2 = {"site": "bsd", "data_level": "1"}
+    expected_output = {"site": None, "inlet": "10m", "data_level": "1"}
     
-    assert "Same key(s) supplied from different sources:" in str(excinfo.value)
+    output = merge_dict(dict1, dict2, remove_null=remove_null)
+    assert output == expected_output
