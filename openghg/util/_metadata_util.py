@@ -160,7 +160,7 @@ def get_overlap_keys(left: dict, right: dict) -> list:
     return overlapping_keys
 
 
-def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool = False):
+def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool = False) -> dict:
     """
     Convenience function to filter a dictionary by a set of keys.
     """
