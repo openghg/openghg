@@ -203,7 +203,7 @@ class BaseStore:
             # Sources of additional metadata - order in list is order of preference.
             sources = [input_parameters, additional_metadata]
             for source in sources:
-                metadata = merge_dict(metadata, source, keys_dict2=required)
+                metadata = merge_dict(metadata, source, keys_right=required)
 
             required_not_found = set(required) - set(metadata.keys())
             if required_not_found:
@@ -213,13 +213,13 @@ class BaseStore:
 
             # Check if named optional keys are included in the input_parameters and add
             optional_matched = set(optional) & set(input_parameters.keys())
-            metadata = merge_dict(metadata, input_parameters, keys_dict2=optional_matched)
+            metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
 
             # Add additional metadata keys
             if additional_metadata:
                 # Ensure required keys aren't added again (or clash with values from input_parameters)
                 additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
-                metadata = merge_dict(metadata, additional_metadata, keys_dict2=additional_metadata_to_add)
+                metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
 
             parsed_data["metadata"] = metadata
 

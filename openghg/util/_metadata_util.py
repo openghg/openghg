@@ -151,11 +151,11 @@ def check_not_set_value(
         return None
 
 
-def get_overlap_keys(dict1: dict, dict2: dict) -> list:
+def get_overlap_keys(left: dict, right: dict) -> list:
     """
     Find the keys which match between two dictionaries. Return list of these keys.
     """
-    overlapping_keys_check = set(dict1.keys()) & set(dict2.keys())
+    overlapping_keys_check = set(left.keys()) & set(right.keys())
     overlapping_keys = list(overlapping_keys_check)
     return overlapping_keys
 
@@ -172,11 +172,11 @@ def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool
 
 
 def merge_dict(
-    dict1: dict,
-    dict2: dict,
+    left: dict,
+    right: dict,
     keys: Optional[Iterable] = None,
-    keys_dict1: Optional[Iterable] = None,
-    keys_dict2: Optional[Iterable] = None,
+    keys_left: Optional[Iterable] = None,
+    keys_right: Optional[Iterable] = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
     on_overlap: Literal["check_value", "error"] = "check_value",
@@ -194,60 +194,60 @@ def merge_dict(
         - if the same keys are present in both dictionaries:
             - if one of the two values is identified as a value which has not been explicitly set (e.g. "not_set") the
             other value will be used in preference.
-            - otherwise, the value from dict1 gets preference in the merged dictionary.
+            - otherwise, the value from left gets preference in the merged dictionary.
 
     Args:
-        dict1, dict2 : Dictionaries to compare and merge
+        left, right : Dictionaries to compare and merge
         keys: Only include specific keys across both dictionaries in merged output
-        keys_dict1, keys_dict1: Select specific keys from dict1/dict2 when merging
-        remove_null: Before comparing and merging, remove keys from dict1 and dict2 which have null values.
+        keys_left, keys_right: Select specific keys from left/right when merging
+        remove_null: Before comparing and merging, remove keys from left and right which have null values.
         null_values: Values which are classed as null.
             See null_metadata_values() function for list of default values.
-        check_value: If keys overlap, check values match.
-            See check_value_match() function for rules of matching.
+        on_overlap: If keys overlap, can choose to check values using or raise an error.
+            Options: ["check_value", "error"]
+        on_conflict: If there is a conflict between key values, choose how to resolve this.
+            Options: ["left", "right", "drop", "error"]
         relative_tolerance: Tolerance between two numbers when checking values.
         lower: Whether to apply lower case to the two input values as strings when checking values.
         not_set_values: Values which indicate this value has not been specified.
             See not_set_metadata_values() function for list of default values.
-        resolve_mismatch: If keys overlap, values do not match and neither is null,
-            use value from dict1 and raise a warning. This will raise an error if set to False.
     Returns:
         dict: Merged dictionary
     Raises:
-        ValueError: if check_value is False and any keys overlap
-        ValueError: if resolve_mismatch is False, values for overlapping keys don't match and neither matched null_values
+        ValueError: if on_overlap is "error" and any keys overlap
+        ValueError: if on_conflict is "error", values for overlapping keys don't match and neither matched null_values
     """
     # Remove null values
     if remove_null:
-        dict1 = remove_null_keys(dict1, null_values)
-        dict2 = remove_null_keys(dict2, null_values)
+        left = remove_null_keys(left, null_values)
+        right = remove_null_keys(right, null_values)
 
     # Filter dictionaries based on any input key selections
     if keys is not None:
-        dict1 = _filter_keys(dict1, keys)
-        dict2 = _filter_keys(dict2, keys)
+        left = _filter_keys(left, keys)
+        right = _filter_keys(right, keys)
     else:
-        if keys_dict1 is not None:
-            dict1 = _filter_keys(dict1, keys_dict1)
-        if keys_dict2 is not None:
-            dict2 = _filter_keys(dict2, keys_dict2)
+        if keys_left is not None:
+            left = _filter_keys(left, keys_left)
+        if keys_right is not None:
+            right = _filter_keys(right, keys_right)
 
-    overlapping_keys = get_overlap_keys(dict1, dict2)
+    overlapping_keys = get_overlap_keys(left, right)
 
     if on_overlap == "error":
         raise ValueError(f"Unable to merge dictionaries with overlapping keys: {','.join(overlapping_keys)}")
 
-    dict1_non_overlap = {key: value for key, value in dict1.items() if key not in overlapping_keys}
-    dict2_not_overlap = {key: value for key, value in dict2.items() if key not in overlapping_keys}
+    left_non_overlap = {key: value for key, value in left.items() if key not in overlapping_keys}
+    right_not_overlap = {key: value for key, value in right.items() if key not in overlapping_keys}
 
     # Merge the two dictionaries for the keys we know don't overlap
-    merged_dict = dict1_non_overlap | dict2_not_overlap
+    merged_dict = left_non_overlap | right_not_overlap
 
     if on_overlap == "check_value":
         values_not_matching = {}
         for key in overlapping_keys:
-            value1 = dict1[key]
-            value2 = dict2[key]
+            value1 = left[key]
+            value2 = right[key]
 
             # Check whether either one of the values indicates this has not been explictly set.
             # - if so this prefer the other value if there is a difference
@@ -270,14 +270,14 @@ def merge_dict(
                         merged_dict[key] = value2
                         msg += f"Updating to '{on_conflict}' {key} = {value2} (not {value1})."
                     elif on_conflict == "drop":
-                        msg += f"Dropping {key} from merged dictionary."
+                        msg += f"Dropping key '{key}' from merged dictionary."
                     logger.warning(msg)
                 elif on_conflict == "error":
                     values_not_matching[key] = (value1, value2)
 
     if values_not_matching:
         mismatch_details = [
-            f" - '{key}', dict1: {values[0]}, dict2: {values[1]}"
+            f" - '{key}', left: {values[0]}, right: {values[1]}"
             for key, values in values_not_matching.items()
         ]
         mismatch_str = "\n".join(mismatch_details)

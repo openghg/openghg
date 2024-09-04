@@ -3,7 +3,7 @@ from openghg.util import get_overlap_keys, merge_dict
 
 
 @pytest.mark.parametrize(
-    "dict1,dict2,expected_output",
+    "left,right,expected_output",
     [
         (
             {"site": "bsd", "inlet": "10m", "species": "ch4"},
@@ -18,20 +18,20 @@ from openghg.util import get_overlap_keys, merge_dict
         ({}, {}, []),
     ],
 )
-def test_get_overlap_keys(dict1, dict2, expected_output):
+def test_get_overlap_keys(left, right, expected_output):
     """
     Test get_overlap_keys can return expected overlapping keys.
     1. Check empty list returned when no overlap
     2. Check overlap with matching keys are identified
     3. Check two empty input dictionaries return an empty list
     """
-    output = get_overlap_keys(dict1, dict2)
+    output = get_overlap_keys(left, right)
     output.sort()
     assert output == expected_output
 
 
 @pytest.mark.parametrize(
-    "dict1,dict2,expected_output",
+    "left,right,expected_output",
     [
         (
             {"site": "bsd", "inlet": "10m"},
@@ -85,7 +85,7 @@ def test_get_overlap_keys(dict1, dict2, expected_output):
         ),       
     ],
 )
-def test_merge_dict(dict1, dict2, expected_output):
+def test_merge_dict(left, right, expected_output):
     """
     1. Check merge with no overlap
     2. Check merge when keys overlap with identical value
@@ -98,25 +98,25 @@ def test_merge_dict(dict1, dict2, expected_output):
     9. Check not set value will be retained if both keys have the same "not_set" value
     10. Check null value (e.g. None) can be removed and ignored.
 
-    For 3, 4 & 5, expect value from dict1 to be used (order matters)
+    For 3, 4 & 5, expect value from left to be used (order matters)
     """
-    output = merge_dict(dict1, dict2)
+    output = merge_dict(left, right)
     assert output == expected_output
 
 
 def test_merge_dict_raises_no_value_check():
     """Test error is raised when there is an overlapping key and value isn't checked"""
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": "bsd"}
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"site": "bsd"}
 
     with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, on_overlap="error")
+        merge_dict(left, right, on_overlap="error")
 
     assert "Unable to merge dictionaries with overlapping keys" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "on_conflict,dict1,dict2,expected_output",
+    "on_conflict,left,right,expected_output",
     [
         (
             "left",
@@ -138,22 +138,22 @@ def test_merge_dict_raises_no_value_check():
         ),      
     ],
 )
-def test_merge_dict_mismatch(dict1, dict2, on_conflict, expected_output):
+def test_merge_dict_mismatch(left, right, on_conflict, expected_output):
     """
     Test value mismatch can be updated in the correct way for the on_conflict input.
     (1) "left", (2) "right", (3) "drop".
     """
-    output = merge_dict(dict1, dict2, on_conflict=on_conflict)
+    output = merge_dict(left, right, on_conflict=on_conflict)
     assert output == expected_output
 
 
 def test_merge_dict_raises_mismatch():
     """Test error can be raised when there is an overlapping key and value doesn't match"""
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": "TAC"}
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"site": "TAC"}
 
     with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, on_conflict="error")
+        merge_dict(left, right, on_conflict="error")
 
     assert "Same key(s) supplied from different sources:" in str(excinfo.value)
 
@@ -161,75 +161,75 @@ def test_merge_dict_raises_mismatch():
 def test_merge_specific_keys():
     """Test specific keys can be selected for both dict inputs when merging the dictionaries"""
     specific_keys = ["site", "inlet", "data_level"]
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"data_level": "1", "species": "inert"}
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"data_level": "1", "species": "inert"}
     expected_output = {"site": "bsd", "inlet": "10m", "data_level": "1"}
 
-    output = merge_dict(dict1, dict2, keys=specific_keys)
+    output = merge_dict(left, right, keys=specific_keys)
     assert output == expected_output
 
 
-def test_merge_specific_keys_dict1():
-    """Test specific keys can be selected for dict1 inputs when merging the dictionaries"""
-    specific_keys_dict1 = ["site", "inlet"]
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"data_level": "1", "species": "inert"}
+def test_merge_specific_keys_left():
+    """Test specific keys can be selected for left inputs when merging the dictionaries"""
+    specific_keys_left = ["site", "inlet"]
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"data_level": "1", "species": "inert"}
     expected_output = {"site": "bsd", "inlet": "10m", "data_level": "1", "species": "inert"}
 
-    output = merge_dict(dict1, dict2, keys_dict1=specific_keys_dict1)
+    output = merge_dict(left, right, keys_left=specific_keys_left)
     assert output == expected_output
 
 
-def test_merge_specific_keys_dict2():
-    """Test specific keys can be selected for dict2 inputs when merging the dictionaries"""
-    specific_keys_dict2 = ["data_level"]
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"data_level": "1", "species": "inert"}
+def test_merge_specific_keys_right():
+    """Test specific keys can be selected for right inputs when merging the dictionaries"""
+    specific_keys_right = ["data_level"]
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"data_level": "1", "species": "inert"}
     expected_output = {"site": "bsd", "inlet": "10m", "species": "ch4", "data_level": "1"}
 
-    output = merge_dict(dict1, dict2, keys_dict2=specific_keys_dict2)
+    output = merge_dict(left, right, keys_right=specific_keys_right)
     assert output == expected_output
 
 
 def test_merge_not_set_values():
     """Test not_set_values so value is ignored in preference to other value"""
     not_set_values = ["nothing to see here"]
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": "nothing to see here", "data_level": "1"}
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"site": "nothing to see here", "data_level": "1"}
     expected_output = {"site": "bsd", "inlet": "10m", "species": "ch4", "data_level": "1"}
 
-    output = merge_dict(dict1, dict2, not_set_values=not_set_values)
+    output = merge_dict(left, right, not_set_values=not_set_values)
     assert output == expected_output
 
 
 def test_merge_not_set_values_ignore():
     """Test default not_set_values can be ignored."""
     not_set_values = []
-    dict1 = {"site": "not_set", "inlet": "10m", "species": "ch4"}
-    dict2 = {"site": "bsd", "data_level": "1"}
+    left = {"site": "not_set", "inlet": "10m", "species": "ch4"}
+    right = {"site": "bsd", "data_level": "1"}
     expected_output = {"site": "not_set", "inlet": "10m", "species": "ch4", "data_level": "1"}
 
-    output = merge_dict(dict1, dict2, not_set_values=not_set_values)
+    output = merge_dict(left, right, not_set_values=not_set_values)
     assert output == expected_output
 
 
 def test_merge_null_values():
     """Test null_values so value is ignored in preference to other value"""
     null_values = ["null"]
-    dict1 = {"site": "bsd", "inlet": "10m", "species": "null"}
-    dict2 = {"site": "null", "data_level": "null"}
+    left = {"site": "bsd", "inlet": "10m", "species": "null"}
+    right = {"site": "null", "data_level": "null"}
     expected_output = {"site": "bsd", "inlet": "10m"}
 
-    output = merge_dict(dict1, dict2, null_values=null_values)
+    output = merge_dict(left, right, null_values=null_values)
     assert output == expected_output
 
 
 def test_merge_null_values_ignore():
     """Test null values can be made to remain if remove_null is set to False."""
     remove_null = False
-    dict1 = {"site": None, "inlet": "10m"}
-    dict2 = {"site": "bsd", "data_level": "1"}
+    left = {"site": None, "inlet": "10m"}
+    right = {"site": "bsd", "data_level": "1"}
     expected_output = {"site": None, "inlet": "10m", "data_level": "1"}
     
-    output = merge_dict(dict1, dict2, remove_null=remove_null)
+    output = merge_dict(left, right, remove_null=remove_null)
     assert output == expected_output
