@@ -372,9 +372,6 @@ class ObsSurface(BaseStore):
             # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.update_metadata(data, additional_input_parameters, additional_metadata)
 
-            # Use config and latest metadata to create lookup keys
-            lookup_keys = self.get_lookup_keys(data)
-
             # Create Datasources, save them to the object store and get their UUIDs
             data_type = "surface"
             datasource_uuids = self.assign_data(
@@ -382,8 +379,6 @@ class ObsSurface(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=lookup_keys,
-                min_keys=5,  # TODO: In general, should this be updated to length of lookup_keys?
                 compressor=compressor,
                 filters=filters,
             )

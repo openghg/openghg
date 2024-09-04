@@ -206,10 +206,6 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        # combine metadata and get look-up keys
-        if optional_metadata is None:
-            optional_metadata = {}
-
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
@@ -218,15 +214,12 @@ class Flux(BaseStore):
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
 
-        lookup_keys = self.get_lookup_keys(flux_data)
-
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
