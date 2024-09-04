@@ -203,6 +203,7 @@ class BaseStore:
             # Sources of additional metadata - order in list is order of preference.
             sources = [input_parameters, additional_metadata]
             for source in sources:
+                # merge "required" keys from source into metadata; on conflict, keep value from metadata
                 metadata = merge_dict(metadata, source, keys_right=required)
 
             required_not_found = set(required) - set(metadata.keys())
