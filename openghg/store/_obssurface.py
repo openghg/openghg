@@ -379,7 +379,6 @@ class ObsSurface(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                min_keys=5,  # TODO: In general, should this be updated to length of lookup_keys?
                 compressor=compressor,
                 filters=filters,
             )
