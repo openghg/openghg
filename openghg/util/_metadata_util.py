@@ -1,4 +1,4 @@
-from typing import Any, Union, Iterable, List, Optional
+from typing import Any, Union, Iterable, List, Literal, Optional
 import logging
 import math
 
@@ -179,7 +179,7 @@ def merge_dict(
     keys_dict2: Optional[Iterable] = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
-    check_value: bool = True,
+    on_conflict: Literal["check_value", "error"] = "check_value",
     relative_tolerance: float = 1e-3,
     lower: bool = True,
     not_set_values: Iterable = not_set_metadata_values(),
@@ -240,7 +240,7 @@ def merge_dict(
     # Merge the two dictionaries for the keys we know don't overlap
     merged_dict = dict1_non_overlap | dict2_not_overlap
 
-    if check_value:
+    if on_conflict == "check_value":
         overlap_values_not_matching = {}
         for key in overlapping_keys:
             value1 = dict1[key]
@@ -265,7 +265,7 @@ def merge_dict(
                     )
                 else:
                     overlap_values_not_matching[key] = (value1, value2)
-    else:
+    elif on_conflict == "error":
         raise ValueError(f"Unable to merge dictionaries with overlapping keys: {','.join(overlapping_keys)}")
 
     if overlap_values_not_matching:

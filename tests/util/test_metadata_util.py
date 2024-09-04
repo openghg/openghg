@@ -110,7 +110,7 @@ def test_merge_dict_raises_no_value_check():
     dict2 = {"site": "bsd"}
 
     with pytest.raises(ValueError) as excinfo:
-        merge_dict(dict1, dict2, check_value=False)
+        merge_dict(dict1, dict2, on_conflict="error")
 
     assert "Unable to merge dictionaries with overlapping keys" in str(excinfo.value)
 
