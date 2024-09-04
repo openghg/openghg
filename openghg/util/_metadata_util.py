@@ -262,7 +262,7 @@ def merge_dict(
                 merged_dict[key] = value_present
             else:
                 if on_conflict in ["left", "right", "drop"]:
-                    msg = f"Values do not match between dictionaries. "
+                    msg = "Values do not match between dictionaries. "
                     if on_conflict == "left":
                         merged_dict[key] = value1
                         msg += f"Updating to '{on_conflict}' {key} = {value1} (not {value2})."
