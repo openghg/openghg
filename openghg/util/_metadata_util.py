@@ -130,7 +130,7 @@ def check_not_set_value(
     value1: Any, value2: Any, not_set_values: Iterable = not_set_metadata_values()
 ) -> Any:
     """
-    Check whether either value is in the list of null values and if so return the other
+    Check whether either value is in the list of not set values and if so return the other
     value in preference.
     Not set values are sometimes needed if we want to include a key but need a string to indicate
     this value has not been specified by the user.
@@ -138,10 +138,10 @@ def check_not_set_value(
     Args:
         value1, value2: Input values for comparison
         not_set_values: List of values which indicate value has not been explicitly set. (e.g. "not_set")
-            By default this is defined by null_metadata_values() function
+            By default this is defined by not_set_metadata_values() function
     Returns:
-        value: if one value is null (value1 checked first) returns the other value
-        None: if neither value is null.
+        value: if one value has not been set (value1 checked first) returns the other value
+        None: if neither value has not been set.
     """
     if value1 in not_set_values:
         return value2
@@ -178,30 +178,33 @@ def merge_dict(
     The merge_dict function merges the key:value pairs of two dictionaries checking for
     overlap between them.
 
-    Depending on the choice of inputs, if the same keys are present in both dictionaries:
-        - if one of the two values is identified as a null value (e.g. "not_set") the
-          other value will be used in preference.
-        - otherwise, the value from dict1 gets preference in the merged dictionary.
+    Depending on the choice of inputs:
+        - null values (e.g. None) will be removed from both dictionaries before comparison
+        - if the same keys are present in both dictionaries:
+            - if one of the two values is identified as a value which has not been explicitly set (e.g. "not_set") the
+            other value will be used in preference.
+            - otherwise, the value from dict1 gets preference in the merged dictionary.
 
     Args:
         dict1, dict2 : Dictionaries to compare and merge
         keys: Only include specific keys across both dictionaries in merged output
         keys_dict1, keys_dict1: Select specific keys from dict1/dict2 when merging
+        remove_null: Before comparing and merging, remove keys from dict1 and dict2 which have null values.
+        null_values: Values which are classed as null.
+            See null_metadata_values() function for list of default values.
         check_value: If keys overlap, check values match.
             See check_value_match() function for rules of matching.
         relative_tolerance: Tolerance between two numbers when checking values.
         lower: Whether to apply lower case to the two input values as strings when checking values.
         not_set_values: Values which indicate this value has not been specified.
-            See null_metadata_values() function for list of default values.
+            See not_set_metadata_values() function for list of default values.
         resolve_mismatch: If keys overlap, values do not match and neither is null,
             use value from dict1 and raise a warning. This will raise an error if set to False.
     Returns:
         dict: Merged dictionary
-
-        if check_value is False:
-            raises ValueError if any keys overlap
-        if resolve_mismatch is False:
-            raises ValueError if values for overlapping keys don't match (and neither matched null_values)
+    Raises:
+        ValueError: if check_value is False and any keys overlap
+        ValueError: if resolve_mismatch is False, values for overlapping keys don't match and neither matched null_values
     """
     # Remove null values
     if remove_null:
@@ -232,7 +235,7 @@ def merge_dict(
             value1 = dict1[key]
             value2 = dict2[key]
 
-            # Check whether either one of the values indicates this is null.
+            # Check whether either one of the values indicates this has not been explictly set.
             # - if so this prefer the other value if there is a difference
             value_present = check_not_set_value(value1, value2, not_set_values)
             if check_value_match(value1, value2, relative_tolerance, lower):
