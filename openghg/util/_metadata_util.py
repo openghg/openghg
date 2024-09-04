@@ -160,6 +160,17 @@ def get_overlap_keys(dict1: dict, dict2: dict) -> list:
     return overlapping_keys
 
 
+def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool = False):
+    """
+    Convenience function to filter a dictionary by a set of keys.
+    """
+    if keys is None:
+        return dictionary  # probably should return a copy for consistency, but keys = None is mostly for convenience
+    if negate is True:
+        return {key: value for key, value in dictionary.items() if key not in keys}
+    return {key: value for key, value in dictionary.items() if key in keys}
+
+
 def merge_dict(
     dict1: dict,
     dict2: dict,
@@ -213,13 +224,13 @@ def merge_dict(
 
     # Filter dictionaries based on any input key selections
     if keys is not None:
-        dict1 = {key: value for key, value in dict1.items() if key in keys}
-        dict2 = {key: value for key, value in dict2.items() if key in keys}
+        dict1 = _filter_keys(dict1, keys)
+        dict2 = _filter_keys(dict2, keys)
     else:
         if keys_dict1 is not None:
-            dict1 = {key: value for key, value in dict1.items() if key in keys_dict1}
+            dict1 = _filter_keys(dict1, keys_dict1)
         if keys_dict2 is not None:
-            dict2 = {key: value for key, value in dict2.items() if key in keys_dict2}
+            dict2 = _filter_keys(dict2, keys_dict2)
 
     overlapping_keys = get_overlap_keys(dict1, dict2)
 
