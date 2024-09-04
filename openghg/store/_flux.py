@@ -206,10 +206,6 @@ class Flux(BaseStore):
             em_data = split_data["data"]
             Flux.validate_data(em_data)
 
-        # combine metadata and get look-up keys
-        if optional_metadata is None:
-            optional_metadata = {}
-
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
         if optional_metadata is not None:
