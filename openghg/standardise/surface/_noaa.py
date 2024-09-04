@@ -4,9 +4,8 @@ from typing import Any, Dict, Hashable, Optional, Union, cast
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.store.spec import null_metadata_values
 from openghg.types import optionalPathType
-from openghg.util import check_and_set_null_variable
+from openghg.util import check_and_set_null_variable, null_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
