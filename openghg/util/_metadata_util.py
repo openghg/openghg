@@ -234,7 +234,7 @@ def merge_dict(
 
     overlapping_keys = get_overlap_keys(left, right)
 
-    if on_overlap == "error":
+    if overlapping_keys and on_overlap == "error":
         raise ValueError(f"Unable to merge dictionaries with overlapping keys: {','.join(overlapping_keys)}")
 
     left_non_overlap = {key: value for key, value in left.items() if key not in overlapping_keys}
