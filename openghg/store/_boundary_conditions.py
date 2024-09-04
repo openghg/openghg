@@ -235,9 +235,6 @@ class BoundaryConditions(BaseStore):
                 boundary_conditions_data, additional_input_parameters, additional_metadata
             )
 
-            # Use config and latest metadata to create lookup keys
-            lookup_keys = self.get_lookup_keys(boundary_conditions_data)
-
             # This performs the lookup and assignment of data to new or
             # existing Datasources
             datasource_uuids = self.assign_data(
@@ -245,7 +242,6 @@ class BoundaryConditions(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

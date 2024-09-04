@@ -220,16 +220,12 @@ class EulerianModel(BaseStore):
             # Mop up and add additional keys to metadata which weren't passed to the parser
             model_data = self.update_metadata(model_data, additional_input_parameters, additional_metadata)
 
-            # Use config and latest metadata to create lookup keys
-            lookup_keys = self.get_lookup_keys(model_data)
-
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
                 data=model_data,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

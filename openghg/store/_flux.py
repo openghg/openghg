@@ -214,15 +214,12 @@ class Flux(BaseStore):
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
 
-        lookup_keys = self.get_lookup_keys(flux_data)
-
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )

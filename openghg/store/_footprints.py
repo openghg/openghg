@@ -411,16 +411,6 @@ class Footprints(BaseStore):
             footprint_data, additional_input_parameters, additional_metadata
         )
 
-        lookup_keys = self.get_lookup_keys(footprint_data)
-
-        # # TODO - we'll further tidy this up when we move the metdata parsing
-        # # into a centralised place
-        # lookup_keys = self.get_lookup_keys(optional_metadata=optional_metadata)
-
-        # if optional_metadata is not None:
-        #     for parsed_data in footprint_data.values():
-        #         parsed_data["metadata"].update(optional_metadata)
-
         data_type = "footprints"
         # TODO - filter options
         datasource_uuids = self.assign_data(
@@ -428,7 +418,6 @@ class Footprints(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=lookup_keys,
             sort=sort,
             drop_duplicates=drop_duplicates,
             compressor=compressor,

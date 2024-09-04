@@ -190,16 +190,12 @@ class FluxTimeseries(BaseStore):
             flux_timeseries_data, additional_input_parameters, additional_metadata
         )
 
-        # Use config and latest metadata to create lookup keys
-        lookup_keys = self.get_lookup_keys(flux_timeseries_data)
-
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
             data=flux_timeseries_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=lookup_keys,
             compressor=compressor,
             filters=filters,
         )
