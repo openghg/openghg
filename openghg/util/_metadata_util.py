@@ -257,7 +257,10 @@ def merge_dict(
                     logger.warning(
                         f"Same key '{key}' supplied from different sources. Error not raised because values match: '{value1}' (1), '{value2}' (2)."
                     )
-                merged_dict[key] = value1
+                if on_conflict == "right":
+                    merged_dict[key] = value2
+                else:
+                    merged_dict[key] = value1
             elif check_not_set is True:
                 merged_dict[key] = value_present
             else:
