@@ -128,7 +128,7 @@ def check_value_match(value1: Any, value2: Any, relative_tolerance: float = 1e-3
 
 def check_not_set_value(
     value1: Any, value2: Any, not_set_values: Iterable = not_set_metadata_values()
-) -> Any:
+) -> tuple[bool, Any]:
     """
     Check whether either value is in the list of not set values and if so return the other
     value in preference.
@@ -140,15 +140,15 @@ def check_not_set_value(
         not_set_values: List of values which indicate value has not been explicitly set. (e.g. "not_set")
             By default this is defined by not_set_metadata_values() function
     Returns:
-        value: if one value has not been set (value1 checked first) returns the other value
-        None: if neither value has not been set.
+        bool, value: if one value has not been set (value1 checked first) returns True and the other value
+        bool, None: if neither value has not been set returns False and None
     """
     if value1 in not_set_values:
-        return value2
+        return True, value2
     elif value2 in not_set_values:
-        return value1
+        return True, value1
     else:
-        return None
+        return False, None
 
 
 def get_overlap_keys(left: dict, right: dict) -> list:
@@ -251,14 +251,14 @@ def merge_dict(
 
             # Check whether either one of the values indicates this has not been explictly set.
             # - if so this prefer the other value if there is a difference
-            value_present = check_not_set_value(value1, value2, not_set_values)
+            check_not_set, value_present = check_not_set_value(value1, value2, not_set_values)
             if check_value_match(value1, value2, relative_tolerance, lower):
-                if value_present is None:
+                if check_not_set is True:
                     logger.warning(
                         f"Same key '{key}' supplied from different sources. Error not raised because values match: '{value1}' (1), '{value2}' (2)."
                     )
                 merged_dict[key] = value1
-            elif value_present is not None:
+            elif check_not_set is True:
                 merged_dict[key] = value_present
             else:
                 if on_conflict in ["left", "right", "drop"]:
