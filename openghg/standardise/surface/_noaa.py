@@ -4,9 +4,8 @@ from typing import Any, Dict, Hashable, Optional, Union, cast
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.store.spec import null_metadata_values
 from openghg.types import optionalPathType
-from openghg.util import check_and_set_null_variable
+from openghg.util import check_and_set_null_variable, not_set_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -341,7 +340,7 @@ def _read_obspack(
     processed_ds = processed_ds.set_coords(["time"])
 
     # Estimate sampling period using metadata and midpoint time
-    not_set_values = null_metadata_values()
+    not_set_values = not_set_metadata_values()
     if sampling_period in not_set_values:
         sampling_period_estimate = _estimate_sampling_period(obspack_ds)
     else:
