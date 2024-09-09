@@ -34,7 +34,6 @@ def download_data(
     Returns:
         bytes / None: Bytes if no filepath given
     """
-    import functools
     import io
     import shutil
     from urllib.parse import urlparse
