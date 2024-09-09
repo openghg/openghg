@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bug where an input filepath list to standardise_surface was only storing the last file hash. This allowed for some files to bypass the check for the same files depending on where they were in the original filepath list. [PR #1100](https://github.com/openghg/openghg/pull/1100)
 - Bug where filepath needed to be a Path object when storing the file hash values. [PR #1108](https://github.com/openghg/openghg/pull/1108)
 - Catch an `AttributeError` when trying synchronise attributes and metadata and a user passes a `bool` - [PR #1029](https://github.com/openghg/openghg/pull/1029)
+- Mypy issue fixed for `util.download_data()` function based on updates described [requests Issue 465](https://github.com/psf/requests/issues/465) and included in [urllib3 PR 159](https://github.com/urllib3/urllib3/pull/159/files). This allowed the `decode_content` flag to be set directly rather than needing to patch the method. [PR #1118](https://github.com/openghg/openghg/pull/1118)
+
 
 ## [0.9.0] - 2024-08-14
 
