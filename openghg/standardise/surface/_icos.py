@@ -12,8 +12,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def parse_icos(
     filepath: Union[str, Path],
     site: str,
-    inlet: str,
     instrument: str,
+    inlet: Optional[str] = None,
     network: str = "ICOS",
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
@@ -28,8 +28,8 @@ def parse_icos(
         filepath: Path to file
         site: Three letter site code
         network: Network name
-        inlet: Inlet height
         instrument: Instrument name
+        inlet: Optionally specify inlet height to check against filename
         sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
         measurement_type: Measurement type e.g. insitu, flask
         header_type: ICOS data file with large (40 line) header or shorter single line header
@@ -121,21 +121,20 @@ def _read_data_large_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import read_csv
+    from pandas import read_csv, to_datetime
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
     split_filename = filepath.name.split(".")
 
     try:
-        site_fname = split_filename[0]
-        species_fname = split_filename[1]
-        file_sampling_period = split_filename[2]
-        instrument_fname = split_filename[3]
-        inlet_height_fname = split_filename[4]
+        species_fname = filepath.name.split(".")[-1]
+        site_fname = filepath.name.split("_")[-3]
+        inlet_height_fname = filepath.name.split("_")[-2]
     except IndexError:
         raise ValueError(
-            "Unable to read metadata from filename. We expect a filename such as mhd.ch4.hourly.g2401.15m.dat"
+            "Unable to read metadata from filename. We expect a filename such as \
+            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"
         )
 
     if site_fname.lower() != site:
@@ -145,44 +144,25 @@ def _read_data_large_header(
     if inlet is not None and inlet_height_fname.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename.")
 
-    if instrument is not None and instrument_fname.lower() != instrument:
-        raise ValueError("Mismatch between instrument passed and that in filename.")
-
     # Read the header and check its length
     header = read_header(filepath=filepath)
     len_header = len(header)
 
-    if len_header != 40:
+    if len_header < 40:
         logger.warning(
-            f"We expect a header length of 40 but got {len_header}, \
-            note that some metadata may not be collected, \
-            please raise an issue on GitHub if this file format is to be expected."
+            f"We expect a header length of 40 or more but got {len_header}."
         )
-
-    dtypes = {
-        "#Site": "string",
-        "SamplingHeight": "string",
-        "DecimalDate": "float",
-        "Stdev": "float",
-        "NbPoints": "int",
-        "Flag": "string",
-        "InstrumentId": "int",
-        "QualityId": "string",
-        "InternalFlag": "string",
-        "AutoDescriptiveFlag": "string",
-        "ManualDescriptiveFlag": "string",
-    }
 
     df = read_csv(
         filepath,
         header=len_header - 1,
         sep=";",
-        parse_dates={"time": [2, 3, 4, 5, 6]},
         date_format="%Y %m %d %H %M",
-        index_col="time",
-        na_values=["-9.990", "-999.990"],
-        dtype=dtypes,
+        na_values=["-9.990", "-999.990"]
     )
+
+    df["time"] = to_datetime(df[["Year","Month","Day","Hour","Minute"]])
+    df.index = df["time"]
 
     # Lowercase all the column titles
     df.columns = [str(c).lower() for c in df.columns]
@@ -190,20 +170,32 @@ def _read_data_large_header(
     # Read some metadata before dropping the columns
     # sampling_height_data = df["samplingheight"][0]
     site_name_data = df["#site"][0]
-    species_name_data = df.columns[3]
 
     if site != site_name_data.lower():
         raise ValueError("Site mismatch between site argument passed and site in data.")
 
-    if species_fname != species_name_data.lower():
-        raise ValueError("Speices mismatch between site passed and species in data.")
-
     # Drop the columns we don't want
-    cols_to_keep = [species_name_data, "stdev", "nbpoints", "flag", "instrumentid"]
+    if "unc_" + species_fname.lower() in df.columns:
+        cols_to_keep = [species_fname.lower(),
+                        "stdev",
+                        "nbpoints",
+                        "flag",
+                        "ltr",
+                        "sttb",
+                        "unc_" + species_fname.lower()]
+    else:
+        cols_to_keep = [species_fname.lower(),
+                        "stdev",
+                        "nbpoints",
+                        "flag",
+                        "ltr",
+                        "sttb"]
     df = df[cols_to_keep]
 
     # Remove rows with NaNs in the species or stdev columns
-    df = df.dropna(axis="rows", subset=[species_name_data, "stdev"])
+    # JP edit 2024-09-09. Some of the non-icos data is missing stdev but we still use it
+    # df = df.dropna(axis="rows", subset=[species_fname.lower(), "stdev"])
+    df = df.dropna(axis="rows", subset=species_fname.lower())
 
     # Drop duplicate indices
     df = df.loc[~df.index.duplicated(keep="first")]
@@ -212,10 +204,17 @@ def _read_data_large_header(
     if not df.index.is_monotonic_increasing:
         df = df.sort_index()
 
-    rename_dict = {
-        "stdev": species_name_data + " variability",
-        "nbpoints": species_name_data + " number_of_observations",
-    }
+    if "unc_" + species_fname.lower() in df.columns:
+        rename_dict = {
+            "stdev": species_fname.lower() + " variability",
+            "nbpoints": species_fname.lower() + " number_of_observations",
+            "unc_" + species_fname.lower(): species_fname.lower() + " repeatability"
+        }
+    else:
+        rename_dict = {
+            "stdev": species_fname.lower() + " variability",
+            "nbpoints": species_fname.lower() + " number_of_observations",
+        }
 
     df = df.rename(columns=rename_dict)
 
@@ -224,46 +223,45 @@ def _read_data_large_header(
 
     data["flag"] = data["flag"].astype(str)
 
-    if file_sampling_period == "1minute":
-        file_sampling_period = "60.0"
-    elif file_sampling_period == "hourly":
-        file_sampling_period = "3600.0"
-
-    if sampling_period is not None:
-        if file_sampling_period != sampling_period:
-            raise ValueError("Mismatch between sampling period read from filename and that passed.")
-    else:
-        sampling_period = file_sampling_period
-
     metadata = {
         "site": site,
-        "species": species_name_data,
+        "species": species_fname.lower(),
         "inlet": inlet_height_fname,
-        "sampling_period": file_sampling_period,
+        "sampling_period": sampling_period,
         "network": network,
-        "instrument": instrument_fname,
+        "instrument": instrument,
     }
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
 
-    unit_line = header[22]
-    if "MEASUREMENT UNIT" in unit_line:
-        units = unit_line.split(":")[1].lower().strip()
+    f_header = [s for s in header if "MEASUREMENT UNIT" in s]
+    if len(f_header) == 1:
+        units = f_header[0].split(":")[1].lower().strip()
         metadata["units"] = units
+    else:
+        raise ValueError("No unique MEASUREMENT UNIT in file header")
 
-    scale_line = header[26]
-    if "MEASUREMENT SCALE" in scale_line:
-        calibration_scale = scale_line.split(":")[1].lower().lstrip(" ").replace(" ", "_").strip()
-        metadata["calibration_scale"] = calibration_scale
-
-    data_owner_line = header[18]
-    if "CONTACT POINT" in data_owner_line:
-        data_owner_email = data_owner_line.split(":")[1].split(",")[1].strip()
+    f_header = [s for s in header if "CONTACT POINT" in s]
+    if len(f_header) == 1:
+        data_owner_email = f_header[0].split(":")[1].strip()
         metadata["data_owner_email"] = data_owner_email
+    else:
+        f_header = [s for s in header if "CONTACT POINT EMAIL" in s]
+        if len(f_header) == 1:
+            data_owner_email = f_header[0].split(":")[1].strip()
+            metadata["data_owner_email"] = data_owner_email
+        else:
+            raise ValueError("Couldn't identify data owner email")
+
+    if sampling_period is None:
+        f_header = [s for s in header if "TIME INTERVAL" in s]
+        interval_str = f_header[0].split(":")[1].strip()
+        if interval_str == "hourly":
+            metadata["sampling_period"] = 3600.0
 
     species_data = {
-        species_name_data: {
+        species_fname.lower(): {
             "metadata": metadata,
             "data": data,
         }
