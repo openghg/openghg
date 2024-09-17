@@ -9,8 +9,8 @@ from openghg.retrieve import get_obs_surface, get_obs_column
 # - Create a search of the object store
 # - Create obspack structure and include any additional README files
 # - Populate obspack with data from search
-# - TODO: Compile list of data providers using metadata
-# - TODO: Add in ability to compile table of data
+# - Add in ability to compile table of data
+# - Compile list of data providers using metadata/attributes
 
 def define_obs_types():
     """
@@ -132,6 +132,8 @@ def define_site_details(ds, obs_type, strict=False):
                  "inlet": "Inlet height",
                  "station_latitude": "Latitude",
                  "station_longitude": "Longitude",
+                 "data_owner": "Data owner",
+                 "data_owner_email": "Email",
     }
 
     params = {}
