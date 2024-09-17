@@ -153,11 +153,14 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
     return params
 
 
-def create_site_index(df: pd.DataFrame, output_file: TextIO) -> None:
+def create_site_index(df: pd.DataFrame, output_path: Union[Path, str]) -> None:
     """
+    Creates the site index file including data provider details.
     Expects a DataFrame object.
-    Expects file object input (not just filename) at the moment.
     """
+
+    print(f"Writing site details: {output_path}")
+    output_file = open(output_path, "w")
 
     # Site index should include key metadata for each file (enough to be distinguishable but not too much?)
     # Want to create a DataFrame and pass a file object to this - then can add comments before and after the table as needed
@@ -220,6 +223,4 @@ def create_obspack(
     index_output_filename = obspack_folder / f"site_index_details_{version}.txt"
 
     site_details_df = pd.DataFrame(site_detail_rows)
-    print(f"Writing site details: {index_output_filename}")
-    index_output_name = open(index_output_filename, "w")
-    create_site_index(site_details_df, index_output_name)
+    create_site_index(site_details_df, index_output_filename)
