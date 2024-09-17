@@ -179,28 +179,50 @@ class BaseStore:
 
         return self.metakeys
 
-    def update_metadata(self, data: Dict, input_parameters: dict, additional_metadata: Dict) -> Dict:
+    def update_metadata(self, data: dict, input_parameters: dict, additional_metadata: dict) -> dict:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
-            data: Dictionary containing data and metadata for species
-            input_parameters: Input parameters from read_file.
+            data: Dictionary containing data and metadata for datasource
+            input_parameters: Input parameters from read_file...
             additional_metadata: Keys to add to the metadata dictionary
         Returns:
             dict: data dictionary with metadata keys added
         """
+        from openghg.util import merge_dict
+
         # Get defined metakeys from the config setup
         metakeys = self.add_metakeys()
         required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
 
-        input_parameters_required = {key: value for key, value in input_parameters.items() if key in required}
-
-        # Basic implemntation of this
-        # TODO: Move this somewhere else? This shouldn't need self but does need to understand form of data.
-        # TODO: May want to add checks to make sure we're not overwriting anything important.
         for parsed_data in data.values():
-            parsed_data["metadata"].update(input_parameters_required)
-            parsed_data["metadata"].update(additional_metadata)
+            metadata = parsed_data["metadata"]
+
+            # Sources of additional metadata - order in list is order of preference.
+            sources = [input_parameters, additional_metadata]
+            for source in sources:
+                # merge "required" keys from source into metadata; on conflict, keep value from metadata
+                metadata = merge_dict(metadata, source, keys_right=required)
+
+            required_not_found = set(required) - set(metadata.keys())
+            if required_not_found:
+                raise ValueError(
+                    f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                )
+
+            # Check if named optional keys are included in the input_parameters and add
+            optional_matched = set(optional) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
+
+            # Add additional metadata keys
+            if additional_metadata:
+                # Ensure required keys aren't added again (or clash with values from input_parameters)
+                additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
+                metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
+
+            parsed_data["metadata"] = metadata
 
         return data
 
@@ -295,7 +317,7 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        from openghg.store.spec import null_metadata_values
+        from openghg.util import not_set_metadata_values
 
         uuids = {}
 
@@ -319,7 +341,7 @@ class BaseStore:
                 # Our lookup results and gas data have the same keys
                 uuid = lookup_results[key]
 
-                ignore_values = null_metadata_values()
+                ignore_values = not_set_metadata_values()
 
                 # Do we want all the metadata in the Dataset attributes?
                 to_add = {
