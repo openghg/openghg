@@ -121,20 +121,31 @@ def collate_strings(df):
     return df_new
 
 
-def define_site_details(ds, obs_type):
+def define_site_details(ds, obs_type, strict=False):
     """
     Define each row containing the site details.
     """
     attrs = ds.attrs
 
-    params = {
-        "Site code": attrs["site"],
-        "Name": attrs["station_long_name"],
-        "Inlet height": attrs["inlet"],
-        "Latitude": attrs["station_latitude"],
-        "Longitude": attrs["station_longitude"],
-        "Observation type": obs_type,
+    key_names = {"site": "Site code",
+                 "station_long_name": "Name",
+                 "inlet": "Inlet height",
+                 "station_latitude": "Latitude",
+                 "station_longitude": "Longitude",
     }
+
+    params = {}
+    for key, new_name in key_names.items():
+        if key in attrs:
+            params[new_name] = attrs[key]
+        else:
+            if strict:
+                raise ValueError("Unable to find '{}' key in site data attributes")
+            else:
+                pass
+                # include warning
+
+    params["Observation type"] = obs_type
 
     return params
 
