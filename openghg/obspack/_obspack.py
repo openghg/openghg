@@ -3,8 +3,13 @@ import xarray as xr
 import shutil
 from pathlib import Path
 import pkg_resources
+from typing import Union, Optional, Sequence
+import logging
+
 from openghg.retrieve import get_obs_surface, get_obs_column
-from typing import Union, Optional, Sequence, TextIO
+
+
+logger = logging.getLogger("openghg.obspack")
 
 
 def define_obs_types() -> list:
@@ -60,8 +65,7 @@ def create_obspack_structure(
         release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
         release_files = [release_file_readme]
 
-    # TODO: Update this to use logger
-    print(f"Creating obspack folder: {obspack_folder} and subfolder(s)")
+    logger.info(f"Creating obspack folder: {obspack_folder} and subfolder(s)")
     for subfolder in obs_types:
         subfolder = obspack_folder / subfolder
         subfolder.mkdir(parents=True)
@@ -142,11 +146,12 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
         if key in attrs:
             params[new_name] = attrs[key]
         else:
+            msg = f"Unable to find '{key}' key in site data attributes"
             if strict:
-                raise ValueError("Unable to find '{}' key in site data attributes")
+                logger.exception(msg)
+                raise ValueError(msg)
             else:
-                pass
-                # include warning
+                logger.warning(msg)
 
     params["Observation type"] = obs_type
 
@@ -159,7 +164,7 @@ def create_site_index(df: pd.DataFrame, output_path: Union[Path, str]) -> None:
     Expects a DataFrame object.
     """
 
-    print(f"Writing site details: {output_path}")
+    logger.info(f"Writing site details: {output_path}")
     output_file = open(output_path, "w")
 
     # Site index should include key metadata for each file (enough to be distinguishable but not too much?)
