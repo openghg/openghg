@@ -4,13 +4,6 @@ from pathlib import Path
 import pkg_resources
 from openghg.retrieve import get_obs_surface, get_obs_column
 
-# Initial steps:
-# - Read from search file
-# - Create a search of the object store
-# - Create obspack structure and include any additional README files
-# - Populate obspack with data from search
-# - Add in ability to compile table of data
-# - Compile list of data providers using metadata/attributes
 
 def define_obs_types():
     """
@@ -45,7 +38,7 @@ def define_obspack_filename(site, species, inlet, version, obs_type, obspack_fol
     return filename
 
 
-def create_obspack_structure(output_path, obspack_name, obs_types=define_obs_types()):
+def create_obspack_structure(output_path, obspack_name, obs_types=define_obs_types(), release_files=None):
     """
     Create the structure for the new obspack
     """
@@ -53,12 +46,9 @@ def create_obspack_structure(output_path, obspack_name, obs_types=define_obs_typ
     # output_path = Path("~/work/creating_obspack").expanduser()
     obspack_folder = Path(output_path) / obspack_name
 
-    ### TODO: UPDATE TO ALLOW INPUT?
-    release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
-    # release_file_index = pkg_resources.resource_filename("openghg", "data/obspack/index.md")
-    # release_files = [release_file_readme, release_file_index]
-    release_files = [release_file_readme]
-    ###
+    if release_files is None:
+        release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
+        release_files = [release_file_readme]
 
     # TODO: Update this to use logger
     print(f"Creating obspack folder: {obspack_folder} and subfolder(s)")
@@ -117,7 +107,7 @@ def collate_strings(df):
         collated_value = ",".join([str(value) for value in unique_values])
 
         df_new[name] = [collated_value]
-    
+
     return df_new
 
 
@@ -127,13 +117,14 @@ def define_site_details(ds, obs_type, strict=False):
     """
     attrs = ds.attrs
 
-    key_names = {"site": "Site code",
-                 "station_long_name": "Name",
-                 "inlet": "Inlet height",
-                 "station_latitude": "Latitude",
-                 "station_longitude": "Longitude",
-                 "data_owner": "Data owner",
-                 "data_owner_email": "Email",
+    key_names = {
+        "site": "Site code",
+        "station_long_name": "Name",
+        "inlet": "Inlet height",
+        "station_latitude": "Latitude",
+        "station_longitude": "Longitude",
+        "data_owner": "Data owner",
+        "data_owner_email": "Email",
     }
 
     params = {}
@@ -177,14 +168,16 @@ def create_site_index(df, output_file):
     output_file.close()
 
 
-def create_obspack(filename, output_path, obspack_name):
+def create_obspack(filename, output_path, obspack_name, release_files=None):
     """
     Create ObsPack of obspack_name at output_path from input search file.
     """
 
     retrieved_data, obs_types = read_input_file(filename)
 
-    obspack_folder = create_obspack_structure(output_path, obspack_name, obs_types=obs_types)
+    obspack_folder = create_obspack_structure(
+        output_path, obspack_name, obs_types=obs_types, release_files=release_files
+    )
 
     # Put things in obspack and build structure
 
