@@ -1,21 +1,23 @@
 import pandas as pd
+import xarray as xr
 import shutil
 from pathlib import Path
 import pkg_resources
 from openghg.retrieve import get_obs_surface, get_obs_column
+from typing import Union, Optional, Sequence, TextIO
 
 
-def define_obs_types():
+def define_obs_types() -> list:
     """
-    Define names of obs type folders to be included in ObsPack
+    Define names of obs type folders to be included in an ObsPack.
     """
     obs_types = ["surface-insitu", "surface-flask", "column"]
     return obs_types
 
 
-def define_get_functions():
+def define_get_functions() -> dict:
     """
-    Define relationship between obs type names (for folders) and get functions
+    Define relationship between obs type names (for folders) and get functions.
     """
     get_functions = {
         "surface-insitu": get_obs_surface,
@@ -26,11 +28,14 @@ def define_get_functions():
     return get_functions
 
 
-def define_obspack_filename(site, species, inlet, version, obs_type, obspack_folder):
+def define_obspack_filename(
+    site: str, species: str, inlet: str, version: str, obs_type: str, obspack_folder: Union[Path, str]
+) -> Path:
     """
     Create file name with the correct naming convention.
     """
     obs_types = define_obs_types()
+    obspack_folder = Path(obspack_folder)
     if obs_type in obs_types:
         filename = obspack_folder / obs_type / f"{species}_{site}_{inlet}_{obs_type}_{version}.nc"
     else:
@@ -38,7 +43,12 @@ def define_obspack_filename(site, species, inlet, version, obs_type, obspack_fol
     return filename
 
 
-def create_obspack_structure(output_path, obspack_name, obs_types=define_obs_types(), release_files=None):
+def create_obspack_structure(
+    output_path: Union[Path, str],
+    obspack_name: str,
+    obs_types: Sequence = define_obs_types(),
+    release_files: Optional[Sequence] = None,
+) -> Path:
     """
     Create the structure for the new obspack
     """
@@ -62,7 +72,7 @@ def create_obspack_structure(output_path, obspack_name, obs_types=define_obs_typ
     return obspack_folder
 
 
-def read_input_file(filename):
+def read_input_file(filename: Union[Path, str]) -> tuple[list, list]:
     """
     Read input file containing search parameters and use to get data from object store.
     """
@@ -97,7 +107,7 @@ def read_input_file(filename):
     return data_object_all, unique_obs_types
 
 
-def collate_strings(df):
+def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
     """
     For each unique entry in a column, collate this as a single string separated by a semi-colon.
     """
@@ -111,7 +121,7 @@ def collate_strings(df):
     return df_new
 
 
-def define_site_details(ds, obs_type, strict=False):
+def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> dict:
     """
     Define each row containing the site details.
     """
@@ -143,7 +153,7 @@ def define_site_details(ds, obs_type, strict=False):
     return params
 
 
-def create_site_index(df, output_file):
+def create_site_index(df: pd.DataFrame, output_file: TextIO) -> None:
     """
     Expects a DataFrame object.
     Expects file object input (not just filename) at the moment.
@@ -168,7 +178,12 @@ def create_site_index(df, output_file):
     output_file.close()
 
 
-def create_obspack(filename, output_path, obspack_name, release_files=None):
+def create_obspack(
+    filename: Union[Path, str],
+    output_path: Union[Path, str],
+    obspack_name: str,
+    release_files: Optional[Sequence] = None,
+) -> None:
     """
     Create ObsPack of obspack_name at output_path from input search file.
     """
