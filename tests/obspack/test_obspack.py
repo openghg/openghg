@@ -1,7 +1,67 @@
+import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
-from openghg.obspack import read_input_file, create_obspack
+from openghg.obspack import read_input_file, create_obspack, define_obspack_filename
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
+
+
+#%% Test define_obspack_filename functions
+
+@pytest.mark.parametrize(
+        "metadata, obs_type, obspack_path, out_filename",
+        [
+            (
+                {"site": "WAO", "species": "ch4", "inlet": "10m"},
+                "surface-insitu", "",
+                "./surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"
+            ),
+            (
+                {"site": "WAO", "species": "ch4", "inlet": "10m"},
+                "surface-insitu", "/path/to/obspack/",
+                "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"
+            ),
+            (
+                {"site": "WAO", "species": "ch4", "inlet": "10m"},
+                "surface-flask", "",
+                "./surface-flask/ch4_WAO_10m_surface-flask_v1.nc"
+            ),
+            (
+                {"platform": "site", "species": "ch4", "site": "WAO"},
+                "column", "",
+                "./column/ch4_WAO_site_column_v1.nc"
+            ),
+            (
+                {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
+                "column", "",
+                "./column/ch4_GOSAT-BRAZIL_satellite_column_v1.nc"
+            ),
+            (
+                {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
+                "column", "",
+                "./column/ch4_GOSAT-BRAZIL_satellite_column_v1.nc"
+            ),
+            (
+                {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
+                "column", "",
+                "./column/ch4_GOSAT-SOUTHAMERICA_satellite_column_v1.nc"
+            ),
+        ]
+)
+def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename):
+    """
+    Test creation of filename matches to naming scheme
+    1. surface-insitu data
+    2. surface-insitu data, specified output_path
+    3. surface-flask data
+    4. column, site data
+    5. column, satellite data, site name specified
+    6. column, satellite data, satellite name and selection specified
+    7. column, satellite data, satellite name and domain specified
+    """
+    out_filename = Path(out_filename)
+    filename = define_obspack_filename(metadata, obs_type=obs_type, obspack_path=obspack_path)
+
+    assert filename == out_filename
 
 
 def populate_object_store():
