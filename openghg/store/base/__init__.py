@@ -1,2 +1,2 @@
-from ._base import BaseStore, get_data_class
+from ._base import BaseStore
 from ._datasource import Datasource

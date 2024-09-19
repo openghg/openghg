@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -22,7 +23,7 @@ def parse_crds(
     ready for storage in the object store.
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -36,7 +37,7 @@ def parse_crds(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
 
     Returns:
@@ -47,15 +48,15 @@ def parse_crds(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet
 
-    if not isinstance(data_filepath, Path):
-        data_filepath = Path(data_filepath)
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
 
     inlet = format_inlet(inlet)
 
     # This may seem like an almost pointless function as this is all we do
     # but it makes it a lot easier to test assign_attributes
     gas_data = _read_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         site=site,
         network=network,
         inlet=inlet,
@@ -64,6 +65,8 @@ def parse_crds(
         measurement_type=measurement_type,
         drop_duplicates=drop_duplicates,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(
@@ -78,7 +81,7 @@ def parse_crds(
 
 
 def _read_data(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -91,14 +94,14 @@ def _read_data(
     """Read the datafile passed in and extract the data we require.
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
         instrument: Instrument name
         sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
@@ -108,7 +111,7 @@ def _read_data(
     from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
     from pandas import RangeIndex, read_csv, to_datetime
 
-    split_fname = data_filepath.stem.split(".")
+    split_fname = filepath.stem.split(".")
     site = site.lower()
 
     try:
@@ -135,17 +138,13 @@ def _read_data(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         data = read_csv(
-            data_filepath,
+            filepath,
             header=None,
             skiprows=1,
             sep=r"\s+",
             parse_dates={"time": [0, 1]},
             index_col="time",
         )
-
-    # Drop any rows with NaNs
-    # This is now done before creating metadata
-    data = data.dropna(axis="rows", how="any")
 
     dupes = find_duplicate_timestamps(data=data)
 
@@ -160,7 +159,7 @@ def _read_data(
     header = data.head(2)
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-    metadata = _read_metadata(filepath=data_filepath, data=data)
+    metadata = _read_metadata(filepath=filepath, data=data)
 
     if network is not None:
         metadata["network"] = network
@@ -212,6 +211,7 @@ def _read_data(
         gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
+        gas_data = gas_data.dropna(axis="rows", how="any")
 
         # Here we can convert the Dataframe to a Dataset and then write the attributes
         gas_data = gas_data.to_xarray()
@@ -301,7 +301,7 @@ def _get_site_attributes(
         site: Site name
         inlet: Inlet height, example: 108m
         crds_metadata: General CRDS metadata
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of attributes

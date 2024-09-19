@@ -1,13 +1,10 @@
 import json
 import logging
-from io import BytesIO
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
 
 from openghg.dataobjects import ObsData
-from openghg.store import recombine_datasets
 from openghg.util import running_on_hub
 from pandas import DataFrame
-from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
 
@@ -27,33 +24,36 @@ class SearchResults:
         start_result: ?
     """
 
+    # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
-        self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None, start_result: Optional[str] = None
+        self,
+        metadata: Optional[Dict] = None,
+        start_result: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ):
+        # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:
             self.metadata = metadata
-        else:
-            self.metadata = {}
-
-        if start_result is not None and metadata is not None:
-            for uuid_key, uuid_metadata in metadata.items():
-                if start_result in uuid_metadata:
-                    other_keys = list(uuid_metadata.keys())
-                    other_keys.remove(start_result)
-                    reorder = [start_result] + other_keys
-                    metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
-
-        if metadata is not None:
+            # db.insert_multiple([m for m in metadata.values()])
             self.results = (
                 DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
             )
+
+            if start_result is not None:
+                for uuid_key, uuid_metadata in metadata.items():
+                    if start_result in uuid_metadata:
+                        other_keys = list(uuid_metadata.keys())
+                        other_keys.remove(start_result)
+                        reorder = [start_result] + other_keys
+                        metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
+
         else:
             self.results = {}  # type: ignore
+            self.metadata = {}
 
-        if keys is not None:
-            self.key_data = keys
-        else:
-            self.key_data = {}
+        self._start_date = start_date
+        self._end_date = end_date
 
         self.hub = running_on_hub()
 
@@ -82,7 +82,6 @@ class SearchResults:
         """
         return {
             "metadata": self.metadata,
-            "keys": self.key_data,
             "hub": self.hub,
         }
 
@@ -105,43 +104,45 @@ class SearchResults:
         """
         loaded = json.loads(data)
 
-        return cls(keys=loaded["keys"], metadata=loaded["metadata"])
+        return cls(metadata=loaded["metadata"])
 
     def retrieve(
         self,
         dataframe: Optional[DataFrame] = None,
+        version: str = "latest",
         sort: bool = True,
-        elevate_inlet: bool = False,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
             dataframe: pandas DataFrame
-            sort: Sort data by date in retrieved Dataset
-            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
-            for ranked data.
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort data by time in retrieved Dataset
+            **kwargs: Metadata values to search for
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
         if dataframe is not None:
             uuids = dataframe["uuid"].to_list()
-            return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+            return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
         else:
-            return self._retrieve_by_term(sort=sort, elevate_inlet=elevate_inlet, **kwargs)
+            return self._retrieve_by_term(version=version, sort=sort, **kwargs)
 
-    def retrieve_all(self, sort: bool = False, elevate_inlet: bool = False) -> Union[ObsData, List[ObsData]]:
+    def retrieve_all(
+        self,
+        version: str = "latest",
+        sort: bool = True,
+    ) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
 
         Args:
+            version: Version of data requested from Datasource. Default = "latest".
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
-            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
-            for ranked data.
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        uuids = list(self.key_data.keys())
-        return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, sort=sort)
 
     def uuids(self) -> List:
         """Return the UUIDs of the found data
@@ -152,7 +153,7 @@ class SearchResults:
         return list(self.metadata.keys())
 
     def _retrieve_by_term(
-        self, sort: bool, elevate_inlet: bool, **kwargs: Any
+        self, version: str, sort: bool = True, **kwargs: Any
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
@@ -160,11 +161,9 @@ class SearchResults:
         ObsData object(s).
 
         Args:
-            sort: Pass the sort argument to the recombination function
-            (sorts by time)
-            elevate_inlet: Elevate the inlet variable in the Dataset to
-            a variable (used for ranked data)
-            kwargs: Metadata values to search for
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
+            **kwargs: Metadata values to search for
         """
         uuids = set()
         # Make sure we don't have any Nones
@@ -193,10 +192,10 @@ class SearchResults:
                 uuids.add(uid)
 
         # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=list(uuids), sort=sort, elevate_inlet=elevate_inlet)
+        return self._retrieve_by_uuid(uuids=list(uuids), version=version, sort=sort)
 
     def _retrieve_by_uuid(
-        self, uuids: List, sort: bool, elevate_inlet: bool
+        self, uuids: Iterable, version: str, sort: bool = True
     ) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
@@ -204,66 +203,35 @@ class SearchResults:
 
         Args:
             uuids: UUIDs of Datasources in the object store
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
         results = []
-        for uid in uuids:
-            keys = self.key_data[uid]
-            bucket = self.metadata[uid]["object_store"]
-            dataset = self._retrieve_dataset(bucket=bucket, keys=keys, sort=sort, elevate_inlet=elevate_inlet)
-            metadata = self.metadata[uid]
+        for uuid in uuids:
+            metadata = self.metadata[uuid]
+            if version == "latest":
+                version = metadata["latest_version"]
+            else:
+                if version not in metadata["versions"]:
+                    raise ValueError(f"Invalid version {version} for UUID {uuid}")
 
-            results.append(ObsData(data=dataset, metadata=metadata))
+            results.append(
+                ObsData(
+                    uuid=uuid,
+                    version=version,
+                    metadata=metadata,
+                    start_date=self._start_date,
+                    end_date=self._end_date,
+                    sort=sort,
+                )
+            )
 
         if len(results) == 1:
             return results[0]
         else:
             return results
-
-    def _retrieve_dataset(
-        self,
-        bucket: str,
-        keys: List,
-        sort: bool,
-        elevate_inlet: bool = True,
-        attrs_to_check: Optional[Dict] = None,
-    ) -> Dataset:
-        """Retrieves datasets from either cloud or local object store
-
-        Args:
-            keys: List of object store keys
-            sort: Sort data on recombination
-            elevate_inlet: Elevate inlet from attribute to variable
-        Returns:
-            Dataset:
-        """
-        from openghg.cloud import call_function
-
-        if self.hub:
-            to_post: Dict[str, Union[Dict, List, bool, str]] = {}
-            to_post["keys"] = keys
-            to_post["sort"] = sort
-            to_post["elevate_inlet"] = elevate_inlet
-            to_post["function"] = "retrieve"
-
-            if attrs_to_check is not None:
-                to_post["attrs_to_check"] = attrs_to_check
-
-            result = call_function(data=to_post)
-            binary_netcdf = result["content"]["data"]
-            buf = BytesIO(binary_netcdf)
-            # TODO - remove this ignore once xarray have updated their type hints
-            ds: Dataset = open_dataset(buf).load()  # type: ignore
-            return ds
-        else:
-            return recombine_datasets(
-                bucket=bucket,
-                keys=keys,
-                sort=sort,
-                elevate_inlet=elevate_inlet,
-                attrs_to_check=attrs_to_check,
-            )
 
     @staticmethod
     def df_to_table_console_output(df: DataFrame) -> None:

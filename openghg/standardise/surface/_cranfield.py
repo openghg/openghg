@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+import warnings
 
 
 def parse_cranfield(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: Optional[str] = None,
     network: Optional[str] = None,
     inlet: Optional[str] = None,
@@ -16,7 +17,7 @@ def parse_cranfield(
 
     Args:
         filepath: Path of file to load
-        data_filepath : Filepath of data to be read
+        filepath : Filepath of data to be read
         site: Name of site
         network: Name of network
     Returns:
@@ -25,11 +26,13 @@ def parse_cranfield(
     from openghg.util import clean_string, format_inlet
     from pandas import read_csv
 
+    warnings.warn("This function will be removed in a future release", DeprecationWarning)
+
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
-    data = read_csv(data_filepath, parse_dates=["Date"], index_col="Date")
+    filepath = Path(filepath)
+    data = read_csv(filepath, parse_dates=["Date"], index_col="Date")
 
     data = data.rename(
         columns={

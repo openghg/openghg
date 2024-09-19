@@ -27,7 +27,7 @@ import openghg
 # -- Project information -----------------------------------------------------
 
 project = "OpenGHG"
-copyright = "2023 OpenGHG development team"
+copyright = "2024 OpenGHG development team"
 author = "OpenGHG development team"
 
 # -- General configuration ---------------------------------------------------
@@ -166,7 +166,13 @@ html_theme_options = {
     "logo": {
         "image_light": "./images/OpenGHG_Logo_NoText.png",
         "image_dark": "./images/OpenGHG_Logo_NoText.png",
-    }
+    },
+    "navbar_start": ["navbar-logo"],
+    "navbar_center": ["navbar-nav"],
+    "navbar_end": ["navbar-icon-links"],
+    "navbar_persistent": ["search-button"],
+    #
+    "show_nav_level": 2,
 }
 
 html_css_files = ["custom.css"]

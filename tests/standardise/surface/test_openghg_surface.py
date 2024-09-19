@@ -93,17 +93,19 @@ def test_read_file_no_attr():
 #   - for this create file for *new* site and with no attributes
 
 
-#%% Compliance checks for processed data for this standardisation method
+# %% Compliance checks for processed data for this standardisation method
+
 
 @pytest.fixture(scope="session")
 def openghg_data():
     filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
-    data = parse_openghg(data_filepath=filepath)
+    data = parse_openghg(filepath=filepath)
     return data
 
 
 def test_data_metachecker(openghg_data):
     parsed_surface_metachecker(data=openghg_data)
+
 
 @pytest.mark.cfchecks
 def test_openghg_cf_compliance(openghg_data):

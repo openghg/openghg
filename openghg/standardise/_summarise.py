@@ -62,7 +62,6 @@ def summary_source_formats() -> pd.DataFrame:
     source_format_data = pd.read_csv(source_format_file)
 
     for source_format in surface_source_formats:
-
         source_format_site = source_format_data[source_format_data["source_format"] == source_format]
         site_codes = source_format_site["Site"].values
 

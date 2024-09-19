@@ -131,8 +131,8 @@ def test_regrid_uneven_lat_lon(grid_da):
     dlat = lat_in.diff(dim="lat").mean()
     dlon = lon_in.diff(dim="lon").mean()
 
-    lat_out = np.arange(lat_in.min(), lat_in.max(), dlat*2.0)
-    lon_out = np.arange(lon_in.min(), lon_in.max(), dlon*1.5)
+    lat_out = np.arange(lat_in.min(), lat_in.max(), dlat * 2.0)
+    lon_out = np.arange(lon_in.min(), lon_in.max(), dlon * 1.5)
 
     out = regrid_uniform_cc(grid_da, lat_out, lon_out)
     data = out.data

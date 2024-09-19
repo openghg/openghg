@@ -8,7 +8,6 @@ from ._access import (
 )
 from ._export import get_ceda_file
 from ._search import (
-    meta_search,
     search,
     search_bc,
     search_column,

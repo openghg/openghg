@@ -5,7 +5,7 @@ from openghg.types import pathType, optionalPathType
 
 
 def parse_tmb(
-    data_filepath: pathType,
+    filepath: pathType,
     site: str = "TMB",
     network: str = "LGHG",
     inlet: Optional[str] = None,
@@ -20,7 +20,7 @@ def parse_tmb(
     the processed data has been assigned to
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         network: Network, defaults to LGHG
         inlet: Inlet height. Will be inferred if not specified
@@ -33,12 +33,12 @@ def parse_tmb(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.standardise.meta import assign_attributes
+    from openghg.standardise.meta import assign_attributes, dataset_formatter
     from openghg.util import (
         clean_string,
         get_site_info,
@@ -51,9 +51,9 @@ def parse_tmb(
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
-    data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
+    data = pd_read_csv(filepath, parse_dates={"time": [0]}, index_col=0)
     # Drop NaNs from the data
     data = data.dropna(axis="rows", how="all")
     # Drop a column if it's all NaNs
@@ -64,7 +64,6 @@ def parse_tmb(
         rename_dict["Methane"] = "CH4"
 
     data = data.rename(columns=rename_dict)
-    data.index.name = "time"
 
     site_upper = site.upper()
     network_upper = network.upper()
@@ -90,7 +89,6 @@ def parse_tmb(
         print(f"WARNING: inlet value of '{inlet}' does not match to known inlet values")
 
     gas_data = {}
-
     for species_column in data.columns:
         processed_data = data.loc[:, [species_column]].sort_index().to_xarray()
 
@@ -133,6 +131,8 @@ def parse_tmb(
             "data": processed_data,
             "attributes": attributes,
         }
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath

@@ -1,8 +1,10 @@
 from datetime import date
 from typing import Dict, List, Optional, Tuple, Union
-
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
+import re
+
+from openghg.types import TimePeriod
 
 __all__ = [
     "timestamp_tzaware",
@@ -32,9 +34,10 @@ __all__ = [
     "relative_time_offset",
     "find_duplicate_timestamps",
     "in_daterange",
+    "evaluate_sampling_period",
 ]
 
-TupleTimeType = Tuple[Union[int, float], str]
+# TupleTimeType = Tuple[Union[int, float], str]
 
 
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
@@ -646,7 +649,7 @@ def time_offset_definition() -> Dict[str, List]:
     """
     offset_naming = {
         "months": ["monthly", "months", "month", "MS"],
-        "years": ["yearly", "years", "annual", "year", "AS", "YS"],
+        "years": ["yearly", "years", "annual", "year", "AS", "YS", "YS-JAN"],
         "weeks": ["weekly", "weeks", "week", "W"],
         "days": ["daily", "days", "day", "D"],
         "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
@@ -657,7 +660,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> TupleTimeType:
+def parse_period(period: Union[str, tuple]) -> TimePeriod:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -671,17 +674,17 @@ def parse_period(period: Union[str, tuple]) -> TupleTimeType:
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
 
     Returns:
-        int, str: value and associated time period
+        TimePeriod: class containing value and associated time period (subclass of NamedTuple)
 
         Examples:
         >>> parse_period("12H")
-            (12, "hours")
+            TimePeriod(12, "hours")
         >>> parse_period("yearly")
-            (1, "years")
+            TimePeriod(1, "years")
         >>> parse_period("monthly")
-            (1, "months")
+            TimePeriod(1, "months")
         >>> parse_period((1, "minute"))
-            (1, "minutes")
+            TimePeriod(1, "minutes")
     """
     import re
 
@@ -720,13 +723,14 @@ def parse_period(period: Union[str, tuple]) -> TupleTimeType:
             unit = key
             break
 
-    return value, unit
+    return TimePeriod(value, unit)
 
 
 def create_frequency_str(
     value: Optional[Union[int, float]] = None,
     unit: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
+    include_units: bool = True,
 ) -> str:
     """
     Create a suitable frequency string based either a value and unit pair
@@ -751,6 +755,8 @@ def create_frequency_str(
     """
     if period is not None:
         value, unit = parse_period(period)
+        if value is None or unit is None:
+            raise ValueError(f"Unable to derive time value and unit from period: {period}")
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
@@ -858,3 +864,101 @@ def in_daterange(
     end_b = timestamp_tzaware(end_b)
 
     return bool((start_a <= end_b) and (end_a >= start_b))
+
+
+def dates_overlap(
+    start_a: Union[str, Timestamp],
+    end_a: Union[str, Timestamp],
+    start_b: Union[str, Timestamp],
+    end_b: Union[str, Timestamp],
+) -> bool:
+    """Check if two dateranges overlap.
+
+    Args:
+        start: Start datetime
+        end: End datetime
+    Returns:
+        bool: True if overlap
+    """
+    from openghg.util import timestamp_tzaware
+
+    start_a = timestamp_tzaware(start_a)
+    end_a = timestamp_tzaware(end_a)
+
+    start_b = timestamp_tzaware(start_b)
+    end_b = timestamp_tzaware(end_b)
+
+    return bool((start_a <= end_b) and (end_a >= start_b))
+
+
+def dates_in_range(
+    keys: List[str], start_date: Union[Timestamp, str], end_date: Union[Timestamp, str]
+) -> List[str]:
+    """Returns the keys in the key list that are between the given dates
+
+    Args:
+        keys: List of daterange keys
+        start_date: Start date
+        end_date: End date
+    Returns:
+        list: List of keys
+    """
+    start_date = timestamp_tzaware(start_date)
+    end_date = timestamp_tzaware(end_date)
+
+    in_date = []
+    for key in keys:
+        start_key, end_key = split_daterange_str(daterange_str=key)
+
+        if (start_key <= end_date) and (end_key >= start_date):
+            in_date.append(key)
+
+    return in_date
+
+
+def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -> Optional[str]:
+    """
+    Check the sampling period input and convert this into a string containing the
+    sampling period in seconds.
+
+    Args:
+        sampling_period: str or Timedelta value for the time to sample.
+
+    Returns:
+        str : Sampling period as a string containing the number of seconds.
+
+    TODO: Integrate sampling_period handling into logic for time_period (if practical)
+    """
+    # If we have a sampling period passed we want the number of seconds
+    if sampling_period is not None:
+
+        # Check format of input string matches expected
+        sampling_period = str(sampling_period)
+        re_sampling_period = re.compile(r"\d+[.]?\d*\s*[a-zA-Z]+")
+        check_format = re_sampling_period.search(sampling_period)
+
+        # If pattern is not matched this returns a None - indicating string is in incorrect form
+        if check_format is None:
+            raise ValueError(
+                f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
+            )
+
+        # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
+        try:
+            sampling_period_td = Timedelta(sampling_period)
+        except ValueError as e:
+            raise ValueError(
+                f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
+            ) from e
+
+        sampling_period = str(float(sampling_period_td.total_seconds()))
+
+        # Check if sampling period has resolved to 0 seconds.
+        if sampling_period == "0.0":
+            raise ValueError(
+                f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
+            )
+
+        # TODO: May want to add check for NaT or NaN
+
+    return sampling_period

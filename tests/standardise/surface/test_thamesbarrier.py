@@ -12,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 @pytest.fixture(scope="session")
 def tmb_data():
     filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
-    data = parse_tmb(data_filepath=filepath)
+    data = parse_tmb(filepath=filepath)
     return data
 
 
@@ -41,6 +41,7 @@ def test_read_file(tmb_data):
     assert ch4_metadata["inlet"] == "5m"
 
     # TODO: Add additional metadata / attribute checks?
+
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks

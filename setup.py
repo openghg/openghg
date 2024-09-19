@@ -14,6 +14,7 @@ files = ["openghg/*"]
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
+
 setuptools.setup(
     version=versioneer.get_version(),
     install_requires=requirements,
@@ -25,11 +26,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/openghg/openghg",
     packages=setuptools.find_packages(include=["openghg", "openghg.*"]),
-    package_data={"": ["data/*", "py.typed"]},
+    package_data={"": ["data/*", "data/config/objectstore/*", "py.typed"]},
     classifiers=[
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
@@ -39,5 +41,5 @@ setuptools.setup(
             "openghg = openghg.util:cli",
         ]
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 )

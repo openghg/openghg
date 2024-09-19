@@ -1,22 +1,25 @@
 name: openghg_env
 channels:
+  - openghg
   - conda-forge
   - defaults
   - anaconda
 dependencies:
-  - python>=3.8
+  - python>=3.9
   - addict
   - dask
   - h5netcdf
+  - filelock
   - matplotlib
   - msgpack-python
-  - netcdf4
+  - netcdf4<=1.6.5
   - nbformat
   - numexpr
-  - numpy
+  - numpy<2.0
   - nc-time-axis
   - openghg_defs
-  - pandas<2.0
+  - openpyxl
+  - pandas>=2.0
   - pip
   - plotly
   - pyvis
@@ -31,5 +34,7 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
+  - zarr
+  - numcodecs
   - pip:
-    - icoscp
+    - icoscp<=0.1.17

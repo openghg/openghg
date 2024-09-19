@@ -1,3 +1,4 @@
+from __future__ import annotations
 import glob
 import json
 import os
@@ -9,10 +10,12 @@ import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
 
+
 rlock = threading.RLock()
 
 __all__ = [
     "delete_object",
+    "delete_objects",
     "get_user_objectstore_path",
     "get_tutorial_store_path",
     "get_all_object_names",
@@ -20,6 +23,7 @@ __all__ = [
     "get_object",
     "get_object_data_path",
     "set_object",
+    "move_object",
     "set_object_from_json",
     "set_object_from_file",
     "get_object_from_json",
@@ -78,7 +82,7 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
     if not writable_buckets:
         raise ObjectStoreError("No writable object stores found. Check configuration file.")
 
-    if len(writable_buckets) == 1:
+    if name is None and len(writable_buckets) == 1:
         return next(iter(writable_buckets.values()))
     elif name is not None:
         try:
@@ -192,6 +196,21 @@ def delete_object(bucket: str, key: str) -> None:
         pass
 
 
+def delete_objects(bucket: str, prefix: str) -> None:
+    """Remove objects with key prefix
+
+    Args:
+        bucket: Bucket path
+        prefix: Key prefix
+    Returns:
+        None
+    """
+    key = Path(bucket, prefix)
+
+    with rlock:
+        shutil.rmtree(path=key, ignore_errors=True)
+
+
 def get_object_names(bucket: str, prefix: Optional[str] = None) -> List[str]:
     """List all the keys in the object store
 
@@ -221,6 +240,44 @@ def get_object(bucket: str, key: str) -> bytes:
             raise ObjectStoreError(f"No object at key '{key}'")
 
 
+def move_object(bucket: str, src_key: str, dst_key: str) -> None:
+    """Move data from one place to another
+
+    Args:
+        bucket: Bucket path
+        src_key: Source key
+        dest_key: Destination key
+    Returns:
+        None
+    """
+    src = Path(f"{bucket}/{src_key}._data")
+    dst = Path(f"{bucket}/{dst_key}._data")
+
+    with rlock:
+        shutil.move(src=src, dst=dst)
+
+
+def move_objects(bucket: str, src_prefix: str, dst_prefix: str) -> None:
+    """Move all keys with a certain prefix. Any data in the destination folder
+    will be deleted.
+
+    Args:
+        bucket: Bucket path
+        src_prefix: Source prefix
+        dst_prefix: Destination prefix
+    Returns:
+        None
+    """
+    src = Path(bucket, src_prefix)
+    dst = Path(bucket, dst_prefix)
+
+    with rlock:
+        if dst.exists():
+            shutil.rmtree(dst)
+
+        shutil.move(src=src, dst=dst)
+
+
 def get_object_data_path(bucket: str, key: str) -> Path:
     """Get path to object data at key in passed bucket.
 
@@ -236,6 +293,22 @@ def get_object_data_path(bucket: str, key: str) -> Path:
         return filepath
     else:
         raise ObjectStoreError(f"No object at key '{key}'")
+
+
+def get_object_lock_path(bucket: str, key: str) -> Path:
+    """Get path to object lock file at key in passed bucket.
+
+    Args:
+        bucket: Bucket containing data
+        key: Key for data in bucket
+    Returns:
+        Path to object lock file
+    """
+    lock_path = Path(f"{bucket}/{key}._data.lock")
+    if not lock_path.parent.exists():
+        lock_path.parent.mkdir(parents=True)
+
+    return lock_path
 
 
 def set_object(bucket: str, key: str, data: bytes) -> None:
@@ -361,6 +434,25 @@ def clear_object_store() -> None:
         shutil.rmtree(local_store, ignore_errors=True)
     else:
         logger.warning("Cannot delete object store.")
+
+
+def get_folder_size(folder_path: Union[str, Path]) -> int:
+    """Get the total size of a folder
+
+    See https://stackoverflow.com/a/75101666/1303032
+
+    Args:
+        folder_path: Path to folder
+    Returns:
+        int: Total size of folder in bytes
+    """
+    total = 0
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            path = Path(root) / file
+            total += path.stat().st_size
+
+    return total
 
 
 def query_store() -> Dict:

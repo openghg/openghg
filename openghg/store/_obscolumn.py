@@ -1,14 +1,13 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -24,39 +23,36 @@ class ObsColumn(BaseStore):
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def __enter__(self) -> ObsColumn:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
-
     def read_file(
         self,
         filepath: Union[str, Path],
+        species: str,
+        platform: str = "satellite",
         satellite: Optional[str] = None,
         domain: Optional[str] = None,
         selection: Optional[str] = None,
         site: Optional[str] = None,
-        species: Optional[str] = None,
         network: Optional[str] = None,
         instrument: Optional[str] = None,
-        platform: str = "satellite",
         source_format: str = "openghg",
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
+        force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
+        optional_metadata: Optional[Dict] = None,
     ) -> dict:
         """Read column observation file
 
         Args:
             filepath: Path of observation file
-            satellite: Name of satellite (if relevant)
+            species: Species name or synonym e.g. "ch4"
+            platform: Type of platform. Should be one of:
+                - "satellite"
+                - "site"
+            satellite: Name of satellite (if relevant). Should include satellite OR site.
             domain: For satellite only. If data has been selected on an area include the
                 identifier name for domain covered. This can map to previously defined domains
                 (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -64,64 +60,114 @@ class ObsColumn(BaseStore):
                 performed on satellite data. This can be based on any form of filtering, binning etc.
                 but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
                 If not specified, domain will be used.
-            site : Site code/name (if relevant). Can include satellite OR site.
-            species: Species name or synonym e.g. "ch4"
+            site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-            platform: Type of platform. Should be one of:
-                - "satellite"
-                - "site"
             source_format : Type of data being input e.g. openghg (internal format)
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                To disable chunking pass in an empty dictionary.
+            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import ColumnTypes
-        from openghg.util import clean_string, hash_file, load_column_parser
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
+        from openghg.store.spec import define_standardise_parsers
+        from openghg.util import (
+            clean_string,
+            load_standardise_parser,
+            split_function_inputs,
+            check_if_need_new_version,
+            synonyms,
+        )
 
         # TODO: Evaluate which inputs need cleaning (if any)
-        satellite = clean_string(satellite)
-        site = clean_string(site)
         species = clean_string(species)
+        species = synonyms(species)
+        platform = clean_string(platform)
+
+        if site is None and satellite is None:
+            raise ValueError("One of 'site' or 'satellite' must be specified")
+        elif site is not None and satellite is not None:
+            raise ValueError("Only one of 'site' or 'satellite' should be specified")
+
+        site = clean_string(site)
+        satellite = clean_string(satellite)
         domain = clean_string(domain)
         network = clean_string(network)
         instrument = clean_string(instrument)
-        platform = clean_string(platform)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
+
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = ColumnTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        # Load in the metadata store
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
 
-        # Define parameters to pass to the parser function
-        param = {
-            "data_filepath": filepath,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "species": species,
-            "network": network,
-            "instrument": instrument,
-            "platform": platform,
-        }
+        filepath = next(iter(unseen_hashes.values()))
 
-        obs_data = parser_fn(**param)
+        if chunks is None:
+            chunks = {}
+
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
+
+        parser_input_parameters["data_filepath"] = filepath
+
+        obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
         # # Checking against expected format for ObsColumn
@@ -133,15 +179,34 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
-            data=obs_data, overwrite=overwrite, data_type=data_type, required_keys=required, min_keys=3
+            data=obs_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            compressor=compressor,
+            filters=filters,
         )
 
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+
+        # obs_store.add_datasources(
+        #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
+        # )
+
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

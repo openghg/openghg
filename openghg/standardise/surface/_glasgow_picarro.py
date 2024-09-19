@@ -7,7 +7,7 @@ from addict import Dict as aDict
 
 
 def parse_glasow_picarro(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: str,
@@ -19,7 +19,7 @@ def parse_glasow_picarro(
     """Read the Glasgow Science Tower Picarro data
 
     Args:
-        data_filepath: Path to data file
+        filepath: Path to data file
     Returns:
         dict: Dictionary of processed data
     """
@@ -27,7 +27,7 @@ def parse_glasow_picarro(
 
     warn(message="Temporary function used to read Glasgow Science Tower Picarro data")
 
-    df = pd.read_csv(data_filepath, index_col=[0], parse_dates=True)
+    df = pd.read_csv(filepath, index_col=[0], parse_dates=True)
     df = df.dropna(axis="rows", how="any")
     # We just want the concentration values for now
     species = ["co2", "ch4"]

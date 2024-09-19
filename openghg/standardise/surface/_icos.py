@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import logging
 
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -9,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_icos(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     inlet: str,
     instrument: str,
@@ -24,7 +25,7 @@ def parse_icos(
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -39,7 +40,7 @@ def parse_icos(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of gas data
@@ -58,12 +59,12 @@ def parse_icos(
     inlet = clean_string(inlet)
     inlet = format_inlet(inlet)
 
-    if not isinstance(data_filepath, Path):
-        data_filepath = Path(data_filepath)
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
 
     if header_type == "large":
         gas_data = _read_data_large_header(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             network=network,
@@ -73,7 +74,7 @@ def parse_icos(
         )
     else:
         gas_data = _read_data_small_header(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             network=network,
@@ -81,6 +82,8 @@ def parse_icos(
             sampling_period=sampling_period,
             measurement_type=measurement_type,
         )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(
@@ -95,7 +98,7 @@ def parse_icos(
 
 
 def _read_data_large_header(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     inlet: str,
     network: str,
@@ -107,7 +110,7 @@ def _read_data_large_header(
     """Parses ICOS files with the larger (~40) line header
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -118,11 +121,11 @@ def _read_data_large_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import read_csv, to_datetime
+    from pandas import read_csv
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
-    split_filename = data_filepath.name.split(".")
+    split_filename = filepath.name.split(".")
 
     try:
         site_fname = split_filename[0]
@@ -146,7 +149,7 @@ def _read_data_large_header(
         raise ValueError("Mismatch between instrument passed and that in filename.")
 
     # Read the header and check its length
-    header = read_header(filepath=data_filepath)
+    header = read_header(filepath=filepath)
     len_header = len(header)
 
     if len_header != 40:
@@ -171,16 +174,15 @@ def _read_data_large_header(
     }
 
     df = read_csv(
-        data_filepath,
+        filepath,
         header=len_header - 1,
         sep=";",
         parse_dates={"time": [2, 3, 4, 5, 6]},
+        date_format="%Y %m %d %H %M",
         index_col="time",
         na_values=["-9.990", "-999.990"],
         dtype=dtypes,
     )
-
-    df.index = to_datetime(df.index, format="%Y %m %d %H %M")
 
     # Lowercase all the column titles
     df.columns = [str(c).lower() for c in df.columns]
@@ -271,7 +273,7 @@ def _read_data_large_header(
 
 
 def _read_data_small_header(
-    data_filepath: Path,
+    filepath: Path,
     site: str,
     inlet: str,
     network: str,
@@ -282,7 +284,7 @@ def _read_data_small_header(
     """Parses ICOS files with a single line header
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         network: Network name
         inlet: Inlet height
@@ -293,10 +295,10 @@ def _read_data_small_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import Timestamp, read_csv
+    from pandas import read_csv
 
     # Read some metadata from the filename
-    split_filename = data_filepath.name.split(".")
+    split_filename = filepath.name.split(".")
 
     try:
         site_fname = split_filename[0]
@@ -308,14 +310,11 @@ def _read_data_small_header(
             "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
         )
 
-    # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
-    header = read_header(filepath=data_filepath)
+    # metadata = read_metadata(filepath=filepath, data=data, data_type="ICOS")
+    header = read_header(filepath=filepath)
     n_skip = len(header) - 1
 
-    def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
-        return Timestamp(year, month, day, hour, minute)
-
-    datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
+    datetime_columns = ["Year", "Month", "Day", "Hour", "Minute"]
 
     use_cols = [
         "Year",
@@ -329,11 +328,6 @@ def _read_data_small_header(
     ]
 
     dtypes = {
-        "Day": int,
-        "Month": int,
-        "Year": int,
-        "Hour": int,
-        "Minute": int,
         species_fname.lower(): float,
         "Stdev": float,
         "SamplingHeight": float,
@@ -341,15 +335,15 @@ def _read_data_small_header(
     }
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
-        parse_dates=datetime_columns,
-        index_col="time",
         sep=" ",
         usecols=use_cols,
         dtype=dtypes,
         na_values="-999.99",
-        date_parser=date_parser,
+        parse_dates={"time": datetime_columns},
+        date_format="%Y %m %d %H %M",
+        index_col="time",
     )
 
     data = data[data[species_fname.lower()] >= 0.0]

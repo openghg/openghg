@@ -1,16 +1,21 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
-from types import TracebackType
-from pandas import Timestamp
-import tinydb
+from __future__ import annotations
 import logging
-from openghg.types import DatasourceLookupError
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.util import timestamp_now, to_lowercase
+import math
+from pathlib import Path
+from pandas import Timestamp
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
+import xarray as xr
+
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
+from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.store.storage import ChunkingSchema
+from openghg.types import DatasourceLookupError, multiPathType
+from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -26,7 +31,7 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
-        from openghg.store import load_metastore
+        # from openghg.objectstore import get_object_from_json, exists
 
         self._creation_datetime = str(timestamp_now())
         self._stored = False
@@ -42,9 +47,9 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
-        self._datasource_uuids = [r["uuid"] for r in self._metastore]
+        self._datasource_uuids = self._metastore.select("uuid")
 
     def __init_subclass__(cls) -> None:
         BaseStore._registry[cls._data_type] = cls
@@ -54,12 +59,12 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg="", exc_info=exc_val)
         else:
             self.save()
 
@@ -72,6 +77,8 @@ class BaseStore:
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self) -> None:
+        # from openghg.objectstore import set_object_from_json
+
         self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
@@ -93,14 +100,197 @@ class BaseStore:
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
 
+    def chunking_schema(self) -> ChunkingSchema:
+        raise NotImplementedError
+
+    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+        """Store the hashes of files we've seen before
+
+        Args:
+            hahes: Dictionary of hashes
+        Returns:
+            None
+        """
+        name_only = {k: v.name for k, v in hashes.items()}
+        self._file_hashes.update(name_only)
+
+    def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
+        """Check the hashes of the files passed against the hashes of previously
+        uploaded files. Two dictionaries are returned, one containing the hashes
+        of files we've seen before and one containing the hashes of files we haven't.
+
+        A warning is logged if we've seen any of the files before
+
+        Args:
+            filepaths: List of filepaths
+            force: If force is True then we will expect to process all the filepaths, not just the
+            unseen ones
+        Returns:
+            tuple: seen files, unseen files
+        """
+        if not isinstance(filepaths, list):
+            filepaths = [filepaths]
+
+        filepaths = [Path(filepath) for filepath in filepaths]
+
+        unseen: Dict[str, Path] = {}
+        seen: Dict[str, Path] = {}
+
+        for filepath in filepaths:
+            file_hash = hash_file(filepath=filepath)
+            if file_hash in self._file_hashes:
+                seen[file_hash] = filepath
+            else:
+                unseen[file_hash] = filepath
+
+        if force:
+            unseen = {**seen, **unseen}
+
+        if seen:
+            logger.warning("Skipping previously standardised files, see log for list.")
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
+
+            if unseen:
+                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
+
+        if unseen:
+            to_process = "\n".join([str(v) for v in unseen.values()])
+            logger.debug(f"Processing the following files:\n{to_process}")
+        else:
+            logger.info("No new files to process.")
+
+        return seen, unseen
+
+    def add_metakeys(self, force: bool = False) -> dict:
+        """
+        Check metakeys are included from relevant config file and add as the `.metakeys`
+        attributes if not.
+        """
+        if not hasattr(self, "metakeys") or force:
+            try:
+                metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+            except KeyError:
+                raise ValueError(
+                    f"No metakeys for {self._data_type}, please update metakeys configuration file."
+                )
+
+            self.metakeys = metakeys
+
+        return self.metakeys
+
+    def update_metadata(self, data: dict, input_parameters: dict, additional_metadata: dict) -> dict:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+            input_parameters: Input parameters from read_file...
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            dict: data dictionary with metadata keys added
+        """
+        from openghg.util import merge_dict
+
+        # Get defined metakeys from the config setup
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        for parsed_data in data.values():
+            metadata = parsed_data["metadata"]
+
+            # Sources of additional metadata - order in list is order of preference.
+            sources = [input_parameters, additional_metadata]
+            for source in sources:
+                # merge "required" keys from source into metadata; on conflict, keep value from metadata
+                metadata = merge_dict(metadata, source, keys_right=required)
+
+            required_not_found = set(required) - set(metadata.keys())
+            if required_not_found:
+                raise ValueError(
+                    f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                )
+
+            # Check if named optional keys are included in the input_parameters and add
+            optional_matched = set(optional) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
+
+            # Add additional metadata keys
+            if additional_metadata:
+                # Ensure required keys aren't added again (or clash with values from input_parameters)
+                additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
+                metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
+
+            parsed_data["metadata"] = metadata
+
+        return data
+
+    def check_info_keys(self, optional_metadata: Optional[Dict]) -> None:
+        """Check the informational metadata is not being used to set required keys.
+
+        Args:
+            optional_metadata: Additional informational metadata
+        Returns:
+            None
+        Raises:
+            ValueError: if any keys within optional_metadata are within the required set of keys.
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+    def get_lookup_keys(self, data: dict) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+
+        # Note: Just grabbing the first entry in data at the moment
+        # In principle the metadata should have the same keys for all entries
+        # but should check that assumption is reasonable
+        parsed_data_representative = list(data.values())[0]
+        metadata = parsed_data_representative["metadata"]
+
+        # Matching between potential optional keys and those present in the metadata
+        optional_lookup = set(optional) & set(metadata.keys())
+        lookup_keys.extend(list(optional_lookup))
+
+        return lookup_keys
+
     def assign_data(
         self,
         data: Dict,
-        overwrite: bool,
         data_type: str,
-        required_keys: Sequence[str],
+        required_keys: Optional[Sequence[str]] = None,
+        sort: bool = True,
+        drop_duplicates: bool = True,
         min_keys: Optional[int] = None,
         update_keys: Optional[List] = None,
+        if_exists: str = "auto",
+        new_version: bool = True,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
@@ -110,79 +300,98 @@ class BaseStore:
                 overwrite: If True overwrite current data stored
                 data_type: Type of data, timeseries etc
                 required_keys: Required minimum keys to lookup unique Datasource
+                sort: Sort data in time dimension
+                drop_duplicates: Drop duplicate timestamps, keeping the first value
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
+                if_exists: What to do if existing data is present.
+                    - "auto" - checks new and current data for timeseries overlap
+                        - adds data if no overlap
+                        - raises DataOverlapError if there is an overlap
+                    - "new" - just include new data and ignore previous
+                    - "combine" - replace and insert new data into current timeseries
+                new_version: Create a new version for the data and save current
+                    data to a previous version.
+                compressor: Compression for zarr encoding
+                filters: Filters for zarr encoding
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
+        from openghg.util import not_set_metadata_values
 
         uuids = {}
 
-        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
-        # TODO - remove this when the lowercasing of metadata gets removed
-        # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
-        skip_keys = ["object_store"]
+        # Get the metadata keys for this type
+        # metakeys = self.get_metakeys()
 
-        for key, parsed_data in data.items():
-            metadata = parsed_data["metadata"]
-            _data = parsed_data["data"]
+        if not required_keys:
+            required_keys = self.get_lookup_keys(data=data)
 
-            # Our lookup results and gas data have the same keys
-            uuid = lookup_results[key]
+        self._metastore.acquire_lock()
+        try:
+            lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+            # TODO - remove this when the lowercasing of metadata gets removed
+            # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+            skip_keys = ["object_store"]
 
-            # Add the read metadata to the Dataset attributes being careful
-            # not to overwrite any attributes that are already there
-            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
-                """Attributes in a netCDF file can be strings, numbers, or sequences:
-                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+            for key, parsed_data in data.items():
+                metadata = parsed_data["metadata"]
+                dataset = parsed_data["data"]
 
-                This function converts any data whose type is not int, float, str, or list
-                to strings.
-                Booleans are converted to strings, even though they are a subtype of int.
-                """
-                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
-                    return value
+                # Our lookup results and gas data have the same keys
+                uuid = lookup_results[key]
+
+                ignore_values = not_set_metadata_values()
+
+                # Do we want all the metadata in the Dataset attributes?
+                to_add = {
+                    k: v for k, v in metadata.items() if k not in dataset.attrs and v not in ignore_values
+                }
+                dataset.attrs.update(to_add)
+
+                # Take a copy of the metadata so we can update it
+                meta_copy = metadata.copy()
+                new_ds = uuid is False
+
+                if new_ds:
+                    datasource = Datasource(bucket=self._bucket)
+                    uid = datasource.uuid()
+                    meta_copy["uuid"] = uid
+                    # Make sure all the metadata is lowercase for easier searching later
+                    # TODO - do we want to do this or should be just perform lowercase comparisons?
+                    meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 else:
-                    return str(value)
+                    datasource = Datasource(bucket=self._bucket, uuid=uuid)
 
-            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
-            _data.attrs.update(to_add)
+                # Add the dataframe to the datasource
+                datasource.add_data(
+                    metadata=meta_copy,
+                    data=dataset,
+                    sort=sort,
+                    drop_duplicates=drop_duplicates,
+                    skip_keys=skip_keys,
+                    new_version=new_version,
+                    if_exists=if_exists,
+                    data_type=data_type,
+                    compressor=compressor,
+                    filters=filters,
+                )
 
-            # If we have a UUID for this Datasource load the existing object
-            # from the object store
-            # If we haven't stored data with this metadata before we create a new Datasource
-            # and add the metadata to our metastore
+                # Save Datasource to object store
+                datasource.save()
 
-            # Take a copy of the metadata so we can update it
-            meta_copy = metadata.copy()
-            new_ds = uuid is False
+                # Add the metadata to the metastore and make sure it's up to date with the metadata stored
+                # in the Datasource
+                datasource_metadata = datasource.metadata()
 
-            if new_ds:
-                datasource = Datasource()
-                uid = datasource.uuid()
-                meta_copy["uuid"] = uid
-                # Make sure all the metadata is lowercase for easier searching later
-                # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
-            else:
-                datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
+                if new_ds:
+                    self._metastore.insert(datasource_metadata)
+                else:
+                    self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
 
-            # Add the dataframe to the datasource
-            datasource.add_data(
-                metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type, skip_keys=skip_keys
-            )
-            # Save Datasource to object store
-            datasource.save(bucket=self._bucket)
-
-            # Add the metadata to the metastore and make sure it's up to date with the metadata stored
-            # in the Datasource
-            datasource_metadata = datasource.metadata()
-            if new_ds:
-                self._metastore.insert(datasource_metadata)
-            else:
-                self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
-
-            uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+                uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+        finally:
+            self._metastore.release_lock()
 
         return uuids
 
@@ -218,16 +427,18 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
-            required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))
+            required_result = self._metastore.search(required_metadata)
 
             if not required_result:
                 results[key] = False
             elif len(required_result) > 1:
-                raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+                raise DatasourceLookupError("More than one Datasource found for metadata, refine lookup.")
             else:
                 results[key] = required_result[0]["uuid"]
 
@@ -457,21 +668,74 @@ class BaseStore:
         self._datasource_uuids.clear()
         self._file_hashes.clear()
 
+    def check_chunks(
+        self,
+        ds: xr.Dataset,
+        chunks: Optional[Dict[str, int]] = None,
+        max_chunk_size: int = 300,
+        **chunking_kwargs: Any,
+    ) -> Dict[str, int]:
+        """Check the chunk size of a variable in a dataset and return the chunk size
 
-def get_data_class(data_type: str) -> type[BaseStore]:
-    """Return data class corresponding to given data type.
+        Args:
+            ds: dataset to check
+            variable: Name of the variable that we want to check for max chunksize
+            chunk_dimension: Dimension to chunk over
+            secondary_dimensions: List of secondary dimensions to chunk over
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+        Returns:
+            Dict: Dictionary of chunk sizes
+        """
+        try:
+            default_schema = self.chunking_schema(**chunking_kwargs)
+        except NotImplementedError:
+            logger.warn(f"No chunking schema found for {type(self).__name__}")
+            return {}
 
-    Args:
-        data_type: one of "surface", "column", "emissions", "footprints",
-    "boundary_conditions", or "eulerian_model"
+        variable = default_schema.variable
+        default_chunks = default_schema.chunks
+        secondary_dimensions = default_schema.secondary_dims
 
-    Returns:
-        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
-    `Footprints`, `BoundaryConditions`.
-    """
-    try:
-        data_class = BaseStore._registry[data_type]
-    except KeyError:
-        raise ValueError(f"No data class for data type {data_type}.")
-    else:
-        return data_class
+        dim_sizes = dict(ds[variable].sizes)
+        var_dtype_bytes = ds[variable].dtype.itemsize
+
+        if secondary_dimensions is not None:
+            missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
+            if missing_dims:
+                raise ValueError(f"The following dimensions are missing: {missing_dims}")
+
+        # Make the 'chunks' dict, using dim_sizes for any unspecified dims
+        specified_chunks = default_chunks if chunks is None else chunks
+        # TODO - revisit this type hinting
+        chunks = dict(dim_sizes, **specified_chunks)  # type: ignore
+
+        # So now we want to check the size of the chunks
+        # We need to add in the sizes of the other dimensions so we calculate
+        # the chunk size correctly
+        # TODO - should we check if the specified chunk size is greater than the dimension size?
+        MB_to_bytes = 1024 * 1024
+        bytes_to_MB = 1 / MB_to_bytes
+
+        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))  # bytes
+        max_chunk_size_bytes = max_chunk_size * MB_to_bytes
+
+        if current_chunksize > max_chunk_size_bytes:
+            # Do we want to check the secondary dimensions really?
+            # if secondary_dimensions is not None:
+            # raise NotImplementedError("Secondary dimensions scaling not yet implemented")
+            # ratio = np.power(max_chunk_size / current_chunksize, 1 / len(secondary_dimensions))
+            # for dim in secondary_dimensions:
+            #     # Rescale chunks, but don't allow chunks smaller than 10
+            #     chunks[dim] = max(int(ratio * chunks[dim]), 10)
+            # else:
+            raise ValueError(
+                f"Chunk size {current_chunksize * bytes_to_MB} is greater than the maximum chunk size {max_chunk_size}"
+            )
+
+        # Do we need to supply the chunks of the other dimensions?
+        # rechunk = {k: v for k, v in chunks.items() if v < dim_sizes[k]}
+        # rechunk = {}
+        # for k in dim_sizes:
+        #     if chunks[k] < dim_sizes[k]:
+        #         rechunk[k] = chunks.pop(k)
+        return chunks

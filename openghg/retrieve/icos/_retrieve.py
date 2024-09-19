@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub, load_json
+from openghg.types import MetadataFormatError
 import openghg_defs
 import logging
 
@@ -21,6 +22,7 @@ def retrieve_atmospheric(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -49,6 +51,7 @@ def retrieve_atmospheric(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -64,6 +67,7 @@ def retrieve_atmospheric(
         dataset_source=dataset_source,
         update_mismatch=update_mismatch,
         store=store,
+        force=force,
     )
 
 
@@ -105,6 +109,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_icos"
         post_data["search_terms"] = kwargs
@@ -138,7 +143,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
 def local_retrieve(
     site: str,
-    species: Optional[Union[str, List]] = None,
+    species: Optional[Union[str, list[str]]] = None,
     inlet: Optional[str] = None,
     sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -148,6 +153,7 @@ def local_retrieve(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -177,37 +183,50 @@ def local_retrieve(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
-    from openghg.util import to_lowercase
+    from openghg.util import to_lowercase, format_data_level
 
-    if not 1 <= data_level <= 2:
-        logger.error("Error: data level must be 1 or 2.")
+    # ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])
+    if not 1 <= int(data_level) <= 2:
+        msg = "Error: for ICOS data the data level must be 1 or 2."
+        logger.exception(msg)
+        raise MetadataFormatError(msg)
 
     if sampling_height and inlet is None:
         inlet = sampling_height
     elif sampling_height and inlet:
         logger.warning(f"Both sampling height and inlet specified. Using inlet value of {inlet}")
 
-    # NOTE - we skip ranking here, will we be ranking ICOS data?
-    results = search_surface(
-        site=site,
-        species=species,
-        inlet=inlet,
-        network="ICOS",
-        data_source="icoscp",
-        start_date=start_date,
-        end_date=end_date,
-        icos_data_level=data_level,
-        dataset_source=dataset_source,
-        store=store,
-    )
+    # Search for data_level OR icos_data_level keyword within current data.
+    # - icos_data_level is no longer added but this is included for backwards compatability.
+    data_level_keywords = {
+        "data_level": format_data_level(data_level),
+        "icos_data_level": format_data_level(data_level),
+    }
+
+    search_keywords: dict[str, Any] = {
+        "site": site,
+        "species": species,
+        "inlet": inlet,
+        "network": "ICOS",
+        "data_source": "icoscp",
+        "start_date": start_date,
+        "end_date": end_date,
+        "dataset_source": dataset_source,
+        "store": store,
+        "data_level": data_level_keywords,
+    }
+
+    results = search_surface(**search_keywords)
 
     if results and not force_retrieval:
         obs_data = results.retrieve_all()
+        # break
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(
@@ -219,20 +238,24 @@ def local_retrieve(
             sampling_height=sampling_height,
             update_mismatch=update_mismatch,
         )
-
         if standardised_data is None:
             return None
 
         bucket = get_writable_bucket(name=store)
         with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data)
+            obs.store_data(data=standardised_data, force=force)
 
         # Create the expected ObsData type
         obs_data = []
         for data in standardised_data.values():
             measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = ["citation_string", "instrument_data", "dobj_pid", "dataset_source"]
+            skip_keys = [
+                "citation_string",
+                "instrument_data",
+                "dobj_pid",
+                "dataset_source",
+            ]
             metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
@@ -287,7 +310,7 @@ def _retrieve_remote(
 
     import re
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import format_inlet
+    from openghg.util import format_inlet, format_data_level
     from pandas import to_datetime
 
     if species is None:
@@ -307,7 +330,7 @@ def _retrieve_remote(
     stat = station.get(stationId=site.upper())
 
     if not stat.valid:
-        logger.error("Please check you have passed a valid ICOS site.")
+        logger.error("Please check you have passed a valid ICOS site and have a working internet connection.")
         return None
 
     data_pids = stat.data(level=data_level)
@@ -317,7 +340,26 @@ def _retrieve_remote(
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
     # Now filter the dataframe so we can extract the PIDS
-    filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
+    # We filter out any data that contains "Obspack" or "csv" in the specLabel
+    # Also filter out some drought files which cause trouble being read in
+    # For some reason they have separate station record pages that contain "ATMO_"
+    filtered_sources = data_pids[
+        data_pids["specLabel"].str.contains(search_str)
+        & ~data_pids["specLabel"].str.contains("Obspack")
+        & ~data_pids["specLabel"].str.contains("csv")
+        & ~data_pids["station"].str.contains("ATMO_")
+    ]
+
+    if filtered_sources.empty:
+        species_lower = [s.lower() for s in species]
+        # For this see https://stackoverflow.com/a/55335207
+        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
+        # Now filter the dataframe so we can extract the PIDS
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str)
+            & ~data_pids["specLabel"].str.contains("Obspack")
+            & ~data_pids["specLabel"].str.contains("csv")
+        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
@@ -468,7 +510,8 @@ def _retrieve_remote(
         additional_data["data_type"] = "surface"
         additional_data["data_source"] = "icoscp"
         additional_data["source_format"] = "icos"
-        additional_data["icos_data_level"] = str(data_level)
+        # additional_data["icos_data_level"] = str(data_level)
+        additional_data["data_level"] = format_data_level(data_level)
         additional_data["dataset_source"] = dobj_dataset_source
         additional_data["site"] = site
 
