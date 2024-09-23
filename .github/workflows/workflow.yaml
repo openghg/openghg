@@ -104,8 +104,6 @@ jobs:
       - name: Install pypa/build
         run: |
           pip install --upgrade build
-      - name: Checking for tags
-        id: check_tag
       - name: Build a binary wheel and a source tarball
         id: build_pypi
         run: |
