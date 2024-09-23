@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated data type classes to dynamically select inputs to pass to parse function and to include any required/optional keys not passed to the parse function within the metadata. [PR #1111](https://github.com/openghg/openghg/pull/1111)
 - When adding new data sources, updated how lookup keys add optional keys. This used to only extract these from the optional_metadata input but this now allows keys to be added through any metadata. [PR #1112](https://github.com/openghg/openghg/pull/1112)
 - Formalising metadata data merging logic within new util.metadata_util functions. [PR #1113](https://github.com/openghg/openghg/pull/1113)
+- Splited build and publish steps in the workflow and check for `-` and `.` in the tags for build and publish. [PR #759](https://github.com/openghg/openghg/pull/759)
 
 ### Fixed
 
