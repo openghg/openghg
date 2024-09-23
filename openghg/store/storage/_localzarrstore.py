@@ -259,7 +259,7 @@ class LocalZarrStore(Store):
         """
         self._check_writable()
         self._stores.clear()
-        shutil.rmtree(self._stores_path, ignore_errors=True)
+        shutil.rmtree(self._stores_path.parent, ignore_errors=True)
 
     def update(
         self,

@@ -169,6 +169,8 @@ def test_delete_all(store):
 
     assert not parent.exists()
 
+    assert not parent.parent.exists()
+
 
 def test_pop_dataset(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
