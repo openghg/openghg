@@ -180,16 +180,12 @@ def _read_data_large_header(
                         "stdev",
                         "nbpoints",
                         "flag",
-                        "ltr",
-                        "sttb",
                         "unc_" + species_fname.lower()]
     else:
         cols_to_keep = [species_fname.lower(),
                         "stdev",
                         "nbpoints",
-                        "flag",
-                        "ltr",
-                        "sttb"]
+                        "flag"]
     df = df[cols_to_keep]
 
     # Remove rows with NaNs in the species or stdev columns
