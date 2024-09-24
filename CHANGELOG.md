@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bug where a datasource's folder in the `data` directory was not deleted by `Datasource.delete_all_data()`. This was causing `check_zarr_store` in `util/_user.py` to give a false negative. [PR #1126](https://github.com/openghg/openghg/pull/1126) 
 - Bug where an input filepath list to standardise_surface was only storing the last file hash. This allowed for some files to bypass the check for the same files depending on where they were in the original filepath list. [PR #1100](https://github.com/openghg/openghg/pull/1100)
 - Bug where filepath needed to be a Path object when storing the file hash values. [PR #1108](https://github.com/openghg/openghg/pull/1108)
 - Catch an `AttributeError` when trying synchronise attributes and metadata and a user passes a `bool` - [PR #1029](https://github.com/openghg/openghg/pull/1029)

@@ -259,7 +259,13 @@ class LocalZarrStore(Store):
         """
         self._check_writable()
         self._stores.clear()
-        shutil.rmtree(self._stores_path, ignore_errors=True)
+
+        # make sure we're not deleting too much...
+        bucket_path = Path(self._bucket).expanduser().resolve()
+        if self._stores_path.parent not in [bucket_path, bucket_path / "data"]:
+            shutil.rmtree(self._stores_path.parent, ignore_errors=True)
+        else:
+            shutil.rmtree(self._stores_path, ignore_errors=True)
 
     def update(
         self,
