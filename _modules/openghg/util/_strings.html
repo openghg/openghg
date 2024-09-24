@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._strings &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.util._strings &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -343,7 +343,9 @@ document.write(`
                   
   <h1>Source code for openghg.util._strings</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">not_set_metadata_values</span><span class="p">,</span> <span class="n">null_metadata_values</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;clean_string&quot;</span><span class="p">,</span> <span class="s2">&quot;to_lowercase&quot;</span><span class="p">]</span>
 
@@ -528,27 +530,33 @@ document.write(`
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No float values found in &#39;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">check_and_set_null_variable</span><span class="p">(</span><span class="n">param</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">null_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">check_and_set_null_variable</span><span class="p">(</span>
+    <span class="n">param</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">not_set_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">null_values</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">=</span> <span class="n">null_metadata_values</span><span class="p">(),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check whether a variable is set to None and if so replace this with</span>
-<span class="sd">    the defined string to define a null variable.</span>
+<span class="sd">    Check whether a variable is set to a null value (e.g. None) and if so replace this with</span>
+<span class="sd">    a defined string used to indicate the variable has not been set.</span>
 <span class="sd">    This is typically: &quot;not_set&quot;</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        param: variable to check</span>
-<span class="sd">        null_value: Optional value to replace if None. Otherwise details</span>
-<span class="sd">            from openghg.store.spec.null_metadata_values will be used.</span>
+<span class="sd">        not_set_value: Optional value to replace if None. By default details</span>
+<span class="sd">            from openghg.util.not_set_metadata_values() will be used.</span>
+<span class="sd">        null_values: Values to identify as null. By default details</span>
+<span class="sd">            from openghg.util.null_metadata_values() will be used.</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        str: Original string or null value</span>
+<span class="sd">        str: Original string or value to indicate this is not set</span>
+<span class="sd">        None: Only returned if value is None and None is not included as one of the null_values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">null_metadata_values</span>
 
-    <span class="k">if</span> <span class="n">null_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">null_values</span> <span class="o">=</span> <span class="n">null_metadata_values</span><span class="p">()</span>
-        <span class="n">null_value</span> <span class="o">=</span> <span class="n">null_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">not_set_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">not_set_values</span> <span class="o">=</span> <span class="n">not_set_metadata_values</span><span class="p">()</span>
+        <span class="n">not_set_value</span> <span class="o">=</span> <span class="n">not_set_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="n">null_value</span>
+    <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">null_values</span><span class="p">:</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">not_set_value</span>
 
     <span class="k">return</span> <span class="n">param</span>
 </pre></div>

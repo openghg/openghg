@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -613,14 +613,18 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">FootprintTypes</span>
+        <span class="c1"># Get initial values which exist within this function scope using locals</span>
+        <span class="c1"># MUST be at the top of the function</span>
+        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
+        <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_standardise_parsers</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
             <span class="n">format_inlet</span><span class="p">,</span>
             <span class="n">check_and_set_null_variable</span><span class="p">,</span>
             <span class="n">check_if_need_new_version</span><span class="p">,</span>
-            <span class="n">load_footprint_parser</span><span class="p">,</span>
+            <span class="n">split_function_inputs</span><span class="p">,</span>
+            <span class="n">load_standardise_parser</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
@@ -660,13 +664,30 @@ document.write(`
         <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
 
+        <span class="c1"># Do some housekeeping on the inputs</span>
+        <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">check_species_time_resolved</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">time_resolved</span><span class="p">)</span>
+        <span class="n">short_lifetime</span> <span class="o">=</span> <span class="n">check_species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">short_lifetime</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_resolved</span> <span class="ow">and</span> <span class="n">sort</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Sorting high time resolution data is very memory intensive, we recommend not sorting.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Specify any additional metadata to be added</span>
+        <span class="n">additional_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">standardise_parsers</span> <span class="o">=</span> <span class="n">define_standardise_parsers</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">source_format</span> <span class="o">=</span> <span class="n">FootprintTypes</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">source_format</span> <span class="o">=</span> <span class="n">standardise_parsers</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data type </span><span class="si">{</span><span class="n">source_format</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Load the data retrieve object</span>
-        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_footprint_parser</span><span class="p">(</span><span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
+        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_standardise_parser</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
+
+        <span class="c1"># Get current parameter values and filter to only include function inputs</span>
+        <span class="n">fn_current_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Make a copy of parameters passed to function</span>
+        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">fn_current_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fn_input_parameters</span><span class="p">}</span>
 
         <span class="c1"># file_hash = hash_file(filepath=filepath)</span>
         <span class="c1"># if file_hash in self._file_hashes and not overwrite:</span>
@@ -693,52 +714,12 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="c1"># Do some housekeeping on the inputs</span>
-        <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">check_species_time_resolved</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">time_resolved</span><span class="p">)</span>
-        <span class="n">short_lifetime</span> <span class="o">=</span> <span class="n">check_species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">short_lifetime</span><span class="p">)</span>
+        <span class="c1"># Define parameters to pass to the parser function and remaining keys</span>
+        <span class="n">parser_input_parameters</span><span class="p">,</span> <span class="n">additional_input_parameters</span> <span class="o">=</span> <span class="n">split_function_inputs</span><span class="p">(</span>
+            <span class="n">fn_input_parameters</span><span class="p">,</span> <span class="n">parser_fn</span>
+        <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">time_resolved</span> <span class="ow">and</span> <span class="n">sort</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Sorting high time resolution data is very memory intensive, we recommend not sorting.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Define parameters to pass to the parser function</span>
-        <span class="c1"># TODO: Update this to match against inputs for parser function.</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">filepath</span><span class="p">,</span>
-            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-            <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
-            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
-            <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
-            <span class="s2">&quot;met_model&quot;</span><span class="p">:</span> <span class="n">met_model</span><span class="p">,</span>
-            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
-            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
-            <span class="s2">&quot;time_resolved&quot;</span><span class="p">:</span> <span class="n">time_resolved</span><span class="p">,</span>
-            <span class="s2">&quot;high_spatial_resolution&quot;</span><span class="p">:</span> <span class="n">high_spatial_resolution</span><span class="p">,</span>
-            <span class="s2">&quot;short_lifetime&quot;</span><span class="p">:</span> <span class="n">short_lifetime</span><span class="p">,</span>
-            <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">,</span>
-            <span class="s2">&quot;continuous&quot;</span><span class="p">:</span> <span class="n">continuous</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="n">input_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="c1"># # TODO: Decide if we want to include details below / switch any parameters to be optional.</span>
-        <span class="c1"># optional_keywords: dict[Any, Any] = {}</span>
-
-        <span class="c1"># signature = inspect.signature(parser_fn)</span>
-        <span class="c1"># fn_accepted_parameters = [param.name for param in signature.parameters.values()]</span>
-
-        <span class="c1"># # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.</span>
-        <span class="c1"># for param, param_value in optional_keywords.items():</span>
-        <span class="c1">#     if param in fn_accepted_parameters:</span>
-        <span class="c1">#         input_parameters[param] = param_value</span>
-        <span class="c1">#     else:</span>
-        <span class="c1">#         logger.warning(</span>
-        <span class="c1">#             f&quot;Input: &#39;{param}&#39; (value: {param_value}) is not being used as part of the standardisation process.&quot;</span>
-        <span class="c1">#             f&quot;This is not accepted by the current standardisation function: {parser_fn}&quot;</span>
-        <span class="c1">#         )</span>
-
-        <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">input_parameters</span><span class="p">)</span>
+        <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
 
         <span class="n">chunks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_chunks</span><span class="p">(</span>
             <span class="n">ds</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">footprint_data</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span>
@@ -771,13 +752,15 @@ document.write(`
                 <span class="s2">&quot;Sorting high time resolution data is very memory intensive, we recommend not sorting.&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># TODO - we&#39;ll further tidy this up when we move the metdata parsing</span>
-        <span class="c1"># into a centralised place</span>
-        <span class="n">lookup_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lookup_keys</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
-
+        <span class="c1"># Check to ensure no required keys are being passed through optional_metadata dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_info_keys</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">optional_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">parsed_data</span> <span class="ow">in</span> <span class="n">footprint_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">parsed_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
+            <span class="n">additional_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
+
+        <span class="c1"># Mop up and add additional keys to metadata which weren&#39;t passed to the parser</span>
+        <span class="n">footprint_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span>
+            <span class="n">footprint_data</span><span class="p">,</span> <span class="n">additional_input_parameters</span><span class="p">,</span> <span class="n">additional_metadata</span>
+        <span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
         <span class="c1"># TODO - filter options</span>
@@ -786,7 +769,6 @@ document.write(`
             <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
             <span class="n">new_version</span><span class="o">=</span><span class="n">new_version</span><span class="p">,</span>
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-            <span class="n">required_keys</span><span class="o">=</span><span class="n">lookup_keys</span><span class="p">,</span>
             <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
             <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">,</span>
             <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>

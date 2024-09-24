@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -608,14 +608,14 @@ document.write(`
 
 <span class="k">def</span> <span class="nf">standardise_column</span><span class="p">(</span>
     <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">satellite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -632,7 +632,11 @@ document.write(`
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path of observation file</span>
-<span class="sd">        satellite: Name of satellite (if relevant)</span>
+<span class="sd">        species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">        platform: Type of platform. Should be one of:</span>
+<span class="sd">            - &quot;satellite&quot;</span>
+<span class="sd">            - &quot;site&quot;</span>
+<span class="sd">        satellite: Name of satellite (if relevant). Should include satellite OR site.</span>
 <span class="sd">        domain: For satellite only. If data has been selected on an area include the</span>
 <span class="sd">            identifier name for domain covered. This can map to previously defined domains</span>
 <span class="sd">            (see openghg_defs &quot;domain_info.json&quot; file) or a newly defined domain.</span>
@@ -640,14 +644,9 @@ document.write(`
 <span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
 <span class="sd">            but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
 <span class="sd">            If not specified, domain will be used.</span>
-<span class="sd">        site : Site code/name (if relevant). Can include satellite OR site.</span>
-<span class="sd">        species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">        site : Site code/name (if relevant). Should include satellite OR site.</span>
 <span class="sd">        instrument: Instrument name e.g. &quot;TANSO-FTS&quot;</span>
-<span class="sd">        network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;</span>
-<span class="sd">        platform: Type of platform. Should be one of:</span>
-<span class="sd">            - &quot;satellite&quot;</span>
-<span class="sd">            - &quot;site&quot;</span>
-<span class="sd">        source_format : Type of data being input e.g. openghg (internal format)</span>
+<span class="sd">        network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;        source_format : Type of data being input e.g. openghg (internal format)</span>
 <span class="sd">        store: Name of store to write to</span>
 <span class="sd">        if_exists: What to do if existing data is present.</span>
 <span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
@@ -683,15 +682,15 @@ document.write(`
         <span class="n">compressed_data</span><span class="p">,</span> <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
             <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
             <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
             <span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="n">selection</span><span class="p">,</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
             <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
             <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
             <span class="s2">&quot;source_format&quot;</span><span class="p">:</span> <span class="n">source_format</span><span class="p">,</span>
             <span class="s2">&quot;overwrite&quot;</span><span class="p">:</span> <span class="n">overwrite</span><span class="p">,</span>
         <span class="p">}</span>
@@ -710,14 +709,14 @@ document.write(`
             <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
             <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">,</span>
             <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+            <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
             <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
             <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
-            <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
             <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
             <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>

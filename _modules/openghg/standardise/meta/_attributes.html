@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -353,6 +353,8 @@ document.write(`
     <span class="s2">&quot;define_species_label&quot;</span><span class="p">,</span>
     <span class="s2">&quot;assign_flux_attributes&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_flux_attributes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dataset_formatter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data_variable_formatter&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.standardise&quot;</span><span class="p">)</span>
@@ -494,28 +496,6 @@ document.write(`
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;This function only accepts xarray Datasets&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Current CF Conventions (v1.8) demand that valid variable names</span>
-    <span class="c1"># begin with a letter and be composed of letters, digits and underscores</span>
-    <span class="c1"># Here variable names are also made lowercase to enable easier matching below</span>
-
-    <span class="c1"># TODO - could I just cast ds.variables as as type for mypy instead of doing this?</span>
-    <span class="c1"># variable_names = [str(v) for v in ds.variables]</span>
-    <span class="c1"># Is this better?</span>
-    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
-    <span class="n">to_underscores</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">}</span>
-    <span class="n">to_underscores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>  <span class="c1"># Added to remove warning around resetting time index.</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_underscores</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-
-    <span class="n">species_lower</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="n">species_search</span> <span class="o">=</span> <span class="n">species_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>  <span class="c1"># Apply same formatting as above</span>
-
-    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
-    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="n">species_search</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
-
-    <span class="c1"># If we don&#39;t have any variables to rename, raise an error</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">matched_keys</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find species </span><span class="si">{</span><span class="n">species_search</span><span class="si">}</span><span class="s2"> in Dataset variables&quot;</span><span class="p">)</span>
-
     <span class="c1"># Load attributes files</span>
     <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">()</span>
     <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
@@ -527,12 +507,6 @@ document.write(`
     <span class="c1"># Extract both label to use for species and key for attributes</span>
     <span class="c1"># Typically species_label will be the lower case version of species_key</span>
     <span class="n">species_label</span><span class="p">,</span> <span class="n">species_key</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">)</span>
-
-    <span class="n">species_rename</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">matched_keys</span><span class="p">:</span>
-        <span class="n">species_rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">species_search</span><span class="p">,</span> <span class="n">species_label</span><span class="p">)</span>
-
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">species_rename</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Global attributes</span>
     <span class="n">global_attributes_default</span> <span class="o">=</span> <span class="p">{</span>
@@ -594,7 +568,6 @@ document.write(`
     <span class="n">ancillary_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
-    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="n">species_search</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
 
     <span class="c1"># Write units as attributes to variables containing any of these</span>
     <span class="n">match_words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;variability&quot;</span><span class="p">,</span> <span class="s2">&quot;repeatability&quot;</span><span class="p">,</span> <span class="s2">&quot;stdev&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">]</span>
@@ -957,6 +930,67 @@ document.write(`
 
     <span class="n">global_attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">current_attributes</span><span class="p">)</span>
     <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">global_attributes</span>
+
+    <span class="k">return</span> <span class="n">ds</span>
+
+
+<span class="k">def</span> <span class="nf">dataset_formatter</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formats species/variables from the dataset by removing the whitespaces</span>
+<span class="sd">    with underscores and species to lower case</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Dict containing dataset information(gas_data)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Dictionary of source_name : data, metadata, attributes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">gas_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+        <span class="n">species_label</span><span class="p">,</span> <span class="n">species_key</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_variable_formatter</span><span class="p">(</span>
+            <span class="n">ds</span><span class="o">=</span><span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">species_label</span><span class="o">=</span><span class="n">species_label</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">data_variable_formatter</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formats variables from the dataset by removing the whitespaces</span>
+<span class="sd">    with underscores and species data var to lower case</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: Should contain variables such as &quot;ch4&quot;, &quot;ch4 repeatability&quot;.</span>
+<span class="sd">            Must have a &quot;time&quot; dimension.</span>
+<span class="sd">        species: Species name</span>
+<span class="sd">        species_label: Species label</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ds: xarray dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">to_underscores</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">}</span>
+    <span class="n">to_underscores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>  <span class="c1"># Added to remove warning around resetting time index.</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_underscores</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="n">species_lower</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">species_search</span> <span class="o">=</span> <span class="n">species_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="n">species_search</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+
+    <span class="c1"># If we don&#39;t have any variables to rename, raise an error</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matched_keys</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find species </span><span class="si">{</span><span class="n">species_search</span><span class="si">}</span><span class="s2"> in Dataset variables&quot;</span><span class="p">)</span>
+
+    <span class="n">species_rename</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">matched_keys</span><span class="p">:</span>
+        <span class="n">species_rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">species_search</span><span class="p">,</span> <span class="n">species_label</span><span class="p">)</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">species_rename</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ds</span>
 </pre></div>

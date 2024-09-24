@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -346,11 +346,13 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
+<span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">dataset_formatter</span>
+
 
 <div class="viewcode-block" id="parse_btt">
 <a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.surface.parse_btt">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_btt</span><span class="p">(</span>
-    <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;BTT&quot;</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;LGHG&quot;</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -361,7 +363,7 @@ document.write(`
 <span class="sd">    the processed data has been assigned to</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data_filepath: Path of file to load</span>
+<span class="sd">        filepath: Path of file to load</span>
 <span class="sd">        site: Site name</span>
 <span class="sd">        update_mismatch: This determines how mismatches between the internal data</span>
 <span class="sd">            &quot;attributes&quot; and the supplied / derived &quot;metadata&quot; are handled.</span>
@@ -380,7 +382,7 @@ document.write(`
     <span class="c1"># TODO: Decide what to do about inputs which aren&#39;t use anywhere</span>
     <span class="c1"># at present - inlet, instrument, sampling_period, measurement_type</span>
 
-    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This function will be removed in a future release&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;BTT&quot;</span>
@@ -417,7 +419,7 @@ document.write(`
     <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
     <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="s2">&quot;2019-01-01 00:00&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;DOY&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">sampling_period_seconds</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">~</span><span class="n">isnull</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">)]</span>
@@ -450,6 +452,7 @@ document.write(`
             <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_data</span><span class="p">,</span>
             <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
         <span class="p">}</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">dataset_formatter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">)</span>
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 

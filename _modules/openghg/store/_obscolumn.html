@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obscolumn &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.store._obscolumn &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -374,14 +374,14 @@ document.write(`
     <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
         <span class="n">satellite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">save_current</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -396,7 +396,11 @@ document.write(`
 
 <span class="sd">        Args:</span>
 <span class="sd">            filepath: Path of observation file</span>
-<span class="sd">            satellite: Name of satellite (if relevant)</span>
+<span class="sd">            species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">            platform: Type of platform. Should be one of:</span>
+<span class="sd">                - &quot;satellite&quot;</span>
+<span class="sd">                - &quot;site&quot;</span>
+<span class="sd">            satellite: Name of satellite (if relevant). Should include satellite OR site.</span>
 <span class="sd">            domain: For satellite only. If data has been selected on an area include the</span>
 <span class="sd">                identifier name for domain covered. This can map to previously defined domains</span>
 <span class="sd">                (see openghg_defs &quot;domain_info.json&quot; file) or a newly defined domain.</span>
@@ -404,13 +408,9 @@ document.write(`
 <span class="sd">                performed on satellite data. This can be based on any form of filtering, binning etc.</span>
 <span class="sd">                but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
 <span class="sd">                If not specified, domain will be used.</span>
-<span class="sd">            site : Site code/name (if relevant). Can include satellite OR site.</span>
-<span class="sd">            species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">            site : Site code/name (if relevant). Should include satellite OR site.</span>
 <span class="sd">            instrument: Instrument name e.g. &quot;TANSO-FTS&quot;</span>
 <span class="sd">            network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;</span>
-<span class="sd">            platform: Type of platform. Should be one of:</span>
-<span class="sd">                - &quot;satellite&quot;</span>
-<span class="sd">                - &quot;site&quot;</span>
 <span class="sd">            source_format : Type of data being input e.g. openghg (internal format)</span>
 <span class="sd">            if_exists: What to do if existing data is present.</span>
 <span class="sd">                - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
@@ -437,19 +437,37 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of datasource UUIDs data assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">ColumnTypes</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_column_parser</span><span class="p">,</span> <span class="n">check_if_need_new_version</span><span class="p">,</span> <span class="n">synonyms</span>
+        <span class="c1"># Get initial values which exist within this function scope using locals</span>
+        <span class="c1"># MUST be at the top of the function</span>
+        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_standardise_parsers</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">clean_string</span><span class="p">,</span>
+            <span class="n">load_standardise_parser</span><span class="p">,</span>
+            <span class="n">split_function_inputs</span><span class="p">,</span>
+            <span class="n">check_if_need_new_version</span><span class="p">,</span>
+            <span class="n">synonyms</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># TODO: Evaluate which inputs need cleaning (if any)</span>
-        <span class="n">satellite</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">satellite</span><span class="p">)</span>
-        <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">platform</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">platform</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of &#39;site&#39; or &#39;satellite&#39; must be specified&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one of &#39;site&#39; or &#39;satellite&#39; should be specified&quot;</span><span class="p">)</span>
+
+        <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+        <span class="n">satellite</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">satellite</span><span class="p">)</span>
         <span class="n">domain</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
         <span class="n">instrument</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
-        <span class="n">platform</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">platform</span><span class="p">)</span>
+
+        <span class="c1"># Specify any additional metadata to be added</span>
+        <span class="n">additional_metadata</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -466,13 +484,19 @@ document.write(`
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
+        <span class="n">standardise_parsers</span> <span class="o">=</span> <span class="n">define_standardise_parsers</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">]</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">source_format</span> <span class="o">=</span> <span class="n">ColumnTypes</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">source_format</span> <span class="o">=</span> <span class="n">standardise_parsers</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data type </span><span class="si">{</span><span class="n">source_format</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Load the data retrieve object</span>
-        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_column_parser</span><span class="p">(</span><span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
+        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_standardise_parser</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
+
+        <span class="c1"># Get current parameter values and filter to only include function inputs</span>
+        <span class="n">fn_current_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Make a copy of parameters passed to function</span>
+        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">fn_current_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fn_input_parameters</span><span class="p">}</span>
 
         <span class="n">_</span><span class="p">,</span> <span class="n">unseen_hashes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_hashes</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
 
@@ -484,21 +508,14 @@ document.write(`
         <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">chunks</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Define parameters to pass to the parser function</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;data_filepath&quot;</span><span class="p">:</span> <span class="n">filepath</span><span class="p">,</span>
-            <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
-            <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
-            <span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="n">selection</span><span class="p">,</span>
-            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
-            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
-            <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
-            <span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="c1"># Define parameters to pass to the parser function and remaining keys</span>
+        <span class="n">parser_input_parameters</span><span class="p">,</span> <span class="n">additional_input_parameters</span> <span class="o">=</span> <span class="n">split_function_inputs</span><span class="p">(</span>
+            <span class="n">fn_input_parameters</span><span class="p">,</span> <span class="n">parser_fn</span>
+        <span class="p">)</span>
 
-        <span class="n">obs_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        <span class="n">parser_input_parameters</span><span class="p">[</span><span class="s2">&quot;data_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span>
+
+        <span class="n">obs_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
 
         <span class="c1"># TODO: Add in schema and checks for ObsColumn</span>
         <span class="c1"># # Checking against expected format for ObsColumn</span>
@@ -510,11 +527,13 @@ document.write(`
         <span class="c1"># this could be &quot;site&quot; or &quot;satellite&quot; keys.</span>
         <span class="c1"># platform = list(obs_data.keys())[0][&quot;metadata&quot;][&quot;platform&quot;]</span>
 
-        <span class="n">lookup_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lookup_keys</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
-
+        <span class="c1"># Check to ensure no required keys are being passed through optional_metadata dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_info_keys</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">optional_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">parsed_data</span> <span class="ow">in</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">parsed_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
+            <span class="n">additional_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>
+
+        <span class="c1"># Mop up and add additional keys to metadata which weren&#39;t passed to the parser</span>
+        <span class="n">obs_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">additional_input_parameters</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
@@ -522,8 +541,6 @@ document.write(`
             <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
             <span class="n">new_version</span><span class="o">=</span><span class="n">new_version</span><span class="p">,</span>
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-            <span class="n">required_keys</span><span class="o">=</span><span class="n">lookup_keys</span><span class="p">,</span>
-            <span class="n">min_keys</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
             <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
             <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="p">)</span>

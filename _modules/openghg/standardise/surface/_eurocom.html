@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._eurocom &#8212; OpenGHG 0.9.0 documentation</title>
+    <title>openghg.standardise.surface._eurocom &#8212; OpenGHG 0.10.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="../../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 14, 2024"/>
+    <meta name="docbuild:last-update" content="Sep 24, 2024"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.9.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.9.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -345,11 +345,13 @@ document.write(`
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">dataset_formatter</span>
+
 
 <div class="viewcode-block" id="parse_eurocom">
 <a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.surface.parse_eurocom">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_eurocom</span><span class="p">(</span>
-    <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -360,7 +362,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses EUROCOM data files into a format expected by OpenGHG</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data_filepath: Path of file to read</span>
+<span class="sd">        filepath: Path of file to read</span>
 <span class="sd">        site: Site code</span>
 <span class="sd">        sampling_period: Sampling period in seconds</span>
 <span class="sd">        network: Network name</span>
@@ -379,17 +381,17 @@ document.write(`
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_internal_json</span><span class="p">,</span> <span class="n">read_header</span><span class="p">,</span> <span class="n">format_inlet</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
 
-    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">site</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
 
-    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
     <span class="n">inlet_height</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="s2">&quot;m&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inlet_height</span><span class="p">:</span>
@@ -399,7 +401,7 @@ document.write(`
     <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Read the header as lines starting with #</span>
-    <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">comment_char</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">comment_char</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
     <span class="n">n_skip</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
 
@@ -424,7 +426,7 @@ document.write(`
     <span class="p">}</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
-        <span class="n">data_filepath</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">,</span>
         <span class="n">skiprows</span><span class="o">=</span><span class="n">n_skip</span><span class="p">,</span>
         <span class="n">parse_dates</span><span class="o">=</span><span class="n">datetime_columns</span><span class="p">,</span>
         <span class="n">date_format</span><span class="o">=</span><span class="s2">&quot;%Y %m </span><span class="si">%d</span><span class="s2"> %H %M&quot;</span><span class="p">,</span>
@@ -478,6 +480,8 @@ document.write(`
         <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">gas_data</span><span class="p">,</span>
         <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">global_attributes</span><span class="p">,</span>
     <span class="p">}</span>
+
+    <span class="n">combined_data</span> <span class="o">=</span> <span class="n">dataset_formatter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">combined_data</span><span class="p">)</span>
 
     <span class="n">combined_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">combined_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span>
