@@ -5,7 +5,29 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.9.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.10.0...HEAD)
+
+## [0.10.0] - 2024-09-24
+
+### Updated
+
+- Updated parse_* functions for surface data type to accept `filepath` rather than `data_filepath`. This maps better to the `standardise_surface` input and makes this consistent with the other data types. [PR #1101](https://github.com/openghg/openghg/pull/1101)
+- Separated data variable formatting from assign attributes function into dataset_formatter function.- [PR #1102](https://github.com/openghg/openghg/pull/1102)
+- Required and optional keys for "column" data type were updated to reflect the two sources of this data (site, satellite) [PR #1104](https://github.com/openghg/openghg/pull/1104)
+- Ensure metadata keywords for NOAA obspack are consistent with wider definitions including renaming data_source to dataset_source (data_source would be "internal"). [PR #1110](https://github.com/openghg/openghg/pull/1110)
+- Updated data type classes to dynamically select inputs to pass to parse function and to include any required/optional keys not passed to the parse function within the metadata. [PR #1111](https://github.com/openghg/openghg/pull/1111)
+- When adding new data sources, updated how lookup keys add optional keys. This used to only extract these from the optional_metadata input but this now allows keys to be added through any metadata. [PR #1112](https://github.com/openghg/openghg/pull/1112)
+- Formalising metadata data merging logic within new util.metadata_util functions. [PR #1113](https://github.com/openghg/openghg/pull/1113)
+- Splited build and publish steps in the workflow and check for `-` and `.` in the tags for build and publish. [PR #759](https://github.com/openghg/openghg/pull/759)
+
+### Fixed
+
+- Bug where a datasource's folder in the `data` directory was not deleted by `Datasource.delete_all_data()`. This was causing `check_zarr_store` in `util/_user.py` to give a false negative. [PR #1126](https://github.com/openghg/openghg/pull/1126) 
+- Bug where an input filepath list to standardise_surface was only storing the last file hash. This allowed for some files to bypass the check for the same files depending on where they were in the original filepath list. [PR #1100](https://github.com/openghg/openghg/pull/1100)
+- Bug where filepath needed to be a Path object when storing the file hash values. [PR #1108](https://github.com/openghg/openghg/pull/1108)
+- Catch an `AttributeError` when trying synchronise attributes and metadata and a user passes a `bool` - [PR #1029](https://github.com/openghg/openghg/pull/1029)
+- Mypy issue fixed for `util.download_data()` function based on updates described [requests Issue 465](https://github.com/psf/requests/issues/465) and included in [urllib3 PR 159](https://github.com/urllib3/urllib3/pull/159/files). This allowed the `decode_content` flag to be set directly rather than needing to patch the method. [PR #1118](https://github.com/openghg/openghg/pull/1118)
+
 
 ## [0.9.0] - 2024-08-14
 

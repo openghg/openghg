@@ -12,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 @pytest.fixture(scope="session")
 def btt_data():
     filepath = get_surface_datapath(filename="BTT_test.csv", source_format="LGHG")
-    data = parse_btt(data_filepath=filepath)
+    data = parse_btt(filepath=filepath)
     return data
 
 

@@ -99,7 +99,7 @@ def test_read_file_no_attr():
 @pytest.fixture(scope="session")
 def openghg_data():
     filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
-    data = parse_openghg(data_filepath=filepath)
+    data = parse_openghg(filepath=filepath)
     return data
 
 

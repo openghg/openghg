@@ -1,16 +1,18 @@
 import logging
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
 import xarray as xr
+
+from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
+from openghg.util import check_and_set_null_variable, not_set_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     measurement_type: str,
     inlet: Optional[str] = None,
@@ -24,7 +26,7 @@ def parse_noaa(
     """Read NOAA data from raw text file or ObsPack NetCDF
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         site: Three letter site code
         inlet: Inlet height (as value unit e.g. "10m")
         measurement_type: One of ("flask", "insitu", "pfp")
@@ -43,15 +45,15 @@ def parse_noaa(
         dict: Dictionary of data and metadata
     """
     if sampling_period is None:
-        sampling_period = "NOT_SET"
+        sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
 
-    file_extension = Path(data_filepath).suffix
+    file_extension = Path(filepath).suffix
 
     if file_extension == ".nc":
         return _read_obspack(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -62,7 +64,7 @@ def parse_noaa(
         )
     else:
         return _read_raw_file(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -270,7 +272,7 @@ def _split_inlets(
 
 
 def _read_obspack(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
@@ -282,7 +284,7 @@ def _read_obspack(
     """Read NOAA ObsPack NetCDF files
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -307,7 +309,7 @@ def _read_obspack(
     if measurement_type not in valid_types:
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
-    with xr.open_dataset(data_filepath) as temp:
+    with xr.open_dataset(filepath) as temp:
         obspack_ds = temp
         orig_attrs = temp.attrs
 
@@ -338,7 +340,8 @@ def _read_obspack(
     processed_ds = processed_ds.set_coords(["time"])
 
     # Estimate sampling period using metadata and midpoint time
-    if sampling_period == "NOT_SET":
+    not_set_values = not_set_metadata_values()
+    if sampling_period in not_set_values:
         sampling_period_estimate = _estimate_sampling_period(obspack_ds)
     else:
         sampling_period_estimate = -1.0
@@ -360,7 +363,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
-    metadata["data_source"] = "noaa_obspack"
+    metadata["dataset_source"] = "noaa_obspack"
     metadata["data_type"] = "surface"
 
     # Add additional sampling_period_estimate if sampling_period is not set
@@ -369,18 +372,21 @@ def _read_obspack(
             sampling_period_estimate
         )  # convert to string to keep consistent with "sampling_period"
 
+    # Define not_set value to use as a default
+    not_set_value = not_set_values[0]
+
     # Add instrument if present
     if instrument is not None:
         metadata["instrument"] = instrument
     else:
-        metadata["instrument"] = orig_attrs.get("instrument", "NOT_SET")
+        metadata["instrument"] = orig_attrs.get("instrument", not_set_value)
 
     # Add data owner details, station position and calibration scale, if present
-    metadata["data_owner"] = orig_attrs.get("provider_1_name", "NOT_SET")
-    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", "NOT_SET")
-    metadata["station_longitude"] = orig_attrs.get("site_longitude", "NOT_SET")
-    metadata["station_latitude"] = orig_attrs.get("site_latitude", "NOT_SET")
-    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
+    metadata["data_owner"] = orig_attrs.get("provider_1_name", not_set_value)
+    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", not_set_value)
+    metadata["station_longitude"] = orig_attrs.get("site_longitude", not_set_value)
+    metadata["station_latitude"] = orig_attrs.get("site_latitude", not_set_value)
+    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", not_set_value)
 
     # Create attributes with copy of metadata values
     attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
@@ -402,6 +408,8 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
+    gas_data = dataset_formatter(data=gas_data)
+
     gas_data = assign_attributes(
         data=gas_data,
         site=site,
@@ -414,7 +422,7 @@ def _read_obspack(
 
 
 def _read_raw_file(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
@@ -427,7 +435,7 @@ def _read_raw_file(
     data and metadata.
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -452,21 +460,23 @@ def _read_raw_file(
     if inlet is None:
         raise ValueError("Inlet must be specified to derive data from NOAA raw (txt) files.")
 
-    data_filepath = Path(data_filepath)
-    filename = data_filepath.name
+    filepath = Path(filepath)
+    filename = filepath.name
 
     species = filename.split("_")[0].lower()
 
-    source_name = data_filepath.stem
+    source_name = filepath.stem
     source_name = source_name.split("-")[0]
 
     gas_data = _read_raw_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         inlet=inlet,
         species=species,
         measurement_type=measurement_type,
         sampling_period=sampling_period,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data, site=site, network="NOAA", update_mismatch=update_mismatch, site_filepath=site_filepath
@@ -476,7 +486,7 @@ def _read_raw_file(
 
 
 def _read_raw_data(
-    data_filepath: Path,
+    filepath: Path,
     species: str,
     inlet: str,
     sampling_period: str,
@@ -488,7 +498,7 @@ def _read_raw_data(
     dataframes
 
     Args:
-        data_filepath: Path of datafile
+        filepath: Path of datafile
         species: Species string such as CH4, CO
         measurement_type: Type of measurements e.g. flask
     Returns:
@@ -497,7 +507,7 @@ def _read_raw_data(
     from openghg.util import clean_string, get_site_info, load_internal_json, read_header
     from pandas import read_csv
 
-    header = read_header(filepath=data_filepath)
+    header = read_header(filepath=filepath)
 
     column_names = header[-1][14:].split()
 
@@ -514,7 +524,7 @@ def _read_raw_data(
     ]
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
         names=column_names,
         sep=r"\s+",
@@ -537,7 +547,7 @@ def _read_raw_data(
     site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
-        site = str(data_filepath.name).split("_")[1].upper()
+        site = str(filepath.name).split("_")[1].upper()
 
         if site not in site_data:
             raise ValueError(f"The site {site} is not recognized.")

@@ -7,11 +7,8 @@ from openghg.types import pathType, multiPathType
 
 __all__ = [
     "load_parser",
-    "load_surface_parser",
-    "load_column_parser",
-    "load_column_source_parser",
-    "load_flux_parser",
-    "load_flux_database_parser",
+    "load_standardise_parser",
+    "load_transform_parser",
     "get_datapath",
     "get_logfile_path",
     "load_json",
@@ -49,108 +46,51 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     return fn
 
 
-def load_surface_parser(source_format: str) -> Callable:
-    """Load parsing object for the obssurface data type.
-    Used with `openghg.standardise.surface` sub-module
+def load_standardise_parser(data_type: str, source_format: str) -> Callable:
+    """
+    Load a standardise parsing function associated with a given data_type.
+    This will look for a parser function with a sub-module of `openghg.standardise`
+    depending on the specified data_type and source_format.
+
+    For example for inputs of data_type="surface" and source_format="openghg"
+    this will look for a function called:
+     - `openghg.standardise.surface.parse_openghg`
 
     Args:
-        source_format: Name of data type such as CRDS
-    Returns:
-        callable: class_name object
-    """
-    surface_module_name = "openghg.standardise.surface"
-    fn = load_parser(data_name=source_format, module_name=surface_module_name)
-
-    return fn
-
-
-def load_column_parser(source_format: str) -> Callable:
-    """Load a parsing object for the obscolumn data type.
-    Used with `openghg.standardise.column` sub-module
-
-    Args:
-        source_format: Name of data type e.g. OPENGHG
-    Returns:
-        callable: parser function
-    """
-    column_st_module = "openghg.standardise.column"
-    fn = load_parser(data_name=source_format, module_name=column_st_module)
-
-    return fn
-
-
-def load_column_source_parser(source_format: str) -> Callable:
-    """Load a parsing object for the source of column data.
-    Used with `openghg.transform.column` sub-module
-
-    Args:
-        source_format: Name of data source e.g. GOSAT
-    Returns:
-        callable: parser function
-    """
-    column_tr_module = "openghg.transform.column"
-    fn = load_parser(data_name=source_format, module_name=column_tr_module)
-
-    return fn
-
-
-def load_flux_parser(source_format: str) -> Callable:
-    """Load a parsing object for the "flux" data type.
-    Used with `openghg.standardise.flux` sub-module
-
-    Args:
-        source_format: Name of data type e.g. OPENGHG
-    Returns:
-        callable: parser function
-    """
-    flux_st_module_name = "openghg.standardise.flux"
-    fn = load_parser(data_name=source_format, module_name=flux_st_module_name)
-
-    return fn
-
-
-def load_flux_database_parser(database: str) -> Callable:
-    """Load a parsing object for the source of column data.
-    Used with `openghg.transform.flux` sub-module
-
-    Args:
-        database: Name of data source e.g. EDGAR
-    Returns:
-        callable: parser function
-    """
-    flux_tr_module_name = "openghg.transform.flux"
-    fn = load_parser(data_name=database, module_name=flux_tr_module_name)
-
-    return fn
-
-
-def load_footprint_parser(source_format: str) -> Callable:
-    """Load a parsing object for the footprint data type.
-    Used with `openghg.standardise.footprint` sub-module
-
-    Args:
-        source_format: Name of data type e.g. OPENGHG, ACRG_ORG
-    Returns:
-        callable: parser function
-    """
-    footprint_st_module_name = "openghg.standardise.footprint"
-    fn = load_parser(data_name=source_format, module_name=footprint_st_module_name)
-
-    return fn
-
-
-def load_flux_timeseries_parser(source_format: str) -> Callable:
-    """
-    Load a parsing object for the one dimensional timeseries data type.
-    Used with `openghg.standardise.flux_timeseries` sub-module
-
-    Args:
-        source_format: Name of the data type e.g CRF
+        data_type: Data types for objects within OpenGHG
+            see openghg.store.specification.define_data_types() for full list.
+        source_format: Name given to the format of the input data e.g AGAGE
     Returns:
         callable: parser_function
     """
-    flux_timeseries_st_module_name = "openghg.standardise.flux_timeseries"
-    fn = load_parser(data_name=source_format, module_name=flux_timeseries_st_module_name)
+    standardise_module_name = "openghg.standardise"
+    data_type_st_module_name = f"{standardise_module_name}.{data_type}"
+    fn = load_parser(data_name=source_format, module_name=data_type_st_module_name)
+
+    return fn
+
+
+def load_transform_parser(data_type: str, source_format: str) -> Callable:
+    """
+    Load a transform parsing function associated with a given data_type.
+    This will look for a parser function with a sub-module of `openghg.transform`
+    depending on the specified data_type and source_format.
+
+    For example for inputs of data_type="flux" and source_format="edgar"
+    this will look for a function called:
+     - `openghg.transform.surface.parse_edgar`
+
+    Args:
+        data_type: Data types for objects within OpenGHG
+            see openghg.store.specification.define_data_types() for full list.
+        source_format: Name given to the input data. Could be a database or
+            a format e.g EDGAR
+    Returns:
+        callable: parser_function
+    """
+    transform_module_name = "openghg.transform"
+    data_type_st_module_name = f"{transform_module_name}.{data_type}"
+    fn = load_parser(data_name=source_format, module_name=data_type_st_module_name)
 
     return fn
 

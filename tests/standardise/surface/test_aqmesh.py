@@ -7,7 +7,7 @@ def test_aqmesh_read():
     datafile = get_surface_datapath(filename="co2_data.csv", source_format="AQMesh")
     metafile = get_surface_datapath(filename="co2_metadata.csv", source_format="AQMesh")
 
-    data = parse_aqmesh(data_filepath=datafile, metadata_filepath=metafile)
+    data = parse_aqmesh(filepath=datafile, metadata_filepath=metafile)
 
     site_data = data["briarroadclydebank"]
 
