@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - "devel"
-  workflow_dispatch:  # Option to manually trigger
+  workflow_dispatch:
 
 jobs:
   release_conda:
@@ -24,9 +24,14 @@ jobs:
         id: get_latest_tag
         run: |
           git fetch --tags
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          LATEST_TAG=$(git describe --tags --abbrev=0)
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-          echo "Fetched latest tag: $LATEST_TAG"
+          echo "GIT_TAG=$LATEST_TAG"
+        env:
+          GIT_TAG: ${{ env.LATEST_TAG }}
+
+      - name: Load environment variables
+        run: source $GITHUB_ENV
 
       - uses: mamba-org/setup-micromamba@v1
         with:
@@ -44,6 +49,8 @@ jobs:
           conda config --append channels openghg
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
+        env:
+          GIT_TAG: ${{ env.LATEST_TAG }}
 
       - name: Publish to Anaconda
         run: |
