@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
-from openghg.obspack import read_input_file, create_obspack, define_obspack_filename
+from openghg.obspack import retrieve_data, create_obspack, define_obspack_filename
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 
 
@@ -92,12 +92,12 @@ def populate_object_store():
     standardise_surface(store="user", filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
 
 
-def test_read_input_file():
+def test_retrieve_data():
 
     populate_object_store()
     filename = get_obspack_datapath("example_search_input.csv")
 
-    data, obs_types = read_input_file(filename)
+    data = retrieve_data(filename=filename)
     print("data", data)
     print("data 1 data", data[0].data)
     print("data 2 data", data[1].data)

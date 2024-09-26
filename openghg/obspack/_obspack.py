@@ -274,17 +274,29 @@ def create_obspack_structure(
     return obspack_path
 
 
-def read_input_file(filename: pathType) -> tuple[list, list]:
+def read_input_file(filename: pathType) -> pd.DataFrame:
     """
     Read input file containing search parameters and use to get data from object store.
     """
     search_df = pd.read_csv(filename)
+    return search_df
+
+
+def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.DataFrame] = None) -> list:
+    """
+    Use search parameters to get data from object store.
+    """
+
+    if filename:
+        search_df = read_input_file(filename)
+    
+    if search_df is None:
+        raise ValueError("Either filename or extracted search dataframe must be supplied to retrieve data")
 
     obs_type_name = "obs_type"
     search_functions = define_search_functions()
 
     data_object_all = []
-    unique_obs_types = []
     for i, row in search_df.iterrows():
         obs_type = row[obs_type_name]
         search_fn = search_functions[obs_type]
@@ -304,10 +316,7 @@ def read_input_file(filename: pathType) -> tuple[list, list]:
             data_retrieved = data_retrieved[0]
         data_object_all.append(data_retrieved)
 
-        if obs_type not in unique_obs_types:
-            unique_obs_types.append(obs_type)
-
-    return data_object_all, unique_obs_types
+    return data_object_all
 
 
 def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
@@ -398,20 +407,23 @@ def create_obspack(
     Create ObsPack of obspack_name at output_folder from input search file.
     """
 
-    retrieved_data, obs_types = read_input_file(filename)
+    search_df = read_input_file(filename)
+    retrieved_data = retrieve_data(search_df=search_df)
+
+    obs_types = search_df["obs_type"]
+    unique_obs_types = np.unique(obs_types)
 
     obspack_path = create_obspack_structure(
-        output_folder, obspack_name, obs_types=obs_types, release_files=release_files
+        output_folder, obspack_name, obs_types=unique_obs_types, release_files=release_files
     )
 
     # Put things in obspack and build structure
     # TODO: TEMPORARY - To be updated and generalised
     version = "v1"
-    obs_type = "surface-insitu"
     ####
 
     site_detail_rows = []
-    for data in retrieved_data:
+    for data, obs_type in zip(retrieved_data, obs_types):
         metadata = data.metadata
 
         output_name = define_obspack_filename(
