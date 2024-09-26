@@ -6,7 +6,7 @@ import pkg_resources
 from typing import Union, Optional, Sequence
 import logging
 
-from openghg.retrieve import get_obs_surface, get_obs_column
+from openghg.retrieve import search_surface, search_column
 from openghg.types import pathType, optionalPathType
 
 logger = logging.getLogger("openghg.obspack")
@@ -20,17 +20,17 @@ def define_obs_types() -> list:
     return obs_types
 
 
-def define_get_functions() -> dict:
+def define_search_functions() -> dict:
     """
-    Define relationship between obs type names (for folders) and get functions.
+    Define relationship between obs type names (for folders) and search functions.
     """
-    get_functions = {
-        "surface-insitu": get_obs_surface,
-        "surface-flask": get_obs_surface,
-        "column": get_obs_column,
+    search_functions = {
+        "surface-insitu": search_surface,
+        "surface-flask": search_surface,
+        "column": search_column,
     }
 
-    return get_functions
+    return search_functions
 
 
 def define_filename(
@@ -280,13 +280,13 @@ def read_input_file(filename: pathType) -> tuple[list, list]:
     search_df = pd.read_csv(filename)
 
     obs_type_name = "obs_type"
-    get_functions = define_get_functions()
+    search_functions = define_search_functions()
 
     data_object_all = []
     unique_obs_types = []
     for i, row in search_df.iterrows():
         obs_type = row[obs_type_name]
-        get_fn = get_functions[obs_type]
+        search_fn = search_functions[obs_type]
 
         kwargs = row.to_dict()
         kwargs.pop(obs_type_name)
@@ -297,10 +297,11 @@ def read_input_file(filename: pathType) -> tuple[list, list]:
             kwargs["inlet"] = slice(start, end)
 
         # TODO: Decide details around catching errors for no files/multi files found.
-        surface_data = get_fn(**kwargs)
-        # search_results = search_surface(**kwargs)
-        # data_retrieved = search_results.retrieve()
-        data_object_all.append(surface_data)
+        search_results = search_fn(**kwargs)
+        data_retrieved = search_results.retrieve()
+        if isinstance(data_retrieved, list):
+            data_retrieved = data_retrieved[0]
+        data_object_all.append(data_retrieved)
 
         if obs_type not in unique_obs_types:
             unique_obs_types.append(obs_type)
