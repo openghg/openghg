@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.9.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.10.0...HEAD)
+
+## [0.10.0] - 2024-09-24
 
 ### Updated
 
@@ -16,9 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated data type classes to dynamically select inputs to pass to parse function and to include any required/optional keys not passed to the parse function within the metadata. [PR #1111](https://github.com/openghg/openghg/pull/1111)
 - When adding new data sources, updated how lookup keys add optional keys. This used to only extract these from the optional_metadata input but this now allows keys to be added through any metadata. [PR #1112](https://github.com/openghg/openghg/pull/1112)
 - Formalising metadata data merging logic within new util.metadata_util functions. [PR #1113](https://github.com/openghg/openghg/pull/1113)
+- Splited build and publish steps in the workflow and check for `-` and `.` in the tags for build and publish. [PR #759](https://github.com/openghg/openghg/pull/759)
 
 ### Fixed
 
+- Bug where a datasource's folder in the `data` directory was not deleted by `Datasource.delete_all_data()`. This was causing `check_zarr_store` in `util/_user.py` to give a false negative. [PR #1126](https://github.com/openghg/openghg/pull/1126) 
 - Bug where an input filepath list to standardise_surface was only storing the last file hash. This allowed for some files to bypass the check for the same files depending on where they were in the original filepath list. [PR #1100](https://github.com/openghg/openghg/pull/1100)
 - Bug where filepath needed to be a Path object when storing the file hash values. [PR #1108](https://github.com/openghg/openghg/pull/1108)
 - Catch an `AttributeError` when trying synchronise attributes and metadata and a user passes a `bool` - [PR #1029](https://github.com/openghg/openghg/pull/1029)

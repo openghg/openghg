@@ -365,9 +365,12 @@ class Datasource:
         self._last_updated = timestamp_str_now
 
     def delete_all_data(self) -> None:
-        """Delete the zarr store that contains all the data
-        associated with this Datasource and clear out all keys
-        stored in this Datasource.=
+        """Delete datasource entirely.
+
+        Deletes the zarr store that contains all the data
+        associated with this Datasource, clears out all keys
+        stored in this Datasource, and removes the uuid
+        from the `data` path.
 
         Returns:
             None
