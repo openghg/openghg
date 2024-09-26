@@ -165,8 +165,6 @@ class ObsColumn(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        parser_input_parameters["data_filepath"] = filepath
-
         obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
