@@ -243,8 +243,23 @@ def define_obspack_filename(
 def define_obspack_path(output_folder: pathType, obspack_name: str) -> Path:
     """
     Define the full output path for the obspack folder.
+    Args:
+        output_folder: Path to top level directory where obspack folder will be created
+        obspack_name: Name of obspack to be created
+    Returns:
+        Path: Full obspack folder name
     """
     return Path(output_folder) / obspack_name
+
+
+def default_release_files() -> list:
+    """
+    Release files which will be included in the created obspack by default.
+    This will return a list of filepaths to these default files.
+    """
+    release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
+    release_files = [release_file_readme]
+    return release_files
 
 
 def create_obspack_structure(
@@ -254,14 +269,23 @@ def create_obspack_structure(
     release_files: Optional[Sequence] = None,
 ) -> Path:
     """
-    Create the structure for the new obspack
+    Create the structure for the new obspack and add initial release files to be included.
+
+    Args:
+        output_folder: Path to top level directory where obspack folder will be created
+        obspack_name: Name of obspack to be created
+        obs_types: Observation types to include in obspack. Sub-folders will be created for these obs_types.
+        release_files: Release files to be included within the output obspack.
+            - If release_files=None (default) this will use the files defined by default_release_files() function.
+            - If release_files=[] no release files will be included in the obspack.
+    Returns:
+        Path: Path to top level obspack directory {output_folder}/{obspack_name}
     """
 
     obspack_path = define_obspack_path(output_folder, obspack_name)
 
     if release_files is None:
-        release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
-        release_files = [release_file_readme]
+        release_files = default_release_files()
 
     logger.info(f"Creating top level obspack folder: {obspack_path} and subfolder(s)")
     for subfolder in obs_types:
@@ -276,7 +300,23 @@ def create_obspack_structure(
 
 def read_input_file(filename: pathType) -> pd.DataFrame:
     """
-    Read input file containing search parameters and use to get data from object store.
+    Read input file containing search parameters as a pandas DataFrame.
+
+    This should include at least 1 search parameter column and an obs_type column.
+    See define_obs_types() for different obs types currently supported.
+
+    Example:
+    >    site,inlet,species,obs_type
+    >    tac,185m,co2,surface-insitu
+    >    bsd,42m,ch4,surface-insitu
+    >    bsd,100m-250m,ch4,surface-insitu
+
+    Args:
+        filename: Filename containing search parameters and obs_type column.
+    Returns:
+        pandas.DataFrame: Input file opened as a csv file using pd.read_csv(...)
+
+    TODO: Add checks for expected columns in input search file as required
     """
     search_df = pd.read_csv(filename)
     return search_df
@@ -284,12 +324,20 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
 
 def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.DataFrame] = None) -> list:
     """
-    Use search parameters to get data from object store.
+    Use search parameters to get data from object store. This expects either a filename for an input
+    file containing search parameters (see read_input_file() for more details) or a DataFrame containing
+    the search parameters.
+
+    Args:
+        filename: Filename containing search parameters.
+        search_df: pandas DataFrame containing search parameters
+    Returns:
+        list [ObsSurface/ObsColumn]: List of extracted data from the object store based on search parameters
     """
 
     if filename:
         search_df = read_input_file(filename)
-    
+
     if search_df is None:
         raise ValueError("Either filename or extracted search dataframe must be supplied to retrieve data")
 
@@ -321,7 +369,13 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
 
 def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
     """
-    For each unique entry in a column, collate this as a single string separated by a semi-colon.
+    Reduce pandas data frame rows by combining unique entries within a column into a single string separated by a semi-colon.
+    This can be used as part of applying a function to a split DataFrame (e.g. via groupby)
+
+    Args:
+        df: any pandas DataFrame
+    Returns:
+        pandas.DataFrame: A new, single row DataFrame
     """
     df_new = pd.DataFrame()
     for name, series in df.items():
@@ -335,7 +389,28 @@ def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
 
 def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> dict:
     """
-    Define each row containing the site details.
+    Extract associated site details as a dictionary for a given Dataset. Expect these details to
+    be incuded within the dataset attributes.
+    This can be used as a way to build up a DataFrame from a set of dictionaries and defines friendly
+    column names for this output.
+
+    Overall attributes which this will attempt to extract are:
+        - "site"
+        - "station_long_name"
+        - "inlet"
+        - "station_latitude"
+        - "station_longitude"
+        - "instrument"
+        - "network"
+        - "data_owner"
+        - "data_owner_email"    
+
+    Args:
+        ds: Expect this dataset to contain useful attributes describing the site data.
+        obs_type: Observation type associated with this dataset (see define_obs_types() for full list)
+        strict: Whether to raise an error if any key is missing. Default = False
+    Returns:
+        dict: Dictionary containing extracted site details from Dataset
     """
     attrs = ds.attrs
 
