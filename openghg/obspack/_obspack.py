@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import xarray as xr
 import shutil
@@ -332,9 +333,11 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
     key_names = {
         "site": "Site code",
         "station_long_name": "Name",
-        "inlet": "Inlet height",
+        "inlet": "Inlet height(s)",
         "station_latitude": "Latitude",
         "station_longitude": "Longitude",
+        "instrument": "Instrument",
+        "network": "Associated network",
         "data_owner": "Data owner",
         "data_owner_email": "Email",
     }
@@ -350,6 +353,7 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
                 raise ValueError(msg)
             else:
                 logger.warning(msg)
+                params[new_name] = np.nan
 
     params["Observation type"] = obs_type
 
@@ -369,7 +373,7 @@ def create_site_index(df: pd.DataFrame, output_folder: pathType) -> None:
     # Want to create a DataFrame and pass a file object to this - then can add comments before and after the table as needed
 
     site_details = df.groupby("Site code").apply(collate_strings)
-    site_details = site_details.rename(columns={"Inlet height": "Inlet heights"})
+    site_details = site_details.dropna(axis=1, how="all")
 
     # index_output_name = open(obspack_folder / f"site_index_details_{version}.txt", "w")
 
