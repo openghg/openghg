@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.10.0...HEAD)
 
+### Updated
+
+- Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
+
 ## [0.10.0] - 2024-09-24
 
 ### Updated
