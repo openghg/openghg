@@ -261,7 +261,7 @@ def search_surface(
     inlet: Union[str, slice, None, list[Union[str, slice, None]]] = None,
     height: Union[str, slice, None, list[Union[str, slice, None]]] = None,
     instrument: Union[str, list[str], None] = None,
-    data_level: Union[str, list[str], None] = None,
+    data_level: Union[str, list[str], dict, None] = None,
     data_sublevel: Union[str, list[str], None] = None,
     dataset_source: Optional[str] = None,
     data_source: Optional[str] = None,
@@ -320,7 +320,7 @@ def search_surface(
     if isinstance(data_level, list):
         data_level = [format_data_level(value) for value in data_level]
     elif isinstance(data_level, dict):
-        data_level = {k: format_data_level(v) for k, v in data_level.items()}  # type: ignore  (this is potentially a problem for any parameter)
+        data_level = {k: format_data_level(v) for k, v in data_level.items()}
     else:
         data_level = format_data_level(data_level)
 
