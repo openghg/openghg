@@ -247,7 +247,7 @@ def test_many_term_search():
 
 
 def test_optional_term_search():
-    """Test search using dicst inputs. This should create an OR search between the key, value pairs in the dictionaries"""
+    """Test search using dict inputs. This should create an OR search between the key, value pairs in the dictionaries"""
     # Note: had to be careful to not create duplicates as this currently raises an error.
     res = search(
         site="bsd",
