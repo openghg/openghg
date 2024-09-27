@@ -319,6 +319,8 @@ def search_surface(
     # Ensure data_level input is formatted
     if isinstance(data_level, list):
         data_level = [format_data_level(value) for value in data_level]
+    elif isinstance(data_level, dict):
+        data_level = {k: format_data_level(v) for k, v in data_level.items()}  # type: ignore  (this is potentially a problem for any parameter)
     else:
         data_level = format_data_level(data_level)
 
