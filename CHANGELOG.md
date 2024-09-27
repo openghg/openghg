@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bug where `search_surface` couldn't accept a dictionary argument for `data_level`. [PR #1133](https://github.com/openghg/openghg/pull/1133)
+- GIT_TAG variable passed to build step of release_conda and also environment activation is executed for publishing to conda step. [PR #1135](https://github.com/openghg/openghg/pull/1135) 
+
 
 ## [0.10.0] - 2024-09-24
 
