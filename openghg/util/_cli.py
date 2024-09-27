@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 
 def cli() -> None:
@@ -25,3 +26,10 @@ def cli() -> None:
         show_versions()
     else:
         parser.print_help()
+
+
+def icos_auth_cli() -> None:
+    from openghg.util._user import set_icos_auth
+    print("Enter your credentials for the ICOS data portal:")
+    set_icos_auth()
+    print(f"Credentials saved in {Path.home() / '.icoscp'}")

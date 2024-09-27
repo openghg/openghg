@@ -8,6 +8,7 @@ import toml
 import shutil
 from openghg.types import ConfigFileError
 
+
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -388,3 +389,8 @@ def _check_valid_store(store_path: Path) -> bool:
     store_data_dir = store_dirs[0]
 
     return store_data_dir.joinpath("zarr").exists()
+
+
+def set_icos_auth() -> None:
+    from icoscp_core.icos import auth
+    auth.init_config_file()
