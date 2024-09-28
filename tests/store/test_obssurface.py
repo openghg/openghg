@@ -448,15 +448,19 @@ def test_read_noaa_metastorepack(bucket):
 
 @pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
 def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
+    data_filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG")
 
     standardise_surface(
         store="user",
         filepath=data_filepath,
-        source_format="THAMESBARRIER",
-        site="tmb",
-        network="LGHG",
-        sampling_period="1m",
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h",
+        update_mismatch="attributes",
+        if_exists="new",
+        sort_files=True
     )
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
