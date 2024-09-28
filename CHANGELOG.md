@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.10.1...HEAD)
 
+### Added
+
+- Removed parsers that are unused. [PR #1129](https://github.com/openghg/openghg/pull/1129)
 
 ## [0.10.1] - 2024-09-27
 
