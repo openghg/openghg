@@ -81,18 +81,18 @@ def assign_attributes(
             species_filepath=species_filepath,
         )
 
-        measurement_data = gas_data["data"]
-        metadata = gas_data["metadata"]
-
-        attrs = measurement_data.attrs
-
-        metadata_aligned, attrs_aligned = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-        )
-
-        gas_data["metadata"] = metadata_aligned
-        gas_data["attributes"] = attrs_aligned
-        measurement_data.attrs = gas_data["attributes"]
+        # measurement_data = gas_data["data"]
+        # metadata = gas_data["metadata"]
+        #
+        # attrs = measurement_data.attrs
+        #
+        # metadata_aligned, attrs_aligned = sync_surface_metadata(
+        #     metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
+        # )
+        #
+        # gas_data["metadata"] = metadata_aligned
+        # gas_data["attributes"] = attrs_aligned
+        # measurement_data.attrs = gas_data["attributes"]
 
     return data
 
