@@ -33,3 +33,4 @@ def icos_auth_cli() -> None:
     print("Enter your credentials for the ICOS data portal:")
     set_icos_auth()
     print(f"Credentials saved in {Path.home() / '.icoscp'}")
+    print("Make sure you accept the data licence in your user profile on the ICOS data portal.")
