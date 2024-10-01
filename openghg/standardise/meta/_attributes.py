@@ -51,7 +51,6 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    from openghg.standardise.meta import sync_surface_metadata
 
     for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
@@ -80,19 +79,6 @@ def assign_attributes(
             site_filepath=site_filepath,
             species_filepath=species_filepath,
         )
-
-        # measurement_data = gas_data["data"]
-        # metadata = gas_data["metadata"]
-        #
-        # attrs = measurement_data.attrs
-        #
-        # metadata_aligned, attrs_aligned = sync_surface_metadata(
-        #     metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-        # )
-        #
-        # gas_data["metadata"] = metadata_aligned
-        # gas_data["attributes"] = attrs_aligned
-        # measurement_data.attrs = gas_data["attributes"]
 
     return data
 
