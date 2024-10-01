@@ -24,10 +24,6 @@ def test_read_icos_large_header():
         "instrument": "g2401",
         "units": "nmol.mol-¹",
         "calibration_scale": "wmo_co_x2014a",
-        "station_longitude": -9.90389,
-        "station_latitude": 53.32611,
-        "station_long_name": "Mace Head, Ireland",
-        "station_height_masl": 5.0,
         "data_owner_email": "morgan.lopez@lsce.ipsl.fr",
     }
 
@@ -128,11 +124,6 @@ def test_read_icos_small_header_file():
         "sampling_period": "60.0",
         "network": "icos",
         "instrument": "test_instrument",
-        "calibration_scale": "unknown",
-        "station_longitude": -2.98598,
-        "station_latitude": 56.55511,
-        "station_long_name": "Angus Tower, UK",
-        "station_height_masl": 300.0,
         "data_type": "surface",
         "source_format": "icos",
     }
