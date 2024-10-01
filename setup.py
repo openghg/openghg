@@ -39,6 +39,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "openghg = openghg.util:cli",
+            "openghg-icos-auth = openghg.util._cli:icos_auth_cli",
         ]
     },
     python_requires=">=3.9",
