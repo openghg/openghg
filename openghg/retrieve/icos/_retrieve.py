@@ -1,10 +1,13 @@
-from typing import Any, Dict, List, Optional, Union
+import logging
+import re
+from typing import Any, cast, Dict, List, Optional, Union
+
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub, load_json
 from openghg.types import MetadataFormatError
 import openghg_defs
-import logging
+import pandas as pd
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -265,6 +268,94 @@ def local_retrieve(
         return obs_data
 
 
+def _get_species_and_dobjs_url(
+    site: str,
+    data_level: int,
+    species: List,
+    inlet: Optional[str] = None,
+    ignore_obs_pack: bool = True,
+) -> pd.DataFrame:
+    """Get icoscp Dobjs for given site and data level, keyed by species. Additonal parameters filter the results.
+
+    Args:
+        site: ICOS site code, for site codes see
+        https://www.icos-cp.eu/observations/atmosphere/stations
+        data_level: ICOS data level (1, 2)
+            - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+            - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                            to be distributed through the Carbon Portal.
+                            This level is the ICOS-data product and free available for users.
+            See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        species: Species name
+        inlet: Height of the inlet for sampling in metres.
+        ignore_obs_pack: if True, ignore ObsPack data. Default = True.
+
+    Returns:
+        dict: Dictionary of icos Dobjs for given site, species, and keywords, keyed by species.
+
+    TODO: refactor into two functions: 1) get Dobjs (filter ObsPack and inlet), 2) extract metadata
+    """
+    # icoscp isn't available to conda so we've got to resort to this for now
+    try:
+        from icoscp.cpb.dobj import Dobj  # type: ignore
+        from icoscp.station import station  # type: ignore
+    except ImportError:
+        raise ImportError(
+            "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
+        )
+
+    stat = station.get(stationId=site.upper())
+
+    if not stat.valid:
+        raise ValueError("Please check you have passed a valid ICOS site.")
+
+    data_pids = cast(pd.DataFrame, stat.data(level=data_level))
+
+    if ignore_obs_pack:
+        data_pids = data_pids[~data_pids["specLabel"].str.contains("ObsPack")]
+
+    # extract species, unit, measurement_type from dobj metadata
+    def get_species_from_col_names(url: str, species: list[str]) -> pd.Series:
+        """Get species, unit, and measurement type given "dobj" url."""
+        try:
+            dobj = Dobj(url)
+            names = dobj.colNames
+        except:
+            return pd.Series({"species": None, "units": None, "measurement_type": None})
+
+        if names is None:
+            return pd.Series({"species": None, "units": None, "measurement_type": None})
+
+        col_data = dobj.meta["specificInfo"]["columns"]  # type: ignore
+
+        # match the species string (upper or lower) *exactly*
+        pat = re.compile(r"^({})$".format("|".join(map(re.escape, species))), re.IGNORECASE)
+
+        for name, data in zip(names, col_data):
+            if re.search(pat, name):
+                species = name
+                units = data["valueType"]["unit"]  # type: ignore
+                measurement_type = data["valueType"]["self"]["label"]  # type: ignore
+
+                return pd.Series({"species": species, "units": units, "measurement_type": measurement_type})
+
+        return pd.Series({"species": None, "units": None, "measurement_type": None})
+
+    info_df = data_pids["dobj"].apply(lambda x: get_species_from_col_names(x, species))
+    data_pids = pd.concat([data_pids, info_df], axis=1)
+
+    # drop rows where no species is found
+    data_pids = data_pids.dropna(subset="species")
+
+    # filter by inlet
+    if inlet is not None:
+        inlet = str(float(inlet.rstrip("m")))
+        filt = data_pids["samplingheight"].astype("string").str.contains(inlet)  # astype needed for tests...
+        data_pids = data_pids[filt]
+
+    return data_pids[["dobj", "species", "units", "measurement_type"]]
+
+
 def _retrieve_remote(
     site: str,
     data_level: int,
@@ -333,47 +424,50 @@ def _retrieve_remote(
         logger.error("Please check you have passed a valid ICOS site and have a working internet connection.")
         return None
 
-    data_pids = stat.data(level=data_level)
+    # data_pids = stat.data(level=data_level)
 
-    # We want to get the PIDs of the data for each species here
-    species_upper = [s.upper() for s in species]
-    # For this see https://stackoverflow.com/a/55335207
-    search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
-    # Now filter the dataframe so we can extract the PIDS
-    # We filter out any data that contains "Obspack" or "csv" in the specLabel
-    # Also filter out some drought files which cause trouble being read in
-    # For some reason they have separate station record pages that contain "ATMO_"
-    filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str)
-        & ~data_pids["specLabel"].str.contains("Obspack")
-        & ~data_pids["specLabel"].str.contains("csv")
-        & ~data_pids["station"].str.contains("ATMO_")
-    ]
+    # # We want to get the PIDs of the data for each species here
+    # species_upper = [s.upper() for s in species]
+    # # For this see https://stackoverflow.com/a/55335207
+    # search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+    # # Now filter the dataframe so we can extract the PIDS
+    # # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
+    # filtered_sources = data_pids[
+    #     data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
+    # ]
 
-    if filtered_sources.empty:
-        species_lower = [s.lower() for s in species]
-        # For this see https://stackoverflow.com/a/55335207
-        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
-        # Now filter the dataframe so we can extract the PIDS
-        filtered_sources = data_pids[
-            data_pids["specLabel"].str.contains(search_str)
-            & ~data_pids["specLabel"].str.contains("Obspack")
-            & ~data_pids["specLabel"].str.contains("csv")
-        ]
+    # if filtered_sources.empty:
+    #     species_lower = [s.lower() for s in species]
+    #     # For this see https://stackoverflow.com/a/55335207
+    #     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
+    #     # Now filter the dataframe so we can extract the PIDS
+    #     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
-    if inlet is not None:
-        inlet = str(float(inlet.rstrip("m")))
-        height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]
-        filtered_sources = filtered_sources[height_filter]
+    # if inlet is not None:
+    #     inlet = str(float(inlet.rstrip("m")))
+    #     height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]
+    #     filtered_sources = filtered_sources[height_filter]
 
-    if filtered_sources.empty:
+    # if filtered_sources.empty:
+    #     logger.error(
+    #         f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
+    #     )
+    #     return None
+
+    # # Now extract the PIDs along with some data about them
+    # dobj_urls = filtered_sources["dobj"].tolist()
+
+    try:
+        species_and_dobj_url = _get_species_and_dobjs_url(site, data_level, species, inlet)
+    except ValueError:
+        logger.error("Please check you have passed a valid ICOS site.")
+        return None
+
+    if species_and_dobj_url.empty:
         logger.error(
             f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
         )
         return None
-
-    # Now extract the PIDs along with some data about them
-    dobj_urls = filtered_sources["dobj"].tolist()
 
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
@@ -382,7 +476,9 @@ def _retrieve_remote(
 
     standardised_data: Dict[str, Dict] = {}
 
-    for n, dobj_url in enumerate(dobj_urls):
+    # for n, dobj_url in enumerate(dobj_urls):
+    for n, dobj_url, the_species, units, measurement_type in species_and_dobj_url.itertuples():
+        print(n, dobj_url, the_species, units, measurement_type)
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
         # We've got to jump through some hoops here to try and avoid the NOAA
@@ -406,25 +502,23 @@ def _retrieve_remote(
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
         # This is the metadata, dobj.info and dobj.meta are equal
-        dobj_info = dobj.meta
+        dobj_info = cast(dict[str, dict[str, Any]], dobj.meta)
 
         attributes = {}
 
-        specific_info = dobj_info["specificInfo"]
-        col_data = specific_info["columns"]
+        # specific_info = dobj_info["specificInfo"]
+        # col_data = specific_info["columns"]
 
-        # Get the species this dobj holds information for
-        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
-        species_info = next(i for i in col_data if i["label"] not in not_the_species)
+        # # Get the species this dobj holds information for
+        # not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+        # species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
-        measurement_type = species_info["valueType"]["self"]["label"].lower()
-        units = species_info["valueType"]["unit"].lower()
-        the_species = species_info["label"]
-
-        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
+        # measurement_type = species_info["valueType"]["self"]["label"].lower()
+        # units = species_info["valueType"]["unit"].lower()
+        # the_species = species_info["label"]
 
         attributes["species"] = the_species
-        acq_data = specific_info["acquisition"]
+        acq_data = cast(dict[str, Any], dobj_info["specificInfo"]["acquisition"])  # type: ignore
         station_data = acq_data["station"]
 
         to_store: Dict[str, Any] = {}
@@ -540,11 +634,17 @@ def _retrieve_remote(
         # if flag_col:
         #     flag_str = flag_col[0]
         #     dataframe = dataframe.astype({flag_str: str})
+        try:
+            dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+            dataframe.index.name = "time"
+            dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
+        except KeyError:
+            # flask data has sampling start instead of timestamp
+            dataframe = dataframe.rename(columns=rename_cols).set_index("samplingstart")
+            dataframe.index.name = "time"
+            dataframe.index = to_datetime(dataframe.index, unit="ms")
 
-        dataframe.index.name = "time"
-        dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
         dataset = dataframe.to_xarray()
         dataset.attrs.update(attributes)
