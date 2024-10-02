@@ -479,6 +479,7 @@ def get_obs_column(
     platform: str = "satellite",
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
+    return_mf: bool = True,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -490,6 +491,7 @@ def get_obs_column(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        return_mf: Return mole fraction rather than column data. Default=True
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -509,70 +511,72 @@ def get_obs_column(
         **kwargs,
     )
 
-    if max_level > max(obs_data.data.lev.values) + 1:
-        logger.warning(
-            f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+    if return_mf:
+
+        if max_level > max(obs_data.data.lev.values) + 1:
+            logger.warning(
+                f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+            )
+            max_level = max(obs_data.data.lev.values) + 1
+
+        ## processing taken from acrg/acrg/obs/read.py get_gosat()
+        lower_levels = list(range(0, max_level))
+
+        prior_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
+            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+        ).sum(dim="lev")
+
+        upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
+        prior_upper_level_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+        ).sum(dim="lev")
+
+        obs_data.data["mf_prior_factor"] = prior_factor
+        obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
+        obs_data.data["mf"] = (
+            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
         )
-        max_level = max(obs_data.data.lev.values) + 1
+        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
 
-    ## processing taken from acrg/acrg/obs/read.py get_gosat()
-    lower_levels = list(range(0, max_level))
+        # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
+        drop_data_vars = [
+            "xch4",
+            "xch4_uncertainty",
+            "lon",
+            "lat",
+            "ch4_profile_apriori",
+            "xch4_averaging_kernel",
+            "pressure_levels",
+            "pressure_weights",
+            "exposure_id",
+        ]
+        drop_coords = ["lev", "id"]
 
-    prior_factor = (
-        obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
-        * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
-        * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
-    ).sum(dim="lev")
+        for dv in drop_data_vars:
+            if dv in obs_data.data.data_vars:
+                obs_data.data = obs_data.data.drop_vars(dv)
+        for coord in drop_coords:
+            if coord in obs_data.data.coords:
+                obs_data.data = obs_data.data.drop_vars(coord)
 
-    upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
-    prior_upper_level_factor = (
-        obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
-        * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
-    ).sum(dim="lev")
+        obs_data.data.attrs["max_level"] = max_level
+        if species.upper() == "CH4":
+            # obs_data.data.mf.attrs["units"] = "1e-9"
+            obs_data.data.attrs["species"] = "CH4"
+        if species.upper() == "CO2":
+            # obs_data.data.mf.attrs["units"] = "1e-6"
+            obs_data.data.attrs["species"] = "CO2"
 
-    obs_data.data["mf_prior_factor"] = prior_factor
-    obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
-    obs_data.data["mf"] = (
-        obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
-    )
-    obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+        # obs_data.data.attrs["scale"] = "GOSAT"
 
-    # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
-    drop_data_vars = [
-        "xch4",
-        "xch4_uncertainty",
-        "lon",
-        "lat",
-        "ch4_profile_apriori",
-        "xch4_averaging_kernel",
-        "pressure_levels",
-        "pressure_weights",
-        "exposure_id",
-    ]
-    drop_coords = ["lev", "id"]
-
-    for dv in drop_data_vars:
-        if dv in obs_data.data.data_vars:
-            obs_data.data = obs_data.data.drop_vars(dv)
-    for coord in drop_coords:
-        if coord in obs_data.data.coords:
-            obs_data.data = obs_data.data.drop_vars(coord)
+        obs_data.metadata["transforms"] = (
+            f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
+        )
 
     obs_data.data = obs_data.data.sortby("time")
-
-    obs_data.data.attrs["max_level"] = max_level
-    if species.upper() == "CH4":
-        # obs_data.data.mf.attrs["units"] = "1e-9"
-        obs_data.data.attrs["species"] = "CH4"
-    if species.upper() == "CO2":
-        # obs_data.data.mf.attrs["units"] = "1e-6"
-        obs_data.data.attrs["species"] = "CO2"
-
-    # obs_data.data.attrs["scale"] = "GOSAT"
-
-    obs_data.metadata["transforms"] = (
-        f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
-    )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 

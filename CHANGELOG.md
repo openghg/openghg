@@ -5,7 +5,24 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.10.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.10.1...HEAD)
+
+### Added
+
+- Removed parsers that are unused. [PR #1129](https://github.com/openghg/openghg/pull/1129)
+
+## [0.10.1] - 2024-09-27
+
+### Fixed
+
+- Bug where `search_surface` couldn't accept a dictionary argument for `data_level`. [PR #1133](https://github.com/openghg/openghg/pull/1133)
+- GIT_TAG variable passed to build step of release_conda and also environment activation is executed for publishing to conda step. [PR #1135](https://github.com/openghg/openghg/pull/1135) 
+
+
+### Updated
+
+- Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
+
 
 ### Updated
 
