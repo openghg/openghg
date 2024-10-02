@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GIT_TAG variable passed to build step of release_conda and also environment activation is executed for publishing to conda step. [PR #1135](https://github.com/openghg/openghg/pull/1135) 
 
 
+### Updated
+
+- Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
+
+
 ## [0.10.0] - 2024-09-24
 
 ### Updated
