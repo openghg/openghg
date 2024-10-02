@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Dict, List
+from typing import Any, Tuple, Dict
 from openghg.types import (
     SurfaceTypes,
     ColumnTypes,
@@ -13,7 +13,6 @@ __all__ = [
     "define_data_type_classes",
     "define_standardise_parsers",
     "define_transform_parsers",
-    "null_metadata_values",
 ]
 
 
@@ -94,15 +93,3 @@ def define_transform_parsers() -> Dict[str, Any]:
     }
 
     return data_type_parsers
-
-
-def null_metadata_values() -> List:
-    """
-    Defines values which indicate metadata value is not specified.
-    Returns:
-        list: values to be seen as null
-    """
-    # TODO: Depending on how this is implemented, may want to update this to include np.nan values
-    null_values = ["not_set", "NOT_SET"]
-
-    return null_values

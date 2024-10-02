@@ -34,7 +34,6 @@ def download_data(
     Returns:
         bytes / None: Bytes if no filepath given
     """
-    import functools
     import io
     import shutil
     from urllib.parse import urlparse
@@ -83,9 +82,11 @@ def download_data(
     file_size = int(r.headers.get("Content-Length", 0))
 
     desc = f"Downloading {filename}"
-    r.raw.read = functools.partial(r.raw.read, decode_content=True)
+    r.raw.decode_content = True
 
-    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:
+    # mypy error ignored
+    # rich and requests libraries not quite aligning but urllib3.response.HTTPResponse should be very similiar to BinaryIO object expected.
+    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:  # type:ignore
         with io.BytesIO() as buf:
             shutil.copyfileobj(r_raw, buf)
 

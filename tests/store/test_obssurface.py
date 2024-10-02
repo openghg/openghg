@@ -364,34 +364,6 @@ def test_read_GC(bucket):
     ]
 
 
-@pytest.mark.skip(reason="Cranfield data processing will be removed.")
-def test_read_cranfield():
-    clear_test_stores()
-
-    data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
-    results = standardise_surface(
-        store="user", filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
-    )
-
-    expected_keys = ["ch4", "co", "co2"]
-
-    assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
-
-    uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
-
-    ch4_data = Datasource(bucket=get_bucket(), uuid=uuid, shallow=False).data()
-    ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
-
-    assert ch4_data.time[0] == Timestamp("2018-05-05")
-    assert ch4_data.time[-1] == Timestamp("2018-05-13T16:00:00")
-
-    assert ch4_data["ch4"][0] == pytest.approx(2585.651)
-    assert ch4_data["ch4"][-1] == pytest.approx(1999.018)
-
-    assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
-    assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
-
-
 def test_read_openghg_format(bucket):
     """
     Test that files already in OpenGHG format can be read. This file includes:
@@ -474,49 +446,21 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
 
-@pytest.mark.skip(reason="Thames Barrier data read to be removed.")
-def test_read_thames_barrier(bucket):
-    clear_test_stores()
-
-    data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
-
-    results = standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="THAMESBARRIER",
-        site="TMB",
-        network="LGHG",
-        sampling_period="3600s",
-    )
-
-    expected_keys = sorted(["ch4", "co2", "co"])
-
-    assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
-
-    uuid = results["processed"]["thames_test_20190707.csv"]["co2"]["uuid"]
-
-    data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
-
-    assert data.time[0] == Timestamp("2019-07-01T00:39:55")
-    assert data.time[-1] == Timestamp("2019-08-01T00:10:30")
-    assert data["co2"][0] == pytest.approx(417.97344761)
-    assert data["co2"][-1] == pytest.approx(417.80000653)
-    assert data["co2_variability"][0] == 0
-    assert data["co2_variability"][-1] == 0
-
-
 @pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
 def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
+    data_filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG")
 
     standardise_surface(
         store="user",
         filepath=data_filepath,
-        source_format="THAMESBARRIER",
-        site="tmb",
-        network="LGHG",
-        sampling_period="1m",
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h",
+        update_mismatch="attributes",
+        if_exists="new",
+        sort_files=True
     )
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
