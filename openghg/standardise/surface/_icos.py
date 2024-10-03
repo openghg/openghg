@@ -83,7 +83,8 @@ def parse_icos(
             measurement_type=measurement_type,
         )
 
-    gas_data = dataset_formatter(data=gas_data)
+    # JP 2024-10-02 - don't do this for consistency with the icos retrieve function
+    #gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(
@@ -143,6 +144,7 @@ def _read_data_large_header(
     inlet_height_fname = format_inlet(inlet_height_fname)
     if inlet is not None and inlet_height_fname.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename.")
+    inlet_height_magl = format_inlet(inlet_height_fname, key_name="inlet_height_magl")
 
     # Read the header and check its length
     header = read_header(filepath=filepath)
@@ -223,6 +225,7 @@ def _read_data_large_header(
         "site": site,
         "species": species_fname.lower(),
         "inlet": inlet_height_fname,
+        "inlet_height_magl": inlet_height_magl,
         "sampling_period": sampling_period,
         "network": network,
         "instrument": instrument,
