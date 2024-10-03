@@ -20,7 +20,7 @@ def test_read_icos_large_header():
         "species": "ch4",
         "inlet": "90m",
         "inlet_height_magl": "90",
-        "sampling_period": 3600.0,
+        "sampling_period": "3600.0",
         "network": "icos",
         "instrument": "g2301",
         "units": "nmol.mol-¹",
