@@ -63,23 +63,24 @@ def test_standardise_obs_two_writable_stores():
     results = search(site="hfd", inlet="100m", store="group")
     assert not results
 
-    mhd_path = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    rgl_path = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     results = standardise_surface(
-        filepath=mhd_path,
-        site="mhd",
-        inlet="15m",
-        instrument="g2401",
+        filepath=rgl_path,
+        site="rgl",
+        inlet="90m",
+        instrument="g2301",
+        sampling_period="1H",
         network="ICOS",
         source_format="ICOS",
         store="group",
     )
 
-    assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
+    assert "ch4" in results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"]
 
-    results = search(site="mhd", instrument="g2401", store="group")
+    results = search(site="rgl", instrument="g2301", store="group")
     assert results
-    results = search(site="mhd", instrument="g2401", store="user")
+    results = search(site="rgl", instrument="g2301", store="user")
     assert not results
 
 
