@@ -191,14 +191,14 @@ def _read_data_large_header(
 
     if "unc_" + species_fname.lower() in df.columns:
         rename_dict = {
-            "stdev": species_fname.lower() + " variability",
-            "nbpoints": species_fname.lower() + " number_of_observations",
-            "unc_" + species_fname.lower(): species_fname.lower() + " repeatability",
+            "stdev": species_fname.lower() + "_variability",
+            "nbpoints": species_fname.lower() + "_number_of_observations",
+            "unc_" + species_fname.lower(): species_fname.lower() + "_repeatability",
         }
     else:
         rename_dict = {
-            "stdev": species_fname.lower() + " variability",
-            "nbpoints": species_fname.lower() + " number_of_observations",
+            "stdev": species_fname.lower() + "_variability",
+            "nbpoints": species_fname.lower() + "_number_of_observations",
         }
 
     df = df.rename(columns=rename_dict)
