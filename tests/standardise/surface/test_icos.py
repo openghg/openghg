@@ -38,8 +38,8 @@ def test_read_icos_large_header():
 
     assert data["ch4"]["data"]["ch4"][0] == pytest.approx(2045.79)
     assert data["ch4"]["data"]["ch4"][-1] == pytest.approx(2001.63)
-    assert data["ch4"]["data"]["ch4 variability"][0] == pytest.approx(9.801)
-    assert data["ch4"]["data"]["ch4 variability"][-1] == pytest.approx(5.185)
+    assert data["ch4"]["data"]["ch4_variability"][0] == pytest.approx(9.801)
+    assert data["ch4"]["data"]["ch4_variability"][-1] == pytest.approx(5.185)
 
 
 def test_read_icos_large_header_incorrect_site_raises():
@@ -117,8 +117,8 @@ def test_read_icos_small_header_file():
     co2_data = data["co2"]["data"]
 
     assert co2_data["co2"][0].values == pytest.approx(401.645)
-    assert co2_data["co2 variability"][0].values == pytest.approx(0.087)
-    assert co2_data["co2 number_of_observations"][0].values == 13
+    assert co2_data["co2_variability"][0].values == pytest.approx(0.087)
+    assert co2_data["co2_number_of_observations"][0].values == 13
 
     co2_metadata = data["co2"]["metadata"]
 

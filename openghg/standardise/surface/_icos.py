@@ -340,8 +340,8 @@ def _read_data_small_header(
         data = data.sort_index()
 
     rename_dict = {
-        "Stdev": species_fname + " variability",
-        "NbPoints": species_fname + " number_of_observations",
+        "Stdev": species_fname + "_variability",
+        "NbPoints": species_fname + "_number_of_observations",
     }
 
     data = data.rename(columns=rename_dict)
