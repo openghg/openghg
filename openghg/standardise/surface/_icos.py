@@ -101,9 +101,9 @@ def parse_icos(
 def _read_data_large_header(
     filepath: Path,
     site: str,
-    inlet: str,
     network: str,
     instrument: str,
+    inlet: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     **kwargs: Dict,
@@ -114,8 +114,8 @@ def _read_data_large_header(
         filepath: Path to file
         site: Three letter site code
         network: Network name
-        inlet: Inlet height
         instrument: Instrument name
+        inlet: Optionally specify inlet height to check against filename
         sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
         measurement_type: Measurement type e.g. insitu, flask
     Returns:
@@ -272,9 +272,9 @@ def _read_data_large_header(
 def _read_data_small_header(
     filepath: Path,
     site: str,
-    inlet: str,
     network: str,
     instrument: str,
+    inlet: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
 ) -> Dict:
@@ -284,8 +284,8 @@ def _read_data_small_header(
         filepath: Path to file
         site: Three letter site code
         network: Network name
-        inlet: Inlet height
         instrument: Instrument name
+        inlet: Optionally specify inlet height to check against filename
         sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
         measurement_type: Measurement type e.g. insitu, flask
     Returns:
