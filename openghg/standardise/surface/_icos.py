@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import logging
 
-from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -84,7 +83,7 @@ def parse_icos(
         )
 
     # JP 2024-10-02 - don't do this for consistency with the icos retrieve function
-    #gas_data = dataset_formatter(data=gas_data)
+    # gas_data = dataset_formatter(data=gas_data)
 
     # Ensure the data is CF compliant
     gas_data = assign_attributes(
@@ -124,10 +123,7 @@ def _read_data_large_header(
     from openghg.util import read_header, format_inlet
     from pandas import read_csv, to_datetime
 
-    # Read metadata from the filename and cross check to make sure the passed
-    # arguments match
-    split_filename = filepath.name.split(".")
-
+    # Read metadata from the filename
     try:
         species_fname = filepath.name.split(".")[-1]
         site_fname = filepath.name.split("_")[-3]
@@ -151,19 +147,17 @@ def _read_data_large_header(
     len_header = len(header)
 
     if len_header < 40:
-        logger.warning(
-            f"We expect a header length of 40 or more but got {len_header}."
-        )
+        logger.warning(f"We expect a header length of 40 or more but got {len_header}.")
 
     df = read_csv(
         filepath,
         header=len_header - 1,
         sep=";",
         date_format="%Y %m %d %H %M",
-        na_values=["-9.990", "-999.990"]
+        na_values=["-9.990", "-999.990"],
     )
 
-    df["time"] = to_datetime(df[["Year","Month","Day","Hour","Minute"]])
+    df["time"] = to_datetime(df[["Year", "Month", "Day", "Hour", "Minute"]])
     df.index = df["time"]
 
     # Lowercase all the column titles
@@ -178,16 +172,9 @@ def _read_data_large_header(
 
     # Drop the columns we don't want
     if "unc_" + species_fname.lower() in df.columns:
-        cols_to_keep = [species_fname.lower(),
-                        "stdev",
-                        "nbpoints",
-                        "flag",
-                        "unc_" + species_fname.lower()]
+        cols_to_keep = [species_fname.lower(), "stdev", "nbpoints", "flag", "unc_" + species_fname.lower()]
     else:
-        cols_to_keep = [species_fname.lower(),
-                        "stdev",
-                        "nbpoints",
-                        "flag"]
+        cols_to_keep = [species_fname.lower(), "stdev", "nbpoints", "flag"]
     df = df[cols_to_keep]
 
     # Remove rows with NaNs in the species or stdev columns
@@ -206,7 +193,7 @@ def _read_data_large_header(
         rename_dict = {
             "stdev": species_fname.lower() + " variability",
             "nbpoints": species_fname.lower() + " number_of_observations",
-            "unc_" + species_fname.lower(): species_fname.lower() + " repeatability"
+            "unc_" + species_fname.lower(): species_fname.lower() + " repeatability",
         }
     else:
         rename_dict = {
@@ -257,7 +244,7 @@ def _read_data_large_header(
         f_header = [s for s in header if "TIME INTERVAL" in s]
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
-            metadata["sampling_period"] = 3600.0
+            metadata["sampling_period"] = "3600.0"
 
     species_data = {
         species_fname.lower(): {
