@@ -14,6 +14,7 @@ from .helpers import (
     get_mobile_datapath,
     get_retrieval_datapath,
     get_surface_datapath,
+    get_obspack_datapath,
     glob_files,
     key_to_local_filepath,
     temporary_store_paths,
