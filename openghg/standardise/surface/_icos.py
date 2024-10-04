@@ -217,10 +217,7 @@ def _read_data_large_header(
         "network": network,
         "instrument": instrument,
     }
-    attributes = {
-        "inlet_height_magl": metadata["inlet_height_magl"],
-        "data_owner": "See data owner email"
-    }
+    attributes = {"inlet_height_magl": metadata["inlet_height_magl"], "data_owner": "See data owner email"}
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
@@ -252,13 +249,7 @@ def _read_data_large_header(
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
 
-    species_data = {
-        species_fname.lower(): {
-            "metadata": metadata,
-            "data": data,
-            "attributes": attributes
-        }
-    }
+    species_data = {species_fname.lower(): {"metadata": metadata, "data": data, "attributes": attributes}}
 
     return species_data
 
@@ -384,20 +375,11 @@ def _read_data_small_header(
         "data_type": "surface",
         "source_format": "icos",
     }
-    attributes = {
-        "inlet_height_magl": metadata["inlet"],
-        "data_owner": "NOT_SET"
-    }
+    attributes = {"inlet_height_magl": metadata["inlet"], "data_owner": "NOT_SET"}
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
 
-    species_data = {
-        species_fname: {
-            "metadata": metadata,
-            "data": data,
-            "attributes": attributes
-        }
-    }
+    species_data = {species_fname: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     return species_data
