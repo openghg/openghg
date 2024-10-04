@@ -233,13 +233,11 @@ def _read_data_large_header(
     if len(f_header) == 1:
         data_owner_email = f_header[0].split(":")[1].strip()
         metadata["data_owner_email"] = data_owner_email
-        attributes["data_owner"] = data_owner_email
     else:
         f_header = [s for s in header if "CONTACT POINT EMAIL" in s]
         if len(f_header) == 1:
             data_owner_email = f_header[0].split(":")[1].strip()
             metadata["data_owner_email"] = data_owner_email
-            attributes["data_owner"] = data_owner_email
         else:
             raise ValueError("Couldn't identify data owner email")
 
