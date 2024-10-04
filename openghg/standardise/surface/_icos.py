@@ -217,6 +217,10 @@ def _read_data_large_header(
         "network": network,
         "instrument": instrument,
     }
+    attributes = {
+        "inlet_height_magl": metadata["inlet_height_magl"],
+        "data_owner": "See data owner email"
+    }
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
@@ -232,11 +236,13 @@ def _read_data_large_header(
     if len(f_header) == 1:
         data_owner_email = f_header[0].split(":")[1].strip()
         metadata["data_owner_email"] = data_owner_email
+        attributes["data_owner"] = data_owner_email
     else:
         f_header = [s for s in header if "CONTACT POINT EMAIL" in s]
         if len(f_header) == 1:
             data_owner_email = f_header[0].split(":")[1].strip()
             metadata["data_owner_email"] = data_owner_email
+            attributes["data_owner"] = data_owner_email
         else:
             raise ValueError("Couldn't identify data owner email")
 
@@ -250,6 +256,7 @@ def _read_data_large_header(
         species_fname.lower(): {
             "metadata": metadata,
             "data": data,
+            "attributes": attributes
         }
     }
 
@@ -377,6 +384,10 @@ def _read_data_small_header(
         "data_type": "surface",
         "source_format": "icos",
     }
+    attributes = {
+        "inlet_height_magl": metadata["inlet"],
+        "data_owner": "NOT_SET"
+    }
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
@@ -385,6 +396,7 @@ def _read_data_small_header(
         species_fname: {
             "metadata": metadata,
             "data": data,
+            "attributes": attributes
         }
     }
 
