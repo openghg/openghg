@@ -1066,10 +1066,10 @@ def test_optional_metadata():
                              (get_surface_datapath("ch4_bao_tower-insitu_1_ccgg_all.nc", "noaa"),
                               "bao", None, None, "noaa", None, "user", "noaa", "from_source"),
 
-                             (get_surface_datapath("mhd.co.hourly.g2401.15m.dat", "icos"),
-                              "mhd", None, None, "icos", None, "user", "icos", "never")
+                             (get_surface_datapath("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "icos"),
+                              "rgl", "g2301", None, "icos", None, "user", "icos", "never")
                          ])
-def test_sync_surface_metadata(filepath, site, instrument, sampling_period, network, inlet, store,
+def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_period, network, inlet, store,
                                source_format, update_mismatch, caplog):
     clear_test_stores()
     bucket = get_writable_bucket(name="user")
