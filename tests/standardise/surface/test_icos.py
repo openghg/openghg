@@ -30,7 +30,7 @@ def test_read_icos_large_header():
         "station_latitude": 51.99747,
         "station_long_name": "Ridge Hill, UK",
         "station_height_masl": 207.0,
-        'data_owner': 's.odoherty@bris.ac.uk,joseph.pitt@bristol.ac.uk,k.m.stanley@bristol.ac.uk',
+        'data_owner': 'See data_owner_email',
     }
 
     metadata = data["ch4"]["metadata"]

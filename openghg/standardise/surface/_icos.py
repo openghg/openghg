@@ -217,7 +217,7 @@ def _read_data_large_header(
         "network": network,
         "instrument": instrument,
     }
-    attributes = {"inlet_height_magl": metadata["inlet_height_magl"], "data_owner": "See data owner email"}
+    attributes = {"inlet_height_magl": metadata["inlet_height_magl"], "data_owner": "See data_owner_email"}
 
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
