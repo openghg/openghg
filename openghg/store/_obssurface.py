@@ -6,6 +6,7 @@ from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cas
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
+from openghg.standardise.meta import sync_surface_metadata
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
@@ -362,6 +363,20 @@ class ObsSurface(BaseStore):
             if chunks:
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
+
+            for _, gas_data in data.items():
+                measurement_data = gas_data["data"]
+                metadata = gas_data["metadata"]
+
+                attrs = measurement_data.attrs
+
+                metadata_aligned, attrs_aligned = sync_surface_metadata(
+                    metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
+                )
+
+                gas_data["metadata"] = metadata_aligned
+                gas_data["attributes"] = attrs_aligned
+                measurement_data.attrs = gas_data["attributes"]
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
