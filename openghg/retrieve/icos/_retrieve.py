@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
+from openghg.standardise.meta import dataset_formatter
 from openghg.util import running_on_hub, load_json
 from openghg.types import MetadataFormatError
 import openghg_defs
@@ -559,7 +560,7 @@ def _retrieve_remote(
             "data": dataset,
             "attributes": attributes,
         }
-
+    standardised_data = dataset_formatter(data=standardised_data)
     standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
     return standardised_data
