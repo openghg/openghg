@@ -4,7 +4,7 @@ from xarray import Dataset
 from collections.abc import Iterator
 
 
-class Store(ABC):
+class VersionedStore(ABC):
     """Interface for storing data in a Datasource. This may be in a zarr directory
     store, compressed NetCDF, a sparse storage format or others."""
 

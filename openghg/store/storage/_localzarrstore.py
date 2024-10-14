@@ -10,7 +10,7 @@ import shutil
 from openghg.types import ZarrStoreError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
-from openghg.store.storage import Store
+from openghg.store.storage import VersionedStore
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
 
-class LocalZarrStore(Store):
+class LocalZarrStore(VersionedStore):
     """A zarr based data store on the local filesystem.
     This is used by Datasource to handle the storage of versioned data.
 
