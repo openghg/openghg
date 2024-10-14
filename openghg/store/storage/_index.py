@@ -40,6 +40,11 @@ class StoreIndex(ABC):
         ...
 
     @abstractmethod
+    def nonconflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
+        """Return True if there are index values in other that are not in self ."""
+        ...
+
+    @abstractmethod
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         """Restrict dataset to values in index."""
         ...
@@ -94,6 +99,10 @@ class DatetimeStoreIndex(StoreIndex):
         result = DatetimeStoreIndex(diff)
         return result
 
+    def nonconflicts_found(self, other: DatetimeStoreIndex | xr.Dataset) -> bool:
+        nonconflict_index = self.nonconflicts(other).index
+        return len(nonconflict_index) > 0
+
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
 
@@ -142,6 +151,10 @@ class FloorDatetimeStoreIndex(StoreIndex):
         other_diff = cast(pd.DatetimeIndex, other_diff)
         result = FloorDatetimeStoreIndex(other_diff, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
         return result
+
+    def nonconflicts_found(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> bool:
+        nonconflict_index = self.nonconflicts(other).index
+        return len(nonconflict_index) > 0
 
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
