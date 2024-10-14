@@ -1,41 +1,111 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Literal, Protocol, TypeVar
 
-from xarray import Dataset
+import xarray as xr
 
 from openghg.store.storage._index import StoreIndex
+from openghg.types import DataOverlapError
 
 
 class Store(ABC):
     """Interface for means of storing a single dataset."""
-    @abstractmethod
-    def add(self, data: Dataset) -> None:
-        """Add an xr.Dataset to the store."""
-        ...
-
-    @abstractmethod
-    def delete(self) -> None:
-        """Delete the store."""
-        ...
-
-    @abstractmethod
-    def get(self) -> Dataset:
-        """Return the stored data."""
-        ...
-
     @property
     @abstractmethod
     def index(self) -> StoreIndex:
         """Get index for store."""
         ...
 
+    @abstractmethod
+    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+        """Insert an xr.Dataset to the store.
+
+        If no data is present in the Store, this method should initialise storage.
+
+        Args:
+            data: xr.Dataset to add to Store
+            on_conflict: if "error", raise DataOverlapError if any conflicts found. If "ignore", then
+                ignore any conflicting values in `data`, and insert only non-conflicting values.
+
+        Returns:
+            None
+
+        Raises:
+            DataOverlapError if conflicts found and `on_conflict` == "error".
+        """
+        if on_conflict == "error" and self.index.conflicts_found(data):
+            raise DataOverlapError
+
+    @abstractmethod
+    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+        """Update the data in the Store with data in an xr.Dataset.
+
+        Note: by default, only existing data can be updated, so an error is raised if there are
+        non-conflicting times in the new data. This can be overridden.
+
+        Args:
+            data: xr.Dataset to add to Store
+            on_nonconflict: if "error", raise IndexError if any non-conflicts found. If "ignore", then
+                ignore any non-conflicting values in `data`, and insert only conflicting values.
+
+        Returns:
+            None
+
+        Raises:
+            IndexError if nonconflicts found and `on_nonconflict` == "error".
+        """
+        if on_nonconflict == "error" and self.index.nonconflicts_found(data):
+            raise IndexError("To update with data that contains values outside the existing data index, use `on_nonconflict = 'error'`.")
+
+    def upsert(self, data: xr.Dataset) -> None:
+        """Add data to Store, inserting at new index values and updating at existing index values."""
+        self.insert(data, on_conflict="ignore")
+        self.update(data, on_nonconflict="ignore")
+
+    @abstractmethod
+    def clear(self) -> None:
+        """Clear data from store."""
+        ...
+
+    def overwrite(self, data: xr.Dataset) -> None:
+        """Write data to Store, deleting any existing data."""
+        self.clear()
+        self.insert(data, on_conflict="ignore")  # "ignore" to avoid checking for conflicts
+
+    @abstractmethod
+    def get(self) -> xr.Dataset:
+        """Return the stored data."""
+        ...
+
+    @abstractmethod
+    def delete(self) -> None:
+        """Delete the store.
+
+        Note: override this method if there are other artefacts
+        to remove (for instance, a directory that held the data).
+        """
+        self.clear()
+
     def copy(self, other: Store) -> None:
-        """Copy data from self to other."""
+        """Copy data from self to other.
+
+        Note: this overwrites the data in `other`.
+        """
         ds = self.get()
-        other.add(ds)
+        other.overwrite(ds)
 
     @abstractmethod
     def bytes_stored(self) -> int:
         """Return the number of bytes stored in the store."""
+        ...
+
+
+T = TypeVar("T")
+
+class SupportsVersioning(Protocol):
+    @classmethod
+    def new_version(cls: type[T], version_root: Path, version_key: str) -> T:
+        # TODO: `Path` probably isn't the right type here...
         ...
