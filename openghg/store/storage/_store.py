@@ -1,73 +1,41 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+
 from xarray import Dataset
-from collections.abc import Iterator
+
+from openghg.store.storage._index import StoreIndex
 
 
-class VersionedStore(ABC):
-    """Interface for storing data in a Datasource. This may be in a zarr directory
-    store, compressed NetCDF, a sparse storage format or others."""
+class Store(ABC):
+    """Interface for means of storing a single dataset."""
+    @abstractmethod
+    def add(self, data: Dataset) -> None:
+        """Add an xr.Dataset to the store."""
+        ...
 
     @abstractmethod
-    def add(
-        self,
-        version: str,
-        dataset: Dataset,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-    ) -> None:
-        """Add an xr.Dataset to the zarr store."""
-        pass
+    def delete(self) -> None:
+        """Delete the store."""
+        ...
 
     @abstractmethod
-    def delete_version(self, version: str) -> None:
-        """Delete a version from the store"""
-        pass
+    def get(self) -> Dataset:
+        """Return the stored data."""
+        ...
 
+    @property
     @abstractmethod
-    def delete_all(self) -> None:
-        """Remove data from the zarr store"""
-        pass
+    def index(self) -> StoreIndex:
+        """Get index for store."""
+        ...
 
-    @abstractmethod
-    def keys(self, version: str) -> Iterator[str]:
-        """Keys of data stored in the zarr store"""
-        pass
-
-    @abstractmethod
-    def close(self) -> None:
-        """Close the zarr store."""
-        pass
-
-    @abstractmethod
-    def store_key(self, version: str) -> str:
-        """Return the key of this zarr store"""
-        pass
-
-    @abstractmethod
-    def version_exists(self, version: str) -> bool:
-        """Check if a version exists in the current store"""
-        pass
-
-    @abstractmethod
-    def get(self, version: str) -> Dataset:
-        """Get the version of the dataset stored in the zarr store."""
-        pass
-
-    @abstractmethod
-    def _pop(self, version: str) -> Dataset:
-        """Pop some data from the store. This removes the data at this version from the store
-        and returns it."""
-        pass
-
-    @abstractmethod
-    def update(
-        self, version: str, dataset: Dataset, compressor: Optional[Any], filters: Optional[Any]
-    ) -> None:
-        """Update the data at the given key"""
-        pass
+    def copy(self, other: Store) -> None:
+        """Copy data from self to other."""
+        ds = self.get()
+        other.add(ds)
 
     @abstractmethod
     def bytes_stored(self) -> int:
-        """Return the number of bytes stored in the zarr store"""
-        pass
+        """Return the number of bytes stored in the store."""
+        ...
