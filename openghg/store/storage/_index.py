@@ -30,6 +30,11 @@ class StoreIndex(ABC):
         ...
 
     @abstractmethod
+    def conflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
+        """Return True if common index values found in self and other."""
+        ...
+
+    @abstractmethod
     def nonconflicts(self, other: SIT | xr.Dataset) -> SIT:
         """Return index values in other, but not in self."""
         ...
@@ -77,6 +82,10 @@ class DatetimeStoreIndex(StoreIndex):
         result = DatetimeStoreIndex(intersection)
         return result
 
+    def conflicts_found(self, other: DatetimeStoreIndex | xr.Dataset) -> bool:
+        conflict_index = self.conflicts(other).index
+        return len(conflict_index) > 0
+
     def nonconflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
@@ -117,6 +126,10 @@ class FloorDatetimeStoreIndex(StoreIndex):
         other_intersection = cast(pd.DatetimeIndex, other_intersection)
         result = FloorDatetimeStoreIndex(other_intersection, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
         return result
+
+    def conflicts_found(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> bool:
+        conflict_index = self.conflicts(other).index
+        return len(conflict_index) > 0
 
     def nonconflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
