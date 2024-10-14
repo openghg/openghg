@@ -25,6 +25,7 @@ from ._errors import (
     AttrMismatchError,
     MetadataFormatError,
     DataOverlapError,
+    UpdateError,
     ConfigFileError,
     MetastoreError,
     ZarrStoreError,

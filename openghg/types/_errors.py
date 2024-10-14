@@ -60,6 +60,9 @@ class MetadataFormatError(OpenGHGError):
 class DataOverlapError(OpenGHGError):
     """New data overlaps with current data stored"""
 
+class UpdateError(OpenGHGError):
+    """Error when updating existing data."""
+
 
 class ConfigFileError(OpenGHGError):
     """Raised for errors with configuration file"""

@@ -71,9 +71,12 @@ class StoreIndex(ABC):
 
 class DatetimeStoreIndex(StoreIndex):
     """Store index based on pd.DatetimeIndex."""
-    def __init__(self, times: np.ndarray | pd.DatetimeIndex) -> None:
+    def __init__(self, times: np.ndarray | pd.DatetimeIndex | None = None) -> None:
         super().__init__()
-        self.index = pd.DatetimeIndex(times)
+        if times is None:
+            self.index = pd.DatetimeIndex([])
+        else:
+            self.index = pd.DatetimeIndex(times)
 
     @classmethod
     def from_dataset(cls: type[DatetimeStoreIndex], ds: xr.Dataset) -> DatetimeStoreIndex:

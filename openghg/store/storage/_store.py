@@ -6,8 +6,11 @@ from typing import Literal, Protocol, TypeVar
 
 import xarray as xr
 
-from openghg.store.storage._index import StoreIndex
-from openghg.types import DataOverlapError
+from openghg.store.storage._index import StoreIndex, DatetimeStoreIndex
+from openghg.types import DataOverlapError, UpdateError
+
+
+
 
 
 class Store(ABC):
@@ -54,15 +57,20 @@ class Store(ABC):
             None
 
         Raises:
-            IndexError if nonconflicts found and `on_nonconflict` == "error".
+            UpdateError if nonconflicts found and `on_nonconflict` == "error".
         """
         if on_nonconflict == "error" and self.index.nonconflicts_found(data):
-            raise IndexError("To update with data that contains values outside the existing data index, use `on_nonconflict = 'error'`.")
+            raise UpdateError("To update with data that contains values outside the existing data index, use `on_nonconflict = 'error'`.")
 
     def upsert(self, data: xr.Dataset) -> None:
         """Add data to Store, inserting at new index values and updating at existing index values."""
         self.insert(data, on_conflict="ignore")
         self.update(data, on_nonconflict="ignore")
+
+    @abstractmethod
+    def get(self) -> xr.Dataset:
+        """Return the stored data."""
+        ...
 
     @abstractmethod
     def clear(self) -> None:
@@ -73,11 +81,6 @@ class Store(ABC):
         """Write data to Store, deleting any existing data."""
         self.clear()
         self.insert(data, on_conflict="ignore")  # "ignore" to avoid checking for conflicts
-
-    @abstractmethod
-    def get(self) -> xr.Dataset:
-        """Return the stored data."""
-        ...
 
     @abstractmethod
     def delete(self) -> None:
@@ -109,3 +112,40 @@ class SupportsVersioning(Protocol):
     def new_version(cls: type[T], version_root: Path, version_key: str) -> T:
         # TODO: `Path` probably isn't the right type here...
         ...
+
+
+class MemoryStore(Store):
+    """Simple in-memory implementation of Store interface."""
+    def __init__(self, data: xr.Dataset | None = None) -> None:
+        super().__init__()
+        self.data = data
+
+    def clear(self) -> None:
+        self.data = None
+
+    @property
+    def index(self) -> DatetimeStoreIndex:
+        if self.data is None:
+            return DatetimeStoreIndex()
+        return DatetimeStoreIndex.from_dataset(self.data)
+
+    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+        if self.data is None:
+            self.data = data
+        else:
+            super().insert(data, on_conflict) # error checking
+            data_nonconflicts = self.index.select_nonconflicts(data)
+            self.data = xr.concat([self.data, data_nonconflicts], dim="time").sortby("time")
+
+    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+        if self.data is None:
+            raise UpdateError("Cannot update empty Store.")
+        else:
+            super().update(data, on_nonconflict) # error checking
+            data_conflicts = self.index.select_conflicts(data)
+            self.data.update(data_conflicts)
+
+    def get(self) -> xr.Dataset:
+        if self.data is None:
+            return xr.Dataset()
+        return self.data
