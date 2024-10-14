@@ -40,7 +40,14 @@ class StoreIndex(ABC):
         ...
 
     def select_conflicts(self, ds: xr.Dataset, conflicts: StoreIndex | None = None) -> xr.Dataset:
-        """Return dataset restricted to conflicting index values."""
+        """Return dataset restricted to conflicting index values.
+
+        Note: this method may need to align the index values after restricting; the result of this
+        method must result in a dataset that will exactly overwrite the existing data.
+
+        What this means will depend on the implementation of `Store`; if the implementation uses Zarr,
+        then the alignment must be done before adding data.
+        """
         if conflicts is None:
             conflicts = self.conflicts(ds)
         return conflicts.select(ds)  # type:ignore
@@ -80,3 +87,60 @@ class DatetimeStoreIndex(StoreIndex):
 
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
+
+
+class FloorDatetimeStoreIndex(StoreIndex):
+    """Store index based on pd.DatetimeIndex with times rounded down to a frequency.
+
+    Note: this uses `pd.DatetimeIndex.floor` to drop any time units more precise than
+    the specified frequency.
+    """
+    def __init__(self, times: np.ndarray | pd.DatetimeIndex, freq: str = "s") -> None:
+        super().__init__()
+        self.index = pd.DatetimeIndex(times)
+        self.freq = freq
+        self.floored = pd.Series(data=np.arange(len(times)), index=self.index.floor(freq=self.freq))
+
+    @classmethod
+    def from_dataset(cls: type[FloorDatetimeStoreIndex], ds: xr.Dataset, freq: str) -> FloorDatetimeStoreIndex:
+        return cls(ds.time.values, freq)
+
+    def conflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
+        """Return the times from `other` that conflict, after rounding down to self.freq"""
+        if isinstance(other, xr.Dataset):
+            other = FloorDatetimeStoreIndex.from_dataset(other, self.freq)
+
+        floored_intersection = self.floored.index.intersection(other.floored.index)
+        other_floored_intersection_idxs = other.floored[floored_intersection]
+
+        other_intersection = other.index[other_floored_intersection_idxs]
+        other_intersection = cast(pd.DatetimeIndex, other_intersection)
+        result = FloorDatetimeStoreIndex(other_intersection, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
+        return result
+
+    def nonconflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
+        if isinstance(other, xr.Dataset):
+            other = FloorDatetimeStoreIndex.from_dataset(other, self.freq)
+
+        floored_diff = other.floored.index.difference(self.floored.index)
+        other_floored_diff_idxs = other.floored[floored_diff]
+
+        other_diff = other.index[other_floored_diff_idxs]
+        other_diff = cast(pd.DatetimeIndex, other_diff)
+        result = FloorDatetimeStoreIndex(other_diff, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
+        return result
+
+    def select(self, ds: xr.Dataset) -> xr.Dataset:
+        return ds.sel(time=self.index)
+
+    def select_conflicts(self, ds: xr.Dataset, conflicts: StoreIndex | None = None) -> xr.Dataset:
+        """Restrict `ds` to intersection of floored times and align to existing times."""
+        ds_restricted = super().select_conflicts(ds, conflicts)
+        other = FloorDatetimeStoreIndex.from_dataset(ds, self.freq)
+
+        floored_intersection = self.floored.index.intersection(other.floored.index)
+        self_floored_intersection_idxs = self.floored[floored_intersection]
+
+        self_intersection = self.index[self_floored_intersection_idxs]
+
+        return ds_restricted.assign_coords(time=self_intersection)
