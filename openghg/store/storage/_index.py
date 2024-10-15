@@ -30,6 +30,11 @@ class StoreIndex(ABC):
         ...
 
     @abstractmethod
+    def __eq__(self, other) -> bool:
+        """Return number of entries in the index."""
+        ...
+
+    @abstractmethod
     def conflicts(self, other: SIT | xr.Dataset) -> SIT:
         """Return common index values from self and other."""
         ...
@@ -85,6 +90,11 @@ class DatetimeStoreIndex(StoreIndex):
     def __len__(self) -> int:
         return len(self.index)
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, DatetimeStoreIndex):
+            return NotImplemented
+        return (self.index == other.index).all()
+
     def conflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
@@ -123,6 +133,11 @@ class FloorDatetimeStoreIndex(StoreIndex):
 
     def __len__(self) -> int:
         return len(self.index)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, FloorDatetimeStoreIndex):
+            return NotImplemented
+        return (self.index == other.index).all() and (self.freq == other.freq)
 
     def conflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
         """Return the times from `other` that conflict, after rounding down to self.freq"""
