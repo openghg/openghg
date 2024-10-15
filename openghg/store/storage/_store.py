@@ -5,11 +5,8 @@ from typing import Literal
 
 import xarray as xr
 
-from openghg.store.storage import StoreIndex, DatetimeStoreIndex
+from ._index import StoreIndex, DatetimeStoreIndex
 from openghg.types import DataOverlapError, UpdateError
-
-
-
 
 
 class Store(ABC):
@@ -19,6 +16,10 @@ class Store(ABC):
     def index(self) -> StoreIndex:
         """Get index for store."""
         ...
+
+    def __len__(self) -> int:
+        """Return number of index values."""
+        return len(self.index)
 
     @abstractmethod
     def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
@@ -62,9 +63,13 @@ class Store(ABC):
             raise UpdateError("To update with data that contains values outside the existing data index, use `on_nonconflict = 'error'`.")
 
     def upsert(self, data: xr.Dataset) -> None:
-        """Add data to Store, inserting at new index values and updating at existing index values."""
-        self.insert(data, on_conflict="ignore")
+        """Add data to Store, inserting at new index values and updating at existing index values.
+
+        Note: the order of updating and inserting can matter. Override this method if this order does not
+        have the desired effect.
+        """
         self.update(data, on_nonconflict="ignore")
+        self.insert(data, on_conflict="ignore")
 
     @abstractmethod
     def get(self) -> xr.Dataset:
@@ -81,7 +86,6 @@ class Store(ABC):
         self.clear()
         self.insert(data, on_conflict="ignore")  # "ignore" to avoid checking for conflicts
 
-    @abstractmethod
     def delete(self) -> None:
         """Delete the store.
 
@@ -98,10 +102,9 @@ class Store(ABC):
         ds = self.get()
         other.overwrite(ds)
 
-    @abstractmethod
     def bytes_stored(self) -> int:
         """Return the number of bytes stored in the store."""
-        ...
+        raise NotImplementedError
 
 
 class MemoryStore(Store):
