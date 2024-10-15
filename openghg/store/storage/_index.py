@@ -108,7 +108,7 @@ class DatetimeStoreIndex(StoreIndex):
 class FloorDatetimeStoreIndex(StoreIndex):
     """Store index based on pd.DatetimeIndex with times rounded down to a frequency.
 
-    Note: this uses `pd.DatetimeIndex.floor` to drop any time units more precise than
+    This uses `pd.DatetimeIndex.floor` to drop any time units more precise than
     the specified frequency.
     """
     def __init__(self, times: np.ndarray | pd.DatetimeIndex, freq: str = "s") -> None:
