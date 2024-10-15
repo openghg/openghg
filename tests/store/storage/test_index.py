@@ -11,8 +11,9 @@ import xarray as xr
 from openghg.store.storage import DatetimeStoreIndex, FloorDatetimeStoreIndex
 
 
-def dummy_dataset(index) -> xr.Dataset:
-    data = np.arange(len(index))
+def dummy_dataset(index, data=None) -> xr.Dataset:
+    if data is None:
+        data = np.arange(len(index))
     ds = xr.Dataset({"x": ("time", data)}, coords={"time": index})
     return ds
 
@@ -277,3 +278,9 @@ class TestFloorDatetimeStoreIndex:
         else:
             assert not nonconflicts
             assert not ds_nonconflicts
+
+    def test_conflicts(self):
+        pass
+
+    def test_nonconflicts(self):
+        pass
