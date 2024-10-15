@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Literal, Protocol, TypeVar
+from typing import Literal
 
 import xarray as xr
 
@@ -105,15 +104,6 @@ class Store(ABC):
         ...
 
 
-T = TypeVar("T")
-
-class SupportsVersioning(Protocol):
-    @classmethod
-    def new_version(cls: type[T], version_root: Path, version_key: str) -> T:
-        # TODO: `Path` probably isn't the right type here...
-        ...
-
-
 class MemoryStore(Store):
     """Simple in-memory implementation of Store interface."""
     def __init__(self, data: xr.Dataset | None = None) -> None:
@@ -149,7 +139,3 @@ class MemoryStore(Store):
         if self.data is None:
             return xr.Dataset()
         return self.data
-
-    @classmethod
-    def new_version(cls: type[MemoryStore], version_root: Path, version_key: str) -> MemoryStore:
-        return cls()
