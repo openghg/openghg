@@ -128,7 +128,7 @@ class FloorDatetimeStoreIndex(StoreIndex):
         self.floored = pd.Series(data=np.arange(len(times)), index=self.index.floor(freq=self.freq))
 
     @classmethod
-    def from_dataset(cls: type[FloorDatetimeStoreIndex], ds: xr.Dataset, freq: str) -> FloorDatetimeStoreIndex:
+    def from_dataset(cls: type[FloorDatetimeStoreIndex], ds: xr.Dataset, freq: str = "s") -> FloorDatetimeStoreIndex:
         return cls(ds.time.values, freq)
 
     def __len__(self) -> int:
