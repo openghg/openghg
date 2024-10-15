@@ -120,6 +120,13 @@ class FloorDatetimeStoreIndex(StoreIndex):
 
     This uses `pd.DatetimeIndex.floor` to drop any time units more precise than
     the specified frequency.
+
+    This could be used to avoid duplicating data when there are small differences in
+    time coordinates, but it is mostly to demonstrate how `StoreIndex` should be
+    implemented in a more complicated case where `select_conflicts` needs to transform
+    the time coordinate.
+
+    # TODO: re-implement this with `pd.Index.get_indexer` and a tolerance?
     """
     def __init__(self, times: np.ndarray | pd.DatetimeIndex, freq: str = "s") -> None:
         super().__init__()
