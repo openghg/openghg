@@ -149,3 +149,7 @@ class MemoryStore(Store):
         if self.data is None:
             return xr.Dataset()
         return self.data
+
+    @classmethod
+    def new_version(cls: type[MemoryStore], version_root: Path, version_key: str) -> MemoryStore:
+        return cls()
