@@ -25,24 +25,27 @@ class StoreIndex(ABC):
     Further, we may want to ignore minor differences in Timestamps.
     """
     @abstractmethod
+    def __len__(self) -> int:
+        """Return number of entries in the index."""
+        ...
+
+    @abstractmethod
     def conflicts(self, other: SIT | xr.Dataset) -> SIT:
         """Return common index values from self and other."""
         ...
 
-    @abstractmethod
     def conflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
         """Return True if common index values found in self and other."""
-        ...
+        return len(self.conflicts(other)) > 0
 
     @abstractmethod
     def nonconflicts(self, other: SIT | xr.Dataset) -> SIT:
         """Return index values in other, but not in self."""
         ...
 
-    @abstractmethod
     def nonconflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
         """Return True if there are index values in other that are not in self ."""
-        ...
+        return len(self.nonconflicts(other)) > 0
 
     @abstractmethod
     def select(self, ds: xr.Dataset) -> xr.Dataset:
@@ -54,9 +57,6 @@ class StoreIndex(ABC):
 
         Note: this method may need to align the index values after restricting; the result of this
         method must result in a dataset that will exactly overwrite the existing data.
-
-        What this means will depend on the implementation of `Store`; if the implementation uses Zarr,
-        then the alignment must be done before adding data.
         """
         if conflicts is None:
             conflicts = self.conflicts(ds)
@@ -82,6 +82,9 @@ class DatetimeStoreIndex(StoreIndex):
     def from_dataset(cls: type[DatetimeStoreIndex], ds: xr.Dataset) -> DatetimeStoreIndex:
         return cls(ds.time.values)
 
+    def __len__(self) -> int:
+        return len(self.index)
+
     def conflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
@@ -90,10 +93,6 @@ class DatetimeStoreIndex(StoreIndex):
         result = DatetimeStoreIndex(intersection)
         return result
 
-    def conflicts_found(self, other: DatetimeStoreIndex | xr.Dataset) -> bool:
-        conflict_index = self.conflicts(other).index
-        return len(conflict_index) > 0
-
     def nonconflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
@@ -101,10 +100,6 @@ class DatetimeStoreIndex(StoreIndex):
         diff = cast(pd.DatetimeIndex, diff)
         result = DatetimeStoreIndex(diff)
         return result
-
-    def nonconflicts_found(self, other: DatetimeStoreIndex | xr.Dataset) -> bool:
-        nonconflict_index = self.nonconflicts(other).index
-        return len(nonconflict_index) > 0
 
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
@@ -126,6 +121,9 @@ class FloorDatetimeStoreIndex(StoreIndex):
     def from_dataset(cls: type[FloorDatetimeStoreIndex], ds: xr.Dataset, freq: str) -> FloorDatetimeStoreIndex:
         return cls(ds.time.values, freq)
 
+    def __len__(self) -> int:
+        return len(self.index)
+
     def conflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
         """Return the times from `other` that conflict, after rounding down to self.freq"""
         if isinstance(other, xr.Dataset):
@@ -139,10 +137,6 @@ class FloorDatetimeStoreIndex(StoreIndex):
         result = FloorDatetimeStoreIndex(other_intersection, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
         return result
 
-    def conflicts_found(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> bool:
-        conflict_index = self.conflicts(other).index
-        return len(conflict_index) > 0
-
     def nonconflicts(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> FloorDatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = FloorDatetimeStoreIndex.from_dataset(other, self.freq)
@@ -154,10 +148,6 @@ class FloorDatetimeStoreIndex(StoreIndex):
         other_diff = cast(pd.DatetimeIndex, other_diff)
         result = FloorDatetimeStoreIndex(other_diff, self.freq)  # NOTE: not sure how this will work if self and other have different freqs
         return result
-
-    def nonconflicts_found(self, other: FloorDatetimeStoreIndex | xr.Dataset) -> bool:
-        nonconflict_index = self.nonconflicts(other).index
-        return len(nonconflict_index) > 0
 
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
