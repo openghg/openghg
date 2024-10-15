@@ -7,8 +7,10 @@ import pytest
 import numpy as np
 import pandas as pd
 import xarray as xr
+import zarr
 
 from openghg.store.storage import MemoryStore
+from openghg.store.storage._store import get_zarr_directory_store
 from openghg.types import DataOverlapError, UpdateError
 
 
@@ -67,12 +69,28 @@ def ds5():
     return dummy_dataset(idx)
 
 
+@pytest.fixture(scope="function")
+def zarr_store(tmp_path):
+    path = tmp_path / "test.zarr"
+    store = get_zarr_directory_store(path)
+    yield store
+    store.clear()
+
+
+@pytest.fixture(scope="function")
+def zarr_store2(tmp_path):
+    path = tmp_path / "test2.zarr"
+    store = get_zarr_directory_store(path)
+    yield store
+    store.clear()
+
+
 class TestMemoryStore():
     def test_insert_on_empty_creates(self, ds1):
         ms = MemoryStore()
 
         assert len(ms) == 0
-        assert ms.data is None
+        assert not ms
 
         ms.insert(ds1)
 
@@ -88,7 +106,7 @@ class TestMemoryStore():
         ms.clear()
 
         assert len(ms) == 0
-        assert ms.data is None
+        assert not ms
 
     def test_insert_twice(self, ds1, ds5):
         ms = MemoryStore()
@@ -206,3 +224,158 @@ class TestMemoryStore():
         ms1.copy(ms2)
 
         xr.testing.assert_equal(ms1.get(), ms2.get())
+
+
+class TestZarrDirectoryStore():
+    def test_insert_on_empty_creates(self, zarr_store, ds1):
+        zstore = zarr_store
+
+        assert len(zstore) == 0
+        assert not zstore
+
+        zstore.insert(ds1)
+
+        assert len(zstore) == len(ds1.time)
+
+    def test_insert_and_clear(self, zarr_store, ds1):
+        zstore = zarr_store
+
+        zstore.insert(ds1)
+
+        assert len(zstore) == len(ds1.time)
+
+        zstore.clear()
+
+        assert len(zstore) == 0
+        assert not zstore
+
+    def test_insert_twice(self, zarr_store, ds1, ds5):
+        zstore = zarr_store
+        zstore.insert(ds1)
+        zstore.insert(ds5)
+
+        assert len(zstore) == len(ds1.time) + len(ds5.time)
+
+        expected = np.hstack([ds1.x.values, ds5.x.values])
+
+        np.testing.assert_equal(zstore.get().x.values, expected)
+
+    def test_insert_raises_on_conflict(self, zarr_store, ds1):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        with pytest.raises(DataOverlapError):
+            zstore.insert(ds1)
+
+    def test_insert_ignore_flag(self, zarr_store, ds1, ds4):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        len1 = len(zstore)
+
+        # all values should be ignored
+        zstore.insert(ds1, on_conflict="ignore")
+
+        assert len(zstore) == len1
+
+        # ds4 has four non-conflicting values, so four values should be added
+        zstore.insert(ds4, on_conflict="ignore")
+
+        assert len(zstore) == len1 + 4
+
+        # check values
+        expected = np.hstack([ds1.x.values, ds4.x.values[-4:]])
+
+        np.testing.assert_equal(zstore.get().x.values, expected)
+
+    def test_update(self, zarr_store, ds1):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        xr.testing.assert_equal(zstore.get(), ds1)
+
+        # update the values
+        twice_ds1 = ds1.map(lambda x: 2 * x)
+        zstore.update(twice_ds1)
+
+        xr.testing.assert_equal(zstore.get(), twice_ds1)
+
+    def test_update_with_gap(self, zarr_store, ds1, ds2):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        xr.testing.assert_equal(zstore.get(), ds1)
+
+        # update the values
+        twice_ds2 = ds2.map(lambda x: 2 * x)
+        zstore.update(twice_ds2)
+
+        expected = np.hstack([twice_ds2.x.values[:5], ds1.x.values[5:10], twice_ds2.x.values[5:]])
+
+        np.testing.assert_equal(zstore.get().x.values, expected)
+
+    def test_update_empty_store_error(self, zarr_store, ds1):
+        zstore = zarr_store
+
+        with pytest.raises(UpdateError):
+            zstore.update(ds1)
+
+    def test_update_raises_on_nonconflict(self, zarr_store, ds1, ds4):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        with pytest.raises(UpdateError):
+            zstore.update(ds4)
+
+    def test_update_ignore_flag(self, zarr_store, ds1, ds4):
+        """Check that update with `on_nonconflict == "ignore"` only updates
+        overlapping times.
+        """
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        xr.testing.assert_equal(zstore.get(), ds1)
+
+        # update the values with "ignore"
+        zstore.update(ds4, on_nonconflict="ignore")
+
+        expected = np.hstack([ds1.x.values[:4], ds4.x.values[:-4]])
+        np.testing.assert_equal(zstore.get().x.values, expected)
+
+    def test_upsert(self, zarr_store, ds1, ds4):
+        """Check that upsert writes all new values."""
+        zstore = zarr_store
+        zstore.insert(ds1)
+        zstore.upsert(ds4)
+
+        expected = np.hstack([ds1.x.values[:4], ds4.x.values])
+        np.testing.assert_equal(zstore.get().x.values, expected)
+
+    def test_overwrite(self, zarr_store, ds1, ds2):
+        zstore = zarr_store
+        zstore.insert(ds1)
+
+        xr.testing.assert_equal(zstore.get(), ds1)
+
+        zstore.overwrite(ds2)
+
+        xr.testing.assert_equal(zstore.get(), ds2)
+
+    def test_copy(self, zarr_store, zarr_store2, ds1, ds2):
+        zstore1 = zarr_store
+        zstore1.insert(ds1)
+
+        zstore2 = zarr_store2
+        zstore1.copy(zstore2)
+
+        xr.testing.assert_equal(zstore1.get(), zstore2.get())
+
+        # copy overwrites: check by overwriting zstore2, then
+        # copying to it again
+        zstore2.overwrite(ds2)
+
+        xr.testing.assert_equal(zstore2.get(), ds2)
+
+        zstore1.copy(zstore2)
+
+        xr.testing.assert_equal(zstore1.get(), zstore2.get())
