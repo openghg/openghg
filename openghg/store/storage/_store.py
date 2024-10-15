@@ -6,7 +6,7 @@ from typing import Literal, Protocol, TypeVar
 
 import xarray as xr
 
-from openghg.store.storage._index import StoreIndex, DatetimeStoreIndex
+from openghg.store.storage import StoreIndex, DatetimeStoreIndex
 from openghg.types import DataOverlapError, UpdateError
 
 
