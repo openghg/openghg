@@ -366,5 +366,9 @@ class ZarrStore(Store, Generic[ZST]):
 
 
 def get_zarr_directory_store(path: Path) -> ZarrStore[zarr.DirectoryStore]:
+    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore
+
+    Uses DatetimeStoreIndex for indexing.
+    """
     store = zarr.DirectoryStore(path)
     return ZarrStore[zarr.DirectoryStore](store)
