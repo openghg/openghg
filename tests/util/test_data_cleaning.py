@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.util._data_cleaning import make_default_resampler_dict, resampler, mean_resample, weighted_resample, independent_uncertainties_resample
+from openghg.util._data_cleaning import make_default_resampler_dict, resampler, mean_resample, weighted_resample, independent_uncertainties_resample, default_resampler
 
 rng = np.random.default_rng(seed=196883)
 
@@ -78,12 +78,16 @@ def tac_ds():
     return ds
 
 
+def test_make_default_resampler_dict(mhd_ds, tac_ds):
+    resampler_dict1 = make_default_resampler_dict(mhd_ds, species="ch4")
+    resampler_dict2 = make_default_resampler_dict(tac_ds, species="ch4")
+
+    assert resampler_dict1 == {"independent_uncertainties_resample": ["ch4_repeatability"]}
+    assert resampler_dict2 == {"weighted_resample": ["ch4", "ch4_number_of_observations", "ch4_variability"]}
+
+
 def test_default_resampling_with_repeatability(mhd_ds):
-    resampler_dict = make_default_resampler_dict(mhd_ds, species="ch4")
-
-    assert resampler_dict == {"independent_uncertainties_resample": ["ch4_repeatability"]}
-
-    result = resampler(mhd_ds, resampler_dict, averaging_period="4h", species="ch4")
+    result = default_resampler(mhd_ds, averaging_period="4h", species="ch4")
 
     expected_repeatability = independent_uncertainties_resample(mhd_ds.ch4_repeatability, averaging_period="4h")
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
@@ -93,11 +97,7 @@ def test_default_resampling_with_repeatability(mhd_ds):
 
 
 def test_default_resampling_with_variability(tac_ds):
-    resampler_dict = make_default_resampler_dict(tac_ds, species="ch4")
-
-    assert resampler_dict == {"weighted_resample": ["ch4", "ch4_number_of_observations", "ch4_variability"]}
-
-    result = resampler(tac_ds, resampler_dict, averaging_period="4h", species="ch4")
+    result = default_resampler(tac_ds, averaging_period="4h", species="ch4")
 
     expected = weighted_resample(tac_ds, species="ch4", averaging_period="4h")
     xr.testing.assert_allclose(result, expected)

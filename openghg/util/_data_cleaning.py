@@ -379,3 +379,9 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
         func_dict["independent_uncertainties_resample"] = repeatability_vars
 
     return func_dict
+
+
+def default_resampler(ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True) -> xr.Dataset:
+    """Apply default resampling options."""
+    resampler_dict = make_default_resampler_dict(ds, species)
+    return resampler(ds, resampler_dict, averaging_period=averaging_period, species=species, drop_na=drop_na)
