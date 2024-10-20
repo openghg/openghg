@@ -1,4 +1,8 @@
+import functools
 from functools import partial
+import inspect
+import types
+import typing
 from typing import Callable, cast, overload
 
 import numpy as np
@@ -208,6 +212,25 @@ def independent_uncertainties_resample(
     return result
 
 
+def _first_arg_type(func: Callable, arg_type: type = xr.Dataset) -> bool:
+    """Return True if the first argument of `func` allows parameters of type `arg_type`."""
+    # if function is wrapped by partial, check args of wrapped function
+    if isinstance(func, functools.partial):
+        func = func.func
+
+    ann = next(iter(inspect.get_annotations(func).values()))
+
+    if ann is arg_type:
+        return True
+
+    if typing.get_origin(ann) is types.UnionType:
+        for x in typing.get_args(ann):
+            if x is arg_type:
+                return True
+
+    return False
+
+
 def apply_funcs(
     ds: xr.Dataset,
     funcs: list,
@@ -260,7 +283,12 @@ def apply_funcs(
     results = []
 
     for func, fvars in zip(funcs, func_vars):
-        results.append(func(ds[fvars]))
+        if _first_arg_type(func, xr.Dataset) is True:
+            results.append(func(ds[fvars]))
+        elif _first_arg_type(func, xr.DataArray):
+            results.append(ds[fvars].map(func))
+        else:
+            raise ValueError(f"Function {func} does not accept xr.Datasets or xr.DataArrays")
 
     if remaining_vars:
         if remainder_func is not None:
