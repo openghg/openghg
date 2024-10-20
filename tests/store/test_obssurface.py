@@ -1057,27 +1057,33 @@ def test_optional_metadata():
     assert "project" in rgl_ch4_metadata
 
 
-@pytest.mark.parametrize("filepath, site, instrument, sampling_period, network, inlet, store, source_format, update_mismatch",
-                         [
-                             (get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
-                                                   source_format="openghg"),
-                              "tac", "picarro", "1h", "decc", "185m", "user", "openghg", "from_definition"),
-
-                             (get_surface_datapath("ch4_bao_tower-insitu_1_ccgg_all.nc", "noaa"),
-                              "bao", None, None, "noaa", None, "user", "noaa", "from_source"),
-
-                             (get_surface_datapath("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "icos"),
-                              "rgl", "g2301", None, "icos", None, "user", "icos", "never")
-                         ])
-def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_period, network, inlet, store,
+@pytest.mark.parametrize(
+    "filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch",
+    [
+        (
+            "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+            "tac", "picarro", "1h", "decc", "185m", "openghg", "from_definition"
+        ),
+        (
+            "ch4_bao_tower-insitu_1_ccgg_all.nc",
+            "bao", None, None, "noaa", None, "noaa", "from_source"
+        ),
+        (
+            "ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4",
+            "rgl", "g2301", None, "icos", None, "icos", "never"
+        )
+    ]
+)
+def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_period, network, inlet,
                                source_format, update_mismatch, caplog):
     clear_test_stores()
     bucket = get_writable_bucket(name="user")
 
+    filepath = get_surface_datapath(filepath, source_format=source_format)
     standardised_data = standardise_surface(filepath=filepath, site=site, instrument=instrument, sampling_period=sampling_period, network=network,
-                        inlet=inlet, store=store, source_format=source_format, update_mismatch=update_mismatch)
+                        inlet=inlet, store="user", source_format=source_format, update_mismatch=update_mismatch)
 
-    standardised_data = standardised_data["processed"][str(filepath).split("/")[-1]]
+    standardised_data = standardised_data["processed"][filepath.name]
 
     for species, uuid in standardised_data.items():
         datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
