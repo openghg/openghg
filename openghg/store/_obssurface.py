@@ -364,19 +364,7 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            for _, gas_data in data.items():
-                measurement_data = gas_data["data"]
-                metadata = gas_data["metadata"]
-
-                attrs = measurement_data.attrs
-
-                metadata_aligned, attrs_aligned = sync_surface_metadata(
-                    metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-                )
-
-                gas_data["metadata"] = metadata_aligned
-                gas_data["attributes"] = attrs_aligned
-                measurement_data.attrs = gas_data["attributes"]
+            ObsSurface.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
@@ -698,3 +686,33 @@ class ObsSurface(BaseStore):
 
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
+
+    @staticmethod
+    def align_metadata_attributes(data, update_mismatch):
+        """
+        Function to sync metadata and attributes if mismatch is found
+
+        Args:
+            data: Dictionary of source_name data, metadata, attributes
+            update_mismatch: This determines how mismatches between the internal data
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+        Returns:
+            None
+        """
+        for _, gas_data in data.items():
+            measurement_data = gas_data["data"]
+            metadata = gas_data["metadata"]
+
+            attrs = measurement_data.attrs
+
+            metadata_aligned, attrs_aligned = sync_surface_metadata(
+                metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
+            )
+
+            gas_data["metadata"] = metadata_aligned
+            gas_data["attributes"] = attrs_aligned
+            measurement_data.attrs = gas_data["attributes"]
