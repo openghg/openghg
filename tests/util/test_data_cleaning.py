@@ -3,7 +3,14 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.util._data_cleaning import make_default_resampler_dict, resampler, mean_resample, weighted_resample, independent_uncertainties_resample, default_resampler
+from openghg.util._data_cleaning import (
+    make_default_resampler_dict,
+    resampler,
+    mean_resample,
+    weighted_resample,
+    independent_uncertainties_resample,
+    default_resampler,
+)
 
 rng = np.random.default_rng(seed=196883)
 
@@ -82,18 +89,24 @@ def test_make_default_resampler_dict(mhd_ds, tac_ds):
     resampler_dict1 = make_default_resampler_dict(mhd_ds, species="ch4")
     resampler_dict2 = make_default_resampler_dict(tac_ds, species="ch4")
 
-    assert resampler_dict1 == {"independent_uncertainties_resample": ["ch4_repeatability"]}
+    assert resampler_dict1 == {
+        "independent_uncertainties_resample": ["ch4_repeatability"],
+        "variability_from_mf_std": ["ch4"],
+        "mean_resample": ["ch4"],
+    }
     assert resampler_dict2 == {"weighted_resample": ["ch4", "ch4_number_of_observations", "ch4_variability"]}
 
 
 def test_default_resampling_with_repeatability(mhd_ds):
     result = default_resampler(mhd_ds, averaging_period="4h", species="ch4")
 
-    expected_repeatability = independent_uncertainties_resample(mhd_ds.ch4_repeatability, averaging_period="4h")
+    expected_repeatability = independent_uncertainties_resample(
+        mhd_ds.ch4_repeatability, averaging_period="4h"
+    )
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
-    xr.testing.assert_allclose(result.drop_vars("ch4_repeatability"), expected_others)
+    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability"]), expected_others)
 
 
 def test_default_resampling_with_variability(tac_ds):

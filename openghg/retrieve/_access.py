@@ -13,6 +13,7 @@ from openghg.dataobjects import (
 )
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet, decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.util._data_cleaning import default_resampler
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
 
@@ -358,56 +359,59 @@ def get_obs_surface_local(
         #     # Now sort to get everything in the right order
         #     data = data.sortby("time")
 
-        # First do a mean resample on all variables
-        ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
-        # keep_attrs doesn't seem to work for some reason, so manually copy
-        ds_resampled.attrs = data.attrs.copy()
 
-        average_in_seconds = Timedelta(average).total_seconds()
-        ds_resampled.attrs["averaged_period"] = average_in_seconds
-        ds_resampled.attrs["averaged_period_str"] = average
+        data = default_resampler(data, averaging_period=average, species=species, drop_na=(not keep_missing))
 
-        # For some variables, need a different type of resampling
-        data_variables: list[str] = [str(v) for v in data.variables]
+        # # First do a mean resample on all variables
+        # ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
+        # # keep_attrs doesn't seem to work for some reason, so manually copy
+        # ds_resampled.attrs = data.attrs.copy()
 
-        for var in data_variables:
-            if "repeatability" in var:
-                ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum())
-                    / data[var].resample(time=average).count()
-                )
+        # average_in_seconds = Timedelta(average).total_seconds()
+        # ds_resampled.attrs["averaged_period"] = average_in_seconds
+        # ds_resampled.attrs["averaged_period_str"] = average
 
-            # Copy over some attributes
-            if "long_name" in data[var].attrs:
-                ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
+        # # For some variables, need a different type of resampling
+        # data_variables: list[str] = [str(v) for v in data.variables]
 
-            if "units" in data[var].attrs:
-                ds_resampled[var].attrs["units"] = data[var].attrs["units"]
+        # for var in data_variables:
+        #     if "repeatability" in var:
+        #         ds_resampled[var] = (
+        #             np.sqrt((data[var] ** 2).resample(time=average).sum())
+        #             / data[var].resample(time=average).count()
+        #         )
 
-        # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = (
-            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
-        )
+        #     # Copy over some attributes
+        #     if "long_name" in data[var].attrs:
+        #         ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
 
-        # If there are any periods where only one measurement was resampled, just use the median variability
-        ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
-            f"{species}_variability"
-        ].median()
+        #     if "units" in data[var].attrs:
+        #         ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
-        # Create attributes for variability variable
-        if "long_name" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs[
-                "long_name"
-            ] = f"{data[species].attrs['long_name']}_variability"
+        # # Create a new variability variable, containing the standard deviation within the resampling period
+        # ds_resampled[f"{species}_variability"] = (
+        #     data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        # )
 
-        if "units" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
+        # # If there are any periods where only one measurement was resampled, just use the median variability
+        # ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
+        #     f"{species}_variability"
+        # ].median()
 
-        # Resampling may introduce NaNs, so remove, if not keep_missing
-        if keep_missing is False:
-            ds_resampled = ds_resampled.dropna(dim="time")
+        # # Create attributes for variability variable
+        # if "long_name" in data[species].attrs:
+        #     ds_resampled[f"{species}_variability"].attrs[
+        #         "long_name"
+        #     ] = f"{data[species].attrs['long_name']}_variability"
 
-        data = ds_resampled
+        # if "units" in data[species].attrs:
+        #     ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
+
+        # # Resampling may introduce NaNs, so remove, if not keep_missing
+        # if keep_missing is False:
+        #     ds_resampled = ds_resampled.dropna(dim="time")
+
+        # data = ds_resampled
 
     # Rename variables
     rename: dict[str, str] = {}

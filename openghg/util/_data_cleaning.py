@@ -212,6 +212,28 @@ def independent_uncertainties_resample(
     return result
 
 
+@register
+def variability_from_mf_std(ds: xr.Dataset, averaging_period: str, species: str, fill_zero: bool = True, drop_na: bool = False) -> xr.DataArray:
+    result = ds[species].resample(time=averaging_period).std(keep_attrs=True).rename(f"{species}_variability")
+
+    if fill_zero:
+        result = result.where(result == 0.0, result.median())
+
+    if "long_name" in ds[species].attrs:
+        result.attrs[
+            "long_name"
+        ] = f"{ds[species].attrs['long_name']}_variability"
+
+    if "units" in ds[species].attrs:
+        result.attrs["units"] = ds[species].attrs["units"]
+
+    if drop_na:
+        result = result.dropna("time")
+
+    return result
+
+
+
 def _first_arg_type(func: Callable, arg_type: type = xr.Dataset) -> bool:
     """Return True if the first argument of `func` allows parameters of type `arg_type`."""
     # if function is wrapped by partial, check args of wrapped function
@@ -249,7 +271,8 @@ def apply_funcs(
     variables.
 
     Note: it is possible for a data variables to appear in more than one list in `func_vars`; this
-    variable will have multiple functions applied to it.
+    variable will have multiple functions applied to it. In this case, the function should rename
+    the variables returned to avoid name conflicts.
 
     Args:
         ds: dataset to apply functions to
@@ -337,6 +360,8 @@ def resampler(
     if drop_na:
         result = result.dropna("time")
 
+    add_averaging_attrs(result, averaging_period)
+
     return result
 
 
@@ -347,30 +372,32 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
     func_dict = {}
     data_vars = [str(dv) for dv in ds.data_vars]
 
+    # try to guess species if not set
+    if species is None:
+        try:
+            species = _guess_species(ds)
+        except ValueError:
+            pass
+
     # see if we have number of observations, so we can do weighted resampling
     possible_n_obs = [dv for dv in data_vars if "number_of_observations" in dv]
 
-    if possible_n_obs:
-        # we need to know the species to do a weighted resample
-        # try to guess species if not set
-        if species is None:
-            try:
-                species = _guess_species(ds)
-            except ValueError:
-                pass
+    variability_set = False
 
-        if species is not None and species in data_vars:
-            n_obs = possible_n_obs[0]
-            data_vars.remove(n_obs)
-            data_vars.remove(species)
+    if possible_n_obs and species is not None and species in data_vars:
+        n_obs = possible_n_obs[0]
+        data_vars.remove(n_obs)
+        data_vars.remove(species)
 
-            weighted_vars = [species, n_obs]
+        weighted_vars = [species, n_obs]
 
-            if f"{species}_variability" in data_vars:
-                weighted_vars.append(f"{species}_variability")
-                data_vars.remove(f"{species}_variability")
+        if f"{species}_variability" in data_vars:
+            weighted_vars.append(f"{species}_variability")
+            data_vars.remove(f"{species}_variability")
 
-            func_dict["weighted_resample"] = weighted_vars
+        func_dict["weighted_resample"] = weighted_vars
+
+        variability_set = True
 
     # now check for repeatability
     repeatability_vars = [dv for dv in data_vars if "repeatability" in dv]
@@ -378,10 +405,30 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
     if repeatability_vars:
         func_dict["independent_uncertainties_resample"] = repeatability_vars
 
+        for dv in repeatability_vars:
+            data_vars.remove(dv)
+
+    if not variability_set and species is not None and species in data_vars:
+        func_dict["variability_from_mf_std"] = [species]
+
+        if f"{species}_variability" in data_vars:
+            data_vars.remove(f"{species}_variability")
+
+        # since species is mapped to species_variability, it will not be mean resampled by `resampler` by default
+        func_dict["mean_resample"] = [species]
+        data_vars.remove(species)
+
     return func_dict
 
 
 def default_resampler(ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True) -> xr.Dataset:
-    """Apply default resampling options."""
+    """Apply default resampling options.
+
+    Keeps attributes from original dataset.
+    """
     resampler_dict = make_default_resampler_dict(ds, species)
     return resampler(ds, resampler_dict, averaging_period=averaging_period, species=species, drop_na=drop_na)
+
+
+def old_resampler(ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True) -> xr.Dataset:
+    pass
