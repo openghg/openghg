@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast, AnyStr
+from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from pandas import Timedelta
