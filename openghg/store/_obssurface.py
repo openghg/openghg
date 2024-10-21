@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast
+from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast, AnyStr
 
 import numpy as np
 from pandas import Timedelta
@@ -688,7 +688,7 @@ class ObsSurface(BaseStore):
         self._file_hashes[file_hash] = filename
 
     @staticmethod
-    def align_metadata_attributes(data: dict, update_mismatch: str):
+    def align_metadata_attributes(data: Dict, update_mismatch: str) -> None:
         """
         Function to sync metadata and attributes if mismatch is found
 
