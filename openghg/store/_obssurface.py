@@ -688,7 +688,7 @@ class ObsSurface(BaseStore):
         self._file_hashes[file_hash] = filename
 
     @staticmethod
-    def align_metadata_attributes(data, update_mismatch):
+    def align_metadata_attributes(data: dict, update_mismatch: str):
         """
         Function to sync metadata and attributes if mismatch is found
 
