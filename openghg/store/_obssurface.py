@@ -364,7 +364,7 @@ class ObsSurface(BaseStore):
                 for key, value in data.items():
                     data[key]["data"] = value["data"].chunk(chunks)
 
-            ObsSurface.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+            self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
@@ -687,8 +687,7 @@ class ObsSurface(BaseStore):
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
 
-    @staticmethod
-    def align_metadata_attributes(data: Dict, update_mismatch: str) -> None:
+    def align_metadata_attributes(self, data: Dict, update_mismatch: str) -> None:
         """
         Function to sync metadata and attributes if mismatch is found
 
