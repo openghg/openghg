@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.10.1...HEAD)
 
+### Fixed
+
+- Fixed options used with `xr.Dataset.to_zarr` in reponse to updates in xarray. [PR #1160](https://github.com/openghg/openghg/pull/1160)
+
 ### Added
 
 - Removed parsers that are unused. [PR #1129](https://github.com/openghg/openghg/pull/1129)
@@ -15,10 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Updated ICOS standardise function to reflect changes in ASCII file format. [PR #1140](https://github.com/openghg/openghg/pull/1140)
-
-
-### Updated
-
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
 
