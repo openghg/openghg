@@ -231,6 +231,7 @@ class ZarrStore(Store, Generic[ZST]):
                 consolidated=True,
                 compute=True,
                 synchronizer=zarr.ThreadSynchronizer(),
+                safe_chunks=False,
             )
 
     def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
