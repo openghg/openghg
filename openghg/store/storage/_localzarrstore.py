@@ -159,15 +159,29 @@ class LocalZarrStore(Store):
             if chunking:
                 dataset = dataset.chunk(chunking)
 
-            dataset.to_zarr(
-                store=self._stores[version],
-                mode="a",
-                consolidated=True,
-                append_dim=append_dim,
-                compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),
-                safe_chunks=False,
-            )
+            try: 
+                dataset.to_zarr(
+                    store=self._stores[version],
+                    mode="w",
+                    encoding=encoding,
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                )
+            except ValueError as v:
+                if ('Zarr requires uniform chunk sizes except for final chunk.' in str(v)) \
+                    and dataset.attrs['time_period']=='1 hour':
+                    dataset.chunk({'time':'M'}).to_zarr(
+                        store=self._stores[version],
+                        mode="w",
+                        encoding=encoding,
+                        consolidated=True,
+                        compute=True,
+                        synchronizer=zarr.ThreadSynchronizer(),
+                    )
+                    pass
+                else :
+                    raise v
         # Otherwise we create a new zarr Store for the version
         else:
             if not self._stores and version != "v1":
