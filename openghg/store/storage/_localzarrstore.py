@@ -11,9 +11,31 @@ from openghg.types import ZarrStoreError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
 from openghg.store.storage import VersionedStore
+from openghg.store.storage._store import get_zarr_directory_store, ZarrStore
+from openghg.store.storage._versioned_store import SimpleVersionedStore
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
+
+ZarrDirStore = ZarrStore[zarr.DirectoryStore]
+
+
+def get_local_zarr_store(bucket: str, datasource_uuid: str) -> SimpleVersionedStore[ZarrDirStore]:
+    root_store_key = f"data/{datasource_uuid}/zarr"
+    stores_path = Path(bucket, root_store_key).expanduser().resolve()
+
+    if not stores_path.exists():
+        versions = None
+    else:
+        pat = re.compile(r"v\d+")
+        versions = [p.name for p in sorted(stores_path.iterdir()) if pat.match(p.name)]
+
+    def store_factory(version: str) -> ZarrDirStore:
+        return get_zarr_directory_store(stores_path / version)
+
+    return SimpleVersionedStore[ZarrDirStore](store_factory, versions)
+
+
 
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 

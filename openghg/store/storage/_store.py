@@ -39,6 +39,8 @@ class Store(ABC):
         """Return True is Store is not empty."""
         ...
 
+    # TODO: need str and repr
+
     @abstractmethod
     def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
         """Insert an xr.Dataset to the store.
@@ -94,7 +96,8 @@ class Store(ABC):
     @abstractmethod
     def get(self) -> xr.Dataset:
         """Return the stored data."""
-        ...
+        if not self.__bool__():
+            return xr.Dataset()  # TODO: should this raise an error instead?
 
     @abstractmethod
     def clear(self) -> None:
@@ -163,9 +166,8 @@ class MemoryStore(Store):
             self.data.update(data_conflicts)
 
     def get(self) -> xr.Dataset:
-        if self.data is None:
-            return xr.Dataset()
-        return self.data
+        super().get()  # empty data case
+        return self.data  # type: ignore
 
 
 ZST = TypeVar("ZST", bound=AbstractZarrStore)
@@ -202,6 +204,7 @@ class ZarrStore(Store, Generic[ZST]):
         self.store.rmdir()
 
     def get(self) -> xr.Dataset:
+        super().get()  # case for empty store
         return xr.open_zarr(self.store, consolidated=True).sortby(
             "time"
         )  # need to sort to be consistent with MemoryStore
@@ -247,6 +250,7 @@ class ZarrStore(Store, Generic[ZST]):
                     consolidated=True,
                     compute=True,
                     synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
                 )
             except ValueError as e:
                 # possible issue with non-contiguous data
@@ -267,6 +271,7 @@ class ZarrStore(Store, Generic[ZST]):
                             consolidated=True,
                             compute=True,
                             synchronizer=zarr.ThreadSynchronizer(),
+                            safe_chunks=False,
                         )
                     )
                     delayed.append(res)
