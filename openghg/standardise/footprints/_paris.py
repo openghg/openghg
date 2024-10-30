@@ -66,8 +66,36 @@ def parse_paris(
         time_resolved = high_time_resolution
 
     xr_open_fn, filepath = check_function_open_nc(filepath)
+    try:
+        fp_data = xr_open_fn(filepath)
+    except ValueError as v :
+        if not 'Resulting object does not have monotonic global indexes along dimension' in str(v):
+            raise v
 
-    fp_data = xr_open_fn(filepath)
+        import xarray as xr
+        import numpy as np
+        from openghg.util import align_lat_lon
+        new_filepath = list()
+        for file_name in filepath:
+            with xr.open_dataset(file_name) as ds:
+                ds_tmp = ds.rename({'longitude':'lon',
+                                    'latitude':'lat'})
+            lon,lat = ds_tmp.lon.values,ds_tmp.lat.values
+            ds_realigned = align_lat_lon(ds_tmp,domain)
+            lon_domain,lat_domain = ds_realigned.lon.values,ds_realigned.lat.values
+            if np.sum(lon-lon_domain)!=0 or np.sum(lat-lat_domain)!=0 :
+                split_file_name = file_name.split('/')
+                split_file_name[-1] = 'tmp_'+split_file_name[-1]
+                tmp_file_name = '/'.join(split_file_name)
+                ds_realigned.rename({'lon':'longitude',
+                                     'lat':'latitude'}
+                                     ).to_netcdf(tmp_file_name)
+                new_filepath.append(tmp_file_name)
+            else :
+                new_filepath.append(file_name)
+        filepath = new_filepath 
+        fp_data = xr_open_fn(filepath)
+        pass
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
