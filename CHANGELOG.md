@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed parsers that are unused. [PR #1129](https://github.com/openghg/openghg/pull/1129)
 - Added `data_owner` and `inlet_height_magl` as attributes to parse_icos. [PR #1147](https://github.com/openghg/openghg/pull/1147)
+- Align the dataset(s) when opening the data while standardising footprints data to prevent error due to misalign coordinates. [PR #1164](https://github.com/openghg/openghg/pull/1164)
 
 ### Updated
 
