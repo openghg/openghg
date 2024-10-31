@@ -65,7 +65,7 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    fp_data, filepath = open_and_align_dataset(filepath,domain)
+    fp_data, filepath = open_and_align_dataset(filepath, domain)
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)

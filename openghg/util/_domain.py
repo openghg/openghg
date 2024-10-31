@@ -280,11 +280,11 @@ def cut_data_extent(
 
 def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrDataLikeMatch:
     """
-    Check that the values of a given coordinate (lat/lon or latitude/longitude) in 
-    spatial data matches the openghg_defs values for that domain. If they don't match 
-    roughly (i.e. within 5%), an exception is raised to alert the user to the fact that 
-    they may have the wrong domain altogether. An exception is also raised if the length 
-    of the arrays don't match. If the lat or lon don't match exactly, the old coordinates 
+    Check that the values of a given coordinate (lat/lon or latitude/longitude) in
+    spatial data matches the openghg_defs values for that domain. If they don't match
+    roughly (i.e. within 5%), an exception is raised to alert the user to the fact that
+    they may have the wrong domain altogether. An exception is also raised if the length
+    of the arrays don't match. If the lat or lon don't match exactly, the old coordinates
     are replaced with the 'correct' values from openghg_defs.
 
     If the domain is not one of the domains listed in openghg_defs
@@ -343,14 +343,16 @@ def align_lat_lon(data: XrDataLikeMatch, domain: str) -> XrDataLikeMatch:
     Returns:
         xarray.DataArray / xarray.Dataset: data with lat, lon ranges aligned to openghg domain.
     """
-    dims =  list(data.sizes.keys())
-    if 'longitude' in dims and 'latitude' in dims:
+    dims = list(data.sizes.keys())
+    if "longitude" in dims and "latitude" in dims:
         data = check_coord_alignment(data=data, domain=domain, coord="latitude")
         data = check_coord_alignment(data=data, domain=domain, coord="longitude")
-    elif 'lon' in dims and 'lat' in dims:
+    elif "lon" in dims and "lat" in dims:
         data = check_coord_alignment(data=data, domain=domain, coord="lat")
         data = check_coord_alignment(data=data, domain=domain, coord="lon")
     else:
-        raise ValueError('Dimensions "lon" and "lat" (or "longitude" and "latitude") could not be found in dataset.')
+        raise ValueError(
+            'Dimensions "lon" and "lat" (or "longitude" and "latitude") could not be found in dataset.'
+        )
 
     return data
