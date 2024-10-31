@@ -8,7 +8,7 @@ from addict import Dict as aDict
 from openghg.standardise.meta import (
     assign_attributes,
     define_species_label,
-    metadata_default_keys,
+    attributes_default_keys,
     dataset_formatter,
 )
 from openghg.types import optionalPathType
@@ -227,13 +227,13 @@ def _format_species(
         if "instrument" in attributes.keys():
             attributes["instrument_name"] = attributes.pop("instrument")
 
-        metadata_keys = metadata_default_keys()
+        attribute_keys = attributes_default_keys()
 
         # JP hack to stop instrument getting overwritten for multi-instrument files
         # instrument = metadata["instrument"]
 
         for k, v in attributes.items():
-            if k in metadata_keys:
+            if k in attribute_keys:
                 metadata[k] = v
 
         attributes["inlet_height_magl"] = species_metadata["inlet_height_magl"]

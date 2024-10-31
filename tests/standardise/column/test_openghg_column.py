@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from helpers import get_column_datapath  # , parsed_surface_metachecker, check_cf_compliance
 from openghg.standardise.column import parse_openghg
-from openghg.standardise.meta import metadata_default_keys
+from openghg.standardise.meta import attributes_default_keys
 from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -94,7 +94,7 @@ def test_read_file():
 #     assert attributes["site"] == param["site"]
 #     assert attributes["species"] == param["species"]
 
-#     metadata_keys = metadata_default_keys()
+#     metadata_keys = attributes_default_keys()
 #     expected_metadata = {param: value for param, value in attributes.items() if param in metadata_keys}
 
 #     metadata = output_co2["metadata"]

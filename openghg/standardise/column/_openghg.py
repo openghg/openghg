@@ -59,7 +59,7 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    # from openghg.standardise.meta import metadata_default_keys, assign_attributes
+    # from openghg.standardise.meta import attributes_default_keys, assign_attributes
 
     filepath = Path(filepath)
 

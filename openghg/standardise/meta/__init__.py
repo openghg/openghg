@@ -6,4 +6,4 @@ from ._attributes import (
     dataset_formatter,
     data_variable_formatter,
 )
-from ._metadata import metadata_default_keys, sync_surface_metadata
+from ._metadata import attributes_default_keys, sync_surface_metadata
