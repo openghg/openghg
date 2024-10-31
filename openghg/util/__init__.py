@@ -31,7 +31,7 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    check_function_open_nc,
+    open_and_align_dataset,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string

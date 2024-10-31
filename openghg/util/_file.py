@@ -1,5 +1,6 @@
 import bz2
 import json
+import xarray as xr
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
@@ -247,27 +248,32 @@ def get_logfile_path() -> Path:
         return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
+def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dataset, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
      - multiple item List - use open_mfdataset
+    then open the dataset and align the data with the domain spatial coordinates
 
     Args:
         filepath: Path or list of filepaths
+        domain: domain of dataset
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    import xarray as xr
+    from openghg.util import align_lat_lon
 
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn: Callable = xr.open_mfdataset
+            ds = xr.open_mfdataset(filepath,
+                                   preprocess = lambda x : align_lat_lon(x,domain))
         else:
-            xr_open_fn = xr.open_dataset
             filepath = filepath[0]
+            ds = xr.open_dataset(filepath)
+            ds = align_lat_lon(ds,domain)
     else:
-        xr_open_fn = xr.open_dataset
+        ds = xr.open_dataset(filepath)
+        ds = align_lat_lon(ds,domain)
 
-    return xr_open_fn, filepath
+    return ds,filepath
