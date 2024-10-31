@@ -159,7 +159,23 @@ class LocalZarrStore(Store):
             if chunking:
                 dataset = dataset.chunk(chunking)
 
-            try: 
+            dataset.to_zarr(
+                    store=self._stores[version],
+                    mode="a",
+                    consolidated=True,
+                    append_dim=append_dim,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+        # Otherwise we create a new zarr Store for the version
+        else:
+            if not self._stores and version != "v1":
+                raise ValueError("First version must be v1")
+
+            self._stores[version] = zarr.storage.DirectoryStore(self.store_path(version=version))
+            encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
+            try :
                 dataset.to_zarr(
                     store=self._stores[version],
                     mode="w",
@@ -170,7 +186,7 @@ class LocalZarrStore(Store):
                 )
             except ValueError as v:
                 if ('Zarr requires uniform chunk sizes except for final chunk.' in str(v)) \
-                    and dataset.attrs['time_period']=='1 hour':
+                     and dataset.attrs['time_period']=='1 hour':
                     dataset.chunk({'time':'M'}).to_zarr(
                         store=self._stores[version],
                         mode="w",
@@ -179,24 +195,6 @@ class LocalZarrStore(Store):
                         compute=True,
                         synchronizer=zarr.ThreadSynchronizer(),
                     )
-                    pass
-                else :
-                    raise v
-        # Otherwise we create a new zarr Store for the version
-        else:
-            if not self._stores and version != "v1":
-                raise ValueError("First version must be v1")
-
-            self._stores[version] = zarr.storage.DirectoryStore(self.store_path(version=version))
-            encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
-            dataset.to_zarr(
-                store=self._stores[version],
-                mode="w",
-                encoding=encoding,
-                consolidated=True,
-                compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),
-            )
 
     def get(self, version: str) -> xr.Dataset:
         """Get the version of the dataset stored in the zarr store.
