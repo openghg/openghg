@@ -5,13 +5,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
+from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath, metadata_checker_obssurface
 from openghg.objectstore import (
     exists,
     get_bucket,
     get_object_from_json,
     get_writable_bucket,
     set_object_from_json,
+    get_readable_buckets
 )
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_obs_surface, search_surface
@@ -26,6 +27,56 @@ from pandas import Timestamp
 def bucket():
     return get_bucket()
 
+@pytest.fixture
+def min_uuids_fixture():
+    clear_test_stores()
+
+    one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    one_min_res = standardise_surface(
+        store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
+    )
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    return min_uuids
+
+
+@pytest.fixture
+def hourly_uuids_fixture():
+
+    one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
+    one_hour_res = standardise_surface(
+        store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
+    )
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    return hour_uuids
+
+
+def test_different_sampling_periods_diff_datasources(min_uuids_fixture, hourly_uuids_fixture):
+
+    min_uuids = min_uuids_fixture
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    hour_uuids = hourly_uuids_fixture
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
+def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
+    """
+    Tests metadata and attributes are as expected, applied after sync_surface_metadata shifted to store level
+    """
+    bucket = get_writable_bucket(name="user")
+    min_uuids = min_uuids_fixture
+    for species, uuid in min_uuids.items():
+        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
+        with datasource.get_data(version="latest") as data:
+            assert attributes_checker_obssurface(data.attrs, species=species)
 
 def test_raising_error_doesnt_save_to_store(mocker, bucket):
     clear_test_stores()
@@ -52,27 +103,6 @@ def test_raising_error_doesnt_save_to_store(mocker, bucket):
 
     assert not exists(bucket=bucket, key=key)
 
-
-def test_different_sampling_periods_diff_datasources():
-    clear_test_stores()
-
-    one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
-    one_min_res = standardise_surface(
-        store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
-    )
-
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
-    for sp, data in min_uuids.items():
-        assert data["new"] is True
-
-    one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
-    one_hour_res = standardise_surface(
-        store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
-    )
-
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
-    for sp, data in hour_uuids.items():
-        assert data["new"] is True
 
 
 def test_same_source_data_same_datasource():
@@ -109,6 +139,8 @@ def test_same_source_data_same_datasource():
 
     assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
     assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
+
+
 
 
 def test_read_data(mocker):
@@ -416,6 +448,9 @@ def test_read_noaa_raw(bucket):
         assert co_data["co"][-1] == pytest.approx(73.16)
         assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
         assert co_data["co_selection_flag"][-1] == pytest.approx(0)
+
+        attributes_checker_obssurface(attrs=co_data.attrs, species="co")
+
 
 
 def test_read_noaa_metastorepack(bucket):
@@ -1020,3 +1055,39 @@ def test_optional_metadata():
     rgl_ch4_metadata = rgl_ch4.metadata
 
     assert "project" in rgl_ch4_metadata
+
+
+@pytest.mark.parametrize(
+    "filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch",
+    [
+        (
+            "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+            "tac", "picarro", "1h", "decc", "185m", "openghg", "from_definition"
+        ),
+        (
+            "ch4_bao_tower-insitu_1_ccgg_all.nc",
+            "bao", None, None, "noaa", None, "noaa", "from_source"
+        ),
+        (
+            "ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4",
+            "rgl", "g2301", None, "icos", None, "icos", "never"
+        )
+    ]
+)
+def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_period, network, inlet,
+                               source_format, update_mismatch, caplog):
+    clear_test_stores()
+    bucket = get_writable_bucket(name="user")
+
+    filepath = get_surface_datapath(filepath, source_format=source_format)
+    standardised_data = standardise_surface(filepath=filepath, site=site, instrument=instrument, sampling_period=sampling_period, network=network,
+                        inlet=inlet, store="user", source_format=source_format, update_mismatch=update_mismatch)
+
+    standardised_data = standardised_data["processed"][filepath.name]
+
+    for species, uuid in standardised_data.items():
+        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
+        with datasource.get_data(version="latest") as data:
+            assert attributes_checker_obssurface(data.attrs, species=species)

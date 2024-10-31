@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed parsers that are unused. [PR #1129](https://github.com/openghg/openghg/pull/1129)
 - Added `data_owner` and `inlet_height_magl` as attributes to parse_icos. [PR #1147](https://github.com/openghg/openghg/pull/1147)
+- Moved `sync_surface_metadata` to ObsSurface.read_file function so this is applied for all input data regardless of source_format. [PR #1138](https://github.com/openghg/openghg/pull/1138)
 
 ### Updated
 

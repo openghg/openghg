@@ -152,8 +152,6 @@ def test_read_file_site_filepath_read(scsn06_data):
     assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
     assert ch4_data["ch4_selection_flag"][0] == 0
 
-    parsed_surface_metachecker(data=scsn06_data)
-
     expected_attrs = {
         "station_longitude": 107.0,
         "station_latitude": 6.0,
@@ -181,8 +179,6 @@ def test_read_raw_file():
         filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
-    parsed_surface_metachecker(data=data)
-
     co_data = data["co"]["data"]
 
     assert co_data.time[0] == Timestamp("1990-06-29T05:00:00")
@@ -194,11 +190,6 @@ def test_read_raw_file():
     assert co_data["co"][-1] == pytest.approx(73.16)
     assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
     assert co_data["co_selection_flag"][-1] == 0
-
-    attrs = co_data.attrs
-
-    assert attributes_checker_obssurface(attrs=attrs, species="co")
-
 
 def test_read_incorrect_site_raises():
     filepath = get_surface_datapath(
