@@ -73,6 +73,10 @@ class StoreIndex(ABC):
             nonconflicts = self.nonconflicts(ds)
         return nonconflicts.select(ds)  # type:ignore
 
+    @abstractmethod
+    def to_array(self) -> np.ndarray:
+        ...
+
 
 class DatetimeStoreIndex(StoreIndex):
     """Store index based on pd.DatetimeIndex."""
@@ -113,6 +117,9 @@ class DatetimeStoreIndex(StoreIndex):
 
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
+
+    def to_array(self) -> np.ndarray:
+        return self.index.values
 
 
 class FloorDatetimeStoreIndex(StoreIndex):
@@ -185,3 +192,6 @@ class FloorDatetimeStoreIndex(StoreIndex):
         self_intersection = self.index[self_floored_intersection_idxs]
 
         return ds_restricted.assign_coords(time=self_intersection)
+
+    def to_array(self) -> np.ndarray:
+        return self.index.values

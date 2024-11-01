@@ -21,8 +21,7 @@ ZarrDirStore = ZarrStore[zarr.DirectoryStore]
 
 
 def get_local_zarr_store(bucket: str, datasource_uuid: str) -> SimpleVersionedStore[ZarrDirStore]:
-    root_store_key = f"data/{datasource_uuid}/zarr"
-    stores_path = Path(bucket, root_store_key).expanduser().resolve()
+    stores_path = (Path(bucket) / "data" / datasource_uuid / "zarr").expanduser().resolve()
 
     if not stores_path.exists():
         versions = None

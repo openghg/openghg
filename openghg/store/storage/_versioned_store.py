@@ -34,7 +34,7 @@ class VersionedStoreNew(Store, Generic[VersionType]):
         ...
 
     @abstractmethod
-    def create_version(self, v: VersionType | None = None, checkout: bool = False) -> None:
+    def create_version(self, v: VersionType | None = None, checkout: bool = False, copy_current: bool = True) -> None:
         """Create new version.
 
         Initially, the new version will contain the same data as the current version.
@@ -42,6 +42,7 @@ class VersionedStoreNew(Store, Generic[VersionType]):
         Args:
             v: tag for new version. If not specified, one will be created.
             checkout: if True, checkout the newly created version.
+            copy_current: if True, copy current version into new version.
 
         Raises:
             ValueError if specfied version already exists.
