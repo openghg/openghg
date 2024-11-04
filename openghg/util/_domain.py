@@ -343,7 +343,7 @@ def align_lat_lon(data: XrDataLikeMatch, domain: str) -> XrDataLikeMatch:
     Returns:
         xarray.DataArray / xarray.Dataset: data with lat, lon ranges aligned to openghg domain.
     """
-    dims = list(data.sizes.keys())
+    dims = data.dims
     if "longitude" in dims and "latitude" in dims:
         data = check_coord_alignment(data=data, domain=domain, coord="latitude")
         data = check_coord_alignment(data=data, domain=domain, coord="longitude")
