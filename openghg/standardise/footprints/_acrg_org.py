@@ -9,7 +9,8 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    open_and_align_dataset,
+    # open_and_align_dataset,
+    check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType, ParseError
@@ -65,7 +66,10 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    fp_data, filepath = open_and_align_dataset(filepath, domain)
+    # fp_data, filepath = open_and_align_dataset(filepath, domain)
+    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
+
+    fp_data = xr_open_fn(filepath)
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)

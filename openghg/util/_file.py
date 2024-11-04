@@ -248,12 +248,40 @@ def get_logfile_path() -> Path:
         return Path("/tmp/openghg.log")
 
 
-def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dataset, multiPathType]:
+# def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dataset, multiPathType]:
+#     """
+#     Check the filepath input to choose which xarray open function to use:
+#      - Path or single item List - use open_dataset
+#      - multiple item List - use open_mfdataset
+#     then open the dataset and align the data with the domain spatial coordinates
+
+#     Args:
+#         filepath: Path or list of filepaths
+#         domain: domain of dataset
+#     Returns:
+#         Callable, Union[Path, List[Path]]: function and suitable filepath
+#             to use with the function.
+#     """
+#     from openghg.util import align_lat_lon
+
+#     if isinstance(filepath, list):
+#         if len(filepath) > 1:
+#             ds = xr.open_mfdataset(filepath, preprocess=lambda x: align_lat_lon(x, domain))
+#         else:
+#             filepath = filepath[0]
+#             ds = xr.open_dataset(filepath) # type: ignore
+#             ds = align_lat_lon(ds, domain)
+#     else:
+#         ds = xr.open_dataset(filepath) # type: ignore 
+#         ds = align_lat_lon(ds, domain)
+
+#     return ds, filepath
+
+def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
      - multiple item List - use open_mfdataset
-    then open the dataset and align the data with the domain spatial coordinates
 
     Args:
         filepath: Path or list of filepaths
@@ -262,17 +290,17 @@ def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dat
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
+    import xarray as xr
+    from functools import partial
     from openghg.util import align_lat_lon
 
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            ds = xr.open_mfdataset(filepath, preprocess=lambda x: align_lat_lon(x, domain))
+            xr_open_fn : Callable = partial(xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, domain))
         else:
+            xr_open_fn = lambda x : align_lat_lon(xr.open_dataset(x), domain)
             filepath = filepath[0]
-            ds = xr.open_dataset(filepath) # type: ignore
-            ds = align_lat_lon(ds, domain)
     else:
-        ds = xr.open_dataset(filepath) # type: ignore 
-        ds = align_lat_lon(ds, domain)
+        xr_open_fn = lambda x : align_lat_lon(xr.open_dataset(x), domain)
 
-    return ds, filepath
+    return xr_open_fn, filepath
