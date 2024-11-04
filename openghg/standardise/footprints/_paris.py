@@ -88,7 +88,7 @@ def parse_paris(
         logger.exception(msg)
         raise ParseError(msg)
 
-    fp_data = fp_data.rename(**dim_rename)
+    fp_data = fp_data.rename(dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
 

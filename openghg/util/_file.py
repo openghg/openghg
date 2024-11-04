@@ -269,10 +269,10 @@ def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dat
             ds = xr.open_mfdataset(filepath, preprocess=lambda x: align_lat_lon(x, domain))
         else:
             filepath = filepath[0]
-            ds = xr.open_dataset(filepath)
+            ds = xr.open_dataset(filepath) # type: ignore
             ds = align_lat_lon(ds, domain)
     else:
-        ds = xr.open_dataset(filepath)
+        ds = xr.open_dataset(filepath) # type: ignore 
         ds = align_lat_lon(ds, domain)
 
     return ds, filepath
