@@ -1,11 +1,13 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Hashable, Optional, Union, cast
+from typing import Dict, Optional, Union
 import xarray as xr
 
-from openghg.standardise.meta import dataset_formatter
 from openghg.types import optionalPathType
-from openghg.util import check_and_set_null_variable, not_set_metadata_values
+from openghg.standardise.meta import (
+    assign_attributes,
+    dataset_formatter,
+)
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -44,3 +46,45 @@ def parse_co2_games(
     Returns:
         dict: Dictionary of data and metadata
     """
+
+    list_of_models = ["BASE", "PTEN", "ATEN", "HGER", "HFRA", "DFIN"]
+
+    gas_data = {}
+
+    with xr.open_dataset(filepath) as dataset:
+        # Use dictionary comprehension to split data variables into individual datasets
+        attributes = dataset.attrs
+        metadata = {"site": attributes["site_code"],
+                    "species": "co2",
+                    "inlet": attributes["dataset_intake_ht"],
+                    "inlet_height_magl": attributes["dataset_intake_ht"],
+                    "network": network,
+                    "instrument": "NOT_SET",
+                    "sampling_period": attributes["dataset_data_frequency_unit"],
+                    "calibration_scale": attributes["dataset_calibration_scale"],
+                    "data_owner": "NOT_SET",
+                    "data_owner_email": "NOT_SET",
+                    "station_longitude": attributes["site_longitude"],
+                    "station_latitude": attributes["site_latitude"],
+                    "station_long_name": attributes["site_name"],
+                    "station_height_masl": attributes["site_elevation"],
+                    "measurement_type": measurement_type}
+
+        gas_dataset = {f"co2_{model}": dataset[[model]] for model in list_of_models}
+        for model in gas_dataset.keys():
+            data_var = list(gas_dataset[model].data_vars.keys())[0]
+            metadata["dataset_source"] = model
+            gas_data[model] = {}
+            gas_data[model]["data"] = gas_dataset[model].rename({data_var: "co2"})
+            gas_data[model]["metadata"] = metadata
+            gas_data[model]["attributes"] = attributes
+
+        # Formats data variables typos
+        gas_data = dataset_formatter(data=gas_data)
+
+        # Assign attributes to the data for CF compliant NetCDFs
+        gas_data = assign_attributes(
+            data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
+        )
+
+        return gas_data

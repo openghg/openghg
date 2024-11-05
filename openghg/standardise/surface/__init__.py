@@ -6,3 +6,4 @@ from ._noaa import parse_noaa
 from ._npl import parse_npl
 from ._openghg import parse_openghg
 from ._agage import parse_agage
+from ._co2_games import parse_co2_games
