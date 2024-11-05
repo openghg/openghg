@@ -6,12 +6,16 @@ the object store.
 import logging
 from typing import Any, Optional, Union
 import warnings
+
+import pandas as pd
+
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
+from openghg.dataobjects._data_object import DataObject
 from ._search_helpers import process_search_kwargs
 
 logger = logging.getLogger("openghg.retrieve")
@@ -597,39 +601,17 @@ def _base_search(**kwargs: Any) -> SearchResults:
         # Here we create a dictionary of the metadata keyed by the Datasource UUID
         # we'll create a pandas DataFrame out of this in the SearchResult object
         # for better printing / searching within a notebook
-        metadata = {r["uuid"]: r for r in metastore_records}
-        # Add in the object store to the metadata the user sees
-        for m in metadata.values():
-            m.update({"object_store": bucket})
+        for r in metastore_records:
+            r["object_store"] = bucket
+
+        metadata = {r["uuid"]: DataObject(r) for r in metastore_records}
 
         # Narrow the search to a daterange if dates passed
-        if start_date is not None or end_date is not None:
-            if start_date is None:
-                start_date = timestamp_epoch()
-            else:
-                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
-
-            if end_date is None:
-                end_date = timestamp_now()
-            else:
-                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
-
-            metadata_in_daterange = {}
-
-            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
-            for uid, record in metadata.items():
-                meta_start = record["start_date"]
-                meta_end = record["end_date"]
-
-                if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
-                    metadata_in_daterange[uid] = record
-
-            if not metadata_in_daterange:
-                logger.warning(
-                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
-                )
-            # Update the metadata we'll use to create the SearchResults object
-            metadata = metadata_in_daterange
+        metadata = {uuid: meta for uuid, meta in metadata.items() if meta.has_data_between(start_date, end_date)}
+        if not metadata:
+            logger.warning(
+                f"No data found for the dates given in the {bucket_name} store, please try a wider search."
+            )
 
         # Remove once more comprehensive tests are done
         dupe_uuids = [k for k in metadata if k in general_metadata]
@@ -637,6 +619,17 @@ def _base_search(**kwargs: Any) -> SearchResults:
             raise ObjectStoreError("Duplicate UUIDs found between buckets.")
 
         general_metadata.update(metadata)
+
+    if start_date is not None or end_date is not None:
+        if start_date is None:
+            start_date = timestamp_epoch()
+        else:
+            start_date = timestamp_tzaware(start_date) + pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
+
+        if end_date is None:
+            end_date = timestamp_now()
+        else:
+            end_date = timestamp_tzaware(end_date) - pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
 
     return SearchResults(
         metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date

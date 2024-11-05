@@ -1,5 +1,6 @@
 from datetime import date
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
+import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
 import re
@@ -75,7 +76,11 @@ def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     """
 
     if not isinstance(timestamp, Timestamp):
-        timestamp = Timestamp(timestamp)
+        _timestamp = Timestamp(timestamp)
+        if pd.isnull(_timestamp):  # type: ignore
+            raise ValueError(f"{timestamp} could not be converted to Timestamp.")
+        else:
+            timestamp = cast(pd.Timestamp, _timestamp)
 
     if timestamp.tzinfo is None:
         return timestamp.tz_localize(tz="UTC")
