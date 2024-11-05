@@ -88,9 +88,14 @@ def sync_surface_metadata(
     }
 
     for key, options in mismatch_keys.items():
-        if update_mismatch.lower() in options:
-            update_mismatch = key.lower()
-            break
+        try:
+            if update_mismatch.lower() in options:
+                update_mismatch = key.lower()
+                break
+        except AttributeError:
+            raise ValueError(
+                f"Input for 'update_mismatch' must be a string and should be one of {mismatch_keys}"
+            )
     else:
         raise ValueError(f"Input for 'update_mismatch' should be one of {mismatch_keys}")
 

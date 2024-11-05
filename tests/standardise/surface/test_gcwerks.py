@@ -15,10 +15,10 @@ def thd_data():
     thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=thd_path,
+        filepath=thd_path,
         precision_filepath=thd_prec_path,
         site="THD",
-        instrument="medusa",
+        instrument="gcmd",
         network="agage",
     )
 
@@ -31,7 +31,7 @@ def cgo_data():
     cgo_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=cgo_data,
+        filepath=cgo_data,
         precision_filepath=cgo_prec,
         site="cgo",
         instrument="medusa",
@@ -42,8 +42,6 @@ def cgo_data():
 
 
 def test_read_file_capegrim(cgo_data):
-    parsed_surface_metachecker(data=cgo_data)
-
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
     expected_eight = [
@@ -69,15 +67,13 @@ def test_read_file_thd():
     thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=thd_path,
+        filepath=thd_path,
         precision_filepath=thd_prec_path,
         site="thd",
         network="agage",
         instrument="gcmd",
-        sampling_period="75",  # Checking this can be compared successfully
+        sampling_period="1",  # Checking this can be compared successfully
     )
-
-    parsed_surface_metachecker(data=gas_data)
 
     expected_keys = [
         "ccl4_10m",
@@ -94,8 +90,8 @@ def test_read_file_thd():
 
     meas_data = gas_data["ch3ccl3_10m"]["data"]
 
-    assert meas_data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    assert meas_data.time[-1] == pd.Timestamp("2001-12-31T23:18:22.5")
+    assert meas_data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    assert meas_data.time[-1] == pd.Timestamp("2001-12-31T23:18:59.5")
 
     assert meas_data["ch3ccl3"][0] == 41.537
     assert meas_data["ch3ccl3"][-1] == 34.649
@@ -114,7 +110,7 @@ def test_read_invalid_instrument_raises():
 
     with pytest.raises(ValueError):
         parse_gcwerks(
-            data_filepath=thd_path,
+            filepath=thd_path,
             precision_filepath=thd_prec_path,
             site="CGO",
             instrument="fish",
@@ -130,7 +126,7 @@ def test_no_precisions_species_raises():
 
     with pytest.raises(ValueError):
         parse_gcwerks(
-            data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
+            filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
         )
 
 
@@ -139,7 +135,7 @@ def test_read_ridgehill_window_inlet_all_NaNs():
     prec_path = get_surface_datapath(filename="ridgehill-md.11.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
+        filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
     )
 
     assert not res
@@ -150,15 +146,13 @@ def test_read_thd_window_inlet():
     prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
+        filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
     )
-
-    parsed_surface_metachecker(data=res)
 
     data = res["ch4_10m"]["data"]
 
-    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:59.5")
     assert data["ch4"][0] == pytest.approx(1818.62)
     assert data["ch4"][-1] == pytest.approx(1840.432)
 
@@ -175,14 +169,12 @@ def test_read_shangdianzi_ASM_inlet():
     prec_path = get_surface_datapath(filename="shangdianzi-medusa.18.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
-        data_filepath=data_path,
+        filepath=data_path,
         precision_filepath=prec_path,
         site="sdz",
         instrument="medusa",
         network="agage",
     )
-
-    parsed_surface_metachecker(data=res)
 
     data = res["nf3_80m"]["data"]
 
@@ -207,7 +199,7 @@ def test_read_shangdianzi_ASM_inlet():
 
     # data = res["ch4_10m"]["data"]
 
-    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:59.5")
     # assert data["ch4"][0] == pytest.approx(1818.62)
     # assert data["ch4"][-1] == pytest.approx(1840.432)

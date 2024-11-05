@@ -19,7 +19,7 @@ def add_data(mocker):
     clear_test_stores()
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
-    standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS", store="user")
+    standardise_surface(filepath=one_min, site="tac", network="decc", source_format="CRDS", store="user")
 
 
 @pytest.fixture()

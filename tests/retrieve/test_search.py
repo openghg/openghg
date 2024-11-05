@@ -253,6 +253,7 @@ def test_optional_term_search():
         site="bsd",
         inlet_option={"inlet": "42m", "height": "42m"},
         name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"},
+        data_level={"icos_data_level": 2, "data_level": "not_set"},
     )
 
     assert len(res.metadata) == 3

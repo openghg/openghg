@@ -1,7 +1,9 @@
 from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
+from openghg.standardise.meta import dataset_formatter
 from openghg.util import running_on_hub, load_json
+from openghg.types import MetadataFormatError
 import openghg_defs
 import logging
 
@@ -142,7 +144,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 
 def local_retrieve(
     site: str,
-    species: Optional[Union[str, List]] = None,
+    species: Optional[Union[str, list[str]]] = None,
     inlet: Optional[str] = None,
     sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -188,32 +190,44 @@ def local_retrieve(
     """
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
-    from openghg.util import to_lowercase
+    from openghg.util import to_lowercase, format_data_level
 
-    if not 1 <= data_level <= 2:
-        logger.error("Error: data level must be 1 or 2.")
+    # ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])
+    if not 1 <= int(data_level) <= 2:
+        msg = "Error: for ICOS data the data level must be 1 or 2."
+        logger.exception(msg)
+        raise MetadataFormatError(msg)
 
     if sampling_height and inlet is None:
         inlet = sampling_height
     elif sampling_height and inlet:
         logger.warning(f"Both sampling height and inlet specified. Using inlet value of {inlet}")
 
-    # NOTE - we skip ranking here, will we be ranking ICOS data?
-    results = search_surface(
-        site=site,
-        species=species,
-        inlet=inlet,
-        network="ICOS",
-        data_source="icoscp",
-        start_date=start_date,
-        end_date=end_date,
-        icos_data_level=data_level,
-        dataset_source=dataset_source,
-        store=store,
-    )
+    # Search for data_level OR icos_data_level keyword within current data.
+    # - icos_data_level is no longer added but this is included for backwards compatability.
+    data_level_keywords = {
+        "data_level": format_data_level(data_level),
+        "icos_data_level": format_data_level(data_level),
+    }
+
+    search_keywords: dict[str, Any] = {
+        "site": site,
+        "species": species,
+        "inlet": inlet,
+        "network": "ICOS",
+        "data_source": "icoscp",
+        "start_date": start_date,
+        "end_date": end_date,
+        "dataset_source": dataset_source,
+        "store": store,
+        "data_level": data_level_keywords,
+    }
+
+    results = search_surface(**search_keywords)
 
     if results and not force_retrieval:
         obs_data = results.retrieve_all()
+        # break
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(
@@ -225,7 +239,6 @@ def local_retrieve(
             sampling_height=sampling_height,
             update_mismatch=update_mismatch,
         )
-
         if standardised_data is None:
             return None
 
@@ -298,7 +311,7 @@ def _retrieve_remote(
 
     import re
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import format_inlet
+    from openghg.util import format_inlet, format_data_level
     from pandas import to_datetime
 
     if species is None:
@@ -498,7 +511,8 @@ def _retrieve_remote(
         additional_data["data_type"] = "surface"
         additional_data["data_source"] = "icoscp"
         additional_data["source_format"] = "icos"
-        additional_data["icos_data_level"] = str(data_level)
+        # additional_data["icos_data_level"] = str(data_level)
+        additional_data["data_level"] = format_data_level(data_level)
         additional_data["dataset_source"] = dobj_dataset_source
         additional_data["site"] = site
 
@@ -546,7 +560,7 @@ def _retrieve_remote(
             "data": dataset,
             "attributes": attributes,
         }
-
+    standardised_data = dataset_formatter(data=standardised_data)
     standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
     return standardised_data

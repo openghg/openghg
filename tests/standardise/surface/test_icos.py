@@ -9,70 +9,66 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_icos_large_header():
-    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     data = parse_icos(
-        data_filepath=filepath, site="mhd", instrument="g2401", header_type="large", inlet="15m"
+        filepath=filepath, site="rgl", instrument="g2301", header_type="large", inlet="90m"
     )
 
     expected_metadata = {
-        "site": "mhd",
-        "species": "co",
-        "inlet": "15m",
+        "site": "rgl",
+        "species": "ch4",
+        "inlet": "90m",
+        "inlet_height_magl": "90",
         "sampling_period": "3600.0",
         "network": "icos",
-        "instrument": "g2401",
+        "instrument": "g2301",
         "units": "nmol.mol-¹",
-        "calibration_scale": "wmo_co_x2014a",
-        "station_longitude": -9.90389,
-        "station_latitude": 53.32611,
-        "station_long_name": "Mace Head, Ireland",
-        "station_height_masl": 5.0,
-        "data_owner_email": "morgan.lopez@lsce.ipsl.fr",
+        "data_owner_email": "s.odoherty@bris.ac.uk,joseph.pitt@bristol.ac.uk,k.m.stanley@bristol.ac.uk",
     }
 
-    metadata = data["co"]["metadata"]
+    metadata = data["ch4"]["metadata"]
 
     assert metadata == expected_metadata
 
-    assert data["co"]["data"]["co"][0] == pytest.approx(155.118)
-    assert data["co"]["data"]["co"][-1] == pytest.approx(196.383)
-    assert data["co"]["data"]["co_variability"][0] == pytest.approx(1.955)
-    assert data["co"]["data"]["co_variability"][-1] == pytest.approx(1.924)
+    assert data["ch4"]["data"]["ch4"][0] == pytest.approx(2045.79)
+    assert data["ch4"]["data"]["ch4"][-1] == pytest.approx(2001.63)
+    assert data["ch4"]["data"]["ch4_variability"][0] == pytest.approx(9.801)
+    assert data["ch4"]["data"]["ch4_variability"][-1] == pytest.approx(5.185)
 
 
 def test_read_icos_large_header_incorrect_site_raises():
-    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
-            instrument="g2401",
+            instrument="g2301",
             header_type="large",
-            inlet="15m",
+            inlet="90m",
         )
 
 
 def test_read_icos_large_header_incorrect_instrument_raises():
-    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
             instrument="sparrow",
             header_type="large",
-            inlet="15m",
+            inlet="90m",
         )
 
 
 def test_read_icos_large_header_incorrect_inlet_raises():
-    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
-            data_filepath=filepath,
+            filepath=filepath,
             site="aaa",
             instrument="sparrow",
             header_type="large",
@@ -84,7 +80,7 @@ def test_read_icos_small_header_file():
     filepath = get_surface_datapath(filename="tta.co2.1minute.222m.min.dat", source_format="ICOS")
 
     data = parse_icos(
-        data_filepath=filepath,
+        filepath=filepath,
         site="tta",
         network="ICOS",
         instrument="test_instrument",
@@ -102,13 +98,16 @@ def test_read_icos_small_header_file():
         "Conventions": "CF-1.8",
         "processed_by": "OpenGHG_Cloud",
         "species": "co2",
-        "calibration_scale": "unknown",
         "sampling_period": "60.0",
         "sampling_period_unit": "s",
-        "station_longitude": -2.98598,
-        "station_latitude": 56.55511,
-        "station_long_name": "Angus Tower, UK",
-        "station_height_masl": 300.0,
+        'inlet_height_magl': '222m',
+        'calibration_scale': 'unknown',
+        'data_owner': 'NOT_SET',
+        'station_height_masl': 300.0,
+        'station_latitude': 56.55511,
+        'station_long_name': 'Angus Tower, UK',
+        'station_longitude': -2.98598
+
     }
 
     assert attrs == expected_attrs
@@ -128,11 +127,6 @@ def test_read_icos_small_header_file():
         "sampling_period": "60.0",
         "network": "icos",
         "instrument": "test_instrument",
-        "calibration_scale": "unknown",
-        "station_longitude": -2.98598,
-        "station_latitude": 56.55511,
-        "station_long_name": "Angus Tower, UK",
-        "station_height_masl": 300.0,
         "data_type": "surface",
         "source_format": "icos",
     }

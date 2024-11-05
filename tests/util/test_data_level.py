@@ -4,7 +4,7 @@ from openghg.types import MetadataFormatError
 
 
 @pytest.mark.parametrize(
-    "test_input", ["0", "1", "1.1", "1.10", "2", "3", 1, None],
+    "test_input", ["0", "1", "1.1", "1.10", "2", "3", 1, 2.2, None],
 )
 def test_format_data_level(test_input):
     """Test correct values for data_level are accepted"""
@@ -20,6 +20,6 @@ def test_format_data_level(test_input):
 )
 def test_format_data_level_incorrect(test_input):
     """Test error is raised for incorrect values"""
-    with pytest.raises(MetadataFormatError) as exc:
+    with pytest.raises(MetadataFormatError) as excinfo:
         format_data_level(test_input)
-        assert "Expect: '0', '1', '2', '3'" in exc
+        assert "Expect: '0', '1', '2', '3'" in excinfo

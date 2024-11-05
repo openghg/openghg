@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 from openghg.util import synonyms
@@ -107,7 +107,9 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from collections import defaultdict
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
 
         from openghg.store import (
             infer_date_range,
@@ -125,6 +127,9 @@ class BoundaryConditions(BaseStore):
         species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -150,6 +155,10 @@ class BoundaryConditions(BaseStore):
 
         if chunks is None:
             chunks = {}
+
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         with open_dataset(filepath).chunk(chunks) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them
@@ -205,15 +214,26 @@ class BoundaryConditions(BaseStore):
 
             key = "_".join((species, bc_input, domain))
 
-            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            boundary_conditions_data: dict[str, dict] = {}
+            boundary_conditions_data[key] = {}
             boundary_conditions_data[key]["data"] = bc_data
             boundary_conditions_data[key]["metadata"] = metadata
 
-            lookup_keys = self.get_lookup_keys(optional_metadata)
+            matched_keys = set(metadata) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
+
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
 
             if optional_metadata is not None:
-                for parsed_data in boundary_conditions_data.values():
-                    parsed_data["metadata"].update(optional_metadata)
+                additional_metadata.update(optional_metadata)
+
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            boundary_conditions_data = self.update_metadata(
+                boundary_conditions_data, additional_input_parameters, additional_metadata
+            )
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
@@ -222,7 +242,6 @@ class BoundaryConditions(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=lookup_keys,
                 compressor=compressor,
                 filters=filters,
             )

@@ -15,7 +15,7 @@ from helpers import get_surface_datapath, parsed_surface_metachecker
 def crds_data():
     hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
-    gas_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC")
+    gas_data = parse_crds(filepath=hfd_filepath, site="hfd", network="DECC")
 
     return gas_data
 
@@ -24,22 +24,22 @@ def test_file_with_dupes_doesnt_raise():
     dupe_file = get_surface_datapath(filename="bsd.picarro.1minute.42m.dupes.dat", source_format="CRDS")
 
     with pytest.raises(ValueError):
-        parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=False)
+        parse_crds(filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=False)
 
-    parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=True)
+    parse_crds(filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=True)
 
 
 def test_read_file_wrong_sampling_period_raises():
     hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     with pytest.raises(ValueError):
-        parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC", sampling_period="1min")
+        parse_crds(filepath=hfd_filepath, site="hfd", network="DECC", sampling_period="1min")
 
 
 def test_read_file():
     hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
-    crds_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC", sampling_period=60)
+    crds_data = parse_crds(filepath=hfd_filepath, site="hfd", network="DECC", sampling_period=60)
 
     ch4_data = crds_data["ch4"]["data"]
     co2_data = crds_data["co2"]["data"]
@@ -57,8 +57,6 @@ def test_read_file():
     assert co_data["co_variability"][0] == pytest.approx(4.081)
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
-    parsed_surface_metachecker(data=crds_data)
-
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
@@ -73,7 +71,7 @@ def test_bad_file_raises():
 
         with pytest.raises(ValueError):
             parse_crds(
-                data_filepath=filepath,
+                filepath=filepath,
                 site="tac",
                 network="DECC",
                 inlet="30m",

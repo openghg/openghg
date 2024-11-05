@@ -53,7 +53,9 @@ First we'll import ``retrieve_atmospheric`` from the ``retrieve`` submodule, the
 we'll retrieve some data from Saclay (**SAC**). The function will
 first check for any data from **SAC** already stored in the object
 store, if any is found it is returned, otherwise it'll retrieve the data
-from the ICOS Carbon Portal, this may take a bit longer.
+from the ICOS Carbon Portal, this may take a bit longer. Note that we pass the `update_mismatch="from_source"`
+as there is a difference in some of the metadata and attributes that OpenGHG will raise an error for.
+For more information about this see the "Metadata and attributes" tutorial.
 
 .. ipython::
    :verbatim:
@@ -63,7 +65,7 @@ from the ICOS Carbon Portal, this may take a bit longer.
 .. ipython::
     :verbatim:
 
-    In [2]: sac_data = retrieve_atmospheric(site="SAC", species="ch4", sampling_height="100m")
+    In [2]: sac_data = retrieve_atmospheric(site="SAC", species="ch4", sampling_height="100m", update_mismatch="from_source")
 
     In [3]: len(sac_data)
     Out[3]: 2

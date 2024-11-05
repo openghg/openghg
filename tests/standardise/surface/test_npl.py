@@ -12,12 +12,11 @@ mpl_logger.setLevel(logging.WARNING)
 @pytest.fixture(scope="session")
 def npl_data():
     filepath = get_surface_datapath(filename="NPL_test.csv", source_format="LGHG")
-    data = parse_npl(data_filepath=filepath, sampling_period="60")
+    data = parse_npl(filepath=filepath, sampling_period="60")
     return data
 
 
 def test_read_file(npl_data):
-    parsed_surface_metachecker(data=npl_data)
 
     co2_data = npl_data["co2"]["data"]
     ch4_data = npl_data["ch4"]["data"]

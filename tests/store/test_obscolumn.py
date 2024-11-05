@@ -68,13 +68,14 @@ def test_optional_metadata_raise_error():
             satellite=satellite,
             domain=domain,
             species=species,
-            optional_metadata={"domain": "openghg_test"},
+            optional_metadata={"species": "ch4"},
         )
 
 
 def test_optional_metadata():
     """
-    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    Test to verify required keys present in optional metadata supplied as dictionary is
+    added to metadata
     """
     filename = "gosat-fts_gosat_20170318_ch4-column.nc"
     datafile = get_column_datapath(filename=filename)

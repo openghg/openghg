@@ -1,6 +1,6 @@
 import pytest
 from helpers import get_footprint_datapath
-from openghg.standardise.footprint import parse_acrg_org
+from openghg.standardise.footprints import parse_acrg_org
 from openghg.types import ParseError
 
 

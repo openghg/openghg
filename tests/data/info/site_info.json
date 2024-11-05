@@ -224,18 +224,18 @@
     "DECC": {
       "height": ["90m", "45m"],
       "height_name": ["90magl", "45magl"],
-      "height_station_masl": 200.0,
-      "latitude": 51.997435,
+      "height_station_masl": 207.0,
+      "latitude": 51.99747,
       "long_name": "Ridge Hill, UK",
-      "longitude": -2.5399
+      "longitude": -2.53992
     },
     "ICOS": {
       "height": ["90m", "45m"],
       "height_name": ["90magl", "45magl"],
-      "height_station_masl": 200.0,
-      "latitude": 51.997435,
+      "height_station_masl": 207.0,
+      "latitude": 51.99747,
       "long_name": "Ridge Hill, UK",
-      "longitude": -2.5399
+      "longitude": -2.53992
     },
     "NOAA": {
       "height": ["90m", "45m"],

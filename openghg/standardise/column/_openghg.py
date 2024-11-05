@@ -5,7 +5,7 @@ import xarray as xr
 
 
 def parse_openghg(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     satellite: Optional[str] = None,
     domain: Optional[str] = None,
     selection: Optional[str] = None,
@@ -31,7 +31,7 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        data_filepath: Path of observation file
+        filepath: Path of observation file
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
@@ -61,12 +61,12 @@ def parse_openghg(
 
     # from openghg.standardise.meta import metadata_default_keys, assign_attributes
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
-    if data_filepath.suffix.lower() != ".nc":
+    if filepath.suffix.lower() != ".nc":
         raise ValueError("Input file must be a .nc (netcdf) file.")
 
-    data = xr.open_dataset(data_filepath).chunk(chunks)
+    data = xr.open_dataset(filepath).chunk(chunks)
 
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)

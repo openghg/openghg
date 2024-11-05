@@ -110,38 +110,39 @@ class SearchResults:
         self,
         dataframe: Optional[DataFrame] = None,
         version: str = "latest",
+        sort: bool = True,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
             dataframe: pandas DataFrame
-            sort: Sort data by date in retrieved Dataset
-            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
-            for ranked data.
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort data by time in retrieved Dataset
+            **kwargs: Metadata values to search for
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
         if dataframe is not None:
             uuids = dataframe["uuid"].to_list()
-            return self._retrieve_by_uuid(uuids=uuids, version=version)
+            return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
         else:
-            return self._retrieve_by_term(version=version, **kwargs)
+            return self._retrieve_by_term(version=version, sort=sort, **kwargs)
 
     def retrieve_all(
         self,
         version: str = "latest",
+        sort: bool = True,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
 
         Args:
+            version: Version of data requested from Datasource. Default = "latest".
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
-            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
-            for ranked data.
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version)
+        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, sort=sort)
 
     def uuids(self) -> List:
         """Return the UUIDs of the found data
@@ -151,14 +152,18 @@ class SearchResults:
         """
         return list(self.metadata.keys())
 
-    def _retrieve_by_term(self, version: str, **kwargs: Any) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(
+        self, version: str, sort: bool = True, **kwargs: Any
+    ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
         ObsData object(s).
 
         Args:
-            kwargs: Metadata values to search for
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
+            **kwargs: Metadata values to search for
         """
         uuids = set()
         # Make sure we don't have any Nones
@@ -187,15 +192,19 @@ class SearchResults:
                 uuids.add(uid)
 
         # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=list(uuids), version=version)
+        return self._retrieve_by_uuid(uuids=list(uuids), version=version, sort=sort)
 
-    def _retrieve_by_uuid(self, uuids: Iterable, version: str) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_uuid(
+        self, uuids: Iterable, version: str, sort: bool = True
+    ) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.
 
         Args:
             uuids: UUIDs of Datasources in the object store
+            version: Version of data requested from Datasource. Default = "latest".
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
@@ -215,6 +224,7 @@ class SearchResults:
                     metadata=metadata,
                     start_date=self._start_date,
                     end_date=self._end_date,
+                    sort=sort,
                 )
             )
 
