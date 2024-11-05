@@ -277,9 +277,9 @@ def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPath
 def permissions(file_path: str | Path) -> tuple[str, str, str]:
     """Return r, w, and/or x permissions for user, group, and other."""
     perms = oct(os.stat(file_path).st_mode)
-    user, group, other = perms[-3:]
+    user, group, other = perms[-3], perms[-2], perms[-1]
 
-    def bits_to_perms(bit_str: str):
+    def bits_to_perms(bit_str: str) -> str:
         bits = [int(b) for b in bin(int(bit_str))[-3:]]
         perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
         return perms
