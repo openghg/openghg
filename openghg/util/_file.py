@@ -274,7 +274,7 @@ def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPath
     return xr_open_fn, filepath
 
 
-def permissions(file_path: str | Path) -> tuple[str, str, str]:
+def permissions(file_path: Union[str, Path]) -> tuple[str, str, str]:
     """Return r, w, and/or x permissions for user, group, and other."""
     perms = oct(os.stat(file_path).st_mode)
     user, group, other = perms[-3], perms[-2], perms[-1]
