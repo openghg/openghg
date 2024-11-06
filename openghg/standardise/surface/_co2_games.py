@@ -24,6 +24,7 @@ def parse_co2_games(
     sampling_period: Optional[str] = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
+    units: str = "mol/mol",
     **kwarg: Dict,
 ) -> Dict:
     """Read co2 verification games files.
@@ -44,6 +45,7 @@ def parse_co2_games(
                 - "metadata" - update mismatches based on input metadata
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        units: currently defaults to mol/mol
     Returns:
         dict: Dictionary of data and metadata
     """
@@ -71,6 +73,7 @@ def parse_co2_games(
             "station_long_name": attributes["site_name"],
             "station_height_masl": attributes["site_elevation"],
             "measurement_type": measurement_type,
+            "units": units
         }
 
         gas_dataset = {f"co2_{model}": dataset[[model]] for model in list_of_models}
