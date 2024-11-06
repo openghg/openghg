@@ -1094,7 +1094,7 @@ def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_
 
 def test_co2_games():
 
-    co2_games_data = get_surface_datapath(filename="co2_bsd_tower-insitu_160_allvalid-108magl.NC",
+    co2_games_data = get_surface_datapath(filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc",
                                           source_format="co2_games")
 
     standardise_surface(source_format="co2_games",
