@@ -12,6 +12,7 @@ class SurfaceTypes(Enum):
     BEACO2N = "BEACO2N"
     NPL = "NPL"
     OPENGHG = "OPENGHG"
+    CO2_GAMES = "CO2_GAMES"
 
 
 class ColumnTypes(Enum):
