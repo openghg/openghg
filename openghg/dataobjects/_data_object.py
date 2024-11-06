@@ -1,9 +1,8 @@
 """Module for class DataObject"""
-
 from __future__ import annotations
 
 from collections.abc import MutableMapping
-from typing import Any, Iterator, Optional, Union
+from typing import Any, Hashable, Iterator, Optional, Union
 
 import pandas as pd
 import xarray as xr
@@ -57,14 +56,14 @@ class DataObject(MutableMapping):
     def __len__(self) -> int:
         return len(self._metadata)
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key: Hashable) -> Any:
         # TODO: add lookup for Datasource metadata as well, so it doesn't need to be copied to the metastore
         return self._metadata[key]
 
-    def __setitem__(self, key, value) -> None:
+    def __setitem__(self, key: Hashable, value: Any) -> None:
         self._metadata[key] = value
 
-    def __delitem__(self, key) -> None:
+    def __delitem__(self, key: Hashable) -> None:
         del self._metadata[key]
 
     def get_data(

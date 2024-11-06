@@ -7,13 +7,14 @@ from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
+from ._data_object import DataObject
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class DataManager:
-    def __init__(self, metadata: Dict[str, Dict], store: str):
+    def __init__(self, metadata: Union[dict[str, dict], dict[str, DataObject]], store: str):
         # We don't want the object store in this metadata as we want it to be the
         # unadulterated metadata to properly reflect what's stored.
         self.metadata = self._clean_metadata(metadata=metadata)

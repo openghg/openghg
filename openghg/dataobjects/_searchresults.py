@@ -50,7 +50,7 @@ class SearchResults:
         if self._results is not None:
             # HACK to maintain behavior of old code
             if self._results.empty:
-                return {} # type: ignore
+                return {}  # type: ignore
             return self._results
 
         df = pd.DataFrame.from_dict(self.metadata, orient="index").reset_index(drop=True)
@@ -64,15 +64,17 @@ class SearchResults:
         self._results = df
 
         # HACK to maintain behavior of old code
-        if self._results.empty:
-            return {} # type: ignore
+        if df.empty:
+            return {}  # type: ignore
 
         return df
 
     def __str__(self) -> str:
         SearchResults.df_to_table_console_output(df=pd.DataFrame.from_dict(data=self.metadata))
 
-        return f"Found {len(self.results)} results.\nView the results pd.DataFrame using the results property."
+        return (
+            f"Found {len(self.results)} results.\nView the results pd.DataFrame using the results property."
+        )
 
     def __repr__(self) -> str:
         return f"SearchResults({self.metadata}, start_result={self.start_result}, start_date={self._start_date}, end_date={self._end_date})"
@@ -151,10 +153,15 @@ class SearchResults:
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        result = [do.to_basedata(version=version, start_date=self._start_date, end_date=self._end_date, sort=sort) for do in self.metadata.values()]
+        result = [
+            do.to_basedata(version=version, start_date=self._start_date, end_date=self._end_date, sort=sort)
+            for do in self.metadata.values()
+        ]
 
         if len(result) == 1:
-            return cast(ObsData, result[0])  # TODO: this should either return the base type or return the correct type for the data
+            return cast(
+                ObsData, result[0]
+            )  # TODO: this should either return the base type or return the correct type for the data
         return [cast(ObsData, x) for x in result]
 
     def uuids(self) -> List:
@@ -234,7 +241,7 @@ class SearchResults:
                 ObsData(
                     uuid=uuid,
                     version=version,
-                    metadata=metadata,
+                    metadata=dict(metadata),
                     start_date=self._start_date,
                     end_date=self._end_date,
                     sort=sort,
