@@ -607,7 +607,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
         metadata = {r["uuid"]: DataObject(r) for r in metastore_records}
 
         # Narrow the search to a daterange if dates passed
-        metadata = {uuid: meta for uuid, meta in metadata.items() if meta.has_data_between(start_date, end_date)}
+        metadata = {
+            uuid: meta for uuid, meta in metadata.items() if meta.has_data_between(start_date, end_date)
+        }
         if not metadata:
             logger.warning(
                 f"No data found for the dates given in the {bucket_name} store, please try a wider search."
@@ -619,17 +621,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
             raise ObjectStoreError("Duplicate UUIDs found between buckets.")
 
         general_metadata.update(metadata)
-
-    if start_date is not None or end_date is not None:
-        if start_date is None:
-            start_date = timestamp_epoch()
-        else:
-            start_date = timestamp_tzaware(start_date) + pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
-
-        if end_date is None:
-            end_date = timestamp_now()
-        else:
-            end_date = timestamp_tzaware(end_date) - pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
 
     return SearchResults(
         metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date

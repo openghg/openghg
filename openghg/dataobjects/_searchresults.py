@@ -1,10 +1,13 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, cast, Dict, List, Optional, Type, TypeVar, Union, Iterable
+
+import pandas as pd
 
 from openghg.dataobjects import ObsData
+from openghg.dataobjects._data_object import DataObject
 from openghg.util import running_on_hub
-from pandas import DataFrame
+
 
 __all__ = ["SearchResults"]
 
@@ -27,52 +30,58 @@ class SearchResults:
     # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
         self,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[dict[str, DataObject]] = None,
         start_result: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
     ):
-        # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
-        if metadata is not None:
-            self.metadata = metadata
-            # db.insert_multiple([m for m in metadata.values()])
-            self.results = (
-                DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
-            )
+        self.start_result = start_result
+        self.metadata = metadata or {}
 
-            if start_result is not None:
-                for uuid_key, uuid_metadata in metadata.items():
-                    if start_result in uuid_metadata:
-                        other_keys = list(uuid_metadata.keys())
-                        other_keys.remove(start_result)
-                        reorder = [start_result] + other_keys
-                        metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
+        self._start_date = pd.to_datetime(start_date) if start_date else None
+        self._end_date = pd.to_datetime(end_date) if end_date else None
 
-        else:
-            self.results = {}  # type: ignore
-            self.metadata = {}
-
-        self._start_date = start_date
-        self._end_date = end_date
+        self._results = None
 
         self.hub = running_on_hub()
 
-    def __str__(self) -> str:
-        SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
+    @property
+    def results(self) -> pd.DataFrame:
+        if self._results is not None:
+            # HACK to maintain behavior of old code
+            if self._results.empty:
+                return {} # type: ignore
+            return self._results
 
-        return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
+        df = pd.DataFrame.from_dict(self.metadata, orient="index").reset_index(drop=True)
+
+        if self.start_result is not None and self.start_result in df.columns:
+            cols = list(df.columns)
+            cols.remove(self.start_result)
+            cols = [self.start_result] + cols
+            df = cast(pd.DataFrame, df[cols])
+
+        self._results = df
+
+        # HACK to maintain behavior of old code
+        if self._results.empty:
+            return {} # type: ignore
+
+        return df
+
+    def __str__(self) -> str:
+        SearchResults.df_to_table_console_output(df=pd.DataFrame.from_dict(data=self.metadata))
+
+        return f"Found {len(self.results)} results.\nView the results pd.DataFrame using the results property."
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return f"SearchResults({self.metadata}, start_result={self.start_result}, start_date={self._start_date}, end_date={self._end_date})"
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
 
     def __len__(self) -> int:
         return len(self.metadata)
-
-    # def __iter__(self) -> Iterator:
-    #     yield from self.results.iterrows()
 
     def to_data(self) -> Dict:
         """Convert this object to a dictionary for JSON serialisation
@@ -108,15 +117,15 @@ class SearchResults:
 
     def retrieve(
         self,
-        dataframe: Optional[DataFrame] = None,
+        dataframe: Optional[pd.DataFrame] = None,
         version: str = "latest",
         sort: bool = True,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
-        """Retrieve data from object store using a filtered pandas DataFrame
+        """Retrieve data from object store using a filtered pandas pd.DataFrame
 
         Args:
-            dataframe: pandas DataFrame
+            dataframe: pandas pd.DataFrame
             version: Version of data requested from Datasource. Default = "latest".
             sort: Sort data by time in retrieved Dataset
             **kwargs: Metadata values to search for
@@ -142,7 +151,11 @@ class SearchResults:
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, sort=sort)
+        result = [do.to_basedata(version=version, start_date=self._start_date, end_date=self._end_date, sort=sort) for do in self.metadata.values()]
+
+        if len(result) == 1:
+            return cast(ObsData, result[0])  # TODO: this should either return the base type or return the correct type for the data
+        return [cast(ObsData, x) for x in result]
 
     def uuids(self) -> List:
         """Return the UUIDs of the found data
@@ -234,12 +247,12 @@ class SearchResults:
             return results
 
     @staticmethod
-    def df_to_table_console_output(df: DataFrame) -> None:
+    def df_to_table_console_output(df: pd.DataFrame) -> None:
         """
-        Process the DataFrame and display it as a formatted table in the console.
+        Process the pd.DataFrame and display it as a formatted table in the console.
 
         Args:
-            df (DataFrame): The DataFrame to be processed and displayed.
+            df (pd.DataFrame): The DataFrame to be processed and displayed.
 
         Returns:
             None

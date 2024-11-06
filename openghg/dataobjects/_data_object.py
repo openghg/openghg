@@ -1,4 +1,7 @@
 """Module for class DataObject"""
+
+from __future__ import annotations
+
 from collections.abc import MutableMapping
 from typing import Any, Iterator, Optional, Union
 
@@ -7,8 +10,9 @@ import xarray as xr
 
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
-from openghg.util import dates_overlap, timestamp_epoch, timestamp_now, timestamp_tzaware
+from openghg.util import daterange_overlap
 
+from ._basedata import _BaseData
 
 DateType = Union[str, pd.Timestamp]
 
@@ -19,6 +23,7 @@ class DataObject(MutableMapping):
     A DataObject acts like a dictionary of metadata, but also has methods to query and
     return data from the Datasource associated with that metadata.
     """
+
     def __init__(
         self,
         metadata: dict,
@@ -32,15 +37,15 @@ class DataObject(MutableMapping):
         if "object_store" not in metadata and bucket is None:
             raise ValueError("If 'object_store' not in metadata, you must provide a value for `bucket`.")
 
-        bucket = bucket or metadata["object_store"]
+        self.bucket = bucket or metadata["object_store"]
 
         self._metadata = metadata
 
         try:
-            self._datasource = Datasource(bucket, uuid)
+            self._datasource = Datasource(self.bucket, uuid)
         except ObjectStoreError:
             # this option is to allow tests for search without adding real data to the object store
-            self._datasource = Datasource(bucket)
+            self._datasource = Datasource(self.bucket)
 
     @property
     def metadata(self) -> dict:
@@ -66,29 +71,53 @@ class DataObject(MutableMapping):
         self,
         start_date: Optional[DateType] = None,
         end_date: Optional[DateType] = None,
+        version: str = "latest",
     ) -> xr.Dataset:
-        result = self._datasource.get_data()
-        if start_date or end_date:
-            result = result.sel(time=slice(start_date, end_date))
+        result = self._datasource.get_data(version=version)
+
+        # NOTE: len(result.time) > 1 is a hack to avoid slicing annual fluxes
+        # but it only works if there is a single year of fluxes
+        # TODO: move this slicing logic to datasource, where it can be
+        # implemented more carefully
+        if (start_date or end_date) and len(result.time) > 1:
+            if start_date is not None:
+                start_date = pd.to_datetime(start_date)
+            if end_date is not None:
+                end_date = pd.to_datetime(end_date)
+
+            result = result.sortby("time").sel(time=slice(start_date, end_date))
         return result
 
     def has_data_between(
         self, start_date: Optional[DateType] = None, end_date: Optional[DateType] = None
     ) -> bool:
-        self_start = self._metadata.get("start_date", timestamp_epoch())
-        self_end = self._metadata.get("end_date", timestamp_now())
+        # TODO: move this logic to Datasource
+
+        latest_version = self._datasource._latest_version
+        date_keys = self._datasource._data_keys[latest_version] if self._datasource._data_keys else []
 
         if start_date is not None or end_date is not None:
             if start_date is None:
-                start_date = timestamp_epoch()
-            else:
-                start_date = timestamp_tzaware(start_date) + pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
+                start_date = pd.Timestamp(0)
 
             if end_date is None:
-                end_date = timestamp_now()
-            else:
-                end_date = timestamp_tzaware(end_date) - pd.Timedelta("1s")  # type: ignore ...this is unlikely to be NaT
+                end_date = pd.Timestamp.now()
 
-            return dates_overlap(start_a=start_date, end_a=end_date, start_b=self_start, end_b=self_end)  # type: ignore start_date and end_date are not None
+            new_daterange = f"{start_date}_{end_date}"
+
+            return any(daterange_overlap(existing, new_daterange) for existing in date_keys)
 
         return True
+
+    def to_basedata(
+        self,
+        version: str = "latest",
+        start_date: Optional[DateType] = None,
+        end_date: Optional[DateType] = None,
+        sort: bool = False,
+    ) -> _BaseData:
+        data = self.get_data(start_date, end_date, version)
+        return _BaseData(self.metadata, data=data, sort=sort)
+
+    def copy(self) -> DataObject:
+        return DataObject(self.metadata.copy(), self.bucket)
