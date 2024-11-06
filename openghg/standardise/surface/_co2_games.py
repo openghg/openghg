@@ -50,7 +50,7 @@ def parse_co2_games(
 
     list_of_models = ["BASE", "PTEN", "ATEN", "HGER", "HFRA", "DFIN"]
 
-    gas_data = {}
+    gas_data: Dict = {}
 
     with xr.open_dataset(filepath) as dataset:
         # Use dictionary comprehension to split data variables into individual datasets
