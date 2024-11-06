@@ -73,7 +73,7 @@ def parse_co2_games(
             "station_long_name": attributes["site_name"],
             "station_height_masl": attributes["site_elevation"],
             "measurement_type": measurement_type,
-            "units": units
+            "units": units,
         }
 
         gas_dataset = {f"co2_{model}": dataset[[model]] for model in list_of_models}
