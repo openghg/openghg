@@ -19,7 +19,7 @@ def parse_co2_games(
     site: str,
     measurement_type: str,
     inlet: Optional[str] = None,
-    network: str = "paris_simulation",
+    network: str = "icos",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     update_mismatch: str = "never",
