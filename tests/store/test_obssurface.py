@@ -1091,3 +1091,14 @@ def test_sync_surface_metadata_store_level(filepath, site, instrument, sampling_
 
         with datasource.get_data(version="latest") as data:
             assert attributes_checker_obssurface(data.attrs, species=species)
+
+def test_co2_games():
+
+    co2_games_data = get_surface_datapath(filename="co2_bsd_tower-insitu_160_allvalid-108magl.NC",
+                                          source_format="co2_games")
+
+    standardise_surface(source_format="co2_games",
+                        network="paris_simulation",
+                        site="bsd",
+                        filepath=co2_games_data,
+                        store="user")
