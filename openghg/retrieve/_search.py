@@ -497,14 +497,10 @@ def _base_search(**kwargs: Any) -> SearchResults:
     """
     from openghg.util import (
         clean_string,
-        dates_overlap,
         format_inlet,
         synonyms,
-        timestamp_epoch,
-        timestamp_now,
-        timestamp_tzaware,
     )
-    from pandas import Timedelta as pd_Timedelta
+
 
     if running_on_hub():
         raise ValueError(
