@@ -572,7 +572,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     end_date = search_kwargs.pop("end_date", None)
 
     expanded_search = process_search_kwargs(search_kwargs)
-    general_metadata = {}
+    general_metadata = []
 
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
@@ -581,43 +581,27 @@ def _base_search(**kwargs: Any) -> SearchResults:
                 for v in expanded_search:
                     res = metastore.search(**v)
                     if res:
+                        # TODO: when DataObjects are returned from ObjectStore, they should have the data type included
+                        for r in res:
+                            r["data_type"] = data_type
                         metastore_records.extend(res)
 
         if not metastore_records:
             continue
 
-        # Add in a quick check to make sure we don't have dupes
-        # TODO - remove this once a more thorough tests are added
-        uuids = [s["uuid"] for s in metastore_records]
-        if len(uuids) != len(set(uuids)):
-            error_msg = "Multiple results found with same UUID!"
-            logger.exception(msg=error_msg)
-            raise ValueError(error_msg)
-
-        # Here we create a dictionary of the metadata keyed by the Datasource UUID
-        # we'll create a pandas DataFrame out of this in the SearchResult object
-        # for better printing / searching within a notebook
-        for r in metastore_records:
-            r["object_store"] = bucket
-
-        metadata = {r["uuid"]: DataObject(r) for r in metastore_records}
+        # TODO: when DataObjects are returned from ObjectStore, we will know the bucket automatically
+        data_objects = [DataObject(r, bucket=bucket) for r in metastore_records]
 
         # Narrow the search to a daterange if dates passed
-        metadata = {
-            uuid: meta for uuid, meta in metadata.items() if meta.has_data_between(start_date, end_date)
-        }
-        if not metadata:
+        data_objects = [do for do in data_objects if do.has_data_between(start_date, end_date)]
+
+        if not data_objects:
             logger.warning(
                 f"No data found for the dates given in the {bucket_name} store, please try a wider search."
             )
 
-        # Remove once more comprehensive tests are done
-        dupe_uuids = [k for k in metadata if k in general_metadata]
-        if dupe_uuids:
-            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
-
-        general_metadata.update(metadata)
+        general_metadata.extend(data_objects)
 
     return SearchResults(
-        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
+        data_objects=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
     )

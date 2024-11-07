@@ -1,12 +1,15 @@
 """Module for class DataObject"""
 from __future__ import annotations
 
-from collections.abc import MutableMapping
+from collections.abc import Generator, MutableMapping
+from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Hashable, Iterator, Optional, Union
 
 import pandas as pd
 import xarray as xr
 
+from openghg.objectstore.metastore import open_metastore, TinyDBMetaStore
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 from openghg.util import daterange_overlap
@@ -22,7 +25,9 @@ class DataObject(MutableMapping):
     A DataObject acts like a dictionary of metadata, but also has methods to query and
     return data from the Datasource associated with that metadata.
     """
-
+    # TODO: should this be a mutable mapping? or just a mapping? I don't really see why it should be modified...
+    # Any updates should probably be propagated to the object store, which would require a different mechanism
+    # ...for now, DataManager needs this to be mutable
     def __init__(
         self,
         metadata: dict,
@@ -31,24 +36,49 @@ class DataObject(MutableMapping):
         if "uuid" not in metadata:
             raise ValueError("Metadata must contain UUID.")
 
-        uuid = metadata["uuid"]
+        self.uuid = metadata["uuid"]
 
         if "object_store" not in metadata and bucket is None:
             raise ValueError("If 'object_store' not in metadata, you must provide a value for `bucket`.")
 
         self.bucket = bucket or metadata["object_store"]
 
+        # TODO: when DataObjects are created directly by an ObjectStore class, we won't need to remove this internal info
+        if "object_store" in metadata:
+            del metadata["object_store"]
+
         self._metadata = metadata
 
+    @property
+    def datasource(self) -> Datasource:
         try:
-            self._datasource = Datasource(self.bucket, uuid)
+            result = Datasource(self.bucket, self.uuid)
         except ObjectStoreError:
             # this option is to allow tests for search without adding real data to the object store
-            self._datasource = Datasource(self.bucket)
+            result = Datasource(self.bucket)
+        return result
 
     @property
     def metadata(self) -> dict:
         return self._metadata
+
+    @property
+    @contextmanager
+    def metastore(self) -> Generator[TinyDBMetaStore, None, None]:
+        with open_metastore(bucket=self.bucket, data_type=self.data_type) as ms:
+            yield ms
+
+    @property
+    def data_type(self) -> str:
+        return self._metadata["data_type"]
+
+    def __hash__(self) -> int:
+        return hash(f"{self.uuid}_{self.bucket}")
+
+    def __eq__(self, other: object, /) -> bool:
+        if not isinstance(other, DataObject):
+            return NotImplemented
+        return (self.uuid == other.uuid) and (self.bucket == other.bucket)
 
     def __iter__(self) -> Iterator:
         return iter(self._metadata)
@@ -58,6 +88,8 @@ class DataObject(MutableMapping):
 
     def __getitem__(self, key: Hashable) -> Any:
         # TODO: add lookup for Datasource metadata as well, so it doesn't need to be copied to the metastore
+        # if key == "object_store":
+        #     return self.bucket
         return self._metadata[key]
 
     def __setitem__(self, key: Hashable, value: Any) -> None:
@@ -72,7 +104,7 @@ class DataObject(MutableMapping):
         end_date: Optional[DateType] = None,
         version: str = "latest",
     ) -> xr.Dataset:
-        result = self._datasource.get_data(version=version)
+        result = self.datasource.get_data(version=version)
 
         # NOTE: len(result.time) > 1 is a hack to avoid slicing annual fluxes
         # but it only works if there is a single year of fluxes
@@ -82,7 +114,7 @@ class DataObject(MutableMapping):
             if start_date is not None:
                 start_date = pd.to_datetime(start_date)
             if end_date is not None:
-                end_date = pd.to_datetime(end_date)
+                end_date = pd.to_datetime(end_date) - pd.to_timedelta("1ns")
 
             result = result.sortby("time").sel(time=slice(start_date, end_date))
         return result
@@ -92,12 +124,12 @@ class DataObject(MutableMapping):
     ) -> bool:
         # TODO: move this logic to Datasource
 
-        latest_version = self._datasource._latest_version
-        date_keys = self._datasource._data_keys[latest_version] if self._datasource._data_keys else []
+        latest_version = self.datasource._latest_version
+        date_keys = self.datasource._data_keys[latest_version] if self.datasource._data_keys else []
 
         if start_date is not None or end_date is not None:
             if start_date is None:
-                start_date = pd.Timestamp(0)
+                start_date = pd.to_datetime(0)  # UNIX epoch
 
             if end_date is None:
                 end_date = pd.Timestamp.now()
@@ -119,4 +151,61 @@ class DataObject(MutableMapping):
         return _BaseData(self.metadata, data=data, sort=sort)
 
     def copy(self) -> DataObject:
+        """This is needed in DataManager, which makes a copy of the metadata returned by a search."""
         return DataObject(self.metadata.copy(), self.bucket)
+
+    def __copy__(self) -> DataObject:
+        return self.copy()
+
+    def __deepcopy__(self, memo: Any) -> DataObject:
+        return self.copy()  # TODO: do a deepcopy of metadata here?
+
+    def update_metadata(self, to_update: dict[str, Any]) -> None:
+        # TODO `to_update` needs to be formatted...
+        if "uuid" in to_update:
+            raise ValueError("Cannot update UUID.")  # TODO: is this necessary? the metastore should check...
+
+        with self.metastore as metastore:
+            metastore.update(where={"uuid": self.uuid}, to_update=to_update)
+
+
+        self._metadata.update(to_update)  # update internal copy if metastore update successful
+
+        with self.datasource as ds:
+            ds._metadata.update(to_update)
+
+    def delete_metadata(self, to_delete: list[str]) -> None:
+        # TODO `to_update` needs to be formatted...
+        if "uuid" in to_delete:
+            raise ValueError("Cannot delete UUID.")
+
+        bad_keys = set(to_delete).difference(set(self._metadata.keys()))
+
+        if bad_keys:
+            raise ValueError(f"Keys {bad_keys} not present in metadata; only existing keys can be deleted.")
+
+        with self.metastore as metastore:
+            metastore.update(where={"uuid": self.uuid}, to_delete=to_delete)
+
+        # update internal metadata to match
+        for key in to_delete:
+            del self._metadata[key]
+
+        with self.datasource as ds:
+            for key in to_delete:
+                ds._metadata.pop(key)
+
+    def delete(self) -> None:
+        from openghg.objectstore import delete_object
+        
+        with self.metastore as metastore:
+            metastore.delete({"uuid": self.uuid})
+
+        with self.datasource as ds:
+            print("open datasource", ds)
+            key = ds.key()
+            ds.delete_all_data()
+
+        # need to delete Datasource object since closing the datasource context manager save
+        # some metadata
+        delete_object(bucket=self.bucket, key=key)  # TODO: this should be done by Datasource?

@@ -1,8 +1,10 @@
 import json
 import logging
-from typing import Any, cast, Dict, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, Hashable, Iterator, cast, Dict, List, Optional, Type, TypeVar, Union, Iterable
 
 import pandas as pd
+import tinydb
+from zarr import storage
 
 from openghg.dataobjects import ObsData
 from openghg.dataobjects._data_object import DataObject
@@ -30,13 +32,13 @@ class SearchResults:
     # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
         self,
-        metadata: Optional[dict[str, DataObject]] = None,
+        data_objects: Optional[list[DataObject]] = None,
         start_result: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
     ):
         self.start_result = start_result
-        self.metadata = metadata or {}
+        self.data_objects = data_objects or []
 
         self._start_date = pd.to_datetime(start_date) if start_date else None
         self._end_date = pd.to_datetime(end_date) if end_date else None
@@ -44,6 +46,10 @@ class SearchResults:
         self._results = None
 
         self.hub = running_on_hub()
+
+
+    def to_dict(self) -> dict:
+        return {do.uuid: do.metadata for do in self.data_objects}
 
     @property
     def results(self) -> pd.DataFrame:
@@ -53,7 +59,7 @@ class SearchResults:
                 return {}  # type: ignore
             return self._results
 
-        df = pd.DataFrame.from_dict(self.metadata, orient="index").reset_index(drop=True)
+        df = pd.DataFrame.from_dict(self.to_dict(), orient="index").reset_index(drop=True)
 
         if self.start_result is not None and self.start_result in df.columns:
             cols = list(df.columns)
@@ -70,52 +76,82 @@ class SearchResults:
         return df
 
     def __str__(self) -> str:
-        SearchResults.df_to_table_console_output(df=pd.DataFrame.from_dict(data=self.metadata))
+        SearchResults.df_to_table_console_output(df=pd.DataFrame.from_dict(data=self.to_dict()))
 
         return (
             f"Found {len(self.results)} results.\nView the results pd.DataFrame using the results property."
         )
 
     def __repr__(self) -> str:
-        return f"SearchResults({self.metadata}, start_result={self.start_result}, start_date={self._start_date}, end_date={self._end_date})"
+        return f"SearchResults({self.data_objects}, start_result={self.start_result}, start_date={self._start_date}, end_date={self._end_date})"
 
     def __bool__(self) -> bool:
-        return bool(self.metadata)
+        return bool(self.data_objects)
 
     def __len__(self) -> int:
-        return len(self.metadata)
+        return len(self.data_objects)
 
-    def to_data(self) -> Dict:
-        """Convert this object to a dictionary for JSON serialisation
+    def __iter__(self) -> Iterator:
+        return iter(self.data_objects)
 
-        Returns:
-            dict: Dictionary of data
-        """
-        return {
-            "metadata": self.metadata,
-            "hub": self.hub,
-        }
+    # NOTE: these get/set item methods would probably be faster if we stored the data by UUID.
+    # These methods are needed by `DataManager`, and eventually, it would be better if DataObjects could
+    # be updated directly.
 
-    def to_json(self) -> str:
-        """Serialises the object to JSON
+    def __getitem__(self, key: Hashable) -> DataObject:
+        for do in self.data_objects:
+            if do == key or do.uuid == key:
+                return do
+        raise KeyError(f"Item with key {key} not found in SearchResults.")
 
-        Returns:
-            str: JSON str
-        """
-        return json.dumps(self.to_data())
 
-    @classmethod
-    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
-        """Create a SearchResults object from a dictionary
+    def __setitem__(self, key: Hashable, value: DataObject) -> None:
+        """Set value based on UUID."""
+        if key not in self.uuids:
+            self.data_objects.append(value)
+        else:
+            old = [do for do in self.data_objects if do.uuid == key][0]
+            self.data_objects.remove(old)
+            self.data_objects.append(value)
 
-        Args:
-            data: Serialised object
-        Returns:
-            SearchResults: SearchResults object
-        """
-        loaded = json.loads(data)
+    def __contains__(self, value: Any) -> bool:
+        for do in self:
+            if do == value or do.uuid == value:
+                return True
+        return False
 
-        return cls(metadata=loaded["metadata"])
+
+    # def to_data(self) -> Dict:
+    #     """Convert this object to a dictionary for JSON serialisation
+
+    #     Returns:
+    #         dict: Dictionary of data
+    #     """
+    #     return {
+    #         "metadata": self.data_objects,
+    #         "hub": self.hub,
+    #     }
+
+    # def to_json(self) -> str:
+    #     """Serialises the object to JSON
+
+    #     Returns:
+    #         str: JSON str
+    #     """
+    #     return json.dumps(self.to_data())
+
+    # @classmethod
+    # def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
+    #     """Create a SearchResults object from a dictionary
+
+    #     Args:
+    #         data: Serialised object
+    #     Returns:
+    #         SearchResults: SearchResults object
+    #     """
+    #     loaded = json.loads(data)
+
+    #     return cls(metadata=loaded["metadata"])
 
     def retrieve(
         self,
@@ -155,7 +191,7 @@ class SearchResults:
         """
         result = [
             do.to_basedata(version=version, start_date=self._start_date, end_date=self._end_date, sort=sort)
-            for do in self.metadata.values()
+            for do in self.data_objects
         ]
 
         if len(result) == 1:
@@ -164,13 +200,14 @@ class SearchResults:
             )  # TODO: this should either return the base type or return the correct type for the data
         return [cast(ObsData, x) for x in result]
 
-    def uuids(self) -> List:
+    @property
+    def uuids(self) -> list:
         """Return the UUIDs of the found data
 
         Returns:
             list: List of UUIDs
         """
-        return list(self.metadata.keys())
+        return [do.uuid for do in self.data_objects]
 
     def _retrieve_by_term(
         self, version: str, sort: bool = True, **kwargs: Any
@@ -185,37 +222,27 @@ class SearchResults:
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
             **kwargs: Metadata values to search for
         """
-        uuids = set()
+        db = tinydb.TinyDB(storage=tinydb.storages.MemoryStorage)
+        for do in self.data_objects:
+            db.insert(do)
+
         # Make sure we don't have any Nones
         clean_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        basic_kwargs = {k: v for k, v in clean_kwargs.items() if not isinstance(v, (list, tuple))}
+        query = tinydb.Query().fragment(basic_kwargs)
 
-        for uid, metadata in self.metadata.items():
-            n_required = len(clean_kwargs)
-            n_matched = 0
-            for key, value in clean_kwargs.items():
-                try:
-                    # Here we want to check if it's a list and if so iterate over it
-                    if isinstance(value, (list, tuple)):
-                        for val in value:
-                            val = str(val).lower()
-                            if metadata[key.lower()] == val:
-                                n_matched += 1
-                                break
-                    else:
-                        value = str(value).lower()
-                        if metadata[key.lower()] == value:
-                            n_matched += 1
-                except KeyError:
-                    pass
+        # process tuple and list values
+        for k, v in clean_kwargs.items():
+            if k not in basic_kwargs:
+                list_query = tinydb.Query()[k].one_of([str(x).lower() for x in v])
+                query = query & list_query
 
-            if n_matched == n_required:
-                uuids.add(uid)
+        uuids = [doc["uuid"] for doc in db.search(query)]
 
-        # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=list(uuids), version=version, sort=sort)
+        return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
 
     def _retrieve_by_uuid(
-        self, uuids: Iterable, version: str, sort: bool = True
+        self, uuids: Iterable, version: str = "latest", sort: bool = True
     ) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
@@ -229,24 +256,9 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         results = []
-        for uuid in uuids:
-            metadata = self.metadata[uuid]
-            if version == "latest":
-                version = metadata["latest_version"]
-            else:
-                if version not in metadata["versions"]:
-                    raise ValueError(f"Invalid version {version} for UUID {uuid}")
-
-            results.append(
-                ObsData(
-                    uuid=uuid,
-                    version=version,
-                    metadata=dict(metadata),
-                    start_date=self._start_date,
-                    end_date=self._end_date,
-                    sort=sort,
-                )
-            )
+        data_objects = [do for do in self.data_objects if do.uuid in uuids]
+        results = [do.to_basedata(version=version, sort=sort, start_date=self._start_date, end_date=self._end_date) for do in data_objects]
+        results = [cast(ObsData, result) for result in results]
 
         if len(results) == 1:
             return results[0]
