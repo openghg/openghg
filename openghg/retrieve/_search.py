@@ -407,64 +407,7 @@ def search_column(
 
 
 def search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
-    the function and these keywords will be used to search the metadata associated
-    with each Datasource.
-
-    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
-     - None - argument will be ignored.
-     - list/tuple - an OR search will be created for the argument and each of the values.
-     - dict - an OR search will be created for the key, value pairs.
-       - Note: in this case the name of argument itself will be ignored.
-     - str/other - argument used directly.
-
-    All input search values are formatted (openghg.utils.clean_string).
-
-    This function detects the running environment and routes the call
-    to either the cloud or local search function.
-
-    Example / commonly used arguments are given below.
-
-    Args:
-        species: Terms to search for in Datasources
-        locations: Where to search for the terms in species
-        inlet: Inlet height such as 100m
-        instrument: Instrument name such as picarro
-        find_all: Require all search terms to be satisfied
-        start_date: Start datetime for search.
-        If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_date: End datetime for search.
-        If None an end datetime of the current datetime is set
-    Returns:
-        SearchResults or None: SearchResults object is results found, otherwise None
-    """
-    from openghg.cloud import call_function
-
-    if running_on_hub():
-        post_data: dict[str, Union[str, dict]] = {}
-        post_data["function"] = "search"
-        post_data["search_terms"] = kwargs
-
-        result = call_function(data=post_data)
-
-        content = result["content"]
-
-        found = content["found"]
-        compressed_response = content["result"]
-
-        if found:
-            data_str = decompress(compressed_response)
-            sr = SearchResults.from_json(data=data_str)
-        else:
-            sr = SearchResults()
-    else:
-        sr = _base_search(**kwargs)
-
-    return sr
-
-
-def _base_search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
+    """Search for observations or auxilliary data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
     Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
@@ -500,12 +443,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         format_inlet,
         synonyms,
     )
-
-
-    if running_on_hub():
-        raise ValueError(
-            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
-        )
 
     # Select and format the search terms
     # - ignore any kwargs which are None

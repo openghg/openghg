@@ -47,7 +47,6 @@ class SearchResults:
 
         self.hub = running_on_hub()
 
-
     def to_dict(self) -> dict:
         return {do.uuid: do.metadata for do in self.data_objects}
 
@@ -104,7 +103,6 @@ class SearchResults:
                 return do
         raise KeyError(f"Item with key {key} not found in SearchResults.")
 
-
     def __setitem__(self, key: Hashable, value: DataObject) -> None:
         """Set value based on UUID."""
         if key not in self.uuids:
@@ -119,39 +117,6 @@ class SearchResults:
             if do == value or do.uuid == value:
                 return True
         return False
-
-
-    # def to_data(self) -> Dict:
-    #     """Convert this object to a dictionary for JSON serialisation
-
-    #     Returns:
-    #         dict: Dictionary of data
-    #     """
-    #     return {
-    #         "metadata": self.data_objects,
-    #         "hub": self.hub,
-    #     }
-
-    # def to_json(self) -> str:
-    #     """Serialises the object to JSON
-
-    #     Returns:
-    #         str: JSON str
-    #     """
-    #     return json.dumps(self.to_data())
-
-    # @classmethod
-    # def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
-    #     """Create a SearchResults object from a dictionary
-
-    #     Args:
-    #         data: Serialised object
-    #     Returns:
-    #         SearchResults: SearchResults object
-    #     """
-    #     loaded = json.loads(data)
-
-    #     return cls(metadata=loaded["metadata"])
 
     def retrieve(
         self,
@@ -195,7 +160,7 @@ class SearchResults:
         ]
 
         if len(result) == 1:
-            result[0]
+            return result[0]
         return result
 
     @property
@@ -255,7 +220,10 @@ class SearchResults:
         """
         results = []
         data_objects = [do for do in self.data_objects if do.uuid in uuids]
-        results = [do.to_basedata(version=version, sort=sort, start_date=self._start_date, end_date=self._end_date) for do in data_objects]
+        results = [
+            do.to_basedata(version=version, sort=sort, start_date=self._start_date, end_date=self._end_date)
+            for do in data_objects
+        ]
 
         if len(results) == 1:
             return results[0]
