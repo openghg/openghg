@@ -53,7 +53,7 @@ def test_retrieve_by_df():
 
     co2_108m_datas = r.retrieve(dataframe=co2_108m_df)
 
-    assert len(co2_108m_datas) == 1
+    assert not isinstance(co2_108m_datas, list)
     assert co2_108m_datas.metadata["species"] == "co2"
     assert co2_108m_datas.metadata["inlet"] == "108m"
 
@@ -63,7 +63,7 @@ def test_retrieve_by_terms():
 
     co_data = r.retrieve(species="co")
 
-    assert len(co_data) == 1
+    assert not isinstance(co_data, list)
     assert co_data.metadata["species"] == "co"
     assert co_data.metadata["inlet"] == "50m"
 

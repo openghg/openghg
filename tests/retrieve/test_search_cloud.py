@@ -16,7 +16,7 @@ def set_env(monkeypatch):
 @pytest.mark.xfail(reason="Cloud tests marked for removal. Cloud code needs rewrite.")
 def test_cloud_search_with_results(mocker):
     metadata = {"site": "london"}
-    sr = SearchResults(keys={"data": [1, 2, 3]}, metadata=metadata)
+    sr = SearchResults(keys={"data": [1, 2, 3]}, data_objects=metadata)
 
     compressed_sr = compress(sr.to_json().encode("utf-8"))
 
@@ -28,7 +28,7 @@ def test_cloud_search_with_results(mocker):
 
     result = search_surface(species="co2", site="tac")
 
-    assert result.metadata == metadata
+    assert result.data_objects == metadata
 
 
 def test_cloud_search_no_results(mocker):
