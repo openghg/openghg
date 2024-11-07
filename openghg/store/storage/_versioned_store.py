@@ -6,6 +6,7 @@ from typing import Any, Callable, Generic, Optional, TypeVar
 
 from xarray import Dataset
 
+from ._index import DatetimeStoreIndex
 from ._store import Store
 
 

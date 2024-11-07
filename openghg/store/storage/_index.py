@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import cast, TypeVar
+from typing_extensions import Self
 
 import numpy as np
 import pandas as pd
 import xarray as xr
-
-
-SIT = TypeVar("SIT", bound="StoreIndex")
 
 
 class StoreIndex(ABC):
@@ -35,20 +33,20 @@ class StoreIndex(ABC):
         ...
 
     @abstractmethod
-    def conflicts(self, other: SIT | xr.Dataset) -> SIT:
+    def conflicts(self, other: Self | xr.Dataset) -> Self:
         """Return common index values from self and other."""
         ...
 
-    def conflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
+    def conflicts_found(self, other: Self | xr.Dataset) -> bool:
         """Return True if common index values found in self and other."""
         return len(self.conflicts(other)) > 0
 
     @abstractmethod
-    def nonconflicts(self, other: SIT | xr.Dataset) -> SIT:
+    def nonconflicts(self, other: Self | xr.Dataset) -> Self:
         """Return index values in other, but not in self."""
         ...
 
-    def nonconflicts_found(self, other: StoreIndex | xr.Dataset) -> bool:
+    def nonconflicts_found(self, other: Self | xr.Dataset) -> bool:
         """Return True if there are index values in other that are not in self ."""
         return len(self.nonconflicts(other)) > 0
 
@@ -57,7 +55,7 @@ class StoreIndex(ABC):
         """Restrict dataset to values in index."""
         ...
 
-    def select_conflicts(self, ds: xr.Dataset, conflicts: StoreIndex | None = None) -> xr.Dataset:
+    def select_conflicts(self, ds: xr.Dataset, conflicts: Self | None = None) -> xr.Dataset:
         """Return dataset restricted to conflicting index values.
 
         Note: this method may need to align the index values after restricting; the result of this
@@ -67,7 +65,7 @@ class StoreIndex(ABC):
             conflicts = self.conflicts(ds)
         return conflicts.select(ds)  # type:ignore
 
-    def select_nonconflicts(self, ds: xr.Dataset, nonconflicts: StoreIndex | None = None) -> xr.Dataset:
+    def select_nonconflicts(self, ds: xr.Dataset, nonconflicts: Self | None = None) -> xr.Dataset:
         """Return dataset restricted to nonconflicting index values."""
         if nonconflicts is None:
             nonconflicts = self.nonconflicts(ds)
@@ -88,7 +86,7 @@ class DatetimeStoreIndex(StoreIndex):
             self.index = pd.DatetimeIndex(times)
 
     @classmethod
-    def from_dataset(cls: type[DatetimeStoreIndex], ds: xr.Dataset) -> DatetimeStoreIndex:
+    def from_dataset(cls: type[Self], ds: xr.Dataset) -> Self:
         return cls(ds.time.values)
 
     def __len__(self) -> int:
@@ -102,6 +100,7 @@ class DatetimeStoreIndex(StoreIndex):
     def conflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
+
         intersection = self.index.intersection(other.index)
         intersection = cast(pd.DatetimeIndex, intersection)
         result = DatetimeStoreIndex(intersection)
@@ -110,6 +109,7 @@ class DatetimeStoreIndex(StoreIndex):
     def nonconflicts(self, other: DatetimeStoreIndex | xr.Dataset) -> DatetimeStoreIndex:
         if isinstance(other, xr.Dataset):
             other = DatetimeStoreIndex.from_dataset(other)
+
         diff = other.index.difference(self.index)
         diff = cast(pd.DatetimeIndex, diff)
         result = DatetimeStoreIndex(diff)
@@ -181,7 +181,7 @@ class FloorDatetimeStoreIndex(StoreIndex):
     def select(self, ds: xr.Dataset) -> xr.Dataset:
         return ds.sel(time=self.index)
 
-    def select_conflicts(self, ds: xr.Dataset, conflicts: StoreIndex | None = None) -> xr.Dataset:
+    def select_conflicts(self, ds: xr.Dataset, conflicts: Self | None = None) -> xr.Dataset:
         """Restrict `ds` to intersection of floored times and align to existing times."""
         ds_restricted = super().select_conflicts(ds, conflicts)
         other = FloorDatetimeStoreIndex.from_dataset(ds, self.freq)

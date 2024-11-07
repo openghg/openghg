@@ -21,12 +21,14 @@ logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
 
 
-class Store(ABC):
+IndexType = TypeVar("IndexType", bound=StoreIndex)
+
+class Store(ABC, Generic[IndexType]):
     """Interface for means of storing a single dataset."""
 
     @property
     @abstractmethod
-    def index(self) -> StoreIndex:
+    def index(self) -> IndexType:
         """Get index for store."""
         ...
 
@@ -130,7 +132,7 @@ class Store(ABC):
         raise NotImplementedError
 
 
-class MemoryStore(Store):
+class MemoryStore(Store[DatetimeStoreIndex]):
     """Simple in-memory implementation of Store interface."""
 
     def __init__(self, data: xr.Dataset | None = None) -> None:
@@ -173,7 +175,7 @@ class MemoryStore(Store):
 ZST = TypeVar("ZST", bound=AbstractZarrStore)
 
 
-class ZarrStore(Store, Generic[ZST]):
+class ZarrStore(Store[DatetimeStoreIndex], Generic[ZST]):
     """Zarr store for storing a single dataset."""
 
     def __init__(self, zarr_store: ZST) -> None:
