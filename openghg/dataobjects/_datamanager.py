@@ -65,6 +65,7 @@ class DataManager:
             None
         """
         from openghg.retrieve import search
+
         self.data_objects = search(uuid=self.data_objects.uuids)
 
     def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
@@ -97,8 +98,10 @@ class DataManager:
 
             with data_object.datasource as ds:
                 ds._metadata = dict(backup)
-            
-    def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Union[dict, DataObject]:
+
+    def view_backup(
+        self, uuid: Optional[str] = None, version: Optional[str] = None
+    ) -> Union[dict, DataObject]:
         """View backed-up metadata for all Datasources
         or a single Datasource if a UUID is passed in.
 

@@ -1,4 +1,5 @@
 """Module for class DataObject"""
+
 from __future__ import annotations
 
 from collections.abc import Generator, MutableMapping
@@ -25,6 +26,7 @@ class DataObject(MutableMapping):
     A DataObject acts like a dictionary of metadata, but also has methods to query and
     return data from the Datasource associated with that metadata.
     """
+
     # TODO: should this be a mutable mapping? or just a mapping? I don't really see why it should be modified...
     # Any updates should probably be propagated to the object store, which would require a different mechanism
     # ...for now, DataManager needs this to be mutable
@@ -168,7 +170,6 @@ class DataObject(MutableMapping):
         with self.metastore as metastore:
             metastore.update(where={"uuid": self.uuid}, to_update=to_update)
 
-
         self._metadata.update(to_update)  # update internal copy if metastore update successful
 
         with self.datasource as ds:
@@ -197,7 +198,7 @@ class DataObject(MutableMapping):
 
     def delete(self) -> None:
         from openghg.objectstore import delete_object
-        
+
         with self.metastore as metastore:
             metastore.delete({"uuid": self.uuid})
 
