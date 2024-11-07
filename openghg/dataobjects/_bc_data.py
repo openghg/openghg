@@ -1,9 +1,9 @@
-from ._basedata import _BaseData
+from ._basedata import BaseData
 
 __all__ = ["BoundaryConditionsData"]
 
 
-class BoundaryConditionsData(_BaseData):
+class BoundaryConditionsData(BaseData):
     """This class is used to return boundary conditions data from the get_bc function
 
     Args:

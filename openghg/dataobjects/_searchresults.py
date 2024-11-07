@@ -6,7 +6,7 @@ import pandas as pd
 import tinydb
 from zarr import storage
 
-from openghg.dataobjects import ObsData
+from openghg.dataobjects._basedata import BaseData
 from openghg.dataobjects._data_object import DataObject
 from openghg.util import running_on_hub
 
@@ -159,7 +159,7 @@ class SearchResults:
         version: str = "latest",
         sort: bool = True,
         **kwargs: Any,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> Union[BaseData, list[BaseData]]:
         """Retrieve data from object store using a filtered pandas pd.DataFrame
 
         Args:
@@ -180,7 +180,7 @@ class SearchResults:
         self,
         version: str = "latest",
         sort: bool = True,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> Union[BaseData, list[BaseData]]:
         """Retrieves all data found during the search
 
         Args:
@@ -195,10 +195,8 @@ class SearchResults:
         ]
 
         if len(result) == 1:
-            return cast(
-                ObsData, result[0]
-            )  # TODO: this should either return the base type or return the correct type for the data
-        return [cast(ObsData, x) for x in result]
+            result[0]
+        return result
 
     @property
     def uuids(self) -> list:
@@ -211,7 +209,7 @@ class SearchResults:
 
     def _retrieve_by_term(
         self, version: str, sort: bool = True, **kwargs: Any
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> Union[BaseData, list[BaseData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
@@ -243,7 +241,7 @@ class SearchResults:
 
     def _retrieve_by_uuid(
         self, uuids: Iterable, version: str = "latest", sort: bool = True
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> Union[BaseData, list[BaseData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.
@@ -258,7 +256,6 @@ class SearchResults:
         results = []
         data_objects = [do for do in self.data_objects if do.uuid in uuids]
         results = [do.to_basedata(version=version, sort=sort, start_date=self._start_date, end_date=self._end_date) for do in data_objects]
-        results = [cast(ObsData, result) for result in results]
 
         if len(results) == 1:
             return results[0]

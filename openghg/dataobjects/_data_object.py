@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections.abc import Generator, MutableMapping
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Hashable, Iterator, Optional, Union
+from typing import Any, cast, Hashable, Iterator, Optional, Union
 
 import pandas as pd
 import xarray as xr
@@ -14,7 +14,7 @@ from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 from openghg.util import daterange_overlap
 
-from ._basedata import _BaseData
+from ._basedata import BaseData
 
 DateType = Union[str, pd.Timestamp]
 
@@ -70,7 +70,7 @@ class DataObject(MutableMapping):
 
     @property
     def data_type(self) -> str:
-        return self._metadata["data_type"]
+        return cast(str, self._metadata["data_type"])
 
     def __hash__(self) -> int:
         return hash(f"{self.uuid}_{self.bucket}")
@@ -146,9 +146,9 @@ class DataObject(MutableMapping):
         start_date: Optional[DateType] = None,
         end_date: Optional[DateType] = None,
         sort: bool = False,
-    ) -> _BaseData:
+    ) -> BaseData:
         data = self.get_data(start_date, end_date, version)
-        return _BaseData(self.metadata, data=data, sort=sort)
+        return BaseData(self.metadata, data=data, sort=sort)
 
     def copy(self) -> DataObject:
         """This is needed in DataManager, which makes a copy of the metadata returned by a search."""

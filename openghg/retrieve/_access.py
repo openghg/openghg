@@ -3,7 +3,7 @@ import logging
 from io import BytesIO
 from typing import Any, Optional, Union
 
-from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
+from openghg.dataobjects._basedata import BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
     FluxData,
@@ -29,7 +29,7 @@ def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: Optional[list] = None,
     **kwargs: Any,
-) -> _BaseData:
+) -> BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
 
     Args:
@@ -793,7 +793,7 @@ def _create_keyword_string(**kwargs: Any) -> str:
 
 
 def _metadata_difference(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: list[BaseData], params: Optional[list] = None, print_output: bool = True
 ) -> dict[str, list]:
     """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
@@ -875,7 +875,7 @@ def _metadata_difference(
 
 
 def _metadata_difference_formatted(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: list[BaseData], params: Optional[list] = None, print_output: bool = True
 ) -> str:
     """Create formatted string for the difference in metadata between input objects.
 

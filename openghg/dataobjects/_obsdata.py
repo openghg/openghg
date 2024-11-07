@@ -1,10 +1,10 @@
-from ._basedata import _BaseData
+from ._basedata import BaseData
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
 from typing import Any, Iterator, Optional
 
 
-class ObsData(_BaseData):
+class ObsData(BaseData):
     """This class is used to return observations data. It be created with a preloaded xarray Dataset or
     with a UUID and version number to retrieve data from Datasource zarr store.
     """

@@ -1,5 +1,5 @@
 """
-This is used as a base for the other dataclasses and shouldn't be used directly.
+This is used as a base for the other metadata/data classes.
 """
 
 from typing import Dict, Optional, Union
@@ -12,7 +12,7 @@ logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class _BaseData:
+class BaseData:
     def __init__(
         self,
         metadata: Dict,
