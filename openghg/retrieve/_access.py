@@ -299,33 +299,6 @@ def get_obs_surface_local(
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
 
-    if start_date is not None and end_date is not None:
-        # Check if underlying data is timezone aware.
-        data_time_index = data.indexes["time"]
-        tzinfo = data_time_index.tzinfo
-
-        if tzinfo:
-            start_date_filter = timestamp_tzaware(start_date)
-            end_date_filter = timestamp_tzaware(end_date)
-        else:
-            start_date_filter = Timestamp(start_date)
-            end_date_filter = Timestamp(end_date)
-
-        end_date_filter_exclusive = end_date_filter - Timedelta(
-            1, unit="nanosecond"
-        )  # Deduct 1 ns to make the end day (date) exclusive.
-
-        # Slice the data to only cover the dates we're interested in
-        data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
-
-    try:
-        start_date_data = timestamp_tzaware(data.time[0].values)
-        end_date_data = timestamp_tzaware(data.time[-1].values)
-    except AttributeError:
-        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
-    except IndexError:
-        return None
-
     if average is not None:
         # We need to compute the value here for the operations done further down
         logger.info("Loading Dataset data into memory for resampling operations.")
