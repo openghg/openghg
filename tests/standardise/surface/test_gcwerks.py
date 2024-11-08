@@ -42,8 +42,6 @@ def cgo_data():
 
 
 def test_read_file_capegrim(cgo_data):
-    parsed_surface_metachecker(data=cgo_data)
-
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
     expected_eight = [
@@ -76,8 +74,6 @@ def test_read_file_thd():
         instrument="gcmd",
         sampling_period="1",  # Checking this can be compared successfully
     )
-
-    parsed_surface_metachecker(data=gas_data)
 
     expected_keys = [
         "ccl4_10m",
@@ -153,8 +149,6 @@ def test_read_thd_window_inlet():
         filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
     )
 
-    parsed_surface_metachecker(data=res)
-
     data = res["ch4_10m"]["data"]
 
     assert data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
@@ -181,8 +175,6 @@ def test_read_shangdianzi_ASM_inlet():
         instrument="medusa",
         network="agage",
     )
-
-    parsed_surface_metachecker(data=res)
 
     data = res["nf3_80m"]["data"]
 

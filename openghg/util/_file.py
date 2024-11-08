@@ -1,5 +1,6 @@
 import bz2
 import json
+import os
 import xarray as xr
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Optional, Union
@@ -277,6 +278,7 @@ def get_logfile_path() -> Path:
 
 #     return ds, filepath
 
+
 def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -304,3 +306,16 @@ def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callab
         xr_open_fn = lambda x : align_lat_lon(xr.open_dataset(x), domain)
 
     return xr_open_fn, filepath
+
+
+def permissions(file_path: Union[str, Path]) -> tuple[str, str, str]:
+    """Return r, w, and/or x permissions for user, group, and other."""
+    perms = oct(os.stat(file_path).st_mode)
+    user, group, other = perms[-3], perms[-2], perms[-1]
+
+    def bits_to_perms(bit_str: str) -> str:
+        bits = [int(b) for b in bin(int(bit_str))[-3:]]
+        perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
+        return perms
+
+    return bits_to_perms(user), bits_to_perms(group), bits_to_perms(other)

@@ -33,6 +33,7 @@ from ._file import (
     read_header,
     # open_and_align_dataset,
     check_function_open_nc,
+    permissions,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
