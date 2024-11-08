@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, MutableMapping
+from collections.abc import Iterable, Generator, MutableMapping
 from contextlib import contextmanager
 from typing import Any, cast, Hashable, Iterator, Optional, Union
 
@@ -203,3 +203,69 @@ class DataObject(MutableMapping):
         # need to delete Datasource object since closing the datasource context manager save
         # some metadata
         delete_object(bucket=self.bucket, key=key)  # TODO: this should be done by Datasource?
+
+
+class DataObjectContainer:
+    def __init__(
+        self,
+        data_objects: Iterable[DataObject],
+    ) -> None:
+        """Create a container for DataObjects.
+
+        Args:
+            data_objects: Iterable (e.g. list) of DataObjects.
+
+        Returns:
+            None
+        """
+        self.data_objects = list(data_objects) or []
+
+    def to_dict(self) -> dict:
+        return {do.uuid: do.metadata for do in self.data_objects}
+
+    def __str__(self) -> str:
+        return str(self.data_objects)
+
+    def __repr__(self) -> str:
+        return f"DataObjectContainer({self.__str__()})"
+
+    def __bool__(self) -> bool:
+        return bool(self.data_objects)
+
+    def __len__(self) -> int:
+        return len(self.data_objects)
+
+    def __iter__(self) -> Iterator:
+        return iter(self.data_objects)
+
+    @property
+    def uuids(self) -> list[str]:
+        """Return the UUIDs of the found data
+
+        Returns:
+            list: List of UUIDs
+        """
+        return [do.uuid for do in self.data_objects]
+
+    # NOTE: these get/set item methods would probably be faster if we stored the data by UUID.
+    # These methods are needed by `DataManager`, and eventually, it would be better if DataObjects could
+    # be updated directly.
+
+    def __getitem__(self, key: Hashable) -> DataObject:
+        for do in self.data_objects:
+            if key in (do, do.uuid):
+                return do
+        raise KeyError(f"Item with key {key} not found.")
+
+    def __setitem__(self, key: Hashable, value: DataObject) -> None:
+        """Set value based on UUID."""
+        if key not in self.uuids:
+            self.data_objects.append(value)
+        else:
+            old = next(do for do in self.data_objects if do.uuid == key)
+            self.data_objects.remove(old)
+            self.data_objects.append(value)
+
+    def __contains__(self, value: Union[str, DataObject]) -> bool:
+        """Return True if `value` is a DataObject or UUID of a DataObject in the container."""
+        return any(value in (do, do.uuid) for do in self)

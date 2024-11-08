@@ -6,7 +6,7 @@ import pandas as pd
 import tinydb
 
 from openghg.dataobjects._basedata import BaseData
-from openghg.objectstore import DataObject
+from openghg.objectstore import DataObject, DataObjectContainer
 from openghg.util import running_on_hub
 
 
@@ -16,7 +16,7 @@ logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class SearchResults:
+class SearchResults(DataObjectContainer):
     """This class is used to return data from the search function.
 
     Printing a `SearchResults` object displays a table of results.
@@ -48,8 +48,9 @@ class SearchResults:
         Returns:
             None
         """
+        super().__init__(data_objects)
+
         self.start_result = start_result
-        self.data_objects = list(data_objects) or []
 
         self._start_date = pd.to_datetime(start_date) if start_date else None
         self._end_date = pd.to_datetime(end_date) if end_date else None
@@ -57,9 +58,6 @@ class SearchResults:
         self._results = None
 
         self.hub = running_on_hub()
-
-    def to_dict(self) -> dict:
-        return {do.uuid: do.metadata for do in self.data_objects}
 
     @property
     def results(self) -> pd.DataFrame:
@@ -94,38 +92,6 @@ class SearchResults:
 
     def __repr__(self) -> str:
         return f"SearchResults({self.data_objects}, start_result={self.start_result}, start_date={self._start_date}, end_date={self._end_date})"
-
-    def __bool__(self) -> bool:
-        return bool(self.data_objects)
-
-    def __len__(self) -> int:
-        return len(self.data_objects)
-
-    def __iter__(self) -> Iterator:
-        return iter(self.data_objects)
-
-    # NOTE: these get/set item methods would probably be faster if we stored the data by UUID.
-    # These methods are needed by `DataManager`, and eventually, it would be better if DataObjects could
-    # be updated directly.
-
-    def __getitem__(self, key: Hashable) -> DataObject:
-        for do in self.data_objects:
-            if key in (do, do.uuid):
-                return do
-        raise KeyError(f"Item with key {key} not found in SearchResults.")
-
-    def __setitem__(self, key: Hashable, value: DataObject) -> None:
-        """Set value based on UUID."""
-        if key not in self.uuids:
-            self.data_objects.append(value)
-        else:
-            old = next(do for do in self.data_objects if do.uuid == key)
-            self.data_objects.remove(old)
-            self.data_objects.append(value)
-
-    def __contains__(self, value: Union[str, DataObject]) -> bool:
-        """Return True if `value` is a DataObject or UUID of a DataObject in the SearchResults."""
-        return any(value in (do, do.uuid) for do in self)
 
     def retrieve(
         self,
@@ -173,15 +139,6 @@ class SearchResults:
         if len(result) == 1:
             return result[0]
         return result
-
-    @property
-    def uuids(self) -> list[str]:
-        """Return the UUIDs of the found data
-
-        Returns:
-            list: List of UUIDs
-        """
-        return [do.uuid for do in self.data_objects]
 
     def _retrieve_by_term(
         self, version: str, sort: bool = True, **kwargs: Any
