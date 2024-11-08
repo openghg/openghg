@@ -57,10 +57,6 @@ class BaseData:
             if sort and not self.data.indexes["time"].is_monotonic_increasing:
                 self.data = self.data.sortby("time")
 
-            # HACK: to deal with this issue: https://github.com/pydata/xarray/issues/9753
-            if len(self.data.time) == 1:
-                self.data = self.data.compute()
-
     def __bool__(self) -> bool:
         return bool(self.data)
 
