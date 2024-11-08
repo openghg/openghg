@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union
 import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
@@ -74,13 +74,7 @@ def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     Returns:
         pandas.Timestamp: Timezone aware
     """
-
-    if not isinstance(timestamp, Timestamp):
-        _timestamp = Timestamp(timestamp)
-        if pd.isnull(_timestamp):  # type: ignore
-            raise ValueError(f"{timestamp} could not be converted to Timestamp.")
-        else:
-            timestamp = cast(pd.Timestamp, _timestamp)
+    timestamp = pd.to_datetime(timestamp)
 
     if timestamp.tzinfo is None:
         return timestamp.tz_localize(tz="UTC")
@@ -106,9 +100,7 @@ def timestamp_epoch() -> Timestamp:
     Returns:
         pandas.Timestamp: Timestamp object at epoch
     """
-    from pandas import Timestamp
-
-    return timestamp_tzaware(Timestamp("1970-1-1 00:00:00"))
+    return timestamp_tzaware(pd.to_datetime(0))
 
 
 def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:

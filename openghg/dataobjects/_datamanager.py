@@ -34,7 +34,7 @@ class DataManager(DataObjectContainer):
             uuid = _uuid
         return uuid  # type: ignore
 
-    def _check_datatypes(self, uuid: str | DataObject | Iterable[str | DataObject]) -> str:
+    def _check_datatypes_uuids(self, uuid: str | DataObject | Iterable[str | DataObject]) -> str:
         """Check the UUIDs are correct and ensure they all belong to a single data type.
 
         Args:
@@ -86,7 +86,7 @@ class DataManager(DataObjectContainer):
 
         version = str(version)
 
-        dtype = self._check_datatypes(uuid=uuid)
+        dtype = self._check_datatypes_uuids(uuid=uuid)
 
         try:
             data_object = next(do for do in self.data_objects if do.uuid == uuid)
@@ -103,9 +103,7 @@ class DataManager(DataObjectContainer):
             with data_object.datasource as ds:
                 ds._metadata = dict(backup)
 
-    def view_backup(
-        self, uuid: str | None = None, version: str | None = None
-    ) -> dict | DataObject:
+    def view_backup(self, uuid: str | None = None, version: str | None = None) -> dict | DataObject:
         """View backed-up metadata for all Datasources or a single Datasource if a UUID is passed in.
 
         Args:
@@ -148,38 +146,37 @@ class DataManager(DataObjectContainer):
 
         uuids = self._convert_uuids(uuids)
 
-        self._check_datatypes(uuids)  # TODO: this name isn't really fitting...
+        self._check_datatypes_uuids(uuids)  # TODO: this name isn't really fitting...
 
         for uuid in uuids:
-            if uuid in self:
-                do = self[uuid]
-                updated = False
+            do = self[uuid]
+            updated = False
 
-                # Save a backup of the metadata for now
-                current_metadata = do.copy()
+            # Save a backup of the metadata for now
+            current_metadata = do.copy()
 
-                version = str(len(self._backup[do.uuid].keys()) + 1)
-                self._latest = version
-                self._backup[do.uuid][version] = copy.deepcopy(current_metadata)
+            version = str(len(self._backup[do.uuid].keys()) + 1)
+            self._latest = version
+            self._backup[do.uuid][version] = copy.deepcopy(current_metadata)
 
-                if to_delete is not None and to_delete:
-                    if not isinstance(to_delete, Sequence) or isinstance(to_delete, str):
-                        to_delete = [to_delete]
+            if to_delete is not None and to_delete:
+                if not isinstance(to_delete, Sequence) or isinstance(to_delete, str):
+                    to_delete = [to_delete]
 
-                    # Do a quick check to make sure we're not being asked to delete all the metadata
-                    n_records = len(self._backup[do.uuid][version])
-                    if len(to_delete) == n_records:
-                        raise ValueError("We can't remove all the metadata associated with this Datasource.")
+                # Do a quick check to make sure we're not being asked to delete all the metadata
+                n_records = len(self._backup[do.uuid][version])
+                if len(to_delete) == n_records:
+                    raise ValueError("We can't remove all the metadata associated with this Datasource.")
 
-                    do.delete_metadata(to_delete)
-                    updated = True
+                do.delete_metadata(to_delete)
+                updated = True
 
-                if to_update is not None and to_update:
-                    do.update_metadata(to_update)
-                    updated = True
+            if to_update is not None and to_update:
+                do.update_metadata(to_update)
+                updated = True
 
-                if updated:
-                    logger.info(f"Modified metadata for {do.uuid}.")
+            if updated:
+                logger.info(f"Modified metadata for {do.uuid}.")
 
     def delete_datasource(self, uuids: list | str | DataObject) -> None:
         """Delete Datasource(s) in the object store.
@@ -197,13 +194,12 @@ class DataManager(DataObjectContainer):
         if not isinstance(uuids, list):
             uuids = [uuids]
 
-        self._check_datatypes(uuids)
+        self._check_datatypes_uuids(uuids)
 
         for uuid in uuids:
-            if uuid in self:
-                do = self[uuid]
-                do.delete()
-                logger.info(f"Deleted Datasource with UUID {do.uuid}.")
+            do = self[uuid]
+            do.delete()
+            logger.info(f"Deleted Datasource with UUID {do.uuid}.")
 
 
 def data_manager(data_type: str, store: str, **kwargs: dict) -> DataManager:

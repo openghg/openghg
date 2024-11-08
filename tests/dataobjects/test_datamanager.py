@@ -80,8 +80,6 @@ def test_delete_footprint_data(footprint_read):
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         uuid = metastore.select("uuid")[0]
 
-    print("Want to delete datasource with UUID", uuid)
-
     ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
@@ -100,7 +98,7 @@ def test_delete_footprint_data(footprint_read):
 
     # Let's open the Datasource again and make sure we get a new empty object
     with pytest.raises(ObjectStoreError):
-         print(Datasource(bucket=bucket, uuid=uuid))
+         Datasource(bucket=bucket, uuid=uuid)
 
     assert not exists(bucket=bucket, key=zarr_store_key)
 
@@ -112,16 +110,16 @@ def test_delete_footprint_data(footprint_read):
 def test_object_store_not_in_metadata():
     # metadata = {"object_store" : ""}
     search_res = data_manager(data_type="surface", site="tac", species="co2", store="user")
-    uuid = next(iter(search_res.data_objects))
+    uuid = next(iter(search_res.uuids))
 
-    assert "object_store" not in search_res.data_objects[uuid]
+    assert "object_store" not in search_res[uuid]
 
-    with_obj_store = search_res.data_objects
+    with_obj_store = search_res
     with_obj_store[uuid]["object_store"] = "/tmp/store"
 
     dm = DataManager(data_objects=with_obj_store)
 
-    assert "object_store" not in dm.data_objects[uuid]
+    assert "object_store" not in dm[uuid]
 
 
 def test_find_modify_metadata():
