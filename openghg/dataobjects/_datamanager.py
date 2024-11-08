@@ -1,50 +1,56 @@
 from collections import defaultdict
 import copy
 import logging
-from typing import Dict, List, Set, Optional, Union
+from collections.abc import Iterable, Sequence
 
 from openghg.objectstore.metastore import open_metastore
-from openghg.objectstore import DataObject, get_writable_buckets
+from openghg.objectstore import DataObject, DataObjectContainer, get_writable_buckets
 from openghg.types import ObjectStoreError
-from ._searchresults import SearchResults
+
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class DataManager:
-    def __init__(self, data_objects: SearchResults):
-        # We don't want the object store in this metadata as we want it to be the
-        # unadulterated metadata to properly reflect what's stored.
-        self.data_objects = data_objects
+class DataManager(DataObjectContainer):
+    def __init__(self, data_objects: Iterable[DataObject]):
+        super().__init__(data_objects)
         self._backup: defaultdict[str, dict[str, DataObject]] = defaultdict(dict)
         self._latest = "latest"
 
-    def __str__(self) -> str:
-        return str(self.data_objects)
+    def _convert_uuids(self, uuid: str | DataObject | Iterable[str | DataObject]) -> list[str]:
+        """Convert UUIDs to list of strings."""
+        if isinstance(uuid, str):
+            uuid = [uuid]
+        elif isinstance(uuid, DataObject):
+            uuid = [uuid.uuid]
+        else:
+            _uuid = []
+            for u in uuid:
+                if isinstance(u, DataObject):
+                    _uuid.append(u.uuid)
+                else:
+                    _uuid.append(u)
+            uuid = _uuid
+        return uuid  # type: ignore
 
-    def __bool__(self) -> bool:
-        return bool(self.data_objects)
-
-    def _check_datatypes(self, uuid: Union[str, DataObject, list]) -> str:
-        """Check the UUIDs are correct and ensure they all
-        belong to a single data type
+    def _check_datatypes(self, uuid: str | DataObject | Iterable[str | DataObject]) -> str:
+        """Check the UUIDs are correct and ensure they all belong to a single data type.
 
         Args:
             uuid: UUID(s) to check
         Returns:
             None
         """
-        if not isinstance(uuid, list):
-            uuid = [uuid]
+        uuid = self._convert_uuids(uuid)
 
-        invalid_keys = [k for k in uuid if k not in self.data_objects]
+        invalid_keys = [k for k in uuid if k not in self]
 
         if invalid_keys:
             raise ValueError(f"Invalid UUIDs: {invalid_keys}")
 
         # We should only have one data type
-        data_types: Set[str] = {do["data_type"] for do in self.data_objects}
+        data_types: set[str] = {do["data_type"] for do in self}
 
         if not data_types:
             raise ValueError("Unable to read data_type from metadata.")
@@ -64,9 +70,9 @@ class DataManager:
         """
         from openghg.retrieve import search
 
-        self.data_objects = search(uuid=self.data_objects.uuids)
+        self.data_objects = list(search(uuid=self.uuids))
 
-    def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
+    def restore(self, uuid: str, version: str | int = "latest") -> None:
         """Restore a backed-up version of a Datasource's metadata.
 
         Args:
@@ -83,13 +89,13 @@ class DataManager:
         dtype = self._check_datatypes(uuid=uuid)
 
         try:
-            data_object = [do for do in self.data_objects if do.uuid == uuid][0]
+            data_object = next(do for do in self.data_objects if do.uuid == uuid)
         except IndexError:
             raise ValueError(f"UUID {uuid} not found in DataManager.")
 
         with open_metastore(data_type=dtype, bucket=data_object.bucket) as metastore:
             backup = self._backup[uuid][version]
-            self.data_objects[uuid] = backup
+            self[uuid] = backup
 
             metastore.delete({"uuid": uuid})
             metastore.insert(dict(backup))
@@ -98,13 +104,13 @@ class DataManager:
                 ds._metadata = dict(backup)
 
     def view_backup(
-        self, uuid: Optional[str] = None, version: Optional[str] = None
-    ) -> Union[dict, DataObject]:
-        """View backed-up metadata for all Datasources
-        or a single Datasource if a UUID is passed in.
+        self, uuid: str | None = None, version: str | None = None
+    ) -> dict | DataObject:
+        """View backed-up metadata for all Datasources or a single Datasource if a UUID is passed in.
 
         Args:
             uuid: UUID of Datasource
+            version: version of backup to view
         Returns:
             dict: Dictionary of versioned metadata
         """
@@ -119,18 +125,20 @@ class DataManager:
 
     def update_metadata(
         self,
-        uuids: Union[list[Union[str, DataObject]], str, DataObject],
-        to_update: Optional[Dict] = None,
-        to_delete: Union[str, List, None] = None,
+        uuids: Iterable[str | DataObject] | str | DataObject,
+        to_update: dict | None = None,
+        to_delete: str | Sequence[str] | None = None,
     ) -> None:
-        """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
+        """Update the metadata associated with data.
+
+        This takes UUIDs of Datasources and updates the associated metadata.
+        To update metadata pass in a dictionary of key/value pairs to update.
         To delete metadata pass in a list of keys to delete.
 
         Args:
-            uuid: UUID(s) of Datasources to be updated.
+            uuids: UUID(s) of Datasources to be updated.
             to_update: Dictionary of metadata to add/update. New key/value pairs will be added.
-            If the key already exists in the metadata the value will be updated.
+                If the key already exists in the metadata the value will be updated.
             to_delete: Key(s) to delete from the metadata
         Returns:
             None
@@ -138,14 +146,13 @@ class DataManager:
         if to_update is None and to_delete is None:
             return None
 
-        if not isinstance(uuids, list):
-            uuids = [uuids]
+        uuids = self._convert_uuids(uuids)
 
         self._check_datatypes(uuids)  # TODO: this name isn't really fitting...
 
         for uuid in uuids:
-            if uuid in self.data_objects:
-                do = self.data_objects[uuid]
+            if uuid in self:
+                do = self[uuid]
                 updated = False
 
                 # Save a backup of the metadata for now
@@ -156,7 +163,7 @@ class DataManager:
                 self._backup[do.uuid][version] = copy.deepcopy(current_metadata)
 
                 if to_delete is not None and to_delete:
-                    if not isinstance(to_delete, list):
+                    if not isinstance(to_delete, Sequence) or isinstance(to_delete, str):
                         to_delete = [to_delete]
 
                     # Do a quick check to make sure we're not being asked to delete all the metadata
@@ -174,14 +181,15 @@ class DataManager:
                 if updated:
                     logger.info(f"Modified metadata for {do.uuid}.")
 
-    def delete_datasource(self, uuids: Union[list, str, DataObject]) -> None:
+    def delete_datasource(self, uuids: list | str | DataObject) -> None:
         """Delete Datasource(s) in the object store.
+
         At the moment we only support deleting the complete Datasource.
 
         NOTE: Make sure you really want to delete the Datasource(s)
 
         Args:
-            uuid: UUID(s) of objects to delete
+            uuids: UUID(s) of objects to delete
         Returns:
             None
         """
@@ -192,13 +200,13 @@ class DataManager:
         self._check_datatypes(uuids)
 
         for uuid in uuids:
-            if uuid in self.data_objects:
-                do = self.data_objects[uuid]
+            if uuid in self:
+                do = self[uuid]
                 do.delete()
                 logger.info(f"Deleted Datasource with UUID {do.uuid}.")
 
 
-def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+def data_manager(data_type: str, store: str, **kwargs: dict) -> DataManager:
     """Lookup the data / metadata you'd like to modify.
 
     Args:

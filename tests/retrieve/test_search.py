@@ -442,11 +442,11 @@ def previous_htr_footprint_setup():
 
     # Find this footprint and update the metadata
     dm = data_manager(data_type="footprints", site="TAC", inlet="185m", time_resolved=True, store="user")
-    uuid = next(iter(dm.data_objects))
+    uuid = next(iter(dm.uuids))
 
     # Removed time_resolved key
     to_delete = "time_resolved"
-    value = dm.data_objects[uuid][to_delete]
+    value = dm[uuid][to_delete]
     dm.update_metadata(uuids=uuid, to_delete=to_delete)
 
     # Add high_time_resolution key
@@ -459,7 +459,7 @@ def previous_htr_footprint_setup():
     dm = data_manager(
         data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user"
     )
-    uuid = next(iter(dm.data_objects))
+    uuid = next(iter(dm.uuids))
     dm.delete_datasource(uuids=uuid)
 
 

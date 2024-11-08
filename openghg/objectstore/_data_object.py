@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Generator, MutableMapping
 from contextlib import contextmanager
-from typing import Any, cast, Hashable, Iterator, Optional, Union
+from typing import Any, Sequence, cast, Hashable, Iterator, Optional, Union
 
 import pandas as pd
 import xarray as xr
@@ -168,7 +168,7 @@ class DataObject(MutableMapping):
         with self.datasource as ds:
             ds._metadata.update(to_update)
 
-    def delete_metadata(self, to_delete: list[str]) -> None:
+    def delete_metadata(self, to_delete: Sequence[str]) -> None:
         # TODO `to_update` needs to be formatted...
         if "uuid" in to_delete:
             raise ValueError("Cannot delete UUID.")
@@ -227,7 +227,7 @@ class DataObjectContainer:
         return str(self.data_objects)
 
     def __repr__(self) -> str:
-        return f"DataObjectContainer({self.__str__()})"
+        return f"{type(self)}({self.__str__()})"
 
     def __bool__(self) -> bool:
         return bool(self.data_objects)
