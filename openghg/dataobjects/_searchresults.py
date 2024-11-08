@@ -155,7 +155,7 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         result = [
-            do.to_basedata(version=version, start_date=self._start_date, end_date=self._end_date, sort=sort)
+            BaseData.from_data_object(do, version=version, start_date=self._start_date, end_date=self._end_date, sort=sort)
             for do in self.data_objects
         ]
 
@@ -221,7 +221,7 @@ class SearchResults:
         results = []
         data_objects = [do for do in self.data_objects if do.uuid in uuids]
         results = [
-            do.to_basedata(version=version, sort=sort, start_date=self._start_date, end_date=self._end_date)
+            BaseData.from_data_object(do, version=version, sort=sort, start_date=self._start_date, end_date=self._end_date)
             for do in data_objects
         ]
 

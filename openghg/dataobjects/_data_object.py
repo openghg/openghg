@@ -15,7 +15,6 @@ from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 from openghg.util import daterange_overlap
 
-from ._basedata import BaseData
 
 DateType = Union[str, pd.Timestamp]
 
@@ -141,16 +140,6 @@ class DataObject(MutableMapping):
             return any(daterange_overlap(existing, new_daterange) for existing in date_keys)
 
         return True
-
-    def to_basedata(
-        self,
-        version: str = "latest",
-        start_date: Optional[DateType] = None,
-        end_date: Optional[DateType] = None,
-        sort: bool = False,
-    ) -> BaseData:
-        data = self.get_data(start_date, end_date, version)
-        return BaseData(self.metadata, data=data, sort=sort)
 
     def copy(self) -> DataObject:
         """This is needed in DataManager, which makes a copy of the metadata returned by a search."""

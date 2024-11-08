@@ -1,15 +1,25 @@
 """
 This is used as a base for the other metadata/data classes.
 """
+from __future__ import annotations
 
-from typing import Dict, Optional, Union
-from openghg.store.storage import LocalZarrStore
-import xarray as xr
-from pandas import Timestamp, Timedelta
 import logging
+from typing import Dict, Iterable, Optional, overload, Union
+from typing_extensions import Self
+
+import pandas as pd
+import xarray as xr
+
+from openghg.store.storage import LocalZarrStore
+from openghg.types import HasMetadataAndData
+from ._data_object import DataObject
+
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+DateType = Union[str, pd.Timestamp]
 
 
 class BaseData:
@@ -19,8 +29,8 @@ class BaseData:
         data: Optional[xr.Dataset] = None,
         uuid: Optional[str] = None,
         version: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        start_date: Optional[Union[str, pd.Timestamp]] = None,
+        end_date: Optional[Union[str, pd.Timestamp]] = None,
         sort: bool = True,
         elevate_inlet: bool = False,
         attrs_to_check: Optional[Dict] = None,
@@ -92,9 +102,9 @@ class BaseData:
                 sorted = True
 
                 if self.data.time.size > 1:
-                    start_date = start_date - Timedelta("1s")
+                    start_date = start_date - pd.Timedelta("1s")
                     # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
-                    end_date = end_date - Timedelta("1s")
+                    end_date = end_date - pd.Timedelta("1s")
 
                     # TODO - I feel we should do this in a tider way
                     start_date = start_date.tz_localize(None)
@@ -117,3 +127,31 @@ class BaseData:
 
     def __str__(self) -> str:
         return f"Data: {self.data}\nMetadata: {self.metadata}"
+
+    @classmethod
+    def from_data_object(
+        cls,
+        do: DataObject,
+        version: str = "latest",
+        start_date: Optional[DateType] = None,
+        end_date: Optional[DateType] = None,
+        sort: bool = False,
+    ) -> Self:
+        data = do.get_data(start_date, end_date, version)
+        return cls(do.metadata, data=data, sort=sort)
+
+    @overload
+    @classmethod
+    def cast(cls, other: HasMetadataAndData) -> Self:
+        ...
+
+    @overload
+    @classmethod
+    def cast(cls, other: Iterable[HasMetadataAndData]) -> list[Self]:
+        ...
+
+    @classmethod
+    def cast(cls, other: Union[HasMetadataAndData, Iterable[HasMetadataAndData]]) -> Union[Self, list[Self]]:
+        if isinstance(other, Iterable):
+            return [cls(metadata=x.metadata, data=x.data) for x in other]
+        return cls(metadata=other.metadata, data=other.data)

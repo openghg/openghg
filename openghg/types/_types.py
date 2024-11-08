@@ -8,6 +8,7 @@ from typing import (
     DefaultDict,
     Dict,
     List,
+    MutableMapping,
     Tuple,
     Union,
     Optional,
@@ -51,7 +52,7 @@ class HasMetadataAndData(Protocol):
     metadata: dict
     data: xr.Dataset
 
-    def __init__(self, metadata: dict, data: xr.Dataset) -> None: ...
+    def __init__(self, metadata: MutableMapping, data: xr.Dataset, *args: Any, **kwargs: Any) -> None: ...
 
 
 CT = TypeVar("CT", bound="Comparable")
