@@ -261,7 +261,8 @@ def check_function_open_nc(
 
     Args:
         filepath: Path or list of filepaths
-        realign_on_domain: When present, realign the data on the given domain
+        realign_on_domain: When present, realign the data on the given domain. Option
+        usable with footprints or flux data but not observations and boundary conditions.
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
