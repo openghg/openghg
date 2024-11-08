@@ -321,13 +321,12 @@ def test_get_obs_column():
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
 
+
 def test_get_obs_column_max_level():
     # test max level defaults to highest available if out of range
     column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
     obscolumn = column_data.data
     assert np.isclose(obscolumn["mf"][0], 1818.2135)
-
-
 
 
 def test_get_flux():
@@ -432,7 +431,7 @@ def test_get_footprint_no_result():
 def test_get_obs_surface_elevate_inlets():
     """Test if searching by range for multiple inlets returns a combined dataset with
     an "inlet" data variable.
-     """
+    """
     result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
 
-    assert "inlet"in result.data.data_vars
+    assert "inlet" in result.data.data_vars

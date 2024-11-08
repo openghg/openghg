@@ -251,6 +251,7 @@ def get_logfile_path() -> Path:
 
 # def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dataset, multiPathType]:
 #     """
+#     DON'T HESITATE THIS FUNCTION. I let it it case it could help for the refont of check_function_open_nc
 #     Check the filepath input to choose which xarray open function to use:
 #      - Path or single item List - use open_dataset
 #      - multiple item List - use open_mfdataset
@@ -273,7 +274,7 @@ def get_logfile_path() -> Path:
 #             ds = xr.open_dataset(filepath) # type: ignore
 #             ds = align_lat_lon(ds, domain)
 #     else:
-#         ds = xr.open_dataset(filepath) # type: ignore 
+#         ds = xr.open_dataset(filepath) # type: ignore
 #         ds = align_lat_lon(ds, domain)
 
 #     return ds, filepath
@@ -298,12 +299,12 @@ def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callab
 
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn : Callable = partial(xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, domain))
+            xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, domain))
         else:
-            xr_open_fn = lambda x : align_lat_lon(xr.open_dataset(x), domain)
+            xr_open_fn = lambda x: align_lat_lon(xr.open_dataset(x), domain)
             filepath = filepath[0]
     else:
-        xr_open_fn = lambda x : align_lat_lon(xr.open_dataset(x), domain)
+        xr_open_fn = lambda x: align_lat_lon(xr.open_dataset(x), domain)
 
     return xr_open_fn, filepath
 

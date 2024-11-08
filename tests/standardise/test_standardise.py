@@ -313,7 +313,7 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
-@pytest.mark.parametrize("source_format", ["paris","flexpart"])
+@pytest.mark.parametrize("source_format", ["paris", "flexpart"])
 def test_standardise_footprint_flexpart(source_format):
     """
     Checking FLEXPART footprints can be added using either "paris" or "flexpart"
@@ -594,11 +594,12 @@ def test_standardise_flux_timeseries():
 
 
 def test_standardise_sorting_true(caplog):
-    """ Testing only the sorting of files here"""
+    """Testing only the sorting of files here"""
 
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     standardise_surface(
         store="user",
@@ -610,7 +611,7 @@ def test_standardise_sorting_true(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=True
+        sort_files=True,
     )
 
     log_messages = [record.message for record in caplog.records]
@@ -619,12 +620,13 @@ def test_standardise_sorting_true(caplog):
 
 
 def test_standardise_sorting_false(caplog):
-    """ Testing only the sorting of files here"""
+    """Testing only the sorting of files here"""
 
     clear_test_stores()
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     standardise_surface(
         store="user",
@@ -636,7 +638,7 @@ def test_standardise_sorting_false(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=False
+        sort_files=False,
     )
 
     log_messages = [record.message for record in caplog.records]
