@@ -1,5 +1,6 @@
+from collections.abc import Hashable, Iterator, Iterable
 import logging
-from typing import Any, Hashable, Iterator, cast, Optional, TypeVar, Union, Iterable
+from typing import Any, cast, Optional, Union
 
 import pandas as pd
 import tinydb
@@ -11,30 +12,42 @@ from openghg.util import running_on_hub
 
 __all__ = ["SearchResults"]
 
-T = TypeVar("T", bound="SearchResults")
-
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class SearchResults:
-    """This class is used to return data from the search function. It
-    has member functions to retrieve data from the object store.
+    """This class is used to return data from the search function.
 
-    Args:
-        keys: Dictionary of keys keyed by Datasource UUID
-        metadata: Dictionary of metadata keyed by Datasource UUID
-        start_result: ?
+    Printing a `SearchResults` object displays a table of results.
+
+    The `.results` attribute contains a pandas DataFrame with the metadata
+    of the search results.
+
+    Filtering the results DataFrame and passing the filtered DataFrame to
+    the `.retrive()` method will retrieve the data for those results.
+
+    The `.retrieve_all()` method retrieves data for all search results.
     """
 
-    # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
         self,
-        data_objects: Optional[list[DataObject]] = None,
+        data_objects: Iterable[DataObject],
         start_result: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-    ):
+    ) -> None:
+        """Create a SearchResults object.
+
+        Args:
+            data_objects: Iterable (e.g. list) of DataObjects.
+            start_result: key to use in first column of `results` DataFrame
+            start_date: start date to slice data to when retrieving
+            end_date: end date to slice data to when retrieving
+
+        Returns:
+            None
+        """
         self.start_result = start_result
         self.data_objects = data_objects or []
 
@@ -61,7 +74,7 @@ class SearchResults:
         if self.start_result is not None and self.start_result in df.columns:
             cols = list(df.columns)
             cols.remove(self.start_result)
-            cols = [self.start_result] + cols
+            cols = [self.start_result, *cols]
             df = cast(pd.DataFrame, df[cols])
 
         self._results = df
@@ -97,7 +110,7 @@ class SearchResults:
 
     def __getitem__(self, key: Hashable) -> DataObject:
         for do in self.data_objects:
-            if do == key or do.uuid == key:
+            if key in (do, do.uuid):
                 return do
         raise KeyError(f"Item with key {key} not found in SearchResults.")
 
@@ -106,15 +119,13 @@ class SearchResults:
         if key not in self.uuids:
             self.data_objects.append(value)
         else:
-            old = [do for do in self.data_objects if do.uuid == key][0]
+            old = next(do for do in self.data_objects if do.uuid == key)
             self.data_objects.remove(old)
             self.data_objects.append(value)
 
-    def __contains__(self, value: Any) -> bool:
-        for do in self:
-            if do == value or do.uuid == value:
-                return True
-        return False
+    def __contains__(self, value: Union[str, DataObject]) -> bool:
+        """Return True if `value` is a DataObject or UUID of a DataObject in the SearchResults."""
+        return any(value in (do, do.uuid) for do in self)
 
     def retrieve(
         self,
@@ -164,7 +175,7 @@ class SearchResults:
         return result
 
     @property
-    def uuids(self) -> list:
+    def uuids(self) -> list[str]:
         """Return the UUIDs of the found data
 
         Returns:
@@ -178,7 +189,7 @@ class SearchResults:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
-        ObsData object(s).
+        BaseData object(s).
 
         Args:
             version: Version of data requested from Datasource. Default = "latest".
@@ -205,7 +216,7 @@ class SearchResults:
         return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
 
     def _retrieve_by_uuid(
-        self, uuids: Iterable, version: str = "latest", sort: bool = True
+        self, uuids: Iterable[str], version: str = "latest", sort: bool = True
     ) -> Union[BaseData, list[BaseData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
@@ -216,7 +227,7 @@ class SearchResults:
             version: Version of data requested from Datasource. Default = "latest".
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
         Returns:
-            ObsData / List[ObsData]: ObsData object(s)
+            BaseData / List[BaseData]: BaseData object(s)
         """
         results = []
         data_objects = [do for do in self.data_objects if do.uuid in uuids]
