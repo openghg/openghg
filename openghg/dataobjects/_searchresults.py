@@ -49,7 +49,7 @@ class SearchResults:
             None
         """
         self.start_result = start_result
-        self.data_objects = data_objects or []
+        self.data_objects = list(data_objects) or []
 
         self._start_date = pd.to_datetime(start_date) if start_date else None
         self._end_date = pd.to_datetime(end_date) if end_date else None
