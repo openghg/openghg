@@ -15,7 +15,7 @@ from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
-from openghg.dataobjects._data_object import DataObject
+from openghg.objectstore import DataObject
 from ._search_helpers import process_search_kwargs
 
 logger = logging.getLogger("openghg.retrieve")

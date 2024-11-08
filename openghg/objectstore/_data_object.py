@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Generator, MutableMapping
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Any, cast, Hashable, Iterator, Optional, Union
 
 import pandas as pd

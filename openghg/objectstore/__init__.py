@@ -55,3 +55,4 @@ from ._config import (
     create_default_config,
     get_metakey_defaults,
 )
+from ._data_object import DataObject

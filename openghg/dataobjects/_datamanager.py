@@ -1,14 +1,12 @@
 from collections import defaultdict
 import copy
 import logging
-from typing import DefaultDict, Dict, List, Set, Optional, Union
+from typing import Dict, List, Set, Optional, Union
 
-from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
-from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.objectstore import DataObject, get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
 from ._searchresults import SearchResults
-from ._data_object import DataObject
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

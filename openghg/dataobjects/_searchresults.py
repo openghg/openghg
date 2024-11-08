@@ -1,13 +1,11 @@
-import json
 import logging
-from typing import Any, Hashable, Iterator, cast, Dict, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, Hashable, Iterator, cast, Optional, TypeVar, Union, Iterable
 
 import pandas as pd
 import tinydb
-from zarr import storage
 
 from openghg.dataobjects._basedata import BaseData
-from openghg.dataobjects._data_object import DataObject
+from openghg.objectstore import DataObject
 from openghg.util import running_on_hub
 
 

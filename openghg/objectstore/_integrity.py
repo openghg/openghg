@@ -6,7 +6,6 @@ from typing import Optional
 
 from openghg.objectstore import get_readable_buckets
 from openghg.objectstore.metastore import open_metastore
-from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
 
 
@@ -26,6 +25,7 @@ def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, st
         found, otherwise None.
     """
     from openghg.store.base import Datasource
+    from openghg.store.spec import define_data_types
 
     # For now loop over each of the object stores, can we somehow lock the object store?
     readable_buckets = get_readable_buckets()

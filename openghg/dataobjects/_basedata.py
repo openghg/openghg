@@ -5,15 +5,14 @@ This is used as a base for the other metadata/data classes.
 from __future__ import annotations
 
 import logging
-from typing import Dict, Iterable, Optional, overload, Union
+from typing import Dict, Iterable, MutableMapping, Optional, overload, Union
 from typing_extensions import Self
 
 import pandas as pd
 import xarray as xr
 
-from openghg.store.storage import LocalZarrStore
+from openghg.objectstore import DataObject
 from openghg.types import HasMetadataAndData
-from ._data_object import DataObject
 
 
 logger = logging.getLogger("openghg.dataobjects")
@@ -26,15 +25,9 @@ DateType = Union[str, pd.Timestamp]
 class BaseData:
     def __init__(
         self,
-        metadata: Dict,
-        data: Optional[xr.Dataset] = None,
-        uuid: Optional[str] = None,
-        version: Optional[str] = None,
-        start_date: Optional[Union[str, pd.Timestamp]] = None,
-        end_date: Optional[Union[str, pd.Timestamp]] = None,
-        sort: bool = True,
-        elevate_inlet: bool = False,
-        attrs_to_check: Optional[Dict] = None,
+        metadata: MutableMapping,
+        data: xr.Dataset,
+        sort: bool = False,
     ) -> None:
         """
         This handles data for each of the data type classes. It accepts either a Dataset
@@ -55,73 +48,11 @@ class BaseData:
                 If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
                 If a list/string is passed, the attribute(s) will be removed.
         """
-        from openghg.util import timestamp_epoch, timestamp_now
+        self.metadata = dict(metadata)
+        self.data = data
 
-        if data is None and uuid is None and version is None:
-            raise ValueError("Must supply either data or uuid and version")
-
-        self.metadata = metadata
-        self._uuid = uuid
-
-        self._start_date = start_date
-        self._end_date = end_date
-        self._zarrstore = None
-
-        if elevate_inlet:
-            raise NotImplementedError("elevate_inlet not implemented yet")
-
-        if attrs_to_check is not None:
-            raise NotImplementedError("attrs_to_check not implemented yet")
-
-        sorted = False  # Check so we don't sort more than once
-
-        if data is not None:
-            self.data = data
-        elif uuid is not None and version is not None:
-            slice_time = False
-            if start_date is not None or end_date is not None:
-                slice_time = True
-                if start_date is None:
-                    start_date = timestamp_epoch()
-                if end_date is None:
-                    end_date = timestamp_now()
-
-            self._version = version
-            self._bucket = metadata["object_store"]
-
-            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-
-            self.data = self._zarrstore.get(version=version)
-            if slice_time:
-                # If slicing by time, this must be sorted along the time dimension
-                if sort is False:
-                    logger.warning(
-                        f"Ignoring sort={sort} input as it is necessary to sort the data when extracting a start and end date range."
-                    )
-
-                self.data = self.data.sortby("time")
-                sorted = True
-
-                if self.data.time.size > 1:
-                    start_date = start_date - pd.Timedelta("1s")
-                    # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
-                    end_date = end_date - pd.Timedelta("1s")
-
-                    # TODO - I feel we should do this in a tider way
-                    start_date = start_date.tz_localize(None)
-                    end_date = end_date.tz_localize(None)
-
-                    self.data = self.data.sel(time=slice(start_date, end_date))
-        else:
-            raise ValueError(
-                "Must supply either data or uuid and version, cannot create an empty data object."
-            )
-
-        if sort and not sorted:
-            try:
-                self.data = self.data.sortby("time")
-            except KeyError:
-                logger.debug("Cannot sort data by time as no time dimension present")
+        if sort and not self.data.indexes["time"].is_monotonic_increasing:
+            self.data = self.data.sortby("time")
 
     def __bool__(self) -> bool:
         return bool(self.data)
