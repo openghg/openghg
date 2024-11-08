@@ -7,12 +7,10 @@ import logging
 from typing import Any, Optional, Union
 import warnings
 
-import pandas as pd
 
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
 from openghg.objectstore import DataObject
@@ -450,20 +448,20 @@ def search(**kwargs: Any) -> SearchResults:
     search_kwargs = {}
     for k, v in kwargs.items():
         if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
-            v = format_inlet(v)
+            val = format_inlet(v)
         elif isinstance(v, (list, tuple)):
-            v = [clean_string(value) for value in v if value is not None]
-            if not v:  # Check empty list
-                v = None
+            val = [clean_string(value) for value in v if value is not None]
+            if not val:  # Check empty list
+                val = None
         elif isinstance(v, dict):
-            v = {key: clean_string(value) for key, value in v.items() if value is not None}
-            if not v:  # Check empty dict
-                v = None
+            val = {key: clean_string(value) for key, value in v.items() if value is not None}
+            if not val:  # Check empty dict
+                val = None
         else:
-            v = clean_string(v)
+            val = clean_string(v)
 
-        if v is not None:
-            search_kwargs[k] = v
+        if val is not None:
+            search_kwargs[k] = val
 
     # Species translation
     species = search_kwargs.get("species")
