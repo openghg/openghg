@@ -282,7 +282,7 @@ def check_function_open_nc(
 
     if realign_on_domain:
 
-        def xr_open_fn(x: multiPathType) -> Union[xr.DataArray, xr.Dataset]:
+        def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
             return align_lat_lon(xr.open_dataset(x), realign_on_domain)
 
     else:
