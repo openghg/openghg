@@ -3,9 +3,11 @@ import json
 import os
 import xarray as xr
 from pathlib import Path
+from functools import partial
 from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
 from openghg.types import pathType, multiPathType
+from openghg.util import align_lat_lon
 
 __all__ = [
     "load_parser",
@@ -293,10 +295,6 @@ def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callab
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    import xarray as xr
-    from functools import partial
-    from openghg.util import align_lat_lon
-
     if isinstance(filepath, list):
         if len(filepath) > 1:
             xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, domain))
