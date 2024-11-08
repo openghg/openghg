@@ -271,7 +271,7 @@ def check_function_open_nc(
         if len(filepath) > 1:
             if realign_on_domain:
                 xr_open_fn: Callable = partial(
-                    xr.open_mfdataset, preprocess=lambda ds: align_lat_lon(ds, realign_on_domain)
+                    xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
                 )
             else:
                 xr_open_fn = xr.open_mfdataset
@@ -282,8 +282,8 @@ def check_function_open_nc(
 
     if realign_on_domain:
 
-        def xr_open_fn(ds):
-            return align_lat_lon(xr.open_dataset(ds), realign_on_domain)
+        def xr_open_fn(x: multiPathType) -> Union[xr.DataArray, xr.Dataset]:
+            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
 
     else:
         xr_open_fn = xr.open_dataset
