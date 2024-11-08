@@ -117,6 +117,11 @@ class DataObject(MutableMapping):
                 end_date = pd.to_datetime(end_date) - pd.to_timedelta("1ns")
 
             result = result.sortby("time").sel(time=slice(start_date, end_date))
+
+        elif not result.indexes["time"].is_monotonic_increasing:
+            # Slicing won't work correctly if the data isn't sorted by time
+            result = result.sortby("time")
+
         return result
 
     def has_data_between(
