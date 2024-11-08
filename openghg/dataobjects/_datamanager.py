@@ -4,7 +4,7 @@ import logging
 from typing import Dict, List, Set, Optional, Union
 
 from openghg.objectstore.metastore import open_metastore
-from openghg.objectstore import DataObject, get_writable_bucket, get_writable_buckets
+from openghg.objectstore import DataObject, get_writable_buckets
 from openghg.types import ObjectStoreError
 from ._searchresults import SearchResults
 

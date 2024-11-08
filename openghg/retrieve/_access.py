@@ -121,7 +121,6 @@ def get_obs_surface(
     )
     from pandas import Timedelta
 
-
     # Allow height to be an alias for inlet but we do not expect height
     # to be within the metadata (for now)
     if inlet is None and height is not None:
@@ -295,7 +294,7 @@ def get_obs_column(
         end_date: End date
         return_mf: Return mole fraction rather than column data. Default=True
         kwargs: Additional search terms
-    
+
     Returns:
         ObsColumnData: ObsColumnData object
     """
@@ -397,7 +396,7 @@ def get_flux(
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
-    
+
     Note that at present ALL flux data is read in per species per domain or by emissions name.
     To be consistent with the footprints, fluxes should be in mol/m2/s.
 
@@ -407,7 +406,7 @@ def get_flux(
         domain: Domain e.g. EUROPE
         database: source for data, e.g. EDGAR
         database_version: database version, e.g. "v8.0" for EDGAR
-        model: model that created flux? 
+        model: model that created flux?
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
