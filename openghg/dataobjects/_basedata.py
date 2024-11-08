@@ -1,6 +1,7 @@
 """
 This is used as a base for the other metadata/data classes.
 """
+
 from __future__ import annotations
 
 import logging
@@ -142,13 +143,11 @@ class BaseData:
 
     @overload
     @classmethod
-    def cast(cls, other: HasMetadataAndData) -> Self:
-        ...
+    def cast(cls, other: HasMetadataAndData) -> Self: ...
 
     @overload
     @classmethod
-    def cast(cls, other: Iterable[HasMetadataAndData]) -> list[Self]:
-        ...
+    def cast(cls, other: Iterable[HasMetadataAndData]) -> list[Self]: ...
 
     @classmethod
     def cast(cls, other: Union[HasMetadataAndData, Iterable[HasMetadataAndData]]) -> Union[Self, list[Self]]:
