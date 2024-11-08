@@ -251,38 +251,9 @@ def get_logfile_path() -> Path:
         return Path("/tmp/openghg.log")
 
 
-# def open_and_align_dataset(filepath: multiPathType, domain: str) -> Tuple[xr.Dataset, multiPathType]:
-#     """
-#     DON'T HESITATE THIS FUNCTION. I let it it case it could help for the refont of check_function_open_nc
-#     Check the filepath input to choose which xarray open function to use:
-#      - Path or single item List - use open_dataset
-#      - multiple item List - use open_mfdataset
-#     then open the dataset and align the data with the domain spatial coordinates
-
-#     Args:
-#         filepath: Path or list of filepaths
-#         domain: domain of dataset
-#     Returns:
-#         Callable, Union[Path, List[Path]]: function and suitable filepath
-#             to use with the function.
-#     """
-#     from openghg.util import align_lat_lon
-
-#     if isinstance(filepath, list):
-#         if len(filepath) > 1:
-#             ds = xr.open_mfdataset(filepath, preprocess=lambda x: align_lat_lon(x, domain))
-#         else:
-#             filepath = filepath[0]
-#             ds = xr.open_dataset(filepath) # type: ignore
-#             ds = align_lat_lon(ds, domain)
-#     else:
-#         ds = xr.open_dataset(filepath) # type: ignore
-#         ds = align_lat_lon(ds, domain)
-
-#     return ds, filepath
-
-
-def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callable, multiPathType]:
+def check_function_open_nc(
+    filepath: multiPathType, realign_on_domain: Optional[str] = None
+) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -290,19 +261,31 @@ def check_function_open_nc(filepath: multiPathType, domain: str) -> Tuple[Callab
 
     Args:
         filepath: Path or list of filepaths
-        domain: domain of dataset
+        realign_on_domain: When present, realign the data on the given domain
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, domain))
+            if realign_on_domain:
+                xr_open_fn: Callable = partial(
+                    xr.open_mfdataset, preprocess=lambda ds: align_lat_lon(ds, realign_on_domain)
+                )
+            else:
+                xr_open_fn = xr.open_mfdataset
+            return xr_open_fn, filepath
+
         else:
-            xr_open_fn = lambda x: align_lat_lon(xr.open_dataset(x), domain)
             filepath = filepath[0]
+
+    if realign_on_domain:
+
+        def xr_open_fn(ds):
+            return align_lat_lon(xr.open_dataset(ds), realign_on_domain)
+
     else:
-        xr_open_fn = lambda x: align_lat_lon(xr.open_dataset(x), domain)
+        xr_open_fn = xr.open_dataset
 
     return xr_open_fn, filepath
 
