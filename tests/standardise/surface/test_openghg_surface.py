@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import pytest
 from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
-from openghg.standardise.meta import metadata_default_keys
+from openghg.standardise.meta import attributes_default_keys
 from openghg.standardise.surface import parse_openghg
 from pandas import Timestamp
 
@@ -38,8 +38,8 @@ def test_read_file():
 
     attributes = data_co2.attrs
 
-    metadata_keys = metadata_default_keys()
-    expected_metadata = {param: value for param, value in attributes.items() if param in metadata_keys}
+    attribute_keys = attributes_default_keys()
+    expected_metadata = {param: value for param, value in attributes.items() if param in attribute_keys}
 
     metadata = output_co2["metadata"]
     assert metadata.items() >= expected_metadata.items()
@@ -80,8 +80,8 @@ def test_read_file_no_attr():
     assert attributes["site"] == param["site"]
     assert attributes["species"] == param["species"]
 
-    metadata_keys = metadata_default_keys()
-    expected_metadata = {param: value for param, value in attributes.items() if param in metadata_keys}
+    attribute_keys = attributes_default_keys()
+    expected_metadata = {param: value for param, value in attributes.items() if param in attribute_keys}
 
     metadata = output_co2["metadata"]
     assert metadata.items() >= expected_metadata.items()
