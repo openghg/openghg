@@ -31,7 +31,6 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    # open_and_align_dataset,
     check_function_open_nc,
     permissions,
 )
