@@ -72,7 +72,6 @@ def test_species_attributes_isotopologue():
     ds_updated = data_variable_formatter(ds, species, species_label=name)
     ds_updated = get_attributes(ds_updated, species, site)
 
-
     long_name = "delta_ch4_c13"
     units = "1"
     units_non_standard = "per mil"

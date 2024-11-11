@@ -5,15 +5,11 @@ from openghg.util import get_overlap_keys, merge_dict
 @pytest.mark.parametrize(
     "left,right,expected_output",
     [
+        ({"site": "bsd", "inlet": "10m", "species": "ch4"}, {"data_level": "1"}, []),
         (
             {"site": "bsd", "inlet": "10m", "species": "ch4"},
-            {"data_level": "1"}, 
-            []
-        ),
-        (
-            {"site": "bsd", "inlet": "10m", "species": "ch4"},
-            {"site": "bsd", "inlet": "10m", "data_level": "1"}, 
-            ["inlet", "site"]
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+            ["inlet", "site"],
         ),
         ({}, {}, []),
     ],
@@ -35,27 +31,27 @@ def test_get_overlap_keys(left, right, expected_output):
     [
         (
             {"site": "bsd", "inlet": "10m"},
-            {"data_level": "1"}, 
+            {"data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m"},
-            {"site": "bsd", "data_level": "1"}, 
+            {"site": "bsd", "data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m"},
-            {"site": "BSD", "data_level": "1"}, 
+            {"site": "BSD", "data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "BSD", "data_level": "1"},
-            {"site": "bsd", "inlet": "10m"}, 
+            {"site": "bsd", "inlet": "10m"},
             {"site": "BSD", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m", "latitude": 56.733},
-            {"latitude": "56.7330001"}, 
+            {"latitude": "56.7330001"},
             {"site": "bsd", "inlet": "10m", "latitude": 56.733},
         ),
         (
@@ -82,7 +78,7 @@ def test_get_overlap_keys(left, right, expected_output):
             {"site": "bsd", "inlet": None},
             {"site": None, "inlet": "10m", "data_level": None},
             {"site": "bsd", "inlet": "10m"},
-        ),       
+        ),
     ],
 )
 def test_merge_dict(left, right, expected_output):
@@ -135,7 +131,7 @@ def test_merge_dict_raises_no_value_check():
             {"site": "bsd", "inlet": "10m"},
             {"site": "TAC"},
             {"inlet": "10m"},
-        ),      
+        ),
     ],
 )
 def test_merge_dict_mismatch(left, right, on_conflict, expected_output):
@@ -230,6 +226,6 @@ def test_merge_null_values_ignore():
     left = {"site": None, "inlet": "10m"}
     right = {"site": "bsd", "data_level": "1"}
     expected_output = {"site": None, "inlet": "10m", "data_level": "1"}
-    
+
     output = merge_dict(left, right, remove_null=remove_null)
     assert output == expected_output

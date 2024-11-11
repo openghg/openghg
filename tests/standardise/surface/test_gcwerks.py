@@ -125,9 +125,7 @@ def test_no_precisions_species_raises():
     )
 
     with pytest.raises(ValueError):
-        parse_gcwerks(
-            filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
-        )
+        parse_gcwerks(filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage")
 
 
 def test_read_ridgehill_window_inlet_all_NaNs():

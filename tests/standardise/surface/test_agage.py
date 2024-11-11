@@ -25,7 +25,9 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc")
+    cgo_data = get_surface_datapath(
+        filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_agage(
         filepath=cgo_data,
@@ -99,7 +101,7 @@ def test_expected_metadata_thd_cfc11():
     expected_metadata = {
         "data_type": "surface",
         "instrument": "gcmd",
-        'instrument_name_0': 'gcmd',
+        "instrument_name_0": "gcmd",
         "site": "THD",
         "network": "agage",
         "sampling_period": "1.0",
@@ -111,6 +113,8 @@ def test_expected_metadata_thd_cfc11():
     }
 
     assert metadata == expected_metadata
+
+
 def test_instrument_metadata(cgo_data):
     """
     This test checks for instrument and instrument_name_number metadata.
