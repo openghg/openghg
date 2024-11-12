@@ -243,12 +243,7 @@ def get_logfile_path() -> Path:
     Returns:
         Path: Path to logfile
     """
-    from openghg.util import running_locally
-
-    if running_locally():
-        return Path.home().joinpath("openghg.log")
-    else:
-        return Path("/tmp/openghg.log")
+    return Path("/tmp/openghg.log")
 
 
 def check_function_open_nc(

@@ -168,15 +168,6 @@ Handling user configuration files.
 
 .. autofunction:: openghg.util.check_config
 
-Environment detection
-=====================
-
-.. autofunction:: openghg.util.running_locally
-
-.. autofunction:: openghg.util.running_in_cloud
-
-.. autofunction:: openghg.util.running_on_hub
-
 Miscellaneous
 =============
 
