@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise.meta import dataset_formatter
-from openghg.util import running_on_hub, load_json
+from openghg.util import load_json
 from openghg.types import MetadataFormatError
 import openghg_defs
 import logging
@@ -72,77 +72,7 @@ def retrieve_atmospheric(
     )
 
 
-def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
-    """Retrieve data from the ICOS Carbon Portal. If data is found in the local object store
-    it will be retrieved from there first.
-
-    This function detects the running environment and routes the call
-    to either the cloud or local search function.
-
-    Example / commonly used arguments are given below.
-
-    Args:
-        site: Site code
-        species: Species name
-        start_date: Start date
-        end_date: End date
-        inlet: Height of the inlet for sampling in metres.
-        sampling_height: Alias for inlet
-        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
-        data_level: ICOS data level (1, 2)
-        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
-        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
-                        to be distributed through the Carbon Portal.
-                        This level is the ICOS-data product and free available for users.
-        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        update_mismatch: This determines how mismatches between the "metadata" derived from
-            stored data and "attributes" derived from ICOS Header are handled.
-            This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
-                - "from_definition" / "metadata" - update mismatches based on input metadata
-    Returns:
-        ObsData, list[ObsData] or None
-    """
-    from io import BytesIO
-    from xarray import load_dataset
-    from openghg.cloud import call_function, unpackage
-
-    # The hub is the only place we want to make remote calls
-    if running_on_hub():
-        raise NotImplementedError("Cloud functionality marked for rewrite.")
-        post_data: Dict[str, Union[str, Dict]] = {}
-        post_data["function"] = "retrieve_icos"
-        post_data["search_terms"] = kwargs
-
-        call_result = call_function(data=post_data)
-
-        content = call_result["content"]
-        found = content["found"]
-
-        if not found:
-            return None
-
-        observations = content["data"]
-
-        obs_data = []
-        for package in observations.values():
-            unpackaged = unpackage(data=package)
-            buf = BytesIO(unpackaged["data"])
-            ds = load_dataset(buf)
-            obs = ObsData(data=ds, metadata=unpackaged["metadata"])
-
-            obs_data.append(obs)
-
-        if len(obs_data) == 1:
-            return obs_data[0]
-        else:
-            return obs_data
-    else:
-        return local_retrieve(**kwargs)
-
-
-def local_retrieve(
+def retrieve(
     site: str,
     species: Optional[Union[str, list[str]]] = None,
     inlet: Optional[str] = None,

@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub
 import logging
 
 logger = logging.getLogger("openghg.retrieve")
@@ -54,67 +53,7 @@ def retrieve_surface(
     )
 
 
-def retrieve(**kwargs: Any) -> Union[List[ObsData], ObsData, None]:
-    """Retrieve surface from the CEDA Archive. This function
-    should not be used directly and is called by the retrieve_* functions,
-    such as retrieve_surface, that retrieve specific data from the archive.
-
-    To retrieve data from the CEDA Archive please browse the
-    website (https://data.ceda.ac.uk/badc) to find the URL of the dataset to retrieve.
-
-    Args:
-        site: Site name
-        species: Species name
-        inlet: Inlet height
-        url: URL of data in CEDA archive
-        force_retrieval: Force the retrieval of data from a URL
-        additional_metadata: Additional metadata to pass if the returned data
-        doesn't contain everythging we need. At the moment we try and find site and inlet
-        keys if they aren't found in the dataset's attributes.
-        For example:
-            {"site": "AAA", "inlet": "10m"}
-    Returns:
-        ObsData or None: ObsData if data found / retrieved successfully.
-    """
-    from io import BytesIO
-
-    from openghg.cloud import call_function, unpackage
-    from xarray import load_dataset
-
-    if running_on_hub():
-        raise NotImplementedError("Cloud functionality marked for rewrite.")
-        post_data: Dict[str, Union[str, Dict]] = {}
-        post_data["function"] = "retrieve_ceda"
-        post_data["arguments"] = kwargs
-
-        call_result = call_function(data=post_data)
-
-        content = call_result["content"]
-        found = content["found"]
-
-        if not found:
-            return None
-
-        observations = content["data"]
-
-        obs_data = []
-        for package in observations.values():
-            unpackaged = unpackage(data=package)
-            buf = BytesIO(unpackaged["data"])
-            ds = load_dataset(buf)
-            obs = ObsData(data=ds, metadata=unpackaged["metadata"])
-
-            obs_data.append(obs)
-
-        if len(obs_data) == 1:
-            return obs_data[0]
-        else:
-            return obs_data
-    else:
-        return local_retrieve_surface(**kwargs)
-
-
-def local_retrieve_surface(
+def retrieve(
     site: Optional[str] = None,
     species: Optional[str] = None,
     inlet: Optional[str] = None,
