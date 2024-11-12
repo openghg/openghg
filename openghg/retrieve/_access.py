@@ -1,6 +1,4 @@
-import json
 import logging
-from io import BytesIO
 from typing import Any, Optional, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
@@ -12,9 +10,9 @@ from openghg.dataobjects import (
     ObsData,
 )
 from openghg.types import SearchError
-from openghg.util import combine_and_elevate_inlet, decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.util import combine_and_elevate_inlet
 from pandas import Timestamp
-from xarray import Dataset, load_dataset
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
