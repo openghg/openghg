@@ -107,6 +107,8 @@ def test_data_metachecker(openghg_data):
     parsed_surface_metachecker(data=openghg_data)
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_openghg_cf_compliance(openghg_data):
     co2_data = openghg_data["co2"]["data"]
