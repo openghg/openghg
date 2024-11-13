@@ -160,6 +160,7 @@ def test_read_file_site_filepath_read(scsn06_data):
         assert attrs[key] == value
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filepath_cf_compliance(scsn06_data):
