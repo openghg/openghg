@@ -72,6 +72,7 @@ def test_read_file_thd():
     assert meas_data["cfc11"][-1].values.item() == 266.9176025390625
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
