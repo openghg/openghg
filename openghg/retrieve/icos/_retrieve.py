@@ -411,6 +411,7 @@ def _retrieve_remote(
 
         attributes = {}
 
+        attributes["icoscp_url"] = str(dobj_url)
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
 
