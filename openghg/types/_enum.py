@@ -73,3 +73,9 @@ class DataTypes(Enum):
     NPL = "NPL"
     OPENGHG = "OPENGHG"
     INTEM = "INTEM"
+
+
+class BoundaryConditions(Enum):
+
+    BOUNDARY_CONDITIONS = "Boundary_Conditions"
+
