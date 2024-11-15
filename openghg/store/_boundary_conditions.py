@@ -68,7 +68,7 @@ class BoundaryConditions(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+    ) -> Dict:
         """Read boundary conditions file
 
         Args:
@@ -150,7 +150,7 @@ class BoundaryConditions(BaseStore):
         )
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: Dict[Any, Any] = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -255,7 +255,7 @@ class BoundaryConditions(BaseStore):
             # Record the file hash in case we see this file again
             self.store_hashes(unseen_hashes)
 
-            return datasource_uuids
+        return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:
