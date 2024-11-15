@@ -183,78 +183,80 @@ class BoundaryConditions(BaseStore):
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         # Call appropriate standardisation function with input parameters
-        bc_data = parser_fn(**parser_input_parameters)
+        boundary_condition_data = parser_fn(**parser_input_parameters)
 
-        # Currently ACRG boundary conditions are split by month or year
-        bc_time = bc_data["time"]
+        for key, value in boundary_condition_data.items():
+             # Currently ACRG boundary conditions are split by month or year
+            bc_data = value['data']
+            bc_time = bc_data["time"]
+            
+            start_date, end_date, period_str = infer_date_range(
+                bc_time, filepath=filepath, period=period, continuous=continuous
+            )
+            
+            # Checking against expected format for boundary conditions
+            BoundaryConditions.validate_data(value['data'])
+            data_type = "boundary_conditions"
 
-        start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
-        )
+            additional_metadata["start_date"] = str(start_date)
+            additional_metadata["end_date"] = str(end_date)
+            additional_metadata["data_type"] = data_type
 
-        # Checking against expected format for boundary conditions
-        BoundaryConditions.validate_data(bc_data)
-        data_type = "boundary_conditions"
+            additional_metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
+            additional_metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
+            additional_metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
+            additional_metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
+            additional_metadata["min_height"] = round(float(bc_data["height"].min()), 5)
+            additional_metadata["max_height"] = round(float(bc_data["height"].max()), 5)
 
-        additional_metadata["start_date"] = str(start_date)
-        additional_metadata["end_date"] = str(end_date)
-        additional_metadata["data_type"] = data_type
+            additional_metadata["input_filename"] = filepath.name
 
-        additional_metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-        additional_metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-        additional_metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-        additional_metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-        additional_metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-        additional_metadata["max_height"] = round(float(bc_data["height"].max()), 5)
+            additional_metadata["time_period"] = period_str
 
-        additional_metadata["input_filename"] = filepath.name
+            matched_keys = set(bc_data) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
 
-        additional_metadata["time_period"] = period_str
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
 
-        matched_keys = set(bc_data) & set(fn_input_parameters)
-        additional_input_parameters = {
-            key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-        }
+            if optional_metadata is not None:
+                additional_metadata.update(optional_metadata)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            boundary_conditions_data = self.update_metadata(
+                boundary_condition_data, additional_input_parameters, additional_metadata
+            )
 
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+            # This performs the lookup and assignment of data to new or
+            # existing Datasources
+            datasource_uuids = self.assign_data(
+                data=boundary_conditions_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                compressor=compressor,
+                filters=filters,
+            )
 
-        # Mop up and add additional keys to metadata which weren't passed to the parser
-        boundary_conditions_data = self.update_metadata(
-            bc_data, additional_input_parameters, additional_metadata
-        )
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # boundary_conditions_data = update_metadata(
+            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
+            # )
 
-        # This performs the lookup and assignment of data to new or
-        # existing Datasources
-        datasource_uuids = self.assign_data(
-            data=boundary_conditions_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            compressor=compressor,
-            filters=filters,
-        )
+            # bc_store.add_datasources(
+            #     uuids=datasource_uuids,
+            #     data=boundary_conditions_data,
+            #     metastore=metastore,
+            #     update_keys=update_keys,
+            # )
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # boundary_conditions_data = update_metadata(
-        #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        # )
+            # Record the file hash in case we see this file again
+            self.store_hashes(unseen_hashes)
 
-        # bc_store.add_datasources(
-        #     uuids=datasource_uuids,
-        #     data=boundary_conditions_data,
-        #     metastore=metastore,
-        #     update_keys=update_keys,
-        # )
-
-        # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
-
-        return datasource_uuids
+            return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:
