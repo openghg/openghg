@@ -17,7 +17,24 @@ def parse_boundary_conditions(
     domain: str,
     source_format: str = "boundary_conditions",
     chunks: Optional[Dict] = None,
-):
+) -> dict:
+    """
+    Parses the boundary conditions file and adds data and metadata.
+    Args:
+        filepath: Path of boundary conditions file
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions
+        source_format: "boundary_conditions is default"
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                To disable chunking pass in an empty dictionary.
+    Returns:
+        Dict: Dictionary of species_bc_input_domain : data, metadata, attributes
+    """
     species = clean_string(species)
     species = synonyms(species)
     bc_input = clean_string(bc_input)
