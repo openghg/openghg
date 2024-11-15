@@ -6,12 +6,14 @@ from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
-from openghg.util import synonyms
+from openghg.util import (synonyms, load_standardise_parser, split_function_inputs
+                          )
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
+from openghg.store.spec import define_standardise_parsers
 
 __all__ = ["BoundaryConditions"]
 
@@ -56,6 +58,7 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
+        source_format: "boundary_conditions",
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -76,6 +79,7 @@ class BoundaryConditions(BaseStore):
               - a model name such as "MOZART" or "CAMS"
               - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
             domain: Region for boundary conditions
+            source_format: "boundary_conditions is default"
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
                      - "yearly", "monthly"
@@ -127,6 +131,28 @@ class BoundaryConditions(BaseStore):
         species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
+
+        data_type = self._data_type
+        standardise_parsers = define_standardise_parsers()[data_type]
+
+        try:
+            source_format = standardise_parsers[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+            # Get current parameter values and filter to only include function inputs
+        current_parameters = locals().copy()
+        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
+
+         fn_input_parameters["filepath"] = filepath
+
+        # Loading parser
+        parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
+
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
         # Specify any additional metadata to be added
         additional_metadata = {}
