@@ -15,18 +15,19 @@ def test_footprint_fail_message():
     inlet = "10m"
     domain = "test"
     model = "NAME"
-    met_model="ukv"
+    met_model = "ukv"
     species = "inert"
 
     with pytest.raises(ParseError) as exc:
 
-        parse_acrg_org(filepath = fp_filepath,
-                    site = site,
-                    domain = domain,
-                    inlet = inlet,
-                    model = model,
-                    met_model = met_model,
-                    species=species,
+        parse_acrg_org(
+            filepath=fp_filepath,
+            site=site,
+            domain=domain,
+            inlet=inlet,
+            model=model,
+            met_model=met_model,
+            species=species,
         )
 
         assert "need to use source_format='paris'" in exc

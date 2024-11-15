@@ -9,7 +9,7 @@ logger = logging.getLogger("openghg.standardise.metadata")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def metadata_default_keys() -> List:
+def attributes_default_keys() -> List:
     """
     Defines default values expected within ObsSurface metadata.
     Returns:
@@ -157,7 +157,7 @@ def sync_surface_metadata(
             f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}"
         )
 
-    default_keys_to_add = metadata_default_keys()
+    default_keys_to_add = attributes_default_keys()
     keys_as_floats = metadata_keys_as_floats()
 
     if keys_to_add is None:

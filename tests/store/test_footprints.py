@@ -674,7 +674,7 @@ def test_pass_empty_dict_means_full_dimension_chunks():
 
     # Start with no chunks passed
     checked_chunks = f.check_chunks(
-        ds = ds,
+        ds=ds,
         chunks={},
         high_spatial_resolution=False,
         time_resolved=False,
@@ -696,7 +696,7 @@ def test_footprints_chunking_schema():
 
     # Start with no chunks passed
     checked_chunks = f.check_chunks(
-        ds = ds,
+        ds=ds,
         high_spatial_resolution=False,
         time_resolved=False,
         short_lifetime=False,
@@ -705,7 +705,7 @@ def test_footprints_chunking_schema():
     assert checked_chunks == {"lat": 12, "lon": 12, "time": 480}
 
     checked_chunks = f.check_chunks(
-        ds = ds,
+        ds=ds,
         chunks={"time": 4},
         high_spatial_resolution=False,
         time_resolved=False,
@@ -718,7 +718,7 @@ def test_footprints_chunking_schema():
     # Let's set a huge chunk size and make sure we get an error
     with pytest.raises(ValueError):
         f.check_chunks(
-            ds = ds,
+            ds=ds,
             chunks={"time": int(1e9)},
             high_spatial_resolution=False,
             time_resolved=False,

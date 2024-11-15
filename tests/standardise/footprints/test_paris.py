@@ -23,7 +23,7 @@ from openghg.types import ParseError
         ),
     ],
 )
-def test_paris_footprint(site,inlet,model,met_model,filename):
+def test_paris_footprint(site, inlet, model, met_model, filename):
     """
     Test the parse_paris function is able to parse data in expected format.
     Note: Does not currently check data, just metadata.
@@ -33,13 +33,14 @@ def test_paris_footprint(site,inlet,model,met_model,filename):
     domain = "test"
     species = "inert"
 
-    data = parse_paris(filepath = fp_filepath,
-                       site = site,
-                       domain = domain,
-                       inlet = inlet,
-                       model = model,
-                       met_model = met_model,
-                       species = species,
+    data = parse_paris(
+        filepath=fp_filepath,
+        site=site,
+        domain=domain,
+        inlet=inlet,
+        model=model,
+        met_model=met_model,
+        species=species,
     )
 
     fp_data = list(data.values())[0]
@@ -75,12 +76,13 @@ def test_paris_footprint_fail_message():
 
     with pytest.raises(ParseError) as exc:
 
-        parse_paris(filepath = fp_filepath,
-                    site = site,
-                    domain = domain,
-                    inlet = inlet,
-                    model = model,
-                    species=species,
+        parse_paris(
+            filepath=fp_filepath,
+            site=site,
+            domain=domain,
+            inlet=inlet,
+            model=model,
+            species=species,
         )
 
         assert "need to use source_format='acrg_org'" in exc

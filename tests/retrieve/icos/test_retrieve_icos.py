@@ -60,7 +60,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #     "instrument": "ftir",
     #     "station_height_masl": 31.0,
 
-    # Results from ICOS on 07/08/2024    
+    # Results from ICOS on 07/08/2024
     expected_metadata = {
         "station_long_name": "weybourne observatory, uk",
         "station_latitude": 52.95042,

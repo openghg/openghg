@@ -63,23 +63,24 @@ def test_standardise_obs_two_writable_stores():
     results = search(site="hfd", inlet="100m", store="group")
     assert not results
 
-    mhd_path = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
+    rgl_path = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
     results = standardise_surface(
-        filepath=mhd_path,
-        site="mhd",
-        inlet="15m",
-        instrument="g2401",
+        filepath=rgl_path,
+        site="rgl",
+        inlet="90m",
+        instrument="g2301",
+        sampling_period="1H",
         network="ICOS",
         source_format="ICOS",
         store="group",
     )
 
-    assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
+    assert "ch4" in results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"]
 
-    results = search(site="mhd", instrument="g2401", store="group")
+    results = search(site="rgl", instrument="g2301", store="group")
     assert results
-    results = search(site="mhd", instrument="g2401", store="user")
+    results = search(site="rgl", instrument="g2301", store="user")
     assert not results
 
 
@@ -312,7 +313,7 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
-@pytest.mark.parametrize("source_format", ["paris","flexpart"])
+@pytest.mark.parametrize("source_format", ["paris", "flexpart"])
 def test_standardise_footprint_flexpart(source_format):
     """
     Checking FLEXPART footprints can be added using either "paris" or "flexpart"
@@ -593,11 +594,12 @@ def test_standardise_flux_timeseries():
 
 
 def test_standardise_sorting_true(caplog):
-    """ Testing only the sorting of files here"""
+    """Testing only the sorting of files here"""
 
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     standardise_surface(
         store="user",
@@ -609,7 +611,7 @@ def test_standardise_sorting_true(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=True
+        sort_files=True,
     )
 
     log_messages = [record.message for record in caplog.records]
@@ -618,12 +620,13 @@ def test_standardise_sorting_true(caplog):
 
 
 def test_standardise_sorting_false(caplog):
-    """ Testing only the sorting of files here"""
+    """Testing only the sorting of files here"""
 
     clear_test_stores()
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     standardise_surface(
         store="user",
@@ -635,7 +638,7 @@ def test_standardise_sorting_false(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=False
+        sort_files=False,
     )
 
     log_messages = [record.message for record in caplog.records]

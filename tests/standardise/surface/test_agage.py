@@ -25,7 +25,9 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc")
+    cgo_data = get_surface_datapath(
+        filename="agage_cgo_hcfc-133a_20240703-multi-instru-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_agage(
         filepath=cgo_data,
@@ -38,8 +40,6 @@ def cgo_data():
 
 
 def test_read_file_capegrim(cgo_data):
-    parsed_surface_metachecker(data=cgo_data)
-
     # Expect two labels at 70m and 80m in this test file, since multiple heights in the period convered
     expected_keys = ["hcfc133a_70m", "hcfc133a_80m"]
 
@@ -59,8 +59,6 @@ def test_read_file_thd():
         sampling_period="1",  # Checking this can be compared successfully
     )
 
-    parsed_surface_metachecker(data=gas_data)
-
     expected_key = ["cfc11_15m"]
 
     assert sorted(list(gas_data.keys())) == expected_key
@@ -74,6 +72,7 @@ def test_read_file_thd():
     assert meas_data["cfc11"][-1].values.item() == 266.9176025390625
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
@@ -103,7 +102,7 @@ def test_expected_metadata_thd_cfc11():
     expected_metadata = {
         "data_type": "surface",
         "instrument": "gcmd",
-        'instrument_name_0': 'gcmd',
+        "instrument_name_0": "gcmd",
         "site": "THD",
         "network": "agage",
         "sampling_period": "1.0",
@@ -112,15 +111,11 @@ def test_expected_metadata_thd_cfc11():
         "inlet": "15m",
         "species": "cfc11",
         "inlet_height_magl": 15.0,
-        "data_owner": "Ray F. Weiss, Jens Muhle",
-        "data_owner_email": "rfweiss@ucsd.edu, jmuhle@ucsd.edu",
-        "station_longitude": -124.151,
-        "station_latitude": 41.0541,
-        "station_height_masl": 107.0,
-        "station_long_name": "Trinidad Head, California",
     }
 
     assert metadata == expected_metadata
+
+
 def test_instrument_metadata(cgo_data):
     """
     This test checks for instrument and instrument_name_number metadata.

@@ -13,7 +13,7 @@ from openghg.util import (
     synonyms,
     to_lowercase,
     verify_site,
-    sort_by_filenames
+    sort_by_filenames,
 )
 
 
@@ -120,7 +120,8 @@ def test_file_sorting():
 
     filepaths = [
         "DECC-picarro_TAC_20130131_co2-185m-20220929.nc",
-        "DECC-picarro_TAC_20130131_co2-185m-20220928.nc"]
+        "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+    ]
 
     sorted_filepaths = sort_by_filenames(filepaths)
 

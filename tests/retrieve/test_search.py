@@ -103,8 +103,10 @@ def test_search_surface_range():
 
     assert res.metadata[key].items() >= partial_metdata.items()
 
+
 @pytest.mark.parametrize(
-    "keyword,value", [
+    "keyword,value",
+    [
         ("data_type", "surface"),
         ("data_source", "internal"),
     ],
@@ -253,6 +255,7 @@ def test_optional_term_search():
         site="bsd",
         inlet_option={"inlet": "42m", "height": "42m"},
         name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"},
+        data_level={"icos_data_level": 2, "data_level": "not_set"},
     )
 
     assert len(res.metadata) == 3
@@ -631,7 +634,6 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
-
 
 
 def test_search_for_float_inlet(tmp_path):

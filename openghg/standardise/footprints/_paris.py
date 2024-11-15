@@ -9,6 +9,7 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
+    # open_and_align_dataset,
     check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
@@ -65,7 +66,8 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = check_function_open_nc(filepath)
+    # fp_data, filepath = open_and_align_dataset(filepath, domain)
+    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
 
     fp_data = xr_open_fn(filepath)
 
@@ -90,7 +92,7 @@ def parse_paris(
         logger.exception(msg)
         raise ParseError(msg)
 
-    fp_data = fp_data.rename(**dim_rename)
+    fp_data = fp_data.rename(dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
 

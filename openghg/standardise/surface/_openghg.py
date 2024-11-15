@@ -63,7 +63,7 @@ def parse_openghg(
     """
     from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
     from openghg.standardise.meta import (
-        metadata_default_keys,
+        attributes_default_keys,
         define_species_label,
         assign_attributes,
         dataset_formatter,
@@ -137,8 +137,8 @@ def parse_openghg(
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
-    metadata_needed = metadata_default_keys()
-    metadata_needed = [param for param in metadata_needed if param not in metadata]
+    attributes_needed = attributes_default_keys()
+    attributes_needed = [param for param in attributes_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
     metadata["species"] = define_species_label(metadata["species"])[0]
@@ -183,7 +183,7 @@ def parse_openghg(
     if site_info:
         # Ensure keywords match to metadata names for station values
         # e.g. "station_longitude" derived from "longitude"
-        for key in metadata_needed:
+        for key in attributes_needed:
             prefix = "station_"
             if key.startswith(prefix):
                 split_key = key.split("_")[1:]
@@ -216,7 +216,7 @@ def parse_openghg(
     attribute_sources = [kwargs, site_info, site_attributes, attributes]
 
     # Search attributes sources (in order) and populate metadata
-    for param in metadata_needed:
+    for param in attributes_needed:
         for source in attribute_sources:
             if param in source:
                 metadata[param] = source[param]

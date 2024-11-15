@@ -166,6 +166,7 @@ class LocalZarrStore(Store):
                 append_dim=append_dim,
                 compute=True,
                 synchronizer=zarr.ThreadSynchronizer(),
+                safe_chunks=False,
             )
         # Otherwise we create a new zarr Store for the version
         else:

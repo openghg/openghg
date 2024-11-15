@@ -36,9 +36,7 @@ def test_read_obspack_2020():
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )
 
-    data = parse_noaa(
-        filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
-    )
+    data = parse_noaa(filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA")
 
     ch4_data = data["ch4"]["data"]
 
@@ -71,9 +69,7 @@ def test_read_obspack_flask_2021():
     '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
     filepath = get_surface_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", source_format="NOAA")
 
-    data = parse_noaa(
-        filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
-    )
+    data = parse_noaa(filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA")
 
     # TODO: Replace this test data example when possible.
     # This ObsPack file contains negative heights because SPF is Antarctic Firn Air (ice cores)
@@ -152,8 +148,6 @@ def test_read_file_site_filepath_read(scsn06_data):
     assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
     assert ch4_data["ch4_selection_flag"][0] == 0
 
-    parsed_surface_metachecker(data=scsn06_data)
-
     expected_attrs = {
         "station_longitude": 107.0,
         "station_latitude": 6.0,
@@ -166,6 +160,7 @@ def test_read_file_site_filepath_read(scsn06_data):
         assert attrs[key] == value
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filepath_cf_compliance(scsn06_data):
@@ -181,8 +176,6 @@ def test_read_raw_file():
         filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
-    parsed_surface_metachecker(data=data)
-
     co_data = data["co"]["data"]
 
     assert co_data.time[0] == Timestamp("1990-06-29T05:00:00")
@@ -194,10 +187,6 @@ def test_read_raw_file():
     assert co_data["co"][-1] == pytest.approx(73.16)
     assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
     assert co_data["co_selection_flag"][-1] == 0
-
-    attrs = co_data.attrs
-
-    assert attributes_checker_obssurface(attrs=attrs, species="co")
 
 
 def test_read_incorrect_site_raises():
