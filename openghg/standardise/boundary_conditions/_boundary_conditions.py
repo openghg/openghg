@@ -55,5 +55,5 @@ def parse_boundary_conditions(
         boundary_conditions_data[key] = {}
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
-        
+
         return boundary_conditions_data
