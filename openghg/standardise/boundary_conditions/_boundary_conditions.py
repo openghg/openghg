@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import xarray as xr
 
-from openghg.standardise.meta import dataset_formatter
 from openghg.util import clean_string, timestamp_now, synonyms
 from openghg.store import update_zero_dim
 
@@ -56,4 +55,5 @@ def parse_boundary_conditions(
         boundary_conditions_data[key] = {}
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
+        
         return boundary_conditions_data
