@@ -59,6 +59,6 @@ def parse_boundary_conditions(filepath: Union[str, Path],
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
         
-        boundary_conditions_data = dataset_formatter(data=boundary_conditions_data)
+        # boundary_conditions_data = dataset_formatter(data=boundary_conditions_data)
 
         return boundary_conditions_data
