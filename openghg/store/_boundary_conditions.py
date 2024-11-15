@@ -6,8 +6,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
-from openghg.util import (synonyms, load_standardise_parser, split_function_inputs
-                          )
+from openghg.util import synonyms, load_standardise_parser, split_function_inputs
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -186,16 +185,16 @@ class BoundaryConditions(BaseStore):
         boundary_condition_data = parser_fn(**parser_input_parameters)
 
         for key, value in boundary_condition_data.items():
-             # Currently ACRG boundary conditions are split by month or year
-            bc_data = value['data']
+            # Currently ACRG boundary conditions are split by month or year
+            bc_data = value["data"]
             bc_time = bc_data["time"]
-            
+
             start_date, end_date, period_str = infer_date_range(
                 bc_time, filepath=filepath, period=period, continuous=continuous
             )
-            
+
             # Checking against expected format for boundary conditions
-            BoundaryConditions.validate_data(value['data'])
+            BoundaryConditions.validate_data(value["data"])
             data_type = "boundary_conditions"
 
             additional_metadata["start_date"] = str(start_date)

@@ -4,23 +4,21 @@ from typing import Dict, Optional, Union
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.util import (clean_string,
-                          timestamp_now,
-                          synonyms)
-from openghg.store import (update_zero_dim)
+from openghg.util import clean_string, timestamp_now, synonyms
+from openghg.store import update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_boundary_conditions(filepath: Union[str, Path],
-                              species: str,
-                              bc_input: str,
-                              domain: str,
-                              source_format: str = "boundary_conditions",
-                              chunks: Optional[Dict] = None,
-                              ):
-    
+def parse_boundary_conditions(
+    filepath: Union[str, Path],
+    species: str,
+    bc_input: str,
+    domain: str,
+    source_format: str = "boundary_conditions",
+    chunks: Optional[Dict] = None,
+):
     species = clean_string(species)
     species = synonyms(species)
     bc_input = clean_string(bc_input)
@@ -59,4 +57,3 @@ def parse_boundary_conditions(filepath: Union[str, Path],
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
         return boundary_conditions_data
-    

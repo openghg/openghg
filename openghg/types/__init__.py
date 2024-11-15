@@ -8,7 +8,7 @@ from ._enum import (
     FluxDatabases,
     FootprintTypes,
     DataTypes,
-    BoundaryConditions
+    BoundaryConditions,
 )
 from ._errors import (
     OpenGHGError,
