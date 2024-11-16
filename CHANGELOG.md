@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Minimum version of python to 3.10. [PR #1175](https://github.com/openghg/openghg/pull/1175)
 - Updated ICOS standardise function to reflect changes in ASCII file format. [PR #1140](https://github.com/openghg/openghg/pull/1140)
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
