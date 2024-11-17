@@ -1,10 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, DefaultDict
+from typing import Any, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
 from openghg.types import resultsType
-from openghg.util import synonyms, load_standardise_parser, split_function_inputs
+from openghg.util import load_standardise_parser, split_function_inputs
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -89,12 +89,8 @@ class EulerianModel(BaseStore):
 
         from openghg.util import (
             clean_string,
-            timestamp_now,
-            timestamp_tzaware,
             check_if_need_new_version,
         )
-        from pandas import Timestamp as pd_Timestamp
-        from xarray import open_dataset
 
         model = clean_string(model)
         species = clean_string(species)

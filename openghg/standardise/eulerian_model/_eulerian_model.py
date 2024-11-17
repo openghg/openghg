@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 import xarray as xr
 
-from openghg.util import clean_string, timestamp_now, synonyms, timestamp_tzaware
-from openghg.store import update_zero_dim
+from openghg.util import clean_string, timestamp_now, timestamp_tzaware
 from pandas import Timestamp as pd_Timestamp
 
 logger = logging.getLogger("openghg.standardise.eulerian_model")
