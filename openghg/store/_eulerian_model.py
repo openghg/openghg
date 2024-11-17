@@ -34,7 +34,7 @@ class EulerianModel(BaseStore):
         filepath: Union[str, Path],
         model: str,
         species: str,
-        source_format: Optional[str] = "eulerian_model",
+        source_format: str = "eulerian_model",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
@@ -97,9 +97,6 @@ class EulerianModel(BaseStore):
         start_date = clean_string(start_date)
         end_date = clean_string(end_date)
         setup = clean_string(setup)
-
-        # Specify any additional metadata to be added
-        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
