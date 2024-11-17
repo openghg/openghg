@@ -12,32 +12,31 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_eulerian_model(
-        filepath: Union[str, Path],
-        model: str,
-        species: str,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        setup: Optional[str] = None,
-        chunks: Optional[Dict] = None,
-        **kwargs: str,
+    filepath: Union[str, Path],
+    model: str,
+    species: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    setup: Optional[str] = None,
+    chunks: Optional[Dict] = None,
+    **kwargs: str,
 ) -> Dict:
+    """Parse Eulerian model files
 
-    """ Parse Eulerian model files
+     Args:
+         filepath: Path of Eulerian model species output
+         model: Eulerian model name
+         species: Species name
+         start_date: Start date (inclusive) associated with model run
+         end_date: End date (exclusive) associated with model run
+         setup: Additional setup details for run
+         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                 To disable chunking pass in an empty dictionary.
 
-    Args:
-        filepath: Path of Eulerian model species output
-        model: Eulerian model name
-        species: Species name
-        start_date: Start date (inclusive) associated with model run
-        end_date: End date (exclusive) associated with model run
-        setup: Additional setup details for run
-        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
-
-   Returns:
-        Dict : Dictionary of source_name : data, metadata, attr
+    Returns:
+         Dict : Dictionary of source_name : data, metadata, attr
     """
 
     filepath = Path(filepath)

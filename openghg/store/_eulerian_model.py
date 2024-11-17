@@ -176,7 +176,6 @@ class EulerianModel(BaseStore):
         results: resultsType = defaultdict(dict)
 
         for key, value in eulerian_model_data.items():
-
             em_data = value["data"]
             matched_keys = set(em_data) & set(fn_input_parameters)
             additional_input_parameters = {
@@ -189,7 +188,9 @@ class EulerianModel(BaseStore):
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            model_data = self.update_metadata(eulerian_model_data, additional_input_parameters, additional_metadata)
+            model_data = self.update_metadata(
+                eulerian_model_data, additional_input_parameters, additional_metadata
+            )
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
