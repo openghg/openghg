@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
+
+from openghg.types import resultsType
 from openghg.util import synonyms, load_standardise_parser, split_function_inputs
 
 if TYPE_CHECKING:
@@ -108,7 +111,7 @@ class BoundaryConditions(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
-            dict: Dictionary of datasource UUIDs data assigned to
+            dict: Dictionary of files processed and datasource UUIDs data assigned to
         """
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
@@ -183,6 +186,7 @@ class BoundaryConditions(BaseStore):
 
         # Call appropriate standardisation function with input parameters
         boundary_condition_data = parser_fn(**parser_input_parameters)
+        results: resultsType = defaultdict(dict)
 
         for key, value in boundary_condition_data.items():
             # Currently ACRG boundary conditions are split by month or year
@@ -251,11 +255,12 @@ class BoundaryConditions(BaseStore):
             #     metastore=metastore,
             #     update_keys=update_keys,
             # )
-
+            results["processed"][filepath.name] = datasource_uuids
+            logger.info(f"Completed processing: {filepath.name}.")
             # Record the file hash in case we see this file again
             self.store_hashes(unseen_hashes)
 
-        return datasource_uuids
+        return dict(results)
 
     @staticmethod
     def schema() -> DataSchema:
