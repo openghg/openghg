@@ -34,6 +34,7 @@ class EulerianModel(BaseStore):
         filepath: Union[str, Path],
         model: str,
         species: str,
+        source_format: Optional[str] = "eulerian_model",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
@@ -52,6 +53,7 @@ class EulerianModel(BaseStore):
             filepath: Path of Eulerian model species output
             model: Eulerian model name
             species: Species name
+            source_format: default to eulerian_model
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
@@ -136,7 +138,7 @@ class EulerianModel(BaseStore):
 
         # Loading parse
 
-        parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
@@ -215,4 +217,4 @@ class EulerianModel(BaseStore):
 
             self.store_hashes(unseen_hashes)
 
-        return results
+        return dict(results)
