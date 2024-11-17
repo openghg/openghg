@@ -1,0 +1,1 @@
+from openghg._eulerian_model import parse_eulerian_model
