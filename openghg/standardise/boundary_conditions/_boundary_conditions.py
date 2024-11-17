@@ -33,7 +33,7 @@ def parse_boundary_conditions(
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
     Returns:
-        Dict: Dictionary of species_bc_input_domain : data, metadata, attributes
+        Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
     species = clean_string(species)
     species = synonyms(species)
@@ -68,8 +68,7 @@ def parse_boundary_conditions(
 
             key = "_".join((species, bc_input, domain))
 
-        boundary_conditions_data: dict[str, dict] = {}
-        boundary_conditions_data[key] = {}
+        boundary_conditions_data: dict[str, dict] = {key: {}}
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
 
