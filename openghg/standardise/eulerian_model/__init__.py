@@ -1,1 +1,1 @@
-from openghg._eulerian_model import parse_eulerian_model
+from ._eulerian_model import parse_eulerian_model
