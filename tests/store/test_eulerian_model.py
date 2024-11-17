@@ -10,7 +10,7 @@ def test_read_file():
 
     proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")
 
-    assert "geoschem_ch4_2015-01-01" in proc_results
+    assert "geoschem_ch4_2015-01-01" in proc_results["processed"]["GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4"]
 
     search_results = search(
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
