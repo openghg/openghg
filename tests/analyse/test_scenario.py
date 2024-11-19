@@ -642,6 +642,40 @@ def obs_ch4_dummy():
 
     return obsdata
 
+@pytest.fixture
+def obs_ch4_dummy2():
+    """
+    Create example ObsData object with dummy data
+     - Species is methane (ch4)
+     - Hourly frequency for 2012-02-01 - 2012-02-02 (48 time points)
+     - "mf" values are from 1, 48
+     - This second version contains obs from a different month. Used to test monthly flux files.
+    """
+    from openghg.dataobjects import ObsData
+
+    time = pd.date_range("2012-03-01T00:00:00", "2012-03-02T23:00:00", freq="H")
+
+    ntime = len(time)
+    values = np.arange(0, ntime, 1)
+
+    species = "ch4"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+
+    # Potential metadata:
+    # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
+    #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
+    # - data_type
+    metadata = attributes
+
+    obsdata = ObsData(data=data, metadata=metadata)
+
+    return obsdata
 
 @pytest.fixture
 def footprint_dummy():
@@ -696,6 +730,58 @@ def footprint_dummy():
 
     return footprintdata
 
+@pytest.fixture
+def footprint_monthly_dummy():
+    """
+    Create example FootprintData object with dummy data:
+     - Daily frequency from 2011-12-31 to 2012-01-03 (inclusive) (4 time points)
+     - Small lat, lon (TEST_DOMAIN)
+     - Small height
+     - "fp" values are all 1 **May change**
+     - "particle_locations_*" are 2, 3, 4, 5 for "n", "e", "s", "w"
+     - "INERT" species
+    """
+    from openghg.dataobjects import FootprintData
+
+    time = pd.date_range("2012-01-01", "2012-03-31", freq="D")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+    height = [500, 1500]
+
+    # Add dummy footprint values
+    nlat, nlon, ntime = len(lat), len(lon), len(time)
+    shape = (ntime, nlat, nlon)
+    values = np.ones(shape)
+
+    data_vars = {}
+    data_vars["fp"] = (("time", "lat", "lon"), values)
+
+    # Add dummy particle location values for NESW boundaries of domain
+    nheight = len(height)
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+    values_n = np.ones(shape_ns) * 2
+    values_e = np.ones(shape_ew) * 3
+    values_s = np.ones(shape_ns) * 4
+    values_w = np.ones(shape_ew) * 5
+
+    data_vars["particle_locations_n"] = (("time", "lon", "height"), values_n)
+    data_vars["particle_locations_e"] = (("time", "lat", "height"), values_e)
+    data_vars["particle_locations_s"] = (("time", "lon", "height"), values_s)
+    data_vars["particle_locations_w"] = (("time", "lat", "height"), values_w)
+
+    coords = {"lat": lat, "lon": lon, "time": time, "height": height}
+
+    data = xr.Dataset(data_vars, coords=coords)
+
+    # Potential metadata:
+    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
+    # - data_type="footprints"
+    metadata = {"site": "TESTSITE", "inlet": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
+
+    footprintdata = FootprintData(data=data, metadata=metadata)
+
+    return footprintdata
 
 @pytest.fixture
 def flux_ch4_dummy():
@@ -733,6 +819,43 @@ def flux_ch4_dummy():
 
     return fluxdata
 
+@pytest.fixture
+def flux_ch4_monthly_dummy():
+    """
+    Create example FluxData object with dummy data
+     - Monthly frequency (2012-01-01, 2012-02-01, 2012-03-01) (3 time points)
+     - Small lat, lon (TEST_DOMAIN)
+     - "flux" values are:
+       - 2012-01-01 - all 2
+       - 2012-02-01 - all 3
+       - 2012-03-01 - all 4
+    """
+    from openghg.dataobjects import FluxData
+
+    time = pd.date_range("2016-01-01", "2016-03-31", freq="MS")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+
+    nlat, nlon, ntime = len(lat), len(lon), len(time)
+    shape = (ntime, nlat, nlon)
+    values = np.ones(shape)
+    values[0, ...] *= 2
+    values[1, ...] *= 3
+    values[2, ...] *= 4
+
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
+
+    # Potential metadata:
+    # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
+    # - data_type?
+    species = "ch4"
+    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
+
+    fluxdata = FluxData(data=flux, metadata=metadata)
+
+    return fluxdata
 
 @pytest.fixture
 def bc_ch4_dummy():
@@ -798,6 +921,24 @@ def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_
 
     return model_scenario
 
+@pytest.fixture
+def model_scenario_ch4_monthly_dummy(obs_ch4_dummy, footprint_monthly_dummy, flux_ch4_monthly_dummy, bc_ch4_dummy):
+    """Create ModelScenario with input dummy data"""
+    model_scenario = ModelScenario(
+        obs=obs_ch4_dummy, footprint=footprint_monthly_dummy, flux=flux_ch4_monthly_dummy, bc=bc_ch4_dummy
+    )
+
+    return model_scenario
+
+@pytest.fixture
+def model_scenario_ch4_monthly_dummy2(obs_ch4_dummy2, footprint_monthly_dummy, flux_ch4_monthly_dummy, bc_ch4_dummy):
+    """Create ModelScenario with input dummy data"""
+    model_scenario = ModelScenario(
+        obs=obs_ch4_dummy2, footprint=footprint_monthly_dummy, flux=flux_ch4_monthly_dummy, bc=bc_ch4_dummy
+    )
+
+    return model_scenario
+
 
 def test_model_resample_ch4(model_scenario_ch4_dummy):
     """Test expected resample values for obs with known dummy data"""
@@ -845,7 +986,69 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
+    
+def test_calc_modelled_obs_ch4_monthly(model_scenario_ch4_monthly_dummy,model_scenario_ch4_monthly_dummy2,
+                                       footprint_monthly_dummy,flux_ch4_monthly_dummy):
+    """Test expected modelled observations from calc_modelled_obs_integrated with known dummy data and different monthly flux dates"""
 
+    model1 = model_scenario_ch4_monthly_dummy
+    model2 = model_scenario_ch4_monthly_dummy2
+    
+    # At this point, both models should contain the same whole flux file
+    assert model1.fluxes == model2.fluxes
+    
+    flux_time_slice1 = slice(Timestamp("2016-01-01T00:00:00"),Timestamp("2016-01-02T23:00:00"))
+    flux_time_slice2 = slice(Timestamp("2016-03-01T00:00:00"),Timestamp("2016-03-02T23:00:00"))
+
+    fp_time_slice1 = slice(Timestamp("2012-01-01T00:00:00"),Timestamp("2012-01-02T23:00:00"))
+    fp_time_slice2 = slice(Timestamp("2012-03-01T00:00:00"),Timestamp("2012-03-02T23:00:00"))
+        
+    footprint1 = footprint_monthly_dummy.data.sel(time=fp_time_slice1)
+    footprint2 = footprint_monthly_dummy.data.sel(time=fp_time_slice2)
+    
+    flux1 = flux_ch4_monthly_dummy.data.sel(time=flux_time_slice1)
+    flux2 = flux_ch4_monthly_dummy.data.sel(time=flux_time_slice2)
+    
+    # Time sliced fluxes should now be different
+    np.not_equal(flux1['flux'].values, flux2['flux'].values).all() == True
+    
+    expected_modelled_mf1 = np.sum(np.sum(flux1['flux'].values * footprint1['fp'].values,axis=1),axis=1)
+    expected_modelled_mf2 = np.sum(np.sum(flux2['flux'].values * footprint2['fp'].values,axis=1),axis=1)
+    
+    modelled_mf1 = model1.calc_modelled_obs().values
+    modelled_mf2 = model2.calc_modelled_obs().values
+    
+    #assert expected_modelled_mf1 == modelled_mf1.values
+    #assert expected_modelled_mf2 == modelled_mf2.values
+    
+    assert np.allclose(modelled_mf1,expected_modelled_mf1)
+    assert np.allclose(modelled_mf2,expected_modelled_mf2)
+    
+    # 
+    
+    
+    '''
+    aligned_time = combined_dataset["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_mf
+    # In our case:
+    # - dummy footprint input contains 1.0 for all values
+    # - dummy flux input contains 3.0 for all value *at the correct time*
+    # Expect different modelled mf for times 2012/01/01 and 2012/01/02 since flux is annual
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_dummy.data.sel(time=time_slice)
+    flux = flux_ch4_monthly_dummy.data.sel(time=time_slice)
+
+    input_flux_values = flux["flux"].reindex_like(footprint, method="ffill")
+    input_fp_values = footprint["fp"]
+
+    expected_modelled_mf = (input_fp_values * input_flux_values).sum(dim=("lat", "lon")).values
+
+    modelled_mf = combined_dataset["mf_mod"].values
+    assert np.allclose(modelled_mf, expected_modelled_mf)
+    '''
 
 def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Tests if disjoint timeseries are existing in obs and footprint data
