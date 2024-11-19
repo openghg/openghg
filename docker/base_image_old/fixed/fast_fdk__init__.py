@@ -37,8 +37,7 @@ def handle(handle_func):
         if lsnr is None:
             log.log("{0} is not set".format(constants.FN_LISTENER))
             sys.exit(1)
-        log.log("{0} is set, value: {1}".
-                format(constants.FN_LISTENER, lsnr))
+        log.log("{0} is set, value: {1}".format(constants.FN_LISTENER, lsnr))
         http_stream.start(handle_func, lsnr, loop=loop)
     else:
         log.log("incompatible function format!")

@@ -385,23 +385,3 @@ changes can be merged back into the development branch.
 For information, see the documentation
 `here <https://help.github.com/articles/about-pull-requests>`__.
 
-Creating a release
-==================
-
-The creation of the packages required by PyPI and conda is handled in the GitHub actions workflow files
-under ``.github/workflows/workflow.yaml``. The package build and release workflow will only be triggered by a
-tagged commit. Before we get to this step we need to make sure everything is setup to do a release.
-
-1. Ensure all issues in a `milestone <https://github.com/openghg/openghg/milestones>`__ are complete
-2. Ensure all tests are passing and no runners are failing
-3. Update CHANGELOG.md with notes of each fix and links to the pull requests
-4. Ensure all documentation is up to date
-5. Create a tagged commit and push it to origin
-
-For example, when I released version 0.5.1 of OpenGHG I created a tag and pushed it like so
-
-.. code-block:: bash
-
-   git tag -a 0.5.1 -m "OpenGHG release v0.5.1" && git push origin 0.5.1
-
-6. Update the website with the new release and information about any new features or tutorials added.

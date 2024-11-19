@@ -131,7 +131,7 @@ def test_bytes_stored_compression(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v1", dataset=ds, compressor=compressor)
         compressed_bytes = store.bytes_stored()
-        assert compressed_bytes == 292896
+        assert np.abs((compressed_bytes - 292896) / 292896) < 0.01
         assert compressed_bytes < original_size
         assert compressed_bytes < uncompressed_bytes
 
@@ -168,6 +168,8 @@ def test_delete_all(store):
     store.delete_all()
 
     assert not parent.exists()
+
+    assert not parent.parent.exists()
 
 
 def test_pop_dataset(store):

@@ -1,12 +1,13 @@
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.objectstore import get_writable_bucket
+from openghg.objectstore import get_writable_bucket, get_metakey_defaults
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
+from unittest.mock import patch
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -434,6 +435,92 @@ def test_read_footprint_short_lived():
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
+@pytest.mark.parametrize(
+    "site,inlet,model,met_model,start,end,filename",
+    [
+        (
+            "mhd",
+            "10m",
+            "NAME",
+            "ukv",
+            "2013-01-01 00:00:00+00:00",
+            "2013-01-03 00:59:59+00:00",
+            "MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_201301.nc",
+        ),
+        (
+            "mhd",
+            "10m",
+            "FLEXPART",
+            "ecmwfhres",
+            "2018-09-02 00:00:00+00:00",
+            "2018-09-04 00:59:59+00:00",
+            "MHD-10magl_FLEXPART_ECMWFHRES_TEST_inert_201809.nc",
+        ),
+    ],
+)
+def test_read_paris_footprint(site, inlet, model, met_model, start, end, filename):
+    """
+    Test footprints can be added which are the "paris" source_format. This includes
+    the new NAME footprints and the FLEXPART footprint data.
+    """
+    # clear_test_store("user")
+
+    datapath = get_footprint_datapath(filename)
+
+    source_format = "paris"
+    domain = "test"
+
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        met_model=met_model,
+        inlet=inlet,
+        domain=domain,
+        source_format=source_format,
+    )
+
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, model=model, data_type="footprints")
+
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_data = footprint_obs.data
+
+    footprint_coords = list(footprint_data.coords.keys())
+
+    # Sorting to allow comparison - coords / dims can be stored in different orders
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    assert footprint_coords == ["height", "lat", "lon", "time"]
+
+    assert "fp" in footprint_data.data_vars
+
+    expected_attrs = {
+        "author": "OpenGHG Cloud",
+        "data_type": "footprints",
+        "site": site,  # lowercase
+        "met_model": met_model,  # lowercase
+        "domain": domain,  # lowercase
+        "model": model,
+        "inlet": inlet,
+        "height": inlet,  # Should always be the same value as inlet
+        "start_date": start,
+        "end_date": end,
+        "species": "inert",
+        "max_longitude": 3.476,
+        "min_longitude": -0.396,
+        "max_latitude": 53.785,
+        "min_latitude": 51.211,
+        "high_spatial_resolution": "False",  # Note: potentially inconsisent case for flags when compared with obs_surface
+        "time_resolved": "False",  # as above
+        "short_lifetime": "False",  # as above
+        "time_period": "1 hour",
+    }
+
+    assert footprint_data.attrs.items() >= expected_attrs.items()
+
+
 def test_footprint_schema():
     """Check expected data variables are being included for default Footprint schema"""
     data_schema = Footprints.schema()
@@ -583,9 +670,11 @@ def test_pass_empty_dict_means_full_dimension_chunks():
 
     f = Footprints(bucket=bucket)
 
+    ds = xr.open_dataset(file1)
+
     # Start with no chunks passed
     checked_chunks = f.check_chunks(
-        filepaths=[file1, file2],
+        ds=ds,
         chunks={},
         high_spatial_resolution=False,
         time_resolved=False,
@@ -603,9 +692,11 @@ def test_footprints_chunking_schema():
 
     f = Footprints(bucket=bucket)
 
+    ds = xr.open_dataset(file1)
+
     # Start with no chunks passed
     checked_chunks = f.check_chunks(
-        filepaths=[file1, file2],
+        ds=ds,
         high_spatial_resolution=False,
         time_resolved=False,
         short_lifetime=False,
@@ -614,7 +705,7 @@ def test_footprints_chunking_schema():
     assert checked_chunks == {"lat": 12, "lon": 12, "time": 480}
 
     checked_chunks = f.check_chunks(
-        filepaths=[file1, file2],
+        ds=ds,
         chunks={"time": 4},
         high_spatial_resolution=False,
         time_resolved=False,
@@ -627,7 +718,7 @@ def test_footprints_chunking_schema():
     # Let's set a huge chunk size and make sure we get an error
     with pytest.raises(ValueError):
         f.check_chunks(
-            filepaths=[file1, file2],
+            ds=ds,
             chunks={"time": int(1e9)},
             high_spatial_resolution=False,
             time_resolved=False,
@@ -660,8 +751,8 @@ def test_optional_metadata_raise_error():
             inlet=inlet,
             species=species,
             domain=domain,
-            optional_metadata={"site":"test"},
-    )
+            optional_metadata={"site": "test"},
+        )
 
 
 def test_optional_metadata():
@@ -687,11 +778,16 @@ def test_optional_metadata():
         inlet=inlet,
         species=species,
         domain=domain,
-        optional_metadata={"project":"test"},
+        optional_metadata={"project": "test"},
     )
 
     # Get the footprints data
-    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints",)
+    footprint_results = search(
+        site=site,
+        domain=domain,
+        species=species,
+        data_type="footprints",
+    )
 
     footprint_obs = footprint_results.retrieve_all()
     footprint_metadata = footprint_obs.metadata
@@ -699,38 +795,53 @@ def test_optional_metadata():
     assert "project" in footprint_metadata
 
 
-def test_fp_retrieved_from_species():
-    """
-    Test to verify species are converted to synonym values and retrieved
-    """
+# These tests test that custom keys can be used to create unique Datasources
+@pytest.fixture()
+def mock_metakeys():
+    # TODO - implement this in a different way
+    default_keys = get_metakey_defaults()
 
-    datapath = get_footprint_datapath("MHD-10magl_UKV_hfo-1234zee_EUROPE_201401_test.nc")
-    site = "MHD"
-    inlet = "10m"
+    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+
+    with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
+        yield
+
+
+def test_standardise_footprints_different_datasources(mock_metakeys):
+    """This tests that adding keys to the optional section of footprints
+    results in data being assigned to different Datasources.
+    """
+    clear_test_store(name="user")
+
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    site = "TAC"
     domain = "TEST"
-    model = "NAME"
-    met_model = "UKV"
-    species = "hfo-1234zee"
+    model = "UKV"
+    inlet = "100m"
 
-    standardise_footprint(
-        store="user",
-        filepath=datapath,
+    optional_metadata = {"project": "zoo", "special_tag": "elephant"}
+    res_1 = standardise_footprint(
+        filepath=file1,
         site=site,
-        model=model,
-        met_model=met_model,
-        inlet=inlet,
-        species=species,
         domain=domain,
-        optional_metadata={"project":"test"},
+        model=model,
+        inlet=inlet,
+        optional_metadata=optional_metadata,
+        store="user",
     )
 
-    # Get the footprints data
-    footprint_results = search(species=species)
+    optional_metadata = {"project": "aquarium", "special_tag": "jellyfish"}
+    res_2 = standardise_footprint(
+        filepath=file2,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        optional_metadata=optional_metadata,
+        store="user",
+    )
 
-    footprint_obs = footprint_results.retrieve_all()
-    footprint_metadata = footprint_obs.metadata
-
-    assert footprint_obs.data is not None
-    assert footprint_metadata["species"] == "hfo1234zee"
-    assert "footprints" in footprint_metadata["data_type"]
-    assert species not in footprint_metadata["species"]
+    # Make sure they're different Datasources
+    assert res_1["tac_test_UKV_100m"]["uuid"] != res_2["tac_test_UKV_100m"]["uuid"]

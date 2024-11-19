@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    data_filepath: Union[str, Path],
+    filepath: Union[str, Path],
     site: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
@@ -62,14 +62,19 @@ def parse_openghg(
         Dict: Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
-    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
+    from openghg.standardise.meta import (
+        attributes_default_keys,
+        define_species_label,
+        assign_attributes,
+        dataset_formatter,
+    )
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
     try:
-        data = xr.open_dataset(data_filepath)  # Change this to with statement?
+        data = xr.open_dataset(filepath)  # Change this to with statement?
     except ValueError as e:
-        raise ValueError(f"Input file {data_filepath.name} could not be opened by xarray.") from e
+        raise ValueError(f"Input file {filepath.name} could not be opened by xarray.") from e
 
     # Extract current attributes from input data
     attributes = data.attrs
@@ -132,8 +137,8 @@ def parse_openghg(
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
-    metadata_needed = metadata_default_keys()
-    metadata_needed = [param for param in metadata_needed if param not in metadata]
+    attributes_needed = attributes_default_keys()
+    attributes_needed = [param for param in attributes_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
     metadata["species"] = define_species_label(metadata["species"])[0]
@@ -178,7 +183,7 @@ def parse_openghg(
     if site_info:
         # Ensure keywords match to metadata names for station values
         # e.g. "station_longitude" derived from "longitude"
-        for key in metadata_needed:
+        for key in attributes_needed:
             prefix = "station_"
             if key.startswith(prefix):
                 split_key = key.split("_")[1:]
@@ -211,7 +216,7 @@ def parse_openghg(
     attribute_sources = [kwargs, site_info, site_attributes, attributes]
 
     # Search attributes sources (in order) and populate metadata
-    for param in metadata_needed:
+    for param in attributes_needed:
         for source in attribute_sources:
             if param in source:
                 metadata[param] = source[param]
@@ -222,6 +227,8 @@ def parse_openghg(
             )
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data,

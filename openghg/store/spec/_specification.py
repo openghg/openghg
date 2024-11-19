@@ -1,6 +1,19 @@
-from typing import Any, Tuple, Dict, List
+from typing import Any, Tuple, Dict
+from openghg.types import (
+    SurfaceTypes,
+    ColumnTypes,
+    FluxTypes,
+    FootprintTypes,
+    FluxTimeseriesTypes,
+    FluxDatabases,
+)
 
-__all__ = ["define_data_types", "define_data_type_classes"]
+__all__ = [
+    "define_data_types",
+    "define_data_type_classes",
+    "define_standardise_parsers",
+    "define_transform_parsers",
+]
 
 
 def define_data_types() -> Tuple[str, ...]:
@@ -49,13 +62,34 @@ def define_data_type_classes() -> Dict[str, Any]:
     return data_type_classes
 
 
-def null_metadata_values() -> List:
+def define_standardise_parsers() -> Dict[str, Any]:
     """
-    Defines values which indicate metadata value is not specified.
-    Returns:
-        list: values to be seen as null
+    Define mapping between data_types and standardise parser details
     """
-    # TODO: Depending on how this is implemented, may want to update this to include np.nan values
-    null_values = ["not_set", "NOT_SET"]
 
-    return null_values
+    # TODO: May want to move away from representing these parser details as classes
+    data_type_parsers = {
+        "surface": SurfaceTypes,
+        "column": ColumnTypes,
+        "flux": FluxTypes,
+        "flux_timeseries": FluxTimeseriesTypes,
+        "footprints": FootprintTypes,
+        # "boundary_conditions": ,
+        # "eulerian_model": EulerianModel,
+        # "met": ???,
+    }
+
+    return data_type_parsers
+
+
+def define_transform_parsers() -> Dict[str, Any]:
+    """
+    Define mapping between data_types and transform parser details
+    """
+
+    # TODO: May want to move away from representing these parser details as classes
+    data_type_parsers = {
+        "flux": FluxDatabases,
+    }
+
+    return data_type_parsers

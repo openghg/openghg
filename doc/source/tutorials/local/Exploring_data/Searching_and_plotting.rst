@@ -110,6 +110,48 @@ present for some data sources) and so will not be demonstrated in this tutorial.
 There are also equivalent search functions for other data types
 including ``search_footprints``, ``search_flux`` and ``search_bc``.
 
+Searching for a range of values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An alternative way to search for multiple inlet values is by specifying a range of values:
+
+.. code:: ipython3
+
+    from openghg.retrieve import search_surface
+
+    tac_surface_search = search_surface(site="TAC", species="ch4", inlet=slice("100m", "185m"))
+    tac_surface_search.results
+
+Again, this will return results from both the 100m and 185m inlets.
+
+When a slice is used to specify ``inlet`` heights in ``get_obs_surface``, the search results will be
+combined into a single output with an ``inlet`` data variable, if possible.
+This is useful when the inlet height changes slightly.
+
+Suppose that we have surface data at the BSD site, with inlet heights 248m and 250m. To retrieve
+this data as a single dataset, we use:
+
+.. code:: ipython3
+
+    from openghg.retrieve import get_obs_surface
+
+    bsd_surface_data = get_obs_surface(site="BSD", species="ch4", inlet=slice("248m", "250m"))
+
+The data in ``bsd_surface_data.data`` will have an ``inlet`` data variable, which contains the inlet
+height at each time.
+
+Note that call
+
+.. code:: ipython3
+
+    bsd_surface_data = get_obs_surface(site="BSD", species="ch4", inlet=["248m", "250m"])
+
+would raise an error, because two datasources would be found, and without specifying a slice, OpenGHG
+doesn't know to combine this data.
+
+Further, the range ``inlet=slice("240m", "260m")`` would also work, so the exact values do not need to be
+specified.
+
 2. Plotting
 -----------
 
@@ -136,7 +178,11 @@ this is displayed:
 
     from openghg.plotting import plot_timeseries
 
-    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm")
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_185m.html" width="100%" height="400"></iframe>
 
 Plotting multiple timeseries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -159,6 +205,10 @@ and and responsive, even with relatively large amounts of data.
 .. code:: ipython3
 
     plot_timeseries(data=all_ch4_tac, units="ppb")
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_all.html" width="100%" height="400"></iframe>
 
 3. Comparing different sites
 ----------------------------
@@ -183,3 +233,9 @@ we want to compare and make a plot
 .. code:: ipython3
 
     plot_timeseries(data=[bsd_data, tac_data], title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+
+.. raw:: html
+
+   <iframe src="../../../_static/bsd_tac_ch4.html" width="100%" height="400"></iframe>
+
+

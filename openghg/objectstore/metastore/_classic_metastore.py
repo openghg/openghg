@@ -32,7 +32,7 @@ from filelock import FileLock
 from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
-from openghg.util import hash_string
+from openghg.util import hash_string, permissions
 import tinydb
 from tinydb.middlewares import Middleware
 
@@ -237,6 +237,20 @@ class DataClassMetaStore(TinyDBMetaStore):
         super().__init__(database=database)
 
         lock_path = get_object_lock_path(bucket, self.key)
+
+        # If lock is created for first time, make sure group has 'rw' permissions
+        if not lock_path.exists():
+            lock_path.touch(mode=0o664)
+
+        # check permissions
+        perms = permissions(lock_path)
+
+        if "w" not in perms[0]:
+            raise PermissionError(
+                "You do not have the correct permissions to add data to this object store."
+                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw'."
+            )
+
         self.lock = FileLock(lock_path, timeout=600)  # file lock with 10 minute timeout
 
     def acquire_lock(self) -> None:

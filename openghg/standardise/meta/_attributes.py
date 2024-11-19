@@ -9,6 +9,8 @@ __all__ = [
     "define_species_label",
     "assign_flux_attributes",
     "get_flux_attributes",
+    "dataset_formatter",
+    "data_variable_formatter",
 ]
 
 logger = logging.getLogger("openghg.standardise")
@@ -49,7 +51,6 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    from openghg.standardise.meta import sync_surface_metadata
 
     for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
@@ -78,19 +79,6 @@ def assign_attributes(
             site_filepath=site_filepath,
             species_filepath=species_filepath,
         )
-
-        measurement_data = gas_data["data"]
-        metadata = gas_data["metadata"]
-
-        attrs = measurement_data.attrs
-
-        metadata_aligned, attrs_aligned = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-        )
-
-        gas_data["metadata"] = metadata_aligned
-        gas_data["attributes"] = attrs_aligned
-        measurement_data.attrs = gas_data["attributes"]
 
     return data
 
@@ -145,28 +133,6 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.8) demand that valid variable names
-    # begin with a letter and be composed of letters, digits and underscores
-    # Here variable names are also made lowercase to enable easier matching below
-
-    # TODO - could I just cast ds.variables as as type for mypy instead of doing this?
-    # variable_names = [str(v) for v in ds.variables]
-    # Is this better?
-    variable_names = cast(Dict[str, Any], ds.variables)
-    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
-    to_underscores.pop("time")  # Added to remove warning around resetting time index.
-    ds = ds.rename(to_underscores)  # type: ignore
-
-    species_lower = species.lower()
-    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
-
-    variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var]
-
-    # If we don't have any variables to rename, raise an error
-    if not matched_keys:
-        raise NameError(f"Cannot find species {species_search} in Dataset variables")
-
     # Load attributes files
     species_attrs = get_species_info()
     attributes_data = load_internal_json(filename="attributes.json")
@@ -178,12 +144,6 @@ def get_attributes(
     # Extract both label to use for species and key for attributes
     # Typically species_label will be the lower case version of species_key
     species_label, species_key = define_species_label(species, species_filepath)
-
-    species_rename = {}
-    for var in matched_keys:
-        species_rename[var] = var.replace(species_search, species_label)
-
-    ds = ds.rename(species_rename)  # type: ignore
 
     # Global attributes
     global_attributes_default = {
@@ -245,7 +205,6 @@ def get_attributes(
     ancillary_variables = []
 
     variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
@@ -601,5 +560,66 @@ def get_flux_attributes(
 
     global_attributes.update(current_attributes)
     ds.attrs = global_attributes
+
+    return ds
+
+
+def dataset_formatter(
+    data: Dict,
+) -> Dict:
+    """
+    Formats species/variables from the dataset by removing the whitespaces
+    with underscores and species to lower case
+
+    Args:
+        data: Dict containing dataset information(gas_data)
+
+    Returns:
+        Dict: Dictionary of source_name : data, metadata, attributes
+    """
+    for _, gas_data in data.items():
+        species = gas_data["metadata"]["species"]
+        species_label, species_key = define_species_label(species)
+        gas_data["data"] = data_variable_formatter(
+            ds=gas_data["data"], species=species, species_label=species_label
+        )
+
+    return data
+
+
+def data_variable_formatter(ds: Dataset, species: str, species_label: str) -> Dataset:
+    """
+    Formats variables from the dataset by removing the whitespaces
+    with underscores and species data var to lower case
+
+    Args:
+        ds: Should contain variables such as "ch4", "ch4 repeatability".
+            Must have a "time" dimension.
+        species: Species name
+        species_label: Species label
+
+    Returns:
+        ds: xarray dataset
+    """
+    variable_names = cast(Dict[str, Any], ds.variables)
+    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores.pop("time")  # Added to remove warning around resetting time index.
+    ds = ds.rename(to_underscores)  # type: ignore
+
+    species_lower = species.lower()
+    species_search = species_lower.replace(" ", "_")
+
+    variable_names = cast(Dict[str, Any], ds.variables)
+    matched_keys = [var for var in variable_names if species_search in var]
+
+    # If we don't have any variables to rename, raise an error
+    if not matched_keys:
+        raise NameError(f"Cannot find species {species_search} in Dataset variables")
+
+    species_rename = {}
+    for var in matched_keys:
+        species_rename[var] = var.replace(species_search, species_label)
+
+    ds = ds.rename(species_rename)
 
     return ds

@@ -48,6 +48,7 @@ import logging
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
+import pandas as pd
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
     get_obs_surface,
@@ -622,8 +623,6 @@ class ModelScenario:
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
         """
-        from pandas import Timedelta
-
         # Check data is present (not None) and cast to correct type
         self._check_data_is_present(need=["obs", "footprint"])
         obs = cast(ObsData, self.obs)
@@ -656,6 +655,9 @@ class ModelScenario:
             sampling_period = obs_attributes["sampling_period"]
             if sampling_period == "NOT_SET":
                 infer_sampling_period = True
+            elif sampling_period == "multiple":
+                # If we have a varying sampling_period, make sure we always resample to footprint
+                obs_data_period_s = 1.0
             else:
                 obs_data_period_s = float(sampling_period)
         elif "sampling_period_estimate" in obs_attributes:
@@ -688,13 +690,13 @@ class ModelScenario:
         # is appropriate or need to do checks on a per time point basis
 
         obs_data_period_ns = obs_data_period_s * 1e9
-        obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
+        obs_data_timeperiod = pd.Timedelta(obs_data_period_ns, unit="ns")
 
         # Derive the footprints period from the frequency of the data
         footprint_data_period_ns = np.nanmedian(
             (footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64")
         )
-        footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
+        footprint_data_timeperiod = pd.Timedelta(footprint_data_period_ns, unit="ns")
 
         # If resample_to is set to "coarsest", check whether "obs" or "footprint" have lower resolution
         if resample_to == "coarsest":
@@ -714,12 +716,12 @@ class ModelScenario:
         end_date = min(obs_enddate, footprint_enddate)
 
         # Ensure lower range is covered for obs
-        start_obs_slice = start_date - Timedelta("1ns")
+        start_obs_slice = start_date - pd.Timedelta("1ns")
         # Ensure extra buffer is added for footprint based on fp timeperiod.
         # This is to ensure footprint can be forward-filled to obs (in later steps)
-        start_footprint_slice = start_date - (footprint_data_timeperiod - Timedelta("1ns"))
+        start_footprint_slice = start_date - (footprint_data_timeperiod - pd.Timedelta("1ns"))
         # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
-        end_slice = end_date - Timedelta("1ns")
+        end_slice = end_date - pd.Timedelta("1ns")
 
         obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
@@ -731,20 +733,27 @@ class ModelScenario:
         tolerance = 1e-9  # seconds
 
         if timeperiod_diff_s >= tolerance or force_resample:
-            base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            offset = pd.Timedelta(
+                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            )
+            offset = cast(pd.Timedelta, offset)
 
             if resample_to == "obs":
                 resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
+                footprint_data = footprint_data.resample(
+                    indexer={"time": resample_period}, offset=offset
+                ).mean()
 
             elif resample_to == "footprint":
                 resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+                obs_data = obs_data.resample(indexer={"time": resample_period}, offset=offset).mean()
 
             else:
                 resample_period = resample_to
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
-                obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+                footprint_data = footprint_data.resample(
+                    indexer={"time": resample_period}, offset=offset
+                ).mean()
+                obs_data = obs_data.resample(indexer={"time": resample_period}, offset=offset).mean()
 
         return obs_data, footprint_data
 
@@ -915,8 +924,11 @@ class ModelScenario:
             footprint_data = footprint.data
             time = footprint_data["time"].values
             start_date = Timestamp(time[0])
-            base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-            footprint_data = footprint_data.resample(indexer={"time": resample_to}, base=base).mean()
+            offset = pd.Timedelta(
+                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            )
+            offset = cast(pd.Timedelta, offset)  # mypy thinks this could be NaT
+            footprint_data = footprint_data.resample(indexer={"time": resample_to}, offset=offset).mean()
             return footprint_data
 
     def _param_setup(
@@ -1254,18 +1266,21 @@ class ModelScenario:
         # Select and align high frequency flux data
         flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
         if flux_res_H <= 24:
-            base = (
-                date_start_back.dt.hour.data
+            offset = pd.Timedelta(
+                hours=date_start_back.dt.hour.data
                 + date_start_back.dt.minute.data / 60.0
                 + date_start_back.dt.second.data / 3600.0
             )
+            offset = cast(pd.Timedelta, offset)
             if flux_res_H <= highest_res_H:
                 # Downsample flux to match to footprints frequency
-                flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).mean()
+                flux_ds_high_freq = flux_ds_high_freq.resample(
+                    {"time": highest_resolution}, offset=offset
+                ).mean()
             elif flux_res_H > highest_res_H:
                 # Upsample flux to match footprints frequency and forward fill
                 flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, base=base
+                    {"time": highest_resolution}, offset=offset
                 ).ffill()
             # Reindex to match to correct values
             flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
@@ -1724,12 +1739,13 @@ def combine_datasets(
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
+        # load dataset_B to avoid performance issue (see xarray issue #8945)
+        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 
     if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
+        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
             flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
             merged_ds = merged_ds[dict(time=flag[0])]
 

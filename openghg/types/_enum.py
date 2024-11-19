@@ -4,21 +4,15 @@ from enum import Enum
 class SurfaceTypes(Enum):
     """For standardising surface measurements"""
 
-    BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
-    GCWERKS_NC = "GCWERKS_NC"
+    AGAGE = "AGAGE"
     ICOS = "ICOS"
     NOAA = "NOAA"
-    EUROCOM = "EUROCOM"
-    THAMESBARRIER = "TMB"
-    CRANFIELD = "CRANFIELD"
     BEACO2N = "BEACO2N"
     NPL = "NPL"
-    AQMESH = "AQMESH"
-    GLASGOW_PICARRO = "GLASGOW_PICARRO"
-    GLASGOW_LICOR = "GLASGOW_LICOR"
     OPENGHG = "OPENGHG"
+    CO2_GAMES = "CO2_GAMES"
 
 
 class ColumnTypes(Enum):
@@ -49,8 +43,9 @@ class FluxDatabases(Enum):
 class FootprintTypes(Enum):
     """For standardising footprint inputs"""
 
-    # OPENGHG = "OPENGHG"  # To be implemented
     ACRG_ORG = "ACRG_ORG"
+    PARIS = "PARIS"
+    FLEXPART = "FLEXPART"  # This is an alias for PARIS
 
 
 class ObsTypes(Enum):
@@ -70,17 +65,11 @@ class FluxTimeseriesTypes(Enum):
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
+    AGAGE = "AGAGE"
     NOAA = "NOAA"
-    EUROCOM = "EUROCOM"
     ICOS = "ICOS"
-    THAMESBARRIER = "TMB"
-    CRANFIELD = "CRANFIELD"
     BEACO2N = "BEACO2N"
     Footprints = "Footprints"
     NPL = "NPL"
-    BTT = "BTT"
-    AQMESH = "AQMESH"
-    GLASGOW_PICARRO = "GLASGOW_PICARRO"
-    GLASGOW_LICOR = "GLASGOW_LICOR"
     OPENGHG = "OPENGHG"
     INTEM = "INTEM"

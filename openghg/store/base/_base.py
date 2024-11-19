@@ -9,9 +9,9 @@ from pathlib import Path
 from pandas import Timestamp
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
-from xarray import open_dataset
+import xarray as xr
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType
@@ -59,12 +59,12 @@ class BaseStore:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg="", exc_info=exc_val)
         else:
             self.save()
 
@@ -131,6 +131,8 @@ class BaseStore:
         if not isinstance(filepaths, list):
             filepaths = [filepaths]
 
+        filepaths = [Path(filepath) for filepath in filepaths]
+
         unseen: Dict[str, Path] = {}
         seen: Dict[str, Path] = {}
 
@@ -160,11 +162,127 @@ class BaseStore:
 
         return seen, unseen
 
+    def add_metakeys(self, force: bool = False) -> dict:
+        """
+        Check metakeys are included from relevant config file and add as the `.metakeys`
+        attributes if not.
+        """
+        if not hasattr(self, "metakeys") or force:
+            try:
+                metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+            except KeyError:
+                raise ValueError(
+                    f"No metakeys for {self._data_type}, please update metakeys configuration file."
+                )
+
+            self.metakeys = metakeys
+
+        return self.metakeys
+
+    def update_metadata(self, data: dict, input_parameters: dict, additional_metadata: dict) -> dict:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+            input_parameters: Input parameters from read_file...
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            dict: data dictionary with metadata keys added
+        """
+        from openghg.util import merge_dict
+
+        # Get defined metakeys from the config setup
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        for parsed_data in data.values():
+            metadata = parsed_data["metadata"]
+
+            # Sources of additional metadata - order in list is order of preference.
+            sources = [input_parameters, additional_metadata]
+            for source in sources:
+                # merge "required" keys from source into metadata; on conflict, keep value from metadata
+                metadata = merge_dict(metadata, source, keys_right=required)
+
+            required_not_found = set(required) - set(metadata.keys())
+            if required_not_found:
+                raise ValueError(
+                    f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                )
+
+            # Check if named optional keys are included in the input_parameters and add
+            optional_matched = set(optional) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
+
+            # Add additional metadata keys
+            if additional_metadata:
+                # Ensure required keys aren't added again (or clash with values from input_parameters)
+                additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
+                metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
+
+            parsed_data["metadata"] = metadata
+
+        return data
+
+    def check_info_keys(self, optional_metadata: Optional[Dict]) -> None:
+        """Check the informational metadata is not being used to set required keys.
+
+        Args:
+            optional_metadata: Additional informational metadata
+        Returns:
+            None
+        Raises:
+            ValueError: if any keys within optional_metadata are within the required set of keys.
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+
+        # Check if anything in optional_metadata tries to override our required keys
+        if optional_metadata is not None:
+            common_keys = set(required) & set(optional_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+    def get_lookup_keys(self, data: dict) -> List[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If optional_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+
+        # Note: Just grabbing the first entry in data at the moment
+        # In principle the metadata should have the same keys for all entries
+        # but should check that assumption is reasonable
+        parsed_data_representative = list(data.values())[0]
+        metadata = parsed_data_representative["metadata"]
+
+        # Matching between potential optional keys and those present in the metadata
+        optional_lookup = set(optional) & set(metadata.keys())
+        lookup_keys.extend(list(optional_lookup))
+
+        return lookup_keys
+
     def assign_data(
         self,
         data: Dict,
         data_type: str,
-        required_keys: Sequence[str],
+        required_keys: Optional[Sequence[str]] = None,
         sort: bool = True,
         drop_duplicates: bool = True,
         min_keys: Optional[int] = None,
@@ -199,9 +317,15 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        from openghg.store.spec import null_metadata_values
+        from openghg.util import not_set_metadata_values
 
         uuids = {}
+
+        # Get the metadata keys for this type
+        # metakeys = self.get_metakeys()
+
+        if not required_keys:
+            required_keys = self.get_lookup_keys(data=data)
 
         self._metastore.acquire_lock()
         try:
@@ -217,7 +341,7 @@ class BaseStore:
                 # Our lookup results and gas data have the same keys
                 uuid = lookup_results[key]
 
-                ignore_values = null_metadata_values()
+                ignore_values = not_set_metadata_values()
 
                 # Do we want all the metadata in the Dataset attributes?
                 to_add = {
@@ -303,8 +427,10 @@ class BaseStore:
             }
 
             if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
                 )
 
             required_result = self._metastore.search(required_metadata)
@@ -544,7 +670,7 @@ class BaseStore:
 
     def check_chunks(
         self,
-        filepaths: Union[str, list[str]],
+        ds: xr.Dataset,
         chunks: Optional[Dict[str, int]] = None,
         max_chunk_size: int = 300,
         **chunking_kwargs: Any,
@@ -552,7 +678,7 @@ class BaseStore:
         """Check the chunk size of a variable in a dataset and return the chunk size
 
         Args:
-            filepaths: List of file paths
+            ds: dataset to check
             variable: Name of the variable that we want to check for max chunksize
             chunk_dimension: Dimension to chunk over
             secondary_dimensions: List of secondary dimensions to chunk over
@@ -560,9 +686,6 @@ class BaseStore:
         Returns:
             Dict: Dictionary of chunk sizes
         """
-        if not isinstance(filepaths, list):
-            filepaths = [filepaths]
-
         try:
             default_schema = self.chunking_schema(**chunking_kwargs)
         except NotImplementedError:
@@ -573,14 +696,13 @@ class BaseStore:
         default_chunks = default_schema.chunks
         secondary_dimensions = default_schema.secondary_dims
 
-        with open_dataset(filepaths[0]) as ds:
-            dim_sizes = dict(ds[variable].sizes)
-            var_dtype_bytes = ds[variable].dtype.itemsize
+        dim_sizes = dict(ds[variable].sizes)
+        var_dtype_bytes = ds[variable].dtype.itemsize
 
         if secondary_dimensions is not None:
             missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
             if missing_dims:
-                raise ValueError(f"File {filepaths[0]} is missing the following dimensions: {missing_dims}")
+                raise ValueError(f"The following dimensions are missing: {missing_dims}")
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks

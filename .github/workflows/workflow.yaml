@@ -11,6 +11,7 @@ on:
     branches: [master, devel]
     paths-ignore:
       - 'CHANGELOG.md'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -58,7 +59,7 @@ jobs:
           pytest -v --run-cfchecks
   docs:
     name: Build and deploy the documentation
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     runs-on: ubuntu-latest
     needs: ["test"]
     steps:
@@ -92,7 +93,7 @@ jobs:
     name: Build and publish Python distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
     needs: ["test", "docs"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.9
@@ -119,7 +120,7 @@ jobs:
     name: Build and publish conda package
     runs-on: ubuntu-latest
     needs: ["test", "docs"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     defaults:
       run:
         shell: bash -el {0}
@@ -135,9 +136,14 @@ jobs:
           conda config --append channels openghg
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+      - name: Publish build to Anaconda
+        run: |
+          micromamba activate openghg_build
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
           anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
-          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN_EXP_2025_08_14 }}
           GIT_TAG: ${{ github.ref_name }}

@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from openghg.retrieve import (
     search,
@@ -20,6 +22,9 @@ from pandas import Timestamp
         ("inlet", "50magl"),
         ("inlet", "50"),
         ("inlet", 50),  # May remove this later as really we expect a string here
+        ("inlet", slice(40, 60.0)),
+        ("inlet", slice("40m", "60.0m")),
+        ("inlet", slice("50m", "50.0m")),
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -97,6 +102,28 @@ def test_search_surface_range():
     }
 
     assert res.metadata[key].items() >= partial_metdata.items()
+
+
+@pytest.mark.parametrize(
+    "keyword,value",
+    [
+        ("data_type", "surface"),
+        ("data_source", "internal"),
+    ],
+)
+def test_search_internal_key_present(keyword, value):
+    """
+    Check keys which weren't specified in standardise function have been
+    added correctly to the metadata.
+    Currently testing for search_surface but could expand to other data_types.
+    """
+
+    res = search_surface(site="hfd", inlet="50m", species="co2")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert keyword in metadata
+    assert metadata[keyword] == value
 
 
 def test_search_site():
@@ -197,11 +224,11 @@ def test_multi_type_search():
 
     res = search(species="ch4", data_type=["surface"])
 
-    assert len(res.metadata) == 7
+    assert len(res.metadata) == 8
 
     res = search(species="co2", data_type=["surface", "flux"])
 
-    assert len(res.metadata) == 8
+    assert len(res.metadata) == 9
 
 
 def test_many_term_search():
@@ -228,6 +255,7 @@ def test_optional_term_search():
         site="bsd",
         inlet_option={"inlet": "42m", "height": "42m"},
         name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"},
+        data_level={"icos_data_level": 2, "data_level": "not_set"},
     )
 
     assert len(res.metadata) == 3
@@ -303,7 +331,7 @@ def test_search_footprints_multiple():
         - 2016-08-01 (3 time points)
     """
     res = search_footprints(
-        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", time_resolved=False
+        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", high_time_resolution=False
     )
 
     key = next(iter(res.metadata))
@@ -606,3 +634,19 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_for_float_inlet(tmp_path):
+    """Test searching for a decimal valued inlet"""
+    from openghg.objectstore.metastore import open_metastore
+
+    bucket = str(tmp_path / "_metastore._data")
+
+    with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
+        metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
+
+    with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
+        print(search(store="temp", data_type="surface"))
+        result = search(inlet="12.3m", data_type="surface", store="temp")
+
+    assert result

@@ -1,9 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
-from xarray import Dataset
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -79,7 +78,10 @@ class EulerianModel(BaseStore):
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
-        from collections import defaultdict
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
         from openghg.util import (
             clean_string,
             timestamp_now,
@@ -94,6 +96,9 @@ class EulerianModel(BaseStore):
         start_date = clean_string(start_date)
         end_date = clean_string(end_date)
         setup = clean_string(setup)
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -119,6 +124,10 @@ class EulerianModel(BaseStore):
 
         if chunks is None:
             chunks = {}
+
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         with open_dataset(filepath).chunk(chunks) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
@@ -193,22 +202,23 @@ class EulerianModel(BaseStore):
 
             key = "_".join((model, species, date))
 
-            model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            model_data: dict[str, dict] = {}
+            model_data[key] = {}
             model_data[key]["data"] = em_data
             model_data[key]["metadata"] = metadata
 
-            required = ("model", "species", "date")
+            matched_keys = set(metadata) & set(fn_input_parameters)
+            additional_input_parameters = {
+                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
+            }
 
-            if optional_metadata:
-                common_keys = set(required) & set(optional_metadata.keys())
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
+            if optional_metadata is not None:
+                additional_metadata.update(optional_metadata)
 
-                if common_keys:
-                    raise ValueError(
-                        f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                    )
-                else:
-                    for key, parsed_data in model_data.items():
-                        parsed_data["metadata"].update(optional_metadata)
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            model_data = self.update_metadata(model_data, additional_input_parameters, additional_metadata)
 
             data_type = "eulerian_model"
             datasource_uuids = self.assign_data(
@@ -216,7 +226,6 @@ class EulerianModel(BaseStore):
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
-                required_keys=required,
                 compressor=compressor,
                 filters=filters,
             )

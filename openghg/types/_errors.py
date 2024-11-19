@@ -45,8 +45,16 @@ class SearchError(OpenGHGError):
     """Related to searching the object store"""
 
 
+class ParseError(OpenGHGError):
+    """Data is not in correct format for requested parse function"""
+
+
 class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
+
+
+class MetadataFormatError(OpenGHGError):
+    """Metadata value not within expected format"""
 
 
 class DataOverlapError(OpenGHGError):
