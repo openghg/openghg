@@ -1151,8 +1151,7 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         expected_modelled_mf_hr = modelled_mf_htres + modelled_mf_residual
 
         modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
-        print(combined_dataset.H_back)
-        assert False
+
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
 
 
