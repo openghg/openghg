@@ -1,10 +1,11 @@
+import re
 import numpy as np
 import pandas as pd
 import xarray as xr
 import shutil
 from pathlib import Path
 import pkg_resources
-from typing import Union, Optional, Sequence
+from typing import Union, Optional, Sequence, cast
 import logging
 
 from openghg.retrieve import get_obs_surface, get_obs_column
@@ -245,6 +246,101 @@ def define_obspack_filename(
     return filename
 
 
+def find_current_obspacks(output_folder: pathType, obspack_stub: str) -> list[Path]:
+    """
+    Find obspacks within the supplied output folder. Expect these will start with
+    the obspack_stub string.
+
+    Args:
+        output_folder: Path to top level directory where obspack folder will be created.
+            When looking for previous obspacks, will look here for these.
+        obspack_stub: Start of the obspack_name. This will be assumed to be standard for
+            other obspacks of the same type.
+    Returns:
+        list : Path to current folders identified as current obspacks within output_folder
+    """
+
+    output_folder = Path(output_folder)
+    current_obspacks = [folder for folder in output_folder.glob(f"{obspack_stub}_*") if folder.is_dir()]
+    current_obspacks.sort()
+
+    return current_obspacks
+
+
+def define_obspack_name(
+    obspack_stub: str,
+    version: Optional[str] = None,
+    major_version_only: bool = False,
+    output_folder: optionalPathType = None,
+    current_obspacks: Optional[list] = None,
+) -> tuple[str, str]:
+    """
+    Define the name of the obspack based on an obspack_stub and version.
+    This will be formatted as:
+        "{obspack_stub}_{version}"
+
+    If version is not specified the version will be extracted by looking
+    for folders following the same naming scheme either using the output_folder
+    or a supplied list of current obspack names.
+
+    Args:
+        output_folder: Path to top level directory where obspack folder will be created.
+            When looking for previous obspacks, will look here for these.
+        obspack_stub: Start of the obspack_name. This will be assumed to be standard for
+            other obspacks of the same type.
+        version: Can explicitly define a version to be used to create the obspack_name
+        major_version_only: Ignore max minor version and include a new major version instead.
+        current_obspacks: List of previous obspacks to use when defining the new version
+            in obspack_name
+    Returns:
+        (str, str): Obspack name and the version associated with this
+
+    TODO: Decide if to also incorporate rough date of creation
+    """
+
+    if version is None:
+        if current_obspacks is None:
+            if output_folder is not None:
+                current_obspacks = find_current_obspacks(output_folder, obspack_stub)
+            else:
+                logger.exception(
+                    "Output_folder must be supplied to define a new obspack name based on obspack_stub.\n"
+                    "Alternatively, supply a complete obspack_name rather than an obspack_stub."
+                )
+
+        if current_obspacks:
+            version_pattern = re.compile(
+                rf"[{obspack_stub}]_v(?P<major_version>\d+)[.]?(?P<minor_version>\d*)"
+            )
+            versions = [(-1, -1)]
+            for c_obspack in current_obspacks:
+                version_search = version_pattern.search(str(c_obspack))
+                if version_search is not None:
+                    version_dict = version_search.groupdict()
+                    major_version = version_dict["major_version"]
+                    minor_version = version_dict["minor_version"]
+                    if minor_version == "":
+                        minor_version = -1
+
+                    version_pairs = (int(major_version), int(minor_version))
+                    versions.append(version_pairs)
+
+            max_version = max(versions)
+
+            if max_version[0] == -1:
+                version = "v1"
+            elif max_version[1] == -1 or major_version_only:
+                version = f"v{max_version[0]+1}"
+            else:
+                version = f"v{max_version[0]}.{max_version[1]+1}"
+        else:
+            version = "v1"
+
+    obspack_name = f"{obspack_stub}_{version}"
+
+    return obspack_name, version
+
+
 def define_obspack_path(output_folder: pathType, obspack_name: str) -> Path:
     """
     Define the full output path for the obspack folder.
@@ -327,9 +423,9 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
     return search_df
 
 
-def retrieve_data(filename: optionalPathType = None,
-                  search_df: Optional[pd.DataFrame] = None,
-                  store: Optional[str] = None) -> list:
+def retrieve_data(
+    filename: optionalPathType = None, search_df: Optional[pd.DataFrame] = None, store: Optional[str] = None
+) -> list:
     """
     Use search parameters to get data from object store. This expects either a filename for an input
     file containing search parameters (see read_input_file() for more details) or a DataFrame containing
@@ -419,7 +515,7 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
         - "instrument"
         - "network"
         - "data_owner"
-        - "data_owner_email"    
+        - "data_owner_email"
 
     Args:
         ds: Expect this dataset to contain useful attributes describing the site data.
@@ -491,7 +587,8 @@ def create_site_index(df: pd.DataFrame, output_folder: pathType) -> None:
 def create_obspack(
     filename: pathType,
     output_folder: pathType,
-    obspack_name: str,
+    obspack_name: Optional[str] = None,
+    obspack_stub: Optional[str] = None,
     release_files: Optional[Sequence] = None,
     store: Optional[str] = None,
 ) -> None:
@@ -505,14 +602,16 @@ def create_obspack(
     obs_types = search_df["obs_type"]
     unique_obs_types = np.unique(obs_types)
 
+    if obspack_name is None and obspack_stub:
+        obspack_name, version = define_obspack_name(obspack_stub, output_folder=output_folder)
+    else:
+        version = "v1"
+
+    obspack_name = cast(str, obspack_name)
+
     obspack_path = create_obspack_structure(
         output_folder, obspack_name, obs_types=unique_obs_types, release_files=release_files
     )
-
-    # Put things in obspack and build structure
-    # TODO: TEMPORARY - To be updated and generalised
-    version = "v1"
-    ####
 
     site_detail_rows = []
     for data, obs_type in zip(retrieved_data, obs_types):

@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
-from openghg.obspack import retrieve_data, create_obspack, define_obspack_filename
+from openghg.obspack import retrieve_data, create_obspack, define_obspack_filename, define_obspack_name
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 
 
@@ -62,6 +62,26 @@ def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename)
     filename = define_obspack_filename(metadata, obs_type=obs_type, obspack_path=obspack_path)
 
     assert filename == out_filename
+
+
+@pytest.mark.parametrize(
+        "obspack_stub,version,current_obspacks,expected_output",
+        [
+            ("gemma_obspack", "v1", [], "gemma_obspack_v1"),
+            ("gemma_obspack", None, ["gemma_obspack"], "gemma_obspack_v1"),
+            ("gemma_obspack", None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
+            ("gemma_obspack", None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            ("gemma_obspack", None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+            ("gemma_obspack", None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            ("gemma_obspack", None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+        ]
+)
+def test_define_obspack_name(obspack_stub, version, current_obspacks, expected_output):
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                 version=version,
+                                 current_obspacks=current_obspacks)
+
+    assert output == expected_output
 
 
 def populate_object_store():
