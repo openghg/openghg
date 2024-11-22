@@ -60,7 +60,7 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
-        source_format: str = "boundary_conditions",
+        source_format: str = "openghg",
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         if_exists: str = "auto",
