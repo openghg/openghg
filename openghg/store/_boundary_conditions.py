@@ -153,10 +153,7 @@ class BoundaryConditions(BaseStore):
         parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, _ = split_function_inputs(
-            fn_input_parameters, parser_fn
-        )
-
+        parser_input_parameters, _ = split_function_inputs(fn_input_parameters, parser_fn)
 
         # Specify any additional metadata to be added
         additional_metadata: Dict[Any, Any] = {}
@@ -210,9 +207,7 @@ class BoundaryConditions(BaseStore):
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_condition_data = self.update_metadata(
-                boundary_condition_data, additional_metadata, _
-            )
+            boundary_condition_data = self.update_metadata(boundary_condition_data, additional_metadata, _)
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
