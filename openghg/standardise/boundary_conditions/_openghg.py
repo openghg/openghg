@@ -4,18 +4,19 @@ from typing import Dict, Optional, Union
 import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, synonyms
-from openghg.store import update_zero_dim
+from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_boundary_conditions(
+def parse_openghg(
     filepath: Union[str, Path],
     species: str,
     bc_input: str,
     domain: str,
-    source_format: str = "boundary_conditions",
+    period: str = None,
+    continuous: str = None,
     chunks: Optional[Dict] = None,
 ) -> dict:
     """
@@ -27,7 +28,6 @@ def parse_boundary_conditions(
             - a model name such as "MOZART" or "CAMS"
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
-        source_format: "boundary_conditions is default"
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -66,7 +66,25 @@ def parse_boundary_conditions(
         if "time" in bc_data.coords:
             bc_data = update_zero_dim(bc_data, dim="time")
 
-            key = "_".join((species, bc_input, domain))
+        bc_time = bc_data["time"]
+
+        start_date, end_date, period_str = infer_date_range(
+            bc_time, filepath=filepath, period=period, continuous=continuous)
+        
+        metadata["start_date"] = str(start_date)
+        metadata["end_date"] = str(end_date)
+
+        metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
+        metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
+        metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
+        metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
+        metadata["min_height"] = round(float(bc_data["height"].min()), 5)
+        metadata["max_height"] = round(float(bc_data["height"].max()), 5)
+        metadata["input_filename"] = filepath.name
+
+        metadata["time_period"] = period_str
+
+        key = "_".join((species, bc_input, domain))
 
         boundary_conditions_data: dict[str, dict] = {key: {}}
         boundary_conditions_data[key]["data"] = bc_data
