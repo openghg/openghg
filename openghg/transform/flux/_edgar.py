@@ -56,8 +56,10 @@ from numpy import ndarray
 
 from openghg.standardise.meta import assign_flux_attributes, define_species_label
 from openghg.store import infer_date_range
+from openghg.transform import regrid_uniform_cc
 from openghg.util import (
     clean_string,
+    cut_data_extent,
     molar_mass,
     synonyms,
     find_coord_name,
@@ -165,8 +167,6 @@ def parse_edgar(
 ) -> Dict:
     """
     Read and parse input EDGAR data.
-    Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
-           Does not accept monthly data yet.
 
     EDGAR data is global on a 0.1 x 0.1 grid. This function allows products
     to be created for a given year which cover specific regions (and matches
@@ -200,7 +200,7 @@ def parse_edgar(
         dict: Dictionary of data
 
     TODO: Allow date range to be extracted rather than year?
-    TODO: Add monthly parsing and sector stacking options
+    TODO: Add sector stacking option
     """
     period = None
 
@@ -244,10 +244,6 @@ def parse_edgar(
         except ValueError:
             continue
         else:
-            # Check if data is actually monthly "...2015_1" etc. - can't parse yet
-            if "month" in metadata:
-                raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
-
             files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
     if not files_by_year:
@@ -289,69 +285,26 @@ def parse_edgar(
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
+
+    if len(flux_da.dims) < 2:
+        raise ValueError(
+            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
+            f" but '{name}' has {len(flux_da.dims)} dimensions: {flux_da.dims}."
+        )
+
     flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
     # TODO: some options for f-gases (.emi files) have different units...
     # need to catch this
-
-    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
-    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
-    if lat_name is None or lon_name is None:
-        raise ValueError(
-            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
-            " Please check this is a 2D grid map."
-        )
-
-    # Check range of longitude values and convert to -180 - +180
-    flux_da = convert_internal_longitude(
-        flux_da, lon_name=lon_name
-    )  # TODO is this creating NaNs for East Asia domain?
-
-    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
-
-    if lat_out is not None and lon_out is not None:
-        # Will produce import error if xesmf has not been installed.
-        from openghg.transform import regrid_uniform_cc
-        from openghg.util import cut_data_extent
-
-        # To improve performance of regridding algorithm cut down the data
-        # to match the output grid (with buffer).
-        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
-        flux_values = flux_da_cut.values
-
-        lat_in_cut = flux_da_cut[lat_name]
-        lon_in_cut = flux_da_cut[lon_name]
-
-        # area conservative regrid
-        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
-    else:
-        lat_out = flux_da[lat_name]
-        lon_out = flux_da[lon_name]
-        flux_values = flux_da.values
-
-    edgar_attrs = edgar_ds.attrs
+    flux_da = regrid_to_domain(flux_da, domain).rename("flux")
+    em_data = flux_da.to_dataset()
+    em_data.attrs = edgar_ds.attrs
 
     # Check for "time" dimension and add if missing.
-    flux_ndim = flux_values.ndim
-    time_name = "time"
-    if time_name in flux_da:
-        time = flux_da[time_name].values
-        flux = flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
-    elif time_name not in flux_da and flux_ndim == 2:
+    if "time" not in em_data.dims and len(em_data.dims) == 2:
         time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
-        flux = flux_values[np.newaxis, ...]
-    else:
-        raise ValueError(
-            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
-            f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
-        )
-
-    dims = ("time", "lat", "lon")
-
-    em_data = xr.Dataset(
-        {"flux": (dims, flux)}, coords={"time": time, "lat": lat_out, "lon": lon_out}, attrs=edgar_attrs
-    )
+        em_data = em_data.expand_dims(time=time, axis=0)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -630,6 +583,40 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
     #                      f"EDGAR versions: {_edgar_known_versions}.")
 
     return file_info
+
+
+def regrid_to_domain(flux_da: xr.DataArray, domain: str | None = None) -> xr.DataArray:
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+
+    if lat_name is None or lon_name is None:
+        raise ValueError(
+            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
+            " Please check this is a 2D grid map."
+        )
+
+    # Check range of longitude values and convert to -180 - +180
+    flux_da = convert_internal_longitude(
+        flux_da, lon_name=lon_name
+    )  # TODO is this creating NaNs for East Asia domain?
+
+    lat_out, lon_out = _check_lat_lon(domain)
+
+    if lat_out is not None and lon_out is not None and domain is not None:
+        # To improve performance of regridding algorithm cut down the data
+        # to match the output grid (with buffer).
+        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
+
+        lat_in_cut = flux_da_cut[lat_name]
+        lon_in_cut = flux_da_cut[lon_name]
+
+        if "time" in flux_da_cut.dims:
+            flux_da_cut = flux_da_cut.transpose("time", "lat", "lon")
+
+        # area conservative regrid
+        return regrid_uniform_cc(flux_da_cut, lat_out, lon_out, lat_in_cut, lon_in_cut)
+
+    return flux_da
 
 
 # def getedgarv5annualsectors(year, lon_out, lat_out, edgar_sectors, species='CH4'):
