@@ -69,8 +69,9 @@ def parse_openghg(
         bc_time = bc_data["time"]
 
         start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous)
-        
+            bc_time, filepath=filepath, period=period, continuous=continuous
+        )
+
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
 
