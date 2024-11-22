@@ -7,7 +7,7 @@ import pkg_resources
 from typing import Union, Optional, Sequence
 import logging
 
-from openghg.retrieve import search_surface, search_column
+from openghg.retrieve import get_obs_surface, get_obs_column
 from openghg.types import pathType, optionalPathType
 
 logger = logging.getLogger("openghg.obspack")
@@ -21,17 +21,22 @@ def define_obs_types() -> list:
     return obs_types
 
 
-def define_search_functions() -> dict:
+def define_get_functions() -> tuple[dict, dict]:
     """
-    Define relationship between obs type names (for folders) and search functions.
+    Define relationship between obs type names (for folders) and get functions.
     """
-    search_functions = {
-        "surface-insitu": search_surface,
-        "surface-flask": search_surface,
-        "column": search_column,
+    get_functions = {
+        "surface-insitu": get_obs_surface,
+        "surface-flask": get_obs_surface,
+        "column": get_obs_column,
     }
 
-    return search_functions
+    get_fn_arguments = {
+        get_obs_surface: {"rename_vars": False},
+        get_obs_column: {"return_mf": False},
+    }
+
+    return get_functions, get_fn_arguments
 
 
 def define_filename(
@@ -342,12 +347,13 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
         raise ValueError("Either filename or extracted search dataframe must be supplied to retrieve data")
 
     obs_type_name = "obs_type"
-    search_functions = define_search_functions()
+    get_functions, get_fn_arguments = define_get_functions()
 
     data_object_all = []
     for i, row in search_df.iterrows():
         obs_type = row[obs_type_name]
-        search_fn = search_functions[obs_type]
+        get_fn = get_functions[obs_type]
+        additional_fn_arguments = get_fn_arguments[get_fn]
 
         kwargs = row.to_dict()
         kwargs.pop(obs_type_name)
@@ -358,10 +364,8 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
             kwargs["inlet"] = slice(start, end)
 
         # TODO: Decide details around catching errors for no files/multi files found.
-        search_results = search_fn(**kwargs)
-        data_retrieved = search_results.retrieve()
-        if isinstance(data_retrieved, list):
-            data_retrieved = data_retrieved[0]
+        kwargs = kwargs | additional_fn_arguments
+        data_retrieved = get_fn(**kwargs)
         data_object_all.append(data_retrieved)
 
     return data_object_all
