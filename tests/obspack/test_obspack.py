@@ -108,8 +108,10 @@ def test_create_obspack():
     populate_object_store()
     filename = get_obspack_datapath("example_search_input.csv")
 
+    store="user"
+
     # TODO: May want to mock the output creation and/or create, check then and delete this within tests
     output_path = Path("~/test_GEMMA_ObsPack").expanduser()
     output_path.mkdir(exist_ok=True)
 
-    create_obspack(filename, output_path, "test_gemma_v1")
+    create_obspack(filename, output_path, "test_gemma_v1",store=store)

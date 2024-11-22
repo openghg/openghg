@@ -327,7 +327,9 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
     return search_df
 
 
-def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.DataFrame] = None) -> list:
+def retrieve_data(filename: optionalPathType = None,
+                  search_df: Optional[pd.DataFrame] = None,
+                  store: Optional[str] = None) -> list:
     """
     Use search parameters to get data from object store. This expects either a filename for an input
     file containing search parameters (see read_input_file() for more details) or a DataFrame containing
@@ -336,6 +338,7 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
     Args:
         filename: Filename containing search parameters.
         search_df: pandas DataFrame containing search parameters
+        store: Name of specific object store to use to search for data
     Returns:
         list [ObsSurface/ObsColumn]: List of extracted data from the object store based on search parameters
     """
@@ -358,12 +361,16 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
         kwargs = row.to_dict()
         kwargs.pop(obs_type_name)
 
+        if store:
+            kwargs["store"] = store
+
         # TODO: Update to a more robust check (may be code to already do this?)
         if "-" in kwargs["inlet"]:
             start, end = kwargs["inlet"].split("-")
             kwargs["inlet"] = slice(start, end)
 
-        # Replace any empty entries with None values
+        # Remove any NaN entries
+        # TODO: Decide how this could work with negative lookup?
         kwargs = {key: value for key, value in kwargs.items() if not pd.isnull(value)}
 
         # Pass any additional arguments needed for the get/search function
@@ -486,13 +493,14 @@ def create_obspack(
     output_folder: pathType,
     obspack_name: str,
     release_files: Optional[Sequence] = None,
+    store: Optional[str] = None,
 ) -> None:
     """
     Create ObsPack of obspack_name at output_folder from input search file.
     """
 
     search_df = read_input_file(filename)
-    retrieved_data = retrieve_data(search_df=search_df)
+    retrieved_data = retrieve_data(search_df=search_df, store=store)
 
     obs_types = search_df["obs_type"]
     unique_obs_types = np.unique(obs_types)
