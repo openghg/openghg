@@ -31,13 +31,16 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict,
+                  file_metadata: Dict, source_format: str, ) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
             binary_data: Footprint data
             metadata: Dictionary of metadata
             file_metadat: File metadata
+            source_format : Type of data being input e.g. openghg (internal format)
+
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -52,7 +55,7 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
 
     def read_file(
         self,
@@ -60,7 +63,7 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
-        source_format: str = "openghg",
+        source_format: str = None,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -81,7 +84,7 @@ class BoundaryConditions(BaseStore):
               - a model name such as "MOZART" or "CAMS"
               - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
             domain: Region for boundary conditions
-            source_format: "boundary_conditions is default"
+            source_format : Type of data being input e.g. openghg (internal format)
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
                      - "yearly", "monthly"
@@ -117,9 +120,6 @@ class BoundaryConditions(BaseStore):
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
-        from openghg.store import (
-            infer_date_range,
-        )
         from openghg.util import (
             clean_string,
             check_if_need_new_version,
@@ -193,33 +193,9 @@ class BoundaryConditions(BaseStore):
             bc_data = value["data"]
             bc_time = bc_data["time"]
 
-            start_date, end_date, period_str = infer_date_range(
-                bc_time, filepath=filepath, period=period, continuous=continuous
-            )
-
             # Checking against expected format for boundary conditions
             BoundaryConditions.validate_data(value["data"])
             data_type = "boundary_conditions"
-
-            additional_metadata["start_date"] = str(start_date)
-            additional_metadata["end_date"] = str(end_date)
-            additional_metadata["data_type"] = data_type
-
-            additional_metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-            additional_metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-            additional_metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-            additional_metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-            additional_metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-            additional_metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-
-            additional_metadata["input_filename"] = filepath.name
-
-            additional_metadata["time_period"] = period_str
-
-            matched_keys = set(bc_data) & set(fn_input_parameters)
-            additional_input_parameters = {
-                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-            }
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             self.check_info_keys(optional_metadata)
