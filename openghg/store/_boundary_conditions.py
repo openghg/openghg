@@ -71,7 +71,7 @@ class BoundaryConditions(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> Dict:
+    ) -> dict:
         """Read boundary conditions file
 
         Args:
