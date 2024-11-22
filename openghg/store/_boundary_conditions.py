@@ -204,14 +204,14 @@ class BoundaryConditions(BaseStore):
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_conditions_data = self.update_metadata(
+            boundary_condition_data = self.update_metadata(
                 boundary_condition_data, additional_input_parameters, additional_metadata
             )
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
             datasource_uuids = self.assign_data(
-                data=boundary_conditions_data,
+                data=boundary_condition_data,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
