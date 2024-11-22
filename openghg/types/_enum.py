@@ -76,4 +76,4 @@ class DataTypes(Enum):
 
 
 class BoundaryConditions(Enum):
-    BOUNDARY_CONDITIONS = "Boundary_Conditions"
+    OPENGHG = "OPENGHG"
