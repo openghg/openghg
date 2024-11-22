@@ -1,1 +1,1 @@
-from ._boundary_conditions import parse_boundary_conditions
+from ._openghg import parse_openghg
