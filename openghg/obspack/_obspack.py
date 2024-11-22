@@ -271,6 +271,7 @@ def define_obspack_name(
     obspack_stub: str,
     version: Optional[str] = None,
     major_version_only: bool = False,
+    minor_version_only: bool = False,
     output_folder: optionalPathType = None,
     current_obspacks: Optional[list] = None,
 ) -> tuple[str, str]:
@@ -289,7 +290,8 @@ def define_obspack_name(
         obspack_stub: Start of the obspack_name. This will be assumed to be standard for
             other obspacks of the same type.
         version: Can explicitly define a version to be used to create the obspack_name
-        major_version_only: Ignore max minor version and include a new major version instead.
+        major_version_only: Only increase the major version.
+        minor_version_only: Only increase the minor version.
         current_obspacks: List of previous obspacks to use when defining the new version
             in obspack_name
     Returns:
@@ -328,13 +330,25 @@ def define_obspack_name(
             max_version = max(versions)
 
             if max_version[0] == -1:
-                version = "v1"
-            elif max_version[1] == -1 or major_version_only:
-                version = f"v{max_version[0]+1}"
+                if minor_version_only:
+                    version = "v1.0"
+                else:
+                    version = "v1"
+            elif max_version[1] == -1:
+                if minor_version_only:
+                    version = f"v{max_version[0]}.1"
+                else:
+                    version = f"v{max_version[0]+1}"
             else:
-                version = f"v{max_version[0]}.{max_version[1]+1}"
+                if major_version_only:
+                    version = f"v{max_version[0]+1}"
+                else:
+                    version = f"v{max_version[0]}.{max_version[1]+1}"
         else:
-            version = "v1"
+            if minor_version_only:
+                version = "v1.0"
+            else:
+                version = "v1"
 
     obspack_name = f"{obspack_stub}_{version}"
 
@@ -589,6 +603,9 @@ def create_obspack(
     output_folder: pathType,
     obspack_name: Optional[str] = None,
     obspack_stub: Optional[str] = None,
+    version: Optional[str] = None,
+    minor_version_only: bool = False,
+    major_version_only: bool = False,
     release_files: Optional[Sequence] = None,
     store: Optional[str] = None,
 ) -> None:
@@ -603,8 +620,14 @@ def create_obspack(
     unique_obs_types = np.unique(obs_types)
 
     if obspack_name is None and obspack_stub:
-        obspack_name, version = define_obspack_name(obspack_stub, output_folder=output_folder)
-    else:
+        obspack_name, version = define_obspack_name(
+            obspack_stub,
+            version=version,
+            minor_version_only=minor_version_only,
+            major_version_only=major_version_only,
+            output_folder=output_folder,
+        )
+    elif version is None:
         version = "v1"
 
     obspack_name = cast(str, obspack_name)

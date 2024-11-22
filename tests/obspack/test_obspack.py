@@ -65,21 +65,69 @@ def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename)
 
 
 @pytest.mark.parametrize(
-        "obspack_stub,version,current_obspacks,expected_output",
+        "version,current_obspacks,expected_output",
         [
-            ("gemma_obspack", "v1", [], "gemma_obspack_v1"),
-            ("gemma_obspack", None, ["gemma_obspack"], "gemma_obspack_v1"),
-            ("gemma_obspack", None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
-            ("gemma_obspack", None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            ("gemma_obspack", None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-            ("gemma_obspack", None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            ("gemma_obspack", None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+            ("v1", [], "gemma_obspack_v1"),
+            (None, ["gemma_obspack"], "gemma_obspack_v1"),
+            (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
+            (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+            (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+            (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
         ]
 )
-def test_define_obspack_name(obspack_stub, version, current_obspacks, expected_output):
+def test_define_obspack_name(version, current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
     output, version = define_obspack_name(obspack_stub=obspack_stub,
                                  version=version,
                                  current_obspacks=current_obspacks)
+
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+        "current_obspacks,expected_output",
+        [
+            ([], "gemma_obspack_v1.0"),
+            (["gemma_obspack"], "gemma_obspack_v1.0"),
+            (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
+            (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
+            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+        ]
+)
+def test_define_obspack_name_minor(current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
+    minor_version_only = True
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                          minor_version_only=minor_version_only,
+                                          current_obspacks=current_obspacks)
+
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+        "current_obspacks,expected_output",
+        [
+            ([], "gemma_obspack_v1"),
+            (["gemma_obspack"], "gemma_obspack_v1"),
+            (["gemma_obspack_v1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
+            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
+        ]
+)
+def test_define_obspack_name_major(current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
+    major_version_only = True
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                          major_version_only=major_version_only,
+                                          current_obspacks=current_obspacks)
 
     assert output == expected_output
 
