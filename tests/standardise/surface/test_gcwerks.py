@@ -97,6 +97,7 @@ def test_read_file_thd():
     assert meas_data["ch3ccl3"][-1] == 34.649
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
@@ -155,6 +156,7 @@ def test_read_thd_window_inlet():
     assert data["ch4"][-1] == pytest.approx(1840.432)
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_thd_cf_compliance(thd_data):
