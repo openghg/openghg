@@ -363,8 +363,13 @@ def retrieve_data(filename: optionalPathType = None, search_df: Optional[pd.Data
             start, end = kwargs["inlet"].split("-")
             kwargs["inlet"] = slice(start, end)
 
-        # TODO: Decide details around catching errors for no files/multi files found.
+        # Replace any empty entries with None values
+        kwargs = {key: value for key, value in kwargs.items() if not pd.isnull(value)}
+
+        # Pass any additional arguments needed for the get/search function
         kwargs = kwargs | additional_fn_arguments
+
+        # TODO: Decide details around catching errors for no files/multi files found.
         data_retrieved = get_fn(**kwargs)
         data_object_all.append(data_retrieved)
 
