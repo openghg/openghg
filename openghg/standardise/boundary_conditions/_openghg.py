@@ -15,8 +15,8 @@ def parse_openghg(
     species: str,
     bc_input: str,
     domain: str,
-    period: str = None,
-    continuous: str = None,
+    period: Optional[str] = None,
+    continuous: bool = True,
     chunks: Optional[Dict] = None,
 ) -> dict:
     """
@@ -39,6 +39,8 @@ def parse_openghg(
     species = synonyms(species)
     bc_input = clean_string(bc_input)
     domain = clean_string(domain)
+
+    filepath = Path(filepath)
 
     with xr.open_dataset(filepath).chunk(chunks) as bc_data:
         # Some attributes are numpy types we can't serialise to JSON so convert them

@@ -68,7 +68,7 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
-        source_format: str = None,
+        source_format: str,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -153,9 +153,10 @@ class BoundaryConditions(BaseStore):
         parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
+        parser_input_parameters, _ = split_function_inputs(
             fn_input_parameters, parser_fn
         )
+
 
         # Specify any additional metadata to be added
         additional_metadata: Dict[Any, Any] = {}
@@ -210,7 +211,7 @@ class BoundaryConditions(BaseStore):
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             boundary_condition_data = self.update_metadata(
-                boundary_condition_data, additional_input_parameters, additional_metadata
+                boundary_condition_data, additional_metadata, _
             )
 
             # This performs the lookup and assignment of data to new or
