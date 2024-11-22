@@ -138,7 +138,7 @@ class BoundaryConditions(BaseStore):
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
-            # Get current parameter values and filter to only include function inputs
+        # Get current parameter values and filter to only include function inputs
         current_parameters = locals().copy()
         fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
 
