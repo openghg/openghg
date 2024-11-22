@@ -25,6 +25,7 @@ dependencies:
   - pyvis
   - rapidfuzz
   - requests>=2.25
+  - setuptools
   - scipy
   - tinydb
   - toml

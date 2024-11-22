@@ -27,6 +27,7 @@ dependencies:
   - rapidfuzz
   - requests>=2.25
   - scipy
+  - setuptools
   - tinydb
   - toml
   - rich
