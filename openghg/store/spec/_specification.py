@@ -6,7 +6,7 @@ from openghg.types import (
     FootprintTypes,
     FluxTimeseriesTypes,
     FluxDatabases,
-    EulerianModelTypes
+    EulerianModelTypes,
 )
 
 __all__ = [

@@ -77,5 +77,5 @@ class DataTypes(Enum):
 
 class EulerianModelTypes(Enum):
     """For standardising eulerian model data"""
+
     OPENGHG = "OPENGHG"
-    
