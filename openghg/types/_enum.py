@@ -73,3 +73,9 @@ class DataTypes(Enum):
     NPL = "NPL"
     OPENGHG = "OPENGHG"
     INTEM = "INTEM"
+
+
+class EulerianModelTypes(Enum):
+    """For standardising eulerian model data"""
+    OPENGHG = "OPENGHG"
+    
