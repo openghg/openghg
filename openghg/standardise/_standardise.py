@@ -807,7 +807,7 @@ def standardise_eulerian(
         filepath: Path of Eulerian model species output
         model: Eulerian model name
         species: Species name
-        source_format: Data format, for example openghg, intem
+        source_format: Data format, for example openghg (internal format)
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
