@@ -10,7 +10,7 @@ logger = logging.getLogger("openghg.standardise.eulerian_model")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_eulerian_model(
+def parse_openghg(
     filepath: Union[str, Path],
     model: str,
     species: str,
