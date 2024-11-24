@@ -169,11 +169,6 @@ class EulerianModel(BaseStore):
         results: resultsType = defaultdict(dict)
 
         for key, value in eulerian_model_data.items():
-            em_data = value["data"]
-            matched_keys = set(em_data) & set(fn_input_parameters)
-            additional_input_parameters = {
-                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-            }
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             self.check_info_keys(optional_metadata)
