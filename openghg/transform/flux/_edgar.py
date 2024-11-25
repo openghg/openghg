@@ -585,9 +585,9 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
     # year and month should be integers
     file_info["year"] = int(file_info["year"])
 
-    if file_info["month"] is not None:
+    if file_info.get("month") is not None:
         file_info["month"] = int(file_info["month"])
-    else:
+    elif "month" in file_info:
         del file_info["month"]
 
     # file_info["version"] = clean_string(file_info["version"])
