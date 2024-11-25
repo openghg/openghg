@@ -489,6 +489,44 @@ def _check_readme_data(readme_data: str) -> Optional[str]:
     return edgar_version
 
 
+def _parse_edgar_filename(file_name: str) -> dict:
+    # remove unwanted parts like:
+    # FT2021, FT2022, etc
+    # GHG
+    # emi_nc, flx_nc
+    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?", r"EDGAR_20\d{2}_"]
+    cleaning_regexps_joined = "|".join(cleaning_regexps)
+    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
+
+    filename_clean = cleaning_pat.sub("", file_name)
+
+    # parse string of form:
+    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
+    info_pat = re.compile(
+        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
+        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
+        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
+        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
+        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
+        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
+        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
+    )
+
+    monthly_sectoral_info_pat = re.compile(
+        r"(?P<species>[a-zA-Z\d-])_" r"(?P<year>(19|20)\d{2})_" r"(?P<sector>\w+)"
+    )
+
+    if m := info_pat.search(filename_clean):
+        return m.groupdict()
+    elif m := monthly_sectoral_info_pat.search(filename_clean):
+        return m.groupdict()
+    else:
+        # info_pat matches all files in known EDGAR versions
+        # (verified by searching all file names for these versions
+        # 18 March 2024)
+        raise ValueError(f"Did not recognise input file format: {file_name}")
+
+
 def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Dict:
     """
     Extract details from EDGAR filename.
@@ -524,35 +562,7 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
         edgar_file = pathlib.Path(edgar_file.name)  # zipfile.Path.stem is Python 3.11+
     filename = edgar_file.stem
 
-    # remove unwanted parts like:
-    # FT2021, FT2022, etc
-    # GHG
-    # emi_nc, flx_nc
-    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?"]
-    cleaning_regexps_joined = "|".join(cleaning_regexps)
-    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
-
-    filename_clean = cleaning_pat.sub("", filename)
-
-    # parse string of form:
-    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
-    info_pat = re.compile(
-        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
-        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
-        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
-        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
-        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
-        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
-        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
-    )
-
-    if m := info_pat.search(filename_clean):
-        file_info = m.groupdict()
-    else:
-        # info_pat matches all files in known EDGAR versions
-        # (verified by searching all file names for these versions
-        # 18 March 2024)
-        raise ValueError(f"Did not recognise input file format: {filename}")
+    file_info = _parse_edgar_filename(filename)
 
     # make "source" string
     co2_options = file_info.pop("co2_options") or ""
