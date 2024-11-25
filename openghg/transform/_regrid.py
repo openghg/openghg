@@ -122,14 +122,14 @@ def regrid_uniform_cc(
         lon_in_extracted = data[latlon[1]].values
 
         if lat_in is not None:
-            if not np.isclose(lat_in, lat_in_extracted):
+            if not np.isclose(lat_in, lat_in_extracted).any():
                 raise ValueError(
                     "Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lat_out' have been supplied correctly as well."
                 )
 
         if lon_in is not None:
-            if not np.isclose(lon_in, lon_in_extracted):
+            if not np.isclose(lon_in, lon_in_extracted).any():
                 raise ValueError(
                     "Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lon_out' has been supplied correctly as well."

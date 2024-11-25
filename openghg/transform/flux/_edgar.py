@@ -621,14 +621,11 @@ def regrid_to_domain(flux_da: xr.DataArray, domain: str | None = None) -> xr.Dat
         # to match the output grid (with buffer).
         flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
 
-        lat_in_cut = flux_da_cut[lat_name]
-        lon_in_cut = flux_da_cut[lon_name]
-
         if "time" in flux_da_cut.dims:
             flux_da_cut = flux_da_cut.transpose("time", "lat", "lon")
 
         # area conservative regrid
-        return regrid_uniform_cc(flux_da_cut, lat_out, lon_out, lat_in_cut, lon_in_cut)
+        return regrid_uniform_cc(flux_da_cut, lat_out, lon_out)
 
     return flux_da
 
