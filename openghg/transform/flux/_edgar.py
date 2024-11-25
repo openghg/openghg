@@ -565,7 +565,11 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
     file_info = _parse_edgar_filename(filename)
 
     # make "source" string
-    co2_options = file_info.pop("co2_options") or ""
+    # monthly sectoral regex doesn't have co2_options...
+    try:
+        co2_options = file_info.pop("co2_options")
+    except KeyError:
+        co2_options = ""
 
     sector = file_info.pop("sector") or ""
     sector = sector.replace("_", "-")
