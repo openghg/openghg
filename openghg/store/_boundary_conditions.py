@@ -153,7 +153,7 @@ class BoundaryConditions(BaseStore):
         parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, _ = split_function_inputs(fn_input_parameters, parser_fn)
+        parser_input_parameters, additional_input_parameters = split_function_inputs(fn_input_parameters, parser_fn)
 
         # Specify any additional metadata to be added
         additional_metadata: Dict[Any, Any] = {}
