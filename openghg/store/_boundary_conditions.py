@@ -205,7 +205,7 @@ class BoundaryConditions(BaseStore):
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             boundary_condition_data = self.update_metadata(
-                boundary_condition_data, fn_input_parameters, additional_metadata
+                boundary_condition_data, additional_input_parameters, additional_metadata
             )
 
             # This performs the lookup and assignment of data to new or
