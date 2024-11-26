@@ -155,7 +155,7 @@ class BoundaryConditions(BaseStore):
         parser_input_parameters, additional_input_parameters = split_function_inputs(fn_input_parameters, parser_fn)
 
         # Specify any additional metadata to be added
-        additional_metadata: Dict[Any, Any] = {}
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
