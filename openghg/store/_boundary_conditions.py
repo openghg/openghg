@@ -194,7 +194,7 @@ class BoundaryConditions(BaseStore):
             bc_data = value["data"]
 
             # Checking against expected format for boundary conditions
-            BoundaryConditions.validate_data(value["data"])
+            BoundaryConditions.validate_data(bc_data)
             data_type = "boundary_conditions"
 
             # Check to ensure no required keys are being passed through optional_metadata dict
