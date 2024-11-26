@@ -188,7 +188,6 @@ class BoundaryConditions(BaseStore):
 
         # Call appropriate standardisation function with input parameters
         boundary_condition_data = parser_fn(**parser_input_parameters)
-        results: resultsType = defaultdict(dict)
 
         for key, value in boundary_condition_data.items():
             # Currently ACRG boundary conditions are split by month or year
