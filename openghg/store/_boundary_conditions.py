@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
@@ -152,7 +153,9 @@ class BoundaryConditions(BaseStore):
         parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(fn_input_parameters, parser_fn)
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
         # Specify any additional metadata to be added
         additional_metadata = {}
@@ -188,6 +191,8 @@ class BoundaryConditions(BaseStore):
 
         # Call appropriate standardisation function with input parameters
         boundary_condition_data = parser_fn(**parser_input_parameters)
+
+        results: resultsType = defaultdict(dict)
 
         for key, value in boundary_condition_data.items():
             # Currently ACRG boundary conditions are split by month or year
