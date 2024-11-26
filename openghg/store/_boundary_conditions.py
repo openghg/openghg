@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
