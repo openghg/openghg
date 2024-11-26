@@ -192,7 +192,6 @@ class BoundaryConditions(BaseStore):
         for key, value in boundary_condition_data.items():
             # Currently ACRG boundary conditions are split by month or year
             bc_data = value["data"]
-            bc_time = bc_data["time"]
 
             # Checking against expected format for boundary conditions
             BoundaryConditions.validate_data(value["data"])
