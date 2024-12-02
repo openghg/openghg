@@ -21,11 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved `sync_surface_metadata` to ObsSurface.read_file function so this is applied for all input data regardless of source_format. [PR #1138](https://github.com/openghg/openghg/pull/1138)
 - Added `parse_co2_games` parser splitting multiple model from one file into separate datasources. [PR #1170](https://github.com/openghg/openghg/pull/1170)
 - Added `dobj_url` as attribute to icos `retrieve_atmospheric` function. [PR #1174](https://github.com/openghg/openghg/pull/1174)
+- Added parser for BoundaryConditions class. [PR #1180](https://github.com/openghg/openghg/pull/1180)
 
 - Added parser for Eulerian Model class. [PR #1180](https://github.com/openghg/openghg/pull/1180)
 
 ### Updated
 
+- Minimum version of python to 3.10. [PR #1175](https://github.com/openghg/openghg/pull/1175)
 - Updated ICOS standardise function to reflect changes in ASCII file format. [PR #1140](https://github.com/openghg/openghg/pull/1140)
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)

@@ -388,6 +388,7 @@ def standardise_bc(
     species: str,
     bc_input: str,
     domain: str,
+    source_format: str = "openghg",
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     store: Optional[str] = None,
@@ -410,6 +411,7 @@ def standardise_bc(
             - a model name such as "MOZART" or "CAMS"
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
+        source_format : Type of data being input e.g. openghg (internal format).
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
@@ -472,6 +474,7 @@ def standardise_bc(
             species=species,
             bc_input=bc_input,
             domain=domain,
+            source_format=source_format,
             period=period,
             continuous=continuous,
             overwrite=overwrite,
