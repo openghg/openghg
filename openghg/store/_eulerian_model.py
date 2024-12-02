@@ -3,9 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
-from openghg.types import resultsType
 from openghg.util import load_standardise_parser, split_function_inputs
-from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -180,44 +178,45 @@ class EulerianModel(BaseStore):
         # Call appropriate standardisation function with input parameters
         eulerian_model_data = parser_fn(**parser_input_parameters)
 
-        results: resultsType = defaultdict(dict)
+        # # TODO: Add schema and validate methods so this can be checked against expected format
+        # for split_data in eulerian_model_data.values():
 
-        for key, value in eulerian_model_data.items():
+        #     em_data = split_data["data"]
+        #     EulerianModel.validate_data(em_data)
 
-            # Check to ensure no required keys are being passed through optional_metadata dict
-            self.check_info_keys(optional_metadata)
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-            # Mop up and add additional keys to metadata which weren't passed to the parser
-            model_data = self.update_metadata(
-                eulerian_model_data, additional_input_parameters, additional_metadata
-            )
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        model_data = self.update_metadata(
+            eulerian_model_data, additional_input_parameters, additional_metadata
+        )
 
-            data_type = "eulerian_model"
-            datasource_uuids = self.assign_data(
-                data=model_data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                compressor=compressor,
-                filters=filters,
-            )
+        data_type = "eulerian_model"
+        datasource_uuids = self.assign_data(
+            data=model_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            compressor=compressor,
+            filters=filters,
+        )
 
-            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-            # update_keys = ["start_date", "end_date", "latest_version"]
-            # model_data = update_metadata(
-            #     data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
-            # )
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # model_data = update_metadata(
+        #     data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
 
-            # em_store.add_datasources(
-            #     uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
-            # )
+        # em_store.add_datasources(
+        #     uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
+        # )
 
-            # Record the file hash in case we see this file again
-            results["processed"][filepath.name] = datasource_uuids
-            logger.info(f"Completed processing: {filepath.name}.")
+        logger.info(f"Completed processing: {filepath.name}.")
 
-            self.store_hashes(unseen_hashes)
+        # Record the file hash in case we see this file again
+        self.store_hashes(unseen_hashes)
 
-        return dict(results)
+        return datasource_uuids
