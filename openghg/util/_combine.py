@@ -218,9 +218,9 @@ def combine_and_elevate_inlet(data_objects: list[T], override_on_conflict: bool 
         try:
             result = extract_float(inlet)
         except ValueError:
-            return cast(float, np.nan)
+            return cast(float, np.nan)  # Mypy failing considering this as Any.
         else:
-            return result
+            return cast(float, result)
 
     preprocess = partial(
         add_variable_from_metadata,

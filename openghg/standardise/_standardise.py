@@ -789,6 +789,7 @@ def standardise_eulerian(
     filepath: Union[str, Path],
     model: str,
     species: str,
+    source_format: str = "openghg",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     setup: Optional[str] = None,
@@ -809,6 +810,7 @@ def standardise_eulerian(
         filepath: Path of Eulerian model species output
         model: Eulerian model name
         species: Species name
+        source_format: Data format, for example openghg (internal format)
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
@@ -847,6 +849,7 @@ def standardise_eulerian(
             store=store,
             data_type="eulerian_model",
             filepath=filepath,
+            source_format=source_format,
             model=model,
             species=species,
             start_date=start_date,

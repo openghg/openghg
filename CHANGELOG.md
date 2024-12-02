@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `parse_co2_games` parser splitting multiple model from one file into separate datasources. [PR #1170](https://github.com/openghg/openghg/pull/1170)
 - Added `dobj_url` as attribute to icos `retrieve_atmospheric` function. [PR #1174](https://github.com/openghg/openghg/pull/1174)
 - Added parser for BoundaryConditions class. [PR #1180](https://github.com/openghg/openghg/pull/1180)
+- Added parser for Eulerian Model class. [PR #1181](https://github.com/openghg/openghg/pull/1181)
 
 ### Updated
 
