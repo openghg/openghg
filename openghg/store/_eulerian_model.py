@@ -34,7 +34,7 @@ class EulerianModel(BaseStore):
         filepath: Union[str, Path],
         model: str,
         species: str,
-        source_format: str,
+        source_format: str = "openghg",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
