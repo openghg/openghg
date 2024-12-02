@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 
-from openghg.types import resultsType
 from openghg.util import synonyms, load_standardise_parser, split_function_inputs
 
 if TYPE_CHECKING:
@@ -192,56 +190,54 @@ class BoundaryConditions(BaseStore):
         # Call appropriate standardisation function with input parameters
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
-        results: resultsType = defaultdict(dict)
-
-        for key, value in boundary_conditions_data.items():
+        for split_data in boundary_conditions_data.values():
             # Currently ACRG boundary conditions are split by month or year
-            bc_data = value["data"]
+            bc_data = split_data["data"]
 
             # Checking against expected format for boundary conditions
             BoundaryConditions.validate_data(bc_data)
-            data_type = "boundary_conditions"
 
-            # Check to ensure no required keys are being passed through optional_metadata dict
-            self.check_info_keys(optional_metadata)
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        boundary_conditions_data = self.update_metadata(
+            boundary_conditions_data, additional_input_parameters, additional_metadata
+        )
 
-            # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_conditions_data = self.update_metadata(
-                boundary_conditions_data, additional_input_parameters, additional_metadata
-            )
+        # This performs the lookup and assignment of data to new or
+        # existing Datasources
+        data_type = "boundary_conditions"
+        datasource_uuids = self.assign_data(
+            data=boundary_conditions_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            compressor=compressor,
+            filters=filters,
+        )
 
-            # This performs the lookup and assignment of data to new or
-            # existing Datasources
-            datasource_uuids = self.assign_data(
-                data=boundary_conditions_data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                compressor=compressor,
-                filters=filters,
-            )
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # boundary_conditions_data = update_metadata(
+        #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
 
-            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-            # update_keys = ["start_date", "end_date", "latest_version"]
-            # boundary_conditions_data = update_metadata(
-            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-            # )
+        # bc_store.add_datasources(
+        #     uuids=datasource_uuids,
+        #     data=boundary_conditions_data,
+        #     metastore=metastore,
+        #     update_keys=update_keys,
+        # )
 
-            # bc_store.add_datasources(
-            #     uuids=datasource_uuids,
-            #     data=boundary_conditions_data,
-            #     metastore=metastore,
-            #     update_keys=update_keys,
-            # )
-            results["processed"][filepath.name] = datasource_uuids
-            logger.info(f"Completed processing: {filepath.name}.")
-            # Record the file hash in case we see this file again
-            self.store_hashes(unseen_hashes)
+        logger.info(f"Completed processing: {filepath.name}.")
 
-        return dict(results)
+        # Record the file hash in case we see this file again
+        self.store_hashes(unseen_hashes)
+
+        return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:

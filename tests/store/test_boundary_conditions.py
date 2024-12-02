@@ -38,7 +38,7 @@ def test_read_data_monthly(mocker):
     )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results["processed"]["ch4_EUROPE_201208.nc"]["ch4_mozart_europe"]["new"] is True
+    assert proc_results["ch4_mozart_europe"]["new"] is True
 
 
 def test_read_file_monthly():
@@ -54,7 +54,7 @@ def test_read_file_monthly():
         force=True,
     )
 
-    assert "processed" in proc_results
+    assert "ch4_mozart_europe" in proc_results
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
