@@ -219,19 +219,6 @@ class BoundaryConditions(BaseStore):
             filters=filters,
         )
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # boundary_conditions_data = update_metadata(
-        #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        # )
-
-        # bc_store.add_datasources(
-        #     uuids=datasource_uuids,
-        #     data=boundary_conditions_data,
-        #     metastore=metastore,
-        #     update_keys=update_keys,
-        # )
-
         logger.info(f"Completed processing: {filepath.name}.")
 
         # Record the file hash in case we see this file again
