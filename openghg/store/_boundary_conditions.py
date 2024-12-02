@@ -190,11 +190,11 @@ class BoundaryConditions(BaseStore):
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         # Call appropriate standardisation function with input parameters
-        boundary_condition_data = parser_fn(**parser_input_parameters)
+        boundary_conditions_data = parser_fn(**parser_input_parameters)
 
         results: resultsType = defaultdict(dict)
 
-        for key, value in boundary_condition_data.items():
+        for key, value in boundary_conditions_data.items():
             # Currently ACRG boundary conditions are split by month or year
             bc_data = value["data"]
 
@@ -209,14 +209,14 @@ class BoundaryConditions(BaseStore):
                 additional_metadata.update(optional_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_condition_data = self.update_metadata(
-                boundary_condition_data, additional_input_parameters, additional_metadata
+            boundary_conditions_data = self.update_metadata(
+                boundary_conditions_data, additional_input_parameters, additional_metadata
             )
 
             # This performs the lookup and assignment of data to new or
             # existing Datasources
             datasource_uuids = self.assign_data(
-                data=boundary_condition_data,
+                data=boundary_conditions_data,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,
