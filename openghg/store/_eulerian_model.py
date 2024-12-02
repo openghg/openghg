@@ -87,6 +87,7 @@ class EulerianModel(BaseStore):
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
             check_if_need_new_version,
@@ -116,6 +117,16 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
+        try:
+            source_format = standardise_parsers[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+        # Loading parse
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -131,10 +142,6 @@ class EulerianModel(BaseStore):
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         fn_input_parameters["filepath"] = filepath
-
-        # Loading parse
-
-        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
