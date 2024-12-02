@@ -218,7 +218,7 @@ def combine_and_elevate_inlet(data_objects: list[T], override_on_conflict: bool 
         try:
             result = extract_float(inlet)
         except ValueError:
-            return np.nan
+            return cast(float, np.nan)
         else:
             return result
 
