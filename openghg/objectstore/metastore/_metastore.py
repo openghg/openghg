@@ -18,6 +18,7 @@ the MetaStore interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from functools import reduce
 from typing import Any, Callable
 
@@ -262,7 +263,7 @@ class TinyDBMetaStore(MetaStore):
         self,
         where: MetaData,
         to_update: MetaData | None = None,
-        to_delete: str | list[str] | None = None,
+        to_delete: str | Iterable[str] | None = None,
     ) -> None:
         """Update a single record with given metadata.
 

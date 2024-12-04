@@ -163,7 +163,7 @@ def local_retrieve_surface(
     results = search_surface(site=site, species=species, inlet=inlet, data_source="ceda_archive", store=store)
 
     if results and not force_retrieval or url is None:
-        return results.retrieve_all()
+        return ObsData.cast(results.retrieve_all())
 
     filename = parse_url_filename(url=url)
     extension = filename.split(".")[-1].lower()

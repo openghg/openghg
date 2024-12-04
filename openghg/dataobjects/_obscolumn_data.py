@@ -1,9 +1,9 @@
-from ._basedata import _BaseData
+from ._basedata import BaseData
 
 __all__ = ["ObsColumnData"]
 
 
-class ObsColumnData(_BaseData):
+class ObsColumnData(BaseData):
     """This class is used to return observations data from the get_obs_column function
 
     Args:

@@ -1,7 +1,7 @@
 """Combine multiple data objects (objects with .metadata and .data attributes) into one."""
 
 from functools import partial
-from typing import Any, Callable, cast, Optional, TypeVar, Union
+from typing import Any, Callable, Sequence, cast, Optional, TypeVar, Union
 
 import numpy as np
 import xarray as xr
@@ -16,7 +16,7 @@ T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .met
 # TODO: review copying vs. mutating data. Is this handled nicely by xarray and dask?
 # TODO: do we need to add options to use dask.delayed like xr.open_mfdataset?
 def combine_data_objects(
-    data_objects: list[T],
+    data_objects: Sequence[T],
     preprocess: Optional[Callable] = None,
     concat_dim: Optional[str] = None,
     compat: Optional[CompatOptions] = None,
@@ -201,7 +201,7 @@ def add_variable_from_metadata(
     return result
 
 
-def combine_and_elevate_inlet(data_objects: list[T], override_on_conflict: bool = True) -> T:
+def combine_and_elevate_inlet(data_objects: Sequence[T], override_on_conflict: bool = True) -> T:
     """Combine multiple data objects, elevating inlet from metadata to data variable with a time dimension.
 
     Args:

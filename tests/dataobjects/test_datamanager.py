@@ -49,10 +49,10 @@ def footprint_read(mocker):
 def test_footprint_metadata_modification(footprint_read):
     search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
 
-    assert len(search_res.metadata) == 1
-    uuid = next(iter(search_res.metadata))
+    assert len(search_res.data_objects) == 1
+    uuid = next(iter(search_res.uuids))
 
-    metadata = search_res.metadata[uuid]
+    metadata = search_res[uuid]
 
     assert metadata["domain"] == "europe"
     assert metadata["model"] == "test_model"
@@ -61,11 +61,11 @@ def test_footprint_metadata_modification(footprint_read):
     to_update = {"domain": "antarctica", "model": "peugeot"}
     to_delete = ["max_latitude_high"]
 
-    search_res.update_metadata(uuid=uuid, to_update=to_update, to_delete=to_delete)
+    search_res.update_metadata(uuids=uuid, to_update=to_update, to_delete=to_delete)
 
     search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
 
-    metadata = search_res.metadata[uuid]
+    metadata = search_res[uuid]
 
     assert metadata["domain"] == "antarctica"
     assert metadata["model"] == "peugeot"
@@ -94,11 +94,11 @@ def test_delete_footprint_data(footprint_read):
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         assert metastore.search({"uuid": uuid})
 
-    res.delete_datasource(uuid=uuid)
+    res.delete_datasource(uuids=uuid)
 
     # Let's open the Datasource again and make sure we get a new empty object
     with pytest.raises(ObjectStoreError):
-        Datasource(bucket=bucket, uuid=uuid)
+         Datasource(bucket=bucket, uuid=uuid)
 
     assert not exists(bucket=bucket, key=zarr_store_key)
 
@@ -106,26 +106,27 @@ def test_delete_footprint_data(footprint_read):
         assert metastore.search({"uuid": uuid}) == []
 
 
+@pytest.mark.skip("DataManager is being reworked and this feature won't be needed in the future.")
 def test_object_store_not_in_metadata():
     # metadata = {"object_store" : ""}
     search_res = data_manager(data_type="surface", site="tac", species="co2", store="user")
-    uuid = next(iter(search_res.metadata))
+    uuid = next(iter(search_res.uuids))
 
-    assert "object_store" not in search_res.metadata[uuid]
+    assert "object_store" not in search_res[uuid]
 
-    with_obj_store = search_res.metadata
+    with_obj_store = search_res
     with_obj_store[uuid]["object_store"] = "/tmp/store"
 
-    dm = DataManager(metadata=with_obj_store, store="user")
+    dm = DataManager(data_objects=with_obj_store)
 
-    assert "object_store" not in dm.metadata[uuid]
+    assert "object_store" not in dm[uuid]
 
 
 def test_find_modify_metadata():
     search_res = data_manager(data_type="surface", site="tac", species="co2", store="user")
 
-    assert len(search_res.metadata) == 1
-    uuid = next(iter(search_res.metadata))
+    assert len(search_res.data_objects) == 1
+    uuid = next(iter(search_res.uuids))
 
     start_metadata = {
         "data_type": "surface",
@@ -152,47 +153,47 @@ def test_find_modify_metadata():
         "versions": {"v1": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
     }
 
-    assert search_res.metadata[uuid].items() >= start_metadata.items()
+    assert search_res[uuid].items() >= start_metadata.items()
 
     to_add = {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
 
-    search_res.update_metadata(uuid=uuid, to_update=to_add)
+    search_res.update_metadata(uuids=uuid, to_update=to_add)
 
-    assert search_res.metadata[uuid].items() >= to_add.items()
+    assert search_res[uuid].items() >= to_add.items()
 
     res = search_surface(site="tac", species="co2")
 
     for key, value in to_add.items():
-        assert res.metadata[uuid][key] == value
+        assert res[uuid][key] == value
 
 
 def test_modify_multiple_uuids():
     res = data_manager(data_type="surface", site="tac", store="user")
 
-    uuids = sorted(res.metadata.keys())
+    uuids = sorted(res.uuids)
 
-    assert not res.metadata[uuids[0]]["data_owner"] == "michael palin"
-    assert not res.metadata[uuids[0]]["data_owner_email"] == "palin@python.com"
-    assert not res.metadata[uuids[1]]["data_owner"] == "michael palin"
-    assert not res.metadata[uuids[1]]["data_owner_email"] == "palin@python.com"
+    assert not res[uuids[0]]["data_owner"] == "michael palin"
+    assert not res[uuids[0]]["data_owner_email"] == "palin@python.com"
+    assert not res[uuids[1]]["data_owner"] == "michael palin"
+    assert not res[uuids[1]]["data_owner_email"] == "palin@python.com"
 
-    uids = list(res.metadata.keys())
+    uids = list(res.uuids)
     to_add = {"data_owner": "michael palin", "data_owner_email": "palin@python.com"}
 
-    res.update_metadata(uuid=uids, to_update=to_add)
+    res.update_metadata(uuids=uids, to_update=to_add)
 
     search_res = search_surface(site="tac", inlet="100m")
 
-    for metadata in search_res.metadata.values():
-        assert metadata["data_owner"] == "michael palin"
-        assert metadata["data_owner_email"] == "palin@python.com"
+    for data_object in search_res:
+        assert data_object["data_owner"] == "michael palin"
+        assert data_object["data_owner_email"] == "palin@python.com"
 
 
 def test_invalid_uuid_raises():
     res = data_manager(data_type="surface", site="tac", store="user")
 
     with pytest.raises(ValueError):
-        res.update_metadata(uuid="123-567", to_update={})
+        res.update_metadata(uuids="123-567", to_update={})
 
 
 def test_delete_metadata_keys():
@@ -222,15 +223,15 @@ def test_delete_metadata_keys():
         "latest_version": "v1",
     }
 
-    uuid = next(iter(res.metadata))
-    assert res.metadata[uuid].items() >= expected.items()
+    uuid = next(iter(res.uuids))
+    assert res[uuid].items() >= expected.items()
 
     # Delete a key giving it a string
-    res.update_metadata(uuid=uuid, to_delete="species")
+    res.update_metadata(uuids=uuid, to_delete="species")
 
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
-    assert "species" not in res.metadata[uuid]
+    assert "species" not in res[uuid]
 
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
 
@@ -239,25 +240,25 @@ def test_delete_metadata_keys():
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
     # Delete keys passing in a list
-    res.update_metadata(uuid=uuid, to_delete=["site", "inlet"])
+    res.update_metadata(uuids=uuid, to_delete=["site", "inlet"])
 
     res.refresh()
 
-    assert "site" not in res.metadata[uuid]
-    assert "inlet" not in res.metadata[uuid]
+    assert "site" not in res[uuid]
+    assert "inlet" not in res[uuid]
 
 
 def test_delete_and_modify_keys():
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
-    uuid = next(iter(res.metadata))
+    uuid = next(iter(res.data_objects))
 
     to_delete = ["station_longitude", "station_latitude"]
 
-    res.update_metadata(uuid=uuid, to_delete=to_delete)
+    res.update_metadata(uuids=uuid, to_delete=to_delete)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
-    fresh_metadata = search_res.metadata[uuid]
+    fresh_metadata = search_res[uuid]
 
     assert "station_longitude" not in fresh_metadata
     assert "station_latitide" not in fresh_metadata
@@ -267,16 +268,16 @@ def test_delete_and_modify_keys():
     to_update = {"sampling_period": "12H", "tasty_dish": "pasta"}
 
     # We've already deleted these keys
-    with pytest.raises(KeyError):
-        res.update_metadata(uuid=uuid, to_delete=to_delete, to_update=to_update)
+    with pytest.raises(ValueError):
+        res.update_metadata(uuids=uuid, to_delete=to_delete, to_update=to_update)
 
     to_delete = ["long_name"]
 
-    res.update_metadata(uuid=uuid, to_delete=to_delete, to_update=to_update)
+    res.update_metadata(uuids=uuid, to_delete=to_delete, to_update=to_update)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
-    freshest_metadata = search_res.metadata[uuid]
+    freshest_metadata = search_res[uuid]
 
     assert "long_name" not in freshest_metadata
 
@@ -287,20 +288,20 @@ def test_delete_and_modify_keys():
 def test_try_delete_none_modify_none_changes_nothing():
     res = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    uuid = next(iter(res.metadata))
+    uuid = next(iter(res.data_objects))
 
-    res.update_metadata(uuid=uuid)
-    res.update_metadata(uuid=uuid, to_update={}, to_delete=[])
+    res.update_metadata(uuids=uuid)
+    res.update_metadata(uuids=uuid, to_update={}, to_delete=[])
 
     res2 = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    assert res.metadata == res2.metadata
+    assert sorted(res.data_objects) == sorted(res2.data_objects)
 
 
 def test_delete_data():
     res = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    uid = next(iter(res.metadata))
+    uid = next(iter(res.data_objects)).uuid
 
     bucket = get_writable_bucket(name="user")
     d = Datasource(bucket=bucket, uuid=uid)
@@ -314,7 +315,7 @@ def test_delete_data():
 
     zarr_store_path = d._store.store_path(version="v1")
 
-    res.delete_datasource(uuid=uid)
+    res.delete_datasource(uuids=uid)
 
     assert not zarr_store_path.exists()
     assert not exists(bucket=bucket, key=key)
@@ -327,61 +328,61 @@ def test_delete_data():
 def test_metadata_backup_restore():
     res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    uid = next(iter(res_one.metadata))
+    uid = next(iter(res_one.uuids))
 
-    version_one = res_one.metadata[uid].copy()
+    version_one = res_one[uid].copy()
 
     to_update = {"owner": "john"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    res_one.update_metadata(uuids=uid, to_update=to_update)
 
-    assert res_one.metadata[uid]["owner"] == "john"
+    assert res_one[uid]["owner"] == "john"
 
     # Force a refresh from the object store
     res_one.refresh()
 
-    assert res_one.metadata[uid]["owner"] == "john"
+    assert res_one[uid]["owner"] == "john"
 
-    assert res_one.metadata[uid] != version_one
+    assert res_one[uid] != version_one
 
     res_one.restore(uuid=uid)
 
-    assert res_one.metadata[uid] == version_one
+    assert res_one[uid] == version_one
 
     res_one.refresh()
 
-    assert res_one.metadata[uid] == version_one
+    assert res_one[uid] == version_one
 
 
 def test_delete_update_uuid_raises():
     res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
-    uid = next(iter(res_one.metadata))
+    uid = next(iter(res_one.data_objects))
 
     with pytest.raises(ValueError):
-        res_one.update_metadata(uuid=uid, to_delete=["uuid"])
+        res_one.update_metadata(uuids=uid, to_delete=["uuid"])
 
     with pytest.raises(ValueError):
-        res_one.update_metadata(uuid=uid, to_update={"uuid": 123})
+        res_one.update_metadata(uuids=uid, to_update={"uuid": 123})
 
 
 def test_metadata_backup_restore_multiple_changes():
     res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
-    uid = next(iter(res_one.metadata))
+    uid = next(iter(res_one.uuids))
 
     to_update = {"owner": "john"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    res_one.update_metadata(uuids=uid, to_update=to_update)
 
-    assert res_one.metadata[uid]["owner"] == "john"
+    assert res_one[uid]["owner"] == "john"
 
     res_one.refresh()
 
-    assert res_one.metadata[uid]["owner"] == "john"
+    assert res_one[uid]["owner"] == "john"
 
     to_update = {"species": "sparrow"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    res_one.update_metadata(uuids=uid, to_update=to_update)
 
     first_backup = res_one._backup[uid]["1"]
 
@@ -397,4 +398,4 @@ def test_metadata_backup_restore_multiple_changes():
 
     res_one.restore(uuid=uid, version=1)
 
-    assert res_one.metadata[uid] == first_backup
+    assert res_one[uid] == first_backup

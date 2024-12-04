@@ -6,12 +6,14 @@ the object store.
 import logging
 from typing import Any, Optional, Union
 import warnings
+
+
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
+from openghg.objectstore import DataObject
 from ._search_helpers import process_search_kwargs
 
 logger = logging.getLogger("openghg.retrieve")
@@ -403,64 +405,7 @@ def search_column(
 
 
 def search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
-    the function and these keywords will be used to search the metadata associated
-    with each Datasource.
-
-    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
-     - None - argument will be ignored.
-     - list/tuple - an OR search will be created for the argument and each of the values.
-     - dict - an OR search will be created for the key, value pairs.
-       - Note: in this case the name of argument itself will be ignored.
-     - str/other - argument used directly.
-
-    All input search values are formatted (openghg.utils.clean_string).
-
-    This function detects the running environment and routes the call
-    to either the cloud or local search function.
-
-    Example / commonly used arguments are given below.
-
-    Args:
-        species: Terms to search for in Datasources
-        locations: Where to search for the terms in species
-        inlet: Inlet height such as 100m
-        instrument: Instrument name such as picarro
-        find_all: Require all search terms to be satisfied
-        start_date: Start datetime for search.
-        If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_date: End datetime for search.
-        If None an end datetime of the current datetime is set
-    Returns:
-        SearchResults or None: SearchResults object is results found, otherwise None
-    """
-    from openghg.cloud import call_function
-
-    if running_on_hub():
-        post_data: dict[str, Union[str, dict]] = {}
-        post_data["function"] = "search"
-        post_data["search_terms"] = kwargs
-
-        result = call_function(data=post_data)
-
-        content = result["content"]
-
-        found = content["found"]
-        compressed_response = content["result"]
-
-        if found:
-            data_str = decompress(compressed_response)
-            sr = SearchResults.from_json(data=data_str)
-        else:
-            sr = SearchResults()
-    else:
-        sr = _base_search(**kwargs)
-
-    return sr
-
-
-def _base_search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
+    """Search for observations or auxilliary data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
     Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
@@ -493,19 +438,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
     """
     from openghg.util import (
         clean_string,
-        dates_overlap,
         format_inlet,
         synonyms,
-        timestamp_epoch,
-        timestamp_now,
-        timestamp_tzaware,
     )
-    from pandas import Timedelta as pd_Timedelta
-
-    if running_on_hub():
-        raise ValueError(
-            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
-        )
 
     # Select and format the search terms
     # - ignore any kwargs which are None
@@ -513,20 +448,20 @@ def _base_search(**kwargs: Any) -> SearchResults:
     search_kwargs = {}
     for k, v in kwargs.items():
         if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
-            v = format_inlet(v)
+            val = format_inlet(v)
         elif isinstance(v, (list, tuple)):
-            v = [clean_string(value) for value in v if value is not None]
-            if not v:  # Check empty list
-                v = None
+            val = [clean_string(value) for value in v if value is not None]
+            if not val:  # Check empty list
+                val = None
         elif isinstance(v, dict):
-            v = {key: clean_string(value) for key, value in v.items() if value is not None}
-            if not v:  # Check empty dict
-                v = None
+            val = {key: clean_string(value) for key, value in v.items() if value is not None}
+            if not val:  # Check empty dict
+                val = None
         else:
-            v = clean_string(v)
+            val = clean_string(v)
 
-        if v is not None:
-            search_kwargs[k] = v
+        if val is not None:
+            search_kwargs[k] = val
 
     # Species translation
     species = search_kwargs.get("species")
@@ -572,7 +507,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     end_date = search_kwargs.pop("end_date", None)
 
     expanded_search = process_search_kwargs(search_kwargs)
-    general_metadata = {}
+    general_metadata = []
 
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
@@ -581,63 +516,27 @@ def _base_search(**kwargs: Any) -> SearchResults:
                 for v in expanded_search:
                     res = metastore.search(**v)
                     if res:
+                        # TODO: when DataObjects are returned from ObjectStore, they should have the data type included
+                        for r in res:
+                            r["data_type"] = data_type
                         metastore_records.extend(res)
 
         if not metastore_records:
             continue
 
-        # Add in a quick check to make sure we don't have dupes
-        # TODO - remove this once a more thorough tests are added
-        uuids = [s["uuid"] for s in metastore_records]
-        if len(uuids) != len(set(uuids)):
-            error_msg = "Multiple results found with same UUID!"
-            logger.exception(msg=error_msg)
-            raise ValueError(error_msg)
-
-        # Here we create a dictionary of the metadata keyed by the Datasource UUID
-        # we'll create a pandas DataFrame out of this in the SearchResult object
-        # for better printing / searching within a notebook
-        metadata = {r["uuid"]: r for r in metastore_records}
-        # Add in the object store to the metadata the user sees
-        for m in metadata.values():
-            m.update({"object_store": bucket})
+        # TODO: when DataObjects are returned from ObjectStore, we will know the bucket automatically
+        data_objects = [DataObject(r, bucket=bucket) for r in metastore_records]
 
         # Narrow the search to a daterange if dates passed
-        if start_date is not None or end_date is not None:
-            if start_date is None:
-                start_date = timestamp_epoch()
-            else:
-                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+        data_objects = [do for do in data_objects if do.has_data_between(start_date, end_date)]
 
-            if end_date is None:
-                end_date = timestamp_now()
-            else:
-                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+        if not data_objects:
+            logger.warning(
+                f"No data found for the dates given in the {bucket_name} store, please try a wider search."
+            )
 
-            metadata_in_daterange = {}
-
-            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
-            for uid, record in metadata.items():
-                meta_start = record["start_date"]
-                meta_end = record["end_date"]
-
-                if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
-                    metadata_in_daterange[uid] = record
-
-            if not metadata_in_daterange:
-                logger.warning(
-                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
-                )
-            # Update the metadata we'll use to create the SearchResults object
-            metadata = metadata_in_daterange
-
-        # Remove once more comprehensive tests are done
-        dupe_uuids = [k for k in metadata if k in general_metadata]
-        if dupe_uuids:
-            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
-
-        general_metadata.update(metadata)
+        general_metadata.extend(data_objects)
 
     return SearchResults(
-        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
+        data_objects=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
     )

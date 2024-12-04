@@ -1,9 +1,9 @@
-from ._basedata import _BaseData
+from ._basedata import BaseData
 
 __all__ = ["FluxData"]
 
 
-class FluxData(_BaseData):
+class FluxData(BaseData):
     """This class is used to return flux/emissions data from the get_flux function
 
     Args:

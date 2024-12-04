@@ -156,7 +156,7 @@ def local_retrieve(
     update_mismatch: str = "never",
     force: bool = False,
     **kwargs: Any,
-) -> Union[ObsData, List[ObsData], None]:
+) -> Union[ObsData, list[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
     If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
@@ -227,7 +227,6 @@ def local_retrieve(
 
     if results and not force_retrieval:
         obs_data = results.retrieve_all()
-        # break
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(
@@ -261,9 +260,9 @@ def local_retrieve(
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
-        return obs_data[0]
-    else:
-        return obs_data
+        obs_data = obs_data[0]
+
+    return ObsData.cast(obs_data)
 
 
 def _retrieve_remote(

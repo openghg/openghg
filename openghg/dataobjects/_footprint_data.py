@@ -1,9 +1,9 @@
-from ._basedata import _BaseData
+from ._basedata import BaseData
 
 __all__ = ["FootprintData"]
 
 
-class FootprintData(_BaseData):
+class FootprintData(BaseData):
     """This class is used to return observations data from the get_footprint function
 
     Args:

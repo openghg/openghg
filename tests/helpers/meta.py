@@ -1,16 +1,12 @@
 # Check if obssurface metadata contains the minimum expected
-from typing import Dict
 
-from openghg.dataobjects import SearchResults
-
-
-def parsed_surface_metachecker(data: Dict) -> None:
+def parsed_surface_metachecker(data: dict) -> None:
     """Checks the metadata and attributes for data stored in a dictionary of the type
     returned from the standardisation functions such as parse_crds. This is a dictionary
     keyed by species name with metadata and data sub-keys.
 
     Args:
-        data: Dictionary of gas data
+        data: dictionary of gas data
     Returns:
         None
     """
@@ -22,11 +18,11 @@ def parsed_surface_metachecker(data: Dict) -> None:
         assert attributes_checker_obssurface(attrs=attributes, species=species)
 
 
-def metadata_checker_obssurface(metadata: Dict, species: str) -> bool:
+def metadata_checker_obssurface(metadata: dict, species: str) -> bool:
     """Checks if the passed metadata dictionary contains the minimum expected keys
 
     Args:
-        metadata: Dictionary of metadata
+        metadata: dictionary of metadata
     Returns:
         bool: True if expected keys exist
     """
@@ -57,12 +53,12 @@ def metadata_checker_obssurface(metadata: Dict, species: str) -> bool:
     return _key_checker(expected=expected_keys, present=metadata_keys)
 
 
-def attributes_checker_get_obs(attrs: Dict, species: str) -> bool:
+def attributes_checker_get_obs(attrs: dict, species: str) -> bool:
     """Checks if the passed attributes dictionary contains the minimum expected keys for
      results retured from the get_obs_surface function
 
     Args:
-        metadata: Dictionary of metadata
+        metadata: dictionary of metadata
         speices: Expected species
     Returns:
         bool: True if expected keys exist
@@ -82,11 +78,11 @@ def attributes_checker_get_obs(attrs: Dict, species: str) -> bool:
     return _attributes_checker(expected=expected_keys, attrs=attrs, species=species)
 
 
-def attributes_checker_obssurface(attrs: Dict, species: str) -> bool:
+def attributes_checker_obssurface(attrs: dict, species: str) -> bool:
     """Checks if the passed attributes dictionary contains the minimum expected keys
 
     Args:
-        metadata: Dictionary of metadata
+        metadata: dictionary of metadata
         species: Expected species
     Returns:
         bool: True if expected keys exist
@@ -109,7 +105,7 @@ def attributes_checker_obssurface(attrs: Dict, species: str) -> bool:
     return _attributes_checker(expected=expected_keys, attrs=attrs, species=species)
 
 
-def _attributes_checker(expected: Dict, attrs: Dict, species: str) -> bool:
+def _attributes_checker(expected: set, attrs: dict, species: str) -> bool:
     attribute_keys = set(attrs.keys())
 
     meta_species = attrs["species"].lower()
