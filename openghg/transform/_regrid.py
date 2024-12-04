@@ -122,14 +122,14 @@ def regrid_uniform_cc(
         lon_in_extracted = data[latlon[1]].values
 
         if lat_in is not None:
-            if not np.isclose(lat_in, lat_in_extracted):
+            if not np.isclose(lat_in, lat_in_extracted).any():
                 raise ValueError(
                     "Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lat_out' have been supplied correctly as well."
                 )
 
         if lon_in is not None:
-            if not np.isclose(lon_in, lon_in_extracted):
+            if not np.isclose(lon_in, lon_in_extracted).any():
                 raise ValueError(
                     "Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lon_out' has been supplied correctly as well."
@@ -141,7 +141,7 @@ def regrid_uniform_cc(
     lat_in = cast(ArrayLike, lat_in)
     lon_in = cast(ArrayLike, lon_in)
 
-    if data.shape != (lat_in.size, lon_in.size):
+    if data.shape[-2] != lat_in.size or data.shape[-1] != lon_in.size:
         raise ValueError(
             f"Shape of input 'data' {data.shape}"
             f"does not match 'lat_in' and 'lon_in' lengths: {len(lat_in)}, {len(lon_in)}"
