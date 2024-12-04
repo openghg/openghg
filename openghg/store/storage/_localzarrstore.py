@@ -10,15 +10,36 @@ import shutil
 from openghg.types import ZarrStoreError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
-from openghg.store.storage import Store
+from openghg.store.storage import VersionedStore
+from openghg.store.storage._store import get_zarr_directory_store, ZarrStore
+from openghg.store.storage._versioned_store import SimpleVersionedStore
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
 
+ZarrDirStore = ZarrStore[zarr.DirectoryStore]
+
+
+def get_local_zarr_store(bucket: str, datasource_uuid: str) -> SimpleVersionedStore[ZarrDirStore]:
+    stores_path = (Path(bucket) / "data" / datasource_uuid / "zarr").expanduser().resolve()
+
+    if not stores_path.exists():
+        versions = None
+    else:
+        pat = re.compile(r"v\d+")
+        versions = [p.name for p in sorted(stores_path.iterdir()) if pat.match(p.name)]
+
+    def store_factory(version: str) -> ZarrDirStore:
+        return get_zarr_directory_store(stores_path / version)
+
+    return SimpleVersionedStore[ZarrDirStore](store_factory, versions)
+
+
+
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
 
-class LocalZarrStore(Store):
+class LocalZarrStore(VersionedStore):
     """A zarr based data store on the local filesystem.
     This is used by Datasource to handle the storage of versioned data.
 
