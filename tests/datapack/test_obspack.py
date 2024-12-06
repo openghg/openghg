@@ -2,7 +2,7 @@ import xarray as xr
 import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
-from openghg.obspack import retrieve_data, create_obspack, define_obspack_filename, define_obspack_name
+from openghg.datapack import retrieve_data, create_obspack, define_obspack_filename, define_obspack_name
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 
 
