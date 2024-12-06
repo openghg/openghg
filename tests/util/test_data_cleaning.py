@@ -56,6 +56,8 @@ def mhd_ds():
         "Conventions": "CF-1.8",
         "station_long_name": "Mace Head, Ireland",
     }
+    ds.ch4.attrs = {"long_name": "mole fraction of methane in air", "units": "1e-9"}
+    ds.ch4_repeatability.attrs = {"long_name": "repeatability of mole fraction of methane in air", "units": "1e-9"}
     return ds
 
 
@@ -77,11 +79,14 @@ def tac_ds():
         coords={"time": (["time"], times)},
     )
     ds.attrs = {
-        "author": "Arthur P. Scientist",
+        "author": "Aretha Q. Scientist",
         "Calibration_scale": "xmo-x2004a",
         "Conventions": "CF-1.8",
         "station_long_name": "Tacolneston Tower, UK",
     }
+    ds.ch4.attrs = {"long_name": "mole fraction of methane in air", "units": "1e-9"}
+    ds.ch4_variability.attrs = {"long_name": "variability of mole fraction of methane in air", "units": "1e-9"}
+    ds.ch4_number_of_observations.attrs = {"long_name": "number of observations of mole fraction of methane in air"}
     return ds
 
 
@@ -107,6 +112,10 @@ def test_default_resampling_with_repeatability(mhd_ds):
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
     xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability"]), expected_others)
+
+    assert result.ch4.attrs == mhd_ds.ch4.attrs
+    assert result.ch4_repeatability.attrs == mhd_ds.ch4_repeatability.attrs
+    assert result.ch4_variability.attrs == {"long_name": "mole fraction of methane in air_variability", "units": "1e-9"}
 
 
 def test_default_resampling_with_variability(tac_ds):

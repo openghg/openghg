@@ -331,38 +331,6 @@ def get_obs_surface_local(
         # We need to compute the value here for the operations done further down
         logger.info("Loading Dataset data into memory for resampling operations.")
         data = data.compute()
-        # GJ - 2021-03-09
-        # TODO - check by RT
-
-        # # Average the Dataset over a given period
-        # if keep_missing is True:
-        #     # Create a dataset with one element and NaNs to prepend or append
-        #     ds_single_element = data[{"time": 0}]
-
-        #     for v in ds_single_element.variables:
-        #         if v != "time":
-        #             ds_single_element[v].values = np.nan
-
-        #     ds_concat = []
-
-        #     # Pad with an empty entry at the start date
-        #     if timestamp_tzaware(data.time.min()) > start_date:
-        #         ds_single_element_start = ds_single_element.copy()
-        #         ds_single_element_start.time.values = Timestamp(start_date)
-        #         ds_concat.append(ds_single_element_start)
-
-        #     ds_concat.append(data)
-
-        #     # Pad with an empty entry at the end date
-        #     if data.time.max() < Timestamp(end_date):
-        #         ds_single_element_end = ds_single_element.copy()
-        #         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta("1ns")
-        #         ds_concat.append(ds_single_element_end)
-
-        #     data = xr_concat(ds_concat, dim="time")
-
-        #     # Now sort to get everything in the right order
-        #     data = data.sortby("time")
 
         data = default_resampler(data, averaging_period=average, species=species, drop_na=(not keep_missing))
 
@@ -450,22 +418,6 @@ def get_obs_surface_local(
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
-
-    # It doesn't make sense to do this now as we've only got a single Dataset
-    # # Now check if the units match for each of the observation Datasets
-    # units = set((f.data.mf.attrs["units"] for f in obs_files))
-    # scales = set((f.data.attrs["scale"] for f in obs_files))
-
-    # if len(units) > 1:
-    #     raise ValueError(
-    #         f"Units do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-
-    # if len(scales) > 1:
-    #     print(
-    #         f"Scales do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-    #     print("Suggestion: set calibration_scale to convert scales")
 
     return obs_data
 

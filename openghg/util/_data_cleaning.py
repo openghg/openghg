@@ -3,7 +3,7 @@ from functools import partial
 import inspect
 import types
 import typing
-from typing import Callable, cast, overload
+from typing import Any, Callable, cast, overload
 
 import numpy as np
 import pandas as pd
@@ -169,7 +169,7 @@ def independent_uncertainties_resample(
 
 
 @overload
-def independent_uncertainties_resample(
+def independent_uncertainties_resample(  # type: ignore[misc]
     data: xr.Dataset, averaging_period: str, sum_kwargs: dict | None = None, drop_na: bool = False
 ) -> xr.Dataset: ...
 
@@ -190,13 +190,14 @@ def independent_uncertainties_resample(
 
     if isinstance(data, xr.Dataset):
         # apply indepedent uncertainties resample to each data variable, but don't drop NaN yet
-        func = partial(
+        # because we don't want the the data variables to be different lengths
+        result = data.map(
             independent_uncertainties_resample,
             averaging_period=averaging_period,
             sum_kwargs=sum_kwargs,
             drop_na=False,
         )
-        result = data.map(func)
+
         result.attrs.update(get_averaging_attrs(averaging_period))
     else:
         n_obs = data.resample(time=averaging_period).count()
@@ -213,16 +214,16 @@ def independent_uncertainties_resample(
 
 
 @register
-def variability_from_mf_std(ds: xr.Dataset, averaging_period: str, species: str, fill_zero: bool = True, drop_na: bool = False) -> xr.DataArray:
+def variability_from_mf_std(
+    ds: xr.Dataset, averaging_period: str, species: str, fill_zero: bool = True, drop_na: bool = False
+) -> xr.DataArray:
     result = ds[species].resample(time=averaging_period).std(keep_attrs=True).rename(f"{species}_variability")
 
     if fill_zero:
         result = result.where(result == 0.0, result.median())
 
     if "long_name" in ds[species].attrs:
-        result.attrs[
-            "long_name"
-        ] = f"{ds[species].attrs['long_name']}_variability"
+        result.attrs["long_name"] = f"{ds[species].attrs['long_name']}_variability"
 
     if "units" in ds[species].attrs:
         result.attrs["units"] = ds[species].attrs["units"]
@@ -231,7 +232,6 @@ def variability_from_mf_std(ds: xr.Dataset, averaging_period: str, species: str,
         result = result.dropna("time")
 
     return result
-
 
 
 def _first_arg_type(func: Callable, arg_type: type = xr.Dataset) -> bool:
@@ -333,7 +333,7 @@ def resampler(
     averaging_period: str,
     drop_na: bool = True,
     apply_func_kwargs: dict | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> xr.Dataset:
     for func in func_dict.keys():
         if func not in functions:
@@ -408,6 +408,7 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
         for dv in repeatability_vars:
             data_vars.remove(dv)
 
+    # if we didn't do a weighted resample for variability, see if we can report the stdev of the mole fraction
     if not variability_set and species is not None and species in data_vars:
         func_dict["variability_from_mf_std"] = [species]
 
@@ -421,14 +422,12 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
     return func_dict
 
 
-def default_resampler(ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True) -> xr.Dataset:
+def default_resampler(
+    ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True
+) -> xr.Dataset:
     """Apply default resampling options.
 
     Keeps attributes from original dataset.
     """
     resampler_dict = make_default_resampler_dict(ds, species)
     return resampler(ds, resampler_dict, averaging_period=averaging_period, species=species, drop_na=drop_na)
-
-
-def old_resampler(ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = True) -> xr.Dataset:
-    pass
