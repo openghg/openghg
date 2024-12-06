@@ -1,3 +1,4 @@
+import xarray as xr
 import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
@@ -163,23 +164,150 @@ def populate_object_store():
 def test_retrieve_data():
 
     populate_object_store()
-    filename = get_obspack_datapath("example_search_input.csv")
+    filename = get_obspack_datapath("example_search_input_full.csv")
 
     data = retrieve_data(filename=filename)
+    
+    
     print("data", data)
     print("data 1 data", data[0].data)
     print("data 2 data", data[1].data)
 
 
-def test_create_obspack():
+def test_create_obspack_structure(tmp_path):
+    """
+    Test full pipeline and that an obspack can be created based on the input
+    search details.
+
+    Current search file is: "example_search_input_full.csv"
+    This contains three entries:
+    1. TAC, 185m, co2, labelled as surface-insitu data - direct search
+    2. BSD, 100m-250m, ch4, labelled as surface-insitu data - search across range of inlets
+    3. BSD, 42m, ch4, labelled as surface-flask data - create in a different subfolder
+
+    Expected obspack structure:
+    test_gemma_v1/
+        obspack_README.md
+        site_index_details*.txt
+        site_insitu/
+            ch4_bsd_multiple_surface-insitu_v1.nc
+            co2_tac_185m_surface-insitu_v1.nc
+        site-flask/
+            ch4_bsd_42m_surface-flask_v1.nc
+    """
 
     populate_object_store()
-    filename = get_obspack_datapath("example_search_input.csv")
+    filename = get_obspack_datapath("example_search_input_full.csv")
 
     store="user"
+    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
 
-    # TODO: May want to mock the output creation and/or create, check then and delete this within tests
-    output_path = Path("~/test_GEMMA_ObsPack").expanduser()
-    output_path.mkdir(exist_ok=True)
+    # Check obspack structure
+    release_file = "obspack_README.md"
+    site_file_search = "site_index_details*.txt"
+    subfolder_file_num = {"surface-insitu": 2,
+                          "surface-flask": 1}
 
-    create_obspack(filename, output_path, "test_gemma_v1",store=store)
+    assert obspack_path.exists()
+    assert (obspack_path / release_file).exists()
+    
+    site_index_files = list(obspack_path.glob(site_file_search))
+    assert len(site_index_files) == 1
+
+    for subfolder, num_files in subfolder_file_num.items():
+        full_path = obspack_path / subfolder
+        assert full_path.exists()
+
+        files_in_folder = list(full_path.glob("*"))
+        assert len(files_in_folder) == num_files
+
+
+def test_create_obspack_file_insitu(tmp_path):
+    """
+    Check data file within obspack folder contains expected details.
+
+    Current search file is: "example_search_input_1.csv"
+
+    Expect: site_insitu/co2_tac_185m_surface-insitu_v1.nc
+     - Main data variable should be species name (not "mf")
+    """
+
+    populate_object_store()
+    filename = get_obspack_datapath("example_search_input_1.csv")
+
+    store="user"
+    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
+
+    species = "co2"
+    site = "tac"
+    inlet = "185m"
+    obs_type = "surface-insitu"
+
+    # Check TAC file within surface-insitu folder in obspack
+    # Check expected data variables
+    # Note: not checking values at the moment.
+    subfolder_insitu = obspack_path / obs_type
+    file_search = f"{species}_{site}_{inlet}_{obs_type}_*.nc"
+    filename = list(subfolder_insitu.glob(file_search))[0]
+
+    ds = xr.open_dataset(filename)
+    assert species in ds.data_vars  # Make sure species name is still used
+    assert "time" in ds.coords
+
+    # Check TAC file contains (at least) the expected attributes
+    expected_attrs = {'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
+                      'Source': 'In situ measurements of air',
+                      'conditions_of_use': 'Ensure that you contact the data owner at the outset of your project.',
+                      'data_owner': "Simon O'Doherty",
+                      'data_owner_email': 's.odoherty@bristol.ac.uk',
+                      'inlet': '185m',
+                      'inlet_height_magl': 185.0,
+                      'instrument': 'picarro',
+                      'network': 'decc',
+                      'sampling_period': '3600.0',
+                      'sampling_period_unit': 's',
+                      'site': 'tac',
+                      'species': 'co2',
+                      'station_height_masl': 50.0,
+                      'station_latitude': 52.51775,
+                      'station_long_name': 'Tacolneston Tower, UK',
+                      'station_longitude': 1.13872,
+                      'scale': 'WMO-X2019',
+    }
+
+    assert ds.attrs.items() > expected_attrs.items()
+
+
+def test_create_obspack_file_multi_inlet(tmp_path):
+    """
+    Check data file within obspack folder contains expected details when
+    range of inlets is specified.
+
+    Current search file is: "example_search_input_2.csv"
+
+    Expect: site_insitu/ch4_bsd_multiple_surface-insitu_v1.nc
+     - Main data variable should be species name (not "mf")
+     - Should contain "inlet" data variable
+    """
+
+    populate_object_store()
+    filename = get_obspack_datapath("example_search_input_2.csv")
+
+    store="user"
+    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
+
+    species = "ch4"
+    site = "bsd"
+    inlet = "multiple"
+    obs_type = "surface-insitu"
+
+    # Check BSD file within surface-insitu folder in obspack
+    # Check expected data variables
+    # Note: not checking values at the moment.
+    subfolder_insitu = obspack_path / obs_type
+    file_search = f"{species}_{site}_{inlet}_{obs_type}_*.nc"
+    filename = list(subfolder_insitu.glob(file_search))[0]
+
+    ds = xr.open_dataset(filename)
+    assert species in ds.data_vars  # Make sure species name is still used
+    assert "inlet" in ds.data_vars  # Check inlet is included for multiple inlet file
