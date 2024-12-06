@@ -443,7 +443,9 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
     default_obs_type = "surface-insitu"
 
     if obs_type_name not in search_df.columns:
-        logger.warning(f"No 'obs_type' column has been supplied within the search parameters. Defaulting to: '{default_obs_type}'")
+        logger.warning(
+            f"No 'obs_type' column has been supplied within the search parameters. Defaulting to: '{default_obs_type}'"
+        )
         search_df[obs_type_name] = default_obs_type
 
     return search_df
