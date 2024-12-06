@@ -574,23 +574,30 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
     return params
 
 
-def create_site_index(df: pd.DataFrame, output_folder: pathType) -> Path:
+def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
     """
     Creates the site index file including data provider details.
     Args:
-        df : Dataframe containing the collated details for the site from the associated metadata.
-        output_folder : Folde
+        df : DataFrame containing the collated details for the site from the associated metadata.
+        output_filename : Filename to use for writing site details.
     Returns:
-        Path: Path to the created site details file
+        None
     """
-
-    logger.info(f"Writing site details: {output_folder}")
-    output_file = open(output_folder, "w")
 
     # Site index should include key metadata for each file (enough to be distinguishable but not too much?)
     # Want to create a DataFrame and pass a file object to this - then can add comments before and after the table as needed
 
-    site_details = df.groupby("Site code").apply(collate_strings)
+    site_column = "Site code"
+
+    if site_column not in site_details.columns:
+        msg = "Unable to create site details file: 'Site code' column is not present in provided DataFrame."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    logger.info(f"Writing site details to: {output_filename}")
+    output_file = open(output_filename, "w")
+
+    site_details = df.groupby(site_column).apply(collate_strings)
     site_details = site_details.dropna(axis=1, how="all")
 
     # index_output_name = open(obspack_folder / f"site_index_details_{version}.txt", "w")
@@ -598,14 +605,13 @@ def create_site_index(df: pd.DataFrame, output_folder: pathType) -> Path:
     # Add header to file
     output_file.write("++++++++++++\n")
     output_file.write("Site details\n")
+    output_file.write(f"File created: {pd.to_datetime('today').normalize}\n")
     output_file.write("++++++++++++\n")
     output_file.write("\n")
 
     site_details.to_csv(output_file, index=False, sep="\t")
 
     output_file.close()
-
-    return output_file
 
 
 def create_obspack(
