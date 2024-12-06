@@ -6,40 +6,12 @@ from openghg.types import InvalidSiteError
 from openghg.util import (
     read_header,
     read_local_config,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     synonyms,
     to_lowercase,
     verify_site,
     sort_by_filenames,
 )
-
-
-def test_running_locally(monkeypatch):
-    monkeypatch.setenv("OPENGHG_PATH", "/tmp/this_that")
-    assert running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-
-    assert running_in_cloud()
-    assert running_on_hub()
-
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "0")
-
-    assert not running_in_cloud()
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_HUB", "0")
-
-    assert not running_on_hub()
-
-    assert running_locally()
-
 
 def test_read_header():
     filename = "header_test.dat"
