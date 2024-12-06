@@ -162,16 +162,26 @@ def populate_object_store():
 
 
 def test_retrieve_data():
+    """
+    Check search file can be used to find data within the object store.
+    """
 
     populate_object_store()
     filename = get_obspack_datapath("example_search_input_full.csv")
 
-    data = retrieve_data(filename=filename)
+    full_data = retrieve_data(filename=filename)
     
-    
-    print("data", data)
-    print("data 1 data", data[0].data)
-    print("data 2 data", data[1].data)
+    assert len(full_data) == 3
+
+    expected_details_found = [
+        {"site": "tac", "species": "co2", "inlet": "185m"},
+        {"site": "bsd", "species": "ch4", "inlet": "multiple"},
+        {"site": "bsd", "species": "ch4", "inlet": "42m"}
+        ]
+
+    for data, details in zip(full_data, expected_details_found):
+        data_attrs = data.data.attrs
+        assert data_attrs.items() >= details.items()
 
 
 def test_create_obspack_structure(tmp_path):
