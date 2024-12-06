@@ -24,7 +24,11 @@ def define_obs_types() -> list:
 
 def define_get_functions() -> tuple[dict, dict]:
     """
-    Define relationship between obs type names (for folders) and get functions.
+    Define relationship between data type names (for folders) and get functions.
+
+    Returns:
+        dict, dict: Folder name to get function mapping and additional arguments
+                    which need to be passed to that function.
     """
     get_functions = {
         "surface-insitu": get_obs_surface,
@@ -48,7 +52,7 @@ def define_filename(
     output_path: optionalPathType = None,
 ) -> Path:
     """
-    Define filename based on determined structure. The input name_components determines
+    Define filename based on the determined structure. The input name_components determines
     the initial naming strings, extracting these from the metadata.
     Sub-names can be specified within name_components by including these as a list.
 
@@ -140,7 +144,7 @@ def define_surface_filename(
     Returns:
         Path: Full path for filename
 
-    TODO: Would we want to incorporate instrument into naming?
+    TODO: Would we want to incorporate instrument into file naming?
     """
     name_components: list[Union[str, list]] = ["species", "site", "inlet"]
     filename = define_filename(
@@ -570,10 +574,14 @@ def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> 
     return params
 
 
-def create_site_index(df: pd.DataFrame, output_folder: pathType) -> None:
+def create_site_index(df: pd.DataFrame, output_folder: pathType) -> Path:
     """
     Creates the site index file including data provider details.
-    Expects a DataFrame object.
+    Args:
+        df : Dataframe containing the collated details for the site from the associated metadata.
+        output_folder : Folde
+    Returns:
+        Path: Path to the created site details file
     """
 
     logger.info(f"Writing site details: {output_folder}")
@@ -597,6 +605,8 @@ def create_site_index(df: pd.DataFrame, output_folder: pathType) -> None:
 
     output_file.close()
 
+    return output_file
+
 
 def create_obspack(
     filename: pathType,
@@ -608,9 +618,12 @@ def create_obspack(
     major_version_only: bool = False,
     release_files: Optional[Sequence] = None,
     store: Optional[str] = None,
-) -> None:
+) -> Path:
     """
     Create ObsPack of obspack_name at output_folder from input search file.
+
+    Returns:
+        Path : Path to created obspack
     """
 
     search_df = read_input_file(filename)
@@ -653,3 +666,5 @@ def create_obspack(
 
     site_details_df = pd.DataFrame(site_detail_rows)
     create_site_index(site_details_df, index_output_filename)
+
+    return obspack_path
