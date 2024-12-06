@@ -599,7 +599,7 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
 
     site_column = "Site code"
 
-    if site_column not in site_details.columns:
+    if site_column not in df.columns:
         msg = "Unable to create site details file: 'Site code' column is not present in provided DataFrame."
         logger.exception(msg)
         raise ValueError(msg)
