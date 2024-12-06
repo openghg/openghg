@@ -623,24 +623,37 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
 
 
 def create_obspack(
-    filename: pathType,
+    search_filename: pathType,
     output_folder: pathType,
     obspack_name: Optional[str] = None,
     obspack_stub: Optional[str] = None,
     version: Optional[str] = None,
-    minor_version_only: bool = False,
     major_version_only: bool = False,
+    minor_version_only: bool = False,
     release_files: Optional[Sequence] = None,
     store: Optional[str] = None,
 ) -> Path:
     """
-    Create ObsPack of obspack_name at output_folder from input search file.
+    Create ObsPack from observation stored within an object store based on input search parameters.
 
+    Args:
+        search_filename: Filename of the search parameters as a csv file. Expect this to contain an 'obs_type' column wit details
+            of the observation type for the data. See define_obs_types() for list of inputs.
+        output_folder: Top level directory for the obspack to be written to disc.
+        obspack_name: Full name for the obspack
+        obspack_stub: As an alternative to the full obspack_name, an obspack_stub can be specified which will have a version.
+            See define_obspack_name() function for details of how the name is constructed when an obspack_stub is specified.
+        version: Version to include with an obspack_stub. If not specified, this will be detected.
+        minor_version_only: When automatically checking for versions, only the minor version will be iterated (e.g. 2.0 --> 2.1)
+        major_version_only: When automatically checking for versions, only the major version will be iterated (e.g. 2.0 --> 3.0)
+        release_files: Additional release files to include within the obspack. See default_release_files() for details of what files
+            will be included by default.
+        store: Name of the object store to use to extract the data.
     Returns:
         Path : Path to created obspack
     """
 
-    search_df = read_input_file(filename)
+    search_df = read_input_file(search_filename)
     retrieved_data = retrieve_data(search_df=search_df, store=store)
 
     obs_types = search_df["obs_type"]
@@ -650,8 +663,8 @@ def create_obspack(
         obspack_name, version = define_obspack_name(
             obspack_stub,
             version=version,
-            minor_version_only=minor_version_only,
             major_version_only=major_version_only,
+            minor_version_only=minor_version_only,
             output_folder=output_folder,
         )
     elif version is None:
