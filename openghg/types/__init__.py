@@ -7,6 +7,8 @@ from ._enum import (
     FluxTypes,
     FluxDatabases,
     FootprintTypes,
+    BoundaryConditions,
+    EulerianModelTypes,
     DataTypes,
 )
 from ._errors import (

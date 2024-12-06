@@ -11,8 +11,12 @@ parser.add_argument(
     type=str,
     help="tag name/number, examples: 1.0 or latest. Not full tag name such as openghg/openghg-base:latest. Default: latest",
 )
-parser.add_argument("--push", dest="push", action="store_true", default=False, help="push the image to DockerHub")
-parser.add_argument("--no-cleanup", dest="cleanup", action="store_false", default=True, help="delete copied files after run")
+parser.add_argument(
+    "--push", dest="push", action="store_true", default=False, help="push the image to DockerHub"
+)
+parser.add_argument(
+    "--no-cleanup", dest="cleanup", action="store_false", default=True, help="delete copied files after run"
+)
 parser.add_argument("--nocache", help="build image without using the cache", action="store_true")
 
 args = parser.parse_args()

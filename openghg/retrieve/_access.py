@@ -92,6 +92,7 @@ def get_obs_surface(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
+    rename_vars: bool = True,
     keep_missing: bool = False,
     skip_ranking: bool = False,
     **kwargs: Any,
@@ -115,6 +116,7 @@ def get_obs_surface(
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
+        rename_vars: Rename variables from species names to use "mf" explictly.
         kwargs: Additional search terms
     Returns:
         ObsData or None: ObsData object if data found, else None
@@ -191,6 +193,7 @@ def get_obs_surface(
             network=network,
             instrument=instrument,
             calibration_scale=calibration_scale,
+            rename_vars=rename_vars,
             keep_missing=keep_missing,
             skip_ranking=skip_ranking,
             **kwargs,
@@ -208,6 +211,7 @@ def get_obs_surface_local(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
+    rename_vars: bool = True,
     keep_missing: Optional[bool] = False,
     skip_ranking: Optional[bool] = False,
     **kwargs: Any,
@@ -233,6 +237,7 @@ def get_obs_surface_local(
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
+        rename_vars: Rename variables from species names to use "mf" explictly.
         kwargs: Additional search terms
     Returns:
         ObsData or None: ObsData object if data found, else None
@@ -359,7 +364,6 @@ def get_obs_surface_local(
         #     # Now sort to get everything in the right order
         #     data = data.sortby("time")
 
-
         data = default_resampler(data, averaging_period=average, species=species, drop_na=(not keep_missing))
 
         # # First do a mean resample on all variables
@@ -414,24 +418,25 @@ def get_obs_surface_local(
         # data = ds_resampled
 
     # Rename variables
-    rename: dict[str, str] = {}
+    if rename_vars:
+        rename: dict[str, str] = {}
 
-    data_variables = [str(v) for v in data.variables]
-    for var in data_variables:
-        if var.lower() == species.lower():
-            rename[var] = "mf"
-        if "repeatability" in var:
-            rename[var] = "mf_repeatability"
-        if "variability" in var:
-            rename[var] = "mf_variability"
-        if "number_of_observations" in var:
-            rename[var] = "mf_number_of_observations"
-        if "status_flag" in var:
-            rename[var] = "status_flag"
-        if "integration_flag" in var:
-            rename[var] = "integration_flag"
+        data_variables = [str(v) for v in data.variables]
+        for var in data_variables:
+            if var.lower() == species.lower():
+                rename[var] = "mf"
+            if "repeatability" in var:
+                rename[var] = "mf_repeatability"
+            if "variability" in var:
+                rename[var] = "mf_variability"
+            if "number_of_observations" in var:
+                rename[var] = "mf_number_of_observations"
+            if "status_flag" in var:
+                rename[var] = "status_flag"
+            if "integration_flag" in var:
+                rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename)  # type: ignore
+        data = data.rename_vars(rename)  # type: ignore
 
     data.attrs["species"] = species
 

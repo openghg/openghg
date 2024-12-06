@@ -1,9 +1,13 @@
 import bz2
 import json
+import os
+import xarray as xr
 from pathlib import Path
+from functools import partial
 from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
 from openghg.types import pathType, multiPathType
+from openghg.util import align_lat_lon
 
 __all__ = [
     "load_parser",
@@ -247,7 +251,9 @@ def get_logfile_path() -> Path:
         return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
+def check_function_open_nc(
+    filepath: multiPathType, realign_on_domain: Optional[str] = None
+) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -255,19 +261,44 @@ def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPath
 
     Args:
         filepath: Path or list of filepaths
+        realign_on_domain: When present, realign the data on the given domain. Option usable
+        when opening footprints or flux data but not observations and boundary conditions.
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    import xarray as xr
-
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn: Callable = xr.open_mfdataset
+            if realign_on_domain:
+                xr_open_fn: Callable = partial(
+                    xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
+                )
+            else:
+                xr_open_fn = xr.open_mfdataset
+            return xr_open_fn, filepath
+
         else:
-            xr_open_fn = xr.open_dataset
             filepath = filepath[0]
+
+    if realign_on_domain:
+
+        def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
+            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
+
     else:
         xr_open_fn = xr.open_dataset
 
     return xr_open_fn, filepath
+
+
+def permissions(file_path: Union[str, Path]) -> tuple[str, str, str]:
+    """Return r, w, and/or x permissions for user, group, and other."""
+    perms = oct(os.stat(file_path).st_mode)
+    user, group, other = perms[-3], perms[-2], perms[-1]
+
+    def bits_to_perms(bit_str: str) -> str:
+        bits = [int(b) for b in bin(int(bit_str))[-3:]]
+        perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
+        return perms
+
+    return bits_to_perms(user), bits_to_perms(group), bits_to_perms(other)

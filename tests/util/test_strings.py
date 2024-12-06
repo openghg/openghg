@@ -56,7 +56,7 @@ def test_is_number():
         ("1e2", 1e2),
         ("100m", 100.0),
         ("100magl", 100.0),
-        ("to +inf and beyond", float("inf"))
+        ("to +inf and beyond", float("inf")),
     ],
 )
 def test_extract_float(string_val, float_val):

@@ -7,7 +7,7 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms, align_lat_lon
+from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -386,7 +386,6 @@ class Footprints(BaseStore):
         for split_data in footprint_data.values():
 
             split_data["data"] = split_data["data"].chunk(chunks)
-            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
 
             fp_data = split_data["data"]
             Footprints.validate_data(
