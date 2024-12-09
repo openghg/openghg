@@ -1,4 +1,5 @@
 import xarray as xr
+from pandas import DataFrame
 import pytest
 from pathlib import Path
 from openghg.standardise import standardise_surface
@@ -210,7 +211,10 @@ def test_create_obspack_structure(tmp_path):
     filename = get_obspack_datapath("example_search_input_full.csv")
 
     store="user"
-    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
+    obspack_path = create_obspack(search_filename=filename,
+                                  output_folder=tmp_path,
+                                  obspack_name="test_gemma_v1",
+                                  store=store)
 
     # Check obspack structure
     release_file = "obspack_README.md"
@@ -246,7 +250,10 @@ def test_create_obspack_file_insitu(tmp_path):
     filename = get_obspack_datapath("example_search_input_1.csv")
 
     store="user"
-    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
+    obspack_path = create_obspack(search_filename=filename,
+                                  output_folder=tmp_path,
+                                  obspack_name="test_gemma_v1",
+                                  store=store)
 
     species = "co2"
     site = "tac"
@@ -304,7 +311,10 @@ def test_create_obspack_file_multi_inlet(tmp_path):
     filename = get_obspack_datapath("example_search_input_2.csv")
 
     store="user"
-    obspack_path = create_obspack(filename, tmp_path, "test_gemma_v1", store=store)
+    obspack_path = create_obspack(search_filename=filename,
+                                  output_folder=tmp_path,
+                                  obspack_name="test_gemma_v1",
+                                  store=store)
 
     species = "ch4"
     site = "bsd"
@@ -321,3 +331,36 @@ def test_create_obspack_file_multi_inlet(tmp_path):
     ds = xr.open_dataset(filename)
     assert species in ds.data_vars  # Make sure species name is still used
     assert "inlet" in ds.data_vars  # Check inlet is included for multiple inlet file
+
+
+def test_create_obspack_search(tmp_path):
+    """
+    Check obspack can be created when specifying a search DataFrame directly.
+    """
+
+    populate_object_store()
+    store="user"
+
+    search_df = DataFrame({"site": ["tac", "bsd"],
+                           "species": ["co2", "ch4"],
+                           "inlet": ["185m", "108m"]})
+
+    obspack_path = create_obspack(search_df=search_df,
+                                  output_folder=tmp_path,
+                                  obspack_name="test_gemma_v1",
+                                  store=store)
+
+    species = "co2"
+    site = "tac"
+    inlet = "185m"
+    obs_type = "surface-insitu"
+
+    # Check TAC file within surface-insitu folder in obspack when created from search DataFrame directly
+    # Check expected data variables
+    # Note: not checking values at the moment.
+    subfolder_insitu = obspack_path / obs_type
+    file_search = f"{species}_{site}_{inlet}_{obs_type}_*.nc"
+    filename = list(subfolder_insitu.glob(file_search))[0]
+
+    ds = xr.open_dataset(filename)
+    assert species in ds.data_vars  # Make sure species name is still used

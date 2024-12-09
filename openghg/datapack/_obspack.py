@@ -438,16 +438,6 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
     TODO: Add checks for expected columns in input search file as required
     """
     search_df = pd.read_csv(filename)
-
-    obs_type_name = "obs_type"
-    default_obs_type = "surface-insitu"
-
-    if obs_type_name not in search_df.columns:
-        logger.warning(
-            f"No 'obs_type' column has been supplied within the search parameters. Defaulting to: '{default_obs_type}'"
-        )
-        search_df[obs_type_name] = default_obs_type
-
     return search_df
 
 
@@ -474,6 +464,13 @@ def retrieve_data(
         raise ValueError("Either filename or extracted search dataframe must be supplied to retrieve data")
 
     obs_type_name = "obs_type"
+    default_obs_type = "surface-insitu"
+    if obs_type_name not in search_df.columns:
+        logger.warning(
+            f"No 'obs_type' column has been supplied within the search parameters. Defaulting to: '{default_obs_type}'"
+        )
+        search_df[obs_type_name] = default_obs_type
+
     get_functions, get_fn_arguments = define_get_functions()
 
     data_object_all = []
@@ -625,8 +622,9 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
 
 
 def create_obspack(
-    search_filename: pathType,
     output_folder: pathType,
+    search_filename: optionalPathType = None,
+    search_df: Optional[pd.DataFrame] = None,
     obspack_name: Optional[str] = None,
     obspack_stub: Optional[str] = None,
     version: Optional[str] = None,
@@ -655,7 +653,14 @@ def create_obspack(
         Path : Path to created obspack
     """
 
-    search_df = read_input_file(search_filename)
+    if search_df is None:
+        if search_filename is not None:
+            search_df = read_input_file(search_filename)
+        else:
+            msg = "Either search_filename or search_df must be specified to create an obspack."
+            logger.exception(msg)
+            raise ValueError(msg)
+
     retrieved_data = retrieve_data(search_df=search_df, store=store)
 
     obs_types = search_df["obs_type"]
