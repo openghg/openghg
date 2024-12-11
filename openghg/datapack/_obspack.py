@@ -631,6 +631,7 @@ def create_obspack(
     version: Optional[str] = None,
     major_version_only: bool = False,
     minor_version_only: bool = False,
+    current_obspacks: Optional[list] = None,
     release_files: Optional[Sequence] = None,
     store: Optional[str] = None,
 ) -> Path:
@@ -649,6 +650,8 @@ def create_obspack(
         version: Version to include with an obspack_stub. If not specified, this will be detected.
         minor_version_only: When automatically checking for versions, only the minor version will be iterated (e.g. 2.0 --> 2.1)
         major_version_only: When automatically checking for versions, only the major version will be iterated (e.g. 2.0 --> 3.0)
+        current_obspacks: List of previous obspacks to use when defining the new version
+            in obspack_name.
         release_files: Additional release files to include within the obspack. See default_release_files() for details of what files
             will be included by default.
         store: Name of the object store to use to extract the data.
@@ -675,6 +678,7 @@ def create_obspack(
             version=version,
             major_version_only=major_version_only,
             minor_version_only=minor_version_only,
+            current_obspacks=current_obspacks,
             output_folder=output_folder,
         )
     elif version is None:
