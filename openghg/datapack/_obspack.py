@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import shutil
+import pathlib
 from pathlib import Path
 import pkg_resources
 from typing import Union, Optional, Sequence, cast
@@ -622,9 +623,9 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
 
 
 def create_obspack(
-    output_folder: pathType,
     search_filename: optionalPathType = None,
     search_df: Optional[pd.DataFrame] = None,
+    output_folder: pathType = pathlib.Path.home(),
     obspack_name: Optional[str] = None,
     obspack_stub: Optional[str] = None,
     version: Optional[str] = None,
@@ -639,7 +640,9 @@ def create_obspack(
     Args:
         search_filename: Filename of the search parameters as a csv file. Expect this to contain an 'obs_type' column wit details
             of the observation type for the data. See define_obs_types() for list of inputs.
+        search_df: DataFrame equivalent of the search_filename. This or search_filename MUST be supplied.
         output_folder: Top level directory for the obspack to be written to disc.
+            Default: user home directory.
         obspack_name: Full name for the obspack
         obspack_stub: As an alternative to the full obspack_name, an obspack_stub can be specified which will have a version.
             See define_obspack_name() function for details of how the name is constructed when an obspack_stub is specified.
