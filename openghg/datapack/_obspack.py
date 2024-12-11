@@ -5,7 +5,8 @@ import xarray as xr
 import shutil
 import pathlib
 from pathlib import Path
-import pkg_resources
+
+import importlib.resources
 from typing import Union, Optional, Sequence, cast
 import logging
 
@@ -377,8 +378,13 @@ def default_release_files() -> list:
     Release files which will be included in the created obspack by default.
     This will return a list of filepaths to these default files.
     """
-    release_file_readme = pkg_resources.resource_filename("openghg", "data/obspack/obspack_README.md")
-    release_files = [release_file_readme]
+    from contextlib import ExitStack
+
+    file_manager = ExitStack()
+    release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
+    release_file_path = file_manager.enter_context(importlib.resources.as_file(release_file_ref))
+
+    release_files = [release_file_path]
     return release_files
 
 
