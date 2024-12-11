@@ -489,48 +489,6 @@ def test_standardise_incomplete_flux():
         )
 
 
-def test_cloud_standardise(monkeypatch, mocker, tmpdir):
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-    call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
-    test_string = "some_text"
-    tmppath = Path(tmpdir).joinpath("test_file.txt")
-    tmppath.write_text(test_string)
-
-    packed = compress((tmppath.read_bytes()))
-
-    standardise_surface(
-        filepath=tmppath,
-        site="bsd",
-        inlet="248m",
-        network="decc",
-        source_format="crds",
-        sampling_period="1m",
-        instrument="picarro",
-    )
-
-    assert call_fn_mock.call_args == mocker.call(
-        data={
-            "function": "standardise",
-            "data": packed,
-            "metadata": {
-                "site": "bsd",
-                "source_format": "crds",
-                "network": "decc",
-                "inlet": "248m",
-                "instrument": "picarro",
-                "sampling_period": "1m",
-                "data_type": "surface",
-            },
-            "file_metadata": {
-                "compressed": True,
-                "sha1_hash": "56ba5dd8ea2fd49024b91792e173c70e08a4ddd1",
-                "filename": "test_file.txt",
-                "obs_type": "surface",
-            },
-        }
-    )
-
-
 def test_standardise_footprint_different_chunking_schemes(caplog):
     datapath_a = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     datapath_b = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")

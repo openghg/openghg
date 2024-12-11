@@ -13,45 +13,6 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def running_in_cloud() -> bool:
-    """Are we running in the cloud?
-
-    Checks for the OPENGHG_CLOUD environment variable being set
-
-    Returns:
-        bool: True if running in cloud
-    """
-    from os import environ
-
-    cloud_env = environ.get("OPENGHG_CLOUD", "0")
-
-    return bool(int(cloud_env))
-
-
-def running_on_hub() -> bool:
-    """Are we running on the OpenGHG Hub?
-
-    Checks for the OPENGHG_CLOUD environment variable being set
-
-    Returns:
-        bool: True if running in cloud
-    """
-    from os import environ
-
-    hub_env = environ.get("OPENGHG_HUB", "0")
-
-    return bool(int(hub_env))
-
-
-def running_locally() -> bool:
-    """Are we running OpenGHG locally?
-
-    Returns:
-        bool: True if running locally
-    """
-    return not (running_on_hub() or running_in_cloud())
-
-
 def unanimous(seq: Dict) -> bool:
     """Checks that all values in an iterable object
     are the same

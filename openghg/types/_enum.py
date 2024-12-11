@@ -62,6 +62,12 @@ class FluxTimeseriesTypes(Enum):
     CRF = "Crf"
 
 
+class EulerianModelTypes(Enum):
+    """For standardising eulerian model data"""
+
+    OPENGHG = "OPENGHG"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"

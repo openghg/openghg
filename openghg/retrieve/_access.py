@@ -1,6 +1,4 @@
-import json
 import logging
-from io import BytesIO
 from typing import Any, Optional, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
@@ -12,9 +10,9 @@ from openghg.dataobjects import (
     ObsData,
 )
 from openghg.types import SearchError
-from openghg.util import combine_and_elevate_inlet, decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.util import combine_and_elevate_inlet
 from pandas import Timestamp
-from xarray import Dataset, load_dataset
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -120,127 +118,6 @@ def get_obs_surface(
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
-    from openghg.cloud import call_function
-    from openghg.util import format_inlet
-
-    # Allow height to be an alias for inlet but we do not expect height
-    # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
-
-    if running_on_hub():
-        raise NotImplementedError("Cloud functionality marked for rewrite.")
-        to_post: dict[str, Union[str, dict]] = {}
-
-        to_post["function"] = "get_obs_surface"
-
-        search_terms = {
-            "site": site,
-            "species": species,
-            "keep_missing": keep_missing,
-            "skip_ranking": skip_ranking,
-        }
-
-        if inlet is not None:
-            search_terms["inlet"] = inlet
-        if start_date is not None:
-            search_terms["start_date"] = start_date
-        if end_date is not None:
-            search_terms["end_date"] = end_date
-        if average is not None:
-            search_terms["average"] = average
-        if network is not None:
-            search_terms["network"] = network
-        if instrument is not None:
-            search_terms["instrument"] = instrument
-        if calibration_scale is not None:
-            search_terms["calibration_scale"] = calibration_scale
-
-        to_post["search_terms"] = search_terms
-
-        result = call_function(data=to_post)
-
-        content = result["content"]
-        found = content["found"]
-
-        if found:
-            binary_data = decompress(data=content["data"])
-
-            file_metadata = content["file_metadata"]
-            sha1_hash_data = file_metadata["data"]["sha1_hash"]
-
-            if sha1_hash_data != hash_bytes(data=binary_data):
-                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
-
-            buf = BytesIO(binary_data)
-            json_str = decompress_str(data=content["metadata"])
-            metadata = json.loads(json_str)
-            dataset = load_dataset(buf)
-
-            return ObsData(data=dataset, metadata=metadata)
-        else:
-            return None
-    else:
-        return get_obs_surface_local(
-            site=site,
-            species=species,
-            start_date=start_date,
-            end_date=end_date,
-            inlet=inlet,
-            average=average,
-            network=network,
-            instrument=instrument,
-            calibration_scale=calibration_scale,
-            rename_vars=rename_vars,
-            keep_missing=keep_missing,
-            skip_ranking=skip_ranking,
-            **kwargs,
-        )
-
-
-def get_obs_surface_local(
-    site: str,
-    species: str,
-    inlet: Optional[Union[str, slice]] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    rename_vars: bool = True,
-    keep_missing: Optional[bool] = False,
-    skip_ranking: Optional[bool] = False,
-    **kwargs: Any,
-) -> Optional[ObsData]:
-    """This is the equivalent of the get_obs function from the ACRG repository.
-
-    Usage and return values are the same whilst implementation may differ.
-
-    This function should not be used on the OpenGHG Hub.
-
-    Args:
-        site: Site of interest e.g. MHD for the Mace Head site.
-        species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
-            can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
-            such as '100m'.
-        height: Alias for inlet
-        average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
-        network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the sipte (must match number of sites).
-        calibration_scale: Convert to this calibration scale
-        rename_vars: Rename variables from species names to use "mf" explictly.
-        kwargs: Additional search terms
-    Returns:
-        ObsData or None: ObsData object if data found, else None
-    """
     import numpy as np
     from openghg.util import (
         format_inlet,
@@ -250,11 +127,11 @@ def get_obs_surface_local(
     )
     from pandas import Timedelta
 
-    if running_on_hub():
-        raise ValueError(
-            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
-        )
-
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)
     if species is not None:
         species = synonyms(species)
 

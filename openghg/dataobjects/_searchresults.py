@@ -1,9 +1,7 @@
-import json
 import logging
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, Dict, List, Optional, TypeVar, Union, Iterable
 
 from openghg.dataobjects import ObsData
-from openghg.util import running_on_hub
 from pandas import DataFrame
 
 __all__ = ["SearchResults"]
@@ -55,8 +53,6 @@ class SearchResults:
         self._start_date = start_date
         self._end_date = end_date
 
-        self.hub = running_on_hub()
-
     def __str__(self) -> str:
         SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
 
@@ -73,38 +69,6 @@ class SearchResults:
 
     # def __iter__(self) -> Iterator:
     #     yield from self.results.iterrows()
-
-    def to_data(self) -> Dict:
-        """Convert this object to a dictionary for JSON serialisation
-
-        Returns:
-            dict: Dictionary of data
-        """
-        return {
-            "metadata": self.metadata,
-            "hub": self.hub,
-        }
-
-    def to_json(self) -> str:
-        """Serialises the object to JSON
-
-        Returns:
-            str: JSON str
-        """
-        return json.dumps(self.to_data())
-
-    @classmethod
-    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
-        """Create a SearchResults object from a dictionary
-
-        Args:
-            data: Serialised object
-        Returns:
-            SearchResults: SearchResults object
-        """
-        loaded = json.loads(data)
-
-        return cls(metadata=loaded["metadata"])
 
     def retrieve(
         self,

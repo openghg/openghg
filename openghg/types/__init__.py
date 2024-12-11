@@ -7,8 +7,9 @@ from ._enum import (
     FluxTypes,
     FluxDatabases,
     FootprintTypes,
-    DataTypes,
     BoundaryConditions,
+    EulerianModelTypes,
+    DataTypes,
 )
 from ._errors import (
     OpenGHGError,

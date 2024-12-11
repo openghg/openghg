@@ -7,6 +7,7 @@ from openghg.types import (
     FluxTimeseriesTypes,
     FluxDatabases,
     BoundaryConditions,
+    EulerianModelTypes,
 )
 
 __all__ = [
@@ -75,8 +76,8 @@ def define_standardise_parsers() -> Dict[str, Any]:
         "flux": FluxTypes,
         "flux_timeseries": FluxTimeseriesTypes,
         "footprints": FootprintTypes,
+        "eulerian_model": EulerianModelTypes,
         "boundary_conditions": BoundaryConditions,
-        # "eulerian_model": EulerianModel,
         # "met": ???,
     }
 
