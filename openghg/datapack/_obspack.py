@@ -344,12 +344,12 @@ def define_obspack_name(
                 if minor_version_only:
                     version = f"v{max_version[0]}.1"
                 else:
-                    version = f"v{max_version[0]+1}"
+                    version = f"v{max_version[0] + 1}"
             else:
                 if major_version_only:
-                    version = f"v{max_version[0]+1}"
+                    version = f"v{max_version[0] + 1}"
                 else:
-                    version = f"v{max_version[0]}.{max_version[1]+1}"
+                    version = f"v{max_version[0]}.{max_version[1] + 1}"
         else:
             if minor_version_only:
                 version = "v1.0"
