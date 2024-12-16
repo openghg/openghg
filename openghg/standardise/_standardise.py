@@ -12,7 +12,9 @@ import logging
 logger = logging.getLogger("openghg.standardise")
 
 
-def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> Dict:
+def standardise(
+    data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any
+) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
     Args:
@@ -79,7 +81,7 @@ def standardise_surface(
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
     sort_files: bool = False,
-) -> Dict:
+) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -201,7 +203,7 @@ def standardise_column(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
-) -> Dict:
+) -> list[dict]:
     """Read column observation file
 
     Args:
@@ -292,7 +294,7 @@ def standardise_bc(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
-) -> Dict:
+) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -386,7 +388,7 @@ def standardise_footprint(
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
     sort_files: bool = False,
-) -> Dict:
+) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -509,7 +511,7 @@ def standardise_flux(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
     optional_metadata: Optional[Dict] = None,
-) -> Dict:
+) -> list[dict]:
     """Process flux / emissions data
 
     Args:
@@ -602,7 +604,7 @@ def standardise_eulerian(
     filters: Optional[Any] = None,
     chunks: Optional[Dict] = None,
     optional_metadata: Optional[Dict] = None,
-) -> Dict:
+) -> list[dict]:
     """Read Eulerian model output
 
     Args:
@@ -718,7 +720,7 @@ def standardise_flux_timeseries(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     optional_metadata: Optional[Dict] = None,
-) -> Dict:
+) -> list[dict]:
     """Process one dimension timeseries file
 
     Args:

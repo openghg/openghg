@@ -1,12 +1,13 @@
 import bz2
+from functools import partial, wraps
 import json
 import os
-import xarray as xr
 from pathlib import Path
-from functools import partial
 from typing import Any, Callable, Dict, List, Tuple, Optional, Union
 
-from openghg.types import pathType, multiPathType
+import xarray as xr
+
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
 
 __all__ = [
@@ -47,7 +48,11 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     function_name = f"parse_{data_name.lower()}"
     fn: Callable = getattr(module, function_name)
 
-    return fn
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):  # type: ignore
+        return convert_to_list_of_metadata_and_data(fn(*args, **kwargs))
+
+    return wrapped_fn
 
 
 def load_standardise_parser(data_type: str, source_format: str) -> Callable:

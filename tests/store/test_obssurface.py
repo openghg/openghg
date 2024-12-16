@@ -63,11 +63,11 @@ def hourly_uuids_fixture():
 def test_different_sampling_periods_diff_datasources(min_uuids_fixture, hourly_uuids_fixture):
 
     min_uuids = min_uuids_fixture
-    for sp, data in min_uuids.items():
+    for data in min_uuids:
         assert data["new"] is True
 
     hour_uuids = hourly_uuids_fixture
-    for sp, data in hour_uuids.items():
+    for data in hour_uuids:
         assert data["new"] is True
 
 
@@ -77,8 +77,9 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     """
     bucket = get_writable_bucket(name="user")
     min_uuids = min_uuids_fixture
-    for species, uuid in min_uuids.items():
-        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+    for result in min_uuids:
+        species=result["species"]
+        datasource = Datasource(bucket=bucket, uuid=result["uuid"])
         assert metadata_checker_obssurface(datasource.metadata(), species=species)
 
         with datasource.get_data(version="latest") as data:

@@ -43,7 +43,7 @@ class ObsColumn(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read column observation file
 
         Args:
@@ -153,7 +153,7 @@ class ObsColumn(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 

@@ -38,7 +38,7 @@ def test_read_data_monthly(mocker):
     )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results["ch4_mozart_europe"]["new"] is True
+    assert proc_results[0]["new"] is True
 
 
 def test_read_file_monthly():

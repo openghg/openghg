@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
+
 import numpy as np
 from xarray import Dataset
 
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 from openghg.store.spec import define_standardise_parsers
+
 
 __all__ = ["BoundaryConditions"]
 
@@ -35,7 +37,7 @@ class BoundaryConditions(BaseStore):
         metadata: Dict,
         file_metadata: Dict,
         source_format: str,
-    ) -> Optional[Dict]:
+    ) -> Optional[list[dict]]:
         """Ready a footprint from binary data
 
         Args:
@@ -77,7 +79,7 @@ class BoundaryConditions(BaseStore):
         filters: Optional[Any] = None,
         chunks: Optional[Dict] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read boundary conditions file
 
         Args:
@@ -117,7 +119,7 @@ class BoundaryConditions(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
-            dict: Dictionary of files processed and datasource UUIDs data assigned to
+            list: of dictionaries of files processed and datasource UUIDs data assigned to, plus "required" metadata
         """
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
@@ -176,7 +178,7 @@ class BoundaryConditions(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -190,9 +192,9 @@ class BoundaryConditions(BaseStore):
         # Call appropriate standardisation function with input parameters
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
-        for split_data in boundary_conditions_data.values():
+        for mdd in boundary_conditions_data:
             # Currently ACRG boundary conditions are split by month or year
-            bc_data = split_data["data"]
+            bc_data = mdd.data
 
             # Checking against expected format for boundary conditions
             BoundaryConditions.validate_data(bc_data)

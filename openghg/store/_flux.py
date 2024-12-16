@@ -33,7 +33,7 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[list[dict]]:
         """Ready a footprint from binary data
 
         Args:
@@ -78,7 +78,7 @@ class Flux(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read flux / emissions file
 
         Args:
@@ -178,7 +178,7 @@ class Flux(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -199,12 +199,11 @@ class Flux(BaseStore):
         flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
-        for split_data in flux_data.values():
+        for mdd in flux_data:
 
-            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
+            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
 
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
+            Flux.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
@@ -240,7 +239,7 @@ class Flux(BaseStore):
         filters: Optional[Any] = None,
         optional_metadata: Optional[Dict] = None,
         **kwargs: Dict,
-    ) -> Dict:
+    ) -> list[dict]:
         """
         Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs

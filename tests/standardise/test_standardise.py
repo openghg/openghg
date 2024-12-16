@@ -54,9 +54,10 @@ def test_standardise_obs_two_writable_stores():
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
 
-    assert "error" not in results
-    assert "ch4" in results
-    assert "co2" in results
+    processed_species = [res.get("species") for res in results]
+
+    assert "ch4" in processed_species
+    assert "co2" in processed_species
 
     results = search(site="hfd", inlet="100m", store="user")
     assert results
@@ -76,7 +77,7 @@ def test_standardise_obs_two_writable_stores():
         store="group",
     )
 
-    assert "ch4" in results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"]
+    assert "ch4" == results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"][0].get("species")
 
     results = search(site="rgl", instrument="g2301", store="group")
     assert results
@@ -109,9 +110,7 @@ def test_standardise_obs_openghg():
     )
 
     results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
-
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
 
 def test_standardise_obs_metadata_mismatch():
@@ -151,8 +150,7 @@ def test_standardise_obs_metadata_mismatch():
     # Check data has been successfully processed
     results = results["processed"][filename]
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="999m", species="co2")
@@ -209,8 +207,7 @@ def test_local_obs_metadata_mismatch_meta():
     # Check data has been successfully processed
     results = results["processed"][filename]
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="998m", species="co2")
@@ -283,8 +280,7 @@ def test_standardise_column():
         store="user",
     )
 
-    assert "error" not in results
-    assert "ch4" in results  # Should this be a more descriprive key?
+    assert "ch4" == results[0].get("species")
 
 
 def test_standardise_footprint():
@@ -309,8 +305,12 @@ def test_standardise_footprint():
         store="user",
     )
 
-    assert "error" not in results
-    assert "tmb_europe_test_model_10m" in results
+    result = results[0]
+
+    assert result["site"] == "tmb"
+    assert result["domain"] == "europe"
+    assert result["model"] == "test_model"
+    assert result["inlet"] == "10m"
 
 
 @pytest.mark.parametrize("source_format", ["paris", "flexpart"])

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast
+from typing import Any, DefaultDict, Dict, MutableSequence, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from pandas import Timedelta
@@ -9,7 +9,7 @@ from xarray import Dataset
 from openghg.standardise.meta import sync_surface_metadata
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType, optionalPathType
+from openghg.types import multiPathType, pathType, resultsType, optionalPathType, MetadataAndData
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -338,14 +338,14 @@ class ObsSurface(BaseStore):
                 parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
-            data = parser_fn(**parser_input_parameters)
+            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
 
             # Current workflow: if any species fails, whole filepath fails
-            for key, value in data.items():
-                species = key.split("_")[0]
+            for mdd in data:
+                species = mdd.metadata["species"]
                 species = synonyms(species)
                 try:
-                    ObsSurface.validate_data(value["data"], species=species)
+                    ObsSurface.validate_data(mdd.data, species=species)
                 except ValueError:
                     logger.error(
                         f"Unable to validate and store data from file: {filepath.name}.",
@@ -361,8 +361,8 @@ class ObsSurface(BaseStore):
 
             # Ensure the data is chunked
             if chunks:
-                for key, value in data.items():
-                    data[key]["data"] = value["data"].chunk(chunks)
+                for mdd in data:
+                    mdd.data = mdd.data.chunk(chunks)
 
             self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
@@ -687,7 +687,7 @@ class ObsSurface(BaseStore):
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
 
-    def align_metadata_attributes(self, data: Dict, update_mismatch: str) -> None:
+    def align_metadata_attributes(self, data: MutableSequence[MetadataAndData], update_mismatch: str) -> None:
         """
         Function to sync metadata and attributes if mismatch is found
 
@@ -702,9 +702,9 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        for _, gas_data in data.items():
-            measurement_data = gas_data["data"]
-            metadata = gas_data["metadata"]
+        for gas_data in data:
+            measurement_data = gas_data.data
+            metadata = gas_data.metadata
 
             attrs = measurement_data.attrs
 
@@ -712,6 +712,5 @@ class ObsSurface(BaseStore):
                 metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
             )
 
-            gas_data["metadata"] = metadata_aligned
-            gas_data["attributes"] = attrs_aligned
-            measurement_data.attrs = gas_data["attributes"]
+            gas_data.metadata = metadata_aligned
+            measurement_data.attrs = attrs_aligned

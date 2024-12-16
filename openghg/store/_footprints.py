@@ -213,7 +213,7 @@ class Footprints(BaseStore):
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
         optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -371,7 +371,7 @@ class Footprints(BaseStore):
         footprint_data = parser_fn(**parser_input_parameters)
 
         chunks = self.check_chunks(
-            ds=list(footprint_data.values())[0]["data"],
+            ds=footprint_data[0].data,
             chunks=chunks,
             high_spatial_resolution=high_spatial_resolution,
             time_resolved=time_resolved,
@@ -383,13 +383,12 @@ class Footprints(BaseStore):
         # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
         # Also check for alignment of domain coordinates
-        for split_data in footprint_data.values():
+        for mdd in footprint_data:
 
-            split_data["data"] = split_data["data"].chunk(chunks)
+            mdd.data = mdd.data.chunk(chunks)
 
-            fp_data = split_data["data"]
             Footprints.validate_data(
-                fp_data,
+                mdd.data,
                 high_spatial_resolution=high_spatial_resolution,
                 time_resolved=time_resolved,
                 short_lifetime=short_lifetime,
