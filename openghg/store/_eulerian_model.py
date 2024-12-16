@@ -146,35 +146,6 @@ class EulerianModel(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return {}
-
-        filepath = next(iter(unseen_hashes.values()))
-
-        if chunks is None:
-            chunks = {}
-
-        # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
-
         # Call appropriate standardisation function with input parameters
         eulerian_model_data = parser_fn(**parser_input_parameters)
 
