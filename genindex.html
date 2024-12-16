@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; OpenGHG 0.10.1 documentation</title>
+    <title>Index &#8212; OpenGHG 0.11.0 documentation</title>
   
   
   
@@ -15,29 +15,32 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=db7899ab" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script src="_static/documentation_options.js?v=261ea15a"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +54,8 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2024"/>
+  <meta name="docsearch:version" content="0.11.0" />
+    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
   </head>
   
   
@@ -67,19 +71,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -87,7 +80,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -95,8 +87,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -129,8 +121,8 @@
       
     
     
-    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.1 documentation - Home"/>
-    <script>document.write(`<img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.1 documentation - Home"/>`);</script>
+    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
   
   
 </a></div>
@@ -190,13 +182,9 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
         </div>
       
       
@@ -207,13 +195,9 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
     </div>
   
 
@@ -230,7 +214,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -391,13 +376,17 @@ document.write(`
 </li>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">add_footprint() (openghg.analyse.ModelScenario method)</a>
 </li>
+      <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.add_obs">add_obs() (openghg.analyse.ModelScenario method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.add_obs">add_obs() (openghg.analyse.ModelScenario method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.align_metadata_attributes">align_metadata_attributes() (openghg.store.ObsSurface method)</a>
 </li>
       <li><a href="api/devapi_metadata.html#openghg.standardise.meta.assign_attributes">assign_attributes() (in module openghg.standardise.meta)</a>, <a href="api/devapi_standardise.html#openghg.standardise.meta.assign_attributes">[1]</a>
 </li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.meta.assign_flux_attributes">assign_flux_attributes() (in module openghg.standardise.meta)</a>
+</li>
+      <li><a href="api/devapi_standardise.html#openghg.standardise.meta.attributes_default_keys">attributes_default_keys() (in module openghg.standardise.meta)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -421,8 +410,6 @@ document.write(`
 </li>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_obs">calc_modelled_obs() (openghg.analyse.ModelScenario method)</a>
 </li>
-      <li><a href="api/devapi_cloud.html#openghg.cloud.call_function">call_function() (in module openghg.cloud)</a>
-</li>
       <li><a href="api/devapi_util.html#openghg.util.check_config">check_config() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.check_date">check_date() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.check_date">[1]</a>
@@ -439,10 +426,10 @@ document.write(`
 </li>
       <li><a href="api/api_tutorial.html#openghg.tutorial.clear_tutorial_store">clear_tutorial_store() (in module openghg.tutorial)</a>
 </li>
-      <li><a href="api/devapi_util.html#openghg.util.closest_daterange">closest_daterange() (in module openghg.util)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/devapi_util.html#openghg.util.closest_daterange">closest_daterange() (in module openghg.util)</a>
+</li>
       <li><a href="api/devapi_util.html#openghg.util.combine_dateranges">combine_dateranges() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.combine_flux_sources">combine_flux_sources() (openghg.analyse.ModelScenario method)</a>
@@ -461,11 +448,7 @@ document.write(`
 </li>
       <li><a href="api/api_util.html#openghg.util.create_daterange_str">create_daterange_str() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.create_daterange_str">[1]</a>
 </li>
-      <li><a href="api/devapi_cloud.html#openghg.cloud.create_file_package">create_file_package() (in module openghg.cloud)</a>
-</li>
       <li><a href="api/devapi_util.html#openghg.util.create_frequency_str">create_frequency_str() (in module openghg.util)</a>
-</li>
-      <li><a href="api/devapi_cloud.html#openghg.cloud.create_post_dict">create_post_dict() (in module openghg.cloud)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -551,8 +534,6 @@ document.write(`
 </li>
       <li><a href="api/api_util.html#openghg.util.format_inlet">format_inlet() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.format_inlet">[1]</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.from_json">from_json() (openghg.dataobjects.SearchResults class method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.from_json">[1]</a>
-</li>
       <li><a href="api/api_types.html#openghg.types.FunctionError">FunctionError (class in openghg.types)</a>, <a href="api/devapi_types.html#openghg.types.FunctionError">[1]</a>
 </li>
   </ul></td>
@@ -637,8 +618,6 @@ document.write(`
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.meta.metadata_default_keys">metadata_default_keys() (in module openghg.standardise.meta)</a>
-</li>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario">ModelScenario (class in openghg.analyse)</a>
 </li>
       <li>
@@ -691,23 +670,13 @@ document.write(`
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_cloud.html#openghg.cloud.package_from_function">package_from_function() (in module openghg.cloud)</a>
-</li>
       <li><a href="api/devapi_util.html#openghg.util.pairwise">pairwise() (in module openghg.util)</a>
 </li>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_aqmesh">parse_aqmesh() (in module openghg.standardise.surface)</a>
-</li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_beaco2n">parse_beaco2n() (in module openghg.standardise.surface)</a>
-</li>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_btt">parse_btt() (in module openghg.standardise.surface)</a>
-</li>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_cranfield">parse_cranfield() (in module openghg.standardise.surface)</a>
 </li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_crds">parse_crds() (in module openghg.standardise.surface)</a>
 </li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.flux_timeseries.parse_crf">parse_crf() (in module openghg.standardise.flux_timeseries)</a>
-</li>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_eurocom">parse_eurocom() (in module openghg.standardise.surface)</a>
 </li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_gcwerks">parse_gcwerks() (in module openghg.standardise.surface)</a>
 </li>
@@ -719,16 +688,14 @@ document.write(`
 </li>
       <li><a href="api/devapi_util.html#openghg.util.parse_period">parse_period() (in module openghg.util)</a>
 </li>
-      <li><a href="api/devapi_standardise.html#openghg.standardise.surface.parse_tmb">parse_tmb() (in module openghg.standardise.surface)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_util.html#openghg.util.parse_url_filename">parse_url_filename() (in module openghg.util)</a>
 </li>
       <li><a href="api/devapi_types.html#openghg.types.pathType">pathType (in module openghg.types)</a>
 </li>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.plot_comparison">plot_comparison() (openghg.analyse.ModelScenario method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_plotting.html#openghg.plotting.plot_footprint">plot_footprint() (in module openghg.plotting)</a>
 </li>
       <li><a href="api/api_plotting.html#openghg.plotting.plot_timeseries">plot_timeseries() (in module openghg.plotting)</a>
@@ -797,12 +764,12 @@ document.write(`
 </li>
       <li><a href="api/devapi_util.html#openghg.util.read_local_config">read_local_config() (in module openghg.util)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">read_multisite_aqmesh() (openghg.store.ObsSurface method)</a>
 </li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.refresh">refresh() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.refresh">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_transform.html#openghg.transform.regrid_uniform_cc">regrid_uniform_cc() (in module openghg.transform)</a>
 </li>
       <li><a href="api/devapi_util.html#openghg.util.relative_time_offset">relative_time_offset() (in module openghg.util)</a>
@@ -824,12 +791,6 @@ document.write(`
       <li><a href="api/api_tutorial.html#openghg.tutorial.retrieve_example_data">retrieve_example_data() (in module openghg.tutorial)</a>
 </li>
       <li><a href="api/api_retrieve.html#openghg.retrieve.ceda.retrieve_surface">retrieve_surface() (in module openghg.retrieve.ceda)</a>, <a href="api/devapi_retrieve.html#openghg.retrieve.ceda.retrieve_surface">[1]</a>
-</li>
-      <li><a href="api/devapi_util.html#openghg.util.running_in_cloud">running_in_cloud() (in module openghg.util)</a>
-</li>
-      <li><a href="api/devapi_util.html#openghg.util.running_locally">running_locally() (in module openghg.util)</a>
-</li>
-      <li><a href="api/devapi_util.html#openghg.util.running_on_hub">running_on_hub() (in module openghg.util)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -915,17 +876,13 @@ document.write(`
 </li>
       <li><a href="api/api_util.html#openghg.util.timestamp_now">timestamp_now() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.timestamp_now">[1]</a>
 </li>
-      <li><a href="api/api_util.html#openghg.util.timestamp_tzaware">timestamp_tzaware() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.timestamp_tzaware">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/api_util.html#openghg.util.timestamp_tzaware">timestamp_tzaware() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.timestamp_tzaware">[1]</a>
+</li>
       <li><a href="api/api_util.html#openghg.util.to_dashboard">to_dashboard() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.to_dashboard_mobile">to_dashboard_mobile() (in module openghg.util)</a>
-</li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.to_data">to_data() (openghg.dataobjects.SearchResults method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_data">[1]</a>
-</li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.to_json">to_json() (openghg.dataobjects.SearchResults method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_json">[1]</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.to_lowercase">to_lowercase() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.to_lowercase">[1]</a>
 </li>
@@ -945,8 +902,6 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_cloud.html#openghg.cloud.unpackage">unpackage() (in module openghg.cloud)</a>
-</li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">update_metadata() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">[1]</a>
 </li>
       <li><a href="api/api_tutorial.html#openghg.tutorial.use_tutorial_store">use_tutorial_store() (in module openghg.tutorial)</a>
@@ -1009,8 +964,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1035,7 +990,7 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>

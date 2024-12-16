@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.10.1 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.11.0 documentation</title>
   
   
   
@@ -15,29 +15,32 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script src="../../../_static/documentation_options.js?v=261ea15a"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -51,7 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2024"/>
+  <meta name="docsearch:version" content="0.11.0" />
+    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
   </head>
   
   
@@ -67,19 +71,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -87,7 +80,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -95,8 +87,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -129,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.10.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.10.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
   
   
 </a></div>
@@ -190,13 +182,9 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
         </div>
       
       
@@ -207,13 +195,9 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
     </div>
   
 
@@ -230,7 +214,8 @@ document.write(`
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -311,8 +296,6 @@ document.write(`
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -324,7 +307,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">openghg.anal...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openghg.analyse._scenario</span></li>
   </ul>
 </nav>
 </div>
@@ -389,8 +372,8 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">rich.progress</span> <span class="kn">import</span> <span class="n">track</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -408,6 +391,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">synonyms</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SearchError</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ModelScenario&quot;</span><span class="p">,</span> <span class="s2">&quot;combine_datasets&quot;</span><span class="p">,</span> <span class="s2">&quot;stack_datasets&quot;</span><span class="p">,</span> <span class="s2">&quot;calc_dim_resolution&quot;</span><span class="p">,</span> <span class="s2">&quot;match_dataset_dims&quot;</span><span class="p">]</span>
@@ -420,7 +404,7 @@ document.write(`
 <span class="c1"># TODO: Add static methods for different ways of creating the class</span>
 <span class="c1"># e.g. from_existing_data(), from_search(), empty() , ...</span>
 
-<span class="n">ParamType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+<span class="n">ParamType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
 <span class="n">methodType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;pad&quot;</span><span class="p">,</span> <span class="s2">&quot;ffill&quot;</span><span class="p">,</span> <span class="s2">&quot;backfill&quot;</span><span class="p">,</span> <span class="s2">&quot;bfill&quot;</span><span class="p">]]</span>
 
 
@@ -443,25 +427,25 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">met_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">flux</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">FluxData</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">bc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fp_inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flux</span><span class="p">:</span> <span class="n">FluxData</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a ModelScenario instance based on a set of keywords to be</span>
@@ -502,10 +486,10 @@ document.write(`
 <span class="sd">        these into the appropriate class?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
@@ -572,10 +556,10 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># Initialise attributes used for caching</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">modelled_baseline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelled_baseline</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
         <span class="c1"># TODO: Check species, site etc. values align between inputs?</span>
@@ -634,15 +618,15 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_obs">[docs]</a>
     <span class="k">def</span> <span class="nf">add_obs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add observation data based on keywords or direct ObsData object.</span>
@@ -684,19 +668,19 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">[docs]</a>
     <span class="k">def</span> <span class="nf">add_footprint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">met_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fp_inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add footprint data based on keywords or direct FootprintData object.</span>
@@ -780,14 +764,14 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_flux">[docs]</a>
     <span class="k">def</span> <span class="nf">add_flux</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">flux</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FluxData</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flux</span><span class="p">:</span> <span class="n">FluxData</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add flux data based on keywords or direct FluxData object.</span>
@@ -877,13 +861,13 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_bc">[docs]</a>
     <span class="k">def</span> <span class="nf">add_bc</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">bc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add boundary conditions data based on keywords or direct BoundaryConditionsData object.</span>
@@ -906,7 +890,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">bc</span> <span class="o">=</span> <span class="n">bc</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_data_is_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">need</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_check_data_is_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">need</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether correct data types have been included. This should</span>
 <span class="sd">        be used by functions to check whether they can perform the requested</span>
@@ -940,7 +924,7 @@ document.write(`
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing necessary </span><span class="si">{</span><span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> data.&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_platform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_get_platform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the platform for a site, if present.</span>
 
@@ -964,7 +948,7 @@ document.write(`
                 <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">site_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">platform</span>
 
-    <span class="k">def</span> <span class="nf">_align_obs_footprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_align_obs_footprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slice and resample obs and footprint data to align along time</span>
 
@@ -1123,7 +1107,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">combine_obs_footprint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
@@ -1176,7 +1160,7 @@ document.write(`
         <span class="c1"># Save the observation data units</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">mf</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
-            <span class="n">units</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">])</span>
+            <span class="n">units</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">])</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
             <span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -1210,13 +1194,13 @@ document.write(`
         <span class="k">return</span> <span class="n">combined_dataset</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_clean_sources_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_clean_sources_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check sources input and make sure this is a list. If None, this will extract</span>
 <span class="sd">        all sources from self.fluxes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fluxes&quot;</span><span class="p">])</span>
-        <span class="n">flux_dict</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
+        <span class="n">flux_dict</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sources</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flux_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -1228,7 +1212,7 @@ document.write(`
 <div class="viewcode-block" id="ModelScenario.combine_flux_sources">
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_flux_sources">[docs]</a>
     <span class="k">def</span> <span class="nf">combine_flux_sources</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Combine together flux sources on the time dimension. This will align to</span>
@@ -1242,7 +1226,7 @@ document.write(`
 <span class="sd">            Dataset: All flux sources stacked on the time dimension.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fluxes&quot;</span><span class="p">])</span>
-        <span class="n">flux_dict</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
+        <span class="n">flux_dict</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
 
         <span class="n">time_dim</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
 
@@ -1302,7 +1286,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">param</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;modelled_obs&quot;</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1373,9 +1357,9 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_obs">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_modelled_obs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
@@ -1443,7 +1427,7 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">_calc_modelled_obs_integrated</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">output_TS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">output_fpXflux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -1491,8 +1475,8 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">_calc_modelled_obs_HiTRes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">averaging</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">averaging</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">output_TS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">output_fpXflux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -1540,8 +1524,6 @@ document.write(`
 <span class="sd">        included as Any for now.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">gcd</span>
-
-        <span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>  <span class="c1"># type: ignore</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">date_range</span>
 
         <span class="c1"># TODO: Need to work out how this fits in with high time resolution method</span>
@@ -1553,17 +1535,30 @@ document.write(`
         <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">fp_HiTRes</span>
         <span class="n">flux_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_flux_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
         <span class="n">fp_HiTRes</span><span class="p">,</span> <span class="n">flux_ds</span> <span class="o">=</span> <span class="n">match_dataset_dims</span><span class="p">([</span><span class="n">fp_HiTRes</span><span class="p">,</span> <span class="n">flux_ds</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+        <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">fp_HiTRes</span><span class="p">)</span>
 
         <span class="c1"># Make sure any NaN values are set to zero as this is a multiplicative and summing operation</span>
         <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="n">flux_ds</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux_ds</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
-        <span class="c1"># Calculate time resolution for both the flux and footprints data</span>
-        <span class="n">nanosecond_to_hour</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e9</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
-        <span class="n">flux_res_H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flux_ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">nanosecond_to_hour</span><span class="p">)</span>
-        <span class="n">fp_res_time_H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">nanosecond_to_hour</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">calc_hourly_freq</span><span class="p">(</span><span class="n">times</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Infer frequency of DataArray of times.</span>
 
-        <span class="n">fp_res_Hback_H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;H_back&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="sd">            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.</span>
+<span class="sd">            Otherwise times are assumed to be in terms of hours.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">nanosecond_to_hour</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e9</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">input_nanoseconds</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">nanosecond_to_hour</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+        <span class="c1"># Calculate time resolution for both the flux and footprints data</span>
+        <span class="n">flux_res_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">flux_ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fp_res_time_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">fp_res_Hback_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;H_back&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
 
         <span class="c1"># Define resolution on time dimension in number in hours</span>
         <span class="k">if</span> <span class="n">averaging</span><span class="p">:</span>
@@ -1604,27 +1599,14 @@ document.write(`
         <span class="c1"># create time array to loop through, with the required resolution</span>
         <span class="c1"># fp_HiTRes.time is the release time of particles into the model</span>
         <span class="n">time_array</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
-        <span class="n">lat</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span>
-        <span class="n">lon</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span>
-        <span class="n">hback</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;H_back&quot;</span><span class="p">]</span>
-
-        <span class="n">ntime</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_array</span><span class="p">)</span>
-        <span class="n">nlat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-        <span class="n">nlon</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-        <span class="c1"># nh_back = len(hback)</span>
 
         <span class="c1"># Define maximum hour back</span>
-        <span class="n">max_h_back</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hback</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">max_h_back</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
         <span class="c1"># Define full range of dates to select from the flux input</span>
         <span class="n">date_start</span> <span class="o">=</span> <span class="n">time_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">date_start_back</span> <span class="o">=</span> <span class="n">date_start</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="n">max_h_back</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
         <span class="n">date_end</span> <span class="o">=</span> <span class="n">time_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
-
-        <span class="n">start</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">dd</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">time_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span> <span class="n">dd</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">]</span>
-        <span class="p">}</span>
 
         <span class="c1"># Create times for matching to the flux</span>
         <span class="n">full_dates</span> <span class="o">=</span> <span class="n">date_range</span><span class="p">(</span>
@@ -1657,102 +1639,78 @@ document.write(`
             <span class="c1"># Reindex to match to correct values</span>
             <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">reindex</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">full_dates</span><span class="p">},</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">flux_res_H</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+            <span class="c1"># TODO this case should be handled outside of the &quot;compute_fp_x_flux&quot; function</span>
             <span class="c1"># If flux is not high frequency use the monthly averages instead.</span>
             <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span>
 
         <span class="c1"># TODO: Add check to make sure time values are exactly aligned based on date range</span>
 
-        <span class="c1"># Make sure the dimensions match the expected order for indexing</span>
-        <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;H_back&quot;</span><span class="p">))</span>
-        <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">))</span>
+        <span class="c1"># Extract flux data from dataset</span>
+        <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">flux</span>
+        <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span><span class="o">.</span><span class="n">flux</span>
 
-        <span class="c1"># Extract footprints array to use in numba loop</span>
-        <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">make_hf_flux_rolling_avg_array</span><span class="p">(</span>
+            <span class="n">flux_high_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+            <span class="n">fp_high_time_res</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+            <span class="n">highest_res_H</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">max_h_back</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+            <span class="c1"># create windows (backwards in time) with `max_h_back` many time points,</span>
+            <span class="c1"># starting at each time point in flux_hf_rolling.time</span>
+            <span class="n">window_size</span> <span class="o">=</span> <span class="n">max_h_back</span> <span class="o">//</span> <span class="n">highest_res_H</span>
+            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">window_size</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes</span>
-        <span class="k">if</span> <span class="n">output_fpXflux</span><span class="p">:</span>
-            <span class="n">fpXflux</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nlat</span><span class="p">,</span> <span class="n">nlon</span><span class="p">,</span> <span class="n">ntime</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
-            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntime</span><span class="p">)</span>
-
-        <span class="c1"># Iterate through the time coord to get the total mf at each time step using the H back coord</span>
-        <span class="c1"># at each release time we disaggregate the particles backwards over the previous 24hrs</span>
-        <span class="c1"># The final value then contains the 29-day integrated residual footprints</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculating modelled timeseries comparison:&quot;</span><span class="p">)</span>
-        <span class="n">iters</span> <span class="o">=</span> <span class="n">track</span><span class="p">(</span><span class="n">time_array</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tt</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iters</span><span class="p">):</span>
-            <span class="c1"># Get correct index for low resolution data based on start and current date</span>
-            <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="n">dd</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span> <span class="n">dd</span><span class="p">)</span> <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">]}</span>
-            <span class="n">tt_low</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">12</span> <span class="o">*</span> <span class="p">(</span><span class="n">current</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">])</span>
-
-            <span class="c1"># get 4 dimensional chunk of high time res footprints for this timestep</span>
-            <span class="c1"># units : mol/mol/mol/m2/s</span>
-            <span class="c1"># reverse the time coordinate to be chronological</span>
-            <span class="n">fp_time</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">tt</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="n">fp_high_freq</span> <span class="o">=</span> <span class="n">fp_time</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
-            <span class="n">fp_residual</span> <span class="o">=</span> <span class="n">fp_time</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># First element (reversed) contains residual footprints</span>
-
-            <span class="c1"># Extract flux data from dataset</span>
-            <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">flux</span>
-            <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span><span class="o">.</span><span class="n">flux</span>
-
-            <span class="c1"># Define high and low frequency fluxes based on inputs</span>
-            <span class="c1"># Allow for variable frequency within 24 hours</span>
-            <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_low_freq</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">tt_low</span> <span class="p">:</span> <span class="n">tt_low</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">flux_res_H</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">:</span>
-                <span class="c1"># Define indices to correctly select matching date range from flux data</span>
-                <span class="c1"># This will depend on the various frequencies of the inputs</span>
-                <span class="c1"># At present, highest_res_H matches the flux frequency</span>
-                <span class="n">tt_start</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_res_H</span> <span class="o">/</span> <span class="n">highest_res_H</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">tt_end</span> <span class="o">=</span> <span class="n">tt_start</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_h_back</span> <span class="o">/</span> <span class="n">highest_res_H</span><span class="p">)</span>
-                <span class="n">selection</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_hf_res_H</span> <span class="o">/</span> <span class="n">highest_res_H</span><span class="p">)</span>
-
-                <span class="c1"># Extract matching time range from whole flux array</span>
-                <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">tt_start</span><span class="p">:</span><span class="n">tt_end</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">selection</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="c1"># If flux frequency does not match to the high frequency (hf, H_back)</span>
-                    <span class="c1"># dimension, select entries which do. Reversed to make sure</span>
-                    <span class="c1"># entries matching to the correct times are selected</span>
-                    <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="n">selection</span><span class="p">]</span>
-                    <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">tt_low</span> <span class="p">:</span> <span class="n">tt_low</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-            <span class="c1"># convert to array to use in numba loop</span>
-            <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flux_high_freq</span><span class="p">)</span>
-            <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flux_low_freq</span><span class="p">)</span>
-
-            <span class="c1"># Multiply the HiTRes footprints with the HiTRes emissions to give mf</span>
-            <span class="c1"># Multiply residual footprints by low frequency emissions data to give residual mf</span>
-            <span class="c1"># flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s</span>
-            <span class="c1"># --&gt; mol/mol/mol/m2/s * mol/m2/s === mol / mol</span>
-            <span class="n">fpXflux_time</span> <span class="o">=</span> <span class="n">flux_high_freq</span> <span class="o">*</span> <span class="n">fp_high_freq</span>
-            <span class="n">fpXflux_residual</span> <span class="o">=</span> <span class="n">flux_low_freq</span> <span class="o">*</span> <span class="n">fp_residual</span>
-
-            <span class="c1"># append the residual emissions</span>
-            <span class="n">fpXflux_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">fpXflux_time</span><span class="p">,</span> <span class="n">fpXflux_residual</span><span class="p">))</span>
-
-            <span class="k">if</span> <span class="n">output_fpXflux</span><span class="p">:</span>
-                <span class="c1"># Sum over time (H back) to give the total mf at this timestep</span>
-                <span class="n">fpXflux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">tt</span><span class="p">]</span> <span class="o">=</span> <span class="n">fpXflux_time</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
-                <span class="c1"># work out timeseries by summing over lat, lon (24 hrs)</span>
-                <span class="n">timeseries</span><span class="p">[</span><span class="n">tt</span><span class="p">]</span> <span class="o">=</span> <span class="n">fpXflux_time</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-
-        <span class="c1"># TODO: Add details about units to output</span>
-
-        <span class="k">if</span> <span class="n">output_fpXflux</span><span class="p">:</span>
-            <span class="n">fpXflux</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
-                <span class="n">fpXflux</span><span class="p">,</span>
-                <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">),</span>
-                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lat</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lon</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time_array</span><span class="p">},</span>
+            <span class="c1"># set H_back coordinates using highest_res_H frequency</span>
+            <span class="n">h_back_type</span> <span class="o">=</span> <span class="n">fp_high_time_res</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_hf_rolling</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;H_back&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_h_back</span><span class="p">,</span> <span class="n">highest_res_H</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h_back_type</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
             <span class="p">)</span>
 
+            <span class="c1"># select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)</span>
+            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_hf_rolling</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">H_back</span><span class="o">=</span><span class="n">fp_high_time_res</span><span class="o">.</span><span class="n">H_back</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">flux_hf_rolling</span>
+
+        <span class="k">def</span> <span class="nf">compute_fp_x_flux</span><span class="p">(</span>
+            <span class="n">fp_HiTRes</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+            <span class="n">flux_high_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+            <span class="n">flux_low_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+            <span class="n">highest_res_H</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">max_h_back</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+
+            <span class="c1"># do low res calculation</span>
+            <span class="n">fp_residual</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">H_back</span><span class="o">=</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># take last H_back value</span>
+            <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_low_freq</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">fp_residual</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>  <span class="c1"># forward fill times</span>
+
+            <span class="n">fpXflux_residual</span> <span class="o">=</span> <span class="n">flux_low_freq</span> <span class="o">*</span> <span class="n">fp_residual</span>
+
+            <span class="c1"># get high freq fp</span>
+            <span class="n">fp_high_freq</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span> <span class="o">!=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># if flux_res_H &gt; 24, then flux_high_freq = flux_low_freq, and we don&#39;t take a sum over windows of flux_high_freq</span>
+            <span class="k">if</span> <span class="n">flux_res_H</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+                <span class="n">fpXflux</span> <span class="o">=</span> <span class="p">(</span><span class="n">flux_low_freq</span> <span class="o">*</span> <span class="n">fp_high_freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">make_hf_flux_rolling_avg_array</span><span class="p">(</span>
+                    <span class="n">flux_high_freq</span><span class="p">,</span> <span class="n">fp_high_freq</span><span class="p">,</span> <span class="n">highest_res_H</span><span class="p">,</span> <span class="n">max_h_back</span>
+                <span class="p">)</span>
+                <span class="n">fpXflux</span> <span class="o">=</span> <span class="p">(</span><span class="n">flux_high_freq</span> <span class="o">*</span> <span class="n">fp_high_freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">fpXflux</span> <span class="o">+</span> <span class="n">fpXflux_residual</span>
+
+        <span class="n">fpXflux</span> <span class="o">=</span> <span class="n">compute_fp_x_flux</span><span class="p">(</span>
+            <span class="n">fp_HiTRes</span><span class="p">,</span>
+            <span class="n">flux_high_freq</span><span class="p">,</span>
+            <span class="n">flux_low_freq</span><span class="p">,</span>
+            <span class="n">highest_res_H</span><span class="p">,</span>
+            <span class="n">max_h_back</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
-            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time_array</span><span class="p">})</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">fpXflux</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+
+        <span class="c1"># TODO: Add details about units to output</span>
 
         <span class="k">if</span> <span class="n">output_fpXflux</span> <span class="ow">and</span> <span class="n">output_TS</span><span class="p">:</span>
             <span class="n">timeseries</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
@@ -1772,7 +1730,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">calc_modelled_baseline</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">output_units</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1823,16 +1781,16 @@ document.write(`
         <span class="n">check_monthly</span> <span class="o">=</span> <span class="n">check_lifetime_monthly</span><span class="p">(</span><span class="n">lifetime_value</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">check_monthly</span><span class="p">:</span>
-            <span class="n">lifetime_monthly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">lifetime_value</span><span class="p">)</span>
-            <span class="n">lifetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">lifetime_monthly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lifetime_value</span><span class="p">)</span>
+            <span class="n">lifetime</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lifetime_monthly</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">lifetime_value</span><span class="p">)</span>
+            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lifetime_value</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">lifetime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">short_lifetime</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">lt_time_delta</span> <span class="o">=</span> <span class="n">time_offset</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">lifetime</span><span class="p">)</span>
-            <span class="n">lifetime_hrs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">lt_time_delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">3600.0</span>
+            <span class="n">lifetime_hrs</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">lt_time_delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">3600.0</span>
         <span class="k">elif</span> <span class="n">lifetime_monthly</span><span class="p">:</span>
             <span class="n">short_lifetime</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">lifetime_monthly_hrs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1863,10 +1821,10 @@ document.write(`
                     <span class="p">)</span>
 
             <span class="c1"># Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray</span>
-            <span class="n">loss_n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_n&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_e</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_e&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_s</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_s&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_w</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_w&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">loss_n</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_n&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">loss_e</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_e&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">loss_s</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_s&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">loss_w</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_w&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss_n</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -1923,9 +1881,9 @@ document.write(`
     <span class="k">def</span> <span class="nf">footprints_data_merge</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">calc_timeseries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">calc_bc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -2010,10 +1968,10 @@ document.write(`
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.plot_comparison">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_comparison</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">baseline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
-        <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
-        <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -2127,7 +2085,7 @@ document.write(`
 
 
 <span class="k">def</span> <span class="nf">combine_datasets</span><span class="p">(</span>
-    <span class="n">dataset_A</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;ffill&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dataset_A</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;ffill&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merges two datasets and re-indexes to the first dataset.</span>
@@ -2163,10 +2121,10 @@ document.write(`
 
 <span class="k">def</span> <span class="nf">match_dataset_dims</span><span class="p">(</span>
     <span class="n">datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">dims</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="n">dims</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Aligns datasets to the selected dimensions within a tolerance.</span>
 <span class="sd">    All datasets will be aligned to the first dataset within the list.</span>
@@ -2434,8 +2392,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2460,7 +2418,7 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>
