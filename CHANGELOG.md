@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed options used with `xr.Dataset.to_zarr` in reponse to updates in xarray. [PR #1160](https://github.com/openghg/openghg/pull/1160)
 - Added xfail for `cfchecker` tests due to broken link. [PR #1178](https://github.com/openghg/openghg/pull/1178)
+- Removed duplicate code from `read_file` method in `BoundaryConditions` and `EulerianModel`. [PR #1192](https://github.com/openghg/openghg/pull/1192)
 
 ### Added
 
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
 - Made calculations in `ModelScenario._calc_modelled_obs_HiTRes` more efficient. [PR #1062](https://github.com/openghg/openghg/pull/1062)
+- Updated type hints and `typing` imports for Python 3.10 [PR #1193](https://github.com/openghg/openghg/pull/1193)
 
 ## [0.10.1] - 2024-09-27
 

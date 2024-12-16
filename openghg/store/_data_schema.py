@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
 import logging
 import numpy as np
 from xarray import Dataset
@@ -26,9 +25,9 @@ class DataSchema:
 
     # TODO : Change or add additional checks as needed
 
-    data_vars: Optional[Dict[str, Tuple[str, ...]]] = None
-    dtypes: Optional[Dict[str, type]] = None
-    dims: Optional[List[str]] = None
+    data_vars: dict[str, tuple[str, ...]] | None = None
+    dtypes: dict[str, type] | None = None
+    dims: list[str] | None = None
 
     def _check_data_vars(self, data: Dataset) -> None:
         """

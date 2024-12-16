@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
@@ -25,7 +25,7 @@ multDataTypes = Union[
 
 def _get_generic(
     combine_multiple_inlets: bool = False,
-    ambig_check_params: Optional[list] = None,
+    ambig_check_params: list | None = None,
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -81,19 +81,19 @@ def _get_generic(
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[Union[str, slice]] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
+    inlet: str | slice | None = None,
+    height: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    average: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    calibration_scale: str | None = None,
     rename_vars: bool = True,
     keep_missing: bool = False,
     skip_ranking: bool = False,
     **kwargs: Any,
-) -> Optional[ObsData]:
+) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
     Usage and return values are the same whilst implementation may differ.
@@ -347,15 +347,15 @@ def get_obs_surface(
 def get_obs_column(
     species: str,
     max_level: int,
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     platform: str = "satellite",
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
     return_mf: bool = True,
     **kwargs: Any,
 ) -> ObsColumnData:
@@ -462,12 +462,12 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    time_resolution: Optional[str] = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    time_resolution: str | None = None,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -513,9 +513,9 @@ def get_flux(
 def get_bc(
     species: str,
     domain: str,
-    bc_input: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    bc_input: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -547,12 +547,12 @@ def get_bc(
 def get_footprint(
     site: str,
     domain: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    species: Optional[str] = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    species: str | None = None,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -670,7 +670,7 @@ def _create_keyword_string(**kwargs: Any) -> str:
 
 
 def _metadata_difference(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: multDataTypes, params: list | None = None, print_output: bool = True
 ) -> dict[str, list]:
     """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
@@ -752,7 +752,7 @@ def _metadata_difference(
 
 
 def _metadata_difference_formatted(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: multDataTypes, params: list | None = None, print_output: bool = True
 ) -> str:
     """Create formatted string for the difference in metadata between input objects.
 

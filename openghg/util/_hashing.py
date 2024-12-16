@@ -4,7 +4,6 @@ Some functions for hashing data or strings for idendification of sources
 
 import hashlib
 from pathlib import Path
-from typing import Dict
 
 
 def hash_string(to_hash: str) -> str:
@@ -55,7 +54,7 @@ def hash_bytes(data: bytes) -> str:
     return hashlib.sha1(data).hexdigest()
 
 
-def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
+def hash_retrieved_data(to_hash: dict[str, dict]) -> dict:
     """Hash data retrieved from a data platform. This calculates the SHA1 of the metadata
     and the start date, end date and the number of timestamps in the Dataset.
 
@@ -72,7 +71,7 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
     from openghg.util import timestamp_now
 
     current_timestamp = str(timestamp_now())
-    hashes: Dict[str, Dict] = {}
+    hashes: dict[str, dict] = {}
     for key, data in to_hash.items():
         metadata = data["metadata"].copy()
 
@@ -89,7 +88,7 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
         end_date = str(ds.time.max().values)
         n_timestamps = str(ds.time.size)
 
-        basic_info = f"{start_date}_{end_date}_{n_timestamps}".encode("utf8")
+        basic_info = f"{start_date}_{end_date}_{n_timestamps}".encode()
         time_hash = sha1(basic_info).hexdigest()
 
         combo = (metadata_hash + time_hash).encode("utf8")

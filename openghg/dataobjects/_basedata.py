@@ -2,7 +2,6 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from typing import Dict, Optional, Union
 from openghg.store.storage import LocalZarrStore
 import xarray as xr
 from pandas import Timestamp, Timedelta
@@ -15,15 +14,15 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class _BaseData:
     def __init__(
         self,
-        metadata: Dict,
-        data: Optional[xr.Dataset] = None,
-        uuid: Optional[str] = None,
-        version: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        metadata: dict,
+        data: xr.Dataset | None = None,
+        uuid: str | None = None,
+        version: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
         sort: bool = True,
         elevate_inlet: bool = False,
-        attrs_to_check: Optional[Dict] = None,
+        attrs_to_check: dict | None = None,
     ) -> None:
         """
         This handles data for each of the data type classes. It accepts either a Dataset
