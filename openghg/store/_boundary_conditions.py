@@ -7,7 +7,7 @@ from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 
-from openghg.util import synonyms, load_standardise_parser, split_function_inputs
+from openghg.util import align_lat_lon, load_standardise_parser, split_function_inputs, synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -133,28 +133,6 @@ class BoundaryConditions(BaseStore):
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
 
-        data_type = self._data_type
-        standardise_parsers = define_standardise_parsers()[data_type]
-
-        try:
-            source_format = standardise_parsers[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Get current parameter values and filter to only include function inputs
-        current_parameters = locals().copy()
-        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
-
-        fn_input_parameters["filepath"] = filepath
-
-        # Loading parser
-        parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
-
-        # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
-        )
-
         # Specify any additional metadata to be added
         additional_metadata = {}
 
@@ -173,6 +151,16 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
+        try:
+            source_format = standardise_parsers[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+        # Loading parser
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
@@ -187,14 +175,20 @@ class BoundaryConditions(BaseStore):
         fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
+
         # Call appropriate standardisation function with input parameters
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
+        # Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.
         for split_data in boundary_conditions_data.values():
-            # Currently ACRG boundary conditions are split by month or year
-            bc_data = split_data["data"]
 
-            # Checking against expected format for boundary conditions
+            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
+
+            bc_data = split_data["data"]
             BoundaryConditions.validate_data(bc_data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
