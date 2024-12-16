@@ -180,8 +180,6 @@ class BoundaryConditions(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        parser_input_parameters["data_type"] = self._data_type
-
         # Call appropriate standardisation function with input parameters
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
