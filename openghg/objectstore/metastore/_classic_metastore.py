@@ -26,7 +26,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 import json
-from typing import Any, cast, Literal, Optional, Type
+from typing import Any, cast, Literal
 
 from filelock import FileLock
 from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
@@ -82,7 +82,7 @@ class BucketKeyStorage(tinydb.Storage):
         self._bucket = bucket
         self._mode = mode
 
-    def read(self) -> Optional[dict]:
+    def read(self) -> dict | None:
         """Read data from database.
 
         Returns:
@@ -139,7 +139,7 @@ class SafetyCachingMiddleware(Middleware):
     has changed since it was first accessed by the storage class.
     """
 
-    def __init__(self, storage_cls: Type[tinydb.Storage]) -> None:
+    def __init__(self, storage_cls: type[tinydb.Storage]) -> None:
         """Follows the standard pattern for middleware.
 
         Args:

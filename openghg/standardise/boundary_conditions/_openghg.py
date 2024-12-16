@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
 import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, synonyms
@@ -11,13 +10,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     bc_input: str,
     domain: str,
-    period: Optional[str] = None,
+    period: str | None = None,
     continuous: bool = True,
-    chunks: Optional[Dict] = None,
+    chunks: dict | None = None,
 ) -> dict:
     """
     Parses the boundary conditions file and adds data and metadata.

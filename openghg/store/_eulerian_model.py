@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 import logging
 from openghg.store.base import BaseStore
 from openghg.util import load_standardise_parser, split_function_inputs
@@ -29,21 +29,21 @@ class EulerianModel(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         model: str,
         species: str,
         source_format: str = "openghg",
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        setup: Optional[str] = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        setup: str | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
     ) -> list[dict]:
         """Read Eulerian model output
 

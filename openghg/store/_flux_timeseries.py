@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
 from xarray import Dataset
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -26,7 +26,7 @@ class FluxTimeseries(BaseStore):
     _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[list[dict]]:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -51,24 +51,24 @@ class FluxTimeseries(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         source: str,
         region: str,
-        domain: Optional[str] = None,
-        database: Optional[str] = None,
-        database_version: Optional[str] = None,
-        model: Optional[str] = None,
+        domain: str | None = None,
+        database: str | None = None,
+        database_version: str | None = None,
+        model: str | None = None,
         source_format: str = "crf",
-        period: Optional[Union[str, tuple]] = None,
+        period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        optional_metadata: dict | None = None,
     ) -> list[dict]:
         """Read one dimension timeseries file
 
@@ -238,7 +238,7 @@ class FluxTimeseries(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {"flux_timeseries": ("time",)}
+        data_vars: dict[str, tuple[str, ...]] = {"flux_timeseries": ("time",)}
         dtypes = {
             "time": np.datetime64,
             "flux_timeseries": np.floating,

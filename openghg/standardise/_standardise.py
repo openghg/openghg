@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any
+from typing import Any
 from pandas import Timedelta
 import warnings
 
@@ -13,7 +13,7 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any
+    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -58,28 +58,28 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    instrument: Optional[str] = None,
-    data_level: Union[str, int, float, None] = None,
-    data_sublevel: Union[str, float, None] = None,
-    dataset_source: Optional[str] = None,
-    sampling_period: Optional[Union[Timedelta, str]] = None,
-    calibration_scale: Optional[str] = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    instrument: str | None = None,
+    data_level: str | int | float | None = None,
+    data_sublevel: str | float | None = None,
+    dataset_source: str | None = None,
+    sampling_period: Timedelta | str | None = None,
+    calibration_scale: str | None = None,
     measurement_type: str = "insitu",
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
-    store: Optional[str] = None,
+    store: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
@@ -183,26 +183,26 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     platform: str = "satellite",
-    site: Optional[str] = None,
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    site: str | None = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     source_format: str = "openghg",
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
 ) -> list[dict]:
     """Read column observation file
 
@@ -277,23 +277,23 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     bc_input: str,
     domain: str,
     source_format: str = "openghg",
-    period: Optional[Union[str, tuple]] = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -358,21 +358,21 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: Union[str, Path, List],
+    filepath: str | Path | list,
     site: str,
     domain: str,
     model: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    met_model: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    met_model: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
     source_format: str = "acrg_org",
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    period: str | tuple | None = None,
+    chunks: dict | None = None,
     continuous: bool = True,
     retrieve_met: bool = False,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -384,9 +384,9 @@ def standardise_footprint(
     sort: bool = False,
     drop_duplicates: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    optional_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
@@ -489,28 +489,28 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     source: str,
     domain: str,
-    database: Optional[str] = None,
+    database: str | None = None,
     source_format: str = "openghg",
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
+    database_version: str | None = None,
+    model: str | None = None,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    period: str | tuple | None = None,
+    chunks: dict | None = None,
     continuous: bool = True,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    optional_metadata: dict | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -587,23 +587,23 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     model: str,
     species: str,
     source_format: str = "openghg",
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    setup: Optional[str] = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    setup: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
-    store: Optional[str] = None,
+    store: str | None = None,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -672,7 +672,7 @@ def standardise_from_binary_data(
     metadata: dict,
     file_metadata: dict,
     **kwargs: Any,
-) -> Optional[Dict]:
+) -> list[dict] | None:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -701,25 +701,25 @@ def standardise_from_binary_data(
 
 
 def standardise_flux_timeseries(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     source: str,
     region: str = "UK",
     source_format: str = "crf",
-    domain: Optional[str] = None,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    store: Optional[str] = None,
+    domain: str | None = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
+    optional_metadata: dict | None = None,
 ) -> list[dict]:
     """Process one dimension timeseries file
 

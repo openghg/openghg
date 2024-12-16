@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 from xarray import Dataset
@@ -34,10 +34,10 @@ class BoundaryConditions(BaseStore):
     def read_data(
         self,
         binary_data: bytes,
-        metadata: Dict,
-        file_metadata: Dict,
+        metadata: dict,
+        file_metadata: dict,
         source_format: str,
-    ) -> Optional[list[dict]]:
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -64,21 +64,21 @@ class BoundaryConditions(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         bc_input: str,
         domain: str,
         source_format: str,
-        period: Optional[Union[str, tuple]] = None,
+        period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
     ) -> list[dict]:
         """Read boundary conditions file
 
@@ -236,7 +236,7 @@ class BoundaryConditions(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {
+        data_vars: dict[str, tuple[str, ...]] = {
             "vmr_n": ("time", "height", "lon"),
             "vmr_e": ("time", "height", "lat"),
             "vmr_s": ("time", "height", "lon"),

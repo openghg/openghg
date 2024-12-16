@@ -1,7 +1,8 @@
 from ._basedata import _BaseData
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
-from typing import Any, Iterator, Optional
+from typing import Any
+from collections.abc import Iterator
 
 
 class ObsData(_BaseData):
@@ -55,11 +56,11 @@ class ObsData(_BaseData):
 
     def plot_timeseries(
         self,
-        title: Optional[str] = None,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        units: Optional[str] = None,
-        logo: Optional[bool] = True,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        units: str | None = None,
+        logo: bool | None = True,
     ) -> go.Figure:
         """Plot a timeseries"""
 

@@ -343,8 +343,10 @@ def test_standardise_footprint_flexpart(source_format):
         store="user",
     )
 
-    assert "error" not in results
-    assert "mhd_test_FLEXPART_10m" in results
+    result = results[0]
+    expected_metadata = {"domain": "test", "site": "mhd", "model": "FLEXPART", "inlet": "10m"}
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_align_footprint():
@@ -423,7 +425,11 @@ def test_standardise_flux():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_europe" in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
+    result  = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_flux_additional_keywords():
@@ -439,7 +445,11 @@ def test_standardise_flux_additional_keywords():
         store="user",
     )
 
-    assert "ch4_anthro_globaledgar" in proc_results
+    result = proc_results[0]
+    expected_metadata = {"species": "ch4", "source": "anthro", "domain": "globaledgar"}
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_non_standard_flux_domain():
@@ -463,8 +473,11 @@ def test_standardise_non_standard_flux_domain():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_test" in proc_results
-    assert "error" not in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "test"}
+    result  = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_incomplete_flux():
@@ -548,10 +561,14 @@ def test_standardise_flux_timeseries():
         filepath=data_path, species="ch4", source="crf", period="years", continuous=False, store="user"
     )
 
-    assert "ch4_crf_uk" in flux_results
+    expected_metadata = {"species": "ch4", "source": "crf", "region": "uk"}
+    result  = flux_results[0]
+    print(result)
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
-def test_standardise_sorting_true(caplog):
+def test_standardise_sorting_true():
     """Testing only the sorting of files here"""
 
     filepaths = [
@@ -559,7 +576,7 @@ def test_standardise_sorting_true(caplog):
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
     ]
 
-    standardise_surface(
+    results = standardise_surface(
         store="user",
         filepath=filepaths,
         source_format="OPENGHG",
@@ -572,9 +589,7 @@ def test_standardise_sorting_true(caplog):
         sort_files=True,
     )
 
-    log_messages = [record.message for record in caplog.records]
-
-    assert "20220928.nc" in log_messages[0]
+    assert "20220928.nc" in next(iter(results["processed"].keys()))
 
 
 def test_standardise_sorting_false(caplog):
