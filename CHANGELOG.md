@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed options used with `xr.Dataset.to_zarr` in reponse to updates in xarray. [PR #1160](https://github.com/openghg/openghg/pull/1160)
 - Added xfail for `cfchecker` tests due to broken link. [PR #1178](https://github.com/openghg/openghg/pull/1178)
+- Removed duplicate code from `read_file` method in `BoundaryConditions` and `EulerianModel`. [PR #1192](https://github.com/openghg/openghg/pull/1192)
 
 ### Added
 
