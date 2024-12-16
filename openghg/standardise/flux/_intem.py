@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
 import warnings
 
 
@@ -7,15 +6,15 @@ def parse_intem(
     filepath: Path,
     species: str,
     source: str,
-    chunks: Dict,
+    chunks: dict,
     data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",
-    period: Optional[Union[str, tuple]] = None,
+    period: str | tuple | None = None,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     continuous: bool = True,
-) -> Dict:
+) -> dict:
     """
     Parse INTEM emissions data from the specified file.
 
@@ -97,7 +96,7 @@ def parse_intem(
     emissions_dataset = emissions_dataset.rename_vars({"flux_mean": "flux"})
 
     # Creation of final dictionary with data and metadata as key
-    emissions_data: Dict[str, dict] = {}
+    emissions_data: dict[str, dict] = {}
     emissions_data[key] = {}
     emissions_data[key]["data"] = emissions_dataset
     emissions_data[key]["metadata"] = metadata

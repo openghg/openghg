@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Union, Dict, Any
+from typing import Optional, Any
 
 from openghg.util import load_json
 from openghg.types import optionalPathType
@@ -19,7 +19,7 @@ __all__ = [
 logger = logging.getLogger("openghg.util.species")
 
 
-def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_species_info(species_filepath: optionalPathType = None) -> dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/species_info JSON file by default.
@@ -95,10 +95,10 @@ def synonyms(
         return species
 
 
-LifetimeType = Optional[Union[str, List[str]]]
+LifetimeType = Optional[str | list[str]]
 
 
-def species_lifetime(species: Union[str, None], species_filepath: optionalPathType = None) -> LifetimeType:
+def species_lifetime(species: str | None, species_filepath: optionalPathType = None) -> LifetimeType:
     """Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
@@ -121,7 +121,7 @@ def species_lifetime(species: Union[str, None], species_filepath: optionalPathTy
     lifetime_keywords = ["lifetime", "lifetime_monthly"]
     for key in lifetime_keywords:
         try:
-            lifetime: Optional[list] = species_data[key]
+            lifetime: list | None = species_data[key]
         except KeyError:
             continue
         else:

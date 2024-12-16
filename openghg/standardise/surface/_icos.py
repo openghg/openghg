@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
 import logging
 
 from openghg.standardise.meta import dataset_formatter
@@ -10,18 +9,18 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_icos(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     instrument: str,
-    inlet: Optional[str] = None,
+    inlet: str | None = None,
     network: str = "ICOS",
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    sampling_period: str | None = None,
+    measurement_type: str | None = None,
     header_type: str = "large",
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
-    **kwargs: Dict,
-) -> Dict:
+    **kwargs: dict,
+) -> dict:
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
 
     Args:
@@ -102,11 +101,11 @@ def _read_data_large_header(
     site: str,
     network: str,
     instrument: str,
-    inlet: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
-    **kwargs: Dict,
-) -> Dict:
+    inlet: str | None = None,
+    sampling_period: str | None = None,
+    measurement_type: str | None = None,
+    **kwargs: dict,
+) -> dict:
     """Parses ICOS files with the larger (~40) line header
 
     Args:
@@ -257,10 +256,10 @@ def _read_data_small_header(
     site: str,
     network: str,
     instrument: str,
-    inlet: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
-) -> Dict:
+    inlet: str | None = None,
+    sampling_period: str | None = None,
+    measurement_type: str | None = None,
+) -> dict:
     """Parses ICOS files with a single line header
 
     Args:

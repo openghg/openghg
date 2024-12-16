@@ -1,11 +1,11 @@
-from typing import Dict, Any
+from typing import Any
 from openghg.util import load_json
 from openghg.types import optionalPathType
 
 __all__ = ["get_site_info", "sites_in_network"]
 
 
-def get_site_info(site_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_site_info(site_filepath: optionalPathType = None) -> dict[str, Any]:
     """Extract data from site info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.

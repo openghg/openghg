@@ -6,17 +6,17 @@ data to the object store via transformations.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union, Any
+from typing import Any
 
 from openghg.objectstore import get_writable_bucket
 from openghg.store import get_data_class
 
 
 def transform_flux_data(
-    datapath: Union[str, Path],
+    datapath: str | Path,
     database: str,
     overwrite: bool = False,
-    store: Optional[str] = None,
+    store: str | None = None,
     **kwargs: Any,
 ) -> dict:
     """Read and transform a flux / emissions database. This will find the appropriate

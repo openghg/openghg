@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Dict, List, Optional, TypeVar, Union, Iterable
+from typing import Any, TypeVar
+from collections.abc import Iterable
 
 from openghg.dataobjects import ObsData
 from pandas import DataFrame
@@ -25,10 +26,10 @@ class SearchResults:
     # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
         self,
-        metadata: Optional[Dict] = None,
-        start_result: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
+        metadata: dict | None = None,
+        start_result: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
     ):
         # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:
@@ -72,11 +73,11 @@ class SearchResults:
 
     def retrieve(
         self,
-        dataframe: Optional[DataFrame] = None,
+        dataframe: DataFrame | None = None,
         version: str = "latest",
         sort: bool = True,
         **kwargs: Any,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> ObsData | list[ObsData]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
@@ -97,7 +98,7 @@ class SearchResults:
         self,
         version: str = "latest",
         sort: bool = True,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> ObsData | list[ObsData]:
         """Retrieves all data found during the search
 
         Args:
@@ -108,7 +109,7 @@ class SearchResults:
         """
         return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, sort=sort)
 
-    def uuids(self) -> List:
+    def uuids(self) -> list:
         """Return the UUIDs of the found data
 
         Returns:
@@ -116,9 +117,7 @@ class SearchResults:
         """
         return list(self.metadata.keys())
 
-    def _retrieve_by_term(
-        self, version: str, sort: bool = True, **kwargs: Any
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(self, version: str, sort: bool = True, **kwargs: Any) -> ObsData | list[ObsData]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
@@ -158,9 +157,7 @@ class SearchResults:
         # Now we can retrieve the data using the UUIDs
         return self._retrieve_by_uuid(uuids=list(uuids), version=version, sort=sort)
 
-    def _retrieve_by_uuid(
-        self, uuids: Iterable, version: str, sort: bool = True
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_uuid(self, uuids: Iterable, version: str, sort: bool = True) -> ObsData | list[ObsData]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.

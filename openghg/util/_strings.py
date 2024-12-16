@@ -1,5 +1,6 @@
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, Iterable, overload
+from typing import Any, overload
+from collections.abc import Iterable
 
 from openghg.util import not_set_metadata_values, null_metadata_values
 
@@ -14,7 +15,7 @@ def clean_string(to_clean: str) -> str: ...
 def clean_string(to_clean: None) -> None: ...
 
 
-def clean_string(to_clean: Optional[str]) -> Union[str, None]:
+def clean_string(to_clean: str | None) -> str | None:
     """Returns a lowercase string with only alphanumeric
     characters and underscores.
 
@@ -48,28 +49,28 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
 
 @overload
-def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict: ...
+def to_lowercase(d: dict, skip_keys: list | None = None) -> dict: ...
 
 
 @overload
-def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List: ...
+def to_lowercase(d: list, skip_keys: list | None = None) -> list: ...
 
 
 @overload
-def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple: ...
+def to_lowercase(d: tuple, skip_keys: list | None = None) -> tuple: ...
 
 
 @overload
-def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set: ...
+def to_lowercase(d: set, skip_keys: list | None = None) -> set: ...
 
 
 @overload
-def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str: ...
+def to_lowercase(d: str, skip_keys: list | None = None) -> str: ...
 
 
 def to_lowercase(
-    d: Union[Dict, List, Tuple, Set, str], skip_keys: Optional[List] = None
-) -> Union[Dict, List, Tuple, Set, str]:
+    d: dict | list | tuple | set | str, skip_keys: list | None = None
+) -> dict | list | tuple | set | str:
     """Convert an object to lowercase. All keys and values in a dictionary will be converted
     to lowercase as will all objects in a list, tuple or set. You can optionally pass in a list of keys to
     skip when lowercasing a dictionary.
@@ -175,10 +176,10 @@ def extract_float(s: str) -> float:
 
 
 def check_and_set_null_variable(
-    param: Union[str, None],
-    not_set_value: Optional[str] = None,
+    param: str | None,
+    not_set_value: str | None = None,
     null_values: Iterable = null_metadata_values(),
-) -> Union[str, None]:
+) -> str | None:
     """
     Check whether a variable is set to a null value (e.g. None) and if so replace this with
     a defined string used to indicate the variable has not been set.

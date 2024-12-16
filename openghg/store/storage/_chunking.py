@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass(frozen=True)
@@ -13,7 +12,7 @@ class ChunkingSchema:
     """
 
     variable: str
-    chunks: Dict[str, int]
-    secondary_dims: List[str]
+    chunks: dict[str, int]
+    secondary_dims: list[str]
     # max chunk size in megabytes
     max_chunk_size: int = 300
