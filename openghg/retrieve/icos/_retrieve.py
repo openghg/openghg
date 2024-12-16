@@ -290,6 +290,7 @@ def _retrieve_remote(
             data_pids["specLabel"].str.contains(search_str)
             & ~data_pids["specLabel"].str.contains("Obspack")
             & ~data_pids["specLabel"].str.contains("csv")
+            & ~data_pids["station"].str.contains("ATMO_")
         ]
 
     if inlet is not None:
