@@ -1,9 +1,14 @@
 import bz2
 import json
+import os
+import xarray as xr
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Optional, Union
+from functools import partial
+from typing import Any
+from collections.abc import Callable
 
 from openghg.types import pathType, multiPathType
+from openghg.util import align_lat_lon
 
 __all__ = [
     "load_parser",
@@ -95,7 +100,7 @@ def load_transform_parser(data_type: str, source_format: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+def get_datapath(filename: pathType, directory: str | None = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
@@ -113,7 +118,7 @@ def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(path: Union[str, Path]) -> Dict:
+def load_json(path: str | Path) -> dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -121,13 +126,13 @@ def load_json(path: Union[str, Path]) -> Dict:
     Returns:
         dict: Dictionary created from JSON
     """
-    with open(path, "r") as f:
-        data: Dict[str, Any] = json.load(f)
+    with open(path) as f:
+        data: dict[str, Any] = json.load(f)
 
     return data
 
 
-def load_internal_json(filename: str) -> Dict:
+def load_internal_json(filename: str) -> dict:
     """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
     openghg/data directory or pass a full filepath to path to load from any file.
 
@@ -141,7 +146,7 @@ def load_internal_json(filename: str) -> Dict:
     return load_json(path=file_path)
 
 
-def read_header(filepath: pathType, comment_char: str = "#") -> List:
+def read_header(filepath: pathType, comment_char: str = "#") -> list:
     """Reads the header lines denoted by the comment_char
 
     Args:
@@ -155,7 +160,7 @@ def read_header(filepath: pathType, comment_char: str = "#") -> List:
 
     header = []
     # Get the number of header lines
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         for line in f:
             if line.startswith(comment_char):
                 header.append(line)
@@ -239,15 +244,12 @@ def get_logfile_path() -> Path:
     Returns:
         Path: Path to logfile
     """
-    from openghg.util import running_locally
-
-    if running_locally():
-        return Path.home().joinpath("openghg.log")
-    else:
-        return Path("/tmp/openghg.log")
+    return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
+def check_function_open_nc(
+    filepath: multiPathType, realign_on_domain: str | None = None
+) -> tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -255,19 +257,44 @@ def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPath
 
     Args:
         filepath: Path or list of filepaths
+        realign_on_domain: When present, realign the data on the given domain. Option usable
+        when opening footprints or flux data but not observations and boundary conditions.
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    import xarray as xr
-
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn: Callable = xr.open_mfdataset
+            if realign_on_domain:
+                xr_open_fn: Callable = partial(
+                    xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
+                )
+            else:
+                xr_open_fn = xr.open_mfdataset
+            return xr_open_fn, filepath
+
         else:
-            xr_open_fn = xr.open_dataset
             filepath = filepath[0]
+
+    if realign_on_domain:
+
+        def xr_open_fn(x: pathType) -> xr.DataArray | xr.Dataset:
+            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
+
     else:
         xr_open_fn = xr.open_dataset
 
     return xr_open_fn, filepath
+
+
+def permissions(file_path: str | Path) -> tuple[str, str, str]:
+    """Return r, w, and/or x permissions for user, group, and other."""
+    perms = oct(os.stat(file_path).st_mode)
+    user, group, other = perms[-3], perms[-2], perms[-1]
+
+    def bits_to_perms(bit_str: str) -> str:
+        bits = [int(b) for b in bin(int(bit_str))[-3:]]
+        perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
+        return perms
+
+    return bits_to_perms(user), bits_to_perms(group), bits_to_perms(other)

@@ -1,7 +1,5 @@
-import json
 import logging
-from io import BytesIO
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
@@ -12,9 +10,9 @@ from openghg.dataobjects import (
     ObsData,
 )
 from openghg.types import SearchError
-from openghg.util import combine_and_elevate_inlet, decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.util import combine_and_elevate_inlet
 from pandas import Timestamp
-from xarray import Dataset, load_dataset
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -27,7 +25,7 @@ multDataTypes = Union[
 
 def _get_generic(
     combine_multiple_inlets: bool = False,
-    ambig_check_params: Optional[list] = None,
+    ambig_check_params: list | None = None,
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -83,18 +81,19 @@ def _get_generic(
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[Union[str, slice]] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
+    inlet: str | slice | None = None,
+    height: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    average: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    calibration_scale: str | None = None,
+    rename_vars: bool = True,
     keep_missing: bool = False,
     skip_ranking: bool = False,
     **kwargs: Any,
-) -> Optional[ObsData]:
+) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
     Usage and return values are the same whilst implementation may differ.
@@ -114,124 +113,7 @@ def get_obs_surface(
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
-        kwargs: Additional search terms
-    Returns:
-        ObsData or None: ObsData object if data found, else None
-    """
-    from openghg.cloud import call_function
-    from openghg.util import format_inlet
-
-    # Allow height to be an alias for inlet but we do not expect height
-    # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
-
-    if running_on_hub():
-        raise NotImplementedError("Cloud functionality marked for rewrite.")
-        to_post: dict[str, Union[str, dict]] = {}
-
-        to_post["function"] = "get_obs_surface"
-
-        search_terms = {
-            "site": site,
-            "species": species,
-            "keep_missing": keep_missing,
-            "skip_ranking": skip_ranking,
-        }
-
-        if inlet is not None:
-            search_terms["inlet"] = inlet
-        if start_date is not None:
-            search_terms["start_date"] = start_date
-        if end_date is not None:
-            search_terms["end_date"] = end_date
-        if average is not None:
-            search_terms["average"] = average
-        if network is not None:
-            search_terms["network"] = network
-        if instrument is not None:
-            search_terms["instrument"] = instrument
-        if calibration_scale is not None:
-            search_terms["calibration_scale"] = calibration_scale
-
-        to_post["search_terms"] = search_terms
-
-        result = call_function(data=to_post)
-
-        content = result["content"]
-        found = content["found"]
-
-        if found:
-            binary_data = decompress(data=content["data"])
-
-            file_metadata = content["file_metadata"]
-            sha1_hash_data = file_metadata["data"]["sha1_hash"]
-
-            if sha1_hash_data != hash_bytes(data=binary_data):
-                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
-
-            buf = BytesIO(binary_data)
-            json_str = decompress_str(data=content["metadata"])
-            metadata = json.loads(json_str)
-            dataset = load_dataset(buf)
-
-            return ObsData(data=dataset, metadata=metadata)
-        else:
-            return None
-    else:
-        return get_obs_surface_local(
-            site=site,
-            species=species,
-            start_date=start_date,
-            end_date=end_date,
-            inlet=inlet,
-            average=average,
-            network=network,
-            instrument=instrument,
-            calibration_scale=calibration_scale,
-            keep_missing=keep_missing,
-            skip_ranking=skip_ranking,
-            **kwargs,
-        )
-
-
-def get_obs_surface_local(
-    site: str,
-    species: str,
-    inlet: Optional[Union[str, slice]] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
-    skip_ranking: Optional[bool] = False,
-    **kwargs: Any,
-) -> Optional[ObsData]:
-    """This is the equivalent of the get_obs function from the ACRG repository.
-
-    Usage and return values are the same whilst implementation may differ.
-
-    This function should not be used on the OpenGHG Hub.
-
-    Args:
-        site: Site of interest e.g. MHD for the Mace Head site.
-        species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
-            can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
-            such as '100m'.
-        height: Alias for inlet
-        average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
-        network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the sipte (must match number of sites).
-        calibration_scale: Convert to this calibration scale
+        rename_vars: Rename variables from species names to use "mf" explictly.
         kwargs: Additional search terms
     Returns:
         ObsData or None: ObsData object if data found, else None
@@ -245,11 +127,11 @@ def get_obs_surface_local(
     )
     from pandas import Timedelta
 
-    if running_on_hub():
-        raise ValueError(
-            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
-        )
-
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)
     if species is not None:
         species = synonyms(species)
 
@@ -410,24 +292,25 @@ def get_obs_surface_local(
         data = ds_resampled
 
     # Rename variables
-    rename: dict[str, str] = {}
+    if rename_vars:
+        rename: dict[str, str] = {}
 
-    data_variables = [str(v) for v in data.variables]
-    for var in data_variables:
-        if var.lower() == species.lower():
-            rename[var] = "mf"
-        if "repeatability" in var:
-            rename[var] = "mf_repeatability"
-        if "variability" in var:
-            rename[var] = "mf_variability"
-        if "number_of_observations" in var:
-            rename[var] = "mf_number_of_observations"
-        if "status_flag" in var:
-            rename[var] = "status_flag"
-        if "integration_flag" in var:
-            rename[var] = "integration_flag"
+        data_variables = [str(v) for v in data.variables]
+        for var in data_variables:
+            if var.lower() == species.lower():
+                rename[var] = "mf"
+            if "repeatability" in var:
+                rename[var] = "mf_repeatability"
+            if "variability" in var:
+                rename[var] = "mf_variability"
+            if "number_of_observations" in var:
+                rename[var] = "mf_number_of_observations"
+            if "status_flag" in var:
+                rename[var] = "status_flag"
+            if "integration_flag" in var:
+                rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename)  # type: ignore
+        data = data.rename_vars(rename)  # type: ignore
 
     data.attrs["species"] = species
 
@@ -464,15 +347,16 @@ def get_obs_surface_local(
 def get_obs_column(
     species: str,
     max_level: int,
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     platform: str = "satellite",
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    return_mf: bool = True,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -484,6 +368,7 @@ def get_obs_column(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        return_mf: Return mole fraction rather than column data. Default=True
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -503,70 +388,72 @@ def get_obs_column(
         **kwargs,
     )
 
-    if max_level > max(obs_data.data.lev.values) + 1:
-        logger.warning(
-            f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+    if return_mf:
+
+        if max_level > max(obs_data.data.lev.values) + 1:
+            logger.warning(
+                f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+            )
+            max_level = max(obs_data.data.lev.values) + 1
+
+        ## processing taken from acrg/acrg/obs/read.py get_gosat()
+        lower_levels = list(range(0, max_level))
+
+        prior_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
+            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+        ).sum(dim="lev")
+
+        upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
+        prior_upper_level_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+        ).sum(dim="lev")
+
+        obs_data.data["mf_prior_factor"] = prior_factor
+        obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
+        obs_data.data["mf"] = (
+            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
         )
-        max_level = max(obs_data.data.lev.values) + 1
+        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
 
-    ## processing taken from acrg/acrg/obs/read.py get_gosat()
-    lower_levels = list(range(0, max_level))
+        # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
+        drop_data_vars = [
+            "xch4",
+            "xch4_uncertainty",
+            "lon",
+            "lat",
+            "ch4_profile_apriori",
+            "xch4_averaging_kernel",
+            "pressure_levels",
+            "pressure_weights",
+            "exposure_id",
+        ]
+        drop_coords = ["lev", "id"]
 
-    prior_factor = (
-        obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
-        * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
-        * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
-    ).sum(dim="lev")
+        for dv in drop_data_vars:
+            if dv in obs_data.data.data_vars:
+                obs_data.data = obs_data.data.drop_vars(dv)
+        for coord in drop_coords:
+            if coord in obs_data.data.coords:
+                obs_data.data = obs_data.data.drop_vars(coord)
 
-    upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
-    prior_upper_level_factor = (
-        obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
-        * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
-    ).sum(dim="lev")
+        obs_data.data.attrs["max_level"] = max_level
+        if species.upper() == "CH4":
+            # obs_data.data.mf.attrs["units"] = "1e-9"
+            obs_data.data.attrs["species"] = "CH4"
+        if species.upper() == "CO2":
+            # obs_data.data.mf.attrs["units"] = "1e-6"
+            obs_data.data.attrs["species"] = "CO2"
 
-    obs_data.data["mf_prior_factor"] = prior_factor
-    obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
-    obs_data.data["mf"] = (
-        obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
-    )
-    obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+        # obs_data.data.attrs["scale"] = "GOSAT"
 
-    # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
-    drop_data_vars = [
-        "xch4",
-        "xch4_uncertainty",
-        "lon",
-        "lat",
-        "ch4_profile_apriori",
-        "xch4_averaging_kernel",
-        "pressure_levels",
-        "pressure_weights",
-        "exposure_id",
-    ]
-    drop_coords = ["lev", "id"]
-
-    for dv in drop_data_vars:
-        if dv in obs_data.data.data_vars:
-            obs_data.data = obs_data.data.drop_vars(dv)
-    for coord in drop_coords:
-        if coord in obs_data.data.coords:
-            obs_data.data = obs_data.data.drop_vars(coord)
+        obs_data.metadata["transforms"] = (
+            f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
+        )
 
     obs_data.data = obs_data.data.sortby("time")
-
-    obs_data.data.attrs["max_level"] = max_level
-    if species.upper() == "CH4":
-        # obs_data.data.mf.attrs["units"] = "1e-9"
-        obs_data.data.attrs["species"] = "CH4"
-    if species.upper() == "CO2":
-        # obs_data.data.mf.attrs["units"] = "1e-6"
-        obs_data.data.attrs["species"] = "CO2"
-
-    # obs_data.data.attrs["scale"] = "GOSAT"
-
-    obs_data.metadata["transforms"] = (
-        f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
-    )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
@@ -575,12 +462,12 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    time_resolution: Optional[str] = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    time_resolution: str | None = None,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -626,9 +513,9 @@ def get_flux(
 def get_bc(
     species: str,
     domain: str,
-    bc_input: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    bc_input: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -660,12 +547,12 @@ def get_bc(
 def get_footprint(
     site: str,
     domain: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    species: Optional[str] = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    species: str | None = None,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -783,7 +670,7 @@ def _create_keyword_string(**kwargs: Any) -> str:
 
 
 def _metadata_difference(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: multDataTypes, params: list | None = None, print_output: bool = True
 ) -> dict[str, list]:
     """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
@@ -865,7 +752,7 @@ def _metadata_difference(
 
 
 def _metadata_difference_formatted(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: multDataTypes, params: list | None = None, print_output: bool = True
 ) -> str:
     """Create formatted string for the difference in metadata between input objects.
 

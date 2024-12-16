@@ -1,13 +1,13 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, cast
 import warnings
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms, align_lat_lon
+from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -24,7 +24,7 @@ class Footprints(BaseStore):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> dict | None:
         """Ready a footprint from binary data
 
         Args:
@@ -186,18 +186,18 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[List, str, Path],
+        filepath: list | str | Path,
         site: str,
         domain: str,
         model: str,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        met_model: Optional[str] = None,
-        species: Optional[str] = None,
-        network: Optional[str] = None,
-        period: Optional[Union[str, tuple]] = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        met_model: str | None = None,
+        species: str | None = None,
+        network: str | None = None,
+        period: str | tuple | None = None,
         continuous: bool = True,
-        chunks: Optional[Dict] = None,
+        chunks: dict | None = None,
         source_format: str = "acrg_org",
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
@@ -210,9 +210,9 @@ class Footprints(BaseStore):
         force: bool = False,
         sort: bool = False,
         drop_duplicates: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        optional_metadata: dict | None = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -386,7 +386,6 @@ class Footprints(BaseStore):
         for split_data in footprint_data.values():
 
             split_data["data"] = split_data["data"].chunk(chunks)
-            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
 
             fp_data = split_data["data"]
             Footprints.validate_data(
@@ -479,7 +478,7 @@ class Footprints(BaseStore):
         # # footprint internal format consistent with this.
 
         # Names of data variables and associated dimensions (as a tuple)
-        data_vars: Dict[str, Tuple[str, ...]] = {}
+        data_vars: dict[str, tuple[str, ...]] = {}
         # Internal data types of data variables and coordinates
         dtypes = {
             "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types

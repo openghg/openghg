@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
 
 from pandas import DataFrame
 
@@ -7,14 +6,14 @@ __all__ = ["parse_beaco2n"]
 
 
 def parse_beaco2n(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     network: str,
     inlet: str,
-    instrument: Optional[str] = "shinyei",
-    sampling_period: Optional[str] = None,
-    **kwargs: Dict,
-) -> Dict:
+    instrument: str | None = "shinyei",
+    sampling_period: str | None = None,
+    **kwargs: dict,
+) -> dict:
     """Read BEACO2N data files
 
     Args:
@@ -84,7 +83,7 @@ def parse_beaco2n(
 
     units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
-    gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
+    gas_data: defaultdict[str, dict[str, DataFrame | dict]] = defaultdict(dict)
     for mt in measurement_types:
         m_data = data[[mt, f"{mt}_qc"]]
         m_data = m_data.dropna(axis="rows", subset=[mt])

@@ -5,13 +5,19 @@ from pathlib import Path
 import numpy as np
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
+from helpers import (
+    attributes_checker_obssurface,
+    clear_test_stores,
+    get_surface_datapath,
+    metadata_checker_obssurface,
+)
 from openghg.objectstore import (
     exists,
     get_bucket,
     get_object_from_json,
     get_writable_bucket,
     set_object_from_json,
+    get_readable_buckets,
 )
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_obs_surface, search_surface
@@ -25,6 +31,58 @@ from pandas import Timestamp
 @pytest.fixture
 def bucket():
     return get_bucket()
+
+
+@pytest.fixture
+def min_uuids_fixture():
+    clear_test_stores()
+
+    one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    one_min_res = standardise_surface(
+        store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
+    )
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    return min_uuids
+
+
+@pytest.fixture
+def hourly_uuids_fixture():
+
+    one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
+    one_hour_res = standardise_surface(
+        store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
+    )
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    return hour_uuids
+
+
+def test_different_sampling_periods_diff_datasources(min_uuids_fixture, hourly_uuids_fixture):
+
+    min_uuids = min_uuids_fixture
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    hour_uuids = hourly_uuids_fixture
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
+def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
+    """
+    Tests metadata and attributes are as expected, applied after sync_surface_metadata shifted to store level
+    """
+    bucket = get_writable_bucket(name="user")
+    min_uuids = min_uuids_fixture
+    for species, uuid in min_uuids.items():
+        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
+        with datasource.get_data(version="latest") as data:
+            assert attributes_checker_obssurface(data.attrs, species=species)
 
 
 def test_raising_error_doesnt_save_to_store(mocker, bucket):
@@ -51,28 +109,6 @@ def test_raising_error_doesnt_save_to_store(mocker, bucket):
         standardise_surface(store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS")
 
     assert not exists(bucket=bucket, key=key)
-
-
-def test_different_sampling_periods_diff_datasources():
-    clear_test_stores()
-
-    one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
-    one_min_res = standardise_surface(
-        store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
-    )
-
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
-    for sp, data in min_uuids.items():
-        assert data["new"] is True
-
-    one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
-    one_hour_res = standardise_surface(
-        store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
-    )
-
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
-    for sp, data in hour_uuids.items():
-        assert data["new"] is True
 
 
 def test_same_source_data_same_datasource():
@@ -364,34 +400,6 @@ def test_read_GC(bucket):
     ]
 
 
-@pytest.mark.skip(reason="Cranfield data processing will be removed.")
-def test_read_cranfield():
-    clear_test_stores()
-
-    data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
-    results = standardise_surface(
-        store="user", filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
-    )
-
-    expected_keys = ["ch4", "co", "co2"]
-
-    assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
-
-    uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
-
-    ch4_data = Datasource(bucket=get_bucket(), uuid=uuid, shallow=False).data()
-    ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
-
-    assert ch4_data.time[0] == Timestamp("2018-05-05")
-    assert ch4_data.time[-1] == Timestamp("2018-05-13T16:00:00")
-
-    assert ch4_data["ch4"][0] == pytest.approx(2585.651)
-    assert ch4_data["ch4"][-1] == pytest.approx(1999.018)
-
-    assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
-    assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
-
-
 def test_read_openghg_format(bucket):
     """
     Test that files already in OpenGHG format can be read. This file includes:
@@ -445,6 +453,8 @@ def test_read_noaa_raw(bucket):
         assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
         assert co_data["co_selection_flag"][-1] == pytest.approx(0)
 
+        attributes_checker_obssurface(attrs=co_data.attrs, species="co")
+
 
 def test_read_noaa_metastorepack(bucket):
     data_filepath = get_surface_datapath(
@@ -474,49 +484,23 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
 
-@pytest.mark.skip(reason="Thames Barrier data read to be removed.")
-def test_read_thames_barrier(bucket):
-    clear_test_stores()
-
-    data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
-
-    results = standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="THAMESBARRIER",
-        site="TMB",
-        network="LGHG",
-        sampling_period="3600s",
-    )
-
-    expected_keys = sorted(["ch4", "co2", "co"])
-
-    assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
-
-    uuid = results["processed"]["thames_test_20190707.csv"]["co2"]["uuid"]
-
-    data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
-
-    assert data.time[0] == Timestamp("2019-07-01T00:39:55")
-    assert data.time[-1] == Timestamp("2019-08-01T00:10:30")
-    assert data["co2"][0] == pytest.approx(417.97344761)
-    assert data["co2"][-1] == pytest.approx(417.80000653)
-    assert data["co2_variability"][0] == 0
-    assert data["co2_variability"][-1] == 0
-
-
 @pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
 def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
+    data_filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG"
+    )
 
     standardise_surface(
         store="user",
         filepath=data_filepath,
-        source_format="THAMESBARRIER",
-        site="tmb",
-        network="LGHG",
-        sampling_period="1m",
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h",
+        update_mismatch="attributes",
+        if_exists="new",
+        sort_files=True,
     )
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
@@ -857,7 +841,8 @@ def test_check_obssurface_multi_file_same_skip():
 
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     results = standardise_surface(
         store="user",
@@ -872,7 +857,9 @@ def test_check_obssurface_multi_file_same_skip():
 
     assert results
 
-    filepath_repeat = get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg")
+    filepath_repeat = get_surface_datapath(
+        "DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"
+    )
 
     results = standardise_surface(
         store="user",
@@ -983,25 +970,29 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
     """
 
     clear_test_stores()
-    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc",source_format="OPENGHG")
-    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+    data_filepath_1 = get_surface_datapath(filename="tac_co2_openghg_dummy-ones.nc", source_format="OPENGHG")
+    data_filepath_2 = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     data_labels_1 = {data_keyword: data_value_1}
     data_labels_2 = {data_keyword: data_value_2}
 
-    standardise_surface(filepath=data_filepath_1,
-                        source_format="OPENGHG",
-                        site="TAC",
-                        network="DECC",
-                        store="group",
-                        **data_labels_1)
+    standardise_surface(
+        filepath=data_filepath_1,
+        source_format="OPENGHG",
+        site="TAC",
+        network="DECC",
+        store="group",
+        **data_labels_1
+    )
 
-    standardise_surface(filepath=data_filepath_2,
-                        source_format="OPENGHG",
-                        site="TAC",
-                        network="DECC",
-                        store="group",
-                        **data_labels_2)
+    standardise_surface(
+        filepath=data_filepath_2,
+        source_format="OPENGHG",
+        site="TAC",
+        network="DECC",
+        store="group",
+        **data_labels_2
+    )
 
     tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
     tac_2 = get_obs_surface(site="tac", species="co2", **data_labels_2)
@@ -1020,7 +1011,7 @@ def test_optional_parameters():
     """Test if ValueError is raised for invalid input value to calibration_scale."""
 
     clear_test_stores()
-    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
+    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     with pytest.raises(
         ValueError,
@@ -1076,3 +1067,64 @@ def test_optional_metadata():
     rgl_ch4_metadata = rgl_ch4.metadata
 
     assert "project" in rgl_ch4_metadata
+
+
+@pytest.mark.parametrize(
+    "filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch",
+    [
+        (
+            "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+            "tac",
+            "picarro",
+            "1h",
+            "decc",
+            "185m",
+            "openghg",
+            "from_definition",
+        ),
+        ("ch4_bao_tower-insitu_1_ccgg_all.nc", "bao", None, None, "noaa", None, "noaa", "from_source"),
+        ("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "rgl", "g2301", None, "icos", None, "icos", "never"),
+    ],
+)
+def test_sync_surface_metadata_store_level(
+    filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch, caplog
+):
+    clear_test_stores()
+    bucket = get_writable_bucket(name="user")
+
+    filepath = get_surface_datapath(filepath, source_format=source_format)
+    standardised_data = standardise_surface(
+        filepath=filepath,
+        site=site,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        network=network,
+        inlet=inlet,
+        store="user",
+        source_format=source_format,
+        update_mismatch=update_mismatch,
+    )
+
+    standardised_data = standardised_data["processed"][filepath.name]
+
+    for species, uuid in standardised_data.items():
+        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
+        with datasource.get_data(version="latest") as data:
+            assert attributes_checker_obssurface(data.attrs, species=species)
+
+
+def test_co2_games():
+
+    co2_games_data = get_surface_datapath(
+        filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+    )
+
+    standardise_surface(
+        source_format="co2_games",
+        network="paris_simulation",
+        site="bsd",
+        filepath=co2_games_data,
+        store="user",
+    )

@@ -1,6 +1,5 @@
 from pathlib import Path
 from rich.progress import track
-from typing import Dict, List, Optional, Union
 import logging
 from openghg.standardise import standardise_surface
 
@@ -9,11 +8,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def add_noaa_obspack(
-    data_directory: Union[str, Path],
-    project: Optional[str] = None,
+    data_directory: str | Path,
+    project: str | None = None,
     overwrite: bool = False,
-    store: Optional[str] = None,
-) -> Dict:
+    store: str | None = None,
+) -> dict:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
 
@@ -85,7 +84,7 @@ def add_noaa_obspack(
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
-    processed_summary: Dict[str, Dict] = {}
+    processed_summary: dict[str, dict] = {}
     for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
@@ -127,7 +126,7 @@ def add_noaa_obspack(
     return processed_summary
 
 
-def _param_from_filename(filename: Union[str, Path]) -> Dict:
+def _param_from_filename(filename: str | Path) -> dict:
     """
     Extract parameter from the NOAA filename based on the agreed naming convention.
     See: https://gml.noaa.gov/ccgg/obspack/documentation.html
@@ -156,7 +155,7 @@ def _param_from_filename(filename: Union[str, Path]) -> Dict:
     return param
 
 
-def _create_project_names(input_dict: Dict) -> List:
+def _create_project_names(input_dict: dict) -> list:
     """Creates full project names as would be included in the NOAA filepath
 
     Expects input dictionary for each the type e.g. "surface" and the
@@ -183,7 +182,7 @@ def _create_project_names(input_dict: Dict) -> List:
     return projects
 
 
-def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List[Path]:
+def _find_noaa_files(data_directory: str | Path, ext: str) -> list[Path]:
     """Find obs files in NOAA ObsPack.
 
     Expected directory structure is:

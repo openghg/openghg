@@ -32,6 +32,7 @@ from ._file import (
     load_transform_parser,
     read_header,
     check_function_open_nc,
+    permissions,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -108,9 +109,6 @@ from ._util import (
     find_matching_site,
     multiple_inlets,
     pairwise,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     sort_by_filenames,
     unanimous,

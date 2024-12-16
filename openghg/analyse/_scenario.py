@@ -45,8 +45,8 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Literal, Optional, Union, cast
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -64,6 +64,7 @@ from openghg.retrieve import (
 from openghg.util import synonyms
 from openghg.types import SearchError
 from pandas import Timestamp
+import xarray as xr
 from xarray import DataArray, Dataset
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
@@ -76,7 +77,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
 
-ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
+ParamType = Union[list[dict[str, str | None]], dict[str, str | None]]
 methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
@@ -95,25 +96,25 @@ class ModelScenario:
 
     def __init__(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        fp_inlet: Union[str, list, None] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        bc_input: Optional[str] = None,
-        start_date: Union[str, Timestamp, None] = None,
-        end_date: Union[str, Timestamp, None] = None,
-        obs: Optional[ObsData] = None,
-        footprint: Optional[FootprintData] = None,
-        flux: Union[FluxData, Dict[str, FluxData], None] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        domain: str | None = None,
+        model: str | None = None,
+        met_model: str | None = None,
+        fp_inlet: str | list | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        bc_input: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        footprint: FootprintData | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
@@ -154,10 +155,10 @@ class ModelScenario:
         these into the appropriate class?
         """
 
-        self.obs: Optional[ObsData] = None
-        self.footprint: Optional[FootprintData] = None
-        self.fluxes: Optional[Dict[str, FluxData]] = None
-        self.bc: Optional[BoundaryConditionsData] = None
+        self.obs: ObsData | None = None
+        self.footprint: FootprintData | None = None
+        self.fluxes: dict[str, FluxData] | None = None
+        self.bc: BoundaryConditionsData | None = None
 
         if species is not None:
             species = synonyms(species)
@@ -224,10 +225,10 @@ class ModelScenario:
         )
 
         # Initialise attributes used for caching
-        self.scenario: Optional[Dataset] = None
-        self.modelled_obs: Optional[DataArray] = None
-        self.modelled_baseline: Optional[DataArray] = None
-        self.flux_stacked: Optional[Dataset] = None
+        self.scenario: Dataset | None = None
+        self.modelled_obs: DataArray | None = None
+        self.modelled_baseline: DataArray | None = None
+        self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
 
@@ -283,15 +284,15 @@ class ModelScenario:
 
     def add_obs(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        obs: Optional[ObsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -330,19 +331,19 @@ class ModelScenario:
 
     def add_footprint(
         self,
-        site: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        species: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
-        network: Optional[str] = None,
-        footprint: Optional[FootprintData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        domain: str | None = None,
+        model: str | None = None,
+        met_model: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        species: str | None = None,
+        fp_inlet: str | list | None = None,
+        network: str | None = None,
+        footprint: FootprintData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
@@ -423,14 +424,14 @@ class ModelScenario:
 
     def add_flux(
         self,
-        species: Optional[str] = None,
-        domain: Optional[str] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        domain: str | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -517,13 +518,13 @@ class ModelScenario:
 
     def add_bc(
         self,
-        species: Optional[str] = None,
-        bc_input: Optional[str] = None,
-        domain: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        bc_input: str | None = None,
+        domain: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
@@ -545,7 +546,7 @@ class ModelScenario:
 
         self.bc = bc
 
-    def _check_data_is_present(self, need: Optional[Union[str, Sequence]] = None) -> None:
+    def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """
         Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -579,7 +580,7 @@ class ModelScenario:
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
-    def _get_platform(self) -> Optional[str]:
+    def _get_platform(self) -> str | None:
         """
         Find the platform for a site, if present.
 
@@ -603,7 +604,7 @@ class ModelScenario:
                 platform: str = site_details.get("platform")
                 return platform
 
-    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: Optional[str] = None) -> Tuple:
+    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: str | None = None) -> tuple:
         """
         Slice and resample obs and footprint data to align along time
 
@@ -760,7 +761,7 @@ class ModelScenario:
     def combine_obs_footprint(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Dataset:
@@ -813,7 +814,7 @@ class ModelScenario:
         # Save the observation data units
         try:
             mf = obs.data["mf"]
-            units: Optional[float] = float(mf.attrs["units"])
+            units: float | None = float(mf.attrs["units"])
         except (ValueError, KeyError):
             units = None
         except AttributeError:
@@ -846,13 +847,13 @@ class ModelScenario:
 
         return combined_dataset
 
-    def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
+    def _clean_sources_input(self, sources: str | list | None = None) -> list:
         """
         Check sources input and make sure this is a list. If None, this will extract
         all sources from self.fluxes.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         if sources is None:
             sources = list(flux_dict.keys())
@@ -862,7 +863,7 @@ class ModelScenario:
         return sources
 
     def combine_flux_sources(
-        self, sources: Optional[Union[str, List]] = None, cache: bool = True, recalculate: bool = False
+        self, sources: str | list | None = None, cache: bool = True, recalculate: bool = False
     ) -> Dataset:
         """
         Combine together flux sources on the time dimension. This will align to
@@ -876,7 +877,7 @@ class ModelScenario:
             Dataset: All flux sources stacked on the time dimension.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         time_dim = "time"
 
@@ -935,7 +936,7 @@ class ModelScenario:
         self,
         param: str = "modelled_obs",
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         recalculate: bool = False,
     ) -> bool:
         """
@@ -1004,9 +1005,9 @@ class ModelScenario:
 
     def calc_modelled_obs(
         self,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1073,7 +1074,7 @@ class ModelScenario:
 
     def _calc_modelled_obs_integrated(
         self,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         output_TS: bool = True,
         output_fpXflux: bool = False,
     ) -> Any:
@@ -1121,8 +1122,8 @@ class ModelScenario:
 
     def _calc_modelled_obs_HiTRes(
         self,
-        sources: Optional[Union[str, List]] = None,
-        averaging: Optional[str] = None,
+        sources: str | list | None = None,
+        averaging: str | None = None,
         output_TS: bool = True,
         output_fpXflux: bool = False,
     ) -> Any:
@@ -1170,8 +1171,6 @@ class ModelScenario:
         included as Any for now.
         """
         from math import gcd
-
-        import dask.array as da  # type: ignore
         from pandas import date_range
 
         # TODO: Need to work out how this fits in with high time resolution method
@@ -1183,17 +1182,30 @@ class ModelScenario:
         fp_HiTRes = self.scenario.fp_HiTRes
         flux_ds = self.combine_flux_sources(sources)
         fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
+        fp_HiTRes = cast(xr.DataArray, fp_HiTRes)
 
         # Make sure any NaN values are set to zero as this is a multiplicative and summing operation
         fp_HiTRes = fp_HiTRes.fillna(0.0)
         flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
 
-        # Calculate time resolution for both the flux and footprints data
-        nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-        flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-        fp_res_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+        def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
+            """Infer frequency of DataArray of times.
 
-        fp_res_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
+            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
+            Otherwise times are assumed to be in terms of hours.
+            """
+            nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
+
+            if input_nanoseconds:
+                return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
+            else:
+                return int(times.diff(dim=dim).values.mean())
+
+        # Calculate time resolution for both the flux and footprints data
+        flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
+        fp_res_time_H = calc_hourly_freq(fp_HiTRes.time, input_nanoseconds=True)
+
+        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"], dim="H_back")
 
         # Define resolution on time dimension in number in hours
         if averaging:
@@ -1234,27 +1246,14 @@ class ModelScenario:
         # create time array to loop through, with the required resolution
         # fp_HiTRes.time is the release time of particles into the model
         time_array = fp_HiTRes["time"]
-        lat = fp_HiTRes["lat"]
-        lon = fp_HiTRes["lon"]
-        hback = fp_HiTRes["H_back"]
-
-        ntime = len(time_array)
-        nlat = len(lat)
-        nlon = len(lon)
-        # nh_back = len(hback)
 
         # Define maximum hour back
-        max_h_back = int(hback.values[-1])
+        max_h_back = int(fp_HiTRes.H_back.max().values)
 
         # Define full range of dates to select from the flux input
         date_start = time_array[0]
         date_start_back = date_start - np.timedelta64(max_h_back, "h")
         date_end = time_array[-1] + np.timedelta64(1, "s")
-
-        start = {
-            dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd)
-            for dd in ["month", "year"]
-        }
 
         # Create times for matching to the flux
         full_dates = date_range(
@@ -1287,102 +1286,78 @@ class ModelScenario:
             # Reindex to match to correct values
             flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
         elif flux_res_H > 24:
+            # TODO this case should be handled outside of the "compute_fp_x_flux" function
             # If flux is not high frequency use the monthly averages instead.
             flux_ds_high_freq = flux_ds_low_freq
 
         # TODO: Add check to make sure time values are exactly aligned based on date range
 
-        # Make sure the dimensions match the expected order for indexing
-        fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
-        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
+        # Extract flux data from dataset
+        flux_high_freq = flux_ds_high_freq.flux
+        flux_low_freq = flux_ds_low_freq.flux
 
-        # Extract footprints array to use in numba loop
-        fp_HiTRes = da.array(fp_HiTRes)
+        def make_hf_flux_rolling_avg_array(
+            flux_high_freq: xr.DataArray,
+            fp_high_time_res: xr.DataArray,
+            highest_res_H: int,
+            max_h_back: int,
+        ) -> xr.DataArray:
+            # create windows (backwards in time) with `max_h_back` many time points,
+            # starting at each time point in flux_hf_rolling.time
+            window_size = max_h_back // highest_res_H
+            flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
 
-        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
-        if output_fpXflux:
-            fpXflux = da.zeros((nlat, nlon, ntime))
-
-        if output_TS:
-            timeseries = da.zeros(ntime)
-
-        # Iterate through the time coord to get the total mf at each time step using the H back coord
-        # at each release time we disaggregate the particles backwards over the previous 24hrs
-        # The final value then contains the 29-day integrated residual footprints
-        logger.info("Calculating modelled timeseries comparison:")
-        iters = track(time_array.values)
-        for tt, time in enumerate(iters):
-            # Get correct index for low resolution data based on start and current date
-            current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
-            tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
-
-            # get 4 dimensional chunk of high time res footprints for this timestep
-            # units : mol/mol/mol/m2/s
-            # reverse the time coordinate to be chronological
-            fp_time = fp_HiTRes[:, :, tt, ::-1]
-
-            fp_high_freq = fp_time[:, :, 1:]
-            fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
-
-            # Extract flux data from dataset
-            flux_high_freq = flux_ds_high_freq.flux
-            flux_low_freq = flux_ds_low_freq.flux
-
-            # Define high and low frequency fluxes based on inputs
-            # Allow for variable frequency within 24 hours
-            flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
-            if flux_res_H <= 24:
-                # Define indices to correctly select matching date range from flux data
-                # This will depend on the various frequencies of the inputs
-                # At present, highest_res_H matches the flux frequency
-                tt_start = tt * int(time_res_H / highest_res_H) + 1
-                tt_end = tt_start + int(max_h_back / highest_res_H)
-                selection = int(time_hf_res_H / highest_res_H)
-
-                # Extract matching time range from whole flux array
-                flux_high_freq = flux_high_freq[..., tt_start:tt_end]
-                if selection > 1:
-                    # If flux frequency does not match to the high frequency (hf, H_back)
-                    # dimension, select entries which do. Reversed to make sure
-                    # entries matching to the correct times are selected
-                    flux_high_freq = flux_high_freq[..., ::-selection]
-                    flux_high_freq = flux_high_freq[..., ::-1]
-            else:
-                flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
-
-            # convert to array to use in numba loop
-            flux_high_freq = da.array(flux_high_freq)
-            flux_low_freq = da.array(flux_low_freq)
-
-            # Multiply the HiTRes footprints with the HiTRes emissions to give mf
-            # Multiply residual footprints by low frequency emissions data to give residual mf
-            # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
-            # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
-            fpXflux_time = flux_high_freq * fp_high_freq
-            fpXflux_residual = flux_low_freq * fp_residual
-
-            # append the residual emissions
-            fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
-
-            if output_fpXflux:
-                # Sum over time (H back) to give the total mf at this timestep
-                fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
-
-            if output_TS:
-                # work out timeseries by summing over lat, lon (24 hrs)
-                timeseries[tt] = fpXflux_time.sum()
-
-        # TODO: Add details about units to output
-
-        if output_fpXflux:
-            fpXflux = DataArray(
-                fpXflux,
-                dims=("lat", "lon", "time"),
-                coords={"lat": lat, "lon": lon, "time": time_array},
+            # set H_back coordinates using highest_res_H frequency
+            h_back_type = fp_high_time_res.H_back.dtype
+            flux_hf_rolling = flux_hf_rolling.assign_coords(
+                {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=h_back_type)[::-1]}
             )
 
+            # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
+            flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
+
+            return flux_hf_rolling
+
+        def compute_fp_x_flux(
+            fp_HiTRes: xr.DataArray,
+            flux_high_freq: xr.DataArray,
+            flux_low_freq: xr.DataArray,
+            highest_res_H: int,
+            max_h_back: int,
+        ) -> xr.DataArray:
+
+            # do low res calculation
+            fp_residual = fp_HiTRes.sel(H_back=fp_HiTRes.H_back.max(), drop=True)  # take last H_back value
+            flux_low_freq = flux_low_freq.reindex_like(fp_residual, method="ffill")  # forward fill times
+
+            fpXflux_residual = flux_low_freq * fp_residual
+
+            # get high freq fp
+            fp_high_freq = fp_HiTRes.where(fp_HiTRes.H_back != fp_HiTRes.H_back.max(), drop=True)
+
+            # if flux_res_H > 24, then flux_high_freq = flux_low_freq, and we don't take a sum over windows of flux_high_freq
+            if flux_res_H > 24:
+                fpXflux = (flux_low_freq * fp_high_freq).sum("H_back")
+            else:
+                flux_high_freq = make_hf_flux_rolling_avg_array(
+                    flux_high_freq, fp_high_freq, highest_res_H, max_h_back
+                )
+                fpXflux = (flux_high_freq * fp_high_freq).sum("H_back")
+
+            return fpXflux + fpXflux_residual
+
+        fpXflux = compute_fp_x_flux(
+            fp_HiTRes,
+            flux_high_freq,
+            flux_low_freq,
+            highest_res_H,
+            max_h_back,
+        )
+
         if output_TS:
-            timeseries = DataArray(timeseries, dims=("time"), coords={"time": time_array})
+            timeseries = fpXflux.sum(["lat", "lon"])
+
+        # TODO: Add details about units to output
 
         if output_fpXflux and output_TS:
             timeseries.compute()
@@ -1400,7 +1375,7 @@ class ModelScenario:
     def calc_modelled_baseline(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         output_units: float = 1e-9,
         cache: bool = True,
         recalculate: bool = False,
@@ -1451,16 +1426,16 @@ class ModelScenario:
         check_monthly = check_lifetime_monthly(lifetime_value)
 
         if check_monthly:
-            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
-            lifetime: Optional[str] = None
+            lifetime_monthly = cast(list[str] | None, lifetime_value)
+            lifetime: str | None = None
         else:
             lifetime_monthly = None
-            lifetime = cast(Optional[str], lifetime_value)
+            lifetime = cast(str | None, lifetime_value)
 
         if lifetime is not None:
             short_lifetime = True
             lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.0
+            lifetime_hrs: float | np.ndarray = lt_time_delta.total_seconds() / 3600.0
         elif lifetime_monthly:
             short_lifetime = True
             lifetime_monthly_hrs = []
@@ -1491,10 +1466,10 @@ class ModelScenario:
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
-            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
-            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
-            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
+            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
+            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
+            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
+            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
 
         else:
             loss_n = 1.0
@@ -1548,9 +1523,9 @@ class ModelScenario:
     def footprints_data_merge(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         calc_timeseries: bool = True,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
@@ -1629,10 +1604,10 @@ class ModelScenario:
 
     def plot_comparison(
         self,
-        baseline: Optional[str] = "boundary_conditions",
-        sources: Optional[Union[str, List]] = None,
+        baseline: str | None = "boundary_conditions",
+        sources: str | list | None = None,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Any:
@@ -1744,7 +1719,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: float | None = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1780,10 +1755,10 @@ def combine_datasets(
 
 def match_dataset_dims(
     datasets: Sequence[Dataset],
-    dims: Union[str, Sequence] = [],
+    dims: str | Sequence = [],
     method: methodType = "nearest",
-    tolerance: Union[float, Dict[str, float]] = 1e-5,
-) -> List[Dataset]:
+    tolerance: float | dict[str, float] = 1e-5,
+) -> list[Dataset]:
     """
     Aligns datasets to the selected dimensions within a tolerance.
     All datasets will be aligned to the first dataset within the list.

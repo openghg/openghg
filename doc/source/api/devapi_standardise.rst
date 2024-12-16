@@ -7,13 +7,9 @@ Each of these functions parses a specific type of data file and returns a dictio
 Surface observations
 ^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.surface.parse_aqmesh
-
 .. autofunction:: openghg.standardise.surface.parse_beaco2n
 
-.. autofunction:: openghg.standardise.surface.parse_btt
 
-.. autofunction:: openghg.standardise.surface.parse_cranfield
 
 .. autofunction:: openghg.standardise.surface.parse_crds
 
@@ -61,6 +57,6 @@ These ensure the metadata and attributes stored with data are correct.
 
 .. autofunction:: openghg.standardise.meta.define_species_label
 
-.. autofunction:: openghg.standardise.meta.metadata_default_keys
+.. autofunction:: openghg.standardise.meta.attributes_default_keys
 
 .. autofunction:: openghg.standardise.meta.sync_surface_metadata

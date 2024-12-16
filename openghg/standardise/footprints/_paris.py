@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
 
@@ -9,6 +8,7 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
+    # open_and_align_dataset,
     check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
@@ -25,15 +25,15 @@ def parse_paris(
     model: str,
     inlet: str,
     species: str,
-    met_model: Optional[str] = None,
-    network: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    met_model: str | None = None,
+    network: str | None = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-) -> Dict:
+) -> dict:
     """
     Read and parse input footprints data in "paris" format.
 
@@ -65,7 +65,8 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = check_function_open_nc(filepath)
+    # fp_data, filepath = open_and_align_dataset(filepath, domain)
+    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
 
     fp_data = xr_open_fn(filepath)
 
@@ -90,7 +91,7 @@ def parse_paris(
         logger.exception(msg)
         raise ParseError(msg)
 
-    fp_data = fp_data.rename(**dim_rename)
+    fp_data = fp_data.rename(dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
 
@@ -100,7 +101,7 @@ def parse_paris(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: Dict[str, Union[str, float, List[float]]] = {}
+    metadata: dict[str, str | float | list[float]] = {}
 
     metadata["data_type"] = "footprints"
     metadata["site"] = site
@@ -179,7 +180,7 @@ def parse_paris(
     # TODO - remove this once assign_attributes has been refactored
     key = "_".join((site, domain, model, inlet))
 
-    footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+    footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
     footprint_data[key]["metadata"] = metadata
 

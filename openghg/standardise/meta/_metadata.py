@@ -1,7 +1,6 @@
 import logging
 import math
 from copy import deepcopy
-from typing import Dict, List, Tuple, Optional
 from openghg.types import AttrMismatchError
 from openghg.util import is_number
 
@@ -9,7 +8,7 @@ logger = logging.getLogger("openghg.standardise.metadata")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def metadata_default_keys() -> List:
+def attributes_default_keys() -> list:
     """
     Defines default values expected within ObsSurface metadata.
     Returns:
@@ -35,7 +34,7 @@ def metadata_default_keys() -> List:
     return default_keys
 
 
-def metadata_keys_as_floats() -> List:
+def metadata_keys_as_floats() -> list:
     """
     Defines which keys should be consistently stored as numbers in the metadata
     (even if they are not numbers within the attributes).
@@ -54,11 +53,11 @@ def metadata_keys_as_floats() -> List:
 
 
 def sync_surface_metadata(
-    metadata: Dict,
-    attributes: Dict,
-    keys_to_add: Optional[List] = None,
+    metadata: dict,
+    attributes: dict,
+    keys_to_add: list | None = None,
     update_mismatch: str = "never",
-) -> Tuple[Dict, Dict]:
+) -> tuple[dict, dict]:
     """
     Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
@@ -157,7 +156,7 @@ def sync_surface_metadata(
             f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}"
         )
 
-    default_keys_to_add = metadata_default_keys()
+    default_keys_to_add = attributes_default_keys()
     keys_as_floats = metadata_keys_as_floats()
 
     if keys_to_add is None:

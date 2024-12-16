@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Dict
+from typing import Any
 from openghg.types import (
     SurfaceTypes,
     ColumnTypes,
@@ -6,6 +6,8 @@ from openghg.types import (
     FootprintTypes,
     FluxTimeseriesTypes,
     FluxDatabases,
+    BoundaryConditions,
+    EulerianModelTypes,
 )
 
 __all__ = [
@@ -16,7 +18,7 @@ __all__ = [
 ]
 
 
-def define_data_types() -> Tuple[str, ...]:
+def define_data_types() -> tuple[str, ...]:
     """
     Define names of data types for objects within OpenGHG
     """
@@ -34,7 +36,7 @@ def define_data_types() -> Tuple[str, ...]:
     return data_types
 
 
-def define_data_type_classes() -> Dict[str, Any]:
+def define_data_type_classes() -> dict[str, Any]:
     """
     Define mapping between data types and associated input classes within OpenGHG
     """
@@ -62,7 +64,7 @@ def define_data_type_classes() -> Dict[str, Any]:
     return data_type_classes
 
 
-def define_standardise_parsers() -> Dict[str, Any]:
+def define_standardise_parsers() -> dict[str, Any]:
     """
     Define mapping between data_types and standardise parser details
     """
@@ -74,15 +76,15 @@ def define_standardise_parsers() -> Dict[str, Any]:
         "flux": FluxTypes,
         "flux_timeseries": FluxTimeseriesTypes,
         "footprints": FootprintTypes,
-        # "boundary_conditions": ,
-        # "eulerian_model": EulerianModel,
+        "eulerian_model": EulerianModelTypes,
+        "boundary_conditions": BoundaryConditions,
         # "met": ???,
     }
 
     return data_type_parsers
 
 
-def define_transform_parsers() -> Dict[str, Any]:
+def define_transform_parsers() -> dict[str, Any]:
     """
     Define mapping between data_types and transform parser details
     """
