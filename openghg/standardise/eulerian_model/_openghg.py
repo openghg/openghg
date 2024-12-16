@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
 import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, timestamp_tzaware
@@ -11,15 +10,15 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     model: str,
     species: str,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    setup: Optional[str] = None,
-    chunks: Optional[Dict] = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    setup: str | None = None,
+    chunks: dict | None = None,
     **kwargs: str,
-) -> Dict:
+) -> dict:
     """Parse Eulerian model files
 
      Args:

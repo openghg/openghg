@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional
 import warnings
 import numpy as np
 from numpy import ndarray
@@ -19,7 +19,7 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[ndarray | DataArray]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -33,7 +33,7 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> dict | None:
         """Ready a footprint from binary data
 
         Args:
@@ -58,26 +58,26 @@ class Flux(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         source: str,
         domain: str,
-        database: Optional[str] = None,
-        database_version: Optional[str] = None,
-        model: Optional[str] = None,
+        database: str | None = None,
+        database_version: str | None = None,
+        model: str | None = None,
         source_format: str = "openghg",
         time_resolved: bool = False,
         high_time_resolution: bool = False,
-        period: Optional[Union[str, tuple]] = None,
-        chunks: Optional[Dict] = None,
+        period: str | tuple | None = None,
+        chunks: dict | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        optional_metadata: dict | None = None,
     ) -> dict:
         """Read flux / emissions file
 
@@ -231,16 +231,16 @@ class Flux(BaseStore):
 
     def transform_data(
         self,
-        datapath: Union[str, Path],
+        datapath: str | Path,
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
-        **kwargs: Dict,
-    ) -> Dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        optional_metadata: dict | None = None,
+        **kwargs: dict,
+    ) -> dict:
         """
         Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
@@ -304,7 +304,7 @@ class Flux(BaseStore):
         all_param = list(inspect.signature(parser_fn).parameters.keys())
 
         # Define parameters to pass to the parser function from kwargs
-        param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
+        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
 
         flux_data = parser_fn(**param)
@@ -354,7 +354,7 @@ class Flux(BaseStore):
         Returns:
             DataSchema : Contains schema for Flux.
         """
-        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
+        data_vars: dict[str, tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)

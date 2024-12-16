@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
 import warnings
 
 
@@ -9,15 +8,15 @@ def parse_openghg(
     source: str,
     domain: str,
     data_type: str,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    period: str | tuple | None = None,
+    chunks: dict | None = None,
     continuous: bool = True,
-) -> Dict:
+) -> dict:
     """
     Read and parse input flux / emissions data already in OpenGHG format.
 
@@ -113,7 +112,7 @@ def parse_openghg(
 
     key = "_".join((species, source, domain))
 
-    flux_data: Dict[str, dict] = {}
+    flux_data: dict[str, dict] = {}
     flux_data[key] = {}
     flux_data[key]["data"] = em_data
     flux_data[key]["metadata"] = metadata

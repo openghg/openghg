@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # import cdsapi  # type: ignore
 # import numpy as np
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 # import requests
 # from xarray import open_dataset, Dataset
@@ -19,8 +19,8 @@ __all__ = ["retrieve_met", "METData"]
 def retrieve_met(
     site: str,
     network: str,
-    years: Union[str, List[str]],
-    variables: Optional[List[str]] = None,
+    years: str | list[str],
+    variables: list[str] | None = None,
 ) -> METData:
     """Retrieve METData data. Note that this function will only download a
     full year of data which may take some time.

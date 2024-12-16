@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 import copy
-from typing import Dict, Optional, Union
 import xarray as xr
 
 from openghg.types import optionalPathType
@@ -15,18 +14,18 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_co2_games(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
+    inlet: str | None = None,
     network: str = "icos",
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     units: str = "mol/mol",
-    **kwarg: Dict,
-) -> Dict:
+    **kwarg: dict,
+) -> dict:
     """Read co2 verification games files.
        Current scope is for Paris required by Eric
     Args:
@@ -52,7 +51,7 @@ def parse_co2_games(
 
     list_of_models = ["BASE", "PTEN", "ATEN", "HGER", "HFRA", "DFIN"]
 
-    gas_data: Dict = {}
+    gas_data: dict = {}
 
     with xr.open_dataset(filepath) as dataset:
         # Use dictionary comprehension to split data variables into individual datasets

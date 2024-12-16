@@ -8,7 +8,6 @@ import shutil
 import tarfile
 import warnings
 from pathlib import Path
-from typing import List, Union
 import logging
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
@@ -313,7 +312,7 @@ def clear_example_cache() -> None:
         shutil.rmtree(extracted_examples, ignore_errors=True)
 
 
-def retrieve_example_obspack(extract_dir: Union[str, Path, None] = None) -> Path:
+def retrieve_example_obspack(extract_dir: str | Path | None = None) -> Path:
     """Retrieves our example ObsPack dataset, extracts it and returns the path to the folder.
 
     Args:
@@ -327,7 +326,7 @@ def retrieve_example_obspack(extract_dir: Union[str, Path, None] = None) -> Path
     return files[0].parent
 
 
-def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) -> List[Path]:
+def retrieve_example_data(url: str, extract_dir: str | Path | None = None) -> list[Path]:
     """Retrieve data from the OpenGHG example data repository, cache the downloaded data,
     extract the data and return the filepaths of the extracted files.
 
@@ -388,7 +387,7 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     return unpack_example_archive(archive_path=download_path, extract_dir=extract_dir)
 
 
-def unpack_example_archive(archive_path: Path, extract_dir: Union[str, Path, None] = None) -> List[Path]:
+def unpack_example_archive(archive_path: Path, extract_dir: str | Path | None = None) -> list[Path]:
     """Unpacks an tar file to a temporary folder, or extract_dir if given.
     Returns the filepath(s) of the objects.
 

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional, Union, cast
+from typing import cast
 import logging
 import xarray as xr
 
@@ -10,20 +10,20 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: Union[str, Path],
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    data_owner: Optional[str] = None,
-    data_owner_email: Optional[str] = None,
+    filepath: str | Path,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
+    calibration_scale: str | None = None,
+    data_owner: str | None = None,
+    data_owner_email: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     **kwargs: str,
-) -> Dict:
+) -> dict:
     """
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
@@ -131,7 +131,7 @@ def parse_openghg(
 
     metadata_initial["inlet"] = inlet
 
-    metadata = cast(Dict[str, str], metadata_initial)
+    metadata = cast(dict[str, str], metadata_initial)
 
     metadata["inlet_height_magl"] = format_inlet(str(metadata["inlet"]), key_name="inlet_height_magl")
     metadata["data_type"] = "surface"

@@ -1,7 +1,8 @@
 """Combine multiple data objects (objects with .metadata and .data attributes) into one."""
 
 from functools import partial
-from typing import Any, Callable, cast, Optional, TypeVar, Union
+from typing import Any, cast, TypeVar
+from collections.abc import Callable
 
 import numpy as np
 import xarray as xr
@@ -17,10 +18,10 @@ T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .met
 # TODO: do we need to add options to use dask.delayed like xr.open_mfdataset?
 def combine_data_objects(
     data_objects: list[T],
-    preprocess: Optional[Callable] = None,
-    concat_dim: Optional[str] = None,
-    compat: Optional[CompatOptions] = None,
-    drop_duplicates: Optional[str] = None,
+    preprocess: Callable | None = None,
+    concat_dim: str | None = None,
+    compat: CompatOptions | None = None,
+    drop_duplicates: str | None = None,
 ) -> T:
     """Combine multiple data objects with optional preprocessing step.
 
@@ -79,7 +80,7 @@ def combine_data_objects(
 def _add_dim_from_metadata(
     data_object: T,
     new_dim: str,
-    metadata_key: Optional[str] = None,
+    metadata_key: str | None = None,
     formatter: Callable = str,
     drop_metadata_key: bool = True,
 ) -> T:
@@ -127,7 +128,7 @@ def combine_multisite(data_objects: list[T]) -> T:
     return combine_data_objects(data_objects, preprocess=preprocess, concat_dim="site")
 
 
-def _data_array_from_value(value: Any, coords: xr.Coordinates, name: Optional[str] = None) -> xr.DataArray:
+def _data_array_from_value(value: Any, coords: xr.Coordinates, name: str | None = None) -> xr.DataArray:
     """Create xr.DataArray with single value and given coords and name.
 
     Args:
@@ -146,11 +147,11 @@ def _data_array_from_value(value: Any, coords: xr.Coordinates, name: Optional[st
 def add_variable_from_metadata(
     data_object: T,
     metadata_key: str,
-    dims: Union[str, list[str]] = "time",
+    dims: str | list[str] = "time",
     formatter: Callable = str,
     drop_metadata_key: bool = True,
     new_metadata_value: Any = None,
-    name: Optional[str] = None,
+    name: str | None = None,
 ) -> T:
     """Add a data variable to the data of data_object using the value corresponding
     to the key `metadata_key` in the metadata of data_object.

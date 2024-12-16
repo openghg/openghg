@@ -4,7 +4,8 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Tuple, Union
+from typing import Any
+from collections.abc import Iterator
 import logging
 
 from openghg.types import multiPathType
@@ -13,7 +14,7 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def unanimous(seq: Dict) -> bool:
+def unanimous(seq: dict) -> bool:
     """Checks that all values in an iterable object
     are the same
 
@@ -32,7 +33,7 @@ def unanimous(seq: Dict) -> bool:
         return all(i == first for i in it)
 
 
-def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
+def pairwise(iterable: Iterable) -> Iterator[tuple[Any, Any]]:
     """Return a zip of an iterable where a is the iterable
     and b is the iterable advanced one step.
 
@@ -49,7 +50,7 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
     return zip(a, b)
 
 
-def site_code_finder(site_name: str) -> Optional[str]:
+def site_code_finder(site_name: str) -> str | None:
     """Find the site code for a given site name.
 
     Args:
@@ -84,7 +85,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
     return site_code.lower()
 
 
-def find_matching_site(site_name: str, possible_sites: Dict) -> str:
+def find_matching_site(site_name: str, possible_sites: dict) -> str:
     """Try and find a similar name to site_name in site_list and return a suggestion or
     error string.
 
@@ -119,7 +120,7 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"Unknown site: {site_name}"
 
 
-def _create_site_lookup_dict() -> Dict:
+def _create_site_lookup_dict() -> dict:
     """Create a dictionary of site name: three letter site code values
 
     Returns:
@@ -151,7 +152,7 @@ def _create_site_lookup_dict() -> Dict:
     return inverted
 
 
-def verify_site(site: str) -> Optional[str]:
+def verify_site(site: str) -> str | None:
     """Check if the passed site is a valid one and returns the three
     letter site code if found. Otherwise we use fuzzy text matching to suggest
     sites with similar names.
@@ -201,7 +202,7 @@ def multiple_inlets(site: str) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: Union[multiPathType, Any]) -> list[Path]:
+def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
     """
     Sorting time on filename basis
 

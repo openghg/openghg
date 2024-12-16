@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import tinydb
 from tinydb.operations import delete as tinydb_delete

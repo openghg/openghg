@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 from pathlib import Path
-from typing import Dict, Optional
 import uuid
 import toml
 import shutil
@@ -196,7 +195,7 @@ def create_config(silent: bool = False) -> None:
     user_config_path.write_text(toml.dumps(config))
 
 
-def _user_multstore_input() -> Dict:
+def _user_multstore_input() -> dict:
     """Ask the user to input data about shared object stores
 
     Returns:
@@ -224,7 +223,7 @@ def _user_multstore_input() -> Dict:
     return stores
 
 
-def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[str] = None) -> Dict:
+def _combine_config(config_version: str, object_stores: dict, user_id: str | None = None) -> dict:
     """Combine parts required into the proper dictionary format
 
     Args:
@@ -247,7 +246,7 @@ def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[
 
 
 # @lru_cache
-def read_local_config() -> Dict:
+def read_local_config() -> dict:
     """Reads the local config file.
 
     Returns:
@@ -264,7 +263,7 @@ def read_local_config() -> Dict:
                 or run openghg --quickstart"
             ) from e
 
-    config: Dict = toml.loads(config_path.read_text())
+    config: dict = toml.loads(config_path.read_text())
 
     try:
         _ = config["object_store"]["user"]

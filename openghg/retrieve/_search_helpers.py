@@ -1,7 +1,8 @@
 """Helper functions for processing search input into form accepted by `Metastore.search`."""
 
 import itertools
-from typing import Any, cast, Callable, Optional, TypeVar
+from typing import Any, cast, TypeVar
+from collections.abc import Callable
 
 import numpy as np
 
@@ -12,7 +13,7 @@ from openghg.types import Comparable
 T = TypeVar("T", bound=Comparable)  # types with <=
 
 
-def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
+def _in_interval(x: T, start: T | None, stop: T | None) -> bool:
     """Return True if start <= x <= stop; if either start or stop is None, omit
     the corresponding bound.
 
@@ -35,7 +36,7 @@ def _in_interval(x: T, start: Optional[T], stop: Optional[T]) -> bool:
         return start <= x <= stop
 
 
-def _convert_slice_to_test(s: slice, key: Optional[str] = None) -> Callable:
+def _convert_slice_to_test(s: slice, key: str | None = None) -> Callable:
     """Convert slice to a function that checks if values are in the interval specified by the slice.
 
     Args:

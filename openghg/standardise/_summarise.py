@@ -1,5 +1,3 @@
-from typing import Dict
-
 import pandas as pd
 from openghg.types import SurfaceTypes, optionalPathType
 from openghg.util import get_datapath, get_site_info, sites_in_network
@@ -113,7 +111,7 @@ def summary_site_codes(site_filepath: optionalPathType = None) -> pd.DataFrame:
     # Get data for site
     site_data = get_site_info(site_filepath)
 
-    site_dict: Dict[str, list] = {}
+    site_dict: dict[str, list] = {}
     site_dict["site"] = []
     site_dict["network"] = []
 

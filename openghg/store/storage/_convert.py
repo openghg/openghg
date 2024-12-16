@@ -7,7 +7,6 @@ import inspect
 import json
 from pathlib import Path
 import re
-from typing import Dict, List, Union, Optional
 import tinydb
 import dask
 
@@ -24,10 +23,10 @@ logger.setLevel(logging.DEBUG)
 
 
 def convert_store(
-    path_in: Union[str, Path],
+    path_in: str | Path,
     store_out: str,
-    chunks: Optional[Dict] = None,
-    to_convert: Optional[List] = None,
+    chunks: dict | None = None,
+    to_convert: list | None = None,
 ) -> None:
     """Convert object store to new style Zarr based object store.
 
@@ -218,7 +217,7 @@ def convert_store(
         logger.info(f"Finished converting {data_type} data.")
 
 
-def _get_standardise_args() -> Dict[str, List[str]]:
+def _get_standardise_args() -> dict[str, list[str]]:
     """Get dictionary mapping OpenGHG storage classes to a list of the arguments for the standardise
     function of that data class.
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 from numpy import ndarray
 
@@ -9,7 +9,7 @@ from numpy import ndarray
 from openghg.store.base import BaseStore
 from xarray import DataArray
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[ndarray | DataArray]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -25,24 +25,24 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         platform: str = "satellite",
-        satellite: Optional[str] = None,
-        domain: Optional[str] = None,
-        selection: Optional[str] = None,
-        site: Optional[str] = None,
-        network: Optional[str] = None,
-        instrument: Optional[str] = None,
+        satellite: str | None = None,
+        domain: str | None = None,
+        selection: str | None = None,
+        site: str | None = None,
+        network: str | None = None,
+        instrument: str | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
     ) -> dict:
         """Read column observation file
 

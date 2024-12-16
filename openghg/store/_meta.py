@@ -1,9 +1,8 @@
 # This holds store metadata for now
-from typing import Dict
 from openghg.store.base import BaseStore
 
 
-def data_class_info() -> Dict:
+def data_class_info() -> dict:
     """Return storage class information for each data type.
 
     Returns:

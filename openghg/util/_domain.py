@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, List, Optional
+from typing import Any
 
 import numpy as np
 from numpy import ndarray
@@ -12,7 +12,7 @@ logger = logging.getLogger("openghg.util.domain")
 __all__ = ["get_domain_info", "find_domain", "convert_lon_to_180", "convert_lon_to_360"]
 
 
-def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_domain_info(domain_filepath: optionalPathType = None) -> dict[str, Any]:
     """Extract data from domain info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/domain_info JSON file by default.
@@ -33,7 +33,7 @@ def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
     return domain_info_json
 
 
-def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[ndarray, ndarray]:
+def find_domain(domain: str, domain_filepath: optionalPathType = None) -> tuple[ndarray, ndarray]:
     """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
@@ -62,7 +62,7 @@ def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[
     return latitude, longitude
 
 
-def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
+def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
     """Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
     this can be derived from 'domain_info.json' file).
@@ -122,7 +122,7 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
+def find_coord_name(data: XrDataLike, options: list[str]) -> str | None:
     """
     Find the name of a coordinate based on input options.
     Only the first found value will be returned.
@@ -179,7 +179,7 @@ def convert_lon_to_360(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
 
 
 def convert_internal_longitude(
-    data: XrDataLikeMatch, lon_name: Optional[str] = None, reorder: bool = True
+    data: XrDataLikeMatch, lon_name: str | None = None, reorder: bool = True
 ) -> XrDataLikeMatch:
     """
     Convert longitude coordinate within an xarray data structure (DataArray or Dataset).
@@ -213,8 +213,8 @@ def cut_data_extent(
     data: XrDataLikeMatch,
     lat_out: ArrayLike,
     lon_out: ArrayLike,
-    lat_name: Optional[str] = None,
-    lon_name: Optional[str] = None,
+    lat_name: str | None = None,
+    lon_name: str | None = None,
     copy: bool = False,
 ) -> XrDataLikeMatch:
     """
