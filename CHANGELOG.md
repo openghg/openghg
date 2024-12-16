@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
 
-## [0.11.0] - 2024-12-12
+## [0.11.0] - 2024-12-16
 
 ### Fixed
 
