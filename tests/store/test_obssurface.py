@@ -28,6 +28,34 @@ from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
 
+def filt(results: list[dict], **kwargs) -> list[dict]:
+    """Filter list of dicts by kwargs"""
+    return [res for res in results if kwargs.items() <= res.items()]
+
+
+def select(results: list[dict], *args) -> list[dict]:
+    """Select key-value pairs from result dicts by keys passed as args"""
+    selected_results = []
+
+    for res in results:
+        selected_results.append({arg: res.get(arg) for arg in args})
+
+    return selected_results
+
+
+def make_keys(results, *args) -> list[str]:
+    """Make strings combining values of metadata."""
+    if not args:
+        args = ("species", "inlet")
+
+    keys = []
+    for res in select(results, *args):
+        values_strings = list(map(str, res.values()))
+        keys.append("_".join(values_strings))
+
+    return keys
+
+
 @pytest.fixture
 def bucket():
     return get_bucket()
@@ -42,7 +70,7 @@ def min_uuids_fixture():
         store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
     )
 
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+    min_uuids = filt(one_min_res, file="tac.picarro.1minute.100m.test.dat")
 
     return min_uuids
 
@@ -55,7 +83,7 @@ def hourly_uuids_fixture():
         store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
     )
 
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+    hour_uuids = filt(one_hour_res, file="tac.picarro.hourly.100m.test.dat")
 
     return hour_uuids
 
@@ -138,14 +166,13 @@ def test_same_source_data_same_datasource():
         overwrite=True,
     )
 
-    proc_data = res["processed"]["tac.picarro.1minute.100m.201208.dat"]
-    proc_data_2 = res_2["processed"]["tac.picarro.1minute.100m.201407.dat"]
+    proc_data = filt(res, file="tac.picarro.1minute.100m.201208.dat")
+    proc_data_2 = filt(res_2, file="tac.picarro.1minute.100m.201407.dat")
 
-    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
-    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
-
-    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
-    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
+    for species in ["ch4", "co2"]:
+        uuid1 = filt(proc_data, species=species)[0]["uuid"]
+        uuid2 = filt(proc_data_2, species=species)[0]["uuid"]
+        assert uuid1 == uuid2
 
 
 def test_read_data(mocker):
@@ -171,10 +198,13 @@ def test_read_data(mocker):
         file_metadata=file_metadata,
     )
 
-    species = ["ch4", "co2", "co"]
-    for k, v in result["processed"]["bsd.picarro.1minute.248m.min.dat"].items():
-        assert k in species
-        assert v["new"] is True
+    assert result is not None
+
+    result = filt(result, file="bsd.picarro.1minute.248m.min.dat")
+    for species in ["ch4", "co2", "co"]:
+        res = filt(result, species=species)
+        assert res  # some result has species
+        assert res[0]["new"] is True
 
     with pytest.raises(ValueError):
         metadata = {}
@@ -223,14 +253,12 @@ def test_read_CRDS(bucket, tmpdir):
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
     )
 
-    keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
+    results = filt(results, file="bsd.picarro.1minute.248m.min.dat")
 
-    assert sorted(keys) == ["ch4", "co", "co2"]
+    assert {res["species"] for res in results} == {"ch4", "co", "co2"}
 
     # Load up the assigned Datasources and check they contain the correct data
-    data = results["processed"]["bsd.picarro.1minute.248m.min.dat"]
-
-    uid = data["ch4"]["uuid"]
+    uid = [res["uuid"] for res in results if res["species"] == "ch4"][0]
 
     datasource = Datasource(bucket=bucket, uuid=uid)
 
@@ -341,10 +369,12 @@ def test_read_GC(bucket):
         "so2f2_70m",
     ]
 
-    assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
+    results = filt(results, file="capegrim-medusa.18.C")
+    found_keys = make_keys(results)
+    assert sorted(found_keys) == sorted(expected_keys)
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
+    uuid = select(filt(results, species="hfc152a", inlet="70m"), "uuid")[0]["uuid"]
 
     hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -415,7 +445,7 @@ def test_read_openghg_format(bucket):
         store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC"
     )
 
-    uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
+    uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
 
     co2_data = Datasource(bucket=bucket, uuid=uuid)
 
@@ -441,7 +471,7 @@ def test_read_noaa_raw(bucket):
         inlet="flask",
     )
 
-    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
+    uuid = filt(results, file="co_pocn25_surface-flask_1_ccgg_event.txt", species="co")[0]["uuid"]
 
     co_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -472,7 +502,7 @@ def test_read_noaa_metastorepack(bucket):
         overwrite=True,
     )
 
-    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
+    uuid = filt(results, file="ch4_esp_surface-flask_2_representative.nc", species="ch4")[0]["uuid"]
 
     ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -532,9 +562,9 @@ def test_add_new_data_correct_datasource():
         network="AGAGE",
     )
 
-    first_results = results["processed"]["capegrim-medusa.05.C"]
+    first_results = filt(results, file="capegrim-medusa.05.C")
 
-    sorted_keys = sorted(list(results["processed"]["capegrim-medusa.05.C"].keys()))
+    sorted_keys = sorted(make_keys(first_results))
 
     assert sorted_keys[:4] == ["c2cl4_10m", "c2cl4_70m", "c2f6_10m", "c2f6_70m"]
     assert sorted_keys[-4:] == ["hfc32_70m", "sf6_70m", "so2f2_10m", "so2f2_70m"]
@@ -551,16 +581,19 @@ def test_add_new_data_correct_datasource():
         network="AGAGE",
     )
 
-    second_results = new_results["processed"]["capegrim-medusa.06.C"]
-
-    shared_keys = [key for key in first_results if key in second_results]
+    second_results = filt(new_results, file="capegrim-medusa.06.C")
+    second_keys = make_keys(second_results)
+    shared_keys = set(sorted_keys) & set(second_keys)
 
     assert len(shared_keys) == 67
 
     for key in shared_keys:
-        assert first_results[key]["uuid"] == second_results[key]["uuid"]
-        assert first_results[key]["new"] is True
-        assert second_results[key]["new"] is False
+        species, inlet = key.split("_")
+        first_res = filt(first_results, species=species, inlet=inlet)[0]
+        second_res = filt(second_results, species=species, inlet=inlet)[0]
+        assert first_res["uuid"] == second_res["uuid"]
+        assert first_res["new"] is True
+        assert second_res["new"] is False
 
 
 @pytest.mark.skip(reason="Ranking being completely reworked")
@@ -777,7 +810,7 @@ def test_store_icos_carbonportal_data(bucket):
         first_result = metastore.store_data(data=data)
         second_result = metastore.store_data(data=data)
 
-    assert first_result["co2"]["new"] is True
+    assert filt(first_result, species="co2")[0]["new"] is True
 
     with ObsSurface(bucket=bucket) as obs:
         second_result = obs.store_data(data=data)
@@ -1106,14 +1139,14 @@ def test_sync_surface_metadata_store_level(
         update_mismatch=update_mismatch,
     )
 
-    standardised_data = standardised_data["processed"][filepath.name]
+    standardised_data = filt(standardised_data, file=filepath.name)
 
-    for species, uuid in standardised_data.items():
-        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
-        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+    for res in standardised_data:
+        datasource = Datasource(bucket=bucket, uuid=res["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
 
         with datasource.get_data(version="latest") as data:
-            assert attributes_checker_obssurface(data.attrs, species=species)
+            assert attributes_checker_obssurface(data.attrs, species=res["species"])
 
 
 def test_co2_games():
