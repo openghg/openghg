@@ -90,13 +90,15 @@ class BaseStore:
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
+    def read_data(
+        self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
+    ) -> list[dict] | None:
         raise NotImplementedError
 
     def read_file(self, *args: Any, **kwargs: Any) -> list[dict]:
         raise NotImplementedError
 
-    def store_data(self, *args: Any, **kwargs: Any) -> dict | None:
+    def store_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
         raise NotImplementedError
 
     def transform_data(self, *args: Any, **kwargs: Any) -> list[dict]:

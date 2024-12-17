@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import sync_surface_metadata
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType, optionalPathType, MetadataAndData
+from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -32,7 +32,7 @@ class ObsSurface(BaseStore):
         file_metadata: dict,
         precision_data: bytes | None = None,
         site_filepath: optionalPathType = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -131,7 +131,7 @@ class ObsSurface(BaseStore):
         filters: Any | None = None,
         chunks: dict | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
             to handle each data type.
@@ -204,7 +204,6 @@ class ObsSurface(BaseStore):
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
-        from collections import defaultdict
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
@@ -290,7 +289,7 @@ class ObsSurface(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        results: resultsType = defaultdict(dict)
+        results: list[dict] = []
 
         if chunks is None:
             chunks = {}
@@ -389,12 +388,16 @@ class ObsSurface(BaseStore):
                 filters=filters,
             )
 
-            results["processed"][filepath.name] = datasource_uuids
+            for x in datasource_uuids:
+                x.update({"file": filepath.name})
+
+            results.extend(datasource_uuids)
+
             logger.info(f"Completed processing: {filepath.name}.")
 
             self._file_hashes[file_hash] = filepath.name
 
-        return dict(results)
+        return results
 
     def read_multisite_aqmesh(
         self,

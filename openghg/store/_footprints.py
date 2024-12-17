@@ -24,7 +24,7 @@ class Footprints(BaseStore):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> dict | None:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
