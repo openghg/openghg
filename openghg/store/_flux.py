@@ -308,9 +308,8 @@ class Flux(BaseStore):
         flux_data = parser_fn(**param)
 
         # Checking against expected format for Flux
-        for split_data in flux_data.values():
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
+        for mdd in flux_data:
+            Flux.validate_data(mdd.data)
 
         required_keys = ("species", "source", "domain")
 
@@ -322,8 +321,8 @@ class Flux(BaseStore):
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
             else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+                for parsed_data in flux_data:
+                    parsed_data.metadata.update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -335,6 +334,11 @@ class Flux(BaseStore):
             compressor=compressor,
             filters=filters,
         )
+
+        # "date" used to be part of the "keys" in the old datasource_uuids format
+        if "date" in param:
+            for du in datasource_uuids:
+                du["date"] = param["date"]
 
         return datasource_uuids
 

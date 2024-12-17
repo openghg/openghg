@@ -1,6 +1,6 @@
 import pytest
 import os
-from helpers import clear_test_stores, get_flux_datapath
+from helpers import clear_test_stores, get_flux_datapath, filt, make_keys
 from openghg.objectstore import get_metakey_defaults
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
@@ -45,7 +45,9 @@ def test_read_binary_data(mocker, clear_stores):
         file_metadata=file_metadata,
     )
 
-    assert results["co2_gpp-cardamom_europe"]["new"] is True
+    assert results is not None
+
+    assert filt(results, species="co2", source="gpp-cardamom", domain="europe")[0]["new"] is True
 
 
 def test_read_file():
@@ -61,7 +63,7 @@ def test_read_file():
         force=True,  # For ease, make sure we can add the same data.
     )
 
-    assert "co2_gpp-cardamom_europe" in proc_results
+    assert "co2_gpp-cardamom_europe" in make_keys(proc_results, "species", "source", "domain")
 
     search_results = search(
         species="co2",
@@ -158,11 +160,11 @@ def test_read_file_additional_keys(clear_stores, load_edgar):
     """
     # load 2014, v5
     proc_results1 = load_edgar("ch4", "v5.0", 2014)
-    assert "ch4_anthro_globaledgar" in proc_results1
+    assert "ch4_anthro_globaledgar" in make_keys(proc_results1, "species", "source", "domain")
 
     # load 2015, v6
     proc_results2 = load_edgar("ch4", "v6.0", 2015)
-    assert "ch4_anthro_globaledgar" in proc_results2
+    assert "ch4_anthro_globaledgar" in  make_keys(proc_results2, "species", "source", "domain")
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
 
@@ -272,7 +274,7 @@ def test_add_edgar_database(clear_stores):
     default_source = "anthro"
 
     output_key = f"{species}_{default_source}_{default_domain}_{date}"
-    assert output_key in proc_results
+    assert output_key in make_keys(proc_results, "species", "source", "domain", "date")
 
     search_results = search_flux(
         species=species,
@@ -327,7 +329,7 @@ def test_add_edgar_v8_database(clear_stores, source):
     species = "ch4"
 
     output_key = f"{species}_{expected_source}_{default_domain}_{date}"
-    assert output_key in proc_results
+    assert output_key in make_keys(proc_results, "species", "source", "domain", "date")
 
     search_results = search_flux(
         species=species,

@@ -1,6 +1,7 @@
+import inspect
 import numpy as np
 import pytest
-from helpers import get_bc_datapath, clear_test_store
+from helpers import get_bc_datapath, clear_test_store, make_keys, select
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
@@ -9,8 +10,26 @@ from xarray import open_dataset
 
 
 def test_read_data_monthly(mocker):
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
-    # mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+    class FakeUUID:
+        hex_num = 0
+        uuid_num = 0
+
+        def __init__(self) -> None:
+            pass
+
+        def __str__(self) -> str:
+            print(inspect.currentframe())
+            self.uuid_num += 1
+            return "test-uuid-1"
+
+        @property
+        def hex(self) -> str:
+            self.hex_num += 1
+            return str(self.hex_num)
+
+    fake_uuid = FakeUUID()
+    mocker.patch("uuid.uuid4", side_effect=lambda: fake_uuid)
+    mocker.patch("openghg.store.base._datasource.uuid4", side_effect=lambda: fake_uuid)
 
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
@@ -37,8 +56,11 @@ def test_read_data_monthly(mocker):
         source_format='openghg'
     )
 
-    # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results[0]["new"] is True
+    assert proc_results is not None
+    print(proc_results)
+    print(fake_uuid.hex_num, fake_uuid.uuid_num)
+    assert {"uuid": "test-uuid-1", "new": True}.items() <= select(proc_results, "new", "uuid")[0].items()
+    assert make_keys(proc_results, "species", "bc_input", "domain")[0].lower() == "ch4_mozart_europe"
 
 
 def test_read_file_monthly():
@@ -54,7 +76,7 @@ def test_read_file_monthly():
         force=True,
     )
 
-    assert "ch4_mozart_europe" in proc_results
+    assert "ch4_mozart_europe" in make_keys(proc_results, "species", "bc_input", "domain")
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"

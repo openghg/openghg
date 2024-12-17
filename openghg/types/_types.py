@@ -15,7 +15,6 @@ from collections import defaultdict
 
 import numpy as np
 import xarray as xr
-from collections import defaultdict
 
 
 pathType = Union[str, Path]
