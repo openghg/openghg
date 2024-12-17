@@ -8,6 +8,7 @@ from helpers import (
     get_flux_timeseries_datapath,
     clear_test_stores,
     clear_test_store,
+    filt,
 )
 from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
 from openghg.standardise import (
@@ -52,7 +53,7 @@ def test_standardise_obs_two_writable_stores():
         store="user",
     )
 
-    results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
+    results = filt(results, file="hfd.picarro.1minute.100m.min.dat")
 
     processed_species = [res.get("species") for res in results]
 
@@ -77,7 +78,7 @@ def test_standardise_obs_two_writable_stores():
         store="group",
     )
 
-    assert "ch4" == results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"][0].get("species")
+    assert "ch4" == filt(results, file="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")[0].get("species")
 
     results = search(site="rgl", instrument="g2301", store="group")
     assert results
@@ -109,7 +110,7 @@ def test_standardise_obs_openghg():
         store="user",
     )
 
-    results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
+    results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
     assert "co2" == results[0].get("species")
 
 
@@ -148,12 +149,15 @@ def test_standardise_obs_metadata_mismatch():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
     assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="999m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -205,12 +209,15 @@ def test_local_obs_metadata_mismatch_meta():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
     assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="998m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -589,7 +596,7 @@ def test_standardise_sorting_true():
         sort_files=True,
     )
 
-    assert "20220928.nc" in next(iter(results["processed"].keys()))
+    assert "20220928.nc" in results[0]["file"]
 
 
 def test_standardise_sorting_false(caplog):
