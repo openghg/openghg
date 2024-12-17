@@ -7,6 +7,7 @@ pytest-tornasync
 pytest-cov
 pytest-mock
 pytest-timeout
+pytest-xdist
 requests-mock
 # For mypy
 mypy==1.10.0

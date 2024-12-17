@@ -2,7 +2,6 @@ import os
 import sys
 from typing import Iterator
 from unittest.mock import patch
-from pathlib import Path
 
 import pytest
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
