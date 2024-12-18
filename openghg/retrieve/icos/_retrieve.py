@@ -243,6 +243,7 @@ def _retrieve_remote(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet, format_data_level
     from pandas import to_datetime
+    import numpy as np
 
     if species is None:
         species = ["CO", "CO2", "CH4"]
@@ -451,28 +452,24 @@ def _retrieve_remote(
         attributes.update(additional_data)
         metadata.update(additional_data)
 
+        spec = attributes["species"]
+
         dataframe.columns = [x.lower() for x in dataframe.columns]
+
+        # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
+        dataframe["ch4"] = dataframe["ch4"].where(dataframe["flag"].isin(["O","U","R"]))
         dataframe = dataframe.dropna(axis="index")
+
+        # Sometimes we have missing stdev - change fill value to nan
+        dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"]!=-9.99)
 
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
-
-        spec = attributes["species"]
 
         rename_cols = {
             "stdev": spec + " variability",
             "nbpoints": spec + " number_of_observations",
         }
-
-        # TODO - add this back in once we've merged the fixes in
-        # Try and conver the flag / userflag column to str
-        # possible_flag_cols = ("flag", "userflag")
-        # flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
-
-        # PR328
-        # if flag_col:
-        #     flag_str = flag_col[0]
-        #     dataframe = dataframe.astype({flag_str: str})
 
         dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
