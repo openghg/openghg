@@ -40,6 +40,8 @@ def cgo_data():
 
 
 def test_read_file_capegrim(cgo_data):
+    parsed_surface_metachecker(data=cgo_data)
+
     # Expect two labels at 70m and 80m in this test file, since multiple heights in the period convered
     expected_keys = ["hcfc133a_70m", "hcfc133a_80m"]
 
@@ -58,6 +60,8 @@ def test_read_file_thd():
         instrument="gcmd",
         sampling_period="1",  # Checking this can be compared successfully
     )
+
+    parsed_surface_metachecker(data=gas_data)
 
     expected_key = ["cfc11_15m"]
 
@@ -111,6 +115,12 @@ def test_expected_metadata_thd_cfc11():
         "inlet": "15m",
         "species": "cfc11",
         "inlet_height_magl": 15.0,
+        "data_owner": "Ray F. Weiss, Jens Muhle",
+        "data_owner_email": "rfweiss@ucsd.edu, jmuhle@ucsd.edu",
+        "station_longitude": -124.151,
+        "station_latitude": 41.0541,
+        "station_height_masl": 107.0,
+        "station_long_name": "Trinidad Head, California",
     }
 
     assert metadata == expected_metadata

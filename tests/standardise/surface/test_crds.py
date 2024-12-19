@@ -57,6 +57,8 @@ def test_read_file():
     assert co_data["co_variability"][0] == pytest.approx(4.081)
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
+    parsed_surface_metachecker(data=crds_data)
+
 
 @pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
