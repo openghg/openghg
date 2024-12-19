@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
 
+### Fixed
+- Moved `sync_surface_metadata` back to `assign_attributes` so that it still gets called by the ICOS retrieve function. [PR #1195](https://github.com/openghg/openghg/pull/1195)
+
 ## [0.11.0] - 2024-12-16
 
 ### Fixed
