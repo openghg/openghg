@@ -685,4 +685,3 @@ class ObsSurface(BaseStore):
 
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
-
