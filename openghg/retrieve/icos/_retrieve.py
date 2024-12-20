@@ -315,11 +315,15 @@ def _retrieve_remote(
 
         if dataset_source == "ICOS FastTrack":
             species_fname = re.split("[_.]", dobj.meta["fileName"])[-2]
-            if "FAST_TRACK" not in dobj.meta["fileName"] or species_fname not in species_upper:
+            if "FAST_TRACK" in dobj.meta["fileName"] or species_fname in species_upper:
+                dobj_dataset_source = "ICOS FastTrack"
+            else:
                 continue
         elif dataset_source == "EYE-AVE-PAR":
             species_fname = dobj.meta["fileName"].split(".")[-2]
-            if "EYE-AVE-PAR" not in dobj.meta["fileName"] or species_fname not in species_upper:
+            if "EYE-AVE-PAR" in dobj.meta["fileName"] or species_fname in species_upper:
+                dobj_dataset_source = "EYE-AVE-PAR"
+            else:
                 continue
         else:
             try:
@@ -455,16 +459,21 @@ def _retrieve_remote(
         dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O", "U", "R"]))
         dataframe = dataframe.dropna(axis="index")
 
-        # Sometimes we have missing stdev - change fill value to nan
-        dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] != -9.99)
-
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
 
-        rename_cols = {
-            "stdev": spec + " variability",
-            "nbpoints": spec + " number_of_observations",
-        }
+        # If there is a stdev column, replace missing values with nans
+        # Then rename columns
+        try:
+            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] != -9.99)
+            rename_cols = {
+                "stdev": spec + " variability",
+                "nbpoints": spec + " number_of_observations",
+            }
+        except KeyError:
+            rename_cols = {
+                "nbpoints": spec + " number_of_observations",
+            }
 
         dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
