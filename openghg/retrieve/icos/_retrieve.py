@@ -457,7 +457,7 @@ def _retrieve_remote(
         dataframe.columns = [x.lower() for x in dataframe.columns]
 
         # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
-        dataframe["ch4"] = dataframe["ch4"].where(dataframe["flag"].isin(["O","U","R"]))
+        dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O","U","R"]))
         dataframe = dataframe.dropna(axis="index")
 
         # Sometimes we have missing stdev - change fill value to nan
