@@ -465,7 +465,7 @@ def _retrieve_remote(
         # If there is a stdev column, replace missing values with nans
         # Then rename columns
         try:
-            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] < 0)
+            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
             rename_cols = {
                 "stdev": spec + " variability",
                 "nbpoints": spec + " number_of_observations",
