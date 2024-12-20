@@ -243,7 +243,6 @@ def _retrieve_remote(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet, format_data_level
     from pandas import to_datetime
-    import numpy as np
 
     if species is None:
         species = ["CO", "CO2", "CH4"]
@@ -457,11 +456,11 @@ def _retrieve_remote(
         dataframe.columns = [x.lower() for x in dataframe.columns]
 
         # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
-        dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O","U","R"]))
+        dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O", "U", "R"]))
         dataframe = dataframe.dropna(axis="index")
 
         # Sometimes we have missing stdev - change fill value to nan
-        dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"]!=-9.99)
+        dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] != -9.99)
 
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
