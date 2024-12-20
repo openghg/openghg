@@ -266,10 +266,17 @@ def _retrieve_remote(
 
     data_pids = stat.data(level=data_level)
 
-    # We want to get the PIDs of the data for each species here
     species_upper = [s.upper() for s in species]
-    # For this see https://stackoverflow.com/a/55335207
-    search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+
+    # We want to get the PIDs of the data for each species here
+    # Annoyingly FastTrack and EYE-AVE-PAR data don't have the species anywhere in the data_pids dataframe
+    # so we need to handle these cases separately
+    if dataset_source in ["ICOS FastTrack", "EYE-AVE-PAR"]:
+        search_str = "GHG"
+    else:
+        # For this see https://stackoverflow.com/a/55335207
+        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+
     # Now filter the dataframe so we can extract the PIDS
     # We filter out any data that contains "Obspack" or "csv" in the specLabel
     # Also filter out some drought files which cause trouble being read in
@@ -280,18 +287,6 @@ def _retrieve_remote(
         & ~data_pids["specLabel"].str.contains("csv")
         & ~data_pids["station"].str.contains("ATMO_")
     ]
-
-    if filtered_sources.empty:
-        species_lower = [s.lower() for s in species]
-        # For this see https://stackoverflow.com/a/55335207
-        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
-        # Now filter the dataframe so we can extract the PIDS
-        filtered_sources = data_pids[
-            data_pids["specLabel"].str.contains(search_str)
-            & ~data_pids["specLabel"].str.contains("Obspack")
-            & ~data_pids["specLabel"].str.contains("csv")
-            & ~data_pids["station"].str.contains("ATMO_")
-        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
@@ -317,23 +312,24 @@ def _retrieve_remote(
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
-        # We've got to jump through some hoops here to try and avoid the NOAA
-        # ObsPack GlobalView data
-        try:
-            if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
-                logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
+
+        if dataset_source == "ICOS FastTrack":
+            species_fname = re.split("[_.]", dobj.meta["fileName"])[-2]
+            if "FAST_TRACK" not in dobj.meta["fileName"] or species_fname not in species_upper:
                 continue
-        except KeyError:
-            pass
+        elif dataset_source == "EYE-AVE-PAR":
+            species_fname = dobj.meta["fileName"].split(".")[-2]
+            if "EYE-AVE-PAR" not in dobj.meta["fileName"] or species_fname not in species_upper:
+                continue
+        else:
+            try:
+                dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
+            except KeyError:
+                dobj_dataset_source = "NA"
+                logger.warning("Unable to read project information from dobj.")
 
-        try:
-            dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
-        except KeyError:
-            dobj_dataset_source = "NA"
-            logger.warning("Unable to read project information from dobj.")
-
-        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
-            continue
+            if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+                continue
 
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
