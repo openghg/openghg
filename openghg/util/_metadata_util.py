@@ -1,4 +1,5 @@
-from typing import Any, Union, Iterable, List, Literal, Optional
+from typing import Any, Literal
+from collections.abc import Iterable
 import logging
 import math
 
@@ -20,7 +21,7 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
-def null_metadata_values() -> List:
+def null_metadata_values() -> list:
     """
     Defines values which indicate metadata key should be ignored and not retained within
     the metadata (or added to the metastore).
@@ -33,7 +34,7 @@ def null_metadata_values() -> List:
     return null_values
 
 
-def not_set_metadata_values() -> List:
+def not_set_metadata_values() -> list:
     """
     Defines values which indicate metadata value has not been explicitly specified
     but that we still want to retain within the metadata (and metastore) so the key is present.
@@ -60,7 +61,7 @@ def remove_null_keys(dictionary: dict, null_values: Iterable = null_metadata_val
 
 
 def check_number_match(
-    number1: Union[str, int, float], number2: Union[str, int, float], relative_tolerance: float = 1e-3
+    number1: str | int | float, number2: str | int | float, relative_tolerance: float = 1e-3
 ) -> bool:
     """
     Check values that can be identified as numbers match within a specified tolerance.
@@ -160,7 +161,7 @@ def get_overlap_keys(left: dict, right: dict) -> list:
     return overlapping_keys
 
 
-def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool = False) -> dict:
+def _filter_keys(dictionary: dict, keys: Iterable | None = None, negate: bool = False) -> dict:
     """
     Convenience function to filter a dictionary by a set of keys.
     """
@@ -174,9 +175,9 @@ def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool
 def merge_dict(
     left: dict,
     right: dict,
-    keys: Optional[Iterable] = None,
-    keys_left: Optional[Iterable] = None,
-    keys_right: Optional[Iterable] = None,
+    keys: Iterable | None = None,
+    keys_left: Iterable | None = None,
+    keys_right: Iterable | None = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
     on_overlap: Literal["check_value", "error"] = "check_value",

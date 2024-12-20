@@ -1,6 +1,5 @@
 from __future__ import annotations
 import logging
-from typing import List, Optional, Union, Dict, Tuple
 import plotly.graph_objects as go
 import numpy as np
 import base64
@@ -46,8 +45,8 @@ def _latex2html(latex_string: str) -> str:
 
 
 def _plot_remove_gaps(
-    x_data: np.ndarray, y_data: np.ndarray, gap: Optional[int] = None
-) -> Tuple[np.ndarray, np.ndarray]:
+    x_data: np.ndarray, y_data: np.ndarray, gap: int | None = None
+) -> tuple[np.ndarray, np.ndarray]:
     """Insert NaNs between big gaps in the data.
     Prevents connecting lines being drawn
 
@@ -69,7 +68,7 @@ def _plot_remove_gaps(
     return x_data_plot, y_data_plot
 
 
-def _plot_legend_position(ascending: bool) -> Tuple[Dict, Dict]:
+def _plot_legend_position(ascending: bool) -> tuple[dict, dict]:
     """Position of legend and logo,
     depending on whether data is ascending or descending
 
@@ -89,8 +88,8 @@ def _plot_legend_position(ascending: bool) -> Tuple[Dict, Dict]:
 
 
 def _plot_logo(
-    logo_pos: Dict,
-) -> Dict:
+    logo_pos: dict,
+) -> dict:
     """Create Plotly dictionary for logo
 
     Args:
@@ -102,7 +101,7 @@ def _plot_logo(
     logo = base64.b64encode(logo_bytes)
 
     logo_dict = dict(
-        source="data:image/png;base64,{}".format(logo.decode()),
+        source=f"data:image/png;base64,{logo.decode()}",
         xref="x domain",
         yref="y domain",
         sizex=0.1,
@@ -114,14 +113,14 @@ def _plot_logo(
 
 
 def plot_timeseries(
-    data: Union[ObsData, List[ObsData]],
-    xvar: Optional[str] = None,
-    yvar: Optional[str] = None,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = None,
-    units: Optional[str] = None,
-    logo: Optional[bool] = True,
+    data: ObsData | list[ObsData],
+    xvar: str | None = None,
+    yvar: str | None = None,
+    title: str | None = None,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    units: str | None = None,
+    logo: bool | None = True,
 ) -> go.Figure:
     """Plot a timeseries
 

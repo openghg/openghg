@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
@@ -9,14 +9,14 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def retrieve_surface(
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    inlet: Optional[str] = None,
-    url: Optional[str] = None,
+    site: str | None = None,
+    species: str | None = None,
+    inlet: str | None = None,
+    url: str | None = None,
     force_retrieval: bool = False,
-    additional_metadata: Optional[Dict] = None,
-    store: Optional[str] = None,
-) -> Union[List[ObsData], ObsData, None]:
+    additional_metadata: dict | None = None,
+    store: str | None = None,
+) -> list[ObsData] | ObsData | None:
     """Retrieve surface measurements from the CEDA archive. This function will route the call
     to either local or cloud functions based on the environment.
 
@@ -54,15 +54,15 @@ def retrieve_surface(
 
 
 def retrieve(
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    inlet: Optional[str] = None,
-    url: Optional[str] = None,
+    site: str | None = None,
+    species: str | None = None,
+    inlet: str | None = None,
+    url: str | None = None,
     force_retrieval: bool = False,
-    additional_metadata: Optional[Dict] = None,
-    store: Optional[str] = None,
+    additional_metadata: dict | None = None,
+    store: str | None = None,
     **kwargs: Any,
-) -> Union[List[ObsData], ObsData, None]:
+) -> list[ObsData] | ObsData | None:
     """Retrieve surface observations data from the CEDA archive. You can pass
     search terms and the object store will be searched. To retrieve data from the
     CEDA Archive please browse the website (https://data.ceda.ac.uk/badc) to find

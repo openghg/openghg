@@ -23,6 +23,12 @@ def test_read_icos_large_header():
         "instrument": "g2301",
         "units": "nmol.mol-¹",
         "data_owner_email": "s.odoherty@bris.ac.uk,joseph.pitt@bristol.ac.uk,k.m.stanley@bristol.ac.uk",
+        "calibration_scale": "unknown",
+        "station_longitude": -2.53992,
+        "station_latitude": 51.99747,
+        "station_long_name": "Ridge Hill, UK",
+        "station_height_masl": 207.0,
+        'data_owner': 'See data_owner_email',
     }
 
     metadata = data["ch4"]["metadata"]
@@ -96,15 +102,15 @@ def test_read_icos_small_header_file():
         "Conventions": "CF-1.8",
         "processed_by": "OpenGHG_Cloud",
         "species": "co2",
+        "calibration_scale": "unknown",
         "sampling_period": "60.0",
         "sampling_period_unit": "s",
-        "inlet_height_magl": "222m",
-        "calibration_scale": "unknown",
-        "data_owner": "NOT_SET",
-        "station_height_masl": 300.0,
+        "station_longitude": -2.98598,
         "station_latitude": 56.55511,
         "station_long_name": "Angus Tower, UK",
-        "station_longitude": -2.98598,
+        "station_height_masl": 300.0,
+        'data_owner': 'NOT_SET',
+        'inlet_height_magl': '222m',
     }
 
     assert attrs == expected_attrs
@@ -124,8 +130,15 @@ def test_read_icos_small_header_file():
         "sampling_period": "60.0",
         "network": "icos",
         "instrument": "test_instrument",
+        "calibration_scale": "unknown",
+        "station_longitude": -2.98598,
+        "station_latitude": 56.55511,
+        "station_long_name": "Angus Tower, UK",
+        "station_height_masl": 300.0,
         "data_type": "surface",
         "source_format": "icos",
+        'data_owner': 'NOT_SET',
+        'inlet_height_magl': '222m',
     }
 
     assert co2_metadata == expected_metadata

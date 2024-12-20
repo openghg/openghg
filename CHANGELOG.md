@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
 
-## [0.11.0] - 2024-12-12
+### Fixed
+- Moved `sync_surface_metadata` back to `assign_attributes` so that it still gets called by the ICOS retrieve function. [PR #1195](https://github.com/openghg/openghg/pull/1195)
+
+## [0.11.0] - 2024-12-16
 
 ### Fixed
 
@@ -35,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
 - Made calculations in `ModelScenario._calc_modelled_obs_HiTRes` more efficient. [PR #1062](https://github.com/openghg/openghg/pull/1062)
+- Updated type hints and `typing` imports for Python 3.10 [PR #1193](https://github.com/openghg/openghg/pull/1193)
 
 ## [0.10.1] - 2024-09-27
 

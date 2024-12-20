@@ -5,10 +5,6 @@ import xarray as xr
 from pathlib import Path
 from typing import (
     Any,
-    DefaultDict,
-    Dict,
-    List,
-    Tuple,
     Union,
     Optional,
     TypeVar,
@@ -16,11 +12,12 @@ from typing import (
     Protocol,
     runtime_checkable,
 )
+from collections import defaultdict
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
-multiPathType = Union[str, Path, Tuple, List]
-resultsType = DefaultDict[str, Dict]
+multiPathType = Union[str, Path, tuple, list]
+resultsType = defaultdict[str, dict]
 
 # Create types for ndarray or xr.DataArray inputs
 # Using TypeVar means - whichever type is passed in will be the one which is returned.
@@ -31,8 +28,8 @@ XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
 
 
 class TimePeriod(NamedTuple):
-    value: Union[int, float, None] = None
-    unit: Optional[str] = None
+    value: int | float | None = None
+    unit: str | None = None
 
 
 class MetadataAndData(NamedTuple):

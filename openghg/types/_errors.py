@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 class OpenGHGError(Exception):
     """Top level OpenGHG error"""
 
@@ -77,7 +74,7 @@ class KeyExistsError(ZarrStoreError):
     """Raised if key already exists in zarr store"""
 
 
-def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
+def construct_xesmf_import_error(exception: ImportError | None = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."
         " To use transform modules please follow instructions"

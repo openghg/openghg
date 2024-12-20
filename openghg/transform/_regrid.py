@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union, cast
+from typing import cast
 
 import numpy as np
 import xarray as xr
@@ -7,7 +7,7 @@ from numpy import ndarray
 from openghg.types import construct_xesmf_import_error, ArrayLike, ArrayLikeMatch
 
 
-def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
+def _getGridCC(lat: ndarray, lon: ndarray) -> tuple[ndarray, ndarray]:
     """
     Create a cell centered meshgrid for from 1D arrays of lon, lat
     This meshgrid defines the bounds of each cell.
@@ -63,7 +63,7 @@ def _create_uniform_coords(lat: ndarray, lon: ndarray) -> xr.Dataset:
     return ds_out
 
 
-def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
+def convert_to_ndarray(array: ndarray | xr.DataArray) -> ndarray:
     """Check and extract underlying numpy array from DataArray as necessary"""
 
     if isinstance(array, xr.DataArray):
@@ -78,9 +78,9 @@ def regrid_uniform_cc(
     data: ArrayLikeMatch,
     lat_out: ArrayLike,
     lon_out: ArrayLike,
-    lat_in: Optional[ArrayLike] = None,
-    lon_in: Optional[ArrayLike] = None,
-    latlon: Optional[list] = None,
+    lat_in: ArrayLike | None = None,
+    lon_in: ArrayLike | None = None,
+    latlon: list | None = None,
     method: str = "conservative",
 ) -> ArrayLikeMatch:
     """

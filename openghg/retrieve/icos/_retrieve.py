@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise.meta import dataset_formatter
@@ -13,18 +13,18 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def retrieve_atmospheric(
     site: str,
-    species: Optional[Union[str, List]] = None,
-    inlet: Optional[str] = None,
-    sampling_height: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    species: str | list | None = None,
+    inlet: str | None = None,
+    sampling_height: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     force_retrieval: bool = False,
     data_level: int = 2,
-    dataset_source: Optional[str] = None,
-    store: Optional[str] = None,
+    dataset_source: str | None = None,
+    store: str | None = None,
     update_mismatch: str = "never",
     force: bool = False,
-) -> Union[ObsData, List[ObsData], None]:
+) -> ObsData | list[ObsData] | None:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
     If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
@@ -74,19 +74,19 @@ def retrieve_atmospheric(
 
 def retrieve(
     site: str,
-    species: Optional[Union[str, list[str]]] = None,
-    inlet: Optional[str] = None,
-    sampling_height: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    species: str | list[str] | None = None,
+    inlet: str | None = None,
+    sampling_height: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     force_retrieval: bool = False,
     data_level: int = 2,
-    dataset_source: Optional[str] = None,
-    store: Optional[str] = None,
+    dataset_source: str | None = None,
+    store: str | None = None,
     update_mismatch: str = "never",
     force: bool = False,
     **kwargs: Any,
-) -> Union[ObsData, List[ObsData], None]:
+) -> ObsData | list[ObsData] | None:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
     If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
@@ -199,12 +199,12 @@ def retrieve(
 def _retrieve_remote(
     site: str,
     data_level: int,
-    species: Optional[Union[str, List]] = None,
-    inlet: Optional[str] = None,
-    sampling_height: Optional[str] = None,
-    dataset_source: Optional[str] = None,
+    species: str | list | None = None,
+    inlet: str | None = None,
+    sampling_height: str | None = None,
+    dataset_source: str | None = None,
     update_mismatch: str = "never",
-) -> Optional[Dict]:
+) -> dict | None:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
@@ -313,7 +313,7 @@ def _retrieve_remote(
     site_info_fpath = openghg_defs.site_info_file
     openghg_site_metadata = load_json(path=site_info_fpath)
 
-    standardised_data: Dict[str, Dict] = {}
+    standardised_data: dict[str, dict] = {}
 
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
@@ -361,7 +361,7 @@ def _retrieve_remote(
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
-        to_store: Dict[str, Any] = {}
+        to_store: dict[str, Any] = {}
         try:
             instrument_attributes = acq_data["instrument"]
         except KeyError:
