@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
 
+### Fixed
+
+- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
+
 ## [0.11.0] - 2024-12-16
 
 ### Fixed
