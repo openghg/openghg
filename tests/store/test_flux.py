@@ -403,7 +403,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     default_source = "anthro"
 
     output_key = f"{species}_{default_source}_{domain}_{date}"
-    assert output_key in proc_results
+    assert output_key in make_keys(proc_results, "species", "source", "domain", "date")
 
     search_results = search(
         species=species,
