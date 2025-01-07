@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
 
+### Updated
+
+- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
+
 ## [0.11.0] - 2024-12-16
 
 ### Fixed
