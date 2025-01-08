@@ -645,7 +645,7 @@ def create_obspack(
     Create ObsPack from observation stored within an object store based on input search parameters.
 
     Args:
-        search_filename: Filename of the search parameters as a csv file. Expect this to contain an 'obs_type' column wit details
+        search_filename: Filename of the search parameters as a csv file. Expect this to contain an 'obs_type' column with details
             of the observation type for the data. See define_obs_types() for list of inputs.
         search_df: DataFrame equivalent of the search_filename. This or search_filename MUST be supplied.
         output_folder: Top level directory for the obspack to be written to disc.
