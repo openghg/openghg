@@ -118,13 +118,13 @@ For this obspack the expected structure is:
 
         site_index_details*.txt
 
-        site_insitu/
+        surface-insitu/
 
             ch4_bsd_multiple_surface-insitu_v1.nc
 
             co2_tac_185m_surface-insitu_v1.nc
 
-        site-flask/
+        surface-flask/
 
             ch4_bsd_42m_surface-flask_v1.nc
 
