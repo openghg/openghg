@@ -178,9 +178,13 @@ def sync_surface_metadata(
 
 def align_metadata_attributes(data: dict, update_mismatch: str) -> None:
     """
-    Function to sync metadata and attributes if mismatch is found.
-    Currently this function is applied over all of the surface data.
-    Soon it will be equipped to handle the column data too. With new architecture reforms this needs to be called before parser output.
+    Synchronize metadata and attributes in case of mismatches.
+
+    This function currently applies to all surface-level data. Future enhancements
+    will extend its functionality to handle column-level data as well.
+
+    Since remote retrievals bypass the traditional `read_file` method, this function
+    should be invoked before producing the final standardised output in the retrieval process.
 
     Args:
         data: Dictionary of source_name data, metadata, attributes
