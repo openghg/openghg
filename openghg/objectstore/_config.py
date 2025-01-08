@@ -132,7 +132,7 @@ def create_default_config(bucket: str) -> None:
 
     # Make the expected folder structure
     db_config_folderpath = config_folderpath.joinpath("config")
-    db_config_folderpath.mkdir()
+    db_config_folderpath.mkdir(exist_ok=True)
 
     default_keys = get_metakey_defaults()
 
@@ -166,7 +166,7 @@ def _write_metakey_config(bucket: str, metakeys: dict) -> None:
 
     if not config_folder.exists():
         logger.debug(f"Creating folder at {config_folder}")
-        config_folder.mkdir(parents=True)
+        config_folder.mkdir(parents=True, exist_ok=True)
 
     metakey_path.write_text(json.dumps(config_data))
 
