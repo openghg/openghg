@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
 from xarray import Dataset
+from numpy import ones
 
 from openghg.util import (
     check_species_time_resolved,
@@ -67,9 +68,11 @@ def parse_acrg_org(
         time_resolved = high_time_resolution
 
     # fp_data, filepath = open_and_align_dataset(filepath, domain)
-    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
-
+    xr_open_fn, filepath = check_function_open_nc(filepath, domain, sel_month=True)
     fp_data = xr_open_fn(filepath)
+
+    inlet_int = int(inlet.replace('magl','').replace('m',''))
+    fp_data = fp_data.assign(release_height = (('time'), inlet_int*ones(fp_data.time.size)))
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
@@ -103,6 +106,7 @@ def parse_acrg_org(
         "atmosphere_boundary_layer_thickness",
         "release_lon",
         "release_lat",
+        "release_height",
     ]
 
     for dv in variable_names:
@@ -126,6 +130,8 @@ def parse_acrg_org(
     dv_attribute_updates["release_lon"]["long_name"] = "Release longitude"
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
+    dv_attribute_updates["release_height"]["units"] = "m"
+    dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.

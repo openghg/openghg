@@ -252,7 +252,9 @@ def get_logfile_path() -> Path:
 
 
 def check_function_open_nc(
-    filepath: multiPathType, realign_on_domain: Optional[str] = None
+    filepath: multiPathType, 
+    realign_on_domain: Optional[str] = None,
+    sel_month: Optional[bool] = False
 ) -> Tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -267,26 +269,53 @@ def check_function_open_nc(
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
+    
+    if sel_month:
+        import numpy as np
+        def select_time(x):
+            month = x.time.resample(time='M').count().idxmax().values.astype('datetime64[M]')
+            start_date = month.astype('datetime64[D]')
+            end_date = (month+np.timedelta64(1,'M')).astype('datetime64[D]')
+            return x.sel(time=slice(start_date,end_date))
+
     if isinstance(filepath, list):
         if len(filepath) > 1:
             if realign_on_domain:
                 xr_open_fn: Callable = partial(
                     xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
                 )
-            else:
-                xr_open_fn = xr.open_mfdataset
+                if sel_month:
+                    xr_open_fn: Callable = partial(
+                        xr.open_mfdataset, preprocess=lambda x: align_lat_lon(select_time(x), 
+                                                                            realign_on_domain)
+                    )
+            else:                
+                if sel_month:
+                    xr_open_fn: Callable = partial(
+                        xr.open_mfdataset, preprocess=select_time
+                    )
+                else:
+                    xr_open_fn = xr.open_mfdataset
             return xr_open_fn, filepath
 
         else:
             filepath = filepath[0]
 
     if realign_on_domain:
-
-        def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
-            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
+        if sel_month:
+            def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
+                return align_lat_lon(select_time(xr.open_dataset(x)),
+                                      realign_on_domain)
+        else:
+            def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
+                return align_lat_lon(xr.open_dataset(x), realign_on_domain)
 
     else:
-        xr_open_fn = xr.open_dataset
+        if sel_month:
+            def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
+                return select_time(xr.open_dataset(x))
+        else:
+            xr_open_fn = xr.open_dataset
 
     return xr_open_fn, filepath
 

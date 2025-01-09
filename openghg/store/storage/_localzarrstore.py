@@ -318,7 +318,8 @@ class LocalZarrStore(Store):
         """
         version = self._check_version(version)
 
-        incoming_chunks = dict(dataset.chunks)
+        incoming_chunks = dict(dataset.unify_chunks().chunks)
+        # incoming_chunks = dict(dataset.chunks)
         incoming_actually_chunked = {k: max(v) for k, v in incoming_chunks.items() if len(v) > 1}
 
         stored_chunks = {str(k): v for k, v in self.get(version=version).chunksizes.items()}
