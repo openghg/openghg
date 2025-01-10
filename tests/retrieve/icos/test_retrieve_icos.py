@@ -42,6 +42,7 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
 
 @pytest.mark.icos
 def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
+    clear_test_stores()
     # We patch this here so we can make sure we're getting the result from retrieve_all and not from
     # search
     retrieve_all = mocker.patch.object(
@@ -82,11 +83,6 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "station_height_masl": 17.0,
         "dataset_source": "ICOS",
     }
-
-    all_keys = set(expected_metadata.keys()).union(set(meta1.keys()))
-
-    for key in all_keys:
-        print(f"{key}\t{expected_metadata.get(key)}\t{meta1.get(key)}")
 
     assert expected_metadata.items() <= meta1.items()
 
