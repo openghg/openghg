@@ -1,5 +1,5 @@
 import pytest
-from helpers import get_eulerian_datapath, clear_test_store, make_keys
+from helpers import get_eulerian_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_eulerian
 from xarray import open_dataset
@@ -10,7 +10,9 @@ def test_read_file():
 
     proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")
 
-    assert "geoschem_ch4_2015-01-01" in make_keys(proc_results, "model", "species", "date")
+    assert len(proc_results) == 1
+    expected_info = {"model": "geoschem", "species": "ch4", "date": "2015-01-01"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
