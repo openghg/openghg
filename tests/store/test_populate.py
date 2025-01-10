@@ -1,4 +1,4 @@
-from helpers import get_surface_datapath, filt, make_keys
+from helpers import get_surface_datapath, filt
 from openghg.store import add_noaa_obspack
 
 
@@ -21,10 +21,11 @@ def test_read_noaa_obspack_ch4():
 
     # Check second file in folder has been processed
     filename2 = "ch4_spf_surface-flask_1_ccgg_Event.nc"
-    key2 = "ch4_-2820m"  # Negative heights given in file!
     processed2 = filt(processed, file=filename2)
     assert processed2
-    assert key2 in make_keys(processed2)
+
+    # Negative heights given in file!
+    assert any({"species": "ch4", "inlet": "-2820m"}.items() <= proc.items() for proc in processed2)
     # TODO: update this test when we have thought a way around negative inlet heights
     # being supplied.
 
