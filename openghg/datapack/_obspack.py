@@ -668,7 +668,7 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
     # Add header to file
     output_file.write("++++++++++++\n")
     output_file.write("Site details\n")
-    output_file.write(f"File created: {pd.to_datetime('today').normalize}\n")
+    output_file.write(f"File created: {pd.to_datetime('today').normalize()}\n")
     output_file.write("++++++++++++\n")
     output_file.write("\n")
 
