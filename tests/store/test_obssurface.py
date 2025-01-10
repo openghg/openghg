@@ -12,7 +12,6 @@ from helpers import (
     metadata_checker_obssurface,
     filt,
     select,
-    make_keys,
 )
 from openghg.objectstore import (
     exists,
@@ -20,7 +19,6 @@ from openghg.objectstore import (
     get_object_from_json,
     get_writable_bucket,
     set_object_from_json,
-    get_readable_buckets,
 )
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_obs_surface, search_surface
@@ -81,7 +79,7 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     bucket = get_writable_bucket(name="user")
     min_uuids = min_uuids_fixture
     for result in min_uuids:
-        species=result["species"]
+        species = result["species"]
         datasource = Datasource(bucket=bucket, uuid=result["uuid"])
         assert metadata_checker_obssurface(datasource.metadata(), species=species)
 
@@ -285,68 +283,70 @@ def test_read_GC(bucket):
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
-    expected_keys = [
-        "c2cl4_70m",
-        "c2f6_70m",
-        "c2h2_70m",
-        "c2h6_70m",
-        "c2hcl3_70m",
-        "c3f8_70m",
-        "c3h8_70m",
-        "c4f10_70m",
-        "c4f8_70m",
-        "c6f14_70m",
-        "c6h5ch3_70m",
-        "c6h6_70m",
-        "cc3h8_70m",
-        "ccl4_70m",
-        "cf4_70m",
-        "cfc112_70m",
-        "cfc113_70m",
-        "cfc114_70m",
-        "cfc115_70m",
-        "cfc11_70m",
-        "cfc12_70m",
-        "cfc13_70m",
-        "ch2br2_70m",
-        "ch2cl2_70m",
-        "ch3br_70m",
-        "ch3ccl3_70m",
-        "ch3cl_70m",
-        "ch3i_70m",
-        "chbr3_70m",
-        "chcl3_70m",
-        "cos_70m",
-        "desflurane_70m",
-        "halon1211_70m",
-        "halon1301_70m",
-        "halon2402_70m",
-        "hcfc124_70m",
-        "hcfc132b_70m",
-        "hcfc133a_70m",
-        "hcfc141b_70m",
-        "hcfc142b_70m",
-        "hcfc22_70m",
-        "hfc125_70m",
-        "hfc134a_70m",
-        "hfc143a_70m",
-        "hfc152a_70m",
-        "hfc227ea_70m",
-        "hfc236fa_70m",
-        "hfc23_70m",
-        "hfc245fa_70m",
-        "hfc32_70m",
-        "hfc365mfc_70m",
-        "hfc4310mee_70m",
-        "nf3_70m",
-        "sf5cf3_70m",
-        "sf6_70m",
-        "so2f2_70m",
+    expected_results = [
+        {"species": "c2cl4", "inlet": "70m"},
+        {"species": "c2f6", "inlet": "70m"},
+        {"species": "c2h2", "inlet": "70m"},
+        {"species": "c2h6", "inlet": "70m"},
+        {"species": "c2hcl3", "inlet": "70m"},
+        {"species": "c3f8", "inlet": "70m"},
+        {"species": "c3h8", "inlet": "70m"},
+        {"species": "c4f10", "inlet": "70m"},
+        {"species": "c4f8", "inlet": "70m"},
+        {"species": "c6f14", "inlet": "70m"},
+        {"species": "c6h5ch3", "inlet": "70m"},
+        {"species": "c6h6", "inlet": "70m"},
+        {"species": "cc3h8", "inlet": "70m"},
+        {"species": "ccl4", "inlet": "70m"},
+        {"species": "cf4", "inlet": "70m"},
+        {"species": "cfc112", "inlet": "70m"},
+        {"species": "cfc113", "inlet": "70m"},
+        {"species": "cfc114", "inlet": "70m"},
+        {"species": "cfc115", "inlet": "70m"},
+        {"species": "cfc11", "inlet": "70m"},
+        {"species": "cfc12", "inlet": "70m"},
+        {"species": "cfc13", "inlet": "70m"},
+        {"species": "ch2br2", "inlet": "70m"},
+        {"species": "ch2cl2", "inlet": "70m"},
+        {"species": "ch3br", "inlet": "70m"},
+        {"species": "ch3ccl3", "inlet": "70m"},
+        {"species": "ch3cl", "inlet": "70m"},
+        {"species": "ch3i", "inlet": "70m"},
+        {"species": "chbr3", "inlet": "70m"},
+        {"species": "chcl3", "inlet": "70m"},
+        {"species": "cos", "inlet": "70m"},
+        {"species": "desflurane", "inlet": "70m"},
+        {"species": "halon1211", "inlet": "70m"},
+        {"species": "halon1301", "inlet": "70m"},
+        {"species": "halon2402", "inlet": "70m"},
+        {"species": "hcfc124", "inlet": "70m"},
+        {"species": "hcfc132b", "inlet": "70m"},
+        {"species": "hcfc133a", "inlet": "70m"},
+        {"species": "hcfc141b", "inlet": "70m"},
+        {"species": "hcfc142b", "inlet": "70m"},
+        {"species": "hcfc22", "inlet": "70m"},
+        {"species": "hfc125", "inlet": "70m"},
+        {"species": "hfc134a", "inlet": "70m"},
+        {"species": "hfc143a", "inlet": "70m"},
+        {"species": "hfc152a", "inlet": "70m"},
+        {"species": "hfc227ea", "inlet": "70m"},
+        {"species": "hfc236fa", "inlet": "70m"},
+        {"species": "hfc23", "inlet": "70m"},
+        {"species": "hfc245fa", "inlet": "70m"},
+        {"species": "hfc32", "inlet": "70m"},
+        {"species": "hfc365mfc", "inlet": "70m"},
+        {"species": "hfc4310mee", "inlet": "70m"},
+        {"species": "nf3", "inlet": "70m"},
+        {"species": "sf5cf3", "inlet": "70m"},
+        {"species": "sf6", "inlet": "70m"},
+        {"species": "so2f2", "inlet": "70m"},
     ]
 
     results = filt(results, file="capegrim-medusa.18.C")
-    found_keys = make_keys(results)
-    assert sorted(found_keys) == sorted(expected_keys)
+
+    # select species and inlet, then sort by species
+    found_results = sorted(select(results, "species", "inlet"), key=lambda x: x["species"])
+    assert sorted(expected_results, key=lambda x: x["species"]) == found_results
 
     # Load in some data
     uuid = select(filt(results, species="hfc152a", inlet="70m"), "uuid")[0]["uuid"]
@@ -539,11 +539,12 @@ def test_add_new_data_correct_datasource():
 
     first_results = filt(results, file="capegrim-medusa.05.C")
 
-    sorted_keys = sorted(make_keys(first_results))
+    sorted_pairs = sorted(tuple(res.values()) for res in select(first_results, "species", "inlet"))
 
-    assert sorted_keys[:4] == ["c2cl4_10m", "c2cl4_70m", "c2f6_10m", "c2f6_70m"]
-    assert sorted_keys[-4:] == ["hfc32_70m", "sf6_70m", "so2f2_10m", "so2f2_70m"]
-    assert len(sorted_keys) == 69
+    assert sorted_pairs[:4] == [("c2cl4", "10m"), ("c2cl4", "70m"), ("c2f6", "10m"), ("c2f6", "70m")]
+    assert sorted_pairs[-4:] == [("hfc32", "70m"), ("sf6", "70m"), ("so2f2", "10m"), ("so2f2", "70m")]
+
+    assert len(sorted_pairs) == 69
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.06.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.06.precisions.C", source_format="GC")
@@ -557,13 +558,14 @@ def test_add_new_data_correct_datasource():
     )
 
     second_results = filt(new_results, file="capegrim-medusa.06.C")
-    second_keys = make_keys(second_results)
-    shared_keys = set(sorted_keys) & set(second_keys)
+    second_pairs = sorted(tuple(res.values()) for res in select(second_results, "species", "inlet"))
 
-    assert len(shared_keys) == 67
+    shared_pairs = set(sorted_pairs) & set(second_pairs)
 
-    for key in shared_keys:
-        species, inlet = key.split("_")
+    assert len(shared_pairs) == 67
+
+    for pair in shared_pairs:
+        species, inlet = pair
         first_res = filt(first_results, species=species, inlet=inlet)[0]
         second_res = filt(second_results, species=species, inlet=inlet)[0]
         assert first_res["uuid"] == second_res["uuid"]
