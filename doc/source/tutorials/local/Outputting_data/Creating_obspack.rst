@@ -171,7 +171,7 @@ supplied.
 
     create_obspack(search_df=search_df,
                    output_folder=output_folder,
-                   obspack_name=obspack_name)
+                   obspack_stub=obspack_stub)
 
 This will create a new obspack with a version based on other folder which have the same
 ``obspack_stub`` found within the same folder. If the previous obspack has been created as above,
