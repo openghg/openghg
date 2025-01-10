@@ -15,37 +15,42 @@ from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapat
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
                 "surface-insitu", "",
-                "./surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"
+                "./surface-insitu/ch4_WAO_10m_surface-insitu.nc"
             ),
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
+                "surface-insitu", "/path/to/obspack/",
+                "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"
+            ),
+            (
+                {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"},
                 "surface-insitu", "/path/to/obspack/",
                 "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"
             ),
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
                 "surface-flask", "",
-                "./surface-flask/ch4_WAO_10m_surface-flask_v1.nc"
+                "./surface-flask/ch4_WAO_10m_surface-flask.nc"
             ),
             (
                 {"platform": "site", "species": "ch4", "site": "WAO"},
                 "column", "",
-                "./column/ch4_WAO_site_column_v1.nc"
+                "./column/ch4_WAO_site_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
                 "column", "",
-                "./column/ch4_GOSAT-BRAZIL_satellite_column_v1.nc"
+                "./column/ch4_GOSAT-BRAZIL_satellite_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
                 "column", "",
-                "./column/ch4_GOSAT-BRAZIL_satellite_column_v1.nc"
+                "./column/ch4_GOSAT-BRAZIL_satellite_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
                 "column", "",
-                "./column/ch4_GOSAT-SOUTHAMERICA_satellite_column_v1.nc"
+                "./column/ch4_GOSAT-SOUTHAMERICA_satellite_column.nc"
             ),
         ]
 )
@@ -54,14 +59,50 @@ def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename)
     Test creation of filename matches to naming scheme
     1. surface-insitu data
     2. surface-insitu data, specified output_path
-    3. surface-flask data
-    4. column, site data
-    5. column, satellite data, site name specified
-    6. column, satellite data, satellite name and selection specified
-    7. column, satellite data, satellite name and domain specified
+    3. surface-insitu data, version in the metadata
+    4. surface-flask data
+    5. column, site data
+    6. column, satellite data, site name specified
+    7. column, satellite data, satellite name and selection specified
+    8. column, satellite data, satellite name and domain specified
     """
     out_filename = Path(out_filename)
     filename = define_obspack_filename(metadata, obs_type=obs_type, obspack_path=obspack_path)
+
+    assert filename == out_filename
+
+
+@pytest.mark.parametrize(
+        "latest_version, data_version, include_version, out_filename",
+        [
+            ("v52", None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v52.nc"),
+            (None, "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
+            ("v52", "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
+            (None, None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
+            ("v52", "v34", False, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
+        ]
+)
+def test_define_obspack_filename_version(latest_version, data_version, include_version, out_filename):
+    """
+    Check internal version definitions when creating filenames.
+    1. Check data version can be inferred from metadata
+    2. Check data version can be defined directly
+    3. Check data version defined directly is used in preference to metadata
+    4. Check data version is not included if this cannot be found
+    5. Check data version is not included if include_version is False
+    """
+    metadata = {"site": "WAO", "species": "ch4", "inlet": "10m"}
+    if latest_version:
+        metadata["latest_version"] = latest_version
+
+    obs_type = "surface-insitu"
+    obspack_path = "/path/to/obspack/"
+    out_filename = Path(out_filename)
+    filename = define_obspack_filename(metadata,
+                                       obs_type=obs_type,
+                                       obspack_path=obspack_path,
+                                       include_version=include_version,
+                                       data_version=data_version)
 
     assert filename == out_filename
 
