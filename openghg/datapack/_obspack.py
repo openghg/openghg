@@ -583,7 +583,7 @@ def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
 def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> dict:
     """
     Extract associated site details as a dictionary for a given Dataset. Expect these details to
-    be incuded within the dataset attributes.
+    be included within the dataset attributes.
     This can be used as a way to build up a DataFrame from a set of dictionaries and defines friendly
     column names for this output.
 
