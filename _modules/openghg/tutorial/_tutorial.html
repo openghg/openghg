@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,20 +26,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -276,9 +276,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -329,14 +334,14 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">tarfile</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span><span class="p">,</span> <span class="n">standardise_flux</span><span class="p">,</span> <span class="n">standardise_bc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tarfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_footprint</span><span class="p">,</span> <span class="n">standardise_flux</span><span class="p">,</span> <span class="n">standardise_bc</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.tutorial&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -344,7 +349,7 @@
 
 <div class="viewcode-block" id="populate_footprint_data">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_footprint_data">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_footprint_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_footprint_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds all footprint data to the tutorial object store</span>
 
 <span class="sd">    Returns:</span>
@@ -357,7 +362,7 @@
 
 <div class="viewcode-block" id="populate_footprint_inert">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_footprint_inert">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_footprint_inert</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_footprint_inert</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populates the tutorial object store with inert footprint data</span>
 
 <span class="sd">    Returns:</span>
@@ -391,7 +396,7 @@
 
 <div class="viewcode-block" id="populate_footprint_co2">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_footprint_co2">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_footprint_co2</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_footprint_co2</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populates the tutorial object store with footprints data from the</span>
 <span class="sd">    example data repository.</span>
 
@@ -433,7 +438,7 @@
 
 <div class="viewcode-block" id="populate_flux_data">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_flux_data">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_flux_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_flux_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate the tutorial store with flux data</span>
 
 <span class="sd">    Returns:</span>
@@ -446,7 +451,7 @@
 
 <div class="viewcode-block" id="populate_flux_co2">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_flux_co2">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_flux_co2</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_flux_co2</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate the tutorial object store with CO2 flux data</span>
 
 <span class="sd">    Returns:</span>
@@ -480,7 +485,7 @@
 
 <div class="viewcode-block" id="populate_flux_ch4">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_flux_ch4">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_flux_ch4</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_flux_ch4</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populates the tutorial object store with flux data from the</span>
 <span class="sd">    example data repository.</span>
 
@@ -521,14 +526,14 @@
 
 
 
-<span class="k">def</span> <span class="nf">populate_bc</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_bc</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">populate_bc_ch4</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="populate_bc_ch4">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_bc_ch4">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_bc_ch4</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_bc_ch4</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populates the tutorial object store with boundary conditions data from the</span>
 <span class="sd">    example data repository.</span>
 
@@ -560,14 +565,14 @@
 
 <div class="viewcode-block" id="populate_surface_data">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_surface_data">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_surface_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_surface_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populates the tutorial object store with surface measurement data from the</span>
 <span class="sd">    example data repository.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
     <span class="n">use_tutorial_store</span><span class="p">()</span>
 
@@ -603,7 +608,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">download_edgar_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_edgar_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download edgar data to tutorial store to be used within parse_edgar transform</span>
 <span class="sd">    tutorial.</span>
@@ -626,7 +631,7 @@
 
 <div class="viewcode-block" id="use_tutorial_store">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.use_tutorial_store">[docs]</a>
-<span class="k">def</span> <span class="nf">use_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">use_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets an environment variable telling OpenGHG to use a</span>
 <span class="sd">    temporary object store. This sets the store to be</span>
 <span class="sd">    the result of tempfile.gettempdir() / openghg_temp_store.</span>
@@ -641,13 +646,13 @@
 
 <div class="viewcode-block" id="example_extract_path">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.example_extract_path">[docs]</a>
-<span class="k">def</span> <span class="nf">example_extract_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">example_extract_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the path to folder containing the extracted example files</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
 
     <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_tutorial_store_path</span><span class="p">(),</span> <span class="s2">&quot;extracted_files&quot;</span><span class="p">)</span></div>
 
@@ -655,13 +660,13 @@
 
 <div class="viewcode-block" id="clear_example_cache">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.clear_example_cache">[docs]</a>
-<span class="k">def</span> <span class="nf">clear_example_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clear_example_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes the file cache created when running the tutorials.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
 
     <span class="n">example_cache_path</span> <span class="o">=</span> <span class="n">get_tutorial_store_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;example_cache&quot;</span>
     <span class="n">extracted_examples</span> <span class="o">=</span> <span class="n">example_extract_path</span><span class="p">()</span>
@@ -672,7 +677,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">retrieve_example_obspack</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_example_obspack</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves our example ObsPack dataset, extracts it and returns the path to the folder.</span>
 
 <span class="sd">    Args:</span>
@@ -688,7 +693,7 @@
 
 <div class="viewcode-block" id="retrieve_example_data">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.retrieve_example_data">[docs]</a>
-<span class="k">def</span> <span class="nf">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve data from the OpenGHG example data repository, cache the downloaded data,</span>
 <span class="sd">    extract the data and return the filepaths of the extracted files.</span>
 
@@ -698,8 +703,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list: List of filepaths</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">download_data</span><span class="p">,</span> <span class="n">parse_url_filename</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_data</span><span class="p">,</span> <span class="n">parse_url_filename</span>
 
     <span class="n">use_tutorial_store</span><span class="p">()</span>
 
@@ -752,14 +757,14 @@
 
 <div class="viewcode-block" id="unpack_example_archive">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.unpack_example_archive">[docs]</a>
-<span class="k">def</span> <span class="nf">unpack_example_archive</span><span class="p">(</span><span class="n">archive_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unpack_example_archive</span><span class="p">(</span><span class="n">archive_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">extract_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpacks an tar file to a temporary folder, or extract_dir if given.</span>
 <span class="sd">    Returns the filepath(s) of the objects.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list: List of filepaths</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">example_extract_path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">example_extract_path</span>
 
     <span class="k">if</span> <span class="n">extract_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">extract_dir</span> <span class="o">=</span> <span class="n">example_extract_path</span><span class="p">()</span>
@@ -777,13 +782,13 @@
 
 <div class="viewcode-block" id="clear_tutorial_store">
 <a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.clear_tutorial_store">[docs]</a>
-<span class="k">def</span> <span class="nf">clear_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clear_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete the contents of the tutorial object store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">get_tutorial_store_path</span><span class="p">()</span>
 
@@ -820,8 +825,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -846,7 +851,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

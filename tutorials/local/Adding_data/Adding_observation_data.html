@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,20 +27,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="Tutorials" href="../../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -315,9 +315,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -381,7 +386,7 @@ separate sandboxed object store that we’ll call the tutorial store. To do
 this we use the <code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>.
 This sets the <code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and
 won’t affect your use of OpenGHG outside of this tutorial.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
@@ -406,7 +411,7 @@ on the source format itself as some details can be inferred from the data or may
 not be relevant.
 For the full list of accepted observation inputs and source formats, call
 the function <code class="docutils literal notranslate"><span class="pre">summary_source_formats</span></code>:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_source_formats</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">summary_source_formats</span>
 
 <span class="gp">In [2]: </span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary_source_formats</span><span class="p">()</span>
 
@@ -469,7 +474,7 @@ First, we’ll list all source formats.</p>
 <p>We will start by adding data to the object store from Tacolneston, which is a <em>surface site</em>
 in the DECC network. (Data at surface sites is measured in-situ.)</p>
 <p>First we retrieve the raw data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz&quot;</span>
 
@@ -484,7 +489,7 @@ following arguments:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">network</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;DECC&quot;</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">source_format</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code>, the type of data we want to process</p></li>
 </ul>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="gp">In [8]: </span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 
@@ -524,7 +529,7 @@ distinguish between different data sets as required including:</p>
 to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument.
 So instead of the standardise_surface call above, we’ll tell it to write to our default <code class="docutils literal notranslate"><span class="pre">user</span></code> object store. This is our default local object store
 created when we run <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
 </pre></div>
@@ -621,7 +626,7 @@ stored for easy future comparison.</p>
 <code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function. This function retrieves all of the metadata associated with the search query from the data in the object store.</p>
 <p>For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><span class="pre">species</span></code> keyword:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">cfc_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;cfc11&quot;</span><span class="p">)</span>
 <span class="n">cfc_results</span>
@@ -676,7 +681,7 @@ access.</p>
 species and inlet height to retrieve our data. Using <em class="xref py py-obj">get_*</em> functions will only allow one set of data to be returned and will give details if this is not the case.</p>
 <p>In this case we want to extract the carbon dioxide (“co2”) data from the
 Tacolneston data (“TAC”) site measured at the “185m” inlet:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_obs_surface</span>
 
 <span class="n">co2_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
 </pre></div>
@@ -708,7 +713,7 @@ to the <code class="docutils literal notranslate"><span class="pre">plot_timeser
 <h2>5. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
@@ -800,8 +805,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -826,7 +831,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

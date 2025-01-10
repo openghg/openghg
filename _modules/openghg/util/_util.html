@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,20 +26,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -276,9 +276,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -329,13 +334,13 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterator</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">multiPathType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -343,7 +348,7 @@
 
 <div class="viewcode-block" id="unanimous">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.unanimous">[docs]</a>
-<span class="k">def</span> <span class="nf">unanimous</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unanimous</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks that all values in an iterable object</span>
 <span class="sd">    are the same</span>
 
@@ -365,7 +370,7 @@
 
 <div class="viewcode-block" id="pairwise">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.pairwise">[docs]</a>
-<span class="k">def</span> <span class="nf">pairwise</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pairwise</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a zip of an iterable where a is the iterable</span>
 <span class="sd">    and b is the iterable advanced one step.</span>
 
@@ -374,7 +379,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: Tuple of iterables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">tee</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">tee</span>
 
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">tee</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
     <span class="nb">next</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -385,7 +390,7 @@
 
 <div class="viewcode-block" id="site_code_finder">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.site_code_finder">[docs]</a>
-<span class="k">def</span> <span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the site code for a given site name.</span>
 
 <span class="sd">    Args:</span>
@@ -393,8 +398,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str or None: Three letter site code if found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">remove_punctuation</span>
-    <span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">process</span>  <span class="c1"># type: ignore</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_punctuation</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rapidfuzz</span><span class="w"> </span><span class="kn">import</span> <span class="n">process</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">site_name</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">site_name</span><span class="p">)</span>
 
@@ -423,7 +428,7 @@
 
 <div class="viewcode-block" id="find_matching_site">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_matching_site">[docs]</a>
-<span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try and find a similar name to site_name in site_list and return a suggestion or</span>
 <span class="sd">    error string.</span>
 
@@ -433,7 +438,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Suggestion / error message</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">process</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rapidfuzz</span><span class="w"> </span><span class="kn">import</span> <span class="n">process</span>
 
     <span class="n">site_list</span> <span class="o">=</span> <span class="n">possible_sites</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
@@ -459,14 +464,14 @@
 
 
 
-<span class="k">def</span> <span class="nf">_create_site_lookup_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_site_lookup_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a dictionary of site name: three letter site code values</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of site_name: site_code values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">site_info_file</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">remove_punctuation</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg_defs</span><span class="w"> </span><span class="kn">import</span> <span class="n">site_info_file</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">remove_punctuation</span>
 
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_file</span><span class="p">)</span>
 
@@ -493,7 +498,7 @@
 
 <div class="viewcode-block" id="verify_site">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a>
-<span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site is a valid one and returns the three</span>
 <span class="sd">    letter site code if found. Otherwise we use fuzzy text matching to suggest</span>
 <span class="sd">    sites with similar names.</span>
@@ -503,8 +508,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Verified three letter site code if valid site</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
-    <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">site_info_file</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg_defs</span><span class="w"> </span><span class="kn">import</span> <span class="n">site_info_file</span>
 
     <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_file</span><span class="p">)</span>
 
@@ -520,7 +525,7 @@
 
 <div class="viewcode-block" id="multiple_inlets">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.multiple_inlets">[docs]</a>
-<span class="k">def</span> <span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site has more than one inlet</span>
 
 <span class="sd">    Args:</span>
@@ -528,7 +533,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if multiple inlets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_site_info</span>
 
     <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
 
@@ -547,7 +552,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">sort_by_filenames</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span> <span class="o">|</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sort_by_filenames</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span> <span class="o">|</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sorting time on filename basis</span>
 
@@ -598,8 +603,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -624,7 +629,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

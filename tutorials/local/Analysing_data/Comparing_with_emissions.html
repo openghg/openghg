@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Comparing observations to emissions &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>Comparing observations to emissions &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,20 +27,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="Updating existing data" href="../Adding_data/Updating_existing_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -315,9 +315,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -381,7 +386,7 @@ online documentation version of this notebook.</p>
 <p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>,
 we will use the tutorial object store to avoid cluttering your personal
 object store.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
@@ -400,7 +405,7 @@ This data relates to Tacolneston (TAC) site within the DECC
 network and the area around Europe (EUROPE domain).</p>
 <p>We’ll use some helper functions from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule
 to retrieve raw data in the <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#input-format"><span class="std std-ref">expected format</span></a>:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_inert</span><span class="p">,</span> <span class="n">populate_flux_ch4</span><span class="p">,</span> <span class="n">populate_bc_ch4</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_inert</span><span class="p">,</span> <span class="n">populate_flux_ch4</span><span class="p">,</span> <span class="n">populate_bc_ch4</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
@@ -426,7 +431,7 @@ and an anthropogenic emissions map for a domain defined over Europe.</p>
 <p>To access and link this data we can set up our <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>
 instance using a similiar set of keywords. In this case we have also
 limited ourselves to a date range:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.analyse</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelScenario</span>
 
 <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span>
 <span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span>
@@ -488,7 +493,7 @@ the <code class="docutils literal notranslate"><span class="pre">ModelScenario.p
 <p>You can also set up your own searches and add this data directly.
 One benefit of this interface is to reduce searching the database if the
 same data needs to be used for multiple different scenarios.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">get_footprint</span><span class="p">,</span> <span class="n">get_flux</span><span class="p">,</span> <span class="n">get_bc</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">get_footprint</span><span class="p">,</span> <span class="n">get_flux</span><span class="p">,</span> <span class="n">get_bc</span>
 
 <span class="c1"># Extract obs results from object store</span>
 <span class="n">obs_results</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
@@ -602,7 +607,7 @@ time and stacked to create a total output:</p>
 <h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
@@ -679,8 +684,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -705,7 +710,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Searching and plotting &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>Searching and plotting &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,20 +27,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="Retrieving data from remote archives" href="Retrieving_remote_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -315,9 +315,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -372,13 +377,13 @@ simple plot using one of our plotting functions.</p>
 <p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorial</span></a>,
 we will use the tutorial object store to avoid cluttering your personal
 object store.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Now we’ll add some data to the tutorial store.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">populate_surface_data</span>
 <span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -389,7 +394,7 @@ object store.</p>
 To do this we need to know the site code (“TAC”).</p>
 <p>If we didn’t know the site code, we could find it using
 the <code class="docutils literal notranslate"><span class="pre">summary_site_codes()</span></code> function:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_site_codes</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">summary_site_codes</span>
 
 <span class="c1">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
 <span class="c1"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
@@ -412,7 +417,7 @@ there are two entries for Tacolneston, since it is included under
 multiple networks.</p>
 <p>To see all available data associated with Tacolneston we
 can search for this using the site code of “TAC”.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search</span>
 
 <span class="n">tac_data_search</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">)</span>
 </pre></div>
@@ -425,7 +430,7 @@ a pandas DataFrame).</p>
 <p>To just look for the surface observations we can use the
 <code class="docutils literal notranslate"><span class="pre">search_surface</span></code> function specifically. We can also pass multiple keys
 to extract, for example, just the methane data:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">tac_surface_search</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">results</span>
@@ -437,7 +442,7 @@ to extract, for example, just the methane data:</p>
 If this is done using a list, then datasources which have any of the
 specified values will be found. For example if we wanted to search for methane
 at two specific inlets we could write:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">tac_surface_search</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="s2">&quot;185m&quot;</span><span class="p">])</span>
 <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">results</span>
@@ -454,7 +459,7 @@ including <code class="docutils literal notranslate"><span class="pre">search_fo
 <section id="searching-for-a-range-of-values">
 <h3>Searching for a range of values<a class="headerlink" href="#searching-for-a-range-of-values" title="Link to this heading">#</a></h3>
 <p>An alternative way to search for multiple inlet values is by specifying a range of values:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">tac_surface_search</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="s2">&quot;185m&quot;</span><span class="p">))</span>
 <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">results</span>
@@ -466,7 +471,7 @@ combined into a single output with an <code class="docutils literal notranslate"
 This is useful when the inlet height changes slightly.</p>
 <p>Suppose that we have surface data at the BSD site, with inlet heights 248m and 250m. To retrieve
 this data as a single dataset, we use:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_obs_surface</span>
 
 <span class="n">bsd_surface_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;248m&quot;</span><span class="p">,</span> <span class="s2">&quot;250m&quot;</span><span class="p">))</span>
 </pre></div>
@@ -499,7 +504,7 @@ documentation version of this notebook.</p>
 <p>We can visualise this data using the in-built plotting commands from the
 <code class="docutils literal notranslate"><span class="pre">plotting</span></code> sub-module. We can also modify the inputs to improve how
 this is displayed:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.plotting</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_timeseries</span>
 
 <span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data_185m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Concentration&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
 </pre></div>
@@ -615,8 +620,8 @@ we want to compare and make a plot</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -641,7 +646,8 @@ we want to compare and make a plot</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

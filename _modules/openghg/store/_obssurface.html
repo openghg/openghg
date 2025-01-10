@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,20 +26,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -276,9 +276,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -325,20 +330,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for openghg.store._obssurface</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">sync_surface_metadata</span>
-<span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
-<span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">resultsType</span><span class="p">,</span> <span class="n">optionalPathType</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">align_metadata_attributes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">resultsType</span><span class="p">,</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -346,7 +351,7 @@
 
 <div class="viewcode-block" id="ObsSurface">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface">[docs]</a>
-<span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
 
     <span class="n">_data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
@@ -356,7 +361,7 @@
 
 <div class="viewcode-block" id="ObsSurface.read_data">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -381,7 +386,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of result</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 
         <span class="n">possible_kwargs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
@@ -438,7 +443,7 @@
 
 <div class="viewcode-block" id="ObsSurface.read_file">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -537,9 +542,9 @@
         <span class="c1"># MUST be at the top of the function</span>
         <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-        <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_standardise_parsers</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_standardise_parsers</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
             <span class="n">format_inlet</span><span class="p">,</span>
             <span class="n">format_data_level</span><span class="p">,</span>
@@ -700,7 +705,7 @@
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
+            <span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 
             <span class="c1"># Check to ensure no required keys are being passed through optional_metadata dict</span>
             <span class="c1"># before adding details</span>
@@ -732,7 +737,7 @@
 
 <div class="viewcode-block" id="ObsSurface.read_multisite_aqmesh">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_multisite_aqmesh</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_multisite_aqmesh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
         <span class="n">metadata_filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
@@ -828,7 +833,7 @@
 <div class="viewcode-block" id="ObsSurface.schema">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.schema">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for surface observations Dataset.</span>
 
@@ -844,7 +849,7 @@
 <span class="sd">        # TODO: Decide how to best incorporate optional variables</span>
 <span class="sd">        # e.g. &quot;ch4_variability&quot;, &quot;ch4_number_of_observations&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">define_species_label</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_species_label</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -859,7 +864,7 @@
 <div class="viewcode-block" id="ObsSurface.validate_data">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate input data against ObsSurface schema - definition from</span>
 <span class="sd">        ObsSurface.schema() method.</span>
@@ -880,7 +885,7 @@
 
 <div class="viewcode-block" id="ObsSurface.store_data">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">store_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -915,7 +920,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict or None:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_retrieved_data</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">hash_retrieved_data</span>
 
         <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -986,7 +991,7 @@
 
 <div class="viewcode-block" id="ObsSurface.store_hashes">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>
-    <span class="k">def</span> <span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
 <span class="sd">        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we&#39;ve</span>
 <span class="sd">        seen before and adds the new.</span>
@@ -1002,7 +1007,7 @@
 
 <div class="viewcode-block" id="ObsSurface.delete">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.delete">[docs]</a>
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>
 
 <span class="sd">        This function deletes both the record of the object store in he</span>
@@ -1012,8 +1017,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">delete_object</span>
-        <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">delete_object</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datasource</span>
 
         <span class="c1"># Load the Datasource and get all its keys</span>
         <span class="c1"># iterate over these keys and delete them</span>
@@ -1036,43 +1041,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="p">})</span></div>
 
 
-    <span class="k">def</span> <span class="nf">seen_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">seen_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span>
 
-    <span class="k">def</span> <span class="nf">set_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span>
-
-<div class="viewcode-block" id="ObsSurface.align_metadata_attributes">
-<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.align_metadata_attributes">[docs]</a>
-    <span class="k">def</span> <span class="nf">align_metadata_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Function to sync metadata and attributes if mismatch is found</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: Dictionary of source_name data, metadata, attributes</span>
-<span class="sd">            update_mismatch: This determines how mismatches between the internal data</span>
-<span class="sd">                &quot;attributes&quot; and the supplied / derived &quot;metadata&quot; are handled.</span>
-<span class="sd">                This includes the options:</span>
-<span class="sd">                    - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
-<span class="sd">                    - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on input data (e.g. data attributes)</span>
-<span class="sd">                    - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on associated data (e.g. site_info.json)</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">gas_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-            <span class="n">metadata</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
-
-            <span class="n">attrs</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">attrs</span>
-
-            <span class="n">metadata_aligned</span><span class="p">,</span> <span class="n">attrs_aligned</span> <span class="o">=</span> <span class="n">sync_surface_metadata</span><span class="p">(</span>
-                <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span>
-            <span class="p">)</span>
-
-            <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata_aligned</span>
-            <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs_aligned</span>
-            <span class="n">measurement_data</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span></div>
-</div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span></div>
 
 </pre></div>
 
@@ -1103,8 +1076,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1129,7 +1102,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

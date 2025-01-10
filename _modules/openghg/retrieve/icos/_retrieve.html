@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,20 +26,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -276,9 +276,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -325,14 +330,14 @@
                 <article class="bd-article">
                   
   <h1>Source code for openghg.retrieve.icos._retrieve</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
-<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_writable_bucket</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">dataset_formatter</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">MetadataFormatError</span>
-<span class="kn">import</span> <span class="nn">openghg_defs</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_writable_bucket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset_formatter</span><span class="p">,</span> <span class="n">align_metadata_attributes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetadataFormatError</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">openghg_defs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -340,7 +345,7 @@
 
 <div class="viewcode-block" id="retrieve_atmospheric">
 <a class="viewcode-back" href="../../../../api/devapi_retrieve.html#openghg.retrieve.icos.retrieve_atmospheric">[docs]</a>
-<span class="k">def</span> <span class="nf">retrieve_atmospheric</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_atmospheric</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -402,7 +407,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -448,9 +453,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData, list[ObsData] or None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
-    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">to_lowercase</span><span class="p">,</span> <span class="n">format_data_level</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObsSurface</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_lowercase</span><span class="p">,</span> <span class="n">format_data_level</span>
 
     <span class="c1"># ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -526,7 +531,7 @@
         <span class="k">return</span> <span class="n">obs_data</span>
 
 
-<span class="k">def</span> <span class="nf">_retrieve_remote</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_remote</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -562,17 +567,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># icoscp isn&#39;t available to conda so we&#39;ve got to resort to this for now</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">icoscp.cpb.dobj</span> <span class="kn">import</span> <span class="n">Dobj</span>  <span class="c1"># type: ignore</span>
-        <span class="kn">from</span> <span class="nn">icoscp.station</span> <span class="kn">import</span> <span class="n">station</span>  <span class="c1"># type: ignore</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">icoscp.cpb.dobj</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dobj</span>  <span class="c1"># type: ignore</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">icoscp.station</span><span class="w"> </span><span class="kn">import</span> <span class="n">station</span>  <span class="c1"># type: ignore</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="s2">&quot;Cannot import icoscp, if you&#39;ve installed OpenGHG using conda please run: pip install icoscp&quot;</span>
         <span class="p">)</span>
 
-    <span class="kn">import</span> <span class="nn">re</span>
-    <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">format_data_level</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">to_datetime</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_attributes</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">format_data_level</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_datetime</span>
 
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CO&quot;</span><span class="p">,</span> <span class="s2">&quot;CO2&quot;</span><span class="p">,</span> <span class="s2">&quot;CH4&quot;</span><span class="p">]</span>
@@ -596,10 +601,17 @@
 
     <span class="n">data_pids</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">data_level</span><span class="p">)</span>
 
-    <span class="c1"># We want to get the PIDs of the data for each species here</span>
     <span class="n">species_upper</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
-    <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
-    <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_upper</span><span class="p">)))</span>
+
+    <span class="c1"># We want to get the PIDs of the data for each species here</span>
+    <span class="c1"># Annoyingly FastTrack and EYE-AVE-PAR data don&#39;t have the species anywhere in the data_pids dataframe</span>
+    <span class="c1"># so we need to handle these cases separately</span>
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">,</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">]:</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="s2">&quot;GHG&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_upper</span><span class="p">)))</span>
+
     <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
     <span class="c1"># We filter out any data that contains &quot;Obspack&quot; or &quot;csv&quot; in the specLabel</span>
     <span class="c1"># Also filter out some drought files which cause trouble being read in</span>
@@ -610,17 +622,6 @@
         <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
         <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;ATMO_&quot;</span><span class="p">)</span>
     <span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">filtered_sources</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="n">species_lower</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
-        <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
-        <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_lower</span><span class="p">)))</span>
-        <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
-        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
-            <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span>
-            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
-            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
-        <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>
@@ -646,23 +647,28 @@
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dobj_url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dobj_urls</span><span class="p">):</span>
         <span class="n">dobj</span> <span class="o">=</span> <span class="n">Dobj</span><span class="p">(</span><span class="n">dobj_url</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieving </span><span class="si">{</span><span class="n">dobj_url</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
-        <span class="c1"># We&#39;ve got to jump through some hoops here to try and avoid the NOAA</span>
-        <span class="c1"># ObsPack GlobalView data</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;globalview&quot;</span> <span class="ow">in</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;doi&quot;</span><span class="p">][</span><span class="s2">&quot;titles&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;title&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">dobj_url</span><span class="si">}</span><span class="s2"> as ObsPack GlobalView detected.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">:</span>
+            <span class="n">species_fname</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;[_.]&quot;</span><span class="p">,</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;fileName&quot;</span><span class="p">])[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;FAST_TRACK&quot;</span> <span class="ow">in</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;fileName&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">species_fname</span> <span class="ow">in</span> <span class="n">species_upper</span><span class="p">:</span>
+                <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;ICOS FastTrack&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">:</span>
+            <span class="n">species_fname</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;fileName&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span> <span class="ow">in</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;fileName&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">species_fname</span> <span class="ow">in</span> <span class="n">species_upper</span><span class="p">:</span>
+                <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">][</span><span class="s2">&quot;project&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to read project information from dobj.&quot;</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">][</span><span class="s2">&quot;project&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to read project information from dobj.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dobj_dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dobj_dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">continue</span>
 
         <span class="c1"># We need to pull the data down as .info (metadata) is populated further on this step</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -780,28 +786,29 @@
         <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
         <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
 
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
         <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="c1"># Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else</span>
+        <span class="n">dataframe</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">]))</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
             <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
 
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-
-        <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="c1"># TODO - add this back in once we&#39;ve merged the fixes in</span>
-        <span class="c1"># Try and conver the flag / userflag column to str</span>
-        <span class="c1"># possible_flag_cols = (&quot;flag&quot;, &quot;userflag&quot;)</span>
-        <span class="c1"># flag_col = [x for x in dataframe.columns if x in possible_flag_cols]</span>
-
-        <span class="c1"># PR328</span>
-        <span class="c1"># if flag_col:</span>
-        <span class="c1">#     flag_str = flag_col[0]</span>
-        <span class="c1">#     dataframe = dataframe.astype({flag_str: str})</span>
+        <span class="c1"># If there is a stdev column, replace missing values with nans</span>
+        <span class="c1"># Then rename columns</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
 
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
 
@@ -823,6 +830,7 @@
         <span class="p">}</span>
     <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">dataset_formatter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">)</span>
     <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
+    <span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardised_data</span>
 
@@ -877,8 +885,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -903,7 +911,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._species &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>openghg.util._species &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,20 +26,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -276,9 +276,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -325,11 +330,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for openghg.util._species</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">optionalPathType</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -346,7 +351,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util.species&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract data from species info JSON file as a dictionary.</span>
 
 <span class="sd">    This uses the data stored within openghg_defs/species_info JSON file by default.</span>
@@ -356,7 +361,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Data from species JSON file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">species_info_file</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg_defs</span><span class="w"> </span><span class="kn">import</span> <span class="n">species_info_file</span>
 
     <span class="n">fpath</span> <span class="o">=</span> <span class="n">species_info_file</span> <span class="k">if</span> <span class="n">species_filepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">species_filepath</span>
 
@@ -365,7 +370,7 @@
 
 <div class="viewcode-block" id="synonyms">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.synonyms">[docs]</a>
-<span class="k">def</span> <span class="nf">synonyms</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">synonyms</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lower</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">allow_new_species</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -430,7 +435,7 @@
 
 <div class="viewcode-block" id="species_lifetime">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.species_lifetime">[docs]</a>
-<span class="k">def</span> <span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find species lifetime.</span>
 <span class="sd">    This can either be labelled as &quot;lifetime&quot; or &quot;lifetime_monthly&quot;.</span>
 
@@ -467,7 +472,7 @@
 
 <div class="viewcode-block" id="check_lifetime_monthly">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_lifetime_monthly">[docs]</a>
-<span class="k">def</span> <span class="nf">check_lifetime_monthly</span><span class="p">(</span><span class="n">lifetime</span><span class="p">:</span> <span class="n">LifetimeType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_lifetime_monthly</span><span class="p">(</span><span class="n">lifetime</span><span class="p">:</span> <span class="n">LifetimeType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether retrieved lifetime value represents monthly lifetimes.</span>
 <span class="sd">    This checks whether lifetime is a list and contains 12 values.</span>
 
@@ -488,7 +493,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">check_species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether a species has a [short] lifetime (relevant for footprint types).</span>
 <span class="sd">    Args:</span>
@@ -515,7 +520,7 @@
     <span class="k">return</span> <span class="n">short_lifetime</span>
 
 
-<span class="k">def</span> <span class="nf">check_species_time_resolved</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_species_time_resolved</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether a species requires a time_resolved footprint.</span>
 <span class="sd">    Note: at the moment this is only relevant for &quot;co2&quot;.</span>
@@ -535,7 +540,7 @@
 
 <div class="viewcode-block" id="molar_mass">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.molar_mass">[docs]</a>
-<span class="k">def</span> <span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts the molar mass of a species.</span>
 
 <span class="sd">    Args:</span>
@@ -580,8 +585,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -606,7 +611,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

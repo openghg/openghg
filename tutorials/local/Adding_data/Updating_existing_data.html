@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Updating existing data &#8212; OpenGHG 0.11.0 documentation</title>
+    <title>Updating existing data &#8212; OpenGHG 0.11.1 documentation</title>
   
   
   
@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,20 +27,20 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="Metadata and attributes" href="Metadata_and_attributes.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
-    <meta name="docbuild:last-update" content="Dec 16, 2024"/>
+  <meta name="docsearch:version" content="0.11.1" />
+    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
   
   
 </a></div>
@@ -315,9 +315,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -416,7 +421,7 @@ To do this we use the
 <code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
 <code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
 affect your use of OpenGHG outside of this tutorial.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
@@ -424,7 +429,7 @@ affect your use of OpenGHG outside of this tutorial.</p>
 <p>Since this workflow relies on using an empty object store, we also recommend
 running <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> as well before using this in case other tutorials
 have been run using this store.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 
 <span class="n">clear_tutorial_store</span><span class="p">()</span>
 </pre></div>
@@ -434,7 +439,7 @@ have been run using this store.</p>
 <h3>1. Adding example data<a class="headerlink" href="#adding-example-data" title="Link to this heading">#</a></h3>
 <p>We can grab some example data to demonstrate this workflow, in this case from the Macehead site in Ireland.
 This data includes may different species so we will focus on just $CF_6$ for this tutorial.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2010.tar.gz&quot;</span>
 
@@ -448,7 +453,7 @@ This data includes may different species so we will focus on just $CF_6$ for thi
 <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2010</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
@@ -457,7 +462,7 @@ This data includes may different species so we will focus on just $CF_6$ for thi
 </pre></div>
 </div>
 <p>If we search the tutorial object store we should now see one datasource has been returned.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">data_search</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">data_search</span><span class="o">.</span><span class="n">results</span>
@@ -485,7 +490,7 @@ The start and end dates cover the year of 2010: 2010-01-01 - 2010-12-31.</p>
 <h3>2. Adding more data<a class="headerlink" href="#adding-more-data" title="Link to this heading">#</a></h3>
 <p>We can now download and add data for the next year (2011). The times for this data should
 not overlap with the data in our datasource.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2011.tar.gz&quot;</span>
 
@@ -493,7 +498,7 @@ not overlap with the data in our datasource.</p>
 <span class="n">data_2011</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_2011</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_2011</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># for this specific data need to reorganise to include file and precision data.</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2011</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
@@ -502,7 +507,7 @@ not overlap with the data in our datasource.</p>
 </pre></div>
 </div>
 <p>When we search we should see there is still only one entry returned.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">data_search2</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">data_search2</span><span class="o">.</span><span class="n">results</span>
@@ -534,7 +539,7 @@ This has combined the details from both files that were added to the object stor
 <p>By default this will also create a new version, retaining the original data as a previous
 version but ensuring that the new data will returned when searching. In this case we have downloaded
 data from 2012 to check this.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2012.tar.gz&quot;</span>
 
@@ -542,7 +547,7 @@ data from 2012 to check this.</p>
 <span class="n">data_2012</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_2012</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_2012</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># for this specific data need to reorganise to include file and precision data.</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2012</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
@@ -552,7 +557,7 @@ data from 2012 to check this.</p>
 </pre></div>
 </div>
 <p>We should still only see one datasource when we search:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">data_search3</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
 <span class="n">data_search3</span><span class="o">.</span><span class="n">results</span>
@@ -582,7 +587,7 @@ of the data we can do this using the flags:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">save_current=False</span></code></p></li>
 </ul>
 <p>We can test this by downloading data for the same site from 2013.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2013.tar.gz&quot;</span>
 
@@ -590,7 +595,7 @@ of the data we can do this using the flags:</p>
 <span class="n">data_2013</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_2013</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_2013</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># for this specific data need to reorganise to include file and precision data.</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise</span><span class="w"> </span><span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2013</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
@@ -601,7 +606,7 @@ of the data we can do this using the flags:</p>
 </pre></div>
 </div>
 <p>Searching should return one datasource as before:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">data_search4</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
 <span class="n">data_search4</span><span class="o">.</span><span class="n">results</span>
@@ -686,7 +691,7 @@ replace “identical” data (i.e. the same original input file with the same de
 <h3>6. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h3>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function again.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
@@ -772,8 +777,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -798,7 +803,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
