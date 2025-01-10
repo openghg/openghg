@@ -25,6 +25,7 @@ from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.types import MetadataAndData
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -781,18 +782,14 @@ def test_store_icos_carbonportal_data(bucket):
     with open(metadata_path, "r") as f:
         data = json.load(f)
 
-    data["co2"]["data"] = ds
+    data = [MetadataAndData(metadata=data["co2"]["metadata"], data=ds)]
 
     with ObsSurface(bucket=bucket) as metastore:
-        first_result = metastore.store_data(data=data)
-        second_result = metastore.store_data(data=data)
+        result = metastore.store_data(data=data)
 
-    assert filt(first_result, species="co2")[0]["new"] is True
+    assert result is not None
+    assert filt(result, species="co2")[0]["new"] is True
 
-    with ObsSurface(bucket=bucket) as obs:
-        second_result = obs.store_data(data=data)
-
-    assert second_result is None
 
 
 @pytest.mark.parametrize(

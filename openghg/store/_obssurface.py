@@ -1,13 +1,13 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, cast
-from collections.abc import MutableSequence, Sequence
+from typing import Any, MutableSequence, cast
+from collections.abc import Sequence
 
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
-from openghg.standardise.meta import sync_surface_metadata
+from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData
@@ -366,7 +366,7 @@ class ObsSurface(BaseStore):
                 for mdd in data:
                     mdd.data = mdd.data.chunk(chunks)
 
-            self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+            align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
@@ -540,7 +540,7 @@ class ObsSurface(BaseStore):
 
     def store_data(
         self,
-        data: dict,
+        data: MutableSequence[MetadataAndData],
         if_exists: str = "auto",
         overwrite: bool = False,
         force: bool = False,
@@ -573,8 +573,6 @@ class ObsSurface(BaseStore):
         Returns:
             list of dicts containing details of stored data, or None
         """
-        from openghg.util import hash_retrieved_data
-
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."
@@ -586,33 +584,9 @@ class ObsSurface(BaseStore):
         # obs = ObsSurface.load()
         # metastore = load_metastore(key=obs._metakey)
 
-        # Very rudimentary hash of the data and associated metadata
-        hashes = hash_retrieved_data(to_hash=data)
-        # Find the keys in data we've seen before
-        if force:
-            file_hashes_to_compare = set()
-        else:
-            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
-
         # Making sure data can be force overwritten if force keyword is included.
         if force and if_exists == "auto":
             if_exists = "new"
-
-        if len(file_hashes_to_compare) == len(data):
-            logger.warning("Note: There is no new data to process.")
-            return None
-
-        keys_to_process = set(data.keys())
-        if file_hashes_to_compare:
-            # TODO - add this to log
-            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
-            keys_to_process -= file_hashes_to_compare
-
-        to_process = [
-            MetadataAndData(metadata=v["metadata"], data=v["data"])
-            for k, v in data.items()
-            if k in keys_to_process
-        ]
 
         if required_metakeys is None:
             required_metakeys = (
@@ -632,7 +606,7 @@ class ObsSurface(BaseStore):
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
         datasource_uuids = self.assign_data(
-            data=to_process,
+            data=data,
             if_exists=if_exists,
             data_type=data_type,
             required_keys=required_metakeys,
@@ -640,8 +614,6 @@ class ObsSurface(BaseStore):
             compressor=compressor,
             filters=filters,
         )
-
-        self.store_hashes(hashes=hashes)
 
         return datasource_uuids
 
@@ -696,31 +668,3 @@ class ObsSurface(BaseStore):
 
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
-
-    def align_metadata_attributes(self, data: MutableSequence[MetadataAndData], update_mismatch: str) -> None:
-        """
-        Function to sync metadata and attributes if mismatch is found
-
-        Args:
-            data: Dictionary of source_name data, metadata, attributes
-            update_mismatch: This determines how mismatches between the internal data
-                "attributes" and the supplied / derived "metadata" are handled.
-                This includes the options:
-                    - "never" - don't update mismatches and raise an AttrMismatchError
-                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        Returns:
-            None
-        """
-        for gas_data in data:
-            measurement_data = gas_data.data
-            metadata = gas_data.metadata
-
-            attrs = measurement_data.attrs
-
-            metadata_aligned, attrs_aligned = sync_surface_metadata(
-                metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-            )
-
-            gas_data.metadata = metadata_aligned
-            measurement_data.attrs = attrs_aligned

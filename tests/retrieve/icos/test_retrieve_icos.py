@@ -4,7 +4,7 @@ import pytest
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
 from openghg.retrieve.icos import retrieve_atmospheric
-from openghg.types import AttrMismatchError
+from openghg.types import AttrMismatchError, MetadataAndData
 
 
 @pytest.mark.icos
@@ -83,6 +83,11 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "dataset_source": "ICOS",
     }
 
+    all_keys = set(expected_metadata.keys()).union(set(meta1.keys()))
+
+    for key in all_keys:
+        print(f"{key}\t{expected_metadata.get(key)}\t{meta1.get(key)}")
+
     assert expected_metadata.items() <= meta1.items()
 
     assert retrieve_all.call_count == 0
@@ -139,11 +144,12 @@ def mock_retrieve_remote(mocker):
 
     mocker.patch(
         "openghg.retrieve.icos._retrieve._retrieve_remote",
-        return_value={"ch4": {"metadata": mock_metadata, "data": mock_data}},
+        return_value=[MetadataAndData(metadata=mock_metadata, data=mock_data)],
     )
 
 
 @pytest.mark.icos
+@pytest.mark.xfail(reason="hashing removed from `ObsSurface.store_data`")
 def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
     """Test if retrieving the same data twice issues a warning the second time."""
     clear_test_stores()
@@ -173,7 +179,7 @@ def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
 @pytest.mark.icos
 def test_retrieve_sac_data_update_attrs_with_bool():
     with pytest.raises(AttrMismatchError):
-        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m")
+        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", store="user")
 
     with pytest.raises(ValueError):
-        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", update_mismatch=True)
+        retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", update_mismatch=True, store="user")
