@@ -248,7 +248,7 @@ def get_logfile_path() -> Path:
 
 
 def check_function_open_nc(
-    filepath: multiPathType, realign_on_domain: str | None = None
+    filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
 ) -> tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -259,30 +259,43 @@ def check_function_open_nc(
         filepath: Path or list of filepaths
         realign_on_domain: When present, realign the data on the given domain. Option usable
         when opening footprints or flux data but not observations and boundary conditions.
+        sel_month : when present keep only one month of data
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
+
+    if sel_month:
+        import numpy as np
+
+        def select_time(x: xr.Dataset) -> xr.Dataset:
+            # WARNING : designed for a specific case where a day from another month was present
+            # in a monthly file (concerns file from an old NAME_processing version).
+            # Not designed for a general case.
+            month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+            start_date = month.astype("datetime64[D]")
+            end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
+            return x.sel(time=slice(start_date, end_date))
+
+    def process(x: xr.Dataset) -> xr.Dataset:
+        if realign_on_domain and sel_month:
+            return align_lat_lon(select_time(x), realign_on_domain)
+        elif realign_on_domain:
+            return align_lat_lon(x, realign_on_domain)
+        elif sel_month:
+            return select_time(x)
+        else:
+            return x
+
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            if realign_on_domain:
-                xr_open_fn: Callable = partial(
-                    xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
-                )
-            else:
-                xr_open_fn = xr.open_mfdataset
+            xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=process)
             return xr_open_fn, filepath
-
         else:
             filepath = filepath[0]
 
-    if realign_on_domain:
-
-        def xr_open_fn(x: pathType) -> xr.DataArray | xr.Dataset:
-            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
-
-    else:
-        xr_open_fn = xr.open_dataset
+    def xr_open_fn(x: pathType) -> xr.DataArray | xr.Dataset:
+        return process(xr.open_dataset(x))
 
     return xr_open_fn, filepath
 

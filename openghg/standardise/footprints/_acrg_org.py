@@ -8,7 +8,6 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    # open_and_align_dataset,
     check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
@@ -65,8 +64,7 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    # fp_data, filepath = open_and_align_dataset(filepath, domain)
-    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
+    xr_open_fn, filepath = check_function_open_nc(filepath, domain, sel_month=True)
 
     fp_data = xr_open_fn(filepath)
 

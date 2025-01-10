@@ -13,6 +13,7 @@ from openghg.util import (
     sort_by_filenames,
 )
 
+
 def test_read_header():
     filename = "header_test.dat"
     dir_path = os.path.dirname(__file__)
