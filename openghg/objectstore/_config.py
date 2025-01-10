@@ -5,7 +5,7 @@ from pprint import pformat
 from pathlib import Path
 import pkgutil
 
-from openghg.types import ConfigFileError, ObjectStoreError
+from openghg.types import ConfigFileError
 from openghg.util import timestamp_now
 
 logger = logging.getLogger("openghg.objectstore")
@@ -127,14 +127,12 @@ def create_default_config(bucket: str) -> None:
         None
     """
     config_folderpath = _get_config_folderpath(bucket=bucket)
-    if config_folderpath.exists():
-        raise ObjectStoreError(f"config folder already exists at {config_folderpath}")
 
-    config_folderpath.mkdir(parents=True)
+    config_folderpath.mkdir(parents=True, exist_ok=True)
 
     # Make the expected folder structure
     db_config_folderpath = config_folderpath.joinpath("config")
-    db_config_folderpath.mkdir()
+    db_config_folderpath.mkdir(exist_ok=True)
 
     default_keys = get_metakey_defaults()
 
@@ -168,7 +166,7 @@ def _write_metakey_config(bucket: str, metakeys: dict) -> None:
 
     if not config_folder.exists():
         logger.debug(f"Creating folder at {config_folder}")
-        config_folder.mkdir(parents=True)
+        config_folder.mkdir(parents=True, exist_ok=True)
 
     metakey_path.write_text(json.dumps(config_data))
 
