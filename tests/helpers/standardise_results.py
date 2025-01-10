@@ -23,16 +23,3 @@ def select(results: list[dict], *args) -> list[dict]:
         selected_results.append({arg: res.get(arg) for arg in args})
 
     return selected_results
-
-
-def make_keys(results, *args) -> list[str]:
-    """Make strings combining values of metadata."""
-    if not args:
-        args = ("species", "inlet")
-
-    keys = []
-    for res in select(results, *args):
-        values_strings = list(map(str, res.values()))
-        keys.append("_".join(values_strings))
-
-    return keys
