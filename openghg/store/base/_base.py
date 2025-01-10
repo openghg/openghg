@@ -395,7 +395,7 @@ class BaseStore:
                 required_info = {
                     k: v
                     for k, v in metadata.items()
-                    if k in required_keys and v is not None and v != "not_set"
+                    if k in required_keys and v is not None and v not in not_set_metadata_values()
                 }
                 datasource_uuids.append({"uuid": datasource.uuid(), "new": new_ds, **required_info})
 
