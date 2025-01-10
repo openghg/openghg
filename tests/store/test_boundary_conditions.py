@@ -1,7 +1,6 @@
-import inspect
 import numpy as np
 import pytest
-from helpers import get_bc_datapath, clear_test_store, make_keys, select
+from helpers import get_bc_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
@@ -18,8 +17,6 @@ def test_read_data_monthly(mocker):
             pass
 
         def __str__(self) -> str:
-            print(inspect.currentframe())
-            self.uuid_num += 1
             return "test-uuid-1"
 
         @property
@@ -56,11 +53,10 @@ def test_read_data_monthly(mocker):
         source_format='openghg'
     )
 
-    assert proc_results is not None
-    print(proc_results)
-    print(fake_uuid.hex_num, fake_uuid.uuid_num)
-    assert {"uuid": "test-uuid-1", "new": True}.items() <= select(proc_results, "new", "uuid")[0].items()
-    assert make_keys(proc_results, "species", "bc_input", "domain")[0].lower() == "ch4_mozart_europe"
+    assert proc_results is not None and len(proc_results) == 1
+
+    expected_info = {"uuid": "test-uuid-1", "new": True, "species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
 
 def test_read_file_monthly():
@@ -76,7 +72,10 @@ def test_read_file_monthly():
         force=True,
     )
 
-    assert "ch4_mozart_europe" in make_keys(proc_results, "species", "bc_input", "domain")
+    assert len(proc_results) == 1
+
+    expected_info = {"species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
