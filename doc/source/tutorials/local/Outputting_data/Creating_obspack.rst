@@ -185,7 +185,7 @@ To create a new minor version, this can be run with the ``minor_version_only`` f
 
     create_obspack(search_df=search_df,
                    output_folder=output_folder,
-                   obspack_name=obspack_name,
+                   obspack_stub=obspack_stub,
                    minor_version_only=True)
 
 If the previous set of obspacks have been created, this new obspack will be called "test_obspack_v2.1".
@@ -198,7 +198,7 @@ To create a new major version,  this can be run with the ``major_version_only`` 
 
     create_obspack(search_df=search_df,
                    output_folder=output_folder,
-                   obspack_name=obspack_name,
+                   obspack_stub=obspack_stub,
                    major_version_only=True)
 
 If the previous set of obspacks have been created, this new obspack will be called "test_obspack_v3".
