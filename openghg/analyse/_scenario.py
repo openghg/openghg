@@ -361,14 +361,22 @@ class ModelScenario:
             site = clean_string(site)
 
             if fp_inlet is None:
+                # use obs network if we're trying to infer the height from site info
+                if self.obs is not None:
+                    network = network or self.obs.metadata.get("network")
+
                 height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
-                    logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
+                    logger.info(
+                        f"Using height_name option(s) for footprint inlet: {fp_inlet}."
+                        f"\nInferred from site={site}, network={network}, inlet={inlet}"
+                    )
 
             if fp_inlet is None:
                 if inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
+                    logger.info(f"Using observations' inlet height for footprints: {fp_inlet}")
                 elif inlet is None and height is not None:
                     fp_inlet = clean_string(height)
                 else:

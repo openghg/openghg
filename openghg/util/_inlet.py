@@ -193,8 +193,7 @@ def extract_height_name(
 
     site_data = get_site_info(site_filepath=site_filepath)
 
-    if site:
-        site_upper = site.upper()
+    site_upper = site.upper()
 
     if network is None:
         network = next(iter(site_data[site_upper]))
