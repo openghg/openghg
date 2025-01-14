@@ -7,31 +7,31 @@
     "mol mol-1": "1",
     "millimol mol-1": "1e-3",
     "micromol mol-1": "1e-6",
-    "nmol mol-1": "1e-9", 
+    "nmol mol-1": "1e-9",
     "nanomol mol-1": "1e-9",
     "pmol mol-1": "1e-12",
     "permil": "1",
     "per mil": "1",
-    "permeg": "1", 
+    "permeg": "1",
     "per meg":"1",
     "else": "unknown"
   },
   "unit_mol_fraction": [
-    "ppm", 
-    "ppb", 
-    "ppt", 
+    "ppm",
+    "ppb",
+    "ppt",
     "ppq",
     "mol mol-1",
     "millimol mol-1",
     "micromol mol-1",
-    "nmol mol-1", 
+    "nmol mol-1",
     "nanomol mol-1",
     "pmol mol-1"
   ],
   "unit_non_standard": [
-    "permil", 
-    "permeg", 
-    "per mil", 
+    "permil",
+    "permeg",
+    "per mil",
     "per meg"
   ],
   "unit_print": {
@@ -71,6 +71,18 @@
       "data_owner": "Tim Arnold",
       "data_owner_email": "tim.arnold@npl.co.uk",
       "Notes": "Rooftop instrument at NPL campus in Teddington"
+    }
+  },
+  "NIWA": {
+    "unit_species": { "CH4": "permille" },
+    "scale": {
+      "CH4": "V-PDB"
+    },
+    "instrument": "Picarro G2401",
+    "inlet": "10m",
+    "global_attributes": {
+      "data_owner": "Sara Mikaloff-Fletcher",
+      "data_owner_email": "Sara.Mikaloff-Fletcher@niwa.co.nz"
     }
   },
   "BTT": {
