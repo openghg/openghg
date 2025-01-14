@@ -418,7 +418,7 @@ def test_read_openghg_format(bucket):
     datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     results = standardise_surface(
-        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC"
+        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC", update_mismatch="metadata",
     )
 
     uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
@@ -861,6 +861,7 @@ def test_check_obssurface_multi_file_same_skip():
         instrument="picarro",
         sampling_period="1h",
         if_exists="new",
+        update_mismatch="metadata",
     )
 
     assert results
@@ -878,6 +879,7 @@ def test_check_obssurface_multi_file_same_skip():
         instrument="picarro",
         sampling_period="1h",
         if_exists="new",
+        update_mismatch="metadata",
     )
 
     assert not results
@@ -990,6 +992,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         site="TAC",
         network="DECC",
         store="group",
+        update_mismatch="metadata",
         **data_labels_1
     )
 
@@ -999,6 +1002,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         site="TAC",
         network="DECC",
         store="group",
+        update_mismatch="metadata",
         **data_labels_2
     )
 

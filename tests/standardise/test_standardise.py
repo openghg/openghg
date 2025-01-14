@@ -108,6 +108,7 @@ def test_standardise_obs_openghg():
         sampling_period="1h",
         force=True,
         store="user",
+        update_mismatch="metadata",
     )
 
     results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
