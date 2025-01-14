@@ -26,4 +26,4 @@ tinydb
 toml
 urllib3 >= 1.26.3
 xarray
-zarr
+zarr==2.18.3
