@@ -5,7 +5,16 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.11.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
+
+## [0.11.1] - 2025-01-10
+
+### Fixed
+
+- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
+- Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
+- Pinned Zarr to `2.18.3` as github runners are picking `zarr 3.0` which is still in significant development state.[PR #1205](https://github.com/openghg/openghg/pull/1205)
+- Added exist_ok = true argument to create_config_folder and removed ObjectStoreError call.[PR #1198](https://github.com/openghg/openghg/pull/1198)
 
 ### Updated
 
