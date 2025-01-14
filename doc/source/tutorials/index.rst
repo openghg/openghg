@@ -38,3 +38,9 @@ They'll also help you with managing and customising your object store.
    local/Managing_object_store/Managing_data
    local/Managing_object_store/Changing_object_store
    local/Managing_object_store/Converting_a_store
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Outputting data
+
+   local/Outputting_data/Creating_obspack
