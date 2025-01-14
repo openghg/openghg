@@ -16,6 +16,7 @@ from .helpers import (
     get_surface_datapath,
     glob_files,
     key_to_local_filepath,
+    print_dict_diff,
     temporary_store_paths,
 )
 from .meta import (
