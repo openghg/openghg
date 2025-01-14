@@ -67,6 +67,10 @@ def parse_niwa(
     niwa_params["species"] = species
 
     attributes = niwa_params
+    attributes["data_owner"] = attributes["global_attributes"]["data_owner"]
+    attributes["data_owner_email"] = attributes["global_attributes"]["data_owner_email"]
+    attributes["inlet_height_magl"] = inlet
+    attributes["units"] = attributes["unit_species"][species.upper()]
 
     metadata = {
         "species": species,
