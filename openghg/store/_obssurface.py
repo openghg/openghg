@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData
+from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData, DataOverlapError
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -605,15 +605,28 @@ class ObsSurface(BaseStore):
         data_type = "surface"
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
-        datasource_uuids = self.assign_data(
-            data=data,
-            if_exists=if_exists,
-            data_type=data_type,
-            required_keys=required_metakeys,
-            min_keys=5,
-            compressor=compressor,
-            filters=filters,
-        )
+
+        # Workaround to maintain old behavior without using hashes
+        # TODO: when zarr store updates are made, make default to combine any
+        # new data with the existing, ignoring new data that overlaps
+        datasource_uuids = []
+
+        for mdd in data:
+            try:
+                datasource_uuid = self.assign_data(
+                    data=[mdd],
+                    if_exists=if_exists,
+                    data_type=data_type,
+                    required_keys=required_metakeys,
+                    min_keys=5,
+                    compressor=compressor,
+                    filters=filters,
+                )
+            except DataOverlapError:
+                data_info = ", ".join(f"{key}={mdd.metadata.get(key)}" for key in required_metakeys)
+                logger.info(f"Skipping data that overlaps existing data:\n\t{data_info}.")
+            else:
+                datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
 
