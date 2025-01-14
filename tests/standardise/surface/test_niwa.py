@@ -9,9 +9,11 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
-@pytest.fixture(scope="session")
-def niwa_data():
+def test_niwa_parser():
+    "To test the NIWA network file parser"
     filepath = get_surface_datapath(filename="niwa.nc", source_format="NIWA")
 
-    data = parse_niwa(filepath=filepath, sampling_period="1h")
-    data
+    data = parse_niwa(filepath=filepath, sampling_period="1h", site="LAU",
+inlet=10)
+
+    assert "ch4" in data
