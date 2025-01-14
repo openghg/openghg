@@ -10,6 +10,14 @@ from xarray import open_dataset
 
 def test_read_data_monthly(mocker):
     class FakeUUID:
+        """A class that mocks `uuid.uuid4`.
+
+        It has a `hex` property, which is used by some of our code.
+        The values returned by `hex` are 0, 1, 2, ... (as strings).
+
+        It only returns one uuid, but could be changed to return a different UUID
+        each time.
+        """
         hex_num = 0
         uuid_num = 0
 
