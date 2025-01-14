@@ -74,7 +74,7 @@
     }
   },
   "NIWA": {
-    "unit_species": { "CH4": "permille" },
+    "unit_species": { "CH4": "ppb" },
     "scale": {
       "CH4": "V-PDB"
     },
