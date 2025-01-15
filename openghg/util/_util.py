@@ -1,6 +1,4 @@
-""" Utility functions that are used by multiple modules
-
-"""
+"""Utility functions that are used by multiple modules"""
 
 from collections.abc import Iterable
 from pathlib import Path

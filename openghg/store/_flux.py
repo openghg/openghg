@@ -33,7 +33,7 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> dict | None:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -78,7 +78,7 @@ class Flux(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read flux / emissions file
 
         Args:
@@ -178,7 +178,7 @@ class Flux(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -199,12 +199,10 @@ class Flux(BaseStore):
         flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
-        for split_data in flux_data.values():
+        for mdd in flux_data:
+            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
 
-            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
-
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
+            Flux.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
@@ -240,7 +238,7 @@ class Flux(BaseStore):
         filters: Any | None = None,
         optional_metadata: dict | None = None,
         **kwargs: dict,
-    ) -> dict:
+    ) -> list[dict]:
         """
         Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
@@ -310,9 +308,8 @@ class Flux(BaseStore):
         flux_data = parser_fn(**param)
 
         # Checking against expected format for Flux
-        for split_data in flux_data.values():
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
+        for mdd in flux_data:
+            Flux.validate_data(mdd.data)
 
         required_keys = ("species", "source", "domain")
 
@@ -324,8 +321,8 @@ class Flux(BaseStore):
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
             else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+                for parsed_data in flux_data:
+                    parsed_data.metadata.update(optional_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
@@ -337,6 +334,11 @@ class Flux(BaseStore):
             compressor=compressor,
             filters=filters,
         )
+
+        # "date" used to be part of the "keys" in the old datasource_uuids format
+        if "date" in param:
+            for du in datasource_uuids:
+                du["date"] = param["date"]
 
         return datasource_uuids
 

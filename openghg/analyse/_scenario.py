@@ -361,14 +361,22 @@ class ModelScenario:
             site = clean_string(site)
 
             if fp_inlet is None:
+                # use obs network if we're trying to infer the height from site info
+                if self.obs is not None:
+                    network = network or self.obs.metadata.get("network")
+
                 height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
-                    logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
+                    logger.info(
+                        f"Using height_name option(s) for footprint inlet: {fp_inlet}."
+                        f"\nInferred from site={site}, network={network}, inlet={inlet}"
+                    )
 
             if fp_inlet is None:
                 if inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
+                    logger.info(f"Using observations' inlet height for footprints: {fp_inlet}")
                 elif inlet is None and height is not None:
                     fp_inlet = clean_string(height)
                 else:
@@ -1325,7 +1333,6 @@ class ModelScenario:
             highest_res_H: int,
             max_h_back: int,
         ) -> xr.DataArray:
-
             # do low res calculation
             fp_residual = fp_HiTRes.sel(H_back=fp_HiTRes.H_back.max(), drop=True)  # take last H_back value
             flux_low_freq = flux_low_freq.reindex_like(fp_residual, method="ffill")  # forward fill times
@@ -1466,10 +1473,18 @@ class ModelScenario:
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
-            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
-            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
-            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
+            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename(  # type: ignore
+                "loss_n"
+            )
+            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename(  # type: ignore
+                "loss_e"
+            )
+            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename(  # type: ignore
+                "loss_s"
+            )
+            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename(  # type: ignore
+                "loss_w"
+            )
 
         else:
             loss_n = 1.0

@@ -12,7 +12,7 @@ def add_noaa_obspack(
     project: str | None = None,
     overwrite: bool = False,
     store: str | None = None,
-) -> dict:
+) -> list[dict]:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
 
@@ -22,8 +22,10 @@ def add_noaa_obspack(
         or "surface-flask"
         overwrite : Whether to overwrite existing entries in the object store
         store: Name of object store to write to
+
     Returns:
-        Dict: Details of data which has been processed into the object store
+        list: of dicts with details of data which has been processed into the object store
+
     Examples:
         To add all NOAA ObsPack data (which can be processed) to the object store:
         >>> add_noaa_obspack(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"))
@@ -84,14 +86,14 @@ def add_noaa_obspack(
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
-    processed_summary: dict[str, dict] = {}
+    processed_summary: list[dict] = []
     for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
-        processed = dict()
+        processed: list[dict] = []
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
@@ -106,18 +108,13 @@ def add_noaa_obspack(
                 )
             except Exception:
                 files_with_errors.append(filepath.name)
+            else:
+                processed_summary.extend(processed)
 
         elif _project in project_names_not_implemented:
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
-
-        # Expect "processed" dictionary and/or "error" dictionary within `processed`
-        for key, value in processed.items():
-            if key not in processed_summary:
-                processed_summary[key] = {}
-            for key_in, value_in in value.items():
-                processed_summary[key][key_in] = value_in
 
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
