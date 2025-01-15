@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import numpy as np
-import xarray as xr
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
@@ -13,6 +12,10 @@ from typing import (
     runtime_checkable,
 )
 from collections import defaultdict
+
+import numpy as np
+import xarray as xr
+
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
@@ -32,11 +35,17 @@ class TimePeriod(NamedTuple):
     unit: str | None = None
 
 
-class MetadataAndData(NamedTuple):
+@dataclass
+class MetadataAndData:
     """A very simple implementation of the `HasMetadataAndData` protocol."""
 
     metadata: dict
     data: xr.Dataset
+
+
+def convert_to_list_of_metadata_and_data(nested_dict: dict) -> list[MetadataAndData]:
+    """Convert from old nested dict format to list of MetadataAndData."""
+    return [MetadataAndData(v["metadata"], v["data"]) for v in nested_dict.values()]
 
 
 @runtime_checkable

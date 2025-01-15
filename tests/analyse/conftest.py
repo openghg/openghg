@@ -55,6 +55,7 @@ def data_read():
         site=site2,
         network=network2,
         inlet="10m",
+        update_mismatch="metadata",
     )
 
     # Emissions / Flux data

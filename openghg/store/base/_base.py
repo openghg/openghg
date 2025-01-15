@@ -1,21 +1,22 @@
-""" This file contains the BaseStore class from which other storage
-    modules inherit.
+"""This file contains the BaseStore class from which other storage
+modules inherit.
 """
 
 from __future__ import annotations
 import logging
 import math
 from pathlib import Path
-from pandas import Timestamp
 from types import TracebackType
 from typing import Any, TypeVar
-from collections.abc import Sequence
+from collections.abc import MutableSequence, Sequence
+
+from pandas import Timestamp
 import xarray as xr
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import DatasourceLookupError, multiPathType
+from openghg.types import DatasourceLookupError, multiPathType, MetadataAndData
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
@@ -89,16 +90,18 @@ class BaseStore:
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(self, *args: Any, **kwargs: Any) -> dict | None:
+    def read_data(
+        self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
+    ) -> list[dict] | None:
         raise NotImplementedError
 
-    def read_file(self, *args: Any, **kwargs: Any) -> dict:
+    def read_file(self, *args: Any, **kwargs: Any) -> list[dict]:
         raise NotImplementedError
 
-    def store_data(self, *args: Any, **kwargs: Any) -> dict | None:
+    def store_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
         raise NotImplementedError
 
-    def transform_data(self, *args: Any, **kwargs: Any) -> dict:
+    def transform_data(self, *args: Any, **kwargs: Any) -> list[dict]:
         raise NotImplementedError
 
     def chunking_schema(self) -> ChunkingSchema:
@@ -180,15 +183,17 @@ class BaseStore:
 
         return self.metakeys
 
-    def update_metadata(self, data: dict, input_parameters: dict, additional_metadata: dict) -> dict:
+    MST = TypeVar("MST", bound=MutableSequence[MetadataAndData])
+
+    def update_metadata(self, data: MST, input_parameters: dict, additional_metadata: dict) -> MST:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
-            data: Dictionary containing data and metadata for datasource
+            data: sequence (e.g. list) of objects containing data and metadata for datasource
             input_parameters: Input parameters from read_file...
             additional_metadata: Keys to add to the metadata dictionary
         Returns:
-            dict: data dictionary with metadata keys added
+            list of data and metadata objects with updated metadata
         """
         from openghg.util import merge_dict
 
@@ -198,8 +203,8 @@ class BaseStore:
         # We might not get any optional keys
         optional = metakeys.get("optional", {})
 
-        for parsed_data in data.values():
-            metadata = parsed_data["metadata"]
+        for parsed_data in data:
+            metadata = parsed_data.metadata
 
             # Sources of additional metadata - order in list is order of preference.
             sources = [input_parameters, additional_metadata]
@@ -223,7 +228,7 @@ class BaseStore:
                 additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
                 metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
 
-            parsed_data["metadata"] = metadata
+            parsed_data.metadata = metadata
 
         return data
 
@@ -249,7 +254,7 @@ class BaseStore:
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
 
-    def get_lookup_keys(self, data: dict) -> list[str]:
+    def get_lookup_keys(self, data: MutableSequence[MetadataAndData]) -> list[str]:
         """This creates the list of keys required to perform the Datasource lookup.
         If optional_metadata is passed in then those keys may be taken into account
         if they exist in the list of stored optional keys.
@@ -270,8 +275,8 @@ class BaseStore:
         # Note: Just grabbing the first entry in data at the moment
         # In principle the metadata should have the same keys for all entries
         # but should check that assumption is reasonable
-        parsed_data_representative = list(data.values())[0]
-        metadata = parsed_data_representative["metadata"]
+        parsed_data_representative = data[0]
+        metadata = parsed_data_representative.metadata
 
         # Matching between potential optional keys and those present in the metadata
         optional_lookup = set(optional) & set(metadata.keys())
@@ -281,7 +286,7 @@ class BaseStore:
 
     def assign_data(
         self,
-        data: dict,
+        data: MutableSequence[MetadataAndData],
         data_type: str,
         required_keys: Sequence[str] | None = None,
         sort: bool = True,
@@ -292,7 +297,7 @@ class BaseStore:
         new_version: bool = True,
         compressor: Any | None = None,
         filters: Any | None = None,
-    ) -> dict[str, dict]:
+    ) -> list[dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
 
@@ -315,16 +320,14 @@ class BaseStore:
                 compressor: Compression for zarr encoding
                 filters: Filters for zarr encoding
             Returns:
-                dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
+                dict mapping key based on required keys to Datasource UUIDs created or updated
         """
         from openghg.store.base import Datasource
         from openghg.util import not_set_metadata_values
 
-        uuids = {}
+        datasource_uuids = []
 
         # Get the metadata keys for this type
-        # metakeys = self.get_metakeys()
-
         if not required_keys:
             required_keys = self.get_lookup_keys(data=data)
 
@@ -335,12 +338,9 @@ class BaseStore:
             # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
             skip_keys = ["object_store"]
 
-            for key, parsed_data in data.items():
-                metadata = parsed_data["metadata"]
-                dataset = parsed_data["data"]
-
-                # Our lookup results and gas data have the same keys
-                uuid = lookup_results[key]
+            for uuid, parsed_data in zip(lookup_results, data):
+                metadata = parsed_data.metadata
+                dataset = parsed_data.data
 
                 ignore_values = not_set_metadata_values()
 
@@ -352,7 +352,7 @@ class BaseStore:
 
                 # Take a copy of the metadata so we can update it
                 meta_copy = metadata.copy()
-                new_ds = uuid is False
+                new_ds = uuid is None
 
                 if new_ds:
                     datasource = Datasource(bucket=self._bucket)
@@ -387,18 +387,29 @@ class BaseStore:
 
                 if new_ds:
                     self._metastore.insert(datasource_metadata)
+                    logger.info("Created new datasource with UUID %s", datasource.uuid())
                 else:
                     self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
+                    logger.info("Added data to existing datasource with UUID %s", datasource.uuid())
 
-                uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+                required_info = {
+                    k: v
+                    for k, v in metadata.items()
+                    if k in required_keys and v is not None and v not in not_set_metadata_values()
+                }
+                datasource_uuids.append({"uuid": datasource.uuid(), "new": new_ds, **required_info})
+
         finally:
             self._metastore.release_lock()
 
-        return uuids
+        return datasource_uuids
 
     def datasource_lookup(
-        self, data: dict, required_keys: Sequence[str], min_keys: int | None = None
-    ) -> dict:
+        self,
+        data: MutableSequence[MetadataAndData],
+        required_keys: Sequence[str],
+        min_keys: int | None = None,
+    ) -> list[str | None]:
         """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
         to be present and will require at least min_keys of these to be present when searching.
 
@@ -419,9 +430,9 @@ class BaseStore:
         if min_keys is None:
             min_keys = len(required_keys)
 
-        results = {}
-        for key, _data in data.items():
-            metadata = _data["metadata"]
+        results: list[str | None] = []
+        for _data in data:
+            metadata = _data.metadata
 
             required_metadata = {
                 k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
@@ -437,11 +448,11 @@ class BaseStore:
             required_result = self._metastore.search(required_metadata)
 
             if not required_result:
-                results[key] = False
+                results.append(None)
             elif len(required_result) > 1:
                 raise DatasourceLookupError("More than one Datasource found for metadata, refine lookup.")
             else:
-                results[key] = required_result[0]["uuid"]
+                results.append(required_result[0]["uuid"])
 
         return results
 

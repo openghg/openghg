@@ -84,6 +84,51 @@ def test_sync_surface_metadata():
     assert attrs == updated_attrs
 
 
+def test_parse_openghg_output_with_site_info_attr_mismatch():
+    """The metadata and attributes in this test were created by parse_openghg.
+
+
+    The attributes have different site info than `site_info.json`, so there is a
+    mismatch on site lat, lon, height.
+    """
+    metadata = {
+        "site": "tac",
+        "species": "co2",
+        "network": "decc",
+        "instrument": "picarro",
+        "sampling_period": "3600.0",
+        "calibration_scale": "WMO-X2007",
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet": "54m",
+        "inlet_height_magl": "54",
+        "data_type": "surface",
+        "station_longitude": 1.1387,
+        "station_latitude": 52.51882,
+        "station_long_name": "Tacolneston Tower, UK",
+        "station_height_masl": 64,
+    }
+    attrs = {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "54",
+        "site": "tac",
+        "instrument": "picarro",
+        "sampling_period": "3600.0",
+        "inlet": "54m",
+        "network": "decc",
+        "species": "co2",
+        "calibration_scale": "WMO-X2007",
+        "station_longitude": 1.13872,
+        "station_latitude": 52.51775,
+        "station_long_name": "Tacolneston Tower, UK",
+        "station_height_masl": 50.0,
+    }
+
+    with pytest.raises(AttrMismatchError):
+        sync_surface_metadata(metadata, attrs)
+
+
 def test_metadata_latlon_tolerance():
     metadata = {
         "station_longitude": -38.422,

@@ -928,7 +928,6 @@ def evaluate_sampling_period(sampling_period: Timedelta | str | None) -> str | N
     """
     # If we have a sampling period passed we want the number of seconds
     if sampling_period is not None:
-
         # Check format of input string matches expected
         sampling_period = str(sampling_period)
         re_sampling_period = re.compile(r"\d+[.]?\d*\s*[a-zA-Z]+")

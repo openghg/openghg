@@ -1,5 +1,5 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
 
 from ._cli import cli

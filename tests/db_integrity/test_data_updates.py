@@ -863,8 +863,8 @@ def test_standardising_footprint_with_additional_keys(
         store="user",
     )
 
-    standard_dict = standard_standardised[next(iter(standard_standardised))]
-    special_dict = special_standardised[next(iter(special_standardised))]
+    standard_dict = standard_standardised[0]
+    special_dict = special_standardised[0]
 
     assert special_dict["new"] == True
     assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?
