@@ -844,4 +844,6 @@ def test_standardise_footprints_different_datasources(mock_metakeys):
     )
 
     # Make sure they're different Datasources
-    assert res_1["tac_test_UKV_100m"]["uuid"] != res_2["tac_test_UKV_100m"]["uuid"]
+    assert res_1[0]["uuid"] != res_2[0]["uuid"]
+
+    # key: "tac_test_UKV_100m"

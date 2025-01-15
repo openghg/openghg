@@ -5,12 +5,33 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.10.1...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
+
+## [0.11.1] - 2025-01-10
+
+### Fixed
+
+- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
+- Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
+- Pinned Zarr to `2.18.3` as github runners are picking `zarr 3.0` which is still in significant development state.[PR #1205](https://github.com/openghg/openghg/pull/1205)
+- Added exist_ok = true argument to create_config_folder and removed ObjectStoreError call.[PR #1198](https://github.com/openghg/openghg/pull/1198)
+
+### Updated
+
+- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
+
+### Fixed
+
+- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
+- Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
+
+## [0.11.0] - 2024-12-16
 
 ### Fixed
 
 - Fixed options used with `xr.Dataset.to_zarr` in reponse to updates in xarray. [PR #1160](https://github.com/openghg/openghg/pull/1160)
 - Added xfail for `cfchecker` tests due to broken link. [PR #1178](https://github.com/openghg/openghg/pull/1178)
+- Removed duplicate code from `read_file` method in `BoundaryConditions` and `EulerianModel`. [PR #1192](https://github.com/openghg/openghg/pull/1192)
 
 ### Added
 
@@ -26,11 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Removed serverless/cloud code since it is not being used. [PR #1177](https://github.com/openghg/openghg/pull/1177)
 - Minimum version of python to 3.10. [PR #1175](https://github.com/openghg/openghg/pull/1175)
 - Updated ICOS standardise function to reflect changes in ASCII file format. [PR #1140](https://github.com/openghg/openghg/pull/1140)
 - Added `rename_vars` option to `get_obs_surface` to allow variable names based around species to be returned. [PR #1130](https://github.com/openghg/openghg/pull/1130)
 - Added option to `get_obs_column` to return the column data directly rather than converting to mole fractions. [PR #1131](https://github.com/openghg/openghg/pull/1131)
 - Made calculations in `ModelScenario._calc_modelled_obs_HiTRes` more efficient. [PR #1062](https://github.com/openghg/openghg/pull/1062)
+- Updated type hints and `typing` imports for Python 3.10 [PR #1193](https://github.com/openghg/openghg/pull/1193)
 
 ## [0.10.1] - 2024-09-27
 

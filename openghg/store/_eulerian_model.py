@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 import logging
 from openghg.store.base import BaseStore
 from openghg.util import load_standardise_parser, split_function_inputs
@@ -29,22 +29,22 @@ class EulerianModel(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         model: str,
         species: str,
         source_format: str = "openghg",
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        setup: Optional[str] = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        setup: str | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> Dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Read Eulerian model output
 
         Args:
@@ -128,7 +128,7 @@ class EulerianModel(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -145,35 +145,6 @@ class EulerianModel(BaseStore):
         parser_input_parameters, additional_input_parameters = split_function_inputs(
             fn_input_parameters, parser_fn
         )
-
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return {}
-
-        filepath = next(iter(unseen_hashes.values()))
-
-        if chunks is None:
-            chunks = {}
-
-        # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         # Call appropriate standardisation function with input parameters
         eulerian_model_data = parser_fn(**parser_input_parameters)

@@ -1,6 +1,5 @@
 import re
 from pathlib import Path
-from typing import Optional, Tuple, Union
 import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
@@ -19,9 +18,9 @@ __all__ = ["infer_date_range", "update_zero_dim"]
 def infer_date_range(
     time: DataArray,
     filepath: optionalPathType = None,
-    period: Optional[Union[str, tuple]] = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
-) -> Tuple[Timestamp, Timestamp, str]:
+) -> tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension.
 

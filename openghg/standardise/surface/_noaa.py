@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Hashable, Optional, Union, cast
+from typing import Any, cast
+from collections.abc import Hashable
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
@@ -12,17 +13,17 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_noaa(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
+    inlet: str | None = None,
     network: str = "NOAA",
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
-    **kwarg: Dict,
-) -> Dict:
+    **kwarg: dict,
+) -> dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
 
     Args:
@@ -154,9 +155,7 @@ def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     return processed_ds
 
 
-def _split_inlets(
-    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
-) -> Dict:
+def _split_inlets(obspack_ds: xr.Dataset, attributes: dict, metadata: dict, inlet: str | None = None) -> dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -186,7 +185,7 @@ def _split_inlets(
     # If so we need to select the data for each inlet and indicate this is a separate Datasource
     # Each data key is labelled based on the species and the inlet (if needed)
 
-    gas_data: Dict[str, Dict] = {}
+    gas_data: dict[str, dict] = {}
     if height_var in obspack_ds.data_vars:
         if inlet is not None:
             # TODO: Add to logging?
@@ -272,15 +271,15 @@ def _split_inlets(
 
 
 def _read_obspack(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
-) -> Dict[str, Dict]:
+) -> dict[str, dict]:
     """Read NOAA ObsPack NetCDF files
 
     Args:
@@ -389,7 +388,7 @@ def _read_obspack(
     metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", not_set_value)
 
     # Create attributes with copy of metadata values
-    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
+    attributes = cast(dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
@@ -422,15 +421,15 @@ def _read_obspack(
 
 
 def _read_raw_file(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
-) -> Dict:
+) -> dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.
 
@@ -491,7 +490,7 @@ def _read_raw_data(
     inlet: str,
     sampling_period: str,
     measurement_type: str = "flask",
-) -> Dict:
+) -> dict:
     """Separates the gases stored in the dataframe in
     separate dataframes and returns a dictionary of gases
     with an assigned UUID as gas:UUID and a list of the processed

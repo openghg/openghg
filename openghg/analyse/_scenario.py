@@ -45,7 +45,8 @@ on which data types are missing.
 """
 
 import logging
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Literal, Optional, Union, cast
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -76,7 +77,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
 
-ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
+ParamType = Union[list[dict[str, str | None]], dict[str, str | None]]
 methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
@@ -95,25 +96,25 @@ class ModelScenario:
 
     def __init__(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        fp_inlet: Union[str, list, None] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        bc_input: Optional[str] = None,
-        start_date: Union[str, Timestamp, None] = None,
-        end_date: Union[str, Timestamp, None] = None,
-        obs: Optional[ObsData] = None,
-        footprint: Optional[FootprintData] = None,
-        flux: Union[FluxData, Dict[str, FluxData], None] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        domain: str | None = None,
+        model: str | None = None,
+        met_model: str | None = None,
+        fp_inlet: str | list | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        bc_input: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        footprint: FootprintData | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ):
         """
         Create a ModelScenario instance based on a set of keywords to be
@@ -154,10 +155,10 @@ class ModelScenario:
         these into the appropriate class?
         """
 
-        self.obs: Optional[ObsData] = None
-        self.footprint: Optional[FootprintData] = None
-        self.fluxes: Optional[Dict[str, FluxData]] = None
-        self.bc: Optional[BoundaryConditionsData] = None
+        self.obs: ObsData | None = None
+        self.footprint: FootprintData | None = None
+        self.fluxes: dict[str, FluxData] | None = None
+        self.bc: BoundaryConditionsData | None = None
 
         if species is not None:
             species = synonyms(species)
@@ -224,10 +225,10 @@ class ModelScenario:
         )
 
         # Initialise attributes used for caching
-        self.scenario: Optional[Dataset] = None
-        self.modelled_obs: Optional[DataArray] = None
-        self.modelled_baseline: Optional[DataArray] = None
-        self.flux_stacked: Optional[Dataset] = None
+        self.scenario: Dataset | None = None
+        self.modelled_obs: DataArray | None = None
+        self.modelled_baseline: DataArray | None = None
+        self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
 
@@ -283,15 +284,15 @@ class ModelScenario:
 
     def add_obs(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        obs: Optional[ObsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
@@ -330,19 +331,19 @@ class ModelScenario:
 
     def add_footprint(
         self,
-        site: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        species: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
-        network: Optional[str] = None,
-        footprint: Optional[FootprintData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        domain: str | None = None,
+        model: str | None = None,
+        met_model: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        species: str | None = None,
+        fp_inlet: str | list | None = None,
+        network: str | None = None,
+        footprint: FootprintData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
@@ -360,14 +361,22 @@ class ModelScenario:
             site = clean_string(site)
 
             if fp_inlet is None:
+                # use obs network if we're trying to infer the height from site info
+                if self.obs is not None:
+                    network = network or self.obs.metadata.get("network")
+
                 height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
-                    logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
+                    logger.info(
+                        f"Using height_name option(s) for footprint inlet: {fp_inlet}."
+                        f"\nInferred from site={site}, network={network}, inlet={inlet}"
+                    )
 
             if fp_inlet is None:
                 if inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
+                    logger.info(f"Using observations' inlet height for footprints: {fp_inlet}")
                 elif inlet is None and height is not None:
                     fp_inlet = clean_string(height)
                 else:
@@ -423,14 +432,14 @@ class ModelScenario:
 
     def add_flux(
         self,
-        species: Optional[str] = None,
-        domain: Optional[str] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        domain: str | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
@@ -517,13 +526,13 @@ class ModelScenario:
 
     def add_bc(
         self,
-        species: Optional[str] = None,
-        bc_input: Optional[str] = None,
-        domain: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        bc_input: str | None = None,
+        domain: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ) -> None:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
@@ -545,7 +554,7 @@ class ModelScenario:
 
         self.bc = bc
 
-    def _check_data_is_present(self, need: Optional[Union[str, Sequence]] = None) -> None:
+    def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """
         Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -579,7 +588,7 @@ class ModelScenario:
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
-    def _get_platform(self) -> Optional[str]:
+    def _get_platform(self) -> str | None:
         """
         Find the platform for a site, if present.
 
@@ -603,7 +612,7 @@ class ModelScenario:
                 platform: str = site_details.get("platform")
                 return platform
 
-    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: Optional[str] = None) -> Tuple:
+    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: str | None = None) -> tuple:
         """
         Slice and resample obs and footprint data to align along time
 
@@ -760,7 +769,7 @@ class ModelScenario:
     def combine_obs_footprint(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Dataset:
@@ -813,7 +822,7 @@ class ModelScenario:
         # Save the observation data units
         try:
             mf = obs.data["mf"]
-            units: Optional[float] = float(mf.attrs["units"])
+            units: float | None = float(mf.attrs["units"])
         except (ValueError, KeyError):
             units = None
         except AttributeError:
@@ -846,13 +855,13 @@ class ModelScenario:
 
         return combined_dataset
 
-    def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
+    def _clean_sources_input(self, sources: str | list | None = None) -> list:
         """
         Check sources input and make sure this is a list. If None, this will extract
         all sources from self.fluxes.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         if sources is None:
             sources = list(flux_dict.keys())
@@ -862,7 +871,7 @@ class ModelScenario:
         return sources
 
     def combine_flux_sources(
-        self, sources: Optional[Union[str, List]] = None, cache: bool = True, recalculate: bool = False
+        self, sources: str | list | None = None, cache: bool = True, recalculate: bool = False
     ) -> Dataset:
         """
         Combine together flux sources on the time dimension. This will align to
@@ -876,7 +885,7 @@ class ModelScenario:
             Dataset: All flux sources stacked on the time dimension.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         time_dim = "time"
 
@@ -935,7 +944,7 @@ class ModelScenario:
         self,
         param: str = "modelled_obs",
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         recalculate: bool = False,
     ) -> bool:
         """
@@ -1004,9 +1013,9 @@ class ModelScenario:
 
     def calc_modelled_obs(
         self,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1073,7 +1082,7 @@ class ModelScenario:
 
     def _calc_modelled_obs_integrated(
         self,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         output_TS: bool = True,
         output_fpXflux: bool = False,
     ) -> Any:
@@ -1121,8 +1130,8 @@ class ModelScenario:
 
     def _calc_modelled_obs_HiTRes(
         self,
-        sources: Optional[Union[str, List]] = None,
-        averaging: Optional[str] = None,
+        sources: str | list | None = None,
+        averaging: str | None = None,
         output_TS: bool = True,
         output_fpXflux: bool = False,
     ) -> Any:
@@ -1324,7 +1333,6 @@ class ModelScenario:
             highest_res_H: int,
             max_h_back: int,
         ) -> xr.DataArray:
-
             # do low res calculation
             fp_residual = fp_HiTRes.sel(H_back=fp_HiTRes.H_back.max(), drop=True)  # take last H_back value
             flux_low_freq = flux_low_freq.reindex_like(fp_residual, method="ffill")  # forward fill times
@@ -1374,7 +1382,7 @@ class ModelScenario:
     def calc_modelled_baseline(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         output_units: float = 1e-9,
         cache: bool = True,
         recalculate: bool = False,
@@ -1425,16 +1433,16 @@ class ModelScenario:
         check_monthly = check_lifetime_monthly(lifetime_value)
 
         if check_monthly:
-            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
-            lifetime: Optional[str] = None
+            lifetime_monthly = cast(list[str] | None, lifetime_value)
+            lifetime: str | None = None
         else:
             lifetime_monthly = None
-            lifetime = cast(Optional[str], lifetime_value)
+            lifetime = cast(str | None, lifetime_value)
 
         if lifetime is not None:
             short_lifetime = True
             lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.0
+            lifetime_hrs: float | np.ndarray = lt_time_delta.total_seconds() / 3600.0
         elif lifetime_monthly:
             short_lifetime = True
             lifetime_monthly_hrs = []
@@ -1465,10 +1473,18 @@ class ModelScenario:
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
-            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
-            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
-            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
+            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename(  # type: ignore
+                "loss_n"
+            )
+            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename(  # type: ignore
+                "loss_e"
+            )
+            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename(  # type: ignore
+                "loss_s"
+            )
+            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename(  # type: ignore
+                "loss_w"
+            )
 
         else:
             loss_n = 1.0
@@ -1522,9 +1538,9 @@ class ModelScenario:
     def footprints_data_merge(
         self,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         calc_timeseries: bool = True,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
@@ -1603,10 +1619,10 @@ class ModelScenario:
 
     def plot_comparison(
         self,
-        baseline: Optional[str] = "boundary_conditions",
-        sources: Optional[Union[str, List]] = None,
+        baseline: str | None = "boundary_conditions",
+        sources: str | list | None = None,
         resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Any:
@@ -1718,7 +1734,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: float | None = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1754,10 +1770,10 @@ def combine_datasets(
 
 def match_dataset_dims(
     datasets: Sequence[Dataset],
-    dims: Union[str, Sequence] = [],
+    dims: str | Sequence = [],
     method: methodType = "nearest",
-    tolerance: Union[float, Dict[str, float]] = 1e-5,
-) -> List[Dataset]:
+    tolerance: float | dict[str, float] = 1e-5,
+) -> list[Dataset]:
     """
     Aligns datasets to the selected dimensions within a tolerance.
     All datasets will be aligned to the first dataset within the list.

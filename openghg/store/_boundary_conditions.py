@@ -3,17 +3,19 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING
+
 import numpy as np
 from xarray import Dataset
 
-from openghg.util import synonyms, load_standardise_parser, split_function_inputs
+from openghg.util import align_lat_lon, load_standardise_parser, split_function_inputs, synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
 from openghg.store.spec import define_standardise_parsers
+
 
 __all__ = ["BoundaryConditions"]
 
@@ -32,10 +34,10 @@ class BoundaryConditions(BaseStore):
     def read_data(
         self,
         binary_data: bytes,
-        metadata: Dict,
-        file_metadata: Dict,
+        metadata: dict,
+        file_metadata: dict,
         source_format: str,
-    ) -> Optional[Dict]:
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -62,22 +64,22 @@ class BoundaryConditions(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         bc_input: str,
         domain: str,
         source_format: str,
-        period: Optional[Union[str, tuple]] = None,
+        period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Read boundary conditions file
 
         Args:
@@ -117,7 +119,7 @@ class BoundaryConditions(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
-            dict: Dictionary of files processed and datasource UUIDs data assigned to
+            list: of dictionaries of files processed and datasource UUIDs data assigned to, plus "required" metadata
         """
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
@@ -132,28 +134,6 @@ class BoundaryConditions(BaseStore):
         species = synonyms(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
-
-        data_type = self._data_type
-        standardise_parsers = define_standardise_parsers()[data_type]
-
-        try:
-            source_format = standardise_parsers[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Get current parameter values and filter to only include function inputs
-        current_parameters = locals().copy()
-        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
-
-        fn_input_parameters["filepath"] = filepath
-
-        # Loading parser
-        parser_fn = load_standardise_parser(data_type=data_type, source_format=source_format)
-
-        # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
-        )
 
         # Specify any additional metadata to be added
         additional_metadata = {}
@@ -173,10 +153,20 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
+        try:
+            source_format = standardise_parsers[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+        # Loading parser
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -187,15 +177,17 @@ class BoundaryConditions(BaseStore):
         fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
-        # Call appropriate standardisation function with input parameters
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
+
+        # Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
-        for split_data in boundary_conditions_data.values():
-            # Currently ACRG boundary conditions are split by month or year
-            bc_data = split_data["data"]
-
-            # Checking against expected format for boundary conditions
-            BoundaryConditions.validate_data(bc_data)
+        for mdd in boundary_conditions_data:
+            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
+            BoundaryConditions.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
@@ -244,7 +236,7 @@ class BoundaryConditions(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {
+        data_vars: dict[str, tuple[str, ...]] = {
             "vmr_n": ("time", "height", "lon"),
             "vmr_e": ("time", "height", "lat"),
             "vmr_s": ("time", "height", "lon"),

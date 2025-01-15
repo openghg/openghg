@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-import numpy as np
-import xarray as xr
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
-    DefaultDict,
-    Dict,
-    List,
-    Tuple,
     Union,
     Optional,
     TypeVar,
@@ -16,11 +11,16 @@ from typing import (
     Protocol,
     runtime_checkable,
 )
+from collections import defaultdict
+
+import numpy as np
+import xarray as xr
+
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
-multiPathType = Union[str, Path, Tuple, List]
-resultsType = DefaultDict[str, Dict]
+multiPathType = Union[str, Path, tuple, list]
+resultsType = defaultdict[str, dict]
 
 # Create types for ndarray or xr.DataArray inputs
 # Using TypeVar means - whichever type is passed in will be the one which is returned.
@@ -31,15 +31,21 @@ XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
 
 
 class TimePeriod(NamedTuple):
-    value: Union[int, float, None] = None
-    unit: Optional[str] = None
+    value: int | float | None = None
+    unit: str | None = None
 
 
-class MetadataAndData(NamedTuple):
+@dataclass
+class MetadataAndData:
     """A very simple implementation of the `HasMetadataAndData` protocol."""
 
     metadata: dict
     data: xr.Dataset
+
+
+def convert_to_list_of_metadata_and_data(nested_dict: dict) -> list[MetadataAndData]:
+    """Convert from old nested dict format to list of MetadataAndData."""
+    return [MetadataAndData(v["metadata"], v["data"]) for v in nested_dict.values()]
 
 
 @runtime_checkable

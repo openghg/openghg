@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 import pandas as pd
 import re
@@ -16,16 +15,16 @@ from openghg.util import clean_string, format_inlet
 
 
 def parse_agage(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
+    measurement_type: str | None = None,
     update_mismatch: str = "from_source",
     site_filepath: optionalPathType = None,
-) -> Dict:
+) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
@@ -94,7 +93,7 @@ def parse_agage(
             raise ValueError("Cannot process empty file.")
 
         # This metadata will be added to when species are split and attributes are written
-        metadata: Dict[str, str] = {
+        metadata: dict[str, str] = {
             "instrument": instrument,
             "site": site,
             "network": network,
@@ -167,11 +166,11 @@ def parse_agage(
 def _format_species(
     data: pd.DataFrame,
     species: str,
-    metadata: Dict,
+    metadata: dict,
     units: str,
     scale: str,
-    file_params: Dict,
-) -> Dict:
+    file_params: dict,
+) -> dict:
     """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
     Note that because .nc files contain only a single species, this function is no longer called _split_species
 
@@ -274,6 +273,6 @@ def _format_species(
         combined_data[data_key]["data"] = species_data
         combined_data[data_key]["attributes"] = attributes
 
-    to_return: Dict = combined_data.to_dict()
+    to_return: dict = combined_data.to_dict()
 
     return to_return

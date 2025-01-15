@@ -1,9 +1,8 @@
-import json
 import logging
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, TypeVar
+from collections.abc import Iterable
 
 from openghg.dataobjects import ObsData
-from openghg.util import running_on_hub
 from pandas import DataFrame
 
 __all__ = ["SearchResults"]
@@ -27,10 +26,10 @@ class SearchResults:
     # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(
         self,
-        metadata: Optional[Dict] = None,
-        start_result: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
+        metadata: dict | None = None,
+        start_result: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
     ):
         # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:
@@ -55,8 +54,6 @@ class SearchResults:
         self._start_date = start_date
         self._end_date = end_date
 
-        self.hub = running_on_hub()
-
     def __str__(self) -> str:
         SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
 
@@ -74,45 +71,13 @@ class SearchResults:
     # def __iter__(self) -> Iterator:
     #     yield from self.results.iterrows()
 
-    def to_data(self) -> Dict:
-        """Convert this object to a dictionary for JSON serialisation
-
-        Returns:
-            dict: Dictionary of data
-        """
-        return {
-            "metadata": self.metadata,
-            "hub": self.hub,
-        }
-
-    def to_json(self) -> str:
-        """Serialises the object to JSON
-
-        Returns:
-            str: JSON str
-        """
-        return json.dumps(self.to_data())
-
-    @classmethod
-    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
-        """Create a SearchResults object from a dictionary
-
-        Args:
-            data: Serialised object
-        Returns:
-            SearchResults: SearchResults object
-        """
-        loaded = json.loads(data)
-
-        return cls(metadata=loaded["metadata"])
-
     def retrieve(
         self,
-        dataframe: Optional[DataFrame] = None,
+        dataframe: DataFrame | None = None,
         version: str = "latest",
         sort: bool = True,
         **kwargs: Any,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> ObsData | list[ObsData]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
@@ -133,7 +98,7 @@ class SearchResults:
         self,
         version: str = "latest",
         sort: bool = True,
-    ) -> Union[ObsData, List[ObsData]]:
+    ) -> ObsData | list[ObsData]:
         """Retrieves all data found during the search
 
         Args:
@@ -144,7 +109,7 @@ class SearchResults:
         """
         return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, sort=sort)
 
-    def uuids(self) -> List:
+    def uuids(self) -> list:
         """Return the UUIDs of the found data
 
         Returns:
@@ -152,9 +117,7 @@ class SearchResults:
         """
         return list(self.metadata.keys())
 
-    def _retrieve_by_term(
-        self, version: str, sort: bool = True, **kwargs: Any
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(self, version: str, sort: bool = True, **kwargs: Any) -> ObsData | list[ObsData]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
@@ -194,9 +157,7 @@ class SearchResults:
         # Now we can retrieve the data using the UUIDs
         return self._retrieve_by_uuid(uuids=list(uuids), version=version, sort=sort)
 
-    def _retrieve_by_uuid(
-        self, uuids: Iterable, version: str, sort: bool = True
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_uuid(self, uuids: Iterable, version: str, sort: bool = True) -> ObsData | list[ObsData]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.

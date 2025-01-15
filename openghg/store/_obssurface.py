@@ -1,15 +1,17 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union, cast
+from typing import Any, MutableSequence, cast
+from collections.abc import Sequence
 
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
-from openghg.standardise.meta import sync_surface_metadata
+from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType, optionalPathType
+from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData, DataOverlapError
+from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -26,11 +28,11 @@ class ObsSurface(BaseStore):
     def read_data(
         self,
         binary_data: bytes,
-        metadata: Dict,
-        file_metadata: Dict,
-        precision_data: Optional[bytes] = None,
+        metadata: dict,
+        file_metadata: dict,
+        precision_data: bytes | None = None,
         site_filepath: optionalPathType = None,
-    ) -> Dict:
+    ) -> list[dict]:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -102,20 +104,21 @@ class ObsSurface(BaseStore):
 
         return result
 
+    # TODO: the return type of this method isn't the same as the parent class' method...
     def read_file(
         self,
         filepath: multiPathType,
         source_format: str,
         site: str,
         network: str,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        instrument: Optional[str] = None,
-        data_level: Optional[Union[str, int, float]] = None,
-        data_sublevel: Optional[Union[str, float]] = None,
-        dataset_source: Optional[str] = None,
-        sampling_period: Optional[Union[Timedelta, str]] = None,
-        calibration_scale: Optional[str] = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        instrument: str | None = None,
+        data_level: str | int | float | None = None,
+        data_sublevel: str | float | None = None,
+        dataset_source: str | None = None,
+        sampling_period: Timedelta | str | None = None,
+        calibration_scale: str | None = None,
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
@@ -124,11 +127,11 @@ class ObsSurface(BaseStore):
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> Dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
             to handle each data type.
@@ -201,7 +204,6 @@ class ObsSurface(BaseStore):
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
-        from collections import defaultdict
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
@@ -287,7 +289,7 @@ class ObsSurface(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        results: resultsType = defaultdict(dict)
+        results: list[dict] = []
 
         if chunks is None:
             chunks = {}
@@ -313,7 +315,7 @@ class ObsSurface(BaseStore):
                 filepath = fp
 
             # Cast so it's clear we no longer expect a tuple
-            filepath = cast(Union[str, Path], filepath)
+            filepath = cast(str | Path, filepath)
             filepath = Path(filepath)
 
             fn_input_parameters["filepath"] = filepath
@@ -338,14 +340,14 @@ class ObsSurface(BaseStore):
                 parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
-            data = parser_fn(**parser_input_parameters)
+            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
 
             # Current workflow: if any species fails, whole filepath fails
-            for key, value in data.items():
-                species = key.split("_")[0]
+            for mdd in data:
+                species = mdd.metadata["species"]
                 species = synonyms(species)
                 try:
-                    ObsSurface.validate_data(value["data"], species=species)
+                    ObsSurface.validate_data(mdd.data, species=species)
                 except ValueError:
                     logger.error(
                         f"Unable to validate and store data from file: {filepath.name}.",
@@ -361,10 +363,10 @@ class ObsSurface(BaseStore):
 
             # Ensure the data is chunked
             if chunks:
-                for key, value in data.items():
-                    data[key]["data"] = value["data"].chunk(chunks)
+                for mdd in data:
+                    mdd.data = mdd.data.chunk(chunks)
 
-            self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+            align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
             # Check to ensure no required keys are being passed through optional_metadata dict
             # before adding details
@@ -386,12 +388,16 @@ class ObsSurface(BaseStore):
                 filters=filters,
             )
 
-            results["processed"][filepath.name] = datasource_uuids
+            for x in datasource_uuids:
+                x.update({"file": filepath.name})
+
+            results.extend(datasource_uuids)
+
             logger.info(f"Completed processing: {filepath.name}.")
 
             self._file_hashes[file_hash] = filepath.name
 
-        return dict(results)
+        return results
 
     def read_multisite_aqmesh(
         self,
@@ -403,7 +409,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         if_exists: str = "auto",
         overwrite: bool = False,
-    ) -> DefaultDict:
+    ) -> defaultdict:
         """Read AQMesh data for the Glasgow network
 
         NOTE - temporary function until we know what kind of AQMesh data
@@ -506,7 +512,7 @@ class ObsSurface(BaseStore):
 
         name = define_species_label(species)[0]
 
-        data_vars: Dict[str, Tuple[str, ...]] = {name: ("time",)}
+        data_vars: dict[str, tuple[str, ...]] = {name: ("time",)}
         dtypes = {name: np.floating, "time": np.datetime64}
 
         source_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
@@ -534,14 +540,14 @@ class ObsSurface(BaseStore):
 
     def store_data(
         self,
-        data: Dict,
+        data: MutableSequence[MetadataAndData],
         if_exists: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        required_metakeys: Optional[Sequence] = None,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-    ) -> Optional[Dict]:
+        required_metakeys: Sequence | None = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+    ) -> list[dict] | None:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
@@ -565,10 +571,8 @@ class ObsSurface(BaseStore):
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
-            Dict or None:
+            list of dicts containing details of stored data, or None
         """
-        from openghg.util import hash_retrieved_data
-
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."
@@ -580,29 +584,9 @@ class ObsSurface(BaseStore):
         # obs = ObsSurface.load()
         # metastore = load_metastore(key=obs._metakey)
 
-        # Very rudimentary hash of the data and associated metadata
-        hashes = hash_retrieved_data(to_hash=data)
-        # Find the keys in data we've seen before
-        if force:
-            file_hashes_to_compare = set()
-        else:
-            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
-
         # Making sure data can be force overwritten if force keyword is included.
         if force and if_exists == "auto":
             if_exists = "new"
-
-        if len(file_hashes_to_compare) == len(data):
-            logger.warning("Note: There is no new data to process.")
-            return None
-
-        keys_to_process = set(data.keys())
-        if file_hashes_to_compare:
-            # TODO - add this to log
-            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
-            keys_to_process -= file_hashes_to_compare
-
-        to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
         if required_metakeys is None:
             required_metakeys = (
@@ -621,21 +605,32 @@ class ObsSurface(BaseStore):
         data_type = "surface"
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
-        datasource_uuids = self.assign_data(
-            data=to_process,
-            if_exists=if_exists,
-            data_type=data_type,
-            required_keys=required_metakeys,
-            min_keys=5,
-            compressor=compressor,
-            filters=filters,
-        )
 
-        self.store_hashes(hashes=hashes)
+        # Workaround to maintain old behavior without using hashes
+        # TODO: when zarr store updates are made, make default to combine any
+        # new data with the existing, ignoring new data that overlaps
+        datasource_uuids = []
+
+        for mdd in data:
+            try:
+                datasource_uuid = self.assign_data(
+                    data=[mdd],
+                    if_exists=if_exists,
+                    data_type=data_type,
+                    required_keys=required_metakeys,
+                    min_keys=5,
+                    compressor=compressor,
+                    filters=filters,
+                )
+            except DataOverlapError:
+                data_info = ", ".join(f"{key}={mdd.metadata.get(key)}" for key in required_metakeys)
+                logger.info(f"Skipping data that overlaps existing data:\n\t{data_info}.")
+            else:
+                datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
 
-    def store_hashes(self, hashes: Dict) -> None:
+    def store_hashes(self, hashes: dict) -> None:
         """Store hashes of data retrieved from a remote data source such as
         ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
         seen before and adds the new.
@@ -686,32 +681,3 @@ class ObsSurface(BaseStore):
 
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
-
-    def align_metadata_attributes(self, data: Dict, update_mismatch: str) -> None:
-        """
-        Function to sync metadata and attributes if mismatch is found
-
-        Args:
-            data: Dictionary of source_name data, metadata, attributes
-            update_mismatch: This determines how mismatches between the internal data
-                "attributes" and the supplied / derived "metadata" are handled.
-                This includes the options:
-                    - "never" - don't update mismatches and raise an AttrMismatchError
-                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        Returns:
-            None
-        """
-        for _, gas_data in data.items():
-            measurement_data = gas_data["data"]
-            metadata = gas_data["metadata"]
-
-            attrs = measurement_data.attrs
-
-            metadata_aligned, attrs_aligned = sync_surface_metadata(
-                metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-            )
-
-            gas_data["metadata"] = metadata_aligned
-            gas_data["attributes"] = attrs_aligned
-            measurement_data.attrs = gas_data["attributes"]

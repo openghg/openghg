@@ -1,12 +1,14 @@
 import bz2
+from functools import partial, wraps
 import json
 import os
-import xarray as xr
 from pathlib import Path
-from functools import partial
-from typing import Any, Callable, Dict, List, Tuple, Optional, Union
+from typing import Any
+from collections.abc import Callable
 
-from openghg.types import pathType, multiPathType
+import xarray as xr
+
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
 
 __all__ = [
@@ -47,7 +49,11 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     function_name = f"parse_{data_name.lower()}"
     fn: Callable = getattr(module, function_name)
 
-    return fn
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):  # type: ignore
+        return convert_to_list_of_metadata_and_data(fn(*args, **kwargs))
+
+    return wrapped_fn
 
 
 def load_standardise_parser(data_type: str, source_format: str) -> Callable:
@@ -99,7 +105,7 @@ def load_transform_parser(data_type: str, source_format: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+def get_datapath(filename: pathType, directory: str | None = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
@@ -117,7 +123,7 @@ def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(path: Union[str, Path]) -> Dict:
+def load_json(path: str | Path) -> dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -125,13 +131,13 @@ def load_json(path: Union[str, Path]) -> Dict:
     Returns:
         dict: Dictionary created from JSON
     """
-    with open(path, "r") as f:
-        data: Dict[str, Any] = json.load(f)
+    with open(path) as f:
+        data: dict[str, Any] = json.load(f)
 
     return data
 
 
-def load_internal_json(filename: str) -> Dict:
+def load_internal_json(filename: str) -> dict:
     """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
     openghg/data directory or pass a full filepath to path to load from any file.
 
@@ -145,7 +151,7 @@ def load_internal_json(filename: str) -> Dict:
     return load_json(path=file_path)
 
 
-def read_header(filepath: pathType, comment_char: str = "#") -> List:
+def read_header(filepath: pathType, comment_char: str = "#") -> list:
     """Reads the header lines denoted by the comment_char
 
     Args:
@@ -159,7 +165,7 @@ def read_header(filepath: pathType, comment_char: str = "#") -> List:
 
     header = []
     # Get the number of header lines
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         for line in f:
             if line.startswith(comment_char):
                 header.append(line)
@@ -243,17 +249,12 @@ def get_logfile_path() -> Path:
     Returns:
         Path: Path to logfile
     """
-    from openghg.util import running_locally
-
-    if running_locally():
-        return Path.home().joinpath("openghg.log")
-    else:
-        return Path("/tmp/openghg.log")
+    return Path("/tmp/openghg.log")
 
 
 def check_function_open_nc(
-    filepath: multiPathType, realign_on_domain: Optional[str] = None
-) -> Tuple[Callable, multiPathType]:
+    filepath: multiPathType, realign_on_domain: str | None = None
+) -> tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -282,7 +283,7 @@ def check_function_open_nc(
 
     if realign_on_domain:
 
-        def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
+        def xr_open_fn(x: pathType) -> xr.DataArray | xr.Dataset:
             return align_lat_lon(xr.open_dataset(x), realign_on_domain)
 
     else:
@@ -291,7 +292,7 @@ def check_function_open_nc(
     return xr_open_fn, filepath
 
 
-def permissions(file_path: Union[str, Path]) -> tuple[str, str, str]:
+def permissions(file_path: str | Path) -> tuple[str, str, str]:
     """Return r, w, and/or x permissions for user, group, and other."""
     perms = oct(os.stat(file_path).st_mode)
     user, group, other = perms[-3], perms[-2], perms[-1]

@@ -1,5 +1,5 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
 
 from ._cli import cli
@@ -109,9 +109,6 @@ from ._util import (
     find_matching_site,
     multiple_inlets,
     pairwise,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     sort_by_filenames,
     unanimous,

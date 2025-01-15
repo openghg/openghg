@@ -8,6 +8,7 @@ from helpers import (
     get_flux_timeseries_datapath,
     clear_test_stores,
     clear_test_store,
+    filt,
 )
 from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
 from openghg.standardise import (
@@ -52,11 +53,12 @@ def test_standardise_obs_two_writable_stores():
         store="user",
     )
 
-    results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
+    results = filt(results, file="hfd.picarro.1minute.100m.min.dat")
 
-    assert "error" not in results
-    assert "ch4" in results
-    assert "co2" in results
+    processed_species = [res.get("species") for res in results]
+
+    assert "ch4" in processed_species
+    assert "co2" in processed_species
 
     results = search(site="hfd", inlet="100m", store="user")
     assert results
@@ -76,7 +78,7 @@ def test_standardise_obs_two_writable_stores():
         store="group",
     )
 
-    assert "ch4" in results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"]
+    assert "ch4" == filt(results, file="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")[0].get("species")
 
     results = search(site="rgl", instrument="g2301", store="group")
     assert results
@@ -106,12 +108,11 @@ def test_standardise_obs_openghg():
         sampling_period="1h",
         force=True,
         store="user",
+        update_mismatch="metadata",
     )
 
-    results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
-
-    assert "error" not in results
-    assert "co2" in results
+    results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
+    assert "co2" == results[0].get("species")
 
 
 def test_standardise_obs_metadata_mismatch():
@@ -149,13 +150,15 @@ def test_standardise_obs_metadata_mismatch():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="999m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -207,13 +210,15 @@ def test_local_obs_metadata_mismatch_meta():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="998m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -283,8 +288,7 @@ def test_standardise_column():
         store="user",
     )
 
-    assert "error" not in results
-    assert "ch4" in results  # Should this be a more descriprive key?
+    assert "ch4" == results[0].get("species")
 
 
 def test_standardise_footprint():
@@ -309,8 +313,12 @@ def test_standardise_footprint():
         store="user",
     )
 
-    assert "error" not in results
-    assert "tmb_europe_test_model_10m" in results
+    result = results[0]
+
+    assert result["site"] == "tmb"
+    assert result["domain"] == "europe"
+    assert result["model"] == "test_model"
+    assert result["inlet"] == "10m"
 
 
 @pytest.mark.parametrize("source_format", ["paris", "flexpart"])
@@ -343,8 +351,10 @@ def test_standardise_footprint_flexpart(source_format):
         store="user",
     )
 
-    assert "error" not in results
-    assert "mhd_test_FLEXPART_10m" in results
+    result = results[0]
+    expected_metadata = {"domain": "test", "site": "mhd", "model": "FLEXPART", "inlet": "10m"}
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_align_footprint():
@@ -423,7 +433,11 @@ def test_standardise_flux():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_europe" in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
+    result  = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_flux_additional_keywords():
@@ -439,7 +453,11 @@ def test_standardise_flux_additional_keywords():
         store="user",
     )
 
-    assert "ch4_anthro_globaledgar" in proc_results
+    result = proc_results[0]
+    expected_metadata = {"species": "ch4", "source": "anthro", "domain": "globaledgar"}
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_non_standard_flux_domain():
@@ -463,8 +481,11 @@ def test_standardise_non_standard_flux_domain():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_test" in proc_results
-    assert "error" not in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "test"}
+    result  = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_incomplete_flux():
@@ -487,48 +508,6 @@ def test_standardise_incomplete_flux():
             force=True,
             store="user",
         )
-
-
-def test_cloud_standardise(monkeypatch, mocker, tmpdir):
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-    call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
-    test_string = "some_text"
-    tmppath = Path(tmpdir).joinpath("test_file.txt")
-    tmppath.write_text(test_string)
-
-    packed = compress((tmppath.read_bytes()))
-
-    standardise_surface(
-        filepath=tmppath,
-        site="bsd",
-        inlet="248m",
-        network="decc",
-        source_format="crds",
-        sampling_period="1m",
-        instrument="picarro",
-    )
-
-    assert call_fn_mock.call_args == mocker.call(
-        data={
-            "function": "standardise",
-            "data": packed,
-            "metadata": {
-                "site": "bsd",
-                "source_format": "crds",
-                "network": "decc",
-                "inlet": "248m",
-                "instrument": "picarro",
-                "sampling_period": "1m",
-                "data_type": "surface",
-            },
-            "file_metadata": {
-                "compressed": True,
-                "sha1_hash": "56ba5dd8ea2fd49024b91792e173c70e08a4ddd1",
-                "filename": "test_file.txt",
-                "obs_type": "surface",
-            },
-        }
-    )
 
 
 def test_standardise_footprint_different_chunking_schemes(caplog):
@@ -590,10 +569,14 @@ def test_standardise_flux_timeseries():
         filepath=data_path, species="ch4", source="crf", period="years", continuous=False, store="user"
     )
 
-    assert "ch4_crf_uk" in flux_results
+    expected_metadata = {"species": "ch4", "source": "crf", "region": "uk"}
+    result  = flux_results[0]
+    print(result)
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
-def test_standardise_sorting_true(caplog):
+def test_standardise_sorting_true():
     """Testing only the sorting of files here"""
 
     filepaths = [
@@ -601,7 +584,7 @@ def test_standardise_sorting_true(caplog):
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
     ]
 
-    standardise_surface(
+    results = standardise_surface(
         store="user",
         filepath=filepaths,
         source_format="OPENGHG",
@@ -614,9 +597,7 @@ def test_standardise_sorting_true(caplog):
         sort_files=True,
     )
 
-    log_messages = [record.message for record in caplog.records]
-
-    assert "20220928.nc" in log_messages[0]
+    assert "20220928.nc" in results[0]["file"]
 
 
 def test_standardise_sorting_false(caplog):

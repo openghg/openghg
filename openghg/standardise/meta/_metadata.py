@@ -1,15 +1,16 @@
+from collections.abc import MutableSequence
+from copy import deepcopy
 import logging
 import math
-from copy import deepcopy
-from typing import Dict, List, Tuple, Optional
-from openghg.types import AttrMismatchError
+
+from openghg.types import AttrMismatchError, MetadataAndData
 from openghg.util import is_number
 
 logger = logging.getLogger("openghg.standardise.metadata")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def attributes_default_keys() -> List:
+def attributes_default_keys() -> list:
     """
     Defines default values expected within ObsSurface metadata.
     Returns:
@@ -35,7 +36,7 @@ def attributes_default_keys() -> List:
     return default_keys
 
 
-def metadata_keys_as_floats() -> List:
+def metadata_keys_as_floats() -> list:
     """
     Defines which keys should be consistently stored as numbers in the metadata
     (even if they are not numbers within the attributes).
@@ -54,11 +55,11 @@ def metadata_keys_as_floats() -> List:
 
 
 def sync_surface_metadata(
-    metadata: Dict,
-    attributes: Dict,
-    keys_to_add: Optional[List] = None,
+    metadata: dict,
+    attributes: dict,
+    keys_to_add: list | None = None,
     update_mismatch: str = "never",
-) -> Tuple[Dict, Dict]:
+) -> tuple[dict, dict]:
     """
     Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
@@ -175,3 +176,38 @@ def sync_surface_metadata(
                     meta_copy[key] = float(meta_copy[key])
 
     return meta_copy, attrs_copy
+
+
+def align_metadata_attributes(data: MutableSequence[MetadataAndData], update_mismatch: str) -> None:
+    """
+    Synchronize metadata and attributes in case of mismatches.
+
+    This function currently applies to all surface-level data. Future enhancements
+    will extend its functionality to handle column-level data as well.
+
+    Since remote retrievals bypass the traditional `read_file` method, this function
+    should be invoked before producing the final standardised output in the retrieval process.
+
+    Args:
+        data: sequence of MetadataAndData objects
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+    Returns:
+        None
+    """
+    for gas_data in data:
+        measurement_data = gas_data.data
+        metadata = gas_data.metadata
+
+        attrs = measurement_data.attrs
+
+        metadata_aligned, attrs_aligned = sync_surface_metadata(
+            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
+        )
+
+        gas_data.metadata = metadata_aligned
+        gas_data.data.attrs = attrs_aligned

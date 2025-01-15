@@ -10,7 +10,9 @@ def test_read_file():
 
     proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")
 
-    assert "geoschem_ch4_2015-01-01" in proc_results
+    assert len(proc_results) == 1
+    expected_info = {"model": "geoschem", "species": "ch4", "date": "2015-01-01"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
@@ -20,8 +22,8 @@ def test_read_file():
 
     assert euler_obs
 
-    eulerian_data = euler_obs.data
-    metadata = euler_obs.metadata
+    eulerian_data = euler_obs.data  # type: ignore  ...retrieve_all probably returns a single ObsData object in this case...
+    metadata = euler_obs.metadata  # type: ignore ...same reason
 
     orig_data = open_dataset(test_datapath)
 

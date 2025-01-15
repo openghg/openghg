@@ -34,7 +34,7 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
-  - zarr
+  - zarr==2.18.3
   - numcodecs
   - pip:
     - icoscp<=0.1.17
