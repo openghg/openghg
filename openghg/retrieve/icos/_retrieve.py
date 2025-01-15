@@ -278,15 +278,21 @@ def _retrieve_remote(
         search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
 
     # Now filter the dataframe so we can extract the PIDS
-    # We filter out any data that contains "Obspack" or "csv" in the specLabel
+    # If we want the combined .nc file we seartch for Obspack
+    # Otherwise filter out any data that contains "Obspack" or "csv" in the specLabel
     # Also filter out some drought files which cause trouble being read in
     # For some reason they have separate station record pages that contain "ATMO_"
-    filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str)
-        & ~data_pids["specLabel"].str.contains("Obspack")
-        & ~data_pids["specLabel"].str.contains("csv")
-        & ~data_pids["station"].str.contains("ATMO_")
-    ]
+    if dataset_source == "ICOS Combined":
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str) & data_pids["specLabel"].str.contains("Obspack")
+        ]
+    else:
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str)
+            & ~data_pids["specLabel"].str.contains("Obspack")
+            & ~data_pids["specLabel"].str.contains("csv")
+            & ~data_pids["station"].str.contains("ATMO_")
+        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
@@ -325,6 +331,8 @@ def _retrieve_remote(
                 dobj_dataset_source = "EYE-AVE-PAR"
             else:
                 continue
+        elif dataset_source == "ICOS Combined":
+            dobj_dataset_source = "ICOS Combined"
         else:
             try:
                 dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
@@ -346,48 +354,52 @@ def _retrieve_remote(
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
 
-        # Get the species this dobj holds information for
-        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
-        species_info = next(i for i in col_data if i["label"] not in not_the_species)
+        if dataset_source == "ICOS Combined":
+            species_info = next(i for i in col_data if i["label"] == "value")
+        else:
+            not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+            species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
         measurement_type = species_info["valueType"]["self"]["label"].lower()
         units = species_info["valueType"]["unit"].lower()
-        the_species = species_info["label"]
 
-        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
-
-        attributes["species"] = the_species
+        attributes["species"] = measurement_type.split()[0]
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
         to_store: dict[str, Any] = {}
-        try:
-            instrument_attributes = acq_data["instrument"]
-        except KeyError:
+
+        if dataset_source == "ICOS Combined":
             to_store["instrument"] = "NA"
             to_store["instrument_data"] = "NA"
         else:
-            # Do some tidying of the instrument attributes
-            instruments = set()
-            cleaned_instrument_attributes = []
-
-            if not isinstance(instrument_attributes, list):
-                instrument_attributes = [instrument_attributes]
-
-            for inst in instrument_attributes:
-                instrument_name = inst["label"]
-                instruments.add(instrument_name)
-                uri = inst["uri"]
-
-                cleaned_instrument_attributes.extend([instrument_name, uri])
-
-            if len(instruments) == 1:
-                instrument = instruments.pop()
+            try:
+                instrument_attributes = acq_data["instrument"]
+            except KeyError:
+                to_store["instrument"] = "NA"
+                to_store["instrument_data"] = "NA"
             else:
-                instrument = "multiple"
+                # Do some tidying of the instrument attributes
+                instruments = set()
+                cleaned_instrument_attributes = []
 
-            to_store["instrument"] = instrument
-            to_store["instrument_data"] = cleaned_instrument_attributes
+                if not isinstance(instrument_attributes, list):
+                    instrument_attributes = [instrument_attributes]
+
+                for inst in instrument_attributes:
+                    instrument_name = inst["label"]
+                    instruments.add(instrument_name)
+                    uri = inst["uri"]
+
+                    cleaned_instrument_attributes.extend([instrument_name, uri])
+
+                if len(instruments) == 1:
+                    instrument = instruments.pop()
+                else:
+                    instrument = "multiple"
+
+                to_store["instrument"] = instrument
+                to_store["instrument_data"] = cleaned_instrument_attributes
 
         attributes.update(to_store)
 
@@ -452,32 +464,42 @@ def _retrieve_remote(
         metadata.update(additional_data)
 
         spec = attributes["species"]
-
         dataframe.columns = [x.lower() for x in dataframe.columns]
+
+        # If there is a stdev column, replace missing values with nans
+        # Then rename columns
+        if dataset_source == "ICOS Combined":
+            dataframe["value_std_dev"] = dataframe["value_std_dev"].where(dataframe["value_std_dev"] >= 0)
+            rename_cols = {
+                "value": attributes["species"],
+                "qc_flag": "flag",
+                "value_std_dev": spec + " variability",
+            }
+        else:
+            try:
+                dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
+                rename_cols = {
+                    "timestamp": "time",
+                    "stdev": spec + " variability",
+                    "nbpoints": spec + " number_of_observations",
+                }
+            except KeyError:
+                rename_cols = {
+                    "timestamp": "time",
+                    "nbpoints": spec + " number_of_observations",
+                }
+
+        dataframe = dataframe.rename(columns=rename_cols)
 
         # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
         dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O", "U", "R"]))
-        dataframe = dataframe.dropna(axis="index")
+        dataframe = dataframe[dataframe[spec].notna()]
 
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
 
-        # If there is a stdev column, replace missing values with nans
-        # Then rename columns
-        try:
-            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
-            rename_cols = {
-                "stdev": spec + " variability",
-                "nbpoints": spec + " number_of_observations",
-            }
-        except KeyError:
-            rename_cols = {
-                "nbpoints": spec + " number_of_observations",
-            }
+        dataframe = dataframe.set_index("time")
 
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
-
-        dataframe.index.name = "time"
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
         dataset = dataframe.to_xarray()
