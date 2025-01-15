@@ -375,6 +375,7 @@ def _retrieve_remote(
                 dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e6
                 units = "ppm"
             else:
+                dataframe["value"] = dataframe["value"] * 1e9
                 dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e9
                 units = "ppb"
         else:
