@@ -12,7 +12,9 @@ import logging
 logger = logging.getLogger("openghg.standardise")
 
 
-def standardise(data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any) -> dict:
+def standardise(
+    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
     Args:
@@ -79,7 +81,7 @@ def standardise_surface(
     chunks: dict | None = None,
     optional_metadata: dict | None = None,
     sort_files: bool = False,
-) -> dict:
+) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -201,7 +203,7 @@ def standardise_column(
     filters: Any | None = None,
     chunks: dict | None = None,
     optional_metadata: dict | None = None,
-) -> dict:
+) -> list[dict]:
     """Read column observation file
 
     Args:
@@ -292,7 +294,7 @@ def standardise_bc(
     filters: Any | None = None,
     chunks: dict | None = None,
     optional_metadata: dict | None = None,
-) -> dict:
+) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -386,7 +388,7 @@ def standardise_footprint(
     filters: Any | None = None,
     optional_metadata: dict | None = None,
     sort_files: bool = False,
-) -> dict:
+) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -509,7 +511,7 @@ def standardise_flux(
     compressor: Any | None = None,
     filters: Any | None = None,
     optional_metadata: dict | None = None,
-) -> dict:
+) -> list[dict]:
     """Process flux / emissions data
 
     Args:
@@ -602,7 +604,7 @@ def standardise_eulerian(
     filters: Any | None = None,
     chunks: dict | None = None,
     optional_metadata: dict | None = None,
-) -> dict:
+) -> list[dict]:
     """Read Eulerian model output
 
     Args:
@@ -670,7 +672,7 @@ def standardise_from_binary_data(
     metadata: dict,
     file_metadata: dict,
     **kwargs: Any,
-) -> dict | None:
+) -> list[dict] | None:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -718,7 +720,7 @@ def standardise_flux_timeseries(
     period: str | tuple | None = None,
     continuous: bool | None = None,
     optional_metadata: dict | None = None,
-) -> dict:
+) -> list[dict]:
     """Process one dimension timeseries file
 
     Args:

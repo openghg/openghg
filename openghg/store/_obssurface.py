@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, MutableSequence, cast
 from collections.abc import Sequence
 
 import numpy as np
@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType, optionalPathType
+from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData, DataOverlapError
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -32,7 +32,7 @@ class ObsSurface(BaseStore):
         file_metadata: dict,
         precision_data: bytes | None = None,
         site_filepath: optionalPathType = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -104,6 +104,7 @@ class ObsSurface(BaseStore):
 
         return result
 
+    # TODO: the return type of this method isn't the same as the parent class' method...
     def read_file(
         self,
         filepath: multiPathType,
@@ -130,7 +131,7 @@ class ObsSurface(BaseStore):
         filters: Any | None = None,
         chunks: dict | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
             to handle each data type.
@@ -203,7 +204,6 @@ class ObsSurface(BaseStore):
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
-        from collections import defaultdict
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
@@ -289,7 +289,7 @@ class ObsSurface(BaseStore):
         # Load the data retrieve object
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        results: resultsType = defaultdict(dict)
+        results: list[dict] = []
 
         if chunks is None:
             chunks = {}
@@ -340,14 +340,14 @@ class ObsSurface(BaseStore):
                 parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
-            data = parser_fn(**parser_input_parameters)
+            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
 
             # Current workflow: if any species fails, whole filepath fails
-            for key, value in data.items():
-                species = key.split("_")[0]
+            for mdd in data:
+                species = mdd.metadata["species"]
                 species = synonyms(species)
                 try:
-                    ObsSurface.validate_data(value["data"], species=species)
+                    ObsSurface.validate_data(mdd.data, species=species)
                 except ValueError:
                     logger.error(
                         f"Unable to validate and store data from file: {filepath.name}.",
@@ -363,8 +363,8 @@ class ObsSurface(BaseStore):
 
             # Ensure the data is chunked
             if chunks:
-                for key, value in data.items():
-                    data[key]["data"] = value["data"].chunk(chunks)
+                for mdd in data:
+                    mdd.data = mdd.data.chunk(chunks)
 
             align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
@@ -388,12 +388,16 @@ class ObsSurface(BaseStore):
                 filters=filters,
             )
 
-            results["processed"][filepath.name] = datasource_uuids
+            for x in datasource_uuids:
+                x.update({"file": filepath.name})
+
+            results.extend(datasource_uuids)
+
             logger.info(f"Completed processing: {filepath.name}.")
 
             self._file_hashes[file_hash] = filepath.name
 
-        return dict(results)
+        return results
 
     def read_multisite_aqmesh(
         self,
@@ -536,14 +540,14 @@ class ObsSurface(BaseStore):
 
     def store_data(
         self,
-        data: dict,
+        data: MutableSequence[MetadataAndData],
         if_exists: str = "auto",
         overwrite: bool = False,
         force: bool = False,
         required_metakeys: Sequence | None = None,
         compressor: Any | None = None,
         filters: Any | None = None,
-    ) -> dict | None:
+    ) -> list[dict] | None:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
@@ -567,10 +571,8 @@ class ObsSurface(BaseStore):
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
-            Dict or None:
+            list of dicts containing details of stored data, or None
         """
-        from openghg.util import hash_retrieved_data
-
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."
@@ -582,29 +584,9 @@ class ObsSurface(BaseStore):
         # obs = ObsSurface.load()
         # metastore = load_metastore(key=obs._metakey)
 
-        # Very rudimentary hash of the data and associated metadata
-        hashes = hash_retrieved_data(to_hash=data)
-        # Find the keys in data we've seen before
-        if force:
-            file_hashes_to_compare = set()
-        else:
-            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
-
         # Making sure data can be force overwritten if force keyword is included.
         if force and if_exists == "auto":
             if_exists = "new"
-
-        if len(file_hashes_to_compare) == len(data):
-            logger.warning("Note: There is no new data to process.")
-            return None
-
-        keys_to_process = set(data.keys())
-        if file_hashes_to_compare:
-            # TODO - add this to log
-            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
-            keys_to_process -= file_hashes_to_compare
-
-        to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
         if required_metakeys is None:
             required_metakeys = (
@@ -623,17 +605,28 @@ class ObsSurface(BaseStore):
         data_type = "surface"
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
-        datasource_uuids = self.assign_data(
-            data=to_process,
-            if_exists=if_exists,
-            data_type=data_type,
-            required_keys=required_metakeys,
-            min_keys=5,
-            compressor=compressor,
-            filters=filters,
-        )
 
-        self.store_hashes(hashes=hashes)
+        # Workaround to maintain old behavior without using hashes
+        # TODO: when zarr store updates are made, make default to combine any
+        # new data with the existing, ignoring new data that overlaps
+        datasource_uuids = []
+
+        for mdd in data:
+            try:
+                datasource_uuid = self.assign_data(
+                    data=[mdd],
+                    if_exists=if_exists,
+                    data_type=data_type,
+                    required_keys=required_metakeys,
+                    min_keys=5,
+                    compressor=compressor,
+                    filters=filters,
+                )
+            except DataOverlapError:
+                data_info = ", ".join(f"{key}={mdd.metadata.get(key)}" for key in required_metakeys)
+                logger.info(f"Skipping data that overlaps existing data:\n\t{data_info}.")
+            else:
+                datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
 

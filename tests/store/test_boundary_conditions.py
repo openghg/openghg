@@ -9,8 +9,32 @@ from xarray import open_dataset
 
 
 def test_read_data_monthly(mocker):
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
-    # mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+    class FakeUUID:
+        """A class that mocks `uuid.uuid4`.
+
+        It has a `hex` property, which is used by some of our code.
+        The values returned by `hex` are 0, 1, 2, ... (as strings).
+
+        It only returns one uuid, but could be changed to return a different UUID
+        each time.
+        """
+        hex_num = 0
+        uuid_num = 0
+
+        def __init__(self) -> None:
+            pass
+
+        def __str__(self) -> str:
+            return "test-uuid-1"
+
+        @property
+        def hex(self) -> str:
+            self.hex_num += 1
+            return str(self.hex_num)
+
+    fake_uuid = FakeUUID()
+    mocker.patch("uuid.uuid4", side_effect=lambda: fake_uuid)
+    mocker.patch("openghg.store.base._datasource.uuid4", side_effect=lambda: fake_uuid)
 
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
@@ -37,8 +61,10 @@ def test_read_data_monthly(mocker):
         source_format="openghg",
     )
 
-    # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results["ch4_mozart_europe"]["new"] is True
+    assert proc_results is not None and len(proc_results) == 1
+
+    expected_info = {"uuid": "test-uuid-1", "new": True, "species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
 
 def test_read_file_monthly():
@@ -54,7 +80,10 @@ def test_read_file_monthly():
         force=True,
     )
 
-    assert "ch4_mozart_europe" in proc_results
+    assert len(proc_results) == 1
+
+    expected_info = {"species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"

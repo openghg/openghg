@@ -1,8 +1,9 @@
+import logging
 from typing import Any
 
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
-import logging
+from openghg.types import MetadataAndData
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -94,7 +95,7 @@ def retrieve(
     import xarray as xr
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
-    from openghg.util import download_data, parse_url_filename, site_code_finder, timestamp_now
+    from openghg.util import download_data, parse_url_filename, site_code_finder
 
     if additional_metadata is None:
         additional_metadata = {}
@@ -124,9 +125,6 @@ def retrieve(
         #  - Union[str, PathLike[Any], AbstractDataStore]
         dataset = xr.open_dataset(buf).load()  # type:ignore
 
-    now = str(timestamp_now())
-
-    key = f"{filename}_{now}"
     # We expect to be dealing with timeseries data here
     # We'll take the attributes as metadata
     metadata = dataset.attrs.copy()
@@ -166,7 +164,7 @@ def retrieve(
                 logger.error("Unable to read inlet from data or additional_metadata.")
                 return None
 
-    to_store = {key: {"data": dataset, "metadata": metadata}}
+    to_store = [MetadataAndData(metadata=metadata, data=dataset)]
 
     bucket = get_writable_bucket(name=store)
     with ObsSurface(bucket=bucket) as obs:

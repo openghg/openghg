@@ -3,7 +3,7 @@ from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise.meta import dataset_formatter, align_metadata_attributes
 from openghg.util import load_json
-from openghg.types import MetadataFormatError
+from openghg.types import convert_to_list_of_metadata_and_data, MetadataAndData, MetadataFormatError
 import openghg_defs
 import logging
 
@@ -24,68 +24,6 @@ def retrieve_atmospheric(
     store: str | None = None,
     update_mismatch: str = "never",
     force: bool = False,
-) -> ObsData | list[ObsData] | None:
-    """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
-    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
-    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
-    if returned, if nothing then None.
-
-    Args:
-        site: Site code
-        species: Species name
-        inlet: Height of the inlet for sampling in metres.
-        sampling_height: Alias for inlet
-        start_date: Start date
-        end_date: End date
-        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
-        data_level: ICOS data level (1, 2)
-        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
-        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
-                        to be distributed through the Carbon Portal.
-                        This level is the ICOS-data product and free available for users.
-        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        store: Name of object to search/store data to
-        update_mismatch: This determines how mismatches between the "metadata" derived from
-            stored data and "attributes" derived from ICOS Header are handled.
-            This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
-                - "from_definition" / "metadata" - update mismatches based on input metadata
-        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
-    Returns:
-        ObsData, list[ObsData] or None
-    """
-    return retrieve(
-        site=site,
-        species=species,
-        inlet=inlet,
-        sampling_height=sampling_height,
-        start_date=start_date,
-        end_date=end_date,
-        force_retrieval=force_retrieval,
-        data_level=data_level,
-        dataset_source=dataset_source,
-        update_mismatch=update_mismatch,
-        store=store,
-        force=force,
-    )
-
-
-def retrieve(
-    site: str,
-    species: str | list[str] | None = None,
-    inlet: str | None = None,
-    sampling_height: str | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
-    force_retrieval: bool = False,
-    data_level: int = 2,
-    dataset_source: str | None = None,
-    store: str | None = None,
-    update_mismatch: str = "never",
-    force: bool = False,
-    **kwargs: Any,
 ) -> ObsData | list[ObsData] | None:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -178,8 +116,8 @@ def retrieve(
 
         # Create the expected ObsData type
         obs_data = []
-        for data in standardised_data.values():
-            measurement_data = data["data"]
+        for data in standardised_data:
+            measurement_data = data.data
             # These contain URLs that are case sensitive so skip lowercasing these
             skip_keys = [
                 "citation_string",
@@ -187,7 +125,7 @@ def retrieve(
                 "dobj_pid",
                 "dataset_source",
             ]
-            metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
+            metadata = to_lowercase(data.metadata, skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
@@ -204,7 +142,7 @@ def _retrieve_remote(
     sampling_height: str | None = None,
     dataset_source: str | None = None,
     update_mismatch: str = "never",
-) -> dict | None:
+) -> list[MetadataAndData] | None:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
@@ -266,10 +204,17 @@ def _retrieve_remote(
 
     data_pids = stat.data(level=data_level)
 
-    # We want to get the PIDs of the data for each species here
     species_upper = [s.upper() for s in species]
-    # For this see https://stackoverflow.com/a/55335207
-    search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+
+    # We want to get the PIDs of the data for each species here
+    # Annoyingly FastTrack and EYE-AVE-PAR data don't have the species anywhere in the data_pids dataframe
+    # so we need to handle these cases separately
+    if dataset_source in ["ICOS FastTrack", "EYE-AVE-PAR"]:
+        search_str = "GHG"
+    else:
+        # For this see https://stackoverflow.com/a/55335207
+        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+
     # Now filter the dataframe so we can extract the PIDS
     # We filter out any data that contains "Obspack" or "csv" in the specLabel
     # Also filter out some drought files which cause trouble being read in
@@ -280,17 +225,6 @@ def _retrieve_remote(
         & ~data_pids["specLabel"].str.contains("csv")
         & ~data_pids["station"].str.contains("ATMO_")
     ]
-
-    if filtered_sources.empty:
-        species_lower = [s.lower() for s in species]
-        # For this see https://stackoverflow.com/a/55335207
-        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
-        # Now filter the dataframe so we can extract the PIDS
-        filtered_sources = data_pids[
-            data_pids["specLabel"].str.contains(search_str)
-            & ~data_pids["specLabel"].str.contains("Obspack")
-            & ~data_pids["specLabel"].str.contains("csv")
-        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
@@ -316,23 +250,28 @@ def _retrieve_remote(
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
-        # We've got to jump through some hoops here to try and avoid the NOAA
-        # ObsPack GlobalView data
-        try:
-            if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
-                logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
+
+        if dataset_source == "ICOS FastTrack":
+            species_fname = re.split("[_.]", dobj.meta["fileName"])[-2]
+            if "FAST_TRACK" in dobj.meta["fileName"] or species_fname in species_upper:
+                dobj_dataset_source = "ICOS FastTrack"
+            else:
                 continue
-        except KeyError:
-            pass
+        elif dataset_source == "EYE-AVE-PAR":
+            species_fname = dobj.meta["fileName"].split(".")[-2]
+            if "EYE-AVE-PAR" in dobj.meta["fileName"] or species_fname in species_upper:
+                dobj_dataset_source = "EYE-AVE-PAR"
+            else:
+                continue
+        else:
+            try:
+                dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
+            except KeyError:
+                dobj_dataset_source = "NA"
+                logger.warning("Unable to read project information from dobj.")
 
-        try:
-            dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
-        except KeyError:
-            dobj_dataset_source = "NA"
-            logger.warning("Unable to read project information from dobj.")
-
-        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
-            continue
+            if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+                continue
 
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
@@ -450,28 +389,29 @@ def _retrieve_remote(
         attributes.update(additional_data)
         metadata.update(additional_data)
 
+        spec = attributes["species"]
+
         dataframe.columns = [x.lower() for x in dataframe.columns]
+
+        # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
+        dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O", "U", "R"]))
         dataframe = dataframe.dropna(axis="index")
 
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
 
-        spec = attributes["species"]
-
-        rename_cols = {
-            "stdev": spec + " variability",
-            "nbpoints": spec + " number_of_observations",
-        }
-
-        # TODO - add this back in once we've merged the fixes in
-        # Try and conver the flag / userflag column to str
-        # possible_flag_cols = ("flag", "userflag")
-        # flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
-
-        # PR328
-        # if flag_col:
-        #     flag_str = flag_col[0]
-        #     dataframe = dataframe.astype({flag_str: str})
+        # If there is a stdev column, replace missing values with nans
+        # Then rename columns
+        try:
+            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
+            rename_cols = {
+                "stdev": spec + " variability",
+                "nbpoints": spec + " number_of_observations",
+            }
+        except KeyError:
+            rename_cols = {
+                "nbpoints": spec + " number_of_observations",
+            }
 
         dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
@@ -493,9 +433,11 @@ def _retrieve_remote(
         }
     standardised_data = dataset_formatter(data=standardised_data)
     standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
-    align_metadata_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
-    return standardised_data
+    standardised_data_list = convert_to_list_of_metadata_and_data(standardised_data)
+    align_metadata_attributes(data=standardised_data_list, update_mismatch=update_mismatch)
+
+    return standardised_data_list
 
 
 # def _read_site_metadata():

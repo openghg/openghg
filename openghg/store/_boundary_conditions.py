@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING
+
 import numpy as np
 from xarray import Dataset
 
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 from openghg.store.spec import define_standardise_parsers
+
 
 __all__ = ["BoundaryConditions"]
 
@@ -35,7 +37,7 @@ class BoundaryConditions(BaseStore):
         metadata: dict,
         file_metadata: dict,
         source_format: str,
-    ) -> dict | None:
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -77,7 +79,7 @@ class BoundaryConditions(BaseStore):
         filters: Any | None = None,
         chunks: dict | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read boundary conditions file
 
         Args:
@@ -117,7 +119,7 @@ class BoundaryConditions(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
-            dict: Dictionary of files processed and datasource UUIDs data assigned to
+            list: of dictionaries of files processed and datasource UUIDs data assigned to, plus "required" metadata
         """
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
@@ -164,7 +166,7 @@ class BoundaryConditions(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -180,16 +182,12 @@ class BoundaryConditions(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        # Call appropriate standardisation function with input parameters
+        # Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.
         boundary_conditions_data = parser_fn(**parser_input_parameters)
 
-        # Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.
-        for split_data in boundary_conditions_data.values():
-
-            split_data["data"] = align_lat_lon(data=split_data["data"], domain=domain)
-
-            bc_data = split_data["data"]
-            BoundaryConditions.validate_data(bc_data)
+        for mdd in boundary_conditions_data:
+            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
+            BoundaryConditions.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)

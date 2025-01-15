@@ -26,7 +26,7 @@ class FluxTimeseries(BaseStore):
     _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
-    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> dict | None:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -69,7 +69,7 @@ class FluxTimeseries(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read one dimension timeseries file
 
         Args:
@@ -164,7 +164,7 @@ class FluxTimeseries(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -176,9 +176,8 @@ class FluxTimeseries(BaseStore):
         flux_timeseries_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux
-        for split_data in flux_timeseries_data.values():
-            em_data = split_data["data"]
-            FluxTimeseries.validate_data(em_data)
+        for mdd in flux_timeseries_data:
+            FluxTimeseries.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through optional_metadata dict
         self.check_info_keys(optional_metadata)
