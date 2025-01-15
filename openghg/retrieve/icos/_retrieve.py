@@ -180,7 +180,7 @@ def _retrieve_remote(
     import re
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet, format_data_level
-    from pandas import to_datetime
+    from pandas import to_datetime, Timedelta
 
     if species is None:
         species = ["CO", "CO2", "CH4"]
@@ -452,6 +452,8 @@ def _retrieve_remote(
         dataframe = dataframe.set_index("time")
 
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
+        if dataset_source == "ICOS Combined":
+            dataframe.index = dataframe.index - Timedelta(minutes=30)
 
         dataset = dataframe.to_xarray()
         dataset.attrs.update(attributes)
