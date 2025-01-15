@@ -39,7 +39,7 @@ def parse_niwa(
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
     Returns:
-        list: UUIDs of Datasources data has been assigned to
+        dict: data, metadata and attributes keys
     """
 
     if sampling_period is None:
