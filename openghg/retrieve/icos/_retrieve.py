@@ -425,6 +425,7 @@ def _retrieve_remote(
                 "value": attributes["species"],
                 "qc_flag": "flag",
                 "value_std_dev": spec + " variability",
+                "icos_ltr": spec + " repeatability",
             }
         else:
             try:
