@@ -278,7 +278,7 @@ def _retrieve_remote(
         search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
 
     # Now filter the dataframe so we can extract the PIDS
-    # If we want the combined .nc file we seartch for Obspack
+    # If we want the combined .nc file we search for Obspack
     # Otherwise filter out any data that contains "Obspack" or "csv" in the specLabel
     # Also filter out some drought files which cause trouble being read in
     # For some reason they have separate station record pages that contain "ATMO_"
