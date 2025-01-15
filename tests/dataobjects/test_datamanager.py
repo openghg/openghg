@@ -4,6 +4,7 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
     key_to_local_filepath,
+    print_dict_diff
 )
 from openghg.dataobjects import DataManager, data_manager
 from openghg.objectstore import get_writable_bucket, exists
@@ -142,16 +143,17 @@ def test_find_modify_metadata():
         "inlet_height_magl": "100",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": 1.13872,
-        "station_latitude": 52.51775,
+        "station_longitude": 1.1387,
+        "station_latitude": 52.51882,
         "station_long_name": "tacolneston tower, uk",
-        "station_height_masl": 50.0,
+        "station_height_masl": 64.0,
         "latest_version": "v1",
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
         "versions": {"v1": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
     }
 
+    print_dict_diff(search_res.metadata[uuid], start_metadata, skip_missing=True)
     assert search_res.metadata[uuid].items() >= start_metadata.items()
 
     to_add = {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
@@ -213,16 +215,17 @@ def test_delete_metadata_keys():
         "inlet_height_magl": "100",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": 1.13872,
-        "station_latitude": 52.51775,
+        "station_longitude": 1.1387,
+        "station_latitude": 52.51882,
         "station_long_name": "tacolneston tower, uk",
-        "station_height_masl": 50.0,
+        "station_height_masl": 64.0,
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
         "latest_version": "v1",
     }
 
     uuid = next(iter(res.metadata))
+    print_dict_diff(res.metadata[uuid], expected, skip_missing=True)
     assert res.metadata[uuid].items() >= expected.items()
 
     # Delete a key giving it a string

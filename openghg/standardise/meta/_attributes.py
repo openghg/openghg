@@ -362,6 +362,13 @@ def _site_info_attributes(
     # Read site info file
     site_data = get_site_info(site_filepath)
 
+    if site not in site_data:
+        logger.info(
+            f"We haven't seen site {site} before, please let us know so we can update our records."
+            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/openghg_defs"
+        )
+        return {}
+
     if network is None:
         network = next(iter(site_data[site]))
     else:
@@ -375,22 +382,15 @@ def _site_info_attributes(
     }
 
     attributes = {}
-    if site in site_data:
-        for attr in attributes_dict:
-            try:
-                if attr in site_data[site][network]:
-                    attr_key = attributes_dict[attr]
 
-                    attributes[attr_key] = site_data[site][network][attr]
-            except KeyError:
-                pass
-    else:
-        logger.info(
-            f"We haven't seen site {site} before, please let us know so we can update our records."
-            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/openghg_defs"
-        )
-        # TODO - log not seen site message here
-        # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
+    for attr in attributes_dict:
+        try:
+            if attr in site_data[site][network]:
+                attr_key = attributes_dict[attr]
+
+                attributes[attr_key] = site_data[site][network][attr]
+        except KeyError:
+            pass
 
     return attributes
 

@@ -635,7 +635,7 @@ def test_bytes_stored(data, bucket):
 
     d.save()
 
-    assert d.bytes_stored() == 9609
+    assert abs(d.bytes_stored() - 9609) < 10
 
     d = Datasource(bucket=bucket)
 

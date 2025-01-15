@@ -1,5 +1,5 @@
-""" This file contains functions used to export data in compliant formats for archiving with
-    facilities such as CEDA
+"""This file contains functions used to export data in compliant formats for archiving with
+facilities such as CEDA
 
 
 """
