@@ -317,6 +317,7 @@ def _retrieve_remote(
 
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
+        dobj.dateTimeConvert = False
         logger.info(f"Retrieving {dobj_url}...")
 
         if dataset_source == "ICOS FastTrack":
@@ -345,6 +346,7 @@ def _retrieve_remote(
 
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
+
         # This is the metadata, dobj.info and dobj.meta are equal
         dobj_info = dobj.meta
 
@@ -361,11 +363,22 @@ def _retrieve_remote(
             species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
         measurement_type = species_info["valueType"]["self"]["label"].lower()
-        units = species_info["valueType"]["unit"].lower()
-
-        attributes["species"] = measurement_type.split()[0]
+        spec = measurement_type.split()[0]
+        attributes["species"] = spec
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
+
+        # Hack to convert units for Obspack nc files
+        if dataset_source == "ICOS Combined":
+            if spec == "co2":
+                dataframe["value"] = dataframe["value"] * 1e6
+                dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e6
+                units = "ppm"
+            else:
+                dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e9
+                units = "ppb"
+        else:
+            units = species_info["valueType"]["unit"].lower()
 
         to_store: dict[str, Any] = {}
 
@@ -463,7 +476,6 @@ def _retrieve_remote(
         attributes.update(additional_data)
         metadata.update(additional_data)
 
-        spec = attributes["species"]
         dataframe.columns = [x.lower() for x in dataframe.columns]
 
         # If there is a stdev column, replace missing values with nans
