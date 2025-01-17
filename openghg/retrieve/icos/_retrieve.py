@@ -459,6 +459,11 @@ def _retrieve_remote(
         dataset = dataframe.to_xarray()
         dataset.attrs.update(attributes)
 
+        if dataset_source == "ICOS Combined":
+            dataset[spec + " repeatability"].attrs[
+                "comment"
+            ] = "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
+
         # So there isn't an easy way of getting a hash of a Dataset, can we do something
         # simple here we can compare data that's being added? Then we'll be able to make sure
         # ObsSurface.store_data won't accept data it's already seen
