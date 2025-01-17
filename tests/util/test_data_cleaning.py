@@ -12,6 +12,11 @@ from openghg.util._data_cleaning import (
     default_resampler,
 )
 
+
+def test_mean_resample():
+    pass
+
+
 rng = np.random.default_rng(seed=196883)
 
 

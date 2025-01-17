@@ -10,14 +10,11 @@ import pandas as pd
 import xarray as xr
 
 from ._function_inputs import split_function_inputs
+from ._registry import Registry
 
 
-functions = {}
-
-
-def register(func: Callable) -> Callable:
-    functions[func.__name__] = func
-    return func
+registry = Registry(suffix="resample")
+register = registry.register
 
 
 def get_averaging_attrs(averaging_period: str) -> dict:
@@ -335,14 +332,36 @@ def resampler(
     apply_func_kwargs: dict | None = None,
     **kwargs: Any,
 ) -> xr.Dataset:
+    """Resample data variables in dataset using functions specified in func_dict.
+
+    Use `print_resampling_functions` to print a list of valid resampling functions
+    to use in `func_dict`.
+
+    For example,
+    ```
+    func_dict = {
+                 "mean_resample": ["ch4"],
+                 "independent_uncertainties_resample": ["ch4_repeatability"],
+                 "variability_from_mf_std": ["ch4"],
+    }
+    ```
+    would resample the variable "ch4" by taking the mean, the variable "ch4_repeatability"
+
+
+    Args:
+        ds: dataset to resample
+        func_dict: dictionary mapping function names to data variables.
+        averaging_period: period to resample over.
+        drop_na: if True, drop NaNs along time axis.
+    """
     for func in func_dict.keys():
-        if func not in functions:
-            available_functions = ", ".join(functions.keys())
+        if func not in registry.functions:
+            available_functions = ", ".join(registry.functions.keys())
             raise ValueError(f"Function {func} not available. Choose from: {available_functions}.")
 
     funcs = []
     for func in func_dict.keys():
-        real_func = functions[func]
+        real_func = registry.functions[func]
         func_kwargs, _ = split_function_inputs(kwargs, real_func)
         funcs.append(partial(real_func, averaging_period=averaging_period, **func_kwargs))
     func_vars = list(func_dict.values())
