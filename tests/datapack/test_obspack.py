@@ -111,7 +111,7 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
         "version,current_obspacks,expected_output",
         [
             ("v1", [], "gemma_obspack_v1"),
-            (None, ["gemma_obspack"], "gemma_obspack_v1"),
+            (None, ["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next version
             (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
             (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
             (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
@@ -133,7 +133,7 @@ def test_define_obspack_name(version, current_obspacks, expected_output):
         "current_obspacks,expected_output",
         [
             ([], "gemma_obspack_v1.0"),
-            (["gemma_obspack"], "gemma_obspack_v1.0"),
+            (["gemma_obspack"], "gemma_obspack_v1.1"),  # If no version is found, assume v1 and use next minor version
             (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
             (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
             (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
@@ -156,7 +156,7 @@ def test_define_obspack_name_minor(current_obspacks, expected_output):
         "current_obspacks,expected_output",
         [
             ([], "gemma_obspack_v1"),
-            (["gemma_obspack"], "gemma_obspack_v1"),
+            (["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next major version
             (["gemma_obspack_v1"], "gemma_obspack_v2"),
             (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
             (["gemma_obspack_v0.23"], "gemma_obspack_v1"),

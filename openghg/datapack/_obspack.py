@@ -339,6 +339,9 @@ def define_obspack_name(
     for folders following the same naming scheme either using the output_folder
     or a supplied list of current obspack names.
 
+    If the only obspack_stub from previous obspacks has no associated version, this will
+    be treated as "v1" and the new obspack name as the next version.
+
     Args:
         output_folder: Path to top level directory where obspack folder will be created.
             When looking for previous obspacks, will look here for these.
@@ -367,7 +370,7 @@ def define_obspack_name(
 
         if current_obspacks:
             version_pattern = re.compile(
-                rf"[{obspack_stub}]_v(?P<major_version>\d+)[.]?(?P<minor_version>\d*)"
+                rf"{obspack_stub}_?v?(?P<major_version>\d*)[.]?(?P<minor_version>\d*)"
             )
             versions = [(-1, -1)]
             for c_obspack in current_obspacks:
@@ -376,6 +379,11 @@ def define_obspack_name(
                     version_dict = version_search.groupdict()
                     major_version = version_dict["major_version"]
                     minor_version = version_dict["minor_version"]
+
+                    # If obspack stub is found but with no associated version
+                    # we should treat this as "v1" and ensure the new obspack is the next version (e.g. "v2" or "v1.1")
+                    if major_version == "":
+                        major_version = 1
                     if minor_version == "":
                         minor_version = -1
 
