@@ -660,7 +660,7 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
     logger.info(f"Writing site details to: {output_filename}")
     output_file = open(output_filename, "w")
 
-    site_details = df.groupby(site_column).apply(collate_strings)
+    site_details = df.groupby(site_column).apply(collate_strings, include_groups=False)
     site_details = site_details.dropna(axis=1, how="all")
 
     # index_output_name = open(obspack_folder / f"site_index_details_{version}.txt", "w")
