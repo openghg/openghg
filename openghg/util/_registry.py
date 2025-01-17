@@ -135,6 +135,9 @@ class Locatable(type):
     The location records the module where the object was created.
     To infer the location before an object is created, we need to
     use a metaclass to change how the object is created.
+
+    Note: the `__init__` method of any class using `Locatable` as a metaclass
+    must have a keyword argument called `location`, or must accept **kwargs.
     """
 
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
