@@ -75,7 +75,6 @@ def replace(value: str, /, old: str, new: str) -> str:
     Returns:
         string with `old` substituted by `new`
     """
-
     return value.replace(old, new)
 
 
@@ -98,11 +97,12 @@ def str_method(value: str, /, method: str, *args: Any, **kwargs: Any) -> str:
     except AttributeError:
         raise ValueError(f"Method {method} is not a valid Python string method.")
 
-    if signature(func).return_annotation is not str:
-        raise ValueError(f"Method {method} does not return a string.")
+    result = func(*args, **kwargs)
 
-    # call bound method with remaining args, kwargs
-    return cast(str, func(*args, **kwargs))  # mypy doesn't see the type check
+    if not isinstance(result, str):
+        raise ValueError(f"String method {method} does not return a string.")
+
+    return cast(str, func(*args, **kwargs))
 
 
 class UpdateSpec:
@@ -208,7 +208,9 @@ def _make_update_dict(spec: Any, to_update: dict[str, str]) -> dict[str, str]:
     Returns:
         dictionary of keys and value
     """
-    raise NotImplementedError()
+    raise NotImplementedError(
+        f"`spec` must be `UpdateSpec` or `Iterable[UpdateSpec]`; received {spec.__class__}."
+    )
 
 
 @_make_update_dict.register
@@ -230,7 +232,7 @@ def _(spec: UpdateSpec, to_update: dict[str, str]) -> dict[str, str]:
     return spec_dict
 
 
-@_make_update_dict.register
+@_make_update_dict.register(Iterable)
 def _(specs: Iterable[UpdateSpec], to_update: dict[str, str]) -> dict[str, str]:
     spec_dict = {}
     to_update = to_update.copy()
@@ -245,16 +247,55 @@ def _(specs: Iterable[UpdateSpec], to_update: dict[str, str]) -> dict[str, str]:
 DataArrayOrSet = TypeVar("DataArrayOrSet", xr.DataArray, xr.Dataset)
 
 
-def _update_attrs(data: DataArrayOrSet, specs: list[UpdateSpec], **kwargs: str) -> DataArrayOrSet:
+def update_attrs(
+    data: DataArrayOrSet,
+    specs: list[UpdateSpec] | UpdateSpec | None = None,
+    global_attrs: dict | None = None,
+    **kwargs: Any,
+) -> DataArrayOrSet:
+    """Update and add to DataArray or Dataset attributes.
+
+    For example, if `ds` is a Dataset, then
+
+    >>> update_attrs(ds,
+    >>>              UpdateSpec(str_method, "lower"),
+    >>>              global_attrs={"processed_by": "OpenGHG"},
+    >>>              updated=datetime.date.today())
+
+    will:
+
+    1. make all existing attributes (on the dataset and all its data variables) lowercase
+    2. will add the global attribute `processed_by="OpenGHG"`
+    3. added the attribute `updated=datetime.date.today()` globally and on all data variables
+
+    Args:
+        data: xr.DataArray or xr.Dataset whose attributes are to be modified
+        specs: optional tranformations to be applied to attribute values
+        global_attrs: optional global attributes to add; for a Dataset, these are
+            added to the Dataset attributes; for a DataArray, they are combined with
+            **kwargs.
+        **kwargs: attributes to add to DataArray, or Dataset and all data variables.
+
+    Returns:
+        (shallow copy of) DataArray or Dataset with updated attributes
+
+    """
+    global_attrs = global_attrs or {}
+
+    if specs is None:
+        return data.assign_attrs(**kwargs, **global_attrs)
+
     spec_dict = _make_update_dict(specs, data.attrs)
     spec_dict.update(kwargs)
-    data = data.assign_attrs(spec_dict)
+    data = data.assign_attrs(spec_dict, **global_attrs)
 
     if isinstance(data, xr.DataArray):
         return data
 
+    # otherwise, data is a Dataset, and we want to update data variable
+    # attributes, but not add global attributes
     for dv in data.data_vars:
-        data[dv] = _update_attrs(data[dv], specs, **kwargs)
+        data[dv] = update_attrs(data[dv], specs, **kwargs)
 
     return data
 

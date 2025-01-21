@@ -12,7 +12,7 @@ from openghg.data_processing._attrs import (
     _make_update_dict,
     _make_rename_dict,
     rename,
-    _update_attrs,
+    update_attrs,
 )
 
 
@@ -174,7 +174,7 @@ def test_update_attrs(dataset):
     ds = dataset[["ch4"]].resample(time="4h").std()
 
     suffix_spec = UpdateSpec(add_suffix, "variability", keys=["long_name"])
-    ds = _update_attrs(ds, suffix_spec)
+    ds = update_attrs(ds, suffix_spec)
 
     assert ds.ch4.attrs["long_name"] == "mole_fraction_of_methane_in_air_variability"
     assert ds.ch4.attrs["units"] == "1e-9"

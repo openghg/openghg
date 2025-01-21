@@ -5,41 +5,34 @@ from functools import partial
 import inspect
 import types
 import typing
-from typing import Any, Callable, cast
+from typing import Any, cast
+from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from openghg.util import Registry
-
+from ._attrs import add_suffix, rename, update_attrs, UpdateSpec
 
 registry = Registry(suffix="resample")
 register = registry.register
 
 
-def get_averaging_attrs(averaging_period: str) -> dict:
+def averaging_attrs(averaging_period: str) -> dict:
     average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
     result = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
     return result
 
 
-def add_averaging_attrs(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
-    """Add "averaged_period" and "averaged_period_str" attributes to dataset.
-
-    We don't need to return the dataset here, but it allows this function to fit
-    in a pipeline of other post-processing functions.
-    """
-    ds.attrs.update(get_averaging_attrs(averaging_period))
-    return ds
-
-
 @register
 def mean_resample(ds: xr.Dataset, averaging_period: str, drop_na: bool = False) -> xr.Dataset:
     """Resample to mean over averaging period."""
-    ds_resampled = ds.resample(time=averaging_period).mean(skipna=False, keep_attrs=True)
-
-    ds_resampled.attrs.update(get_averaging_attrs(averaging_period))
+    ds_resampled = (
+        ds.resample(time=averaging_period)
+        .mean(skipna=False, keep_attrs=True)
+        .assign_attrs(averaging_attrs(averaging_period))
+    )
 
     if drop_na is True:
         ds_resampled = ds_resampled.dropna("time")
@@ -94,7 +87,7 @@ def weighted_resample(
     )
 
     result.attrs = ds.attrs
-    result.attrs.update(get_averaging_attrs(averaging_period))
+    result.attrs.update(averaging_attrs(averaging_period))
 
     return result
 
@@ -157,7 +150,7 @@ def _weighted_resample(
     if drop_na is True:
         result = result.dropna("time")
 
-    return xr.Dataset(data_vars=data_vars)
+    return result
 
 
 @register
@@ -184,10 +177,7 @@ def uncorrelated_errors_resample(
         n_obs = data.resample(time=averaging_period).count()
         data_resampled_squared = (data**2).resample(time=averaging_period).sum(**sum_kwargs) / n_obs**2
 
-        result = np.sqrt(data_resampled_squared)
-
-    result.attrs = data.attrs
-    result.attrs.update(get_averaging_attrs(averaging_period))
+        result = np.sqrt(data_resampled_squared).assign_attrs(averaging_attrs(averaging_period))
 
     if drop_na is True:
         result = result.dropna("time")
@@ -196,23 +186,22 @@ def uncorrelated_errors_resample(
 
 
 @register
-def stdev_resample(
+def variability_resample(
     data: xr.Dataset, averaging_period: str, fill_zero: bool = True, drop_na: bool = False
 ) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods."""
     result = data.resample(time=averaging_period).std(keep_attrs=True)
 
-    rename_dict = {str(dv): str(dv) + "_variability" for dv in result.data_vars}
-    result = result.rename(rename_dict)
+    result = rename(result, UpdateSpec(add_suffix, "variability"))
 
     if fill_zero:
-        result = result.where(result == 0.0, result.median())
+        # we can't filter by a dask array, so we need to call compute
+        result = result.where(result.compute() == 0.0, result.median())
 
-    if "long_name" in data.attrs:
-        result.attrs["long_name"] = f"{data.attrs['long_name']}_variability"
-
-    if "units" in data.attrs:
-        result.attrs["units"] = data.attrs["units"]
+    avg_attrs = averaging_attrs(averaging_period)
+    result = update_attrs(
+        result, UpdateSpec(add_suffix, "variability", keys=["long_name"]), global_attrs=avg_attrs
+    )
 
     if drop_na:
         result = result.dropna("time")
@@ -353,7 +342,7 @@ def resampler(
         averaging_period: period to resample over.
         drop_na: if True, drop NaNs along time axis.
     """
-    for func_name in func_dict.keys():
+    for func_name in func_dict:
         if func_name not in registry.functions:
             available_functions = ", ".join(registry.functions.keys())
             raise ValueError(f"Function {func_name} not available. Choose from: {available_functions}.")
@@ -361,7 +350,7 @@ def resampler(
     kwargs["averaging_period"] = averaging_period
 
     funcs = []
-    for func_name in func_dict.keys():
+    for func_name in func_dict:
         func = registry.functions[func_name]
         func_kwargs = registry.select_params(func_name, kwargs)
         funcs.append(partial(func, **func_kwargs))
@@ -381,14 +370,13 @@ def resampler(
     if drop_na:
         result = result.dropna("time")
 
-    add_averaging_attrs(result, averaging_period)
+    result = update_attrs(result, global_attrs=averaging_attrs(averaging_period))
 
     return result
 
 
 def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> dict[str, list[str]]:
     """Make dictionary mapping resampling functions to variables they will be applied to."""
-
     # build dict of resampling functions
     func_dict = {}
     data_vars = [str(dv) for dv in ds.data_vars]
@@ -431,7 +419,7 @@ def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> d
 
     # if we didn't do a weighted resample for variability, see if we can report the stdev of the mole fraction
     if not variability_set and species is not None and species in data_vars:
-        func_dict["stdev"] = [species]
+        func_dict["variability"] = [species]
 
         if f"{species}_variability" in data_vars:
             data_vars.remove(f"{species}_variability")

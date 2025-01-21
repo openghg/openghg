@@ -101,7 +101,7 @@ def test_make_default_resampler_dict(mhd_ds, tac_ds):
 
     assert resampler_dict1 == {
         "uncorrelated_errors": ["ch4_repeatability"],
-        "stdev": ["ch4"],
+        "variability": ["ch4"],
         "mean": ["ch4"],
     }
     assert resampler_dict2 == {"weighted": ["ch4", "ch4_number_of_observations", "ch4_variability"]}

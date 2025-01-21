@@ -11,7 +11,7 @@ from openghg.dataobjects import (
 )
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
-from openghg.util._data_cleaning import default_resampler
+from openghg.data_processing._resampling import default_resampler
 
 from pandas import Timestamp
 from xarray import Dataset
