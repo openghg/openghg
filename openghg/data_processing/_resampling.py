@@ -239,7 +239,8 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
 
     if fill_zero:
         # we can't filter by a dask array, so we need to call compute
-        result = result.where(result.compute() == 0.0, result.median())
+        result = result.compute()
+        result = result.where(result == 0.0, result.median(dim="time"))
 
     result = update_attrs(result, UpdateSpec(add_suffix, "variability", keys=["long_name"]))
 
