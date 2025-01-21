@@ -12,10 +12,6 @@ from openghg.data_processing._resampling import (
 )
 
 
-def test_mean_resample():
-    pass
-
-
 rng = np.random.default_rng(seed=196883)
 
 
@@ -92,6 +88,50 @@ def tac_ds():
     ds.ch4_variability.attrs = {"long_name": "variability of mole fraction of methane in air", "units": "1e-9"}
     ds.ch4_number_of_observations.attrs = {"long_name": "number of observations of mole fraction of methane in air"}
     return ds
+
+
+def test_mean_resample(tac_ds):
+    ds = xr.ones_like(tac_ds)
+
+    ds_4h = mean_resample(ds, averaging_period="4h")
+
+    assert {"averaged_period": 4 * 3600.0, "averaged_period_str": "4h"}.items() <= ds_4h.attrs.items()
+
+    ds_4h_expected = xr.ones_like(ds.resample(time="4h").mean(keep_attrs=True))
+
+    xr.testing.assert_equal(ds_4h, ds_4h_expected)
+
+
+def test_weighted_resample(tac_ds):
+    """Weighted resample should give the same result if a resampling is done in
+    two steps or one.
+    """
+    ds_4h = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
+    ds_4h_12h = weighted_resample(ds_4h, averaging_period="12h", species="ch4")
+
+    ds_12h = weighted_resample(tac_ds, averaging_period="12h", species="ch4")
+
+    # check that values are close
+    xr.testing.assert_allclose(ds_4h_12h, ds_12h)
+
+    assert ds_4h_12h.attrs == ds_12h.attrs
+
+
+def test_weighted_resample_with_nans(tac_ds):
+    """
+    NaN values shouldn't affect the final result of weighted resample.
+    """
+
+    tac_ds = tac_ds.assign(ch4=tac_ds.ch4.where(tac_ds.time >= pd.to_datetime("2019-01-01 10:00:00"), other=np.nan))
+
+    ds_4h = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
+    ds_4h_12h = weighted_resample(ds_4h, averaging_period="12h", species="ch4")
+    ds_12h = weighted_resample(tac_ds, averaging_period="12h", species="ch4")
+
+    # check that values are close
+    xr.testing.assert_allclose(ds_4h_12h, ds_12h)
+
+    assert ds_4h_12h.attrs == ds_12h.attrs
 
 
 def test_make_surface_obs_resampler_dict(mhd_ds, tac_ds):

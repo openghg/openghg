@@ -155,7 +155,7 @@ def _weighted_resample(
     Returns:
         xr.Dataset: with obs., number of obs., (and variability) resampled
     """
-    sum_kwargs = {"skipna": True, "min_count": 1}
+    sum_kwargs: dict[str, Any] = {"skipna": True, "min_count": 1}
 
     with xr.set_options(keep_attrs=True):
         n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
