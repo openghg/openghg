@@ -4,12 +4,11 @@ import pytest
 import xarray as xr
 
 from openghg.data_processing._resampling import (
-    make_default_resampler_dict,
-    resampler,
+    _surface_obs_resampler_dict,
     mean_resample,
     weighted_resample,
     uncorrelated_errors_resample,
-    default_resampler,
+    surface_obs_resampler,
 )
 
 
@@ -95,9 +94,9 @@ def tac_ds():
     return ds
 
 
-def test_make_default_resampler_dict(mhd_ds, tac_ds):
-    resampler_dict1 = make_default_resampler_dict(mhd_ds, species="ch4")
-    resampler_dict2 = make_default_resampler_dict(tac_ds, species="ch4")
+def test_make_surface_obs_resampler_dict(mhd_ds, tac_ds):
+    resampler_dict1 = _surface_obs_resampler_dict(mhd_ds, species="ch4")
+    resampler_dict2 = _surface_obs_resampler_dict(tac_ds, species="ch4")
 
     assert resampler_dict1 == {
         "uncorrelated_errors": ["ch4_repeatability"],
@@ -107,8 +106,8 @@ def test_make_default_resampler_dict(mhd_ds, tac_ds):
     assert resampler_dict2 == {"weighted": ["ch4", "ch4_number_of_observations", "ch4_variability"]}
 
 
-def test_default_resampling_with_repeatability(mhd_ds):
-    result = default_resampler(mhd_ds, averaging_period="4h", species="ch4")
+def test_surface_obs_resampling_with_repeatability(mhd_ds):
+    result = surface_obs_resampler(mhd_ds, averaging_period="4h", species="ch4")
 
     expected_repeatability = uncorrelated_errors_resample(
         mhd_ds.ch4_repeatability, averaging_period="4h"
@@ -123,8 +122,12 @@ def test_default_resampling_with_repeatability(mhd_ds):
     assert result.ch4_variability.attrs == {"long_name": "mole fraction of methane in air_variability", "units": "1e-9"}
 
 
-def test_default_resampling_with_variability(tac_ds):
-    result = default_resampler(tac_ds, averaging_period="4h", species="ch4")
+def test_surface_obs_resampling_with_variability(tac_ds):
+    result = surface_obs_resampler(tac_ds, averaging_period="4h", species="ch4")
 
     expected = weighted_resample(tac_ds, species="ch4", averaging_period="4h")
     xr.testing.assert_allclose(result, expected)
+
+
+def test_attributes_kept():
+    pass

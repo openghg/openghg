@@ -1,11 +1,32 @@
-"""Functions for resampling."""
+"""Functions for resampling.
 
-import functools
-from functools import partial
-import inspect
-import types
-import typing
-from typing import Any, cast
+Functions for different types of resampling are registered
+by name in the `registry`.
+
+By convention, the names of these functions end in `_resample`,
+and the function name, without `_resample` is how the function
+is listed in the registry.
+
+These functions include:
+- `mean_resample` (registered as "mean")
+- `weighted_resample` (registered as "weighted")
+- `variability_resample` (registered as "variability")
+- `uncorrelated_errors_resample` (registered as "uncorrelated_errors")
+
+The `resampler` function takes a dictionary mapping the registered names
+(e.g. "mean", "weighted", etc.) to lists of variables those methods should
+be applied to.
+
+The standard options for resampling surface obs. data (in `get_obs_surface`)
+are applied by the function `surface_obs_resampler`.
+
+If custom resampling is needed, the user can write their own resampling function,
+possible using `surface_obs_resampler` as a base.
+"""
+
+from functools import partial, wraps
+from typing import Any, Sequence, cast, Concatenate, Literal
+from typing_extensions import ParamSpec
 from collections.abc import Callable
 
 import numpy as np
@@ -15,47 +36,72 @@ import xarray as xr
 from openghg.util import Registry
 from ._attrs import add_suffix, rename, update_attrs, UpdateSpec
 
+
 registry = Registry(suffix="resample")
 register = registry.register
 
 
-def averaging_attrs(averaging_period: str) -> dict:
-    average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
-    result = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
-    return result
+# somewhat complicated typing for decorator...
+P = ParamSpec("P")
+ResampleFunctionType = Callable[Concatenate[xr.Dataset, str, P], xr.Dataset]
+
+
+def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
+    """Decorator to add averaging attributes to result of resampling function."""
+
+    @wraps(func)
+    def wrapper(ds: xr.Dataset, averaging_period: str, *args: P.args, **kwargs: P.kwargs) -> xr.Dataset:
+        average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
+        avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
+
+        return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
+
+    return wrapper
 
 
 @register
+@add_averaging_attrs
 def mean_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
-    """Resample to mean over averaging period."""
-    ds_resampled = (
-        ds.resample(time=averaging_period)
-        .mean(skipna=False, keep_attrs=True)
-        .assign_attrs(averaging_attrs(averaging_period))
-    )
+    """Resample to mean over averaging period.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+
+    Returns:
+        xr.Dataset with all data variables mean resampled over averaging period
+    """
+    ds_resampled = ds.resample(time=averaging_period).mean(skipna=False, keep_attrs=True)
 
     return ds_resampled
 
 
-def _guess_species(ds: xr.Dataset) -> str:
-    """Rough guess at species name from surface data variables."""
-    possible_species = [str(dv) for dv in ds.data_vars if "_" not in str(dv)]
-
-    if len(set(possible_species)) > 1:
-        raise ValueError("Could not infer species for weighted resampling; please specify.")
-
-    return possible_species[0]
-
-
 @register
-def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str | None = None) -> xr.Dataset:
-    """Resample concentration and variability, weighted by number of observations."""
-    if species is None:
-        species = _guess_species(ds)
+@add_averaging_attrs
+def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr.Dataset:
+    """Resample concentration and variability, weighted by number of observations.
 
-    if f"{species}_number_of_observations" not in ds:
+    Successive applications of this method are consistent with a single equivalent application.
+    For instance, resampling to 1h then to 4h, will give the same result as resampling to 4h
+    in one step.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species data applies to; a data variable with this name, as well as
+            a data variable named {species}_number_of_observations must be present in `ds`.
+
+    Returns:
+        xr.Dataset with obs. (and variability) resampled, weighted by the number of obs.
+
+    Raises:
+        ValueError: if obs. or number of obs. is not present in the dataset.
+    """
+    n_obs = f"{species}_number_of_observations"
+
+    if n_obs not in ds or species not in ds:
         raise ValueError(
-            f"Variable `{species}_number_of_observations` not found. Cannot do weighted resample without number of observations."
+            f"Cannot do weighted resample without variables `{species}` and `{species}_number_of_observations`."
         )
 
     mf_variability = None
@@ -64,14 +110,11 @@ def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str | None
 
     result = _weighted_resample(
         mf=ds[species],
-        n_obs=ds[f"{species}_number_of_observations"],
+        n_obs=ds[n_obs],
         averaging_period=averaging_period,
         species=species,
         mf_variability=mf_variability,
     )
-
-    result.attrs = ds.attrs
-    result.attrs.update(averaging_attrs(averaging_period))
 
     return result
 
@@ -81,21 +124,19 @@ def _weighted_resample(
     n_obs: xr.DataArray,
     averaging_period: str,
     mf_variability: xr.DataArray | None = None,
-    species: str | None = None,
-    sum_kwargs: dict | None = None,
+    species: str = "mf",
 ) -> xr.Dataset:
     """Resample concentration (and variability), weighting by number of observations.
 
     Resampling to a frequency, say 4h, will give the same result, even if the data is first resampled
     to an intermediate frequency.
 
-    # TODO: make this a doc test?
     For example:
 
-    ds_1h = _weighted_resample(mf, n_obs, "1h", mf_variability)
-    ds_4h = _weighted_resample(ds_1h.mf, ds_1h.mf_number_of_observations, "4h", ds_1h.mf_variability)
-    ds_4h_2 = _weighted_resample(mf, n_obs, "4h", mf_variability)
-    xr.testing.assert_all_close(ds_4h, ds_4h_2)
+    >>> ds_1h = _weighted_resample(mf, n_obs, "1h", mf_variability)
+    >>> ds_4h = _weighted_resample(ds_1h.mf, ds_1h.mf_number_of_observations, "4h", ds_1h.mf_variability)
+    >>> ds_4h_2 = _weighted_resample(mf, n_obs, "4h", mf_variability)
+    >>> xr.testing.assert_all_close(ds_4h, ds_4h_2)
 
     Note: to ensure this consistency, you must drop NaN values, or pass kwargs to `sum` to ensure that
     a resampling period containing only NaNs is not resampled to 0.
@@ -103,39 +144,48 @@ def _weighted_resample(
     For instance: `sum_kwargs = {"skipna": True, "min_count": 1}`
 
     See https://github.com/pydata/xarray/issues/4291 for more discussion.
+
+    Args:
+        mf: observations to resample by taking weighted mean
+        n_obs: number of observations; will be resampled by summing
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        mf_variability: optional "variability" to resample
+        species: species the obs. apply to; this is used to name the output variables.
+
+    Returns:
+        xr.Dataset: with obs., number of obs., (and variability) resampled
     """
-    sum_kwargs = sum_kwargs or {"skipna": True, "min_count": 1}
-    sum_kwargs.update({"keep_attrs": True})
+    sum_kwargs = {"skipna": True, "min_count": 1}
 
-    n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
-    weighted_resample_mf = (mf * n_obs).resample(time=averaging_period).sum(**sum_kwargs) / n_obs_resample_sum
-    weighted_resample_mf.attrs = mf.attrs
+    with xr.set_options(keep_attrs=True):
+        n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
 
-    if species is None:
-        species = "mf"
+        weighted_resample_mf = (mf * n_obs).resample(time=averaging_period).sum(
+            **sum_kwargs
+        ) / n_obs_resample_sum
 
-    data_vars = {species: weighted_resample_mf, f"{species}_number_of_observations": n_obs_resample_sum}
+        data_vars = {species: weighted_resample_mf, f"{species}_number_of_observations": n_obs_resample_sum}
 
-    if mf_variability is not None:
-        sums_of_squares = n_obs * (mf_variability**2 + mf**2)
-        weighted_resample_mf_variability_squared = (
-            sums_of_squares.resample(time=averaging_period).sum(**sum_kwargs) / n_obs_resample_sum
-            - weighted_resample_mf**2
-        )
-        weighted_resample_mf_variability = cast(
-            xr.DataArray, np.sqrt(weighted_resample_mf_variability_squared)
-        )
-        weighted_resample_mf_variability.attrs = mf_variability.attrs
-        data_vars[f"{species}_variability"] = weighted_resample_mf_variability
+        if mf_variability is not None:
+            sums_of_squares = n_obs * (mf_variability**2 + mf**2)
 
-    result = xr.Dataset(data_vars=data_vars)
+            weighted_resample_mf_variability_squared = (
+                sums_of_squares.resample(time=averaging_period).sum(**sum_kwargs) / n_obs_resample_sum
+                - weighted_resample_mf**2
+            )
+            weighted_resample_mf_variability = cast(
+                xr.DataArray, np.sqrt(weighted_resample_mf_variability_squared)
+            )
 
-    return result
+            data_vars[f"{species}_variability"] = weighted_resample_mf_variability
+
+    return xr.Dataset(data_vars=data_vars)
 
 
 @register
+@add_averaging_attrs
 def uncorrelated_errors_resample(
-    data: xr.Dataset,
+    ds: xr.Dataset,
     averaging_period: str,
     sum_kwargs: dict | None = None,
 ) -> xr.Dataset:
@@ -149,22 +199,41 @@ def uncorrelated_errors_resample(
     Var((X_1 + ... + X_n) / n) = (Var(X_1) + ... + Var(X_n)) / n^2
 
     on each averaging period, where Var(X_i) = (uncertainty of observation X_i)^2.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        sum_kwargs: arguments to pass to xr.Dataset.sum
+
+    Returns:
+        xr.Dataset with all data variables mean resampled over averaging period
     """
     sum_kwargs = sum_kwargs or {}
 
     with xr.set_options(keep_attrs=True):
-        n_obs = data.resample(time=averaging_period).count()
-        data_resampled_squared = (data**2).resample(time=averaging_period).sum(**sum_kwargs) / n_obs**2
+        n_obs = ds.resample(time=averaging_period).count()
+        data_resampled_squared = (ds**2).resample(time=averaging_period).sum(**sum_kwargs) / n_obs**2
 
-        result = np.sqrt(data_resampled_squared).assign_attrs(averaging_attrs(averaging_period))
+        result = np.sqrt(data_resampled_squared)
 
     return result
 
 
 @register
-def variability_resample(data: xr.Dataset, averaging_period: str, fill_zero: bool = True) -> xr.Dataset:
-    """Compute variability as stdev of observed mole fraction over averaging periods."""
-    result = data.resample(time=averaging_period).std(keep_attrs=True)
+@add_averaging_attrs
+def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = True) -> xr.Dataset:
+    """Compute variability as stdev of observed mole fraction over averaging periods.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        fill_zero: if True, fill zeros with median. (If there is only one value in a resampling
+            period, the stdev is zero.)
+
+    Returns:
+        xr.Dataset with all data variables resampled to standard deviation over averaging period
+    """
+    result = ds.resample(time=averaging_period).std(keep_attrs=True)
 
     result = rename(result, UpdateSpec(add_suffix, "variability"))
 
@@ -172,41 +241,21 @@ def variability_resample(data: xr.Dataset, averaging_period: str, fill_zero: boo
         # we can't filter by a dask array, so we need to call compute
         result = result.where(result.compute() == 0.0, result.median())
 
-    avg_attrs = averaging_attrs(averaging_period)
-    result = update_attrs(
-        result, UpdateSpec(add_suffix, "variability", keys=["long_name"]), global_attrs=avg_attrs
-    )
+    result = update_attrs(result, UpdateSpec(add_suffix, "variability", keys=["long_name"]))
 
     return result
 
 
-def _first_arg_type(func: Callable, arg_type: type = xr.Dataset) -> bool:
-    """Return True if the first argument of `func` allows parameters of type `arg_type`."""
-    # if function is wrapped by partial, check args of wrapped function
-    if isinstance(func, functools.partial):
-        func = func.func
-
-    ann = next(iter(inspect.get_annotations(func).values()))
-
-    if ann is arg_type:
-        return True
-
-    if typing.get_origin(ann) is types.UnionType:
-        for x in typing.get_args(ann):
-            if x is arg_type:
-                return True
-
-    return False
+# typing for `apply_funcs`
+DatasetOpType = Callable[Concatenate[xr.Dataset, P], xr.Dataset]
 
 
-# TODO: if "remainder_func" is None, drop remaining variables
 def apply_funcs(
     ds: xr.Dataset,
-    funcs: list,
-    func_vars: list[list[str]],
-    drop_remaining_vars: bool = False,
-    remainder_func: Callable | None = None,
-    keep_attrs: bool = True,
+    funcs: Sequence[DatasetOpType],
+    func_vars: Sequence[list[str]],
+    remainder: Callable | Literal["pass", "drop"] = "pass",
+    keep_attrs: bool | Literal["default"] = True,
 ) -> xr.Dataset:
     """Apply functions to the data variables of a dataset.
 
@@ -226,65 +275,49 @@ def apply_funcs(
         funcs: list of functions to apply to certain data variables of dataset
         func_vars: list of lists of data variables; the first function in `funcs` will be applied to
             the first list of data variables in `func_vars`, and so on.
-        drop_remaining_vars: if True, drop any variables not appearing in `func_vars`. If False,
-            pass remaining variables through unchanged, or pass them to `remainder_func`, if it is
-            specified.
-        remainder_func: if specified and `drop_remaining_vars` is False, this function will be applied
-            to any variables not in a list in `func_vars`.
+        remainder: species how to handle data variables that were not modified by any function in `funcs`.
+            There are three options:
+            1. if a function is passed, this is applied to all remaining variables.
+            2. if "pass", the remaining variables are passed through unchanged.
+            3. if "drop", the remaining variables are dropped.
         keep_attrs: if True, make global attributes of output dataset the same as the global attributes
             of input dataset.
 
     Returns:
         dataset with functions applied to specified variables.
+
+    Raises:
+        ValueError: if length of `funcs` and `func_vars` is not equal.
     """
     if len(funcs) != len(func_vars):
-        msg = (
-            f"Specified {len(funcs)} functions and {len(func_vars)} lists of function variables. "
-            "Each function must has its own list of function variables."
+        raise ValueError(
+            "Length of `funcs` and `func_vars` must be equal;"
+            f"got lists of length {len(funcs)} and {len(func_vars)}."
         )
-        raise ValueError(msg)
 
-    if drop_remaining_vars is False:
-        all_func_vars = [x for y in func_vars for x in y]
-        remaining_vars = [str(dv) for dv in ds.data_vars if dv not in all_func_vars]
-    else:
-        remaining_vars = []
+    with xr.set_options(keep_attrs=keep_attrs):
+        results = []
 
-    results = []
-
-    for func, fvars in zip(funcs, func_vars):
-        if _first_arg_type(func, xr.Dataset) is True:
+        for func, fvars in zip(funcs, func_vars):
             results.append(func(ds[fvars]))
-        elif _first_arg_type(func, xr.DataArray):
-            results.append(ds[fvars].map(func))
-        else:
-            raise ValueError(f"Function {func} does not accept xr.Datasets or xr.DataArrays")
 
-    if remaining_vars:
-        if remainder_func is not None:
-            results.append(ds[remaining_vars].map(remainder_func))
-        else:
-            results.append(ds[remaining_vars])
+        if remainder != "drop":
+            all_func_vars = [x for y in func_vars for x in y]
+            remaining_vars = [str(dv) for dv in ds.data_vars if dv not in all_func_vars]
 
-    for func, result in zip(funcs, results):
-        print(func.func.__name__)
-        print(result.attrs)
-        for dv in result.data_vars:
-            print(dv, result[dv].attrs)
-        print()
+            if remainder == "pass":
+                results.append(ds[remaining_vars])
+            else:
+                results.append(ds[remaining_vars].map(remainder))
 
-    result = xr.merge(results)
-
-    if keep_attrs:
-        result.attrs = ds.attrs
-
-    return result
+        return xr.merge(results)
 
 
+@add_averaging_attrs
 def resampler(
     ds: xr.Dataset,
-    func_dict: dict[str, list[str]],
     averaging_period: str,
+    func_dict: dict[str, list[str]],
     drop_na: bool = True,
     apply_func_kwargs: dict | None = None,
     **kwargs: Any,
@@ -309,17 +342,21 @@ def resampler(
 
     Args:
         ds: dataset to resample
-        func_dict: dictionary mapping function names to data variables.
         averaging_period: period to resample over.
+        func_dict: dictionary mapping function names to data variables.
         drop_na: if True, drop NaNs along time axis.
-    """
-    for func_name in func_dict:
-        if func_name not in registry.functions:
-            available_functions = ", ".join(registry.functions.keys())
-            raise ValueError(f"Function {func_name} not available. Choose from: {available_functions}.")
+        apply_func_kwargs: optional dict of arguments to pass to `apply_funcs`
+        **kwargs: options that will be passed to the resampling functions. If
+            If the key of an option has the form "<function name>__<key>", then
+            the option for <key> will be applied only to the function with name
+            <function name>.
 
+    Returns:
+        resampled xr.Dataset
+    """
     kwargs["averaging_period"] = averaging_period
 
+    # retrieve functions from registry and apply arguments
     funcs = []
     for func_name in func_dict:
         func = registry.functions[func_name]
@@ -330,88 +367,98 @@ def resampler(
 
     apply_func_kwargs = apply_func_kwargs or {"keep_attrs": True}
 
-    if "drop_remaining_vars" not in apply_func_kwargs:
-        apply_func_kwargs["drop_remaining_vars"] = False
-
-    if "remainder_func" not in apply_func_kwargs:
-        apply_func_kwargs["remainder_func"] = partial(mean_resample, averaging_period=averaging_period)
+    if "remainder" not in apply_func_kwargs:
+        apply_func_kwargs["remainder"] = partial(mean_resample, averaging_period=averaging_period)
 
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
     if drop_na:
         result = result.dropna("time")
 
-    result = update_attrs(result, global_attrs=averaging_attrs(averaging_period))
-
     return result
 
 
-def make_default_resampler_dict(ds: xr.Dataset, species: str | None = None) -> dict[str, list[str]]:
-    """Make dictionary mapping resampling functions to variables they will be applied to."""
+def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
+    """Make dictionary mapping resampling functions to variables they will be applied to.
+
+    This is a helper function used by `surface_obs_resampler`.
+
+    Args:
+        ds: surface obs. data that resampler will be applied to
+        species: species of the obs. data
+
+    Returns:
+        dict mapping resampler function names to lists of data variables.
+    """
     # build dict of resampling functions
     func_dict = {}
     data_vars = [str(dv) for dv in ds.data_vars]
 
-    # try to guess species if not set
-    if species is None:
-        try:
-            species = _guess_species(ds)
-        except ValueError:
-            pass
+    # check for repeatability
+    repeatability = f"{species}_repeatability"
 
-    # see if we have number of observations, so we can do weighted resampling
-    possible_n_obs = [dv for dv in data_vars if "number_of_observations" in dv]
+    if repeatability in data_vars:
+        func_dict["uncorrelated_errors"] = [repeatability]
 
+    # if we have "number of observations", do weighted resampling
+    variability = f"{species}_variability"
     variability_set = False
 
-    if possible_n_obs and species is not None and species in data_vars:
-        n_obs = possible_n_obs[0]
-        data_vars.remove(n_obs)
-        data_vars.remove(species)
+    n_obs = f"{species}_number_of_observations"
 
+    if n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
-        if f"{species}_variability" in data_vars:
-            weighted_vars.append(f"{species}_variability")
-            data_vars.remove(f"{species}_variability")
+        if variability in data_vars:
+            weighted_vars.append(variability)
 
         func_dict["weighted"] = weighted_vars
 
         variability_set = True
 
-    # now check for repeatability
-    repeatability_vars = [dv for dv in data_vars if "repeatability" in dv]
-
-    if repeatability_vars:
-        func_dict["uncorrelated_errors"] = repeatability_vars
-
-        for dv in repeatability_vars:
-            data_vars.remove(dv)
-
-    # if we didn't do a weighted resample for variability, see if we can report the stdev of the mole fraction
-    if not variability_set and species is not None and species in data_vars:
+    # if we didn't do a weighted resample for variability, report the stdev of the mole fraction
+    if not variability_set and species in data_vars:
         func_dict["variability"] = [species]
 
-        if f"{species}_variability" in data_vars:
-            data_vars.remove(f"{species}_variability")
-
-        # since species is mapped to species_variability, it will not be mean resampled by `resampler` by default
-        # so set this explicitly
-        func_dict["mean"] = [species]
-        data_vars.remove(species)
+        # since species is mapped to species_variability, it will not be mean resampled by `resampler` by
+        # default, so set this explicitly
+        if species not in func_dict.get("weighted", []):
+            func_dict["mean"] = [species]
 
     return func_dict
 
 
-def default_resampler(
+def surface_obs_resampler(
     ds: xr.Dataset,
     averaging_period: str,
-    species: str | None = None,
+    species: str,
     drop_na: bool = True,
 ) -> xr.Dataset:
-    """Apply default resampling options.
+    """Apply default resampling options for surface obs. data.
+
+    If the data contains the number of observations as a data variable, the
+    this data variable and the species mole fraction will be resampling using
+    a weighted average. Additionally, if "variability" is present, it will be
+    resampled using weights as well.
+
+    Otherwise, the species mole fraction is resampled to the mean.
+
+    If "repeatability" is present, it is resampled using the "uncorrelated_errors" method.
+
+    If "variability" is not present, it is added by taking the standard deviation of the obs.
+
+    Any remaining variables are mean resampled.
 
     Keeps attributes from original dataset.
+
+    Args:
+        ds: surface obs. data that resampler will be applied to
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species of the obs. data
+        drop_na: if True, drop NaNs along "time" dimension.
+
+    Returns:
+        xr.Dataset resampled according to default specification.
     """
-    resampler_dict = make_default_resampler_dict(ds, species)
-    return resampler(ds, resampler_dict, averaging_period=averaging_period, species=species, drop_na=drop_na)
+    resampler_dict = _surface_obs_resampler_dict(ds, species)
+    return resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na)

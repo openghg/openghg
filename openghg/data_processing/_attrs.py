@@ -90,6 +90,10 @@ def str_method(value: str, /, method: str, *args: Any, **kwargs: Any) -> str:
 
     Returns:
         string modified by specified method
+
+    Raises:
+        ValueError: if `method` is not a valid Python string method, or does not
+            return a string.
     """
     # try getting bound method from value
     try:
@@ -130,9 +134,6 @@ class UpdateSpec:
             keys: optional list of strings; when supplied and the `UpdateSpec` is called on a dictionary
                 only values with these keys will be modified.
             **kwargs: keyword arguments that are needed by `func`
-
-        Returns:
-            None
         """
         self.func = func
 
@@ -152,6 +153,9 @@ class UpdateSpec:
         3. the return type of self.fucn is not `str`
         4. the supplied arguments are incomplete, assuming a string value is passed to self.func
            as the first argument
+
+        Raises:
+            ValueError: if self.func violates the rules above.
         """
         sig = signature(self.func)
         params = sig.parameters
@@ -322,6 +326,14 @@ def _make_rename_dict(
 
 
 def rename(data: xr.Dataset, specs: UpdateSpec | list[UpdateSpec]) -> xr.Dataset:
-    """Rename data variables based on specification."""
+    """Rename data variables based on specification.
+
+    Args:
+        data: xr.Dataset whose data variables are to be renamed
+        specs: (list of) update specification(s) to apply to data variable names
+
+    Returns:
+        xr.Dataset with renamed data variables
+    """
     rename_dict = _make_rename_dict(specs, data)
     return data.rename(rename_dict)

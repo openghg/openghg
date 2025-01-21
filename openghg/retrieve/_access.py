@@ -11,7 +11,7 @@ from openghg.dataobjects import (
 )
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
-from openghg.data_processing._resampling import default_resampler
+from openghg.data_processing._resampling import surface_obs_resampler
 
 from pandas import Timestamp
 from xarray import Dataset
@@ -210,7 +210,9 @@ def get_obs_surface(
         logger.info("Loading Dataset data into memory for resampling operations.")
         data = data.compute()
 
-        data = default_resampler(data, averaging_period=average, species=species, drop_na=(not keep_missing))
+        data = surface_obs_resampler(
+            data, averaging_period=average, species=species, drop_na=(not keep_missing)
+        )
 
         # # First do a mean resample on all variables
         # ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
