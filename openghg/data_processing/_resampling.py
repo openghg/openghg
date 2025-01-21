@@ -214,7 +214,7 @@ def uncorrelated_errors_resample(
         n_obs = ds.resample(time=averaging_period).count()
         data_resampled_squared = (ds**2).resample(time=averaging_period).sum(**sum_kwargs) / n_obs**2
 
-        result = np.sqrt(data_resampled_squared)
+        result = cast(xr.Dataset, np.sqrt(data_resampled_squared))  # mypy doesn't like np applied to xr
 
     return result
 
