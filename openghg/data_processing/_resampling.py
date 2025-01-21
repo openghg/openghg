@@ -26,16 +26,13 @@ def averaging_attrs(averaging_period: str) -> dict:
 
 
 @register
-def mean_resample(ds: xr.Dataset, averaging_period: str, drop_na: bool = False) -> xr.Dataset:
+def mean_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
     """Resample to mean over averaging period."""
     ds_resampled = (
         ds.resample(time=averaging_period)
         .mean(skipna=False, keep_attrs=True)
         .assign_attrs(averaging_attrs(averaging_period))
     )
-
-    if drop_na is True:
-        ds_resampled = ds_resampled.dropna("time")
 
     return ds_resampled
 
@@ -51,9 +48,7 @@ def _guess_species(ds: xr.Dataset) -> str:
 
 
 @register
-def weighted_resample(
-    ds: xr.Dataset, averaging_period: str, species: str | None = None, drop_na: bool = False
-) -> xr.Dataset:
+def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str | None = None) -> xr.Dataset:
     """Resample concentration and variability, weighted by number of observations."""
     if species is None:
         species = _guess_species(ds)
@@ -62,15 +57,6 @@ def weighted_resample(
         raise ValueError(
             f"Variable `{species}_number_of_observations` not found. Cannot do weighted resample without number of observations."
         )
-
-    # to prevent NaNs from being converted to 0's, we need to skip NaNs and set `min_count` to 1,
-    # so that at least 1 non-NaN value
-    # https://github.com/pydata/xarray/issues/4291
-    # if dropping NaN, this doesn't matter
-    if drop_na is False:
-        sum_kwargs = {"skipna": True, "min_count": 1}
-    else:
-        sum_kwargs = {}
 
     mf_variability = None
     if f"{species}_variability" in ds:
@@ -82,8 +68,6 @@ def weighted_resample(
         averaging_period=averaging_period,
         species=species,
         mf_variability=mf_variability,
-        drop_na=drop_na,
-        sum_kwargs=sum_kwargs,
     )
 
     result.attrs = ds.attrs
@@ -98,7 +82,6 @@ def _weighted_resample(
     averaging_period: str,
     mf_variability: xr.DataArray | None = None,
     species: str | None = None,
-    drop_na: bool = False,
     sum_kwargs: dict | None = None,
 ) -> xr.Dataset:
     """Resample concentration (and variability), weighting by number of observations.
@@ -121,7 +104,7 @@ def _weighted_resample(
 
     See https://github.com/pydata/xarray/issues/4291 for more discussion.
     """
-    sum_kwargs = sum_kwargs or {}
+    sum_kwargs = sum_kwargs or {"skipna": True, "min_count": 1}
     sum_kwargs.update({"keep_attrs": True})
 
     n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
@@ -147,9 +130,6 @@ def _weighted_resample(
 
     result = xr.Dataset(data_vars=data_vars)
 
-    if drop_na is True:
-        result = result.dropna("time")
-
     return result
 
 
@@ -158,7 +138,6 @@ def uncorrelated_errors_resample(
     data: xr.Dataset,
     averaging_period: str,
     sum_kwargs: dict | None = None,
-    drop_na: bool = False,
 ) -> xr.Dataset:
     """Resample uncertainties as the standard deviations of an average of independent quantities.
 
@@ -179,16 +158,11 @@ def uncorrelated_errors_resample(
 
         result = np.sqrt(data_resampled_squared).assign_attrs(averaging_attrs(averaging_period))
 
-    if drop_na is True:
-        result = result.dropna("time")
-
     return result
 
 
 @register
-def variability_resample(
-    data: xr.Dataset, averaging_period: str, fill_zero: bool = True, drop_na: bool = False
-) -> xr.Dataset:
+def variability_resample(data: xr.Dataset, averaging_period: str, fill_zero: bool = True) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods."""
     result = data.resample(time=averaging_period).std(keep_attrs=True)
 
@@ -202,9 +176,6 @@ def variability_resample(
     result = update_attrs(
         result, UpdateSpec(add_suffix, "variability", keys=["long_name"]), global_attrs=avg_attrs
     )
-
-    if drop_na:
-        result = result.dropna("time")
 
     return result
 
