@@ -4,110 +4,52 @@ import numpy as np
 import xarray as xr
 
 from openghg.data_processing._attrs import (
-    add_prefix,
-    add_suffix,
-    str_method,
-    UpdateSpec,
-    _make_update_dict,
     _make_rename_dict,
+    map_dict,
+    map_dict_multi,
     rename,
     update_attrs,
 )
 
 
-def test_update_spec():
-    prefix_spec = UpdateSpec(add_prefix, "my_prefix")
+def test_map_dict():
+    to_update = {"a": "A", "b": "B"}
 
-    assert prefix_spec("abc") == "my_prefix_abc"
+    result = map_dict(to_update, lambda x: x + "_suffix")
 
-    prefix_spec2 = UpdateSpec(add_prefix, "my prefix", sep=" ")
-
-    assert prefix_spec2("abc") == "my prefix abc"
-
-    # UpdateSpec with incomplete arguments
-    with pytest.raises(ValueError):
-        UpdateSpec(add_prefix)
-
-    # function without positional only arg
-    def bad_fn1(value: str, option: str):
-        pass
-
-    with pytest.raises(ValueError):
-        UpdateSpec(bad_fn1, "option_value")
-
-    # function that doesn't take strings
-    def bad_fn2(value: int, /, option: str):
-        pass
-
-    with pytest.raises(ValueError):
-        UpdateSpec(bad_fn2, "option_value")
+    assert result == {"a": "A_suffix", "b": "B_suffix"}
 
 
-def test_make_update_dict():
-    prefix_spec = UpdateSpec(add_prefix, "my_prefix")
-    suffix_spec = UpdateSpec(add_suffix, "my_suffix")
-
-    specs = [prefix_spec, suffix_spec]
+def test_map_dict_multi():
+    funcs = [lambda x: "prefix_" + x, lambda x: x + "_suffix"]
 
     to_update = {"a": "A", "b": "B"}
 
-    update_dict = _make_update_dict(specs, to_update)
+    result = map_dict_multi(to_update, funcs)
 
-    assert update_dict == {"a": "my_prefix_A_my_suffix", "b": "my_prefix_B_my_suffix"}
+    assert result == {"a": "prefix_A_suffix", "b": "prefix_B_suffix"}
 
 
-def test_make_update_dict_with_keys():
-    prefix_spec = UpdateSpec(add_prefix, "my_prefix", keys=["a"])
-    suffix_spec = UpdateSpec(add_suffix, "my_suffix", keys=["b"])
-
-    specs = [prefix_spec, suffix_spec]
+def test_map_dict_multi_with_keys():
+    funcs = [(lambda x: "prefix_" + x, ["a"]), (lambda x: x + "_suffix", ["b"])]
 
     to_update = {"a": "A", "b": "B"}
 
-    update_dict = _make_update_dict(specs, to_update)
+    result = map_dict_multi(to_update, funcs)
 
-    assert update_dict == {"a": "my_prefix_A", "b": "B_my_suffix"}
-
-    # test that "c" will not be updated by this specification
-    to_update = {"a": "A", "b": "B", "c": "C"}
-
-    update_dict = _make_update_dict(specs, to_update)
-
-    assert update_dict == {"a": "my_prefix_A", "b": "B_my_suffix"}
+    assert result == {"a": "prefix_A", "b": "B_suffix"}
 
 
 def test_make_rename_dict():
-    to_rename = ["flux_prior", "flux_posterior"]
+    to_rename = xr.Dataset({"flux_prior": xr.DataArray(), "flux_posterior": xr.DataArray()})
 
-    prefix_spec = UpdateSpec(add_prefix, "mean")
-
-    rename_dict = _make_rename_dict(prefix_spec, to_rename)
+    rename_dict = _make_rename_dict(to_rename, lambda x: "mean_" + x)
 
     assert rename_dict == {"flux_prior": "mean_flux_prior", "flux_posterior": "mean_flux_posterior"}
 
-    replace_spec = UpdateSpec.parse(("replace", "flux", "country"))
-
-    rename_dict = _make_rename_dict([prefix_spec, replace_spec], to_rename)
+    rename_dict = _make_rename_dict(to_rename, lambda x: x.replace("flux", "country"), lambda x: "mean_" + x)
 
     assert rename_dict == {"flux_prior": "mean_country_prior", "flux_posterior": "mean_country_posterior"}
-
-
-def test_generic_str_method():
-    """
-    Test `str_method` function, which can be used to apply any Python string
-    method in a `UpdateSpec` object.
-    """
-    assert str_method("abc", "upper") == "ABC"
-    assert str_method("  asdf  ", "strip") == "asdf"
-    assert str_method("==asdf==", "strip", "=") == "asdf"
-
-    upper_spec = UpdateSpec(str_method, "upper")
-    strip_spec = UpdateSpec(str_method, "strip")
-    strip_equals_spec = UpdateSpec(str_method, "strip", "=")
-
-    assert upper_spec("abc") == "ABC"
-    assert strip_spec("  asdf  ") == "asdf"
-    assert strip_equals_spec("==asdf==") == "asdf"
 
 
 @pytest.fixture()
@@ -157,9 +99,7 @@ def dataset():
 
 
 def test_rename_dataset(dataset):
-    replace_spec = UpdateSpec.parse(("replace", "ch4", "mf"))
-
-    renamed_ds = rename(dataset, replace_spec)
+    renamed_ds = rename(dataset, lambda x: x.replace("ch4", "mf"))
 
     assert sorted(renamed_ds.data_vars) == ["mf", "mf_number_of_observations", "mf_variability"]
 
@@ -172,7 +112,7 @@ def test_rename_dataset(dataset):
 def test_update_attrs(dataset):
     ds = dataset[["ch4"]].resample(time="4h").std()
 
-    suffix_spec = UpdateSpec(add_suffix, "variability", keys=["long_name"])
+    suffix_spec = (lambda x: x + "_variability", ["long_name"])
     ds = update_attrs(ds, suffix_spec)
 
     assert ds.ch4.attrs["long_name"] == "mole_fraction_of_methane_in_air_variability"

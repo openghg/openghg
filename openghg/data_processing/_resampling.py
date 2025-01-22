@@ -24,10 +24,10 @@ If custom resampling is needed, the user can write their own resampling function
 possible using `surface_obs_resampler` as a base.
 """
 
+from collections.abc import Callable, Sequence
 from functools import partial, wraps
-from typing import Any, Sequence, cast, Concatenate, Literal
+from typing import Any, cast, Concatenate, Literal
 from typing_extensions import ParamSpec
-from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
@@ -235,14 +235,14 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     """
     result = ds.resample(time=averaging_period).std(keep_attrs=True)
 
-    result = rename(result, ("add_suffix", "variability"))
+    result = rename(result, lambda x: x + "_variability")
 
     if fill_zero:
         # we can't filter by a dask array, so we need to call compute
         result = result.compute()
         result = result.where(result == 0.0, result.median(dim="time"))
 
-    result = update_attrs(result, ("add_suffix", "variability", {"keys": ["long_name"]}))
+    result = update_attrs(result, (lambda x: x + "_variability", ["long_name"]))
 
     return result
 

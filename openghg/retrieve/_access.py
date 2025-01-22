@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Union
 
+from openghg.data_processing import surface_obs_resampler, rename
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -11,7 +12,6 @@ from openghg.dataobjects import (
 )
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
-from openghg.data_processing._resampling import surface_obs_resampler
 
 from pandas import Timestamp
 from xarray import Dataset
@@ -34,9 +34,11 @@ def _get_generic(
 
     Args:
         data_class: Type of dataobject to create
-        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
+        combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
+            to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
         kwargs: Additional search terms
+
     Returns:
         dataclass
     """
@@ -93,7 +95,6 @@ def get_obs_surface(
     calibration_scale: str | None = None,
     rename_vars: bool = True,
     keep_missing: bool = False,
-    skip_ranking: bool = False,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -103,24 +104,24 @@ def get_obs_surface(
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
         species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
         inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
             can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
             such as '100m'.
         height: Alias for inlet
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
         average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
+            the form e.g. "2H", "30min" (should match pandas offset aliases format).
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
         rename_vars: Rename variables from species names to use "mf" explictly.
+        keep_missing: Keep missing data points or drop them.
         kwargs: Additional search terms
+
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
-    import numpy as np
     from openghg.util import (
         format_inlet,
         get_site_info,
@@ -165,7 +166,6 @@ def get_obs_surface(
     surface_keywords.update(kwargs)
 
     # # Get the observation data
-    # obs_results = search_surface(**surface_keywords)
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
@@ -204,24 +204,7 @@ def get_obs_surface(
 
     # Rename variables
     if rename_vars:
-        rename: dict[str, str] = {}
-
-        data_variables = [str(v) for v in data.variables]
-        for var in data_variables:
-            if var.lower() == species.lower():
-                rename[var] = "mf"
-            if "repeatability" in var:
-                rename[var] = "mf_repeatability"
-            if "variability" in var:
-                rename[var] = "mf_variability"
-            if "number_of_observations" in var:
-                rename[var] = "mf_number_of_observations"
-            if "status_flag" in var:
-                rename[var] = "status_flag"
-            if "integration_flag" in var:
-                rename[var] = "integration_flag"
-
-        data = data.rename_vars(rename)  # type: ignore
+        data = rename(data, lambda x: x.lower().replace(species, "mf"))
 
     data.attrs["species"] = species
 
