@@ -71,6 +71,17 @@ class Registry:
         """Return dictionary of registered functions."""
         return self._functions
 
+    def __getitem__(self, name: str) -> Callable:
+        """Get function by name."""
+        try:
+            return self.functions[name]
+        except KeyError as e:
+            raise KeyError(f"No function registered with name {name}.") from e
+
+    def __contains__(self, name: str) -> bool:
+        """Check if function with given name is registered."""
+        return name in self.functions
+
     def register(self, func: Callable) -> Callable:
         """Register a function.
 

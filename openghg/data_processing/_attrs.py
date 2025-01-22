@@ -9,13 +9,32 @@ data variable to be called `ch4_variability`, and we would like the
 "long_name" attribute to have "variability" added to it.
 
 These functions are mainly intended to be used internally, as part of
-other data processing functions.
+other data processing functions. There is a small "domain specific language"
+that allows transformations to be specified using strings, functions, and
+tuples.
+
+For instance, when the list
+
+>>> updaters = ["lower", ("replace", "ch4", "mf")]
+
+is passed to the `rename` function:
+
+>>> ds = rename(ds, updaters)
+
+the data variables of `ds` are renamed by first making them lower case,
+then by replacing "ch4" with "mf".
+
+Alternatively, we could use
+
+>>> updaters = [lambda x: x.lower(), lambda x: x.replace("ch4", "mf")]
 
 This module contains a collection of functions that can be applied to
 update names or attribute values:
 - `add_prefix`
 - `add_suffix`
-- `replace`
+
+These can be accessed by name from a registry, so that they can be
+used as above.
 
 These functions have a positional only argument `value`; the other
 arguments to the functions are bound by a class `UpdateSpec` to suit
@@ -25,17 +44,42 @@ For example:
 >>> add_variability_suffix = UpdateSpec(add_suffix, "variability")
 >>> assert add_variability_suffix("ch4") == "ch4_variability"
 
+This can also be achieved by passing a tuple to `UpdateSpec.parse`:
+>>> updater_tuple = ("add_suffix", "variabilty")
+>>> add_variability_suffix = UpdateSpec.parse(updater_tuple)
+
+Or, we could use
+>>> add_variability_suffix = UpdateSpec.parse(lambda x: x + "_variability")
+
+A valid argument for `UpdateSpec` parse is either:
+1. a string, which is interpreted as the name for a function; the registry
+   will be searched for this function name, and if it isn't found, the name
+   is assumed to be a Python string method (like "lower" or "replace")
+2. a function, which will be applied to dictionary values or used for renaming
+3. a tuple whose first argument is a string or function; the first argument is
+   parsed as in cases 1 and 2, and the remaining arguments will be applied to
+   the function.
+
+When we passed `("add_suffix", "variability")` to `UpdateSpec.parse`, this
+was an example of case 3.
 """
 
 from collections.abc import Iterable
 from functools import singledispatch
 from inspect import get_annotations, signature
 from typing import Any, TypeVar, cast
+from typing_extensions import Self
 from collections.abc import Callable, Sequence
 
 import xarray as xr
 
+from openghg.util import Registry
 
+
+registry = Registry()
+
+
+@registry.register
 def add_prefix(value: str, /, prefix: str, sep: str = "_") -> str:
     """Add a prefix to a string.
 
@@ -50,6 +94,7 @@ def add_prefix(value: str, /, prefix: str, sep: str = "_") -> str:
     return prefix + sep + value
 
 
+@registry.register
 def add_suffix(value: str, /, suffix: str, sep: str = "_") -> str:
     """Add a suffix to a string.
 
@@ -62,20 +107,6 @@ def add_suffix(value: str, /, suffix: str, sep: str = "_") -> str:
         string with suffix added
     """
     return value + sep + suffix
-
-
-def replace(value: str, /, old: str, new: str) -> str:
-    """Replace values in string.
-
-    Args:
-        value: the string to add a prefix to
-        old: the substring to replace
-        new: the substring to substitute for `old`
-
-    Returns:
-        string with `old` substituted by `new`
-    """
-    return value.replace(old, new)
 
 
 def str_method(value: str, /, method: str, *args: Any, **kwargs: Any) -> str:
@@ -144,6 +175,33 @@ class UpdateSpec:
 
         self._validate()
 
+    @classmethod
+    def parse(cls, x: str | Callable | tuple) -> Self:
+        if not isinstance(x, tuple):
+            if isinstance(x, str):
+                return cls(str_method, method=x)
+            return cls(x)
+
+        fn, *args = x
+
+        non_dict_args = []
+        kwargs = {}
+
+        for arg in args:
+            if isinstance(arg, dict):
+                kwargs.update(arg)
+            else:
+                non_dict_args.append(arg)
+
+        if isinstance(fn, str):
+            if fn in registry:
+                return cls(registry[fn], *non_dict_args, **kwargs)
+            return cls(str_method, fn, *non_dict_args, **kwargs)
+        elif callable(fn):
+            return cls(fn, *non_dict_args, **kwargs)
+
+        raise ValueError(f"Cannot parse tuple {x} since it does not begin with a string or a function.")
+
     def _validate(self) -> None:
         """Raise a ValueError if the supplied function and arguments are invalid.
 
@@ -154,35 +212,39 @@ class UpdateSpec:
         4. the supplied arguments are incomplete, assuming a string value is passed to self.func
            as the first argument
 
+        Conditions 1 and 2 are skipped if self.func is a lambda function.
+
         Raises:
             ValueError: if self.func violates the rules above.
         """
         sig = signature(self.func)
         params = sig.parameters
 
-        # check if there is exactly one positional only argument
-        tf_var_pos = [param.kind == param.POSITIONAL_ONLY for param in params.values()][:2]
-        has_single_pos_only = tf_var_pos[0] is True and sum(tf_var_pos) == 1
+        is_lambda = self.func.__code__.co_name == "<lambda>"
 
-        if not has_single_pos_only:
-            raise ValueError(f"Function {self.func} must have a single positional-only argument.")
+        if not is_lambda:
+            # check if there is exactly one positional only argument
+            tf_var_pos = [param.kind == param.POSITIONAL_ONLY for param in params.values()][:2]
+            has_single_pos_only = tf_var_pos[0] is True and sum(tf_var_pos) == 1
 
-        # check that the positional only argument type is str
-        try:
-            var_pos_name = next(name for name, param in params.items() if param.kind == param.POSITIONAL_ONLY)
-        except StopIteration:
-            first_arg_takes_string = False
-        else:
-            first_arg_takes_string = get_annotations(self.func).get(var_pos_name, type(None)) is str
+            if not has_single_pos_only:
+                raise ValueError(f"Function {self.func} must have a single positional-only argument.")
 
-        if not first_arg_takes_string:
-            raise ValueError(f"The first argument of {self.func} must be `str`.")
+            # check that the positional only argument type is str
+            try:
+                var_pos_name = next(
+                    name for name, param in params.items() if param.kind == param.POSITIONAL_ONLY
+                )
+            except StopIteration:
+                first_arg_takes_string = False
+            else:
+                first_arg_takes_string = get_annotations(self.func).get(var_pos_name, type(None)) is str
 
-        # check that the return type is str
+            if not first_arg_takes_string:
+                raise ValueError(f"The first argument of {self.func} must be `str`.")
+
+        # check that the return type is str, but wait to raise error until next test
         returns_str = sig.return_annotation is str
-
-        if not returns_str:
-            raise ValueError(f"The function {self.func} must return `str`.")
 
         # check that if a string is passed as the first value, then all of the function arguments are
         # supplied
@@ -190,6 +252,12 @@ class UpdateSpec:
             sig.bind("test", *self.args, **self.kwargs)
         except TypeError as e:
             raise ValueError(f"Missing arguments {e}") from e
+        else:
+            if not returns_str:
+                returns_str = isinstance(self.func("test", *self.args, **self.kwargs), str)
+
+        if not returns_str:
+            raise ValueError(f"The function {self.func} must return `str`.")
 
     def __repr__(self) -> str:
         if self.keys is not None:
@@ -249,11 +317,27 @@ def _(specs: Iterable[UpdateSpec], to_update: dict[str, str]) -> dict[str, str]:
 
 
 DataArrayOrSet = TypeVar("DataArrayOrSet", xr.DataArray, xr.Dataset)
+Updater = UpdateSpec | str | Callable | tuple
+
+
+def _parse_updaters_to_specs(specs: Updater | list[Updater]) -> list[UpdateSpec]:
+    if not isinstance(specs, list):
+        specs = [specs]
+
+    result = []
+
+    for spec in specs:
+        if isinstance(spec, UpdateSpec):
+            result.append(spec)
+        else:
+            result.append(UpdateSpec.parse(spec))
+
+    return result
 
 
 def update_attrs(
     data: DataArrayOrSet,
-    specs: list[UpdateSpec] | UpdateSpec | None = None,
+    specs: list[Updater] | Updater | None = None,
     global_attrs: dict | None = None,
     **kwargs: Any,
 ) -> DataArrayOrSet:
@@ -274,7 +358,11 @@ def update_attrs(
 
     Args:
         data: xr.DataArray or xr.Dataset whose attributes are to be modified
-        specs: optional tranformations to be applied to attribute values
+        specs: optional tranformation(s) to be applied to attribute values. These
+            can be: the name of a string method (as a string), a function that maps strings
+            to strings, or an `UpdateSpec` object. If the string method or function need
+            additional arguments, then a tuple (str or function, arg1, arg2, ..., kwargs={...})
+            should be passed.
         global_attrs: optional global attributes to add; for a Dataset, these are
             added to the Dataset attributes; for a DataArray, they are combined with
             **kwargs.
@@ -289,7 +377,9 @@ def update_attrs(
     if specs is None:
         return data.assign_attrs(**kwargs, **global_attrs)
 
-    spec_dict = _make_update_dict(specs, data.attrs)
+    parsed_specs = _parse_updaters_to_specs(specs)
+
+    spec_dict = _make_update_dict(parsed_specs, data.attrs)
     spec_dict.update(kwargs)
     data = data.assign_attrs(spec_dict, **global_attrs)
 
@@ -325,7 +415,7 @@ def _make_rename_dict(
     return _make_update_dict(specs, to_update)
 
 
-def rename(data: xr.Dataset, specs: UpdateSpec | list[UpdateSpec]) -> xr.Dataset:
+def rename(data: xr.Dataset, specs: Updater | list[Updater]) -> xr.Dataset:
     """Rename data variables based on specification.
 
     Args:
@@ -335,5 +425,6 @@ def rename(data: xr.Dataset, specs: UpdateSpec | list[UpdateSpec]) -> xr.Dataset
     Returns:
         xr.Dataset with renamed data variables
     """
-    rename_dict = _make_rename_dict(specs, data)
+    parsed_specs = _parse_updaters_to_specs(specs)
+    rename_dict = _make_rename_dict(parsed_specs, data)
     return data.rename(rename_dict)

@@ -34,7 +34,7 @@ import pandas as pd
 import xarray as xr
 
 from openghg.util import Registry
-from ._attrs import add_suffix, rename, update_attrs, UpdateSpec
+from ._attrs import rename, update_attrs
 
 
 registry = Registry(suffix="resample")
@@ -235,14 +235,14 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     """
     result = ds.resample(time=averaging_period).std(keep_attrs=True)
 
-    result = rename(result, UpdateSpec(add_suffix, "variability"))
+    result = rename(result, ("add_suffix", "variability"))
 
     if fill_zero:
         # we can't filter by a dask array, so we need to call compute
         result = result.compute()
         result = result.where(result == 0.0, result.median(dim="time"))
 
-    result = update_attrs(result, UpdateSpec(add_suffix, "variability", keys=["long_name"]))
+    result = update_attrs(result, ("add_suffix", "variability", {"keys": ["long_name"]}))
 
     return result
 

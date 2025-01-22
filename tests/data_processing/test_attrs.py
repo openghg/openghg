@@ -6,7 +6,6 @@ import xarray as xr
 from openghg.data_processing._attrs import (
     add_prefix,
     add_suffix,
-    replace,
     str_method,
     UpdateSpec,
     _make_update_dict,
@@ -86,7 +85,7 @@ def test_make_rename_dict():
 
     assert rename_dict == {"flux_prior": "mean_flux_prior", "flux_posterior": "mean_flux_posterior"}
 
-    replace_spec = UpdateSpec(replace, old="flux", new="country")
+    replace_spec = UpdateSpec.parse(("replace", "flux", "country"))
 
     rename_dict = _make_rename_dict([prefix_spec, replace_spec], to_rename)
 
@@ -158,7 +157,7 @@ def dataset():
 
 
 def test_rename_dataset(dataset):
-    replace_spec = UpdateSpec(replace, old="ch4", new="mf")
+    replace_spec = UpdateSpec.parse(("replace", "ch4", "mf"))
 
     renamed_ds = rename(dataset, replace_spec)
 
@@ -167,7 +166,7 @@ def test_rename_dataset(dataset):
     assert renamed_ds.attrs == dataset.attrs
 
     for dv in renamed_ds.data_vars:
-        assert renamed_ds[dv].attrs == dataset[dv.replace("mf", "ch4")].attrs
+        assert renamed_ds[dv].attrs == dataset[str(dv).replace("mf", "ch4")].attrs
 
 
 def test_update_attrs(dataset):
