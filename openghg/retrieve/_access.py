@@ -130,11 +130,6 @@ def get_obs_surface(
     )
     from pandas import Timedelta
 
-    # Allow height to be an alias for inlet but we do not expect height
-    # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
     if species is not None:
         species = synonyms(species)
 
@@ -177,25 +172,6 @@ def get_obs_surface(
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
-
-    if start_date is not None and end_date is not None:
-        # Check if underlying data is timezone aware.
-        data_time_index = data.indexes["time"]
-        tzinfo = data_time_index.tzinfo
-
-        if tzinfo:
-            start_date_filter = timestamp_tzaware(start_date)
-            end_date_filter = timestamp_tzaware(end_date)
-        else:
-            start_date_filter = Timestamp(start_date)
-            end_date_filter = Timestamp(end_date)
-
-        end_date_filter_exclusive = end_date_filter - Timedelta(
-            1, unit="nanosecond"
-        )  # Deduct 1 ns to make the end day (date) exclusive.
-
-        # Slice the data to only cover the dates we're interested in
-        data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
 
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
