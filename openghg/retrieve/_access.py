@@ -198,6 +198,11 @@ def get_obs_surface(
         data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
 
     if average is not None:
+        # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
+        # then it may be possible to avoid calling `.compute()`
+        # Currently, large gaps in the data could blow up the number of chunks when resampling
+        # which makes resampling extremely slow with Dask >= 2024.8.0
+        data = data.compute()
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
