@@ -50,16 +50,18 @@ from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
-from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
     get_bc,
     get_flux,
     get_footprint,
+    get_obs_column,
     search_surface,
     search_bc,
     search_flux,
     search_footprints,
+    search_column
 )
 from openghg.util import synonyms
 from openghg.types import SearchError
@@ -97,6 +99,7 @@ class ModelScenario:
     def __init__(
         self,
         site: str | None = None,
+        satellite: str | None = None,
         species: str | None = None,
         inlet: str | None = None,
         height: str | None = None,
@@ -111,6 +114,7 @@ class ModelScenario:
         start_date: str | Timestamp | None = None,
         end_date: str | Timestamp | None = None,
         obs: ObsData | None = None,
+        obs_column: ObsColumnData | None = None,
         footprint: FootprintData | None = None,
         flux: FluxData | dict[str, FluxData] | None = None,
         bc: BoundaryConditionsData | None = None,
@@ -124,12 +128,13 @@ class ModelScenario:
         The keywords are related to observation, footprint and flux data
         which may be available within the object store. The combination of these supplied
         will be used to extract the relevant data. Related keywords are as follows:
-         - Observation data: site, species, inlet, network, start_date, end_data
+         - Observation data: site, species, inlet, network, start_date, end_data, satellite
          - Footprint data: site, inlet, domain, model, met_model, species, start_date, end_date
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
             site: Site code e.g. "TAC"
+            satellite: Satellite platform e.g. "GOSAT"
             species: Species code e.g. "ch4"
             inlet: Inlet value e.g. "10m"
             height: Alias for inlet.
@@ -143,6 +148,7 @@ class ModelScenario:
             start_date: Start of date range to use. Note for flux this may not be applied
             end_date: End of date range to use. Note for flux this may not be applied
             obs: Supply ObsData object directly (e.g. from get_obs...() functions)
+            obs_column: Supply ObsColumn object directly (e.g. from get_obs_column() functions)
             footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
             flux: Supply FluxData object directly (e.g. from get_flux() function)
             store: Name of object store to retrieve data from.
@@ -159,32 +165,45 @@ class ModelScenario:
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
+        self.obs_column: ObsColumnData | None = None
 
         if species is not None:
             species = synonyms(species)
 
-        # Add observation data (directly or through keywords)
-        self.add_obs(
-            site=site,
+        if satellite is not None:
+            self.add_obs_column(
+            satellite=satellite,
             species=species,
-            inlet=inlet,
-            height=height,
-            network=network,
+            domain=domain,
             start_date=start_date,
             end_date=end_date,
-            obs=obs,
+            obs_column=obs_column,
             store=store,
+
         )
+        else:
+        # Add observation data (directly or through keywords)
+            self.add_obs(
+                site=site,
+                species=species,
+                inlet=inlet,
+                height=height,
+                network=network,
+                start_date=start_date,
+                end_date=end_date,
+                obs=obs,
+                store=store,
+            )
 
-        # Make sure obs data is present, make sure inputs match to metadata
-        if self.obs is not None:
-            obs_metadata = self.obs.metadata
-            site = obs_metadata["site"]
-            species = obs_metadata["species"]
-            inlet = obs_metadata["inlet"]
-            logger.info("Updating any inputs based on observation data")
-            logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
-
+            # Make sure obs data is present, make sure inputs match to metadata
+            if self.obs is not None:
+                obs_metadata = self.obs.metadata
+                site = obs_metadata["site"]
+                species = obs_metadata["species"]
+                inlet = obs_metadata["inlet"]
+                logger.info("Updating any inputs based on observation data")
+                logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
+        
         # Add footprint data (directly or through keywords)
         self.add_footprint(
             site=site,
@@ -242,6 +261,7 @@ class ModelScenario:
             "footprint": get_footprint,
             "flux": get_flux,
             "boundary_conditions": get_bc,
+            "obs_column": get_obs_column,
         }
 
         search_functions = {
@@ -249,6 +269,7 @@ class ModelScenario:
             "footprint": search_footprints,
             "flux": search_flux,
             "boundary_conditions": search_bc,
+            "obs_column": search_column,
         }
 
         get_fn = get_functions[data_type]
@@ -553,6 +574,46 @@ class ModelScenario:
             bc = self._get_data(bc_keywords, data_type="boundary_conditions")
 
         self.bc = bc
+
+    def add_obs_column(
+        self,
+        satellite: str | None = None,
+        species: str | None = None,
+        network: str | None = None,
+        domain: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs_column: ObsData | None = None,
+        store: str | None = None,
+    ) -> None:
+        """
+        Add observation column data based on keywords or direct ObsColumnData object.
+        """
+        from openghg.util import clean_string, format_inlet
+
+        # Search for obs data based on keywords
+        if satellite is not None and obs_column is None:
+            satellite = clean_string(satellite)
+
+            # search for obs column based on suitable keywords - satellite, species, network, domain
+            obs_column_keywords = {
+                "satellite": satellite,
+                "species": species,
+                "network": network,
+                "domain": domain,
+                "start_date": start_date,
+                "end_date": end_date,
+                "store": store,
+            }
+
+            obs_column = self._get_data(obs_column_keywords, data_type="obs_column")
+
+        self.obs_column = obs_column
+
+        # Add keywords to class for convenience
+        if self.obs_column is not None:
+            self.site = self.obs_column.metadata["satellite"]
+            self.species = self.obs.metadata["species"]
 
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """
