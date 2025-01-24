@@ -26,16 +26,15 @@ possible using `surface_obs_resampler` as a base.
 
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
-from typing import Any, cast, Concatenate, Literal
-from typing_extensions import ParamSpec
+from typing import Any, Concatenate, Literal, cast
 
 import numpy as np
 import pandas as pd
 import xarray as xr
-
 from openghg.util import Registry
-from ._attrs import rename, update_attrs
+from typing_extensions import ParamSpec
 
+from ._attrs import rename, update_attrs
 
 registry = Registry(suffix="resample")
 register = registry.register

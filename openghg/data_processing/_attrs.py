@@ -50,10 +50,9 @@ or use two calls to `rename`:
 >>> rename(ds, (lambda x: x.upper(), ["important_dv"]))
 """
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from functools import partial, reduce
 from typing import Any, TypeVar
-from collections.abc import Callable
 
 import xarray as xr
 
@@ -88,7 +87,7 @@ def map_dict_multi(d: dict, funcs: Iterable[Callable | tuple[Callable, list[str]
 
     Args:
         d: input dict
-        func: functions applied to the values of the dictionary. If a tuple
+        funcs: functions applied to the values of the dictionary. If a tuple
             containing a function and a list of strings is passed, then the function
             is only applied to values whose keys are in that list; other values are
             unmodified.
@@ -96,7 +95,6 @@ def map_dict_multi(d: dict, funcs: Iterable[Callable | tuple[Callable, list[str]
     Returns:
         dict with functions applied to values of input dict
     """
-
     tups = (func if isinstance(func, tuple) else (func, None) for func in funcs)
     maps = (partial(map_dict, func=tup[0], keys=tup[1]) for tup in tups)
     return reduce(lambda x, f: f(x), maps, d)
