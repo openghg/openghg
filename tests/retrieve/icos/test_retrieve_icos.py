@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
+from openghg.retrieve import search_surface
 from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
@@ -39,6 +40,34 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
 
     assert expected_metadata.items() <= first_obs.metadata.items()
     assert "data_owner" in first_obs.metadata and "data_owner_email" in first_obs.metadata
+
+
+@pytest.mark.icos
+def test_icos_retrieve_stores_by_data_level():
+    """Check that retrieving data with different levels creates different datasources."""
+    retrieve_atmospheric(
+        site="BIR",
+        species=["CH4"],
+        inlet="50m",
+        data_level=2,
+        dataset_source="European ObsPack",
+        update_mismatch="from_source",
+        store="user",
+    )
+
+    retrieve_atmospheric(
+        site="BIR",
+        species=["CH4"],
+        inlet="50m",
+        data_level=1,
+        dataset_source="ICOS",
+        update_mismatch="from_source",
+        store="user",
+    )
+
+    res = search_surface(store="user", site="BIR", species="CH4")
+
+    assert len(res) == 2
 
 
 @pytest.mark.icos
