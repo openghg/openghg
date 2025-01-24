@@ -126,9 +126,7 @@ def get_obs_surface(
         format_inlet,
         get_site_info,
         synonyms,
-        timestamp_tzaware,
     )
-    from pandas import Timedelta
 
     if species is not None:
         species = synonyms(species)
@@ -160,7 +158,7 @@ def get_obs_surface(
     }
     surface_keywords.update(kwargs)
 
-    # # Get the observation data
+    # Get the observation data
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
