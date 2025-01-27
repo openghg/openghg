@@ -311,10 +311,16 @@ def _retrieve_remote(
             if spec == "co2":
                 dataframe["value"] = dataframe["value"] * 1e6
                 dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e6
+                dataframe["icos_LTR"] = dataframe["icos_LTR"] * 1e6
+                dataframe["icos_SMR"] = dataframe["icos_SMR"] * 1e6
+                dataframe["icos_STTB"] = dataframe["icos_STTB"] * 1e6
                 units = "ppm"
             else:
                 dataframe["value"] = dataframe["value"] * 1e9
                 dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e9
+                dataframe["icos_LTR"] = dataframe["icos_LTR"] * 1e9
+                dataframe["icos_SMR"] = dataframe["icos_SMR"] * 1e9
+                dataframe["icos_STTB"] = dataframe["icos_STTB"] * 1e9
                 units = "ppb"
         else:
             units = species_info["valueType"]["unit"].lower()
