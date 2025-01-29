@@ -169,32 +169,33 @@ class ModelScenario:
 
         if species is not None:
             species = synonyms(species)
-
-        if satellite is not None:
-            self.add_obs_column(
-            satellite=satellite,
-            species=species,
-            domain=domain,
-            start_date=start_date,
-            end_date=end_date,
-            obs_column=obs_column,
-            store=store,
-
-        )
-        else:
-        # Add observation data (directly or through keywords)
-            self.add_obs(
-                site=site,
+        
+        try:
+            if satellite is not None and site is not None:
+                raise ValueError("Invalid observation data configuration: For a single ModelScenario, there must be only one type of observation data—either surface or column.")
+            elif satellite is not None:
+            # Add satellite data (directly or through keywords)
+                self.add_obs_column(
+                satellite=satellite,
                 species=species,
-                inlet=inlet,
-                height=height,
-                network=network,
+                domain=domain,
                 start_date=start_date,
                 end_date=end_date,
-                obs=obs,
-                store=store,
-            )
-
+                obs_column=obs_column,
+                store=store)
+            else:        
+            # Add observation data (directly or through keywords)
+                self.add_obs(
+                    site=site,
+                    species=species,
+                    inlet=inlet,
+                    height=height,
+                    network=network,
+                    start_date=start_date,
+                    end_date=end_date,
+                    obs=obs,
+                    store=store,
+                )
             # Make sure obs data is present, make sure inputs match to metadata
             if self.obs is not None:
                 obs_metadata = self.obs.metadata
@@ -203,6 +204,9 @@ class ModelScenario:
                 inlet = obs_metadata["inlet"]
                 logger.info("Updating any inputs based on observation data")
                 logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
+
+        except ValueError as e:
+                print(f"Error: {e}")
         
         # Add footprint data (directly or through keywords)
         self.add_footprint(
@@ -604,6 +608,7 @@ class ModelScenario:
                 "start_date": start_date,
                 "end_date": end_date,
                 "store": store,
+                "max_level": max
             }
 
             obs_column = self._get_data(obs_column_keywords, data_type="obs_column")
