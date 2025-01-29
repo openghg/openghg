@@ -16,6 +16,8 @@ def parse_openghg(
     instrument: str | None = None,
     platform: str = "satellite",
     chunks: dict | None = None,
+    data_owner: str | None = "NOT_SET",
+    data_owner_email: str | None = "NOT_SET",
     **kwargs: str,
 ) -> dict:
     """
@@ -98,6 +100,8 @@ def parse_openghg(
         "platform": platform,
         "data_type": "column",
         "source_format": "openghg",
+        "data_owner": data_owner,
+        "data_owner_email": data_owner_email
     }
 
     # TODO: Tidy this up a bit (maybe split some into a separate function?)
