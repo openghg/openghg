@@ -146,6 +146,7 @@ def define_surface_filename(
     output_path: optionalPathType = None,
     include_version: bool = True,
     data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
 ) -> Path:
     """
     Create file name for surface type (surface-flask or surface-insitu)
@@ -160,12 +161,17 @@ def define_surface_filename(
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename. Using the default sets this to ["species", "site", "inlet"]
     Returns:
         Path: Full path for filename
 
     TODO: Would we want to incorporate instrument into file naming?
     """
-    name_components: list[Union[str, list]] = ["species", "site", "inlet"]
+
+    if name_components is None:
+        name_components: list[Union[str, list]] = ["species", "site", "inlet"]
+
     filename = define_filename(
         name_components,
         metadata=metadata,
@@ -183,6 +189,7 @@ def define_column_filename(
     output_path: optionalPathType = None,
     include_version: bool = True,
     data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
 ) -> Path:
     """
     Create file name for column type data with expected naming convention.
@@ -196,35 +203,38 @@ def define_column_filename(
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename. Using the default uses the platform to determine the naming.
     Returns:
         Path: Full path for filename
 
     TODO: Would we want to incorporate instrument into naming?
     """
 
-    try:
-        platform = metadata["platform"]
-    except KeyError:
-        msg = "Expect 'platform' key to be included for 'column' data. Please check metadata"
-        logger.exception(msg)
-        raise ValueError(msg)
+    if name_components is None:
+        try:
+            platform = metadata["platform"]
+        except KeyError:
+            msg = "Expect 'platform' key to be included for 'column' data. Please check metadata"
+            logger.exception(msg)
+            raise ValueError(msg)
 
-    if platform == "site":
-        name_components: list[Union[str, list]] = ["species", "site", "platform"]
-    elif platform == "satellite":
-        name_components = ["species"]
+        if platform == "site":
+            name_components: list[Union[str, list]] = ["species", "site", "platform"]
+        elif platform == "satellite":
+            name_components = ["species"]
 
-        if "satellite" in metadata:
-            sub_name_components = ["satellite"]
-            if "selection" in metadata:
-                sub_name_components.append("selection")
-            elif "domain" in metadata:
-                sub_name_components.append("domain")
-            name_components.append(sub_name_components)
-        elif "site" in metadata:
-            name_components.append("site")
+            if "satellite" in metadata:
+                sub_name_components = ["satellite"]
+                if "selection" in metadata:
+                    sub_name_components.append("selection")
+                elif "domain" in metadata:
+                    sub_name_components.append("domain")
+                name_components.append(sub_name_components)
+            elif "site" in metadata:
+                name_components.append("site")
 
-        name_components.append("platform")
+            name_components.append("platform")
 
     filename = define_filename(
         name_components,
@@ -256,6 +266,7 @@ def define_obspack_filename(
     obspack_path: pathType,
     include_version: bool = True,
     data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
 ) -> Path:
     """
     Create file name for obspack files with expected naming convention. This will
@@ -269,6 +280,9 @@ def define_obspack_filename(
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename. Default will depend on obs_type.
+
     Returns:
         Path: Full path for filename
     """
@@ -285,6 +299,7 @@ def define_obspack_filename(
                 output_path=full_obspack_path,
                 include_version=include_version,
                 data_version=data_version,
+                name_components=name_components,
             )
         elif "column" in obs_type:
             full_obspack_path = Path(obspack_path) / obs_type
@@ -294,6 +309,7 @@ def define_obspack_filename(
                 output_path=full_obspack_path,
                 include_version=include_version,
                 data_version=data_version,
+                name_components=name_components,
             )
     else:
         raise ValueError(f"Did not recognise obs_type {obs_type}. Should be one of: {obs_types}")
