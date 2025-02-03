@@ -10,7 +10,7 @@ from helpers import (
     clear_test_store,
     filt,
 )
-from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
+from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint, get_obs_column
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -272,11 +272,17 @@ def test_local_obs_metadata_mismatch_fail():
 
 
 def test_standardise_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
     satellite = "GOSAT"
-    domain = "BRAZIL"
+    domain = "SOUTH-AMERICA"
+    selection = "LAND"
     species = "methane"
+    region = "BRAZIL"
 
     results = standardise_column(
         filepath=filepath,
@@ -284,11 +290,19 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
+        region=region,
+        selection=selection,
         force=True,
         store="user",
     )
 
     assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species='ch4', max_level=3)
+
+    assert data.metadata["region"] == "brazil"
+    assert data.metadata["selection"] == "LAND"
+    assert data.metadata["domain"] == "SOUTH-AMERICA"
 
 
 def test_standardise_footprint():
