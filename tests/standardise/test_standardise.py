@@ -625,3 +625,40 @@ def test_standardise_sorting_false(caplog):
     log_messages = [record.message for record in caplog.records]
 
     assert "20220928.nc" in log_messages[-1]
+
+
+def test_standardise_satellite_footprints_file():
+    """
+    Tests standardise satellite footprint data and associated metadata keys
+    for satellite footprint data.
+    """
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+    fp_region = "BRAZIL"
+
+    standardise_footprint(
+        filepath=datapath,
+        satellite=satellite,
+        network=network,
+        domain=domain,
+        model="CAMS",
+        height=6500,
+        period='1S',
+        fp_region=fp_region,
+        selection="LAND",
+        force=True,
+        store="user",
+        continuous=False,
+    )
+
+    data = get_footprint(
+        satellite="GOSAT",
+        domain="southamerica"
+    )
+
+    assert data.metadata["fp_region"] == "brazil"
+    assert data.metadata["selection" ] == "land"
+    assert data.metadata["domain"] == "southamerica"
