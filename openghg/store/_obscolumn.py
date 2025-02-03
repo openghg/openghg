@@ -28,7 +28,7 @@ class ObsColumn(BaseStore):
         filepath: str | Path,
         species: str,
         platform: str = "satellite",
-        region: str = None,
+        region: Optional[str] = None,
         satellite: str | None = None,
         domain: str | None = None,
         selection: str | None = None,

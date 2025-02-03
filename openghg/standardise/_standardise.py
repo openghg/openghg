@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from pandas import Timedelta
 import warnings
 
@@ -186,7 +186,7 @@ def standardise_column(
     filepath: str | Path,
     species: str,
     platform: str = "satellite",
-    region: str = None,
+    region: Optional[str] = None,
     site: str | None = None,
     satellite: str | None = None,
     domain: str | None = None,
