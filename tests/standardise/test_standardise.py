@@ -279,7 +279,7 @@ def test_standardise_column():
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
     satellite = "GOSAT"
-    domain = "SOUTH-AMERICA"
+    domain = "SOUTHAMERICA"
     selection = "LAND"
     species = "methane"
     region = "BRAZIL"
