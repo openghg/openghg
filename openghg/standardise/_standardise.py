@@ -208,7 +208,7 @@ def standardise_column(
     """Read column observation file
 
     Args:
-        filepath: Path to the input observation file (CSV, HDF5, etc.).
+        filepath: Path to the input observation file (netCDF).
         species: Species name or synonym (e.g., "ch4").
         platform: Type of platform (default is "satellite"). Can be one of:
             - "satellite"
