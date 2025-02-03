@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from pandas import Timedelta
 import warnings
 
@@ -359,9 +359,12 @@ def standardise_bc(
 
 def standardise_footprint(
     filepath: str | Path | list,
-    site: str,
     domain: str,
     model: str,
+    site: Optional[str] = None,
+    satellite: Optional[str] = None,
+    fp_region: Optional[str] = None,
+    selection: Optional[str] = None,
     inlet: str | None = None,
     height: str | None = None,
     met_model: str | None = None,
@@ -462,6 +465,9 @@ def standardise_footprint(
         site=site,
         domain=domain,
         model=model,
+        satellite=satellite,
+        fp_region=fp_region,
+        selection=selection,
         inlet=inlet,
         height=height,
         met_model=met_model,
