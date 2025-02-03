@@ -186,6 +186,7 @@ def standardise_column(
     filepath: str | Path,
     species: str,
     platform: str = "satellite",
+    region: str = None,
     site: str | None = None,
     satellite: str | None = None,
     domain: str | None = None,
@@ -207,46 +208,44 @@ def standardise_column(
     """Read column observation file
 
     Args:
-        filepath: Path of observation file
-        species: Species name or synonym e.g. "ch4"
-        platform: Type of platform. Should be one of:
+        filepath (str | Path): Path to the input observation file (CSV, HDF5, etc.).
+        species (str): Species name or synonym (e.g., "ch4").
+        platform (str, optional): Type of platform (default is "satellite"). Can be one of:
             - "satellite"
             - "site"
-        satellite: Name of satellite (if relevant). Should include satellite OR site.
-        domain: For satellite only. If data has been selected on an area include the
-            identifier name for domain covered. This can map to previously defined domains
-            (see openghg_defs "domain_info.json" file) or a newly defined domain.
-        selection: For satellite only, identifier for any data selection which has been
-            performed on satellite data. This can be based on any form of filtering, binning etc.
-            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
-            If not specified, domain will be used.
-        site : Site code/name (if relevant). Should include satellite OR site.
-        instrument: Instrument name e.g. "TANSO-FTS"
-        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"        source_format : Type of data being input e.g. openghg (internal format)
-        store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
-        overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
-        compression: Enable compression in the store
-        compressor: A custom compressor to use. If None, this will default to
-            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-        filters: Filters to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+        region (str, optional): The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site (str, optional): Site name or code, if platform is site-based.
+        satellite (str, optional): Satellite name (if platform is satellite-based).
+        domain (str, optional): For satellite data, specifies the geographical domain identifier.
+            This can either map to an existing domain or define a new domain.
+        selection (str, optional): A unique identifier for a data selection (e.g., "land", "glint").
+            If not specified, `domain` is used.
+        network (str, optional): Name of the satellite or in-situ measurement network (e.g., "TCCON").
+        instrument (str, optional): Instrument name used to collect data (e.g., "TANSO-FTS").
+        source_format (str, optional): Format of the input data (default is "openghg").
+        store (str, optional): The name of the store to write the processed data to.
+        if_exists (str, optional): Determines behavior if data already exists in the store.
+            Can be one of:
+            - "auto" (default): Checks for overlap and decides whether to add or raise an error.
+            - "new": Only includes new data, ignoring existing data.
+            - "combine": Replaces and inserts new data into the existing timeseries.
+        save_current (str, optional): Decides whether to save the current version of the data:
+            - "auto" (default): Automatically saves based on `if_exists` behavior.
+            - "yes" or "y": Save current data as a separate version.
+            - "no" or "n": Allow updates or deletion of current data.
+        overwrite (bool, optional): Deprecated. Replaced by `if_exists="new"`.
+        force (bool, optional): Forces the addition of data even if it's identical to the existing data.
+        compression (bool, optional): Enables or disables compression during data storage (default is True).
+        compressor (Any, optional): Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
+        filters (Any, optional): Filters to apply during data storage. Defaults to no filtering.
+        https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks (dict, optional): Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        optional_metadata (dict, optional): Additional metadata to tag the data (e.g., `{"project": "paris"}`).
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -257,6 +256,7 @@ def standardise_column(
         filepath=filepath,
         species=species,
         platform=platform,
+        region=region,
         satellite=satellite,
         domain=domain,
         selection=selection,
