@@ -28,6 +28,7 @@ class ObsColumn(BaseStore):
         filepath: str | Path,
         species: str,
         platform: str = "satellite",
+        region: str = None,
         satellite: str | None = None,
         domain: str | None = None,
         selection: str | None = None,
@@ -115,6 +116,8 @@ class ObsColumn(BaseStore):
         site = clean_string(site)
         satellite = clean_string(satellite)
         domain = clean_string(domain)
+        region = clean_string(region)
+        selection = clean_string(selection)
         network = clean_string(network)
         instrument = clean_string(instrument)
 
