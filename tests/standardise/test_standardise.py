@@ -302,7 +302,7 @@ def test_standardise_column():
 
     assert data.metadata["region"] == "brazil"
     assert data.metadata["selection"] == "land"
-    assert data.metadata["domain"] == "SOUTH-AMERICA"
+    assert data.metadata["domain"] == "south-america"
 
 
 def test_standardise_footprint():
