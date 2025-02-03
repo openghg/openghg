@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
+from typing import Optional
 import warnings
 from xarray import Dataset
 
@@ -19,12 +20,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    filepath: multiPathType,
-    site: str,
     domain: str,
     model: str,
     inlet: str,
     species: str,
+    filepath: multiPathType,
+    site: Optional[str] = None,
+    satellite: Optional[str] = None,
     met_model: str | None = None,
     network: str | None = None,
     period: str | tuple | None = None,
@@ -228,7 +230,8 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    key_parts = [satellite if site is None else site, domain, model, inlet]
+    key =  "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
