@@ -191,7 +191,7 @@ class Footprints(BaseStore):
         filepath: list | str | Path,
         site: Optional[str] = None,
         satellite: Optional[str] = None,
-        region: Optional[str] = None,
+        fp_region: Optional[str] = None,
         selection: Optional[str] = None,
         inlet: str | None = None,
         height: str | None = None,
