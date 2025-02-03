@@ -124,7 +124,28 @@
                 ]
             }
         },
-        "optional": {}
+        "optional": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "satellite": {
+            "type": [
+                "str"
+            ]
+            },
+            "fp_region": {
+            "type": [
+                "str"
+            ]
+            },
+            "selection": {
+                "type": [
+                    "str"
+            ]
+            }
+        }
     },
     "flux": {
         "required": {
