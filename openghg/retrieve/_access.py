@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
@@ -544,8 +544,9 @@ def get_bc(
 
 
 def get_footprint(
-    site: str,
     domain: str,
+    site: Optional[str] = None,
+    satellite: Optional[str] = None,
     inlet: str | None = None,
     height: str | None = None,
     model: str | None = None,
@@ -562,6 +563,7 @@ def get_footprint(
               different met and they are named slightly differently from the obs
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
+        satellite: The name of the satellite footprints data. e.g GOSAT
         domain : Domain name for the footprints
         inlet: Height above ground level in metres
         height: Alias for inlet
