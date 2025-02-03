@@ -81,12 +81,7 @@
         }
     },
     "footprints": {
-        "required": {
-            "site": {
-                "type": [
-                    "str"
-                ]
-            },
+        "required": {           
             "model": {
                 "type": [
                     "str"
