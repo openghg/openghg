@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Optional, cast
 import warnings
 import numpy as np
 from openghg.store import DataSchema
@@ -186,10 +186,13 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: list | str | Path,
-        site: str,
         domain: str,
         model: str,
+        filepath: list | str | Path,
+        site: Optional[str] = None,
+        satellite: Optional[str] = None,
+        region: Optional[str] = None,
+        selection: Optional[str] = None,
         inlet: str | None = None,
         height: str | None = None,
         met_model: str | None = None,
@@ -283,7 +286,13 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
 
-        site = clean_string(site)
+        if satellite is None and site is None:
+            raise ValueError("Please pass either site or satellite value")
+        
+        if satellite is not None:
+            satellite = clean_string(satellite)
+        else:
+            site = clean_string(site)
         network = clean_string(network)
         domain = clean_string(domain)
 
