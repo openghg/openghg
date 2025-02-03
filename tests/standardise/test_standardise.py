@@ -301,7 +301,7 @@ def test_standardise_column():
     data = get_obs_column(species='ch4', max_level=3)
 
     assert data.metadata["region"] == "brazil"
-    assert data.metadata["selection"] == "LAND"
+    assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == "SOUTH-AMERICA"
 
 
