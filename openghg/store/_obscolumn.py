@@ -109,9 +109,10 @@ class ObsColumn(BaseStore):
         platform = clean_string(platform)
 
         if site is None and satellite is None:
-            raise ValueError("One of 'site' or 'satellite' must be specified")
+            raise ValueError("Values for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")
+
 
         site = clean_string(site)
         satellite = clean_string(satellite)
@@ -121,6 +122,15 @@ class ObsColumn(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
 
+        if domain is not None and obs_region is not None:
+            raise ValueError("Error: Only one of 'domain' or 'obs_region' should be specified")
+        elif domain is not None and obs_region is None:
+            obs_region = domain
+            logging.info(f"Updated 'obs_region' to match 'domain': {domain}")
+        elif obs_region is not None and domain is None:
+            domain = "NOT_SET"
+            logging.info(f"Updated value of 'domain': {domain}")
+            
         # Specify any additional metadata to be added
         additional_metadata = {}
 
@@ -150,7 +160,7 @@ class ObsColumn(BaseStore):
         parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
         # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_current_parameters: dict[str, Any] = locals().copy()  # Make a copy of parameters passed to function
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
