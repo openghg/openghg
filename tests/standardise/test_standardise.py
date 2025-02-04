@@ -279,7 +279,6 @@ def test_standardise_column():
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
     satellite = "GOSAT"
-    domain = "SOUTHAMERICA"
     selection = "LAND"
     species = "methane"
     obs_region = "BRAZIL"
@@ -288,7 +287,6 @@ def test_standardise_column():
         filepath=filepath,
         source_format="OPENGHG",
         satellite=satellite,
-        domain=domain,
         species=species,
         obs_region=obs_region,
         selection=selection,
@@ -298,11 +296,10 @@ def test_standardise_column():
 
     assert "ch4" == results[0].get("species")
 
-    data = get_obs_column(species='ch4', max_level=3)
+    data = get_obs_column(species='ch4', max_level=3, satellite="gosat")
 
     assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection"] == "land"
-    assert data.metadata["domain"] == "southamerica"
 
 
 def test_standardise_footprint():
