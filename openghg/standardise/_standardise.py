@@ -186,7 +186,7 @@ def standardise_column(
     filepath: str | Path,
     species: str,
     platform: str = "satellite",
-    region: Optional[str] = None,
+    obs_region: Optional[str] = None,
     site: str | None = None,
     satellite: str | None = None,
     domain: str | None = None,
@@ -213,7 +213,7 @@ def standardise_column(
         platform: Type of platform (default is "satellite"). Can be one of:
             - "satellite"
             - "site"
-        region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         site: Site name or code, if platform is site-based.
         satellite: Satellite name (if platform is satellite-based).
         domain: For satellite data, specifies the geographical domain identifier.
@@ -256,7 +256,7 @@ def standardise_column(
         filepath=filepath,
         species=species,
         platform=platform,
-        region=region,
+        obs_region=obs_region,
         satellite=satellite,
         domain=domain,
         selection=selection,

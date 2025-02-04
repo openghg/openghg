@@ -282,7 +282,7 @@ def test_standardise_column():
     domain = "SOUTH-AMERICA"
     selection = "LAND"
     species = "methane"
-    region = "BRAZIL"
+    obs_region = "BRAZIL"
 
     results = standardise_column(
         filepath=filepath,
@@ -290,7 +290,7 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
-        region=region,
+        obs_region=obs_region,
         selection=selection,
         force=True,
         store="user",
@@ -300,7 +300,7 @@ def test_standardise_column():
 
     data = get_obs_column(species='ch4', max_level=3)
 
-    assert data.metadata["region"] == "brazil"
+    assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == "south-america"
 
