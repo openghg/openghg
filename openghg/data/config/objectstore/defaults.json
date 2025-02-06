@@ -126,8 +126,8 @@
                 ]
             },
             "satellite": {
-            "type": [
-                "str"
+                "type": [
+                    "str"
             ]
             },            
             "domain": {
@@ -136,8 +136,8 @@
                 ]
             },
             "fp_region": {
-            "type": [
-                "str"
+                "type": [
+                    "str"
             ]
             },
             "selection": {
