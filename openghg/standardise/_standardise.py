@@ -186,7 +186,7 @@ def standardise_column(
     filepath: str | Path,
     species: str,
     platform: str = "satellite",
-    obs_region: Optional[str] = None,
+    obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
     domain: str | None = None,
