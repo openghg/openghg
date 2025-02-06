@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import Optional
 import warnings
 from xarray import Dataset
 
