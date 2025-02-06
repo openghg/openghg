@@ -24,10 +24,10 @@ def parse_acrg_org(
     inlet: str,
     species: str,
     filepath: multiPathType,
-    domain: Optional[str] = None,
-    fp_region: Optional[str] = None,
-    site: Optional[str] = None,
-    satellite: Optional[str] = None,
+    domain: str | None = None,
+    fp_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
     met_model: str | None = None,
     network: str | None = None,
     period: str | tuple | None = None,
@@ -159,10 +159,8 @@ def parse_acrg_org(
     metadata: dict[str, str | float | list[float]] = {}
 
     metadata["data_type"] = "footprints"
-    if site is not None:
-        metadata["site"] = site
-    else:
-        metadata["satellite"] = satellite
+    metadata["site"] = site
+    metadata["satellite"] = satellite
     metadata["domain"] = domain
     metadata["model"] = model
     metadata["fp_region"] = fp_region
