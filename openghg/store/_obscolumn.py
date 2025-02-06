@@ -125,7 +125,7 @@ class ObsColumn(BaseStore):
             raise ValueError("Error: Only one of 'domain' or 'obs_region' should be specified")
         elif domain is not None and obs_region is None:
             obs_region = domain
-            logging.info(f"Updated 'obs_region' to match 'domain': {domain}")
+            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
         elif obs_region is not None and domain is None:
             domain = "NOT_SET"
             logging.info(f"Updated value of 'domain': {domain}")
