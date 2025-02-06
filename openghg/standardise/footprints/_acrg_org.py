@@ -239,7 +239,7 @@ def parse_acrg_org(
     # TODO - remove this once assign_attributes has been refactored
     key_parts = [
         satellite if site is None else site,
-        fp_region if domain is "NOT_SET" else domain,
+        fp_region if domain == "NOT_SET" else domain,
         model,
         inlet,
     ]
