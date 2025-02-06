@@ -371,7 +371,7 @@ def standardise_footprint(
     species: str | None = None,
     network: str | None = None,
     source_format: str = "acrg_org",
-    period: str | tuple = "1S",
+    period: str | tuple | None = None,
     chunks: dict | None = None,
     continuous: bool = True,
     retrieve_met: bool = False,
@@ -408,7 +408,7 @@ def standardise_footprint(
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         source_format: Format of the input data format, for example acrg_org
-        period: Period of measurements. Only needed if this can not be inferred from the time coords. Default to '1S'
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
         chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking

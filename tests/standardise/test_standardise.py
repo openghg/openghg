@@ -644,6 +644,7 @@ def test_standardise_satellite_footprints_file():
         network=network,
         model="CAMS",
         height=6500,
+        period='1S',
         fp_region=fp_region,
         selection="LAND",
         force=True,
