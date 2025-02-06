@@ -290,12 +290,11 @@ class Footprints(BaseStore):
 
         if satellite is None and site is None:
             raise ValueError("Please pass either site or satellite value")
-        
+
         if satellite is not None:
             satellite = clean_string(satellite)
         else:
             site = clean_string(site)
-        
 
         if domain is not None and fp_region is not None:
             raise ValueError("Error: Only one of 'domain' or 'fp_region' should be specified")

@@ -161,12 +161,12 @@ def parse_acrg_org(
     metadata["data_type"] = "footprints"
     if site is not None:
         metadata["site"] = site
-    else: 
+    else:
         metadata["satellite"] = satellite
     metadata["domain"] = domain
     metadata["model"] = model
     metadata["fp_region"] = fp_region
-        
+
     # Include both inlet and height keywords for backwards compatability
     metadata["inlet"] = inlet
     metadata["height"] = inlet
@@ -237,7 +237,12 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key_parts = [satellite if site is None else site, fp_region if domain is "NOT_SET" else domain, model, inlet]
+    key_parts = [
+        satellite if site is None else site,
+        fp_region if domain is "NOT_SET" else domain,
+        model,
+        inlet,
+    ]
     key = "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
