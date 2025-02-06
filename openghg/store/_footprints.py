@@ -224,6 +224,8 @@ class Footprints(BaseStore):
             filepath: Path(s) of file(s) to standardise
             site: Site name
             domain: Domain of footprints
+            satellite: Satellite name
+            fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
             height: Alias for inlet. One of height or inlet MUST be included.
@@ -293,6 +295,17 @@ class Footprints(BaseStore):
             satellite = clean_string(satellite)
         else:
             site = clean_string(site)
+        
+
+        if domain is not None and fp_region is not None:
+            raise ValueError("Error: Only one of 'domain' or 'fp_region' should be specified")
+        elif domain is not None and fp_region is None:
+            fp_region = domain
+            logging.info(f"Updated 'fp_region' to match 'domain': {domain}")
+        elif fp_region is not None and domain is None:
+            domain = "NOT_SET"
+            logging.info(f"Updated value of 'domain': {domain}")
+
         network = clean_string(network)
         domain = clean_string(domain)
 
@@ -318,6 +331,7 @@ class Footprints(BaseStore):
         # Ensure we have a clear missing value for met_model
         met_model = check_and_set_null_variable(met_model)
         met_model = clean_string(met_model)
+        fp_region = clean_string(fp_region)
 
         if network is not None:
             network = clean_string(network)
