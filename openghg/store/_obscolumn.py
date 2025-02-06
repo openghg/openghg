@@ -117,7 +117,6 @@ class ObsColumn(BaseStore):
         satellite = clean_string(satellite)
         domain = clean_string(domain)
         obs_region = clean_string(obs_region)
-        selection = selection
         network = clean_string(network)
         instrument = clean_string(instrument)
 
