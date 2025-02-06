@@ -544,10 +544,10 @@ def get_bc(
 
 
 def get_footprint(
-    domain: Optional[str] = None,
-    fp_region: Optional[str] = None,
-    site: Optional[str] = None,
-    satellite: Optional[str] = None,
+    domain: str | None = None,
+    fp_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
     inlet: str | None = None,
     height: str | None = None,
     model: str | None = None,
