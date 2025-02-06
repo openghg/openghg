@@ -544,7 +544,8 @@ def get_bc(
 
 
 def get_footprint(
-    domain: str,
+    domain: Optional[str] = None,
+    fp_region: Optional[str] = None,
     site: Optional[str] = None,
     satellite: Optional[str] = None,
     inlet: str | None = None,
@@ -564,7 +565,8 @@ def get_footprint(
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
         satellite: The name of the satellite footprints data. e.g GOSAT
-        domain : Domain name for the footprints
+        domain: Domain name for the footprints
+        fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         inlet: Height above ground level in metres
         height: Alias for inlet
         model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -592,6 +594,8 @@ def get_footprint(
     fp_data = _get_generic(
         site=site,
         domain=domain,
+        satellite=satellite,
+        fp_region=fp_region,
         inlet=inlet,
         height=height,
         model=model,
