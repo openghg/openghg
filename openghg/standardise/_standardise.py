@@ -359,8 +359,8 @@ def standardise_bc(
 
 def standardise_footprint(
     filepath: str | Path | list,
-    domain: str,
     model: str,
+    domain: Optional[str] = None,
     site: Optional[str] = None,
     satellite: Optional[str] = None,
     fp_region: Optional[str] = None,
@@ -399,6 +399,8 @@ def standardise_footprint(
         filepath: Path(s) of file to standardise
         site: Site name
         domain: Domain of footprints
+        satellite: Satellite name
+        fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
