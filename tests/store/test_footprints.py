@@ -736,10 +736,10 @@ def test_optional_metadata_raise_error():
 
     site = "WAO"
     inlet = "20m"
-    domain = "TEST"
     model = "NAME"
     met_model = "UKV"
     species = "Rn"
+    fp_region = "test"
 
     with pytest.raises(ValueError):
         standardise_footprint(
@@ -747,11 +747,11 @@ def test_optional_metadata_raise_error():
             filepath=datapath,
             site=site,
             model=model,
+            fp_region=fp_region,
             met_model=met_model,
             inlet=inlet,
             species=species,
-            domain=domain,
-            optional_metadata={"site": "test"},
+            optional_metadata={"species": species},
         )
 
 

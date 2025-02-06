@@ -92,11 +92,6 @@
                     "height"
                 ]
             },
-            "domain": {
-                "type": [
-                    "str"
-                ]
-            },
             "time_resolved": {
                 "type": [
                     "bool"
@@ -134,6 +129,11 @@
             "type": [
                 "str"
             ]
+            },            
+            "domain": {
+                "type": [
+                    "str"
+                ]
             },
             "fp_region": {
             "type": [
