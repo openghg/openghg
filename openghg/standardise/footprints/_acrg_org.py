@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 import warnings
+from typing import cast
 from xarray import Dataset
 
 from openghg.util import (
@@ -155,7 +156,7 @@ def parse_acrg_org(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: dict[str, str | float | list[float]] = {}
+    metadata: dict[str, str | float | list[float] | None] = {}
 
     metadata["data_type"] = "footprints"
     metadata["site"] = site
@@ -235,11 +236,14 @@ def parse_acrg_org(
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
     key_parts = [
-        satellite if site is None else site,
-        fp_region if domain == "NOT_SET" else domain,
+        cast(str, satellite) if site is None else site,
+        cast(str, fp_region) if domain == "NOT_SET" else cast(str, domain),
         model,
         inlet,
     ]
+
+    key_parts = [str(part) for part in key_parts if part is not None]
+
     key = "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
