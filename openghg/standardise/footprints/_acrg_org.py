@@ -20,11 +20,12 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    domain: str,
     model: str,
     inlet: str,
     species: str,
     filepath: multiPathType,
+    domain: Optional[str] = None,
+    fp_region: Optional[str] = None,
     site: Optional[str] = None,
     satellite: Optional[str] = None,
     met_model: str | None = None,
@@ -42,7 +43,9 @@ def parse_acrg_org(
     Args:
         filepath: Path of file to load
         site: Site name
+        satellite: Satellite name
         domain: Domain of footprints
+        fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         met_model: Underlying meteorlogical model used (e.g. UKV)
@@ -156,10 +159,14 @@ def parse_acrg_org(
     metadata: dict[str, str | float | list[float]] = {}
 
     metadata["data_type"] = "footprints"
-    metadata["site"] = site
+    if site is not None:
+        metadata["site"] = site
+    else: 
+        metadata["satellite"] = satellite
     metadata["domain"] = domain
     metadata["model"] = model
-
+    metadata["fp_region"] = fp_region
+        
     # Include both inlet and height keywords for backwards compatability
     metadata["inlet"] = inlet
     metadata["height"] = inlet
@@ -230,8 +237,8 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key_parts = [satellite if site is None else site, domain, model, inlet]
-    key =  "_".join(key_parts)
+    key_parts = [satellite if site is None else site, fp_region if domain is "NOT_SET" else domain, model, inlet]
+    key = "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
