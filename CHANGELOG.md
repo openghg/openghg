@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
+- Ability to process satellite footprints data.[#PR 1218](https://github.com/openghg/openghg/pull/1218/)
 
 ### Fixed
 
