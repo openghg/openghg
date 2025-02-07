@@ -108,6 +108,41 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
 
 
 @pytest.mark.parametrize(
+        "name_components, out_filename",
+        [
+            (["species", "site", "inlet"], "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
+            (["site", "inlet", "species"], "/path/to/obspack/surface-insitu/WAO_10m_ch4_surface-insitu_v1.nc"),
+            ([["species", "site"], "inlet"], "/path/to/obspack/surface-insitu/ch4-WAO_10m_surface-insitu_v1.nc"),
+            (["site", "data_source", "data_level"], "/path/to/obspack/surface-insitu/WAO_icos_1_surface-insitu_v1.nc"),
+        ]
+)
+def test_define_obspack_filename_name_components(name_components, out_filename):
+    """
+    Check name components for the file name can be used correctly.
+    1. Check the usual value create the expected output - ["species", "site", "inlet"]
+    2. Check the order of the specified values is used - ["site", "inlet", "species"]
+    3. Check sub-names can be specified (separated by a "-" rather than a "_") - [["species", "site"], "inlet"]
+    4. Check different values for the metadata can be selected - ["site", "data_source", "data_level"]
+    """
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "data_level": 1,
+                "data_source": "icos",
+                "latest_version": "v1"}
+
+    obs_type = "surface-insitu"
+    obspack_path = "/path/to/obspack/"
+    out_filename = Path(out_filename)
+    filename = define_obspack_filename(metadata,
+                                       obs_type=obs_type,
+                                       obspack_path=obspack_path,
+                                       name_components=name_components)
+
+    assert filename == out_filename
+
+
+@pytest.mark.parametrize(
         "version,current_obspacks,expected_output",
         [
             ("v1", [], "gemma_obspack_v1"),
