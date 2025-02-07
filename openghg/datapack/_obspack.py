@@ -45,6 +45,10 @@ class StoredData:
 
         self.obs_type = obs_type
         self.obspack_path = obspack_path
+
+        if isinstance(obspack_filename, str):
+            obspack_filename = Path(obspack_filename)
+
         self.obspack_filename = obspack_filename
 
     def define_obspack_filename(
@@ -221,8 +225,8 @@ def define_name_components(obs_type: str, metadata: Optional[dict] = None) -> li
         metadata: Only needed if obs_type="column". This is because the platform from the
             the metadata is used to determine whether the site or satellite naming scheme
             should be used.
-
-
+    Returns:
+        list: Keys to use when extracting names from the metadata and to use within the filename.
     """
     if "surface" in obs_type:
         name_components: list[Union[str, list]] = ["species", "site", "inlet"]
@@ -289,7 +293,10 @@ def define_surface_filename(
     """
 
     if name_components is None:
-        name_components: list[Union[str, list]] = ["species", "site", "inlet"]
+        if obs_type is not None:
+            name_components = define_name_components(obs_type=obs_type)
+        else:
+            raise ValueError("Must specify name_components directly or obs_type so default name_components can be defined.")
 
     filename = define_filename(
         name_components,
@@ -426,7 +433,7 @@ def check_unique(values: Sequence) -> bool:
     return len(values) == len(set(values))
 
 
-def find_repeats(values: Sequence) -> list[np.ndarray]:
+def find_repeats(values: Sequence) -> Optional[list[np.ndarray]]:
     """
     Find repeated indices from within a sequence.
     Returns:
@@ -495,7 +502,7 @@ def check_unique_filenames(
     name_components: Optional[list] = None,
     add_to_objects: bool = True,
     force: bool = False,
-) -> list[list[StoredData]]:
+) -> Optional[list[list[StoredData]]]:
     """
     Check whether filenames associated with retrieved data are unique.
 
@@ -536,7 +543,7 @@ def check_unique_filenames(
 
 
 def _find_additional_metakeys(
-    obs_type, metadata: Optional[dict] = None, name_components: Optional[list] = None
+    obs_type: str, metadata: Optional[dict] = None, name_components: Optional[list] = None
 ) -> list:
     """
     From the openghg config for each data_type, find additional metakeys to use when
@@ -636,6 +643,9 @@ def add_obspack_filenames(
             example_data = data_group[0]
             example_metadata = example_data.metadata
             obs_type = example_data.obs_type
+
+            if name_components is None:
+                name_components = define_name_components(obs_type, example_metadata)
 
             metakeys = _find_additional_metakeys(
                 obs_type, metadata=example_metadata, name_components=name_components
