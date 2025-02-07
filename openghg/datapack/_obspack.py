@@ -7,17 +7,17 @@ import pathlib
 from pathlib import Path
 
 import importlib.resources
-from typing import Union, Optional, Sequence, cast
+from typing import Sequence, cast
 import logging
 
 from openghg.dataobjects import ObsData, ObsColumnData
 from openghg.retrieve import get_obs_surface, get_obs_column
-from openghg.types import pathType, optionalPathType
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.obspack")
 
 # TODO: Move to types submodule?
-ObsOutputType = Union[ObsData, ObsColumnData]
+ObsOutputType = ObsData | ObsColumnData
 
 
 class StoredData:
@@ -30,8 +30,8 @@ class StoredData:
         self,
         data: ObsOutputType,
         obs_type: str = "surface-insitu",
-        obspack_path: optionalPathType = None,
-        obspack_filename: Optional[pathType] = None,
+        obspack_path: pathType | None = None,
+        obspack_filename: pathType | None = None,
     ):
         """
         Creation of a StoredData object. This expects a retrieved data object from the object store.
@@ -53,10 +53,10 @@ class StoredData:
 
     def define_obspack_filename(
         self,
-        obspack_path: optionalPathType = None,
+        obspack_path: pathType | None = None,
         include_version: bool = True,
-        data_version: Optional[str] = None,
-        name_components: Optional[list] = None,
+        data_version: str | None = None,
+        name_components: list | None = None,
         add_to_object: bool = True,
     ) -> Path:
         """
@@ -123,12 +123,12 @@ def define_get_functions() -> tuple[dict, dict]:
 
 
 def define_filename(
-    name_components: list[Union[str, list]],
+    name_components: list[str | list],
     metadata: dict,
-    obs_type: Optional[str] = None,
-    output_path: optionalPathType = None,
+    obs_type: str | None = None,
+    output_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
+    data_version: str | None = None,
 ) -> Path:
     """
     Define filename based on the determined structure. The input name_components determines
@@ -216,7 +216,7 @@ def define_filename(
     return filename
 
 
-def define_name_components(obs_type: str, metadata: Optional[dict] = None) -> list[Union[str, list]]:
+def define_name_components(obs_type: str, metadata: dict | None = None) -> list[str | list]:
     """
     Define the default naming scheme for the input obs_type.
 
@@ -229,7 +229,7 @@ def define_name_components(obs_type: str, metadata: Optional[dict] = None) -> li
         list: Keys to use when extracting names from the metadata and to use within the filename.
     """
     if "surface" in obs_type:
-        name_components: list[Union[str, list]] = ["species", "site", "inlet"]
+        name_components: list[str | list] = ["species", "site", "inlet"]
     elif "column" in obs_type:
         if metadata is None:
             raise ValueError(
@@ -265,11 +265,11 @@ def define_name_components(obs_type: str, metadata: Optional[dict] = None) -> li
 
 def define_surface_filename(
     metadata: dict,
-    obs_type: Optional[str] = None,
-    output_path: optionalPathType = None,
+    obs_type: str | None = None,
+    output_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
 ) -> Path:
     """
     Create file name for surface type (surface-flask or surface-insitu)
@@ -312,10 +312,10 @@ def define_surface_filename(
 def define_column_filename(
     metadata: dict,
     obs_type: str = "column",
-    output_path: optionalPathType = None,
+    output_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
 ) -> Path:
     """
     Create file name for column type data with expected naming convention.
@@ -352,7 +352,7 @@ def define_column_filename(
     return filename
 
 
-def find_data_version(metadata: dict) -> Optional[str]:
+def find_data_version(metadata: dict) -> str | None:
     """
     Find the latest version from within the metadata by looking for the "latest_version" key.
     Args:
@@ -367,10 +367,10 @@ def find_data_version(metadata: dict) -> Optional[str]:
 def define_obspack_filename(
     metadata: dict,
     obs_type: str,
-    obspack_path: optionalPathType = None,
+    obspack_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
 ) -> Path:
     """
     Create file name for obspack files with expected naming convention. This will
@@ -433,7 +433,7 @@ def check_unique(values: Sequence) -> bool:
     return len(values) == len(set(values))
 
 
-def find_repeats(values: Sequence) -> Optional[list[np.ndarray]]:
+def find_repeats(values: Sequence) -> list[np.ndarray] | None:
     """
     Find repeated indices from within a sequence.
     Returns:
@@ -453,10 +453,10 @@ def find_repeats(values: Sequence) -> Optional[list[np.ndarray]]:
 
 def define_obspack_filenames(
     retrieved_data: list[StoredData],
-    obspack_path: optionalPathType = None,
+    obspack_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
     add_to_objects: bool = True,
     force: bool = False,
 ) -> list[Path]:
@@ -496,13 +496,13 @@ def define_obspack_filenames(
 
 def check_unique_filenames(
     retrieved_data: list[StoredData],
-    obspack_path: optionalPathType = None,
+    obspack_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
     add_to_objects: bool = True,
     force: bool = False,
-) -> Optional[list[list[StoredData]]]:
+) -> list[list[StoredData]] | None:
     """
     Check whether filenames associated with retrieved data are unique.
 
@@ -533,7 +533,7 @@ def check_unique_filenames(
     repeated_indices = find_repeats(filenames)
 
     if repeated_indices:
-        data_grouped_repeats: Optional[list[list]] = [
+        data_grouped_repeats: list[list] | None = [
             [retrieved_data[index] for index in index_set] for index_set in repeated_indices
         ]
     else:
@@ -543,7 +543,7 @@ def check_unique_filenames(
 
 
 def _find_additional_metakeys(
-    obs_type: str, metadata: Optional[dict] = None, name_components: Optional[list] = None
+    obs_type: str, metadata: dict | None = None, name_components: list | None = None
 ) -> list:
     """
     From the openghg config for each data_type, find additional metakeys to use when
@@ -599,10 +599,10 @@ def _find_additional_metakeys(
 
 def add_obspack_filenames(
     retrieved_data: list[StoredData],
-    obspack_path: optionalPathType = None,
+    obspack_path: pathType | None = None,
     include_version: bool = True,
-    data_version: Optional[str] = None,
-    name_components: Optional[list] = None,
+    data_version: str | None = None,
+    name_components: list | None = None,
 ) -> list[StoredData]:
     """
     Based on the metadata associated with the retrieved data, create suitable obspack
@@ -701,11 +701,11 @@ def find_current_obspacks(output_folder: pathType, obspack_stub: str) -> list[Pa
 
 def define_obspack_name(
     obspack_stub: str,
-    version: Optional[str] = None,
+    version: str | None = None,
     major_version_only: bool = False,
     minor_version_only: bool = False,
-    output_folder: optionalPathType = None,
-    current_obspacks: Optional[list] = None,
+    output_folder: pathType | None = None,
+    current_obspacks: list | None = None,
 ) -> tuple[str, str]:
     """
     Define the name of the obspack based on an obspack_stub and version.
@@ -826,7 +826,7 @@ def create_obspack_structure(
     output_folder: pathType,
     obspack_name: str,
     obs_types: Sequence = define_obs_types(),
-    release_files: Optional[Sequence] = None,
+    release_files: Sequence | None = None,
 ) -> Path:
     """
     Create the structure for the new obspack and add initial release files to be included.
@@ -883,7 +883,7 @@ def read_input_file(filename: pathType) -> pd.DataFrame:
 
 
 def retrieve_data(
-    filename: optionalPathType = None, search_df: Optional[pd.DataFrame] = None, store: Optional[str] = None
+    filename: pathType | None = None, search_df: pd.DataFrame | None = None, store: str | None = None
 ) -> list:
     """
     Use search parameters to get data from object store. This expects either a filename for an input
@@ -1066,18 +1066,18 @@ def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
 
 
 def create_obspack(
-    search_filename: optionalPathType = None,
-    search_df: Optional[pd.DataFrame] = None,
+    search_filename: pathType | None = None,
+    search_df: pd.DataFrame | None = None,
     output_folder: pathType = pathlib.Path.home(),
-    obspack_name: Optional[str] = None,
-    obspack_stub: Optional[str] = None,
-    version: Optional[str] = None,
+    obspack_name: str | None = None,
+    obspack_stub: str | None = None,
+    version: str | None = None,
     major_version_only: bool = False,
     minor_version_only: bool = False,
-    current_obspacks: Optional[list] = None,
-    release_files: Optional[Sequence] = None,
+    current_obspacks: list | None = None,
+    release_files: Sequence | None = None,
     include_data_versions: bool = True,
-    store: Optional[str] = None,
+    store: str | None = None,
 ) -> Path:
     """
     Create ObsPack from observation stored within an object store based on input search parameters.
