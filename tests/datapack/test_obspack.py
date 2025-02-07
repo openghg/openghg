@@ -1,10 +1,24 @@
+import numpy as np
+import pandas as pd
 import xarray as xr
 from pandas import DataFrame
 import pytest
 from pathlib import Path
-from openghg.standardise import standardise_surface
-from openghg.datapack import retrieve_data, create_obspack, define_obspack_filename, define_obspack_name
+
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
+from openghg.standardise import standardise_surface
+from openghg.dataobjects import ObsData
+from openghg.datapack import (
+    StoredData,
+    retrieve_data,
+    create_obspack,
+    define_obspack_filename,
+    define_obspack_name,
+    check_unique,
+    check_unique_filenames,
+    add_obspack_filenames,
+)
+from openghg.datapack._obspack import _find_additional_metakeys
 
 
 #%% Test define_obspack_filename functions
@@ -140,6 +154,148 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
                                        name_components=name_components)
 
     assert filename == out_filename
+
+
+@pytest.mark.parametrize(
+        "input,expected_result",
+        [
+            ([1, 2, 3, 4, 5], True),  # no repeats
+            ([1, 2, 3, 4, 5, 5], False),  # repeats
+            ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
+            (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
+        ]
+)
+def test_check_unique(input, expected_result):
+    """
+    Test the check_unique function returns True/False as expected
+    """
+    result = check_unique(input)
+    assert result == expected_result
+
+
+@pytest.fixture
+def stored_data_1():
+    """
+    Define StoredData object with overlapping keys but data_level 1.
+    """
+
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    values = np.arange(0, len(time), 1)
+
+    data = xr.Dataset({"mf": ("time", values)},
+                       coords={"time": time}
+    )
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "data_level": 1,
+                "data_source": "icos",
+                "latest_version": "v1"}
+
+    obs_data = ObsData(data=data, metadata=metadata)
+
+    stored_data = StoredData(obs_data, obs_type="surface-insitu")
+
+    return stored_data
+
+
+@pytest.fixture
+def stored_data_2():
+    """
+    Define StoredData object with overlapping keys but data_level 2.
+    """
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    values = np.arange(10, len(time) + 10, 1)
+
+    data = xr.Dataset({"mf": ("time", values)},
+                       coords={"time": time}
+    )
+
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "data_level": 2,
+                "data_source": "internal",
+                "latest_version": "v1"}
+
+    obs_data = ObsData(data=data, metadata=metadata)
+
+    stored_data = StoredData(obs_data, obs_type="surface-insitu")
+
+    return stored_data
+
+
+def test_check_unique_filenames(stored_data_1, stored_data_2):
+    """
+    Check and compare the automatic filenames created for two StoredData objects.
+    This function should discover that these two names
+    based on ['site', 'species', 'inlet'] do overlap and so are not unique.
+    """
+
+    # TODO: Accidentally discovered interesting corner case
+    # If versions for two side-by-side components are different,
+    # this creates unique names which you would actually likely want to look different.
+    # Can come back to perhaps once we get the workflow working
+    # (though may then need to rip it apart again!)
+
+    retrieved_data = [stored_data_1, stored_data_2]
+    data_grouped_repeats = check_unique_filenames(retrieved_data,
+                                                  name_components=["site", "species", "inlet"])
+
+    # Check the returned data contains 1 group and taht this group contains 2 entries.
+    assert len(data_grouped_repeats) == 1
+    assert len(data_grouped_repeats[0]) == 2
+
+
+def test_find_additional_metakeys_insitu():
+    """
+    Check additional metakeys can be found for surface-insitu data.
+    Assumptions:
+    - The following keys are defaults when defining surface data:
+      - "site", "species", "inlet", "data_level"
+    This test will need updating is this stops being the case.
+    """
+
+    obs_type = "surface-insitu"
+    name_components = ["site", "species", "inlet"]
+
+    metakeys = _find_additional_metakeys(obs_type=obs_type,
+                                         name_components=name_components)
+
+    # Define a metakey we would expect for surface data
+    # Note: Will need to update if the surface definition changes to remove this
+    one_expected_metakey = "data_level"
+
+    # Check name_components are not in metakeys
+    assert not set(name_components) <= set(metakeys)
+    assert one_expected_metakey in metakeys
+
+
+def test_add_obspack_filenames(stored_data_1, stored_data_2):
+    """
+    Check add_obspack_filenames can produce unique filenames when the
+    default filenames overlap.
+    """
+
+    retrieved_data = [stored_data_1, stored_data_2]
+
+    name_components = ["species", "site", "inlet"]
+
+    retrieved_data = add_obspack_filenames(retrieved_data,
+                          name_components=name_components)
+
+    filename1 = retrieved_data[0].obspack_filename
+    filename2 = retrieved_data[1].obspack_filename
+
+    assert filename1 != filename2
+
+    # Note: this could change if value and/or order of the metakeys change
+    # at the moment this is using the distinct data_level values to create the filenames.
+    expected_filename1 = "surface-insitu/ch4_WAO_10m_1_surface-insitu_v1.nc"
+    expected_filename2 = "surface-insitu/ch4_WAO_10m_2_surface-insitu_v1.nc"
+
+    assert str(filename1) == expected_filename1
+    assert str(filename2) == expected_filename2
 
 
 @pytest.mark.parametrize(

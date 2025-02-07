@@ -26,14 +26,16 @@ class StoredData:
     of how this is related to the obspack this will be outputted to.
     """
 
-    def __init__(self,
-                 data: ObsOutputType,
-                 obs_type: str = "surface-insitu",
-                 obspack_path: optionalPathType = None,
-                 obspack_filename: Optional[pathType] = None):
+    def __init__(
+        self,
+        data: ObsOutputType,
+        obs_type: str = "surface-insitu",
+        obspack_path: optionalPathType = None,
+        obspack_filename: Optional[pathType] = None,
+    ):
         """
         Creation of a StoredData object. This expects a retrieved data object from the object store.
-        
+
         Note: at the moment this is specific to observation types but this could be expanded
         to include all output data types
         """
@@ -45,23 +47,27 @@ class StoredData:
         self.obspack_path = obspack_path
         self.obspack_filename = obspack_filename
 
-    def define_obspack_filename(self,
-                                obspack_path: pathType,
-                                include_version: bool = True,
-                                data_version: Optional[str] = None,
-                                name_components: Optional[list] = None,
-                                add_to_object: bool = True):
+    def define_obspack_filename(
+        self,
+        obspack_path: optionalPathType = None,
+        include_version: bool = True,
+        data_version: Optional[str] = None,
+        name_components: Optional[list] = None,
+        add_to_object: bool = True,
+    ) -> Path:
         """
         Define (and store) a suitable obspack filename for this data. This will be based
         on the metadata associated with the stored data.
         """
 
-        obspack_filename = define_obspack_filename(self.metadata,
-                                                   self.obs_type,
-                                                   obspack_path=obspack_path,
-                                                   include_version=include_version,
-                                                   data_version=data_version,
-                                                   name_components=name_components)
+        obspack_filename = define_obspack_filename(
+            self.metadata,
+            self.obs_type,
+            obspack_path=obspack_path,
+            include_version=include_version,
+            data_version=data_version,
+            name_components=name_components,
+        )
 
         if add_to_object:
             self.obspack_filename = obspack_filename
@@ -75,6 +81,19 @@ def define_obs_types() -> list:
     """
     obs_types = ["surface-insitu", "surface-flask", "column"]
     return obs_types
+
+
+def define_data_type_for_obs_type(obs_type: str) -> str:
+    """
+    Define associated data_type within the object store for a given obs_type.
+    """
+    # TODO: Decide if we should update column to surface-column and satellite
+    # etc. - do we want to link this to "platform"?
+    data_types = {"surface-insitu": "surface", "surface-flask": "surface", "column": "column"}
+
+    data_type = data_types[obs_type]
+
+    return data_type
 
 
 def define_get_functions() -> tuple[dict, dict]:
@@ -193,6 +212,53 @@ def define_filename(
     return filename
 
 
+def define_name_components(obs_type: str, metadata: Optional[dict] = None) -> list[Union[str, list]]:
+    """
+    Define the default naming scheme for the input obs_type.
+
+    Args:
+        obs_type
+        metadata: Only needed if obs_type="column". This is because the platform from the
+            the metadata is used to determine whether the site or satellite naming scheme
+            should be used.
+
+
+    """
+    if "surface" in obs_type:
+        name_components: list[Union[str, list]] = ["species", "site", "inlet"]
+    elif "column" in obs_type:
+        if metadata is None:
+            raise ValueError(
+                "To define the filename commponents for 'column' data, metadata must be supplied."
+            )
+
+        try:
+            platform = metadata["platform"]
+        except KeyError:
+            msg = "Expect 'platform' key to be included for 'column' data. Please check metadata"
+            logger.exception(msg)
+            raise ValueError(msg)
+
+        if platform == "site":
+            name_components = ["species", "site", "platform"]
+        elif platform == "satellite":
+            name_components = ["species"]
+
+            if "satellite" in metadata:
+                sub_name_components = ["satellite"]
+                if "selection" in metadata:
+                    sub_name_components.append("selection")
+                elif "domain" in metadata:
+                    sub_name_components.append("domain")
+                name_components.append(sub_name_components)
+            elif "site" in metadata:
+                name_components.append("site")
+
+            name_components.append("platform")
+
+    return name_components
+
+
 def define_surface_filename(
     metadata: dict,
     obs_type: Optional[str] = None,
@@ -265,29 +331,7 @@ def define_column_filename(
     """
 
     if name_components is None:
-        try:
-            platform = metadata["platform"]
-        except KeyError:
-            msg = "Expect 'platform' key to be included for 'column' data. Please check metadata"
-            logger.exception(msg)
-            raise ValueError(msg)
-
-        if platform == "site":
-            name_components: list[Union[str, list]] = ["species", "site", "platform"]
-        elif platform == "satellite":
-            name_components = ["species"]
-
-            if "satellite" in metadata:
-                sub_name_components = ["satellite"]
-                if "selection" in metadata:
-                    sub_name_components.append("selection")
-                elif "domain" in metadata:
-                    sub_name_components.append("domain")
-                name_components.append(sub_name_components)
-            elif "site" in metadata:
-                name_components.append("site")
-
-            name_components.append("platform")
+        name_components = define_name_components(obs_type=obs_type, metadata=metadata)
 
     filename = define_filename(
         name_components,
@@ -316,7 +360,7 @@ def find_data_version(metadata: dict) -> Optional[str]:
 def define_obspack_filename(
     metadata: dict,
     obs_type: str,
-    obspack_path: pathType,
+    obspack_path: optionalPathType = None,
     include_version: bool = True,
     data_version: Optional[str] = None,
     name_components: Optional[list] = None,
@@ -344,8 +388,13 @@ def define_obspack_filename(
         obspack_path = Path(obspack_path)
 
     if obs_type in obs_types:
-        if "surface" in obs_type:
+
+        if obspack_path is not None:
             full_obspack_path = Path(obspack_path) / obs_type
+        else:
+            full_obspack_path = Path(obs_type)
+
+        if "surface" in obs_type:
             filename = define_surface_filename(
                 metadata=metadata,
                 obs_type=obs_type,
@@ -355,7 +404,6 @@ def define_obspack_filename(
                 name_components=name_components,
             )
         elif "column" in obs_type:
-            full_obspack_path = Path(obspack_path) / obs_type
             filename = define_column_filename(
                 metadata=metadata,
                 obs_type=obs_type,
@@ -368,6 +416,256 @@ def define_obspack_filename(
         raise ValueError(f"Did not recognise obs_type {obs_type}. Should be one of: {obs_types}")
 
     return filename
+
+
+def check_unique(values: Sequence) -> bool:
+    """
+    Check whether sequence is unique. Returns True/False.
+    """
+
+    return len(values) == len(set(values))
+
+
+def find_repeats(values: Sequence) -> list[np.ndarray]:
+    """
+    Find repeated indices from within a sequence.
+    Returns:
+        list[numpy.ndarray]: Grouped arrays containing the repeated indices.
+    """
+
+    unique_values, indices, counts = np.unique(values, return_inverse=True, return_counts=True)
+
+    if len(unique_values) == len(values):
+        return None
+
+    repeated_indices = np.where(counts > 1)[0]
+    repeated_org_indices = [np.where(indices == repeat)[0] for repeat in repeated_indices]
+
+    return repeated_org_indices
+
+
+def define_obspack_filenames(
+    retrieved_data: list[StoredData],
+    obspack_path: optionalPathType = None,
+    include_version: bool = True,
+    data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
+    add_to_objects: bool = True,
+    force: bool = False,
+) -> list[Path]:
+    """
+    Define the obspack_filename values for multiple StoredData objects.
+    If the obspack_filename is already present, this will not update by default and will
+    use the stored value.
+
+    Args:
+        retrieved_data: List of StoredData objects.
+        obspack_path: Top level directory for obspack
+        include_version: Whether to include the data version in the filename. Default = True.
+        data_version: Version of the data. If not specified and include_version is True this
+            will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename.
+        add_to_objects: Add the filename to each of the StoredData objects.
+        force: Force update of the obspack_filename and recreate this.
+    Returns:
+        list[pathlib.Path]: Sequence of filenames associated with the files
+    """
+    filenames = []
+    for data in retrieved_data:
+        filename = data.obspack_filename
+        if filename is None or force:
+            filename = data.define_obspack_filename(
+                obspack_path=obspack_path,
+                include_version=include_version,
+                data_version=data_version,
+                name_components=name_components,
+                add_to_object=add_to_objects,
+            )
+        filenames.append(filename)
+
+    return filenames
+
+
+def check_unique_filenames(
+    retrieved_data: list[StoredData],
+    obspack_path: optionalPathType = None,
+    include_version: bool = True,
+    data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
+    add_to_objects: bool = True,
+    force: bool = False,
+) -> list[list[StoredData]]:
+    """
+    Check whether filenames associated with retrieved data are unique.
+
+    Args:
+        retrieved_data: List of StoredData objects.
+        obspack_path: Top level directory for obspack
+        include_version: Whether to include the data version in the filename. Default = True.
+        data_version: Version of the data. If not specified and include_version is True this
+            will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename.
+        add_to_objects: Add the filename to each of the StoredData objects.
+        force: Force update of the obspack_filename and recreate this.
+    Returns:
+        list: Groups of StoredData objects with have overlapping obspack_filenames
+    """
+
+    filenames = define_obspack_filenames(
+        retrieved_data,
+        obspack_path=obspack_path,
+        include_version=include_version,
+        data_version=data_version,
+        name_components=name_components,
+        force=force,
+        add_to_objects=add_to_objects,
+    )
+
+    repeated_indices = find_repeats(filenames)
+
+    if repeated_indices:
+        data_grouped_repeats: Optional[list[list]] = [
+            [retrieved_data[index] for index in index_set] for index_set in repeated_indices
+        ]
+    else:
+        data_grouped_repeats = None
+
+    return data_grouped_repeats
+
+
+def _find_additional_metakeys(
+    obs_type, metadata: Optional[dict] = None, name_components: Optional[list] = None
+) -> list:
+    """
+    From the openghg config for each data_type, find additional metakeys to use when
+    defining the output filename. This will remove metadata keys specified within name_components.
+
+    Args:
+        obs_type: Name of the observation type.
+            See define_obs_types() for details of obs_type values.
+        metadata: Metadata details associated with the stored data.
+        name_components: Current metadata keys used to define an obspack_filename.
+    Returns:
+        list: Additional metakeys defined within the object store
+    """
+
+    from openghg.objectstore import get_metakeys
+
+    ## TODO: How do we find out which bucket is being used? Is there a default if this is not specified?
+    bucket = "user"
+    full_metakeys = get_metakeys(bucket)
+
+    # Check and extract current name_components being used for filename
+    if name_components is None:
+        name_components = define_name_components(obs_type, metadata)
+
+    # Flatten any hierarchy in the name_components so we just have the key names
+    name_components_flat = []
+    for component in name_components:
+        if isinstance(component, str):
+            name_components_flat.append(component)
+        elif isinstance(component, list):
+            name_components_flat.extend(component)
+
+    # Extract name of data_type so we can find appropriate metakeys
+    # Note: obs_type is getting very similiar to platform - could we link these..?
+    data_type = define_data_type_for_obs_type(obs_type)
+
+    # Extract metakeys for data_type and remove any current keys already being used
+    key_types = ["required", "optional"]
+    metakeys = []
+    for key_type in key_types:
+        metakeys_data_type = full_metakeys[data_type][key_type]
+        metakeys.extend(list(metakeys_data_type))
+
+    for key in name_components_flat:
+        if key in metakeys:
+            metakeys.remove(key)
+
+    if len(metakeys) == 0:
+        raise ValueError("Unable to find additional name components to create unique name.")
+
+    return metakeys
+
+
+def add_obspack_filenames(
+    retrieved_data: list[StoredData],
+    obspack_path: optionalPathType = None,
+    include_version: bool = True,
+    data_version: Optional[str] = None,
+    name_components: Optional[list] = None,
+) -> list[StoredData]:
+    """
+    Based on the metadata associated with the retrieved data, create suitable obspack
+    filenames.
+    If any filenames within the retrieved_data list are not unique, update the filename
+    using more keywords within the metadata.
+
+    Note: updates the obspack_filename attributes in place.
+
+    Args:
+        retrieved_data: List of StoredData objects.
+        obspack_path: Top level directory for obspack
+        include_version: Whether to include the data version in the filename. Default = True.
+        data_version: Version of the data. If not specified and include_version is True this
+            will attempt to extract the latest version details from the metadata.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename.
+    Returns:
+        list: Same list of StoredData objects passed to the function
+    """
+
+    # Create default obspack names
+    define_obspack_filenames(
+        retrieved_data,
+        obspack_path=obspack_path,
+        include_version=include_version,
+        data_version=data_version,
+        name_components=name_components,
+        force=True,
+        add_to_objects=True,
+    )
+
+    # Check for repeats and update names
+    data_grouped_repeats = check_unique_filenames(retrieved_data)
+    if data_grouped_repeats:
+        for data_group in data_grouped_repeats:
+
+            example_data = data_group[0]
+            example_metadata = example_data.metadata
+            obs_type = example_data.obs_type
+
+            metakeys = _find_additional_metakeys(
+                obs_type, metadata=example_metadata, name_components=name_components
+            )
+
+            filenames = [data.obspack_filename for data in data_group]
+            for additional_key in metakeys:
+                if check_unique(filenames):
+                    break
+                else:
+                    key_present = [additional_key in data.metadata for data in data_group]
+                    if np.all(key_present):
+                        name_components = name_components + [additional_key]
+
+                        # print(f"Checking new names with {additional_key}")
+                        filenames = [
+                            data.define_obspack_filename(name_components=name_components, add_to_object=False)
+                            for data in data_group
+                        ]
+            else:
+                raise ValueError(
+                    f"Unable to find unique name for {data_group}. Please specify name_components to use."
+                )
+
+            # Once unique names have been found add them to the data entries.
+            # **Better way to do this?
+            for data, filename in zip(data_group, filenames):
+                data.obspack_filename = filename
+
+    return retrieved_data
 
 
 def find_current_obspacks(output_folder: pathType, obspack_stub: str) -> list[Path]:
@@ -827,13 +1125,11 @@ def create_obspack(
         output_folder, obspack_name, obs_types=unique_obs_types, release_files=release_files
     )
 
-    # Create initial obspack filenames
-    for data in retrieved_data:
-
-        data.define_obspack_filename(
-            obspack_path=obspack_path,
-            include_version=include_data_versions,
-        )
+    # Create default obspack filenames for data
+    # If any duplicates are found and update to use more of the metadata be more specific
+    retrieved_data = add_obspack_filenames(
+        retrieved_data, obspack_path=obspack_path, include_version=include_data_versions
+    )
 
     site_detail_rows = []
     for data in retrieved_data:
