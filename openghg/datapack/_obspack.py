@@ -10,10 +10,63 @@ import importlib.resources
 from typing import Union, Optional, Sequence, cast
 import logging
 
+from openghg.dataobjects import ObsData, ObsColumnData
 from openghg.retrieve import get_obs_surface, get_obs_column
 from openghg.types import pathType, optionalPathType
 
 logger = logging.getLogger("openghg.obspack")
+
+# TODO: Move to types submodule?
+ObsOutputType = Union[ObsData, ObsColumnData]
+
+
+class StoredData:
+    """
+    This class contains details of the data extracted from the object store with details
+    of how this is related to the obspack this will be outputted to.
+    """
+
+    def __init__(self,
+                 data: ObsOutputType,
+                 obs_type: str = "surface-insitu",
+                 obspack_path: optionalPathType = None,
+                 obspack_filename: Optional[pathType] = None):
+        """
+        Creation of a StoredData object. This expects a retrieved data object from the object store.
+        
+        Note: at the moment this is specific to observation types but this could be expanded
+        to include all output data types
+        """
+        self.stored_data = data
+        self.data = data.data
+        self.metadata = data.metadata
+
+        self.obs_type = obs_type
+        self.obspack_path = obspack_path
+        self.obspack_filename = obspack_filename
+
+    def define_obspack_filename(self,
+                                obspack_path: pathType,
+                                include_version: bool = True,
+                                data_version: Optional[str] = None,
+                                name_components: Optional[list] = None,
+                                add_to_object: bool = True):
+        """
+        Define (and store) a suitable obspack filename for this data. This will be based
+        on the metadata associated with the stored data.
+        """
+
+        obspack_filename = define_obspack_filename(self.metadata,
+                                                   self.obs_type,
+                                                   obspack_path=obspack_path,
+                                                   include_version=include_version,
+                                                   data_version=data_version,
+                                                   name_components=name_components)
+
+        if add_to_object:
+            self.obspack_filename = obspack_filename
+
+        return obspack_filename
 
 
 def define_obs_types() -> list:
@@ -109,7 +162,7 @@ def define_filename(
         sub_name_details = []
         for sub_name in sub_names:
             if sub_name in metadata:
-                sub_name_details.append(metadata[sub_name])
+                sub_name_details.append(str(metadata[sub_name]))
             else:
                 missing_keys.append(sub_name)
                 sub_name_details.append("")
@@ -579,7 +632,10 @@ def retrieve_data(
 
         # TODO: Decide details around catching errors for no files/multi files found.
         data_retrieved = get_fn(**kwargs)
-        data_object_all.append(data_retrieved)
+
+        DataRetrieved = StoredData(data_retrieved, obs_type=obs_type)
+
+        data_object_all.append(DataRetrieved)
 
     return data_object_all
 
@@ -771,20 +827,20 @@ def create_obspack(
         output_folder, obspack_name, obs_types=unique_obs_types, release_files=release_files
     )
 
-    site_detail_rows = []
-    for data, obs_type in zip(retrieved_data, obs_types):
-        metadata = data.metadata
+    # Create initial obspack filenames
+    for data in retrieved_data:
 
-        output_name = define_obspack_filename(
-            metadata=metadata,
-            obs_type=obs_type,
+        data.define_obspack_filename(
             obspack_path=obspack_path,
             include_version=include_data_versions,
         )
-        ds = data.data
-        ds.to_netcdf(output_name)
 
-        site_details = define_site_details(ds, obs_type)
+    site_detail_rows = []
+    for data in retrieved_data:
+        ds = data.data
+        ds.to_netcdf(data.obspack_filename)
+
+        site_details = define_site_details(ds, data.obs_type)
         site_detail_rows.append(site_details)
 
     index_output_filename = obspack_path / f"site_index_details_{version}.txt"
