@@ -296,14 +296,9 @@ class Footprints(BaseStore):
         else:
             site = clean_string(site)
 
-        if domain is not None and obs_region is not None:
-            raise ValueError("Error: Only one of 'domain' or 'obs_region' should be specified")
-        elif domain is not None and obs_region is None:
+        if domain is not None and obs_region is None:
             obs_region = domain
             logging.info(f"Updated 'obs_region' to match 'domain': {domain}")
-        elif obs_region is not None and domain is None:
-            domain = "NOT_SET"
-            logging.info(f"Updated value of 'domain': {domain}")
 
         network = clean_string(network)
         domain = clean_string(domain)
