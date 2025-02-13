@@ -255,7 +255,6 @@ def parse_acrg_org(
 
     key = "_".join(key_parts)
 
-
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
     footprint_data[key]["metadata"] = metadata
