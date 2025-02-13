@@ -665,7 +665,7 @@ def test_standardise_satellite_footprints_file():
 
     data = get_footprint(
         satellite=satellite,
-        obs_region="brazil"
+        domain="brazil",
     )
 
     assert data.metadata["obs_region"] == "brazil"

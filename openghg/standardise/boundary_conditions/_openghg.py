@@ -78,13 +78,10 @@ def parse_openghg(
         unique_months = sorted(set(time_values.strftime("%Y-%m")))
 
         if period:
-            expected_months = pd.date_range(
-                start=start_date, end=end_date, freq="MS"
-            ).strftime("%Y-%m")
+            expected_months = pd.date_range(start=start_date, end=end_date, freq="MS").strftime("%Y-%m")
             missing_months = set(expected_months) - set(unique_months)
             if missing_months:
                 logger.warning(f"Missing months in dataset: {missing_months}")
-        
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)

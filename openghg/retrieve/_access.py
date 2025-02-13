@@ -544,7 +544,7 @@ def get_bc(
 
 
 def get_footprint(
-    domain: str | None = None,
+    domain: str,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
