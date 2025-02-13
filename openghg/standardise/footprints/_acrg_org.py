@@ -24,7 +24,7 @@ def parse_acrg_org(
     inlet: str,
     species: str,
     filepath: multiPathType,
-    domain: str | None = None,
+    domain: str,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,

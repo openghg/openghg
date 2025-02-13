@@ -360,7 +360,7 @@ def standardise_bc(
 def standardise_footprint(
     filepath: str | Path | list,
     model: str,
-    domain: str | None = None,
+    domain: str,
     site: str | None = None,
     satellite: str | None = None,
     obs_region: str | None = None,

@@ -91,6 +91,11 @@
                 "type": [
                     "str"
                 ]
+            },            
+            "domain": {
+                "type": [
+                    "str"
+                ]
             },
             "inlet": {
                 "type": [
@@ -135,11 +140,6 @@
                     "str"
             ]
             },            
-            "domain": {
-                "type": [
-                    "str"
-                ]
-            },
             "obs_region": {
                 "type": [
                     "str"
