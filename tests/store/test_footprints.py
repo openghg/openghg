@@ -242,7 +242,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "height": "10m",  # Should always be the same as inlet
         "model": "test_model",
         "domain": "europe",
-        "fp_region": 'europe',
+        "obs_region": 'europe',
         "species": "inert",
         "start_date": "2020-08-01 00:00:00+00:00",
         "end_date": "2020-08-31 23:59:59+00:00",
@@ -740,7 +740,7 @@ def test_optional_metadata_raise_error():
     model = "NAME"
     met_model = "UKV"
     species = "Rn"
-    fp_region = "test"
+    obs_region = "test"
 
     with pytest.raises(ValueError):
         standardise_footprint(
@@ -748,7 +748,7 @@ def test_optional_metadata_raise_error():
             filepath=datapath,
             site=site,
             model=model,
-            fp_region=fp_region,
+            obs_region=obs_region,
             met_model=met_model,
             inlet=inlet,
             species=species,

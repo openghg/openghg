@@ -25,7 +25,7 @@ def parse_acrg_org(
     species: str,
     filepath: multiPathType,
     domain: str | None = None,
-    fp_region: str | None = None,
+    obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
     met_model: str | None = None,
@@ -45,7 +45,7 @@ def parse_acrg_org(
         site: Site name
         satellite: Satellite name
         domain: Domain of footprints
-        fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         met_model: Underlying meteorlogical model used (e.g. UKV)
@@ -163,7 +163,7 @@ def parse_acrg_org(
     metadata["satellite"] = satellite
     metadata["domain"] = domain
     metadata["model"] = model
-    metadata["fp_region"] = fp_region
+    metadata["obs_region"] = obs_region
 
     # Include both inlet and height keywords for backwards compatability
     metadata["inlet"] = inlet
@@ -237,7 +237,7 @@ def parse_acrg_org(
     # TODO - remove this once assign_attributes has been refactored
     key_parts = [
         cast(str, satellite) if site is None else site,
-        cast(str, fp_region) if domain == "NOT_SET" else cast(str, domain),
+        cast(str, obs_region) if domain == "NOT_SET" else cast(str, domain),
         model,
         inlet,
     ]

@@ -68,7 +68,7 @@ def test_read_data_monthly(mocker):
 
 
 def test_read_file_monthly():
-    test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
+    test_datapath = get_bc_datapath("/user/home/vq21425/openghg/openghg/ch4_EUROPE_012012_042012.nc")
 
     proc_results = standardise_bc(
         store="user",

@@ -191,7 +191,7 @@ class Footprints(BaseStore):
         filepath: list | str | Path,
         site: str | None = None,
         satellite: str | None = None,
-        fp_region: str | None = None,
+        obs_region: str | None = None,
         selection: str | None = None,
         inlet: str | None = None,
         height: str | None = None,
@@ -225,7 +225,7 @@ class Footprints(BaseStore):
             site: Site name
             domain: Domain of footprints
             satellite: Satellite name
-            fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+            obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
             height: Alias for inlet. One of height or inlet MUST be included.
@@ -296,12 +296,12 @@ class Footprints(BaseStore):
         else:
             site = clean_string(site)
 
-        if domain is not None and fp_region is not None:
-            raise ValueError("Error: Only one of 'domain' or 'fp_region' should be specified")
-        elif domain is not None and fp_region is None:
-            fp_region = domain
-            logging.info(f"Updated 'fp_region' to match 'domain': {domain}")
-        elif fp_region is not None and domain is None:
+        if domain is not None and obs_region is not None:
+            raise ValueError("Error: Only one of 'domain' or 'obs_region' should be specified")
+        elif domain is not None and obs_region is None:
+            obs_region = domain
+            logging.info(f"Updated 'obs_region' to match 'domain': {domain}")
+        elif obs_region is not None and domain is None:
             domain = "NOT_SET"
             logging.info(f"Updated value of 'domain': {domain}")
 
@@ -330,7 +330,7 @@ class Footprints(BaseStore):
         # Ensure we have a clear missing value for met_model
         met_model = check_and_set_null_variable(met_model)
         met_model = clean_string(met_model)
-        fp_region = clean_string(fp_region)
+        obs_region = clean_string(obs_region)
 
         if network is not None:
             network = clean_string(network)

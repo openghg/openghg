@@ -647,7 +647,7 @@ def test_standardise_satellite_footprints_file():
 
     satellite = "GOSAT"
     network = "GOSAT"
-    fp_region = "BRAZIL"
+    obs_region = "BRAZIL"
 
     standardise_footprint(
         filepath=datapath,
@@ -656,7 +656,7 @@ def test_standardise_satellite_footprints_file():
         model="CAMS",
         height=6500,
         period='1S',
-        fp_region=fp_region,
+        obs_region=obs_region,
         selection="LAND",
         force=True,
         store="user",
@@ -665,9 +665,9 @@ def test_standardise_satellite_footprints_file():
 
     data = get_footprint(
         satellite=satellite,
-        fp_region=fp_region
+        obs_region=obs_region
     )
 
-    assert data.metadata["fp_region"] == "brazil"
+    assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == "not_set"

@@ -363,7 +363,7 @@ def standardise_footprint(
     domain: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
-    fp_region: str | None = None,
+    obs_region: str | None = None,
     selection: str | None = None,
     inlet: str | None = None,
     height: str | None = None,
@@ -400,7 +400,7 @@ def standardise_footprint(
         site: Site name
         domain: Domain of footprints
         satellite: Satellite name
-        fp_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
@@ -468,7 +468,7 @@ def standardise_footprint(
         domain=domain,
         model=model,
         satellite=satellite,
-        fp_region=fp_region,
+        obs_region=obs_region,
         selection=selection,
         inlet=inlet,
         height=height,
