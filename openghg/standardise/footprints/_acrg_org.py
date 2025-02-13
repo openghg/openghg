@@ -235,16 +235,26 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key_parts = [
-        cast(str, satellite) if site is None else site,
-        cast(str, obs_region) if domain == "NOT_SET" else cast(str, domain),
-        model,
-        inlet,
-    ]
+    if site is None:
+        key_parts = [
+            cast(str, satellite),
+            cast(str, obs_region),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+    else:
+        key_parts = [
+            cast(str, site),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
 
     key_parts = [str(part) for part in key_parts if part is not None]
 
     key = "_".join(key_parts)
+
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
