@@ -288,13 +288,13 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
 
-        if satellite is None and site is None:
-            raise ValueError("Please pass either site or satellite value")
-
-        if satellite is not None:
-            satellite = clean_string(satellite)
-        else:
+        if site is not None:
             site = clean_string(site)
+        elif satellite is not None and obs_region is not None:
+            satellite = clean_string(satellite)
+            obs_region = clean_string(obs_region)
+        else:
+            raise ValueError("Please pass either site or satellite and obs_region values")
 
         if domain is not None and obs_region is None:
             obs_region = domain
