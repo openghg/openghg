@@ -502,7 +502,7 @@ def check_unique_filenames(
     name_components: list | None = None,
     add_to_objects: bool = True,
     force: bool = False,
-) -> list[list[StoredData]] | None:
+) -> list[list[StoredData]]:
     """
     Check whether filenames associated with retrieved data are unique.
 
@@ -532,12 +532,11 @@ def check_unique_filenames(
 
     repeated_indices = find_repeats(filenames)
 
+    data_grouped_repeats: list[list] = []
     if repeated_indices:
-        data_grouped_repeats: list[list] | None = [
+        data_grouped_repeats = [
             [retrieved_data[index] for index in index_set] for index_set in repeated_indices
         ]
-    else:
-        data_grouped_repeats = None
 
     return data_grouped_repeats
 
