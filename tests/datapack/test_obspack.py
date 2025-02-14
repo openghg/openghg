@@ -18,10 +18,57 @@ from openghg.datapack import (
     check_unique_filenames,
     add_obspack_filenames,
 )
-from openghg.datapack._obspack import _find_additional_metakeys
+from openghg.datapack._obspack import _find_additional_metakeys, _construct_name
 
 
-#%% Test define_obspack_filename functions
+#%% Test filename creation functions
+
+
+@pytest.mark.parametrize(
+        "keys, separators, expected",
+        [
+            (["a", "c", "b"], ("_",), "start_middle_end"),
+            (["a", ["c", "b"]], ("_", "-"), "start_middle-end"),
+            (["a", ["c", "d"], "b"], ("_", "-"), "start_middle-extra_end"),
+            ([["a", ["c", "d"]], "b"], ("_", "-", "+"), "start-middle+extra_end"),
+            (["a"], ("_",), "start"),
+        ]
+)
+def test_construct_name(keys, separators, expected):
+    """
+    Check for the recurive _construct_name() function. This takes a nested list of keys,
+    a dictionary and a set of seperators and constructs an output name based on this.
+    1. Check simple list - all values separated by "_"
+    2. Check nested list (using different separators)
+    3. Check nested list can be intermixed
+    4. Check 3-level nesting
+    """
+    dictionary = {"a": "start", "b": "end", "c": "middle", "d": "extra"}
+    name = _construct_name(keys, dictionary, separators)
+    assert name == expected
+
+
+def test_construct_name_fails_sep_depth():
+    keys = [["a", ["c", "d"]], "b"]
+    separators = ("_", "-")
+    dictionary = {"a": "start", "b": "end", "c": "middle", "d": "extra"}
+
+    with pytest.raises(ValueError) as excinfo:
+        _construct_name(keys, dictionary, separators)
+
+    assert "separators must be >= depth of keys" in str(excinfo.value)
+
+
+def test_construct_name_fails_missing_key():
+    keys = ["a", "c", "b"]
+    separators = ("_", "-")
+    dictionary = {"a": "start", "b": "end"}
+
+    with pytest.raises(ValueError) as excinfo:
+        _construct_name(keys, dictionary, separators)
+
+    assert "unable to find key within supplied dictionary" in str(excinfo.value)
+
 
 @pytest.mark.parametrize(
         "metadata, obs_type, obspack_path, out_filename",
@@ -126,7 +173,6 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
         [
             (["species", "site", "inlet"], "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
             (["site", "inlet", "species"], "/path/to/obspack/surface-insitu/WAO_10m_ch4_surface-insitu_v1.nc"),
-            ([["species", "site"], "inlet"], "/path/to/obspack/surface-insitu/ch4-WAO_10m_surface-insitu_v1.nc"),
             (["site", "data_source", "data_level"], "/path/to/obspack/surface-insitu/WAO_icos_1_surface-insitu_v1.nc"),
         ]
 )
@@ -135,7 +181,6 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
     Check name components for the file name can be used correctly.
     1. Check the usual value create the expected output - ["species", "site", "inlet"]
     2. Check the order of the specified values is used - ["site", "inlet", "species"]
-    3. Check sub-names can be specified (separated by a "-" rather than a "_") - [["species", "site"], "inlet"]
     4. Check different values for the metadata can be selected - ["site", "data_source", "data_level"]
     """
     metadata = {"site": "WAO",

@@ -122,20 +122,47 @@ def define_get_functions() -> tuple[dict, dict]:
     return get_functions, get_fn_arguments
 
 
+def _construct_name(keys: list | str, dictionary: dict, separators: Sequence[str]) -> str:
+    """
+    Recursive function to create a composite string by selecting values from a dictionary
+    using supplied keys and appropriate separators.
+
+    This allows keys to be nested to make this use different separators for different key selections.
+    """
+    if isinstance(keys, list):
+        try:
+            # Attempt to grab the head (element 0) and tail (elements 1:) from the Sequence
+            separator, *separators = separators
+        except ValueError as exc:
+            raise ValueError("When constructing names, separators must be >= depth of keys input.\n") from exc
+
+        # Generator expression to loop over elements
+        values = (_construct_name(key, dictionary, separators) for key in keys)
+        return separator.join(values)
+    else:
+        try:
+            value = str(dictionary[keys])
+        except KeyError:
+            raise ValueError("When constructing names, unable to find key within supplied dictionary")
+
+        return value
+
+
 def define_filename(
-    name_components: list[str | list],
+    name_components: list,
     metadata: dict,
     obs_type: str | None = None,
     output_path: pathType | None = None,
     include_version: bool = True,
     data_version: str | None = None,
+    separators: str | tuple = ("_", "-"),
 ) -> Path:
     """
     Define filename based on the determined structure. The input name_components determines
     the initial naming strings, extracting these from the metadata.
     Sub-names can be specified within name_components by including these as a list.
 
-    The name_components inputs will be interpreted as follows:
+    By default, the name_components inputs will be interpreted as follows:
      - list elements (names) will be separated by underscores "_"
      - any sub-list elements (sub-names) will be seperated by dashes "-"
 
@@ -149,6 +176,7 @@ def define_filename(
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         output_path: Full output folder path for file
+        separators: Seperators to use between name_components. Default = ("_", "-")
     Returns:
         Path: Full path for filename
 
@@ -166,52 +194,37 @@ def define_filename(
         Path("/path/to/output/ch4_tac_42m_surface-insitu_v1.nc")
     """
 
-    name_separator = "_"
-    sub_name_separator = "-"
     file_extension = ".nc"
 
     if output_path is not None:
         output_path = Path(output_path)
 
-    name_details = []
-    missing_keys = []
-    for name in name_components:
+    if isinstance(separators, str):
+        separators = (separators,)
 
-        if isinstance(name, list):
-            sub_names = name
-        else:
-            sub_names = [name]
+    filename_stub = _construct_name(name_components, metadata, separators)
 
-        sub_name_details = []
-        for sub_name in sub_names:
-            if sub_name in metadata:
-                sub_name_details.append(str(metadata[sub_name]))
-            else:
-                missing_keys.append(sub_name)
-                sub_name_details.append("")
-
-        full_name = sub_name_separator.join(sub_name_details)
-        name_details.append(full_name)
-
-    if missing_keys:
-        msg = f"Necessary keys missing from stored metadata: {', '.join(missing_keys)}"
-        logger.exception(msg)
-        raise ValueError(msg)
+    additional_components = []
+    if obs_type is not None:
+        additional_components.append(obs_type)
 
     if include_version:
         if data_version is None:
             data_version = find_data_version(metadata)
+
+        if data_version is not None:
+            additional_components.append(data_version)
+
+    if additional_components:
+        all_components = [filename_stub] + additional_components
     else:
-        data_version = None
+        all_components = [filename_stub]
 
-    joined_names = name_separator.join(name_details)
-    all_name_components = [joined_names, obs_type, data_version]
-    final_name_components = [name for name in all_name_components if name is not None]
-
-    filename = Path(f"{name_separator.join(final_name_components)}{file_extension}")
+    filename_stub = separators[0].join(all_components)
+    filename = Path(f"{filename_stub}{file_extension}")
 
     if output_path is not None:
-        filename = output_path / filename
+        filename = Path(output_path) / filename
 
     return filename
 
@@ -296,7 +309,9 @@ def define_surface_filename(
         if obs_type is not None:
             name_components = define_name_components(obs_type=obs_type)
         else:
-            raise ValueError("Must specify name_components directly or obs_type so default name_components can be defined.")
+            raise ValueError(
+                "Must specify name_components directly or obs_type so default name_components can be defined."
+            )
 
     filename = define_filename(
         name_components,
