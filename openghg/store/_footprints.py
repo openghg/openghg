@@ -321,7 +321,6 @@ class Footprints(BaseStore):
         # Ensure we have a clear missing value for met_model
         met_model = check_and_set_null_variable(met_model)
         met_model = clean_string(met_model)
-        obs_region = clean_string(obs_region)
 
         if network is not None:
             network = clean_string(network)
