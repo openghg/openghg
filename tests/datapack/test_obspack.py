@@ -202,6 +202,37 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
 
 
 @pytest.mark.parametrize(
+        "name_suffixes, out_filename",
+        [
+            ({"obs_type": "surface-insitu", "data_version": "v1"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
+            ({"latest_version": "v51"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_v51.nc"),
+            ({"project": "gemma", "source": "noaa"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_gemma_noaa.nc"),
+        ]
+)
+def test_define_obspack_filename_name_components(name_suffixes, out_filename):
+    """
+    Check name components for the file name can be used correctly.
+    1. Check the standard suffix values create the expected output
+    2. If same key exists in metadata, check values from name_suffixes are used
+    3. Check new suffix values can be used to create output name
+    """
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "latest_version": "v1"}
+
+    obs_type = "surface-insitu"
+    obspack_path = "/path/to/obspack/"
+    out_filename = Path(out_filename)
+    filename = define_obspack_filename(metadata,
+                                       obs_type=obs_type,
+                                       obspack_path=obspack_path,
+                                       name_suffixes=name_suffixes)
+
+    assert filename == out_filename
+
+
+@pytest.mark.parametrize(
         "input,expected_result",
         [
             ([1, 2, 3, 4, 5], True),  # no repeats

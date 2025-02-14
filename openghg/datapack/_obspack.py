@@ -54,9 +54,11 @@ class StoredData:
     def define_obspack_filename(
         self,
         obspack_path: pathType | None = None,
+        include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
         name_components: list | None = None,
+        name_suffixes: dict | None = None,
         add_to_object: bool = True,
     ) -> Path:
         """
@@ -68,9 +70,11 @@ class StoredData:
             self.metadata,
             self.obs_type,
             obspack_path=obspack_path,
+            include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=data_version,
             name_components=name_components,
+            name_suffixes=name_suffixes,
         )
 
         if add_to_object:
@@ -151,10 +155,8 @@ def _construct_name(keys: list | str, dictionary: dict, separators: Sequence[str
 def define_filename(
     name_components: list,
     metadata: dict,
-    obs_type: str | None = None,
+    name_suffixes: dict,
     output_path: pathType | None = None,
-    include_version: bool = True,
-    data_version: str | None = None,
     separators: str | tuple = ("_", "-"),
 ) -> Path:
     """
@@ -170,11 +172,7 @@ def define_filename(
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename.
         metadata: Dictionary containing the metadata keys to use
-        obs_type: Name of the observation type to be included in the obspack.
-            See define_obs_types() for details of obs_type values.
-        include_version: Whether to include the data version in the filename. Default = True.
-        data_version: Version of the data. If not specified and include_version is True this
-            will attempt to extract the latest version details from the metadata.
+        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
         output_path: Full output folder path for file
         separators: Seperators to use between name_components. Default = ("_", "-")
     Returns:
@@ -204,23 +202,11 @@ def define_filename(
 
     filename_stub = _construct_name(name_components, metadata, separators)
 
-    additional_components = []
-    if obs_type is not None:
-        additional_components.append(obs_type)
+    suffixes = list(name_suffixes.values())
 
-    if include_version:
-        if data_version is None:
-            data_version = find_data_version(metadata)
-
-        if data_version is not None:
-            additional_components.append(data_version)
-
-    if additional_components:
-        all_components = [filename_stub] + additional_components
-    else:
-        all_components = [filename_stub]
-
+    all_components = [filename_stub] + suffixes
     filename_stub = separators[0].join(all_components)
+
     filename = Path(f"{filename_stub}{file_extension}")
 
     if output_path is not None:
@@ -229,12 +215,42 @@ def define_filename(
     return filename
 
 
+def define_name_suffixes(
+    obs_type: str | None = None,
+    include_obs_type: bool = True,
+    data_version: str | None = None,
+    include_version: bool = True,
+) -> dict:
+    """
+    Define default suffix dictionary for output filename.
+    Dependent on the `include_obs_type` and `include_version` flags this will
+    typically include obs_type and latest version.
+
+    Args:
+        obs_type: Name of the observation type associated with the data.
+        include_obs_type: Whether to include obs_type as the first suffix.
+        data_version: Version of the data.
+        include_version: Whether to include version as as the last suffix.
+    Returns:
+        dict: Dictionary of suffix names and values
+    """
+    name_suffixes = {}
+    if include_obs_type:
+        if obs_type is not None:
+            name_suffixes["obs_type"] = obs_type
+    if include_version:
+        if data_version is not None:
+            name_suffixes["data_version"] = data_version
+
+    return name_suffixes
+
+
 def define_name_components(obs_type: str, metadata: dict | None = None) -> list[str | list]:
     """
     Define the default naming scheme for the input obs_type.
 
     Args:
-        obs_type
+        obs_type: Name of the observation type associated with the data.
         metadata: Only needed if obs_type="column". This is because the platform from the
             the metadata is used to determine whether the site or satellite naming scheme
             should be used.
@@ -280,9 +296,11 @@ def define_surface_filename(
     metadata: dict,
     obs_type: str | None = None,
     output_path: pathType | None = None,
+    include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
+    name_suffixes: dict | None = None,
 ) -> Path:
     """
     Create file name for surface type (surface-flask or surface-insitu)
@@ -294,11 +312,13 @@ def define_surface_filename(
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
         output_path: Full output folder path for file
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename. Using the default sets this to ["species", "site", "inlet"]
+        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
     Returns:
         Path: Full path for filename
 
@@ -313,14 +333,24 @@ def define_surface_filename(
                 "Must specify name_components directly or obs_type so default name_components can be defined."
             )
 
+    if data_version is None:
+        data_version = find_data_version(metadata)
+
+    if name_suffixes is None:
+        name_suffixes = define_name_suffixes(
+            obs_type=obs_type,
+            include_obs_type=include_obs_type,
+            data_version=data_version,
+            include_version=include_version,
+        )
+
     filename = define_filename(
         name_components,
         metadata=metadata,
-        obs_type=obs_type,
-        include_version=include_version,
-        data_version=data_version,
+        name_suffixes=name_suffixes,
         output_path=output_path,
     )
+
     return filename
 
 
@@ -328,9 +358,11 @@ def define_column_filename(
     metadata: dict,
     obs_type: str = "column",
     output_path: pathType | None = None,
+    include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
+    name_suffixes: dict | None = None,
 ) -> Path:
     """
     Create file name for column type data with expected naming convention.
@@ -341,11 +373,13 @@ def define_column_filename(
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
         output_path: Full output folder path for file
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename. Using the default uses the platform to determine the naming.
+        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
     Returns:
         Path: Full path for filename
 
@@ -355,12 +389,21 @@ def define_column_filename(
     if name_components is None:
         name_components = define_name_components(obs_type=obs_type, metadata=metadata)
 
+    if data_version is None:
+        data_version = find_data_version(metadata)
+
+    if name_suffixes is None:
+        name_suffixes = define_name_suffixes(
+            obs_type=obs_type,
+            include_obs_type=include_obs_type,
+            data_version=data_version,
+            include_version=include_version,
+        )
+
     filename = define_filename(
         name_components,
         metadata=metadata,
-        obs_type=obs_type,
-        include_version=include_version,
-        data_version=data_version,
+        name_suffixes=name_suffixes,
         output_path=output_path,
     )
 
@@ -383,9 +426,11 @@ def define_obspack_filename(
     metadata: dict,
     obs_type: str,
     obspack_path: pathType | None = None,
+    include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
+    name_suffixes: dict | None = None,
 ) -> Path:
     """
     Create file name for obspack files with expected naming convention. This will
@@ -401,7 +446,7 @@ def define_obspack_filename(
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename. Default will depend on obs_type.
-
+        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
     Returns:
         Path: Full path for filename
     """
@@ -421,18 +466,22 @@ def define_obspack_filename(
                 metadata=metadata,
                 obs_type=obs_type,
                 output_path=full_obspack_path,
+                include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
                 name_components=name_components,
+                name_suffixes=name_suffixes,
             )
         elif "column" in obs_type:
             filename = define_column_filename(
                 metadata=metadata,
                 obs_type=obs_type,
                 output_path=full_obspack_path,
+                include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
                 name_components=name_components,
+                name_suffixes=name_suffixes,
             )
     else:
         raise ValueError(f"Did not recognise obs_type {obs_type}. Should be one of: {obs_types}")
@@ -469,9 +518,11 @@ def find_repeats(values: Sequence) -> list[np.ndarray] | None:
 def define_obspack_filenames(
     retrieved_data: list[StoredData],
     obspack_path: pathType | None = None,
+    include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
+    name_suffixes: dict | None = None,
     add_to_objects: bool = True,
     force: bool = False,
 ) -> list[Path]:
@@ -483,11 +534,13 @@ def define_obspack_filenames(
     Args:
         retrieved_data: List of StoredData objects.
         obspack_path: Top level directory for obspack
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename.
+        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
         add_to_objects: Add the filename to each of the StoredData objects.
         force: Force update of the obspack_filename and recreate this.
     Returns:
@@ -499,9 +552,11 @@ def define_obspack_filenames(
         if filename is None or force:
             filename = data.define_obspack_filename(
                 obspack_path=obspack_path,
+                include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
                 name_components=name_components,
+                name_suffixes=name_suffixes,
                 add_to_object=add_to_objects,
             )
         filenames.append(filename)
@@ -574,7 +629,7 @@ def _find_additional_metakeys(
 
     from openghg.objectstore import get_metakeys
 
-    ## TODO: How do we find out which bucket is being used? Is there a default if this is not specified?
+    # TODO: How do we find out which bucket is being used? Is there a default if this is not specified?
     bucket = "user"
     full_metakeys = get_metakeys(bucket)
 
@@ -614,6 +669,7 @@ def _find_additional_metakeys(
 def add_obspack_filenames(
     retrieved_data: list[StoredData],
     obspack_path: pathType | None = None,
+    include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
@@ -629,6 +685,7 @@ def add_obspack_filenames(
     Args:
         retrieved_data: List of StoredData objects.
         obspack_path: Top level directory for obspack
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
@@ -642,6 +699,7 @@ def add_obspack_filenames(
     define_obspack_filenames(
         retrieved_data,
         obspack_path=obspack_path,
+        include_obs_type=include_obs_type,
         include_version=include_version,
         data_version=data_version,
         name_components=name_components,
@@ -1090,6 +1148,7 @@ def create_obspack(
     minor_version_only: bool = False,
     current_obspacks: list | None = None,
     release_files: Sequence | None = None,
+    include_obs_type: bool = True,
     include_data_versions: bool = True,
     store: str | None = None,
 ) -> Path:
@@ -1112,6 +1171,7 @@ def create_obspack(
             in obspack_name.
         release_files: Additional release files to include within the obspack. See default_release_files() for details of what files
             will be included by default.
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_data_versions: Whether to include the internal data versions for the stored data. Default = True.
         store: Name of the object store to use to extract the data.
     Returns:
@@ -1152,7 +1212,10 @@ def create_obspack(
     # Create default obspack filenames for data
     # If any duplicates are found and update to use more of the metadata be more specific
     retrieved_data = add_obspack_filenames(
-        retrieved_data, obspack_path=obspack_path, include_version=include_data_versions
+        retrieved_data,
+        obspack_path=obspack_path,
+        include_obs_type=include_obs_type,
+        include_version=include_data_versions,
     )
 
     site_detail_rows = []
