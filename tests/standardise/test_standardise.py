@@ -638,10 +638,9 @@ def test_standardise_sorting_false(caplog):
     assert "20220928.nc" in log_messages[-1]
 
 
-def test_standardise_satellite_footprints_file():
+def test_standardise_footprints_satellite_raises_error():
     """
-    Tests standardise satellite footprint data and associated metadata keys
-    for satellite footprint data.
+    Tests standardise footprint raises value error when site and obs_region values are not supplied.
     """
     datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
 
@@ -649,25 +648,53 @@ def test_standardise_satellite_footprints_file():
     network = "GOSAT"
     domain = "BRAZIL"
 
-    standardise_footprint(
-        filepath=datapath,
-        satellite=satellite,
-        network=network,
-        model="CAMS",
-        height=6500,
-        period='1S',
-        domain=domain,
-        selection="LAND",
-        force=True,
-        store="user",
-        continuous=False,
-    )
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            height=6500,
+            period='1S',
+            domain=domain,
+            selection="LAND",
+            force=True,
+            store="user",
+            continuous=False,
+        )
 
+
+def test_standardise_footprint_satellite():
+    """
+    Tests standardise footprint for satellite data and associated metadata keys."""
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "BRAZIL"
+    obs_region = "BRAZIL-LAND"
+
+    standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            height=6500,
+            period='1S',
+            domain=domain,
+            obs_region=obs_region,
+            selection="LAND",
+            force=True,
+            store="user",
+            continuous=False,
+        )
+    
     data = get_footprint(
         satellite=satellite,
         domain="brazil",
+        obs_region=obs_region
     )
 
-    assert data.metadata["obs_region"] == "brazil"
+    assert data.metadata["obs_region"] == "brazil-land"
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == "brazil"

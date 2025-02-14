@@ -296,10 +296,6 @@ class Footprints(BaseStore):
         else:
             raise ValueError("Please pass either site or satellite and obs_region values")
 
-        if domain is not None and obs_region is None:
-            obs_region = domain
-            logging.info(f"Updated 'obs_region' to match 'domain': {domain}")
-
         network = clean_string(network)
         domain = clean_string(domain)
 
