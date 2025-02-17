@@ -54,8 +54,8 @@ def test_parse_acrg_org_site_key():
                    domain=domain,
                    site=site
                    )
-    
-    expected_key = f"{site}_{domain}_{model}_{inlet}"  
+
+    expected_key = f"{site}_{domain}_{model}_{inlet}"
     assert expected_key in result
 
 
@@ -64,12 +64,12 @@ def test_parse_acrg_org_satellite_key():
     Tests the key created in the parser output for satellite data
     """
 
-    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_TEST_SA_201004_compressed.nc")
 
     satellite = "GOSAT"
     network = "GOSAT"
-    domain = "BRAZIL"
-    obs_region = "BRAZIL-LAND"
+    domain = "TEST_SA"
+    obs_region = "TEST_SA"
     model = "NAME"
     species = "ch4"
     inlet = "column"
@@ -83,7 +83,6 @@ def test_parse_acrg_org_satellite_key():
                    inlet=inlet,
                    continuous=False
                    )
-    
-    expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"  
+
+    expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"
     assert expected_key in result
-    
