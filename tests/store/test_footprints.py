@@ -739,7 +739,6 @@ def test_optional_metadata_raise_error():
     model = "NAME"
     met_model = "UKV"
     species = "Rn"
-    obs_region = "test"
     domain = "TEST"
 
     with pytest.raises(ValueError):
