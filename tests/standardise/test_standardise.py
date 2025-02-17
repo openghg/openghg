@@ -697,6 +697,6 @@ def test_standardise_footprint_satellite():
         obs_region=obs_region
     )
 
-    assert data.metadata["obs_region"] == "brazil-land"
+    assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == "southamerica"
