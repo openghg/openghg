@@ -669,12 +669,12 @@ def test_standardise_footprint_satellite():
     Tests standardise footprint for satellite data and associated metadata keys."""
     clear_test_stores()
 
-    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_TEST_SA_201004_compressed.nc")
 
     satellite = "GOSAT"
     network = "GOSAT"
-    domain = "SOUTHAMERICA"
-    obs_region = "BRAZIL"
+    domain = "TEST_SA"
+    obs_region = "TEST_SA"
 
     standardise_footprint(
             filepath=datapath,
@@ -690,13 +690,13 @@ def test_standardise_footprint_satellite():
             store="user",
             continuous=False,
         )
-    
+
     data = get_footprint(
         satellite=satellite,
-        domain="brazil",
+        domain=domain,
         obs_region=obs_region
     )
 
-    assert data.metadata["obs_region"] == "brazil"
+    assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection" ] == "land"
-    assert data.metadata["domain"] == "southamerica"
+    assert data.metadata["domain"] == domain.lower()

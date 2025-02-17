@@ -748,7 +748,6 @@ def test_optional_metadata_raise_error():
             site=site,
             model=model,
             domain=domain,
-            obs_region=obs_region,
             met_model=met_model,
             inlet=inlet,
             species=species,
