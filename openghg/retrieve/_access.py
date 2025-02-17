@@ -559,14 +559,14 @@ def get_footprint(
     """Get footprints from one site.
 
     Args:
+        domain: Domain name for the footprints
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         site: The name of the site given in the footprints. This often matches
               to the site name but  if the same site footprints are run with a
               different met and they are named slightly differently from the obs
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
         satellite: The name of the satellite footprints data. e.g GOSAT
-        domain: Domain name for the footprints
-        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         inlet: Height above ground level in metres
         height: Alias for inlet
         model: Model used to create footprint (e.g. NAME or FLEXPART)
