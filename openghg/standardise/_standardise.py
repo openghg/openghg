@@ -397,11 +397,12 @@ def standardise_footprint(
 
     Args:
         filepath: Path(s) of file to standardise
-        site: Site name
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
         domain: Domain of footprints
+        site: Site name
         satellite: Satellite name
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
-        model: Model used to create footprint (e.g. NAME or FLEXPART)
+        selection: For satellite only, identifier for any data selection which has been performed on satellite data. This can be based on any form of filtering, binning etc. but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
         met_model: Underlying meteorlogical model used (e.g. UKV)
