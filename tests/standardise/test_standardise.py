@@ -681,7 +681,7 @@ def test_standardise_footprint_satellite():
             satellite=satellite,
             network=network,
             model="CAMS",
-            height=6500,
+            inlet="column",
             period='1S',
             domain=domain,
             obs_region=obs_region,
