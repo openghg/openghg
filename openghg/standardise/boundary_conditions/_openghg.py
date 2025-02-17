@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-import pandas as pd
 import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, synonyms
@@ -73,15 +72,6 @@ def parse_openghg(
         start_date, end_date, period_str = infer_date_range(
             bc_time, filepath=filepath, period=period, continuous=continuous
         )
-
-        time_values = pd.to_datetime(bc_data["time"].values)
-        unique_months = sorted(set(time_values.strftime("%Y-%m")))
-
-        if period:
-            expected_months = pd.date_range(start=start_date, end=end_date, freq="MS").strftime("%Y-%m")
-            missing_months = set(expected_months) - set(unique_months)
-            if missing_months:
-                logger.warning(f"Missing months in dataset: {missing_months}")
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
