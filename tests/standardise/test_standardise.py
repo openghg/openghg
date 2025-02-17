@@ -673,7 +673,7 @@ def test_standardise_footprint_satellite():
 
     satellite = "GOSAT"
     network = "GOSAT"
-    domain = "BRAZIL"
+    domain = "SOUTHAMERICA"
     obs_region = "BRAZIL"
 
     standardise_footprint(
