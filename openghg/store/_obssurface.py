@@ -598,7 +598,7 @@ class ObsSurface(BaseStore):
                 "network",
                 "source_format",
                 "data_source",
-                "icos_data_level",
+                "data_level",
             )
 
         # Create Datasources, save them to the object store and get their UUIDs
