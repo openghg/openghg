@@ -740,7 +740,7 @@ def test_optional_metadata_raise_error():
     met_model = "UKV"
     species = "Rn"
     obs_region = "test"
-    domain = "BRAZIL"
+    domain = "TEST"
 
     with pytest.raises(ValueError):
         standardise_footprint(
