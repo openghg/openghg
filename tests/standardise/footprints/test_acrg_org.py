@@ -37,6 +37,7 @@ def test_parse_acrg_org_site_key():
     """
     Tests the key created in the parser output for site data
     """
+    # TODO: Remove test after keys declaration is removed from the parsers
 
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
@@ -63,7 +64,7 @@ def test_parse_acrg_org_satellite_key():
     """
     Tests the key created in the parser output for satellite data
     """
-
+    # TODO: Remove test after keys declaration is removed from the parsers
     datapath = get_footprint_datapath("GOSAT-BRAZIL-column_TEST_SA_201004_compressed.nc")
 
     satellite = "GOSAT"

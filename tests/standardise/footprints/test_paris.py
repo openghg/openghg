@@ -44,9 +44,10 @@ def test_paris_footprint(site, inlet, model, met_model, filename):
         species=species,
     )
 
-    expected_key = f"{site}_{domain}_{model}_{inlet}"  
-    assert expected_key in data    
-    
+    # TODO: Remove check after keys declaration is removed from the parsers
+    expected_key = f"{site}_{domain}_{model}_{inlet}"
+    assert expected_key in data
+
     fp_data = list(data.values())[0]
 
     metadata = fp_data["metadata"]
