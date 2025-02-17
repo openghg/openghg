@@ -20,11 +20,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
+    filepath: multiPathType,
+    domain: str,
     model: str,
     inlet: str,
     species: str,
-    filepath: multiPathType,
-    domain: str,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -42,14 +42,14 @@ def parse_acrg_org(
 
     Args:
         filepath: Path of file to load
-        site: Site name
-        satellite: Satellite name
         domain: Domain of footprints
-        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name
+        satellite: Satellite name
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.

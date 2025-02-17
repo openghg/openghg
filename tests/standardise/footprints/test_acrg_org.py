@@ -31,3 +31,59 @@ def test_footprint_fail_message():
         )
 
         assert "need to use source_format='paris'" in exc
+
+
+def test_parse_acrg_org_site_key():
+    """
+    Tests the key created in the parser output for site data
+    """
+
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    site = "WAO"
+    inlet = "20m"
+    model = "NAME"
+    met_model = "UKV"
+    species = "Rn"
+    domain = "BRAZIL"
+
+    result = parse_acrg_org(model=model,
+                   inlet=inlet,
+                   species=species,
+                   filepath=datapath,
+                   domain=domain,
+                   site=site
+                   )
+    
+    expected_key = f"{site}_{domain}_{model}_{inlet}"  
+    assert expected_key in result
+
+
+def test_parse_acrg_org_satellite_key():
+    """
+    Tests the key created in the parser output for satellite data
+    """
+
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "BRAZIL"
+    obs_region = "BRAZIL-LAND"
+    model = "NAME"
+    species = "ch4"
+    inlet = "column"
+
+    result = parse_acrg_org(model=model,
+                   filepath=datapath,
+                   satellite=satellite,
+                   species=species,
+                   domain=domain,
+                   obs_region=obs_region,
+                   inlet=inlet,
+                   continuous=False
+                   )
+    
+    expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"  
+    assert expected_key in result
+    

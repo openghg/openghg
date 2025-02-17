@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
+from typing import cast
 import warnings
 from xarray import Dataset
 
@@ -20,11 +21,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def parse_paris(
     filepath: multiPathType,
-    site: str,
     domain: str,
     model: str,
     inlet: str,
     species: str,
+    obs_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
     met_model: str | None = None,
     network: str | None = None,
     period: str | tuple | None = None,
@@ -39,12 +42,14 @@ def parse_paris(
 
     Args:
         filepath: Path of file to load
-        site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name
+        satellite: Satellite name
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
@@ -112,6 +117,7 @@ def parse_paris(
     metadata["inlet"] = inlet
     metadata["height"] = inlet
     metadata["species"] = species
+    metadata["obs_region"] = obs_region
 
     if met_model is not None:
         metadata["met_model"] = met_model
@@ -178,7 +184,25 @@ def parse_paris(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    if site is None:
+        key_parts = [
+            cast(str, satellite),
+            cast(str, obs_region),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+    else:
+        key_parts = [
+            cast(str, site),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+
+    key_parts = [str(part) for part in key_parts if part is not None]
+
+    key = "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data

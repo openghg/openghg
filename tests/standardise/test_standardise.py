@@ -667,6 +667,8 @@ def test_standardise_footprints_satellite_raises_error():
 def test_standardise_footprint_satellite():
     """
     Tests standardise footprint for satellite data and associated metadata keys."""
+    clear_test_stores()
+
     datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
 
     satellite = "GOSAT"
