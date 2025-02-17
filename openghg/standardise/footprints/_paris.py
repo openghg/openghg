@@ -106,7 +106,7 @@ def parse_paris(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: dict[str, str | float | list[float]] = {}
+    metadata: dict[str, str | float | list[float] | None] = {}
 
     metadata["data_type"] = "footprints"
     metadata["site"] = site
