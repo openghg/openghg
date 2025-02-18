@@ -686,7 +686,6 @@ def test_standardise_footprint_satellite():
             domain=domain,
             obs_region=obs_region,
             selection="LAND",
-            force=True,
             store="user",
             continuous=False,
         )
