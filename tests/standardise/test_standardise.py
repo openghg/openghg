@@ -642,11 +642,11 @@ def test_standardise_footprints_satellite_raises_error():
     """
     Tests standardise footprint raises value error when site and obs_region values are not supplied.
     """
-    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_TEST_SA_201004_compressed.nc")
 
     satellite = "GOSAT"
     network = "GOSAT"
-    domain = "BRAZIL"
+    domain = "TEST_SA"
 
     with pytest.raises(ValueError):
         standardise_footprint(
@@ -674,7 +674,7 @@ def test_standardise_footprint_satellite():
     satellite = "GOSAT"
     network = "GOSAT"
     domain = "TEST_SA"
-    obs_region = "TEST_SA"
+    obs_region = "BRAZIL"
 
     standardise_footprint(
             filepath=datapath,
