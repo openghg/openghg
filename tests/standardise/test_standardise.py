@@ -636,3 +636,23 @@ def test_standardise_sorting_false(caplog):
     log_messages = [record.message for record in caplog.records]
 
     assert "20220928.nc" in log_messages[-1]
+
+
+def test_standardise_surface_niwa(caplog):
+    """ Testing NIWA network file gets standardised here"""
+
+    data = get_surface_datapath(filename="niwa.nc", source_format="NIWA")
+
+    results = standardise_surface(filepath=data,
+                    source_format="niwa",
+                    network="NIWA",
+                    site="LAU",
+                    store="user",
+                    verify_site_code=False,
+                    inlet="10m"
+                    )
+
+    assert "ch4" in results[0]["species"]
+    assert "LAU" in results[0]["site"]
+    assert "10m" in results[0]["inlet"]
+    assert "niwa" in results[0]["source_format"]
