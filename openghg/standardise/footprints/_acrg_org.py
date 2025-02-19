@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 import warnings
+from typing import cast
 from xarray import Dataset
 
 from openghg.util import (
@@ -20,11 +21,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def parse_acrg_org(
     filepath: multiPathType,
-    site: str,
     domain: str,
     model: str,
     inlet: str,
     species: str,
+    obs_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
     met_model: str | None = None,
     network: str | None = None,
     period: str | tuple | None = None,
@@ -39,12 +42,14 @@ def parse_acrg_org(
 
     Args:
         filepath: Path of file to load
-        site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name
+        satellite: Satellite name
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
@@ -153,15 +158,19 @@ def parse_acrg_org(
     # Do we need to chunk the footprints / will a Datasource store it correctly?
     metadata: dict[str, str | float | list[float]] = {}
 
-    metadata["data_type"] = "footprints"
-    metadata["site"] = site
-    metadata["domain"] = domain
-    metadata["model"] = model
+    default_metadata: dict = {
+        "data_type": "footprints",
+        "site": site,
+        "satellite": satellite,
+        "domain": domain,
+        "model": model,
+        "obs_region": obs_region,
+        "inlet": inlet,
+        "height": inlet,
+        "species": species,
+    }
 
-    # Include both inlet and height keywords for backwards compatability
-    metadata["inlet"] = inlet
-    metadata["height"] = inlet
-    metadata["species"] = species
+    metadata = {key: value for key, value in default_metadata.items() if value is not None}
 
     if met_model is not None:
         metadata["met_model"] = met_model
@@ -228,7 +237,25 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    if site is None:
+        key_parts = [
+            cast(str, satellite),
+            cast(str, obs_region),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+    else:
+        key_parts = [
+            cast(str, site),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+
+    key_parts = [str(part) for part in key_parts if part is not None]
+
+    key = "_".join(key_parts)
 
     footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data

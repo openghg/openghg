@@ -86,13 +86,13 @@
         }
     },
     "footprints": {
-        "required": {
-            "site": {
+        "required": {           
+            "model": {
                 "type": [
                     "str"
                 ]
-            },
-            "model": {
+            },            
+            "domain": {
                 "type": [
                     "str"
                 ]
@@ -100,11 +100,6 @@
             "inlet": {
                 "type": [
                     "height"
-                ]
-            },
-            "domain": {
-                "type": [
-                    "str"
                 ]
             },
             "time_resolved": {
@@ -134,7 +129,28 @@
                 ]
             }
         },
-        "optional": {}
+        "optional": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "satellite": {
+                "type": [
+                    "str"
+            ]
+            },            
+            "obs_region": {
+                "type": [
+                    "str"
+            ]
+            },
+            "selection": {
+                "type": [
+                    "str"
+            ]
+            }
+        }
     },
     "flux": {
         "required": {
