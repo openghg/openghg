@@ -65,12 +65,11 @@ def test_parse_acrg_org_satellite_key():
     Tests the key created in the parser output for satellite data
     """
     # TODO: Remove test after keys declaration is removed from the parsers
-    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_TEST_SA_201004_compressed.nc")
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
 
     satellite = "GOSAT"
-    network = "GOSAT"
-    domain = "TEST_SA"
-    obs_region = "TEST_SA"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
     model = "NAME"
     species = "ch4"
     inlet = "column"
