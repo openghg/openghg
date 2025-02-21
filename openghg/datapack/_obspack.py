@@ -18,6 +18,8 @@ logger = logging.getLogger("openghg.obspack")
 
 # TODO: Move to types submodule?
 ObsOutputType = ObsData | ObsColumnData
+NameComponents = list[str | list]
+MultiNameComponents = dict[str, NameComponents] | NameComponents | None
 
 
 class StoredData:
@@ -57,7 +59,7 @@ class StoredData:
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
-        name_components: list | None = None,
+        name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
         add_to_object: bool = True,
     ) -> Path:
@@ -245,7 +247,7 @@ def define_name_suffixes(
     return name_suffixes
 
 
-def define_name_components(obs_type: str, metadata: dict | None = None) -> list[str | list]:
+def define_name_components(obs_type: str, metadata: dict | None = None) -> NameComponents:
     """
     Define the default naming scheme for the input obs_type.
 
@@ -258,7 +260,7 @@ def define_name_components(obs_type: str, metadata: dict | None = None) -> list[
         list: Keys to use when extracting names from the metadata and to use within the filename.
     """
     if "surface" in obs_type:
-        name_components: list[str | list] = ["species", "site", "inlet"]
+        name_components: NameComponents = ["species", "site", "inlet"]
     elif "column" in obs_type:
         if metadata is None:
             raise ValueError(
@@ -429,7 +431,7 @@ def define_obspack_filename(
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
-    name_components: list | None = None,
+    name_components: MultiNameComponents = None,
     name_suffixes: dict | None = None,
 ) -> Path:
     """
@@ -445,7 +447,8 @@ def define_obspack_filename(
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
-            within the filename. Default will depend on obs_type.
+            within the filename. This can be specified per obs_type using a dictionary and the obs_type
+            input will be used to select the appropriate values.
         name_suffixes: Dictionary of additional values to add to the filename as a suffix.
     Returns:
         Path: Full path for filename
@@ -460,6 +463,14 @@ def define_obspack_filename(
             full_obspack_path = Path(obspack_path) / obs_type
         else:
             full_obspack_path = Path(obs_type)
+
+        if isinstance(name_components, dict):
+            try:
+                name_components = name_components[obs_type]
+            except KeyError:
+                raise ValueError(
+                    f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
+                )
 
         if "surface" in obs_type:
             filename = define_surface_filename(
@@ -521,7 +532,7 @@ def define_obspack_filenames(
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
-    name_components: list | None = None,
+    name_components: MultiNameComponents = None,
     name_suffixes: dict | None = None,
     add_to_objects: bool = True,
     force: bool = False,
@@ -539,7 +550,8 @@ def define_obspack_filenames(
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
-            within the filename.
+            within the filename. This can be specified per obs_type using a dictionary.
+            Default will depend on obs_type - see define_name_components().
         name_suffixes: Dictionary of additional values to add to the filename as a suffix.
         add_to_objects: Add the filename to each of the StoredData objects.
         force: Force update of the obspack_filename and recreate this.
@@ -672,7 +684,7 @@ def add_obspack_filenames(
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
-    name_components: list | None = None,
+    name_components: MultiNameComponents = None,
 ) -> list[StoredData]:
     """
     Based on the metadata associated with the retrieved data, create suitable obspack
@@ -690,7 +702,8 @@ def add_obspack_filenames(
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
         name_components: Keys to use when extracting names from the metadata and to use
-            within the filename.
+            within the filename. This can be specified per obs_type using a dictionary.
+            Default will depend on obs_type - see define_name_components().
     Returns:
         list: Same list of StoredData objects passed to the function
     """
@@ -718,6 +731,13 @@ def add_obspack_filenames(
 
             if name_components is None:
                 name_components = define_name_components(obs_type, example_metadata)
+            elif isinstance(name_components, dict):
+                try:
+                    name_components = name_components[obs_type]
+                except KeyError:
+                    raise ValueError(
+                        f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
+                    )
 
             metakeys = _find_additional_metakeys(
                 obs_type, metadata=example_metadata, name_components=name_components
@@ -1150,6 +1170,7 @@ def create_obspack(
     release_files: Sequence | None = None,
     include_obs_type: bool = True,
     include_data_versions: bool = True,
+    name_components: MultiNameComponents = None,
     store: str | None = None,
 ) -> Path:
     """
@@ -1173,6 +1194,9 @@ def create_obspack(
             will be included by default.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_data_versions: Whether to include the internal data versions for the stored data. Default = True.
+        name_components: Keys to use when extracting names from the metadata and to use
+            within the filename. This can be specified per obs_type using a dictionary.
+            Default will depend on obs_type - see define_name_components().
         store: Name of the object store to use to extract the data.
     Returns:
         Path : Path to created obspack
@@ -1216,6 +1240,7 @@ def create_obspack(
         obspack_path=obspack_path,
         include_obs_type=include_obs_type,
         include_version=include_data_versions,
+        name_components=name_components,
     )
 
     site_detail_rows = []
