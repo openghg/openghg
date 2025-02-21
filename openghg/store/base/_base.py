@@ -331,8 +331,7 @@ class BaseStore:
         if not required_keys:
             required_keys = self.get_lookup_keys(data=data)
 
-        self._metastore.acquire_lock()
-        try:
+        with self._metastore as metastore:
             lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
             # TODO - remove this when the lowercasing of metadata gets removed
             # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
@@ -386,10 +385,10 @@ class BaseStore:
                 datasource_metadata = datasource.metadata()
 
                 if new_ds:
-                    self._metastore.insert(datasource_metadata)
+                    metastore.insert(datasource_metadata)
                     logger.info("Created new datasource with UUID %s", datasource.uuid())
                 else:
-                    self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
+                    metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
                     logger.info("Added data to existing datasource with UUID %s", datasource.uuid())
 
                 required_info = {
@@ -398,9 +397,6 @@ class BaseStore:
                     if k in required_keys and v is not None and v not in not_set_metadata_values()
                 }
                 datasource_uuids.append({"uuid": datasource.uuid(), "new": new_ds, **required_info})
-
-        finally:
-            self._metastore.release_lock()
 
         return datasource_uuids
 
