@@ -674,7 +674,7 @@ def test_standardise_footprints_satellite_raises_error():
             satellite=satellite,
             network=network,
             model="CAMS",
-            height=6500,
+            inlet="column",
             period='1S',
             domain=domain,
             selection="LAND",
