@@ -20,6 +20,7 @@ logger = logging.getLogger("openghg.obspack")
 ObsOutputType = ObsData | ObsColumnData
 NameComponents = list[str | list]
 MultiNameComponents = dict[str, NameComponents] | NameComponents | None
+MultiSubFolder = dict[str, pathType] | pathType | None
 
 
 class StoredData:
@@ -56,6 +57,7 @@ class StoredData:
     def define_obspack_filename(
         self,
         obspack_path: pathType | None = None,
+        subfolder: MultiSubFolder = None,
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
@@ -72,6 +74,7 @@ class StoredData:
             self.metadata,
             self.obs_type,
             obspack_path=obspack_path,
+            subfolder=subfolder,
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=data_version,
@@ -428,6 +431,7 @@ def define_obspack_filename(
     metadata: dict,
     obs_type: str,
     obspack_path: pathType | None = None,
+    subfolder: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -443,6 +447,9 @@ def define_obspack_filename(
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
         obspack_path: Top level directory for obspack
+        subfolder: By default the obs_type will be used to create a subfolder. Specifying a subfolder directly
+            supercedes this. Pass an empty string for no subfolder.
+        include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
             will attempt to extract the latest version details from the metadata.
@@ -459,10 +466,23 @@ def define_obspack_filename(
 
     if obs_type in obs_types:
 
-        if obspack_path is not None:
-            full_obspack_path = Path(obspack_path) / obs_type
+        if isinstance(subfolder, dict):
+            try:
+                subfolder = Path(subfolder[obs_type])
+            except KeyError:
+                raise ValueError(
+                    f"If subfolder is specified as a dict this should use the obs_type values for the keys. Currently: {list(subfolder.keys())}"  # type:ignore
+                )
+
+        if subfolder is None:
+            subfolder = obs_type
         else:
-            full_obspack_path = Path(obs_type)
+            subfolder = Path(subfolder)
+
+        if obspack_path is not None:
+            full_obspack_path = Path(obspack_path) / subfolder
+        else:
+            full_obspack_path = Path(subfolder)
 
         if isinstance(name_components, dict):
             try:
@@ -529,6 +549,7 @@ def find_repeats(values: Sequence) -> list[np.ndarray] | None:
 def define_obspack_filenames(
     retrieved_data: list[StoredData],
     obspack_path: pathType | None = None,
+    subfolders: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -545,6 +566,11 @@ def define_obspack_filenames(
     Args:
         retrieved_data: List of StoredData objects.
         obspack_path: Top level directory for obspack
+        subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
+            this. This can be specified as:
+             - no subfolder(s) - pass empty string
+             - one subfolder for all files
+             - dictionary of subfolders per obs_type.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -564,6 +590,7 @@ def define_obspack_filenames(
         if filename is None or force:
             filename = data.define_obspack_filename(
                 obspack_path=obspack_path,
+                subfolder=subfolders,
                 include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
@@ -681,6 +708,7 @@ def _find_additional_metakeys(
 def add_obspack_filenames(
     retrieved_data: list[StoredData],
     obspack_path: pathType | None = None,
+    subfolders: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -697,6 +725,11 @@ def add_obspack_filenames(
     Args:
         retrieved_data: List of StoredData objects.
         obspack_path: Top level directory for obspack
+        subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
+            this. This can be specified as:
+             - no subfolder(s) - pass empty string
+             - one subfolder for all files
+             - dictionary of subfolders per obs_type.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -712,6 +745,7 @@ def add_obspack_filenames(
     define_obspack_filenames(
         retrieved_data,
         obspack_path=obspack_path,
+        subfolders=subfolders,
         include_obs_type=include_obs_type,
         include_version=include_version,
         data_version=data_version,
@@ -754,7 +788,9 @@ def add_obspack_filenames(
 
                         # print(f"Checking new names with {additional_key}")
                         filenames = [
-                            data.define_obspack_filename(name_components=name_components, add_to_object=False)
+                            data.define_obspack_filename(
+                                name_components=name_components, subfolder=subfolders, add_to_object=False
+                            )
                             for data in data_group
                         ]
             else:
@@ -918,6 +954,7 @@ def create_obspack_structure(
     output_folder: pathType,
     obspack_name: str,
     obs_types: Sequence = define_obs_types(),
+    subfolder_names: Sequence | None = None,
     release_files: Sequence | None = None,
 ) -> Path:
     """
@@ -926,7 +963,8 @@ def create_obspack_structure(
     Args:
         output_folder: Path to top level directory where obspack folder will be created
         obspack_name: Name of obspack to be created
-        obs_types: Observation types to include in obspack. Sub-folders will be created for these obs_types.
+        obs_types: Observation types to include in obspack. By default, sub-folders will be created for these obs_types.
+        subfolder_names: Alternatively, can specify a list of subfolders to create directly. This will supercede obs_types input.
         release_files: Release files to be included within the output obspack.
             - If release_files=None (default) this will use the files defined by default_release_files() function.
             - If release_files=[] no release files will be included in the obspack.
@@ -939,8 +977,11 @@ def create_obspack_structure(
     if release_files is None:
         release_files = default_release_files()
 
-    logger.info(f"Creating top level obspack folder: {obspack_path} and subfolder(s)")
-    for subfolder in obs_types:
+    if subfolder_names is None:
+        subfolder_names = obs_types
+
+    logger.info(f"Creating top level obspack folder: {obspack_path} and subfolder(s): {subfolder_names}")
+    for subfolder in subfolder_names:
         subfolder = obspack_path / subfolder
         subfolder.mkdir(parents=True)
 
@@ -1168,6 +1209,7 @@ def create_obspack(
     minor_version_only: bool = False,
     current_obspacks: list | None = None,
     release_files: Sequence | None = None,
+    subfolders: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_data_versions: bool = True,
     name_components: MultiNameComponents = None,
@@ -1192,6 +1234,11 @@ def create_obspack(
             in obspack_name.
         release_files: Additional release files to include within the obspack. See default_release_files() for details of what files
             will be included by default.
+        subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
+            this. This can be specified as:
+             - no subfolder(s) - pass empty string
+             - one subfolder for all files
+             - dictionary of subfolders per obs_type.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_data_versions: Whether to include the internal data versions for the stored data. Default = True.
         name_components: Keys to use when extracting names from the metadata and to use
@@ -1229,8 +1276,19 @@ def create_obspack(
 
     obspack_name = cast(str, obspack_name)
 
+    if isinstance(subfolders, dict):
+        subfolder_names = list(subfolders.values())
+    elif isinstance(subfolders, str):
+        subfolder_names = [subfolders]
+    else:
+        subfolder_names = None
+
     obspack_path = create_obspack_structure(
-        output_folder, obspack_name, obs_types=unique_obs_types, release_files=release_files
+        output_folder,
+        obspack_name,
+        obs_types=unique_obs_types,
+        subfolder_names=subfolder_names,
+        release_files=release_files,
     )
 
     # Create default obspack filenames for data
@@ -1238,6 +1296,7 @@ def create_obspack(
     retrieved_data = add_obspack_filenames(
         retrieved_data,
         obspack_path=obspack_path,
+        subfolders=subfolders,
         include_obs_type=include_obs_type,
         include_version=include_data_versions,
         name_components=name_components,
