@@ -359,9 +359,12 @@ def standardise_bc(
 
 def standardise_footprint(
     filepath: str | Path | list,
-    site: str,
-    domain: str,
     model: str,
+    domain: str,
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
+    selection: str | None = None,
     inlet: str | None = None,
     height: str | None = None,
     met_model: str | None = None,
@@ -394,9 +397,12 @@ def standardise_footprint(
 
     Args:
         filepath: Path(s) of file to standardise
-        site: Site name
-        domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
+        domain: Domain of footprints
+        site: Site name
+        satellite: Satellite name
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        selection: For satellite only, identifier for any data selection which has been performed on satellite data. This can be based on any form of filtering, binning etc. but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
         met_model: Underlying meteorlogical model used (e.g. UKV)
@@ -462,6 +468,9 @@ def standardise_footprint(
         site=site,
         domain=domain,
         model=model,
+        satellite=satellite,
+        obs_region=obs_region,
+        selection=selection,
         inlet=inlet,
         height=height,
         met_model=met_model,
