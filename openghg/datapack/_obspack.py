@@ -651,7 +651,7 @@ def check_unique_filenames(
 
 
 def _find_additional_metakeys(
-    obs_type: str, metadata: dict | None = None, name_components: list | None = None
+    obs_type: str, metadata: dict | None = None, name_components: list | None = None, store: str | None = None,
 ) -> list:
     """
     From the openghg config for each data_type, find additional metakeys to use when
@@ -662,15 +662,17 @@ def _find_additional_metakeys(
             See define_obs_types() for details of obs_type values.
         metadata: Metadata details associated with the stored data.
         name_components: Current metadata keys used to define an obspack_filename.
+        store: Name of the object store to use when finding additional metakeys.
     Returns:
         list: Additional metakeys defined within the object store
     """
 
     from openghg.objectstore import get_metakeys
 
-    # TODO: How do we find out which bucket is being used? Is there a default if this is not specified?
-    bucket = "user"
-    full_metakeys = get_metakeys(bucket)
+    # TODO: How do we find out which bucket/store is being used? Is there a default if this is not specified?
+    if store is None:
+        store = "user"
+    full_metakeys = get_metakeys(store)
 
     # Check and extract current name_components being used for filename
     if name_components is None:
@@ -713,6 +715,7 @@ def add_obspack_filenames(
     include_version: bool = True,
     data_version: str | None = None,
     name_components: MultiNameComponents = None,
+    store: str | None = None,
 ) -> list[StoredData]:
     """
     Based on the metadata associated with the retrieved data, create suitable obspack
@@ -737,6 +740,9 @@ def add_obspack_filenames(
         name_components: Keys to use when extracting names from the metadata and to use
             within the filename. This can be specified per obs_type using a dictionary.
             Default will depend on obs_type - see define_name_components().
+        store: Name of the object store to use if we need to find the config file for the data type.
+            This will be used if names are not unique to work out which keys to create a more
+            descriptive filename.
     Returns:
         list: Same list of StoredData objects passed to the function
     """
@@ -774,7 +780,7 @@ def add_obspack_filenames(
                     )
 
             metakeys = _find_additional_metakeys(
-                obs_type, metadata=example_metadata, name_components=name_components
+                obs_type, metadata=example_metadata, name_components=name_components, store=store,
             )
 
             filenames = [data.obspack_filename for data in data_group]
