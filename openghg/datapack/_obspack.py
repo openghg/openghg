@@ -651,7 +651,10 @@ def check_unique_filenames(
 
 
 def _find_additional_metakeys(
-    obs_type: str, metadata: dict | None = None, name_components: list | None = None, store: str | None = None,
+    obs_type: str,
+    metadata: dict | None = None,
+    name_components: list | None = None,
+    store: str | None = None,
 ) -> list:
     """
     From the openghg config for each data_type, find additional metakeys to use when
@@ -780,7 +783,10 @@ def add_obspack_filenames(
                     )
 
             metakeys = _find_additional_metakeys(
-                obs_type, metadata=example_metadata, name_components=name_components, store=store,
+                obs_type,
+                metadata=example_metadata,
+                name_components=name_components,
+                store=store,
             )
 
             filenames = [data.obspack_filename for data in data_group]
