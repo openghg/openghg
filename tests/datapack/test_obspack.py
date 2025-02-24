@@ -255,7 +255,7 @@ def stored_data_1():
     Define StoredData object with overlapping keys but data_level 1.
     """
 
-    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(0, len(time), 1)
 
     data = xr.Dataset({"mf": ("time", values)},
@@ -280,7 +280,7 @@ def stored_data_2():
     """
     Define StoredData object with overlapping keys but data_level 2.
     """
-    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(10, len(time) + 10, 1)
 
     data = xr.Dataset({"mf": ("time", values)},
@@ -593,7 +593,7 @@ def test_create_obspack_file_insitu(tmp_path):
                       'sampling_period_unit': 's',
                       'site': 'tac',
                       'species': 'co2',
-                      'station_height_masl': 50.0,
+                      'station_height_masl': 64.0,
                       'station_latitude': 52.51775,
                       'station_long_name': 'Tacolneston Tower, UK',
                       'station_longitude': 1.13872,
