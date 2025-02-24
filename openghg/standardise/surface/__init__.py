@@ -7,3 +7,4 @@ from ._npl import parse_npl
 from ._openghg import parse_openghg
 from ._agage import parse_agage
 from ._co2_games import parse_co2_games
+from ._niwa import parse_niwa

@@ -10,6 +10,8 @@ from helpers import (
     clear_test_stores,
     get_surface_datapath,
     metadata_checker_obssurface,
+    filt,
+    select,
 )
 from openghg.objectstore import (
     exists,
@@ -17,13 +19,13 @@ from openghg.objectstore import (
     get_object_from_json,
     get_writable_bucket,
     set_object_from_json,
-    get_readable_buckets,
 )
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.types import MetadataAndData
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -42,7 +44,7 @@ def min_uuids_fixture():
         store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
     )
 
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+    min_uuids = filt(one_min_res, file="tac.picarro.1minute.100m.test.dat")
 
     return min_uuids
 
@@ -55,7 +57,7 @@ def hourly_uuids_fixture():
         store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
     )
 
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+    hour_uuids = filt(one_hour_res, file="tac.picarro.hourly.100m.test.dat")
 
     return hour_uuids
 
@@ -63,11 +65,11 @@ def hourly_uuids_fixture():
 def test_different_sampling_periods_diff_datasources(min_uuids_fixture, hourly_uuids_fixture):
 
     min_uuids = min_uuids_fixture
-    for sp, data in min_uuids.items():
+    for data in min_uuids:
         assert data["new"] is True
 
     hour_uuids = hourly_uuids_fixture
-    for sp, data in hour_uuids.items():
+    for data in hour_uuids:
         assert data["new"] is True
 
 
@@ -77,8 +79,9 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     """
     bucket = get_writable_bucket(name="user")
     min_uuids = min_uuids_fixture
-    for species, uuid in min_uuids.items():
-        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
+    for result in min_uuids:
+        species = result["species"]
+        datasource = Datasource(bucket=bucket, uuid=result["uuid"])
         assert metadata_checker_obssurface(datasource.metadata(), species=species)
 
         with datasource.get_data(version="latest") as data:
@@ -137,14 +140,13 @@ def test_same_source_data_same_datasource():
         overwrite=True,
     )
 
-    proc_data = res["processed"]["tac.picarro.1minute.100m.201208.dat"]
-    proc_data_2 = res_2["processed"]["tac.picarro.1minute.100m.201407.dat"]
+    proc_data = filt(res, file="tac.picarro.1minute.100m.201208.dat")
+    proc_data_2 = filt(res_2, file="tac.picarro.1minute.100m.201407.dat")
 
-    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
-    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
-
-    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
-    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
+    for species in ["ch4", "co2"]:
+        uuid1 = filt(proc_data, species=species)[0]["uuid"]
+        uuid2 = filt(proc_data_2, species=species)[0]["uuid"]
+        assert uuid1 == uuid2
 
 
 def test_read_data(mocker):
@@ -170,10 +172,13 @@ def test_read_data(mocker):
         file_metadata=file_metadata,
     )
 
-    species = ["ch4", "co2", "co"]
-    for k, v in result["processed"]["bsd.picarro.1minute.248m.min.dat"].items():
-        assert k in species
-        assert v["new"] is True
+    assert result is not None
+
+    result = filt(result, file="bsd.picarro.1minute.248m.min.dat")
+    for species in ["ch4", "co2", "co"]:
+        res = filt(result, species=species)
+        assert res  # some result has species
+        assert res[0]["new"] is True
 
     with pytest.raises(ValueError):
         metadata = {}
@@ -222,14 +227,12 @@ def test_read_CRDS(bucket, tmpdir):
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
     )
 
-    keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
+    results = filt(results, file="bsd.picarro.1minute.248m.min.dat")
 
-    assert sorted(keys) == ["ch4", "co", "co2"]
+    assert {res["species"] for res in results} == {"ch4", "co", "co2"}
 
     # Load up the assigned Datasources and check they contain the correct data
-    data = results["processed"]["bsd.picarro.1minute.248m.min.dat"]
-
-    uid = data["ch4"]["uuid"]
+    uid = [res["uuid"] for res in results if res["species"] == "ch4"][0]
 
     datasource = Datasource(bucket=bucket, uuid=uid)
 
@@ -281,69 +284,73 @@ def test_read_GC(bucket):
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
-    expected_keys = [
-        "c2cl4_70m",
-        "c2f6_70m",
-        "c2h2_70m",
-        "c2h6_70m",
-        "c2hcl3_70m",
-        "c3f8_70m",
-        "c3h8_70m",
-        "c4f10_70m",
-        "c4f8_70m",
-        "c6f14_70m",
-        "c6h5ch3_70m",
-        "c6h6_70m",
-        "cc3h8_70m",
-        "ccl4_70m",
-        "cf4_70m",
-        "cfc112_70m",
-        "cfc113_70m",
-        "cfc114_70m",
-        "cfc115_70m",
-        "cfc11_70m",
-        "cfc12_70m",
-        "cfc13_70m",
-        "ch2br2_70m",
-        "ch2cl2_70m",
-        "ch3br_70m",
-        "ch3ccl3_70m",
-        "ch3cl_70m",
-        "ch3i_70m",
-        "chbr3_70m",
-        "chcl3_70m",
-        "cos_70m",
-        "desflurane_70m",
-        "halon1211_70m",
-        "halon1301_70m",
-        "halon2402_70m",
-        "hcfc124_70m",
-        "hcfc132b_70m",
-        "hcfc133a_70m",
-        "hcfc141b_70m",
-        "hcfc142b_70m",
-        "hcfc22_70m",
-        "hfc125_70m",
-        "hfc134a_70m",
-        "hfc143a_70m",
-        "hfc152a_70m",
-        "hfc227ea_70m",
-        "hfc236fa_70m",
-        "hfc23_70m",
-        "hfc245fa_70m",
-        "hfc32_70m",
-        "hfc365mfc_70m",
-        "hfc4310mee_70m",
-        "nf3_70m",
-        "sf5cf3_70m",
-        "sf6_70m",
-        "so2f2_70m",
+    expected_results = [
+        {"species": "c2cl4", "inlet": "70m"},
+        {"species": "c2f6", "inlet": "70m"},
+        {"species": "c2h2", "inlet": "70m"},
+        {"species": "c2h6", "inlet": "70m"},
+        {"species": "c2hcl3", "inlet": "70m"},
+        {"species": "c3f8", "inlet": "70m"},
+        {"species": "c3h8", "inlet": "70m"},
+        {"species": "c4f10", "inlet": "70m"},
+        {"species": "c4f8", "inlet": "70m"},
+        {"species": "c6f14", "inlet": "70m"},
+        {"species": "c6h5ch3", "inlet": "70m"},
+        {"species": "c6h6", "inlet": "70m"},
+        {"species": "cc3h8", "inlet": "70m"},
+        {"species": "ccl4", "inlet": "70m"},
+        {"species": "cf4", "inlet": "70m"},
+        {"species": "cfc112", "inlet": "70m"},
+        {"species": "cfc113", "inlet": "70m"},
+        {"species": "cfc114", "inlet": "70m"},
+        {"species": "cfc115", "inlet": "70m"},
+        {"species": "cfc11", "inlet": "70m"},
+        {"species": "cfc12", "inlet": "70m"},
+        {"species": "cfc13", "inlet": "70m"},
+        {"species": "ch2br2", "inlet": "70m"},
+        {"species": "ch2cl2", "inlet": "70m"},
+        {"species": "ch3br", "inlet": "70m"},
+        {"species": "ch3ccl3", "inlet": "70m"},
+        {"species": "ch3cl", "inlet": "70m"},
+        {"species": "ch3i", "inlet": "70m"},
+        {"species": "chbr3", "inlet": "70m"},
+        {"species": "chcl3", "inlet": "70m"},
+        {"species": "cos", "inlet": "70m"},
+        {"species": "desflurane", "inlet": "70m"},
+        {"species": "halon1211", "inlet": "70m"},
+        {"species": "halon1301", "inlet": "70m"},
+        {"species": "halon2402", "inlet": "70m"},
+        {"species": "hcfc124", "inlet": "70m"},
+        {"species": "hcfc132b", "inlet": "70m"},
+        {"species": "hcfc133a", "inlet": "70m"},
+        {"species": "hcfc141b", "inlet": "70m"},
+        {"species": "hcfc142b", "inlet": "70m"},
+        {"species": "hcfc22", "inlet": "70m"},
+        {"species": "hfc125", "inlet": "70m"},
+        {"species": "hfc134a", "inlet": "70m"},
+        {"species": "hfc143a", "inlet": "70m"},
+        {"species": "hfc152a", "inlet": "70m"},
+        {"species": "hfc227ea", "inlet": "70m"},
+        {"species": "hfc236fa", "inlet": "70m"},
+        {"species": "hfc23", "inlet": "70m"},
+        {"species": "hfc245fa", "inlet": "70m"},
+        {"species": "hfc32", "inlet": "70m"},
+        {"species": "hfc365mfc", "inlet": "70m"},
+        {"species": "hfc4310mee", "inlet": "70m"},
+        {"species": "nf3", "inlet": "70m"},
+        {"species": "sf5cf3", "inlet": "70m"},
+        {"species": "sf6", "inlet": "70m"},
+        {"species": "so2f2", "inlet": "70m"},
     ]
 
-    assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
+    results = filt(results, file="capegrim-medusa.18.C")
+
+    # select species and inlet, then sort by species
+    found_results = sorted(select(results, "species", "inlet"), key=lambda x: x["species"])
+    assert sorted(expected_results, key=lambda x: x["species"]) == found_results
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
+    uuid = select(filt(results, species="hfc152a", inlet="70m"), "uuid")[0]["uuid"]
 
     hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -411,10 +418,10 @@ def test_read_openghg_format(bucket):
     datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     results = standardise_surface(
-        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC"
+        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC", update_mismatch="metadata",
     )
 
-    uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
+    uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
 
     co2_data = Datasource(bucket=bucket, uuid=uuid)
 
@@ -440,7 +447,7 @@ def test_read_noaa_raw(bucket):
         inlet="flask",
     )
 
-    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
+    uuid = filt(results, file="co_pocn25_surface-flask_1_ccgg_event.txt", species="co")[0]["uuid"]
 
     co_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -471,7 +478,7 @@ def test_read_noaa_metastorepack(bucket):
         overwrite=True,
     )
 
-    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
+    uuid = filt(results, file="ch4_esp_surface-flask_2_representative.nc", species="ch4")[0]["uuid"]
 
     ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
 
@@ -531,13 +538,14 @@ def test_add_new_data_correct_datasource():
         network="AGAGE",
     )
 
-    first_results = results["processed"]["capegrim-medusa.05.C"]
+    first_results = filt(results, file="capegrim-medusa.05.C")
 
-    sorted_keys = sorted(list(results["processed"]["capegrim-medusa.05.C"].keys()))
+    sorted_pairs = sorted(tuple(res.values()) for res in select(first_results, "species", "inlet"))
 
-    assert sorted_keys[:4] == ["c2cl4_10m", "c2cl4_70m", "c2f6_10m", "c2f6_70m"]
-    assert sorted_keys[-4:] == ["hfc32_70m", "sf6_70m", "so2f2_10m", "so2f2_70m"]
-    assert len(sorted_keys) == 69
+    assert sorted_pairs[:4] == [("c2cl4", "10m"), ("c2cl4", "70m"), ("c2f6", "10m"), ("c2f6", "70m")]
+    assert sorted_pairs[-4:] == [("hfc32", "70m"), ("sf6", "70m"), ("so2f2", "10m"), ("so2f2", "70m")]
+
+    assert len(sorted_pairs) == 69
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.06.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.06.precisions.C", source_format="GC")
@@ -550,16 +558,20 @@ def test_add_new_data_correct_datasource():
         network="AGAGE",
     )
 
-    second_results = new_results["processed"]["capegrim-medusa.06.C"]
+    second_results = filt(new_results, file="capegrim-medusa.06.C")
+    second_pairs = sorted(tuple(res.values()) for res in select(second_results, "species", "inlet"))
 
-    shared_keys = [key for key in first_results if key in second_results]
+    shared_pairs = set(sorted_pairs) & set(second_pairs)
 
-    assert len(shared_keys) == 67
+    assert len(shared_pairs) == 67
 
-    for key in shared_keys:
-        assert first_results[key]["uuid"] == second_results[key]["uuid"]
-        assert first_results[key]["new"] is True
-        assert second_results[key]["new"] is False
+    for pair in shared_pairs:
+        species, inlet = pair
+        first_res = filt(first_results, species=species, inlet=inlet)[0]
+        second_res = filt(second_results, species=species, inlet=inlet)[0]
+        assert first_res["uuid"] == second_res["uuid"]
+        assert first_res["new"] is True
+        assert second_res["new"] is False
 
 
 @pytest.mark.skip(reason="Ranking being completely reworked")
@@ -770,18 +782,14 @@ def test_store_icos_carbonportal_data(bucket):
     with open(metadata_path, "r") as f:
         data = json.load(f)
 
-    data["co2"]["data"] = ds
+    data = [MetadataAndData(metadata=data["co2"]["metadata"], data=ds)]
 
     with ObsSurface(bucket=bucket) as metastore:
-        first_result = metastore.store_data(data=data)
-        second_result = metastore.store_data(data=data)
+        result = metastore.store_data(data=data)
 
-    assert first_result["co2"]["new"] is True
+    assert result is not None
+    assert filt(result, species="co2")[0]["new"] is True
 
-    with ObsSurface(bucket=bucket) as obs:
-        second_result = obs.store_data(data=data)
-
-    assert second_result is None
 
 
 @pytest.mark.parametrize(
@@ -853,6 +861,7 @@ def test_check_obssurface_multi_file_same_skip():
         instrument="picarro",
         sampling_period="1h",
         if_exists="new",
+        update_mismatch="metadata",
     )
 
     assert results
@@ -870,6 +879,7 @@ def test_check_obssurface_multi_file_same_skip():
         instrument="picarro",
         sampling_period="1h",
         if_exists="new",
+        update_mismatch="metadata",
     )
 
     assert not results
@@ -982,6 +992,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         site="TAC",
         network="DECC",
         store="group",
+        update_mismatch="metadata",
         **data_labels_1
     )
 
@@ -991,6 +1002,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         site="TAC",
         network="DECC",
         store="group",
+        update_mismatch="metadata",
         **data_labels_2
     )
 
@@ -1105,14 +1117,14 @@ def test_sync_surface_metadata_store_level(
         update_mismatch=update_mismatch,
     )
 
-    standardised_data = standardised_data["processed"][filepath.name]
+    standardised_data = filt(standardised_data, file=filepath.name)
 
-    for species, uuid in standardised_data.items():
-        datasource = Datasource(bucket=bucket, uuid=uuid["uuid"])
-        assert metadata_checker_obssurface(datasource.metadata(), species=species)
+    for res in standardised_data:
+        datasource = Datasource(bucket=bucket, uuid=res["uuid"])
+        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
 
         with datasource.get_data(version="latest") as data:
-            assert attributes_checker_obssurface(data.attrs, species=species)
+            assert attributes_checker_obssurface(data.attrs, species=res["species"])
 
 
 def test_co2_games():

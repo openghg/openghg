@@ -162,3 +162,20 @@ def all_datasource_keys(keys: Dict) -> List[str]:
 def get_flux_timeseries_datapath(filename: str) -> Path:
     """Return the path to the flux_timeseries test data file"""
     return get_datapath_base(data_type="flux_timeseries", filename=filename)
+
+
+def print_dict_diff(dict1: dict, dict2: dict, skip_missing: bool = False) -> None:
+    all_keys = set(dict1.keys()).union(set(dict2.keys()))
+
+    print("\nDiff of dicts:\n")
+    print(f"{'key':<20}{'dict1':<20}{'dict2':<20}")
+
+    for key in all_keys:
+        val1 = dict1.get(key, "Missing")
+        val2 = dict2.get(key, "Missing")
+
+        if skip_missing and "Missing" in (val1, val2):
+            continue
+
+        if val1 != val2:
+            print(f"{key:<20}{val1:<20}{val2:<20}")

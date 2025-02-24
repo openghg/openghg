@@ -17,6 +17,7 @@ from .helpers import (
     get_obspack_datapath,
     glob_files,
     key_to_local_filepath,
+    print_dict_diff,
     temporary_store_paths,
 )
 from .meta import (
@@ -24,4 +25,8 @@ from .meta import (
     attributes_checker_obssurface,
     metadata_checker_obssurface,
     parsed_surface_metachecker,
+)
+from .standardise_results import (
+    filt,
+    select,
 )

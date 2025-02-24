@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from helpers import get_column_datapath, clear_test_store
+from helpers import get_column_datapath, clear_test_store, filt
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search_column
 from openghg.standardise import standardise_column
@@ -35,8 +35,9 @@ def test_read_openghg_format():
     # uuid = results["processed"][filename]["ch4"]["uuid"]
 
     # Output style for other object types
-    assert "ch4" in results
-    uuid = results["ch4"]["uuid"]
+    results = filt(results, species="ch4")
+    assert results  # results with species ch4 exist
+    uuid = results[0]["uuid"]
 
     bucket = get_bucket()
 

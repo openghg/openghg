@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
@@ -389,7 +389,6 @@ def get_obs_column(
     )
 
     if return_mf:
-
         if max_level > max(obs_data.data.lev.values) + 1:
             logger.warning(
                 f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
@@ -545,8 +544,10 @@ def get_bc(
 
 
 def get_footprint(
-    site: str,
     domain: str,
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
     inlet: str | None = None,
     height: str | None = None,
     model: str | None = None,
@@ -558,12 +559,14 @@ def get_footprint(
     """Get footprints from one site.
 
     Args:
+        domain: Domain name for the footprints
         site: The name of the site given in the footprints. This often matches
               to the site name but  if the same site footprints are run with a
               different met and they are named slightly differently from the obs
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
-        domain : Domain name for the footprints
+        satellite: The name of the satellite footprints data. e.g GOSAT
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         inlet: Height above ground level in metres
         height: Alias for inlet
         model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -591,6 +594,8 @@ def get_footprint(
     fp_data = _get_generic(
         site=site,
         domain=domain,
+        satellite=satellite,
+        obs_region=obs_region,
         inlet=inlet,
         height=height,
         model=model,
