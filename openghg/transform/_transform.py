@@ -18,7 +18,7 @@ def transform_flux_data(
     overwrite: bool = False,
     store: str | None = None,
     **kwargs: Any,
-) -> dict:
+) -> list[dict]:
     """Read and transform a flux / emissions database. This will find the appropriate
     parser function to use for the database specified. The necessary inputs
     are determined by which database is being used.

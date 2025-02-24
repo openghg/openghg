@@ -1,5 +1,5 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
 
 from ._cli import cli
@@ -32,7 +32,6 @@ from ._file import (
     load_transform_parser,
     read_header,
     check_function_open_nc,
-    permissions,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string

@@ -23,18 +23,20 @@ These methods are only needed by `store.BaseStore`.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
-import json
-from typing import Any, cast, Literal
+from types import TracebackType
+from typing import Any, Literal, cast
 
+import tinydb
 from filelock import FileLock
-from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
+from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
-from openghg.util import hash_string, permissions
-import tinydb
+from openghg.util import hash_string
 from tinydb.middlewares import Middleware
+from typing_extensions import Self
 
 
 def get_metakey(data_type: str) -> str:
@@ -242,16 +244,26 @@ class DataClassMetaStore(TinyDBMetaStore):
         if not lock_path.exists():
             lock_path.touch(mode=0o664)
 
-        # check permissions
-        perms = permissions(lock_path)
-
-        if "w" not in perms[0]:
+        try:
+            self.lock = FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
+        except PermissionError as e:
             raise PermissionError(
                 "You do not have the correct permissions to add data to this object store."
-                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw'."
-            )
+                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
+                f"e.g. using `chmod +664 {lock_path}`"
+            ) from e
 
-        self.lock = FileLock(lock_path, timeout=600)  # file lock with 10 minute timeout
+    def __enter__(self) -> Self:
+        self.acquire_lock()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None:
+        self.release_lock()
 
     def acquire_lock(self) -> None:
         """Acquire a lock for the object store."""

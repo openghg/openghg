@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import numpy as np
-import xarray as xr
+from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
@@ -13,6 +13,10 @@ from typing import (
     runtime_checkable,
 )
 from collections import defaultdict
+
+import numpy as np
+import xarray as xr
+
 
 pathType = Union[str, Path]
 optionalPathType = Optional[pathType]
@@ -32,11 +36,29 @@ class TimePeriod(NamedTuple):
     unit: str | None = None
 
 
-class MetadataAndData(NamedTuple):
+@dataclass
+class MetadataAndData:
     """A very simple implementation of the `HasMetadataAndData` protocol."""
 
     metadata: dict
     data: xr.Dataset
+
+
+def convert_to_list_of_metadata_and_data(
+    parser_output: dict | Iterable[HasMetadataAndData],
+) -> list[MetadataAndData]:
+    """Convert from old nested dict format to list of MetadataAndData."""
+    if isinstance(parser_output, dict):
+        return [MetadataAndData(v["metadata"], v["data"]) for v in parser_output.values()]
+    else:
+        parser_output = list(parser_output)
+
+        if all(isinstance(x, HasMetadataAndData) for x in parser_output):
+            return [MetadataAndData(v.metadata, v.data) for v in parser_output]
+
+    raise ValueError(
+        "`parser_output` must be dict or Iterable of objects with .metadata and .data attributes."
+    )
 
 
 @runtime_checkable

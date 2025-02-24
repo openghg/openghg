@@ -1,13 +1,13 @@
 import bz2
+from functools import partial, wraps
 import json
-import os
-import xarray as xr
 from pathlib import Path
-from functools import partial
 from typing import Any
 from collections.abc import Callable
 
-from openghg.types import pathType, multiPathType
+import xarray as xr
+
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
 
 __all__ = [
@@ -48,7 +48,11 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     function_name = f"parse_{data_name.lower()}"
     fn: Callable = getattr(module, function_name)
 
-    return fn
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):  # type: ignore
+        return convert_to_list_of_metadata_and_data(fn(*args, **kwargs))
+
+    return wrapped_fn
 
 
 def load_standardise_parser(data_type: str, source_format: str) -> Callable:
@@ -285,16 +289,3 @@ def check_function_open_nc(
         xr_open_fn = xr.open_dataset
 
     return xr_open_fn, filepath
-
-
-def permissions(file_path: str | Path) -> tuple[str, str, str]:
-    """Return r, w, and/or x permissions for user, group, and other."""
-    perms = oct(os.stat(file_path).st_mode)
-    user, group, other = perms[-3], perms[-2], perms[-1]
-
-    def bits_to_perms(bit_str: str) -> str:
-        bits = [int(b) for b in bin(int(bit_str))[-3:]]
-        perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
-        return perms
-
-    return bits_to_perms(user), bits_to_perms(group), bits_to_perms(other)

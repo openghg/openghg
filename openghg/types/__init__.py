@@ -46,4 +46,5 @@ from ._types import (
     HasMetadataAndData,
     MetadataAndData,
     Comparable,
+    convert_to_list_of_metadata_and_data,
 )

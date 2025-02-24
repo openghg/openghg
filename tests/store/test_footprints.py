@@ -736,10 +736,10 @@ def test_optional_metadata_raise_error():
 
     site = "WAO"
     inlet = "20m"
-    domain = "TEST"
     model = "NAME"
     met_model = "UKV"
     species = "Rn"
+    domain = "TEST"
 
     with pytest.raises(ValueError):
         standardise_footprint(
@@ -747,11 +747,11 @@ def test_optional_metadata_raise_error():
             filepath=datapath,
             site=site,
             model=model,
+            domain=domain,
             met_model=met_model,
             inlet=inlet,
             species=species,
-            domain=domain,
-            optional_metadata={"site": "test"},
+            optional_metadata={"species": species},
         )
 
 
@@ -844,4 +844,6 @@ def test_standardise_footprints_different_datasources(mock_metakeys):
     )
 
     # Make sure they're different Datasources
-    assert res_1["tac_test_UKV_100m"]["uuid"] != res_2["tac_test_UKV_100m"]["uuid"]
+    assert res_1[0]["uuid"] != res_2[0]["uuid"]
+
+    # key: "tac_test_UKV_100m"

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
 
+### Updated
+- Update `standardise_footprint` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1218](https://github.com/openghg/openghg/pull/1218/)
+
+### Added
+
+- Added parser to process and add "NIWA" network data to the object store. [PR #1208](https://github.com/openghg/openghg/pull/1208)
+- Update `standardise_column` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1217](https://github.com/openghg/openghg/pull/1217/)
+
+### Fixed
+
+- Changed `icos_data_level` to `data_level` in `ObsSurface.store_data` to fix bug where ICOS data was not distinguished by data level. [PR #1211](https://github.com/openghg/openghg/pull/1211)
+- Allow parsers to return a list of `MetadataAndData` directly. [PR #1222](https://github.com/openghg/openghg/pull/1222)
+- Fixed permissions for file locks [PR #1221](https://github.com/openghg/openghg/pull/1221)
+
 ## [0.11.1] - 2025-01-10
 
 ### Fixed
@@ -15,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
 - Pinned Zarr to `2.18.3` as github runners are picking `zarr 3.0` which is still in significant development state.[PR #1205](https://github.com/openghg/openghg/pull/1205)
 - Added exist_ok = true argument to create_config_folder and removed ObjectStoreError call.[PR #1198](https://github.com/openghg/openghg/pull/1198)
+
+### Updated
+
+- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
+
+### Fixed
+
+- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
+- Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
 
 ## [0.11.0] - 2024-12-16
 

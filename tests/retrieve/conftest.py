@@ -94,6 +94,7 @@ def data_read():
         network="DECC",
         instrument="picarro",
         sampling_period="1h",
+        update_mismatch="metadata",
     )
 
     # Obs Column data

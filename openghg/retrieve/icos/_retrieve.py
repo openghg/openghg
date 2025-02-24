@@ -3,7 +3,7 @@ from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise.meta import dataset_formatter, align_metadata_attributes
 from openghg.util import load_json
-from openghg.types import MetadataFormatError
+from openghg.types import convert_to_list_of_metadata_and_data, MetadataAndData, MetadataFormatError
 import openghg_defs
 import logging
 
@@ -24,68 +24,6 @@ def retrieve_atmospheric(
     store: str | None = None,
     update_mismatch: str = "never",
     force: bool = False,
-) -> ObsData | list[ObsData] | None:
-    """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
-    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
-    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
-    if returned, if nothing then None.
-
-    Args:
-        site: Site code
-        species: Species name
-        inlet: Height of the inlet for sampling in metres.
-        sampling_height: Alias for inlet
-        start_date: Start date
-        end_date: End date
-        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
-        data_level: ICOS data level (1, 2)
-        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
-        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
-                        to be distributed through the Carbon Portal.
-                        This level is the ICOS-data product and free available for users.
-        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        store: Name of object to search/store data to
-        update_mismatch: This determines how mismatches between the "metadata" derived from
-            stored data and "attributes" derived from ICOS Header are handled.
-            This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
-                - "from_definition" / "metadata" - update mismatches based on input metadata
-        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
-    Returns:
-        ObsData, list[ObsData] or None
-    """
-    return retrieve(
-        site=site,
-        species=species,
-        inlet=inlet,
-        sampling_height=sampling_height,
-        start_date=start_date,
-        end_date=end_date,
-        force_retrieval=force_retrieval,
-        data_level=data_level,
-        dataset_source=dataset_source,
-        update_mismatch=update_mismatch,
-        store=store,
-        force=force,
-    )
-
-
-def retrieve(
-    site: str,
-    species: str | list[str] | None = None,
-    inlet: str | None = None,
-    sampling_height: str | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
-    force_retrieval: bool = False,
-    data_level: int = 2,
-    dataset_source: str | None = None,
-    store: str | None = None,
-    update_mismatch: str = "never",
-    force: bool = False,
-    **kwargs: Any,
 ) -> ObsData | list[ObsData] | None:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -178,8 +116,8 @@ def retrieve(
 
         # Create the expected ObsData type
         obs_data = []
-        for data in standardised_data.values():
-            measurement_data = data["data"]
+        for data in standardised_data:
+            measurement_data = data.data
             # These contain URLs that are case sensitive so skip lowercasing these
             skip_keys = [
                 "citation_string",
@@ -187,7 +125,7 @@ def retrieve(
                 "dobj_pid",
                 "dataset_source",
             ]
-            metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
+            metadata = to_lowercase(data.metadata, skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
@@ -204,7 +142,7 @@ def _retrieve_remote(
     sampling_height: str | None = None,
     dataset_source: str | None = None,
     update_mismatch: str = "never",
-) -> dict | None:
+) -> list[MetadataAndData] | None:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
@@ -495,9 +433,11 @@ def _retrieve_remote(
         }
     standardised_data = dataset_formatter(data=standardised_data)
     standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
-    align_metadata_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
-    return standardised_data
+    standardised_data_list = convert_to_list_of_metadata_and_data(standardised_data)
+    align_metadata_attributes(data=standardised_data_list, update_mismatch=update_mismatch)
+
+    return standardised_data_list
 
 
 # def _read_site_metadata():
