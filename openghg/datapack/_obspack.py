@@ -721,12 +721,12 @@ def add_obspack_filenames(
     store: str | None = None,
 ) -> list[StoredData]:
     """
-    Based on the metadata associated with the retrieved data, create suitable obspack
-    filenames.
+    Add obspack filenames to StoredData objects in retrieved_data. This is based
+    on the metadata associated with the retrieved data.
     If any filenames within the retrieved_data list are not unique, update the filename
     using more keywords within the metadata.
 
-    Note: updates the obspack_filename attributes in place.
+    Note: updates the obspack_filename attributes in place within StoredData objects.
 
     Args:
         retrieved_data: List of StoredData objects.
@@ -747,7 +747,7 @@ def add_obspack_filenames(
             This will be used if names are not unique to work out which keys to create a more
             descriptive filename.
     Returns:
-        list: Same list of StoredData objects passed to the function
+        list: Same list of StoredData objects passed to the function with filenames added.
     """
 
     # Create default obspack names
