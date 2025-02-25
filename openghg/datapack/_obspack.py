@@ -152,7 +152,9 @@ def _construct_name(keys: list | str, dictionary: dict, separators: Sequence[str
         try:
             value = str(dictionary[keys])
         except KeyError:
-            raise ValueError("When constructing names, unable to find key within supplied dictionary")
+            raise ValueError(
+                f"When constructing names, unable to find key: '{keys}' within supplied dictionary"
+            )
 
         return value
 

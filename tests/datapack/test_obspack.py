@@ -67,7 +67,7 @@ def test_construct_name_fails_missing_key():
     with pytest.raises(ValueError) as excinfo:
         _construct_name(keys, dictionary, separators)
 
-    assert "unable to find key within supplied dictionary" in str(excinfo.value)
+    assert "unable to find key: 'c'" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
