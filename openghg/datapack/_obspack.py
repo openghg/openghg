@@ -798,7 +798,9 @@ def add_obspack_filenames(
                     if all(key_present):
                         name_components = name_components + [additional_key]
 
-                        logger.info(f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}.")
+                        logger.info(
+                            f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
+                        )
                         filenames = [
                             data.define_obspack_filename(
                                 name_components=name_components, subfolder=subfolders, add_to_object=False
