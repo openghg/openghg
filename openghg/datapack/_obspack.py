@@ -1273,8 +1273,7 @@ def create_obspack(
 
     retrieved_data = retrieve_data(search_df=search_df, store=store)
 
-    obs_types = search_df["obs_type"]
-    unique_obs_types = np.unique(obs_types)
+    unique_obs_types = search_df["obs_type"].unique()
 
     if obspack_name is None:
         if obspack_stub:
