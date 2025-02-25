@@ -795,7 +795,7 @@ def add_obspack_filenames(
                     break
                 else:
                     key_present = [additional_key in data.metadata for data in data_group]
-                    if np.all(key_present):
+                    if all(key_present):
                         name_components = name_components + [additional_key]
 
                         # print(f"Checking new names with {additional_key}")
