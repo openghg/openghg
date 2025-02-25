@@ -1274,15 +1274,20 @@ def create_obspack(
     obs_types = search_df["obs_type"]
     unique_obs_types = np.unique(obs_types)
 
-    if obspack_name is None and obspack_stub:
-        obspack_name, version = define_obspack_name(
-            obspack_stub,
-            version=version,
-            major_version_only=major_version_only,
-            minor_version_only=minor_version_only,
-            current_obspacks=current_obspacks,
-            output_folder=output_folder,
-        )
+    if obspack_name is None:
+        if obspack_stub:
+            obspack_name, version = define_obspack_name(
+                obspack_stub,
+                version=version,
+                major_version_only=major_version_only,
+                minor_version_only=minor_version_only,
+                current_obspacks=current_obspacks,
+                output_folder=output_folder,
+            )
+        else:
+            msg = "Either obspack_name or obspack_stub must be specified when creating an obspack."
+            logger.exception(msg)
+            raise ValueError(msg)
     elif version is None:
         version = "v1"
 
