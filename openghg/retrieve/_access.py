@@ -176,6 +176,7 @@ def get_obs_surface(
         # then it may be possible to avoid calling `.compute()`
         # Currently, large gaps in the data could blow up the number of chunks when resampling
         # which makes resampling extremely slow with Dask >= 2024.8.0
+        logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
