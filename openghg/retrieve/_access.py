@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Union
 
-from openghg.data_processing import surface_obs_resampler, rename
+from openghg.data_processing import surface_obs_resampler
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -184,7 +184,8 @@ def get_obs_surface(
 
     # Rename variables
     if rename_vars:
-        data = rename(data, lambda x: x.lower().replace(species, "mf"))
+        rename_dict = {str(dv): str(dv).lower().replace(species, "mf") for dv in data.data_vars}
+        data = data.rename(rename_dict)
 
     data.attrs["species"] = species
 
