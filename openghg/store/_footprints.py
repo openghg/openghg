@@ -186,10 +186,13 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: list | str | Path,
-        site: str,
         domain: str,
         model: str,
+        filepath: list | str | Path,
+        site: str | None = None,
+        satellite: str | None = None,
+        obs_region: str | None = None,
+        selection: str | None = None,
         inlet: str | None = None,
         height: str | None = None,
         met_model: str | None = None,
@@ -221,6 +224,8 @@ class Footprints(BaseStore):
             filepath: Path(s) of file(s) to standardise
             site: Site name
             domain: Domain of footprints
+            satellite: Satellite name
+            obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
             height: Alias for inlet. One of height or inlet MUST be included.
@@ -283,7 +288,14 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
 
-        site = clean_string(site)
+        if site is not None:
+            site = clean_string(site)
+        elif satellite is not None and obs_region is not None:
+            satellite = clean_string(satellite)
+            obs_region = clean_string(obs_region)
+        else:
+            raise ValueError("Please pass either site or satellite and obs_region values")
+
         network = clean_string(network)
         domain = clean_string(domain)
 

@@ -10,7 +10,7 @@ from helpers import (
     clear_test_store,
     filt,
 )
-from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
+from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint, get_obs_column
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -272,23 +272,34 @@ def test_local_obs_metadata_mismatch_fail():
 
 
 def test_standardise_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
     satellite = "GOSAT"
-    domain = "BRAZIL"
+    selection = "LAND"
     species = "methane"
+    obs_region = "BRAZIL"
 
     results = standardise_column(
         filepath=filepath,
         source_format="OPENGHG",
         satellite=satellite,
-        domain=domain,
         species=species,
+        obs_region=obs_region,
+        selection=selection,
         force=True,
         store="user",
     )
 
     assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species='ch4', max_level=3, satellite="gosat")
+
+    assert data.metadata["obs_region"] == "brazil"
+    assert data.metadata["selection"] == "land"
 
 
 def test_standardise_footprint():
@@ -625,3 +636,86 @@ def test_standardise_sorting_false(caplog):
     log_messages = [record.message for record in caplog.records]
 
     assert "20220928.nc" in log_messages[-1]
+
+
+def test_standardise_surface_niwa(caplog):
+    """ Testing NIWA network file gets standardised here"""
+
+    data = get_surface_datapath(filename="niwa.nc", source_format="NIWA")
+
+    results = standardise_surface(filepath=data,
+                    source_format="niwa",
+                    network="NIWA",
+                    site="LAU",
+                    store="user",
+                    verify_site_code=False,
+                    inlet="10m"
+                    )
+
+    assert "ch4" in results[0]["species"]
+    assert "LAU" in results[0]["site"]
+    assert "10m" in results[0]["inlet"]
+    assert "niwa" in results[0]["source_format"]
+
+
+def test_standardise_footprints_satellite_raises_error():
+    """
+    Tests standardise footprint raises value error when site and obs_region values are not supplied.
+    """
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            inlet="column",
+            period='1S',
+            domain=domain,
+            selection="LAND",
+            force=True,
+            store="user",
+            continuous=False,
+        )
+
+
+def test_standardise_footprint_satellite():
+    """
+    Tests standardise footprint for satellite data and associated metadata keys."""
+    clear_test_stores()
+
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
+
+    standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            inlet="column",
+            period='1S',
+            domain=domain,
+            obs_region=obs_region,
+            selection="LAND",
+            store="user",
+            continuous=False,
+        )
+
+    data = get_footprint(
+        satellite=satellite,
+        domain=domain,
+        obs_region=obs_region
+    )
+
+    assert data.metadata["obs_region"] == obs_region.lower()
+    assert data.metadata["selection" ] == "land"
+    assert data.metadata["domain"] == domain.lower()
