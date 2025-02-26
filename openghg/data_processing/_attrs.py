@@ -52,9 +52,11 @@ or use two calls to `rename`:
 
 from collections.abc import Callable, Iterable
 from functools import partial, reduce
-from typing import Any, TypeVar
+from typing import Any
 
 import xarray as xr
+
+from openghg.types import XrDataLikeMatch
 
 
 def map_dict(d: dict, func: Callable, keys: list[str] | None = None) -> dict:
@@ -100,15 +102,12 @@ def map_dict_multi(d: dict, funcs: Iterable[Callable | tuple[Callable, list[str]
     return reduce(lambda x, f: f(x), maps, d)
 
 
-DataArrayOrSet = TypeVar("DataArrayOrSet", xr.DataArray, xr.Dataset)
-
-
 def update_attrs(
-    data: DataArrayOrSet,
+    data: XrDataLikeMatch,
     *funcs: Callable | tuple[Callable, list[str]],
     global_attrs: dict | None = None,
     **kwargs: Any,
-) -> DataArrayOrSet:
+) -> XrDataLikeMatch:
     """Update and add to attributes of DataArray or Dataset.
 
     For example, if `ds` is a Dataset, then
