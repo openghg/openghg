@@ -20,6 +20,8 @@ There are two cases:
    are in the list)
 
 Examples:
+---------
+
 >>> rename(ds, lambda x: x.lower())
 
 would make all data variable names in `ds` lower case.
@@ -48,6 +50,7 @@ or use two calls to `rename`:
 
 >>> ds = rename(ds, lambda x: x.lower())
 >>> rename(ds, (lambda x: x.upper(), ["important_dv"]))
+
 """
 
 from collections.abc import Callable, Iterable

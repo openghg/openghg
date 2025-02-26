@@ -26,22 +26,26 @@ possible using `surface_obs_resampler` as a base.
 
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
-from typing import Any, Concatenate, Literal, cast
+from typing import Any, Concatenate, Literal
 
-import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
 from typing_extensions import ParamSpec
 
 from ._attrs import rename, update_attrs
+from ._xarray_helpers import xr_sqrt
+
 
 registry = Registry(suffix="resample")
 register = registry.register
 
 
-# somewhat complicated typing for decorator...
+# somewhat complicated typing for decorator:
+# we need to use `ParamSpec` to represent *args and **kwargs
 P = ParamSpec("P")
+
+# resampling functions take: a dataset, an averaging period (str), and possibly *args and **kwargs
 ResampleFunctionType = Callable[Concatenate[xr.Dataset, str, P], xr.Dataset]
 
 
@@ -172,9 +176,7 @@ def _weighted_resample(
                 sums_of_squares.resample(time=averaging_period).sum(**sum_kwargs) / n_obs_resample_sum
                 - weighted_resample_mf**2
             )
-            weighted_resample_mf_variability = cast(
-                xr.DataArray, np.sqrt(weighted_resample_mf_variability_squared)
-            )
+            weighted_resample_mf_variability = xr_sqrt(weighted_resample_mf_variability_squared)
 
             data_vars[f"{species}_variability"] = weighted_resample_mf_variability
 
@@ -213,7 +215,7 @@ def uncorrelated_errors_resample(
         n_obs = ds.resample(time=averaging_period).count()
         data_resampled_squared = (ds**2).resample(time=averaging_period).sum(**sum_kwargs) / n_obs**2
 
-        result = cast(xr.Dataset, np.sqrt(data_resampled_squared))  # mypy doesn't like np applied to xr
+        result = xr_sqrt(data_resampled_squared)
 
     return result
 
