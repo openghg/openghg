@@ -11,6 +11,10 @@ def get_parameters(func: Callable) -> list[str]:
 class Registry:
     """Class to register functions so that they can be retrieved by name.
 
+    Essentially, a "Registry" acts like a dictionary mapping strings to functions,
+    so that the functions can be retrieve from this dictionary. This facilitates
+    selecting functions by keywords in other functions or config files/dicts/etc.
+
     For example:
 
     >>> registry = Registry()
@@ -32,7 +36,6 @@ class Registry:
     >>>
     >>> assert "icos_data" in registry.functions
     >>> assert registry.functions["icos_data"] == icos_data_parser
-
 
     """
 
