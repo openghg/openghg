@@ -5,7 +5,25 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.12.0...HEAD)
+
+## [0.12.0] - 2025-02-27
+
+### Updated
+- Update `standardise_column` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1217](https://github.com/openghg/openghg/pull/1217/)
+- Update `standardise_footprint` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1218](https://github.com/openghg/openghg/pull/1218/)
+- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
+
+### Added
+
+- Added parser to process and add "NIWA" network data to the object store. [PR #1208](https://github.com/openghg/openghg/pull/1208)
+- Improved resampling of variability when number of observations is present. Also added methods for customising resampling, and a `Registry` class to "register" functions. [PR #1156](https://github.com/openghg/openghg/pull/1156)
+- Allow parsers to return a list of `MetadataAndData` directly. [PR #1222](https://github.com/openghg/openghg/pull/1222)
+
+### Fixed
+
+- Changed `icos_data_level` to `data_level` in `ObsSurface.store_data` to fix bug where ICOS data was not distinguished by data level. [PR #1211](https://github.com/openghg/openghg/pull/1211)
+- Fixed permissions for file locks [PR #1221](https://github.com/openghg/openghg/pull/1221)
 
 ## [0.11.1] - 2025-01-10
 

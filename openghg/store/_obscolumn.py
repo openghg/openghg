@@ -28,6 +28,7 @@ class ObsColumn(BaseStore):
         filepath: str | Path,
         species: str,
         platform: str = "satellite",
+        obs_region: Optional[str] = None,
         satellite: str | None = None,
         domain: str | None = None,
         selection: str | None = None,
@@ -43,7 +44,7 @@ class ObsColumn(BaseStore):
         filters: Any | None = None,
         chunks: dict | None = None,
         optional_metadata: dict | None = None,
-    ) -> dict:
+    ) -> list[dict]:
         """Read column observation file
 
         Args:
@@ -108,15 +109,27 @@ class ObsColumn(BaseStore):
         platform = clean_string(platform)
 
         if site is None and satellite is None:
-            raise ValueError("One of 'site' or 'satellite' must be specified")
+            raise ValueError("Value for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")
 
         site = clean_string(site)
         satellite = clean_string(satellite)
         domain = clean_string(domain)
+        obs_region = clean_string(obs_region)
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        if domain is not None and obs_region is not None:
+            err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
+            logger.exception(err_msg)
+            raise ValueError(err_msg)
+        elif domain is not None and obs_region is None:
+            obs_region = domain
+            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
+        elif obs_region is not None and domain is None:
+            domain = "NOT_SET"
+            logging.info(f"Updated value of 'domain': {domain}")
 
         # Specify any additional metadata to be added
         additional_metadata = {}
@@ -153,7 +166,7 @@ class ObsColumn(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 

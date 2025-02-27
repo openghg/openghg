@@ -1,7 +1,9 @@
+from collections.abc import MutableSequence
+from copy import deepcopy
 import logging
 import math
-from copy import deepcopy
-from openghg.types import AttrMismatchError
+
+from openghg.types import AttrMismatchError, MetadataAndData
 from openghg.util import is_number
 
 logger = logging.getLogger("openghg.standardise.metadata")
@@ -176,7 +178,7 @@ def sync_surface_metadata(
     return meta_copy, attrs_copy
 
 
-def align_metadata_attributes(data: dict, update_mismatch: str) -> None:
+def align_metadata_attributes(data: MutableSequence[MetadataAndData], update_mismatch: str) -> None:
     """
     Synchronize metadata and attributes in case of mismatches.
 
@@ -187,7 +189,7 @@ def align_metadata_attributes(data: dict, update_mismatch: str) -> None:
     should be invoked before producing the final standardised output in the retrieval process.
 
     Args:
-        data: Dictionary of source_name data, metadata, attributes
+        data: sequence of MetadataAndData objects
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -197,9 +199,9 @@ def align_metadata_attributes(data: dict, update_mismatch: str) -> None:
     Returns:
         None
     """
-    for _, gas_data in data.items():
-        measurement_data = gas_data["data"]
-        metadata = gas_data["metadata"]
+    for gas_data in data:
+        measurement_data = gas_data.data
+        metadata = gas_data.metadata
 
         attrs = measurement_data.attrs
 
@@ -207,6 +209,5 @@ def align_metadata_attributes(data: dict, update_mismatch: str) -> None:
             metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
 
-        gas_data["metadata"] = metadata_aligned
-        gas_data["attributes"] = attrs_aligned
-        measurement_data.attrs = gas_data["attributes"]
+        gas_data.metadata = metadata_aligned
+        gas_data.data.attrs = attrs_aligned
