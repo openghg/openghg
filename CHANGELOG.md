@@ -21,8 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Improved resampling of variability when number of observations is present. Also added methods for customising resampling.
-  [PR #1156](https://github.com/openghg/openghg/pull/1156)
+- Improved resampling of variability when number of observations is present. Also added methods for customising resampling, and a `Registry` class to "registry" functions. [PR #1156](https://github.com/openghg/openghg/pull/1156)
 - Allow parsers to return a list of `MetadataAndData` directly. [PR #1222](https://github.com/openghg/openghg/pull/1222)
 - Fixed permissions for file locks [PR #1221](https://github.com/openghg/openghg/pull/1221)
 
