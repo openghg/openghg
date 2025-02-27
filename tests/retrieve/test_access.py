@@ -48,11 +48,11 @@ def test_get_obs_surface_average_works_without_longname():
         site="mhd",
         species="ch4",
         inlet="10magl",
-        average="4H",
+        average="4h",
         instrument="gcmd",
     )
 
-    assert obsdata.data.attrs["averaged_period_str"] == "4H"
+    assert obsdata.data.attrs["averaged_period_str"] == "4h"
     assert obsdata.data.attrs["averaged_period"] == 14400
 
 

@@ -18,8 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Changed `icos_data_level` to `data_level` in `ObsSurface.store_data` to fix bug where ICOS data was not distinguished by data level. [PR #1211](https://github.com/openghg/openghg/pull/1211)
+
+### Added
+
+- Improved resampling of variability when number of observations is present. Also added methods for customising resampling, and a `Registry` class to "register" functions. [PR #1156](https://github.com/openghg/openghg/pull/1156)
 - Allow parsers to return a list of `MetadataAndData` directly. [PR #1222](https://github.com/openghg/openghg/pull/1222)
 - Fixed permissions for file locks [PR #1221](https://github.com/openghg/openghg/pull/1221)
+
 
 ## [0.11.1] - 2025-01-10
 

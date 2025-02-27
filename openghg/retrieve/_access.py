@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Optional, Union
 
+from openghg.data_processing import surface_obs_resampler
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -11,6 +12,7 @@ from openghg.dataobjects import (
 )
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
+
 from pandas import Timestamp
 from xarray import Dataset
 
@@ -32,9 +34,11 @@ def _get_generic(
 
     Args:
         data_class: Type of dataobject to create
-        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
+        combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
+            to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
         kwargs: Additional search terms
+
     Returns:
         dataclass
     """
@@ -91,7 +95,6 @@ def get_obs_surface(
     calibration_scale: str | None = None,
     rename_vars: bool = True,
     keep_missing: bool = False,
-    skip_ranking: bool = False,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -101,37 +104,30 @@ def get_obs_surface(
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
         species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
         inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
             can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
             such as '100m'.
         height: Alias for inlet
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
         average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
+            the form e.g. "2H", "30min" (should match pandas offset aliases format).
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
         rename_vars: Rename variables from species names to use "mf" explictly.
+        keep_missing: Keep missing data points or drop them.
         kwargs: Additional search terms
+
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
-    import numpy as np
     from openghg.util import (
         format_inlet,
         get_site_info,
         synonyms,
-        timestamp_tzaware,
     )
-    from pandas import Timedelta
 
-    # Allow height to be an alias for inlet but we do not expect height
-    # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
     if species is not None:
         species = synonyms(species)
 
@@ -162,8 +158,7 @@ def get_obs_surface(
     }
     surface_keywords.update(kwargs)
 
-    # # Get the observation data
-    # obs_results = search_surface(**surface_keywords)
+    # Get the observation data
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
@@ -176,141 +171,21 @@ def get_obs_surface(
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
 
-    if start_date is not None and end_date is not None:
-        # Check if underlying data is timezone aware.
-        data_time_index = data.indexes["time"]
-        tzinfo = data_time_index.tzinfo
-
-        if tzinfo:
-            start_date_filter = timestamp_tzaware(start_date)
-            end_date_filter = timestamp_tzaware(end_date)
-        else:
-            start_date_filter = Timestamp(start_date)
-            end_date_filter = Timestamp(end_date)
-
-        end_date_filter_exclusive = end_date_filter - Timedelta(
-            1, unit="nanosecond"
-        )  # Deduct 1 ns to make the end day (date) exclusive.
-
-        # Slice the data to only cover the dates we're interested in
-        data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
-
-    try:
-        start_date_data = timestamp_tzaware(data.time[0].values)
-        end_date_data = timestamp_tzaware(data.time[-1].values)
-    except AttributeError:
-        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
-    except IndexError:
-        return None
-
     if average is not None:
-        # We need to compute the value here for the operations done further down
-        logger.info("Loading Dataset data into memory for resampling operations.")
+        # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
+        # then it may be possible to avoid calling `.compute()`
+        # Currently, large gaps in the data could blow up the number of chunks when resampling
+        # which makes resampling extremely slow with Dask >= 2024.8.0
+        logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
-        # GJ - 2021-03-09
-        # TODO - check by RT
-
-        # # Average the Dataset over a given period
-        # if keep_missing is True:
-        #     # Create a dataset with one element and NaNs to prepend or append
-        #     ds_single_element = data[{"time": 0}]
-
-        #     for v in ds_single_element.variables:
-        #         if v != "time":
-        #             ds_single_element[v].values = np.nan
-
-        #     ds_concat = []
-
-        #     # Pad with an empty entry at the start date
-        #     if timestamp_tzaware(data.time.min()) > start_date:
-        #         ds_single_element_start = ds_single_element.copy()
-        #         ds_single_element_start.time.values = Timestamp(start_date)
-        #         ds_concat.append(ds_single_element_start)
-
-        #     ds_concat.append(data)
-
-        #     # Pad with an empty entry at the end date
-        #     if data.time.max() < Timestamp(end_date):
-        #         ds_single_element_end = ds_single_element.copy()
-        #         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta("1ns")
-        #         ds_concat.append(ds_single_element_end)
-
-        #     data = xr_concat(ds_concat, dim="time")
-
-        #     # Now sort to get everything in the right order
-        #     data = data.sortby("time")
-
-        # First do a mean resample on all variables
-        ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
-        # keep_attrs doesn't seem to work for some reason, so manually copy
-        ds_resampled.attrs = data.attrs.copy()
-
-        average_in_seconds = Timedelta(average).total_seconds()
-        ds_resampled.attrs["averaged_period"] = average_in_seconds
-        ds_resampled.attrs["averaged_period_str"] = average
-
-        # For some variables, need a different type of resampling
-        data_variables: list[str] = [str(v) for v in data.variables]
-
-        for var in data_variables:
-            if "repeatability" in var:
-                ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum())
-                    / data[var].resample(time=average).count()
-                )
-
-            # Copy over some attributes
-            if "long_name" in data[var].attrs:
-                ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
-
-            if "units" in data[var].attrs:
-                ds_resampled[var].attrs["units"] = data[var].attrs["units"]
-
-        # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = (
-            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        data = surface_obs_resampler(
+            data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
-
-        # If there are any periods where only one measurement was resampled, just use the median variability
-        ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
-            f"{species}_variability"
-        ].median()
-
-        # Create attributes for variability variable
-        if "long_name" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs[
-                "long_name"
-            ] = f"{data[species].attrs['long_name']}_variability"
-
-        if "units" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
-
-        # Resampling may introduce NaNs, so remove, if not keep_missing
-        if keep_missing is False:
-            ds_resampled = ds_resampled.dropna(dim="time")
-
-        data = ds_resampled
 
     # Rename variables
     if rename_vars:
-        rename: dict[str, str] = {}
-
-        data_variables = [str(v) for v in data.variables]
-        for var in data_variables:
-            if var.lower() == species.lower():
-                rename[var] = "mf"
-            if "repeatability" in var:
-                rename[var] = "mf_repeatability"
-            if "variability" in var:
-                rename[var] = "mf_variability"
-            if "number_of_observations" in var:
-                rename[var] = "mf_number_of_observations"
-            if "status_flag" in var:
-                rename[var] = "status_flag"
-            if "integration_flag" in var:
-                rename[var] = "integration_flag"
-
-        data = data.rename_vars(rename)  # type: ignore
+        rename_dict = {str(dv): str(dv).lower().replace(species, "mf") for dv in data.data_vars}
+        data = data.rename(rename_dict)
 
     data.attrs["species"] = species
 
@@ -324,22 +199,6 @@ def get_obs_surface(
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
-
-    # It doesn't make sense to do this now as we've only got a single Dataset
-    # # Now check if the units match for each of the observation Datasets
-    # units = set((f.data.mf.attrs["units"] for f in obs_files))
-    # scales = set((f.data.attrs["scale"] for f in obs_files))
-
-    # if len(units) > 1:
-    #     raise ValueError(
-    #         f"Units do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-
-    # if len(scales) > 1:
-    #     print(
-    #         f"Scales do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-    #     print("Suggestion: set calibration_scale to convert scales")
 
     return obs_data
 
