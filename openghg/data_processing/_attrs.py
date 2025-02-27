@@ -21,7 +21,6 @@ There are two cases:
 
 Examples:
 ---------
-
 >>> rename(ds, lambda x: x.lower())
 
 would make all data variable names in `ds` lower case.

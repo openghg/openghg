@@ -1,11 +1,15 @@
+from collections.abc import Callable
 from importlib import import_module
 import inspect
-from typing import Any, Callable
+from typing import Any, TypeVar
 
 
 def get_parameters(func: Callable) -> list[str]:
     """Return list of parameters for a function."""
     return list(inspect.signature(func).parameters.keys())
+
+
+CType = TypeVar("CType", bound=Callable)
 
 
 class Registry:
@@ -85,7 +89,7 @@ class Registry:
         """Check if function with given name is registered."""
         return name in self.functions
 
-    def register(self, func: Callable) -> Callable:
+    def register(self, func: CType) -> CType:
         """Register a function.
 
         The function will be stored under its formatted name
