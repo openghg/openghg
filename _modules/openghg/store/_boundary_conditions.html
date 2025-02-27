@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -336,6 +336,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 
@@ -346,6 +347,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_standardise_parsers</span>
+
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BoundaryConditions&quot;</span><span class="p">]</span>
 
@@ -371,7 +373,7 @@
         <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">file_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
 
 <span class="sd">        Args:</span>
@@ -416,7 +418,7 @@
         <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read boundary conditions file</span>
 
 <span class="sd">        Args:</span>
@@ -456,7 +458,7 @@
 <span class="sd">                To disable chunking pass in an empty dictionary.</span>
 <span class="sd">            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {&quot;project&quot;:&quot;paris&quot;, &quot;baseline&quot;:&quot;Intem&quot;}</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of files processed and datasource UUIDs data assigned to</span>
+<span class="sd">            list: of dictionaries of files processed and datasource UUIDs data assigned to, plus &quot;required&quot; metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get initial values which exist within this function scope using locals</span>
         <span class="c1"># MUST be at the top of the function</span>
@@ -503,7 +505,7 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">unseen_hashes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_hashes</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">unseen_hashes</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{}</span>
+            <span class="k">return</span> <span class="p">[{}]</span>
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
@@ -519,16 +521,12 @@
             <span class="n">fn_input_parameters</span><span class="p">,</span> <span class="n">parser_fn</span>
         <span class="p">)</span>
 
-        <span class="c1"># Call appropriate standardisation function with input parameters</span>
+        <span class="c1"># Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.</span>
         <span class="n">boundary_conditions_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
 
-        <span class="c1"># Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.</span>
-        <span class="k">for</span> <span class="n">split_data</span> <span class="ow">in</span> <span class="n">boundary_conditions_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-
-            <span class="n">split_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">align_lat_lon</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">split_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
-
-            <span class="n">bc_data</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-            <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">bc_data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mdd</span> <span class="ow">in</span> <span class="n">boundary_conditions_data</span><span class="p">:</span>
+            <span class="n">mdd</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">align_lat_lon</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
+            <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># Check to ensure no required keys are being passed through optional_metadata dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_info_keys</span><span class="p">(</span><span class="n">optional_metadata</span><span class="p">)</span>

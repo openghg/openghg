@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -344,7 +344,9 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.standardise&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">standardise</span><span class="p">(</span><span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">standardise</span><span class="p">(</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic standardise function, used by data-type specific versions.</span>
 
 <span class="sd">    Args:</span>
@@ -413,7 +415,7 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise surface measurements and store the data in the object store.</span>
 
 <span class="sd">    Args:</span>
@@ -519,6 +521,7 @@
     <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+    <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -536,50 +539,48 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read column observation file</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path of observation file</span>
-<span class="sd">        species: Species name or synonym e.g. &quot;ch4&quot;</span>
-<span class="sd">        platform: Type of platform. Should be one of:</span>
+<span class="sd">        filepath: Path to the input observation file.</span>
+<span class="sd">        species: Species name or synonym (e.g., &quot;ch4&quot;).</span>
+<span class="sd">        platform: Type of platform (default is &quot;satellite&quot;). Can be one of:</span>
 <span class="sd">            - &quot;satellite&quot;</span>
 <span class="sd">            - &quot;site&quot;</span>
-<span class="sd">        satellite: Name of satellite (if relevant). Should include satellite OR site.</span>
-<span class="sd">        domain: For satellite only. If data has been selected on an area include the</span>
-<span class="sd">            identifier name for domain covered. This can map to previously defined domains</span>
-<span class="sd">            (see openghg_defs &quot;domain_info.json&quot; file) or a newly defined domain.</span>
-<span class="sd">        selection: For satellite only, identifier for any data selection which has been</span>
-<span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
-<span class="sd">            but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
-<span class="sd">            If not specified, domain will be used.</span>
-<span class="sd">        site : Site code/name (if relevant). Should include satellite OR site.</span>
-<span class="sd">        instrument: Instrument name e.g. &quot;TANSO-FTS&quot;</span>
-<span class="sd">        network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;        source_format : Type of data being input e.g. openghg (internal format)</span>
-<span class="sd">        store: Name of store to write to</span>
-<span class="sd">        if_exists: What to do if existing data is present.</span>
-<span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                - adds data if no overlap</span>
-<span class="sd">                - raises DataOverlapError if there is an overlap</span>
-<span class="sd">            - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">            - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">        save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">             - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">             - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">             - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
-<span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
-<span class="sd">        compression: Enable compression in the store</span>
-<span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
-<span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
-<span class="sd">            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
-<span class="sd">        filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
-<span class="sd">            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
-<span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
+<span class="sd">        obs_region: The geographic region covered by the data (&quot;BRAZIL&quot;, &quot;INDIA&quot;, &quot;UK&quot;).</span>
+<span class="sd">        site: Site name or code, if platform is site-based.</span>
+<span class="sd">        satellite: Satellite name (if platform is satellite-based).</span>
+<span class="sd">        domain: For satellite data, specifies the geographical domain identifier.</span>
+<span class="sd">            This can either map to an existing domain or define a new domain.</span>
+<span class="sd">        selection: A unique identifier for a data selection (e.g., &quot;land&quot;, &quot;glint&quot;).</span>
+<span class="sd">            If not specified, `domain` is used.</span>
+<span class="sd">        network: Name of the satellite or in-situ measurement network (e.g., &quot;TCCON&quot;).</span>
+<span class="sd">        instrument: Instrument name used to collect data (e.g., &quot;TANSO-FTS&quot;).</span>
+<span class="sd">        source_format: Format of the input data (default is &quot;openghg&quot;).</span>
+<span class="sd">        store: The name of the store to write the processed data to.</span>
+<span class="sd">        if_exists: Determines behavior if data already exists in the store.</span>
+<span class="sd">            Can be one of:</span>
+<span class="sd">            - &quot;auto&quot; (default): Checks for overlap and decides whether to add or raise an error.</span>
+<span class="sd">            - &quot;new&quot;: Only includes new data, ignoring existing data.</span>
+<span class="sd">            - &quot;combine&quot;: Replaces and inserts new data into the existing timeseries.</span>
+<span class="sd">        save_current: Decides whether to save the current version of the data:</span>
+<span class="sd">            - &quot;auto&quot; (default): Automatically saves based on `if_exists` behavior.</span>
+<span class="sd">            - &quot;yes&quot; or &quot;y&quot;: Save current data as a separate version.</span>
+<span class="sd">            - &quot;no&quot; or &quot;n&quot;: Allow updates or deletion of current data.</span>
+<span class="sd">        overwrite: Deprecated. Replaced by `if_exists=&quot;new&quot;`.</span>
+<span class="sd">        force: Forces the addition of data even if it&#39;s identical to the existing data.</span>
+<span class="sd">        compression: Enables or disables compression during data storage (default is True).</span>
+<span class="sd">        compressor: Custom compression method. Defaults to `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
+<span class="sd">            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.</span>
+<span class="sd">        filters: Filters to apply during data storage. Defaults to no filtering.</span>
+<span class="sd">        https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
+<span class="sd">        chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</span>
 <span class="sd">            To disable chunking pass an empty dictionary.</span>
-<span class="sd">        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {&quot;project&quot;:&quot;paris&quot;, &quot;baseline&quot;:&quot;Intem&quot;}</span>
+<span class="sd">        optional_metadata: Additional metadata to tag the data (e.g., `{&quot;project&quot;: &quot;paris&quot;}`).</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -590,6 +591,7 @@
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span>
         <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
@@ -629,7 +631,7 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise boundary condition data and store it in the object store.</span>
 
 <span class="sd">    Args:</span>
@@ -697,9 +699,12 @@
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_footprint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_footprint</span><span class="p">(</span>
     <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -726,15 +731,18 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
 <span class="sd">    the processed data has been assigned to</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path(s) of file to standardise</span>
-<span class="sd">        site: Site name</span>
-<span class="sd">        domain: Domain of footprints</span>
 <span class="sd">        model: Model used to create footprint (e.g. NAME or FLEXPART)</span>
+<span class="sd">        domain: Domain of footprints</span>
+<span class="sd">        site: Site name</span>
+<span class="sd">        satellite: Satellite name</span>
+<span class="sd">        obs_region: The geographic region covered by the data (&quot;BRAZIL&quot;, &quot;INDIA&quot;, &quot;UK&quot;).</span>
+<span class="sd">        selection: For satellite only, identifier for any data selection which has been performed on satellite data. This can be based on any form of filtering, binning etc. but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
 <span class="sd">        inlet: Height above ground level in metres. Format &#39;NUMUNIT&#39; e.g. &quot;10m&quot;</span>
 <span class="sd">        height: Alias for inlet. One of height or inlet must be included.</span>
 <span class="sd">        met_model: Underlying meteorlogical model used (e.g. UKV)</span>
@@ -800,6 +808,9 @@
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span>
+        <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
         <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
         <span class="n">met_model</span><span class="o">=</span><span class="n">met_model</span><span class="p">,</span>
@@ -852,7 +863,7 @@
     <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process flux / emissions data</span>
 
 <span class="sd">    Args:</span>
@@ -946,7 +957,7 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read Eulerian model output</span>
 
 <span class="sd">    Args:</span>
@@ -1014,7 +1025,7 @@
     <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">file_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise binary data from serverless function.</span>
 <span class="sd">        The data dictionary should contain sub-dictionaries that contain</span>
 <span class="sd">        data and metadata keys.</span>
@@ -1064,7 +1075,7 @@
     <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process one dimension timeseries file</span>
 
 <span class="sd">    Args:</span>

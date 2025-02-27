@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -703,14 +703,22 @@
             <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># use obs network if we&#39;re trying to infer the height from site info</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">network</span> <span class="o">=</span> <span class="n">network</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">)</span>
+
                 <span class="n">height_name</span> <span class="o">=</span> <span class="n">extract_height_name</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">height_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">height_name</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using height_name option(s) for footprint inlet: </span><span class="si">{</span><span class="n">fp_inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Using height_name option(s) for footprint inlet: </span><span class="si">{</span><span class="n">fp_inlet</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Inferred from site=</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, network=</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">, inlet=</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">fp_inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using observations&#39; inlet height for footprints: </span><span class="si">{</span><span class="n">fp_inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1683,7 +1691,6 @@
             <span class="n">highest_res_H</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">max_h_back</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-
             <span class="c1"># do low res calculation</span>
             <span class="n">fp_residual</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">H_back</span><span class="o">=</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># take last H_back value</span>
             <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_low_freq</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">fp_residual</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>  <span class="c1"># forward fill times</span>
@@ -1826,10 +1833,18 @@
                     <span class="p">)</span>
 
             <span class="c1"># Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray</span>
-            <span class="n">loss_n</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_n&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_e</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_e&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_s</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_s&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="n">loss_w</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;loss_w&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">loss_n</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;loss_n&quot;</span>
+            <span class="p">)</span>
+            <span class="n">loss_e</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;loss_e&quot;</span>
+            <span class="p">)</span>
+            <span class="n">loss_s</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;loss_s&quot;</span>
+            <span class="p">)</span>
+            <span class="n">loss_w</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">lifetime_hrs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;loss_w&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss_n</span> <span class="o">=</span> <span class="mf">1.0</span>

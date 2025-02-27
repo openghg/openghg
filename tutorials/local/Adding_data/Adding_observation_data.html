@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="Tutorials" href="../../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -419,20 +419,20 @@ the function <code class="docutils literal notranslate"><span class="pre">summar
 <span class="go"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
 <span class="gp">In [3]: </span><span class="n">summary</span>
 <span class="gh">Out[3]: </span>
-<span class="go">    Source format Site code  ...                          Long name      Platform</span>
-<span class="go">0            CRDS       RPB  ...             Ragged Point, Barbados  surface site</span>
-<span class="go">1            CRDS       HFD  ...                     Heathfield, UK  surface site</span>
-<span class="go">2            CRDS       BSD  ...                       Bilsdale, UK  surface site</span>
-<span class="go">3            CRDS       TTA  ...                    Angus Tower, UK  surface site</span>
-<span class="go">4            CRDS       RGL  ...                     Ridge Hill, UK  surface site</span>
-<span class="go">..            ...       ...  ...                                ...           ...</span>
-<span class="go">338          NOAA       WSA  ...  Sable Island, Nova Scotia, Canada  surface site</span>
-<span class="go">339          NOAA       WSD  ...           Wessington, South Dakota  surface site</span>
-<span class="go">340          NOAA       YON  ...                Yonagunijima, Japan  surface site</span>
-<span class="go">341          NOAA       ZEP  ...       Zeppelin, Ny Alesund, Norway  surface site</span>
-<span class="go">342           NPL       NPL  ...       National Physical Laboratory  surface site</span>
+<span class="go">    Source format Site code  ...                     Long name      Platform</span>
+<span class="go">0            CRDS       RPB  ...        Ragged Point, Barbados  surface site</span>
+<span class="go">1            CRDS       HFD  ...                Heathfield, UK  surface site</span>
+<span class="go">2            CRDS       BSD  ...                  Bilsdale, UK  surface site</span>
+<span class="go">3            CRDS       TTA  ...               Angus Tower, UK  surface site</span>
+<span class="go">4            CRDS       RGL  ...                Ridge Hill, UK  surface site</span>
+<span class="go">..            ...       ...  ...                           ...           ...</span>
+<span class="go">339          NOAA       WSD  ...      Wessington, South Dakota  surface site</span>
+<span class="go">340          NOAA       YON  ...           Yonagunijima, Japan  surface site</span>
+<span class="go">341          NOAA       ZEP  ...  Zeppelin, Ny Alesund, Norway  surface site</span>
+<span class="go">342           NPL       NPL  ...  National Physical Laboratory  surface site</span>
+<span class="go">343          NIWA       ARH  ...  Arrival Heights, New Zealand  surface site</span>
 
-<span class="go">[343 rows x 8 columns]</span>
+<span class="go">[344 rows x 8 columns]</span>
 </pre></div>
 </div>
 <p>There may be multiple source formats for a given site.
@@ -451,7 +451,9 @@ For instance, the Tacolneston site in the UK (site code “TAC”) has four entr
 <p>Let’s see what data is available for a given source.
 First, we’ll list all source formats.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Source format&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-<span class="gh">Out[5]: </span><span class="go">array([&#39;CRDS&#39;, &#39;GCWERKS&#39;, &#39;AGAGE&#39;, &#39;ICOS&#39;, &#39;NOAA&#39;, &#39;NPL&#39;], dtype=object)</span>
+<span class="gh">Out[5]: </span>
+<span class="go">array([&#39;CRDS&#39;, &#39;GCWERKS&#39;, &#39;AGAGE&#39;, &#39;ICOS&#39;, &#39;NOAA&#39;, &#39;NPL&#39;, &#39;NIWA&#39;],</span>
+<span class="go">      dtype=object)</span>
 </pre></div>
 </div>
 <p>Now we’ll find all data with source format <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code>.</p>

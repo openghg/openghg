@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -333,7 +333,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -342,7 +342,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">align_metadata_attributes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">resultsType</span><span class="p">,</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">optionalPathType</span><span class="p">,</span> <span class="n">MetadataAndData</span><span class="p">,</span> <span class="n">DataOverlapError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
@@ -368,7 +368,7 @@
         <span class="n">file_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">precision_data</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads binary data passed in by serverless function.</span>
 <span class="sd">        The data dictionary should contain sub-dictionaries that contain</span>
 <span class="sd">        data and metadata keys.</span>
@@ -441,6 +441,7 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 
+    <span class="c1"># TODO: the return type of this method isn&#39;t the same as the parent class&#39; method...</span>
 <div class="viewcode-block" id="ObsSurface.read_file">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span>
@@ -469,7 +470,7 @@
         <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">optional_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process files and store in the object store. This function</span>
 <span class="sd">            utilises the process functions of the other classes in this submodule</span>
 <span class="sd">            to handle each data type.</span>
@@ -542,7 +543,6 @@
         <span class="c1"># MUST be at the top of the function</span>
         <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_standardise_parsers</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
@@ -628,7 +628,7 @@
         <span class="c1"># Load the data retrieve object</span>
         <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_standardise_parser</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
 
-        <span class="n">results</span><span class="p">:</span> <span class="n">resultsType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">chunks</span> <span class="o">=</span> <span class="p">{}</span>
@@ -679,14 +679,14 @@
                 <span class="n">parser_input_parameters</span><span class="p">[</span><span class="s2">&quot;precision_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision_filepath</span>
 
             <span class="c1"># Call appropriate standardisation function with input parameters</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetadataAndData</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
 
             <span class="c1"># Current workflow: if any species fails, whole filepath fails</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">species</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">mdd</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">species</span> <span class="o">=</span> <span class="n">mdd</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
                 <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+                    <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Unable to validate and store data from file: </span><span class="si">{</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
@@ -702,8 +702,8 @@
 
             <span class="c1"># Ensure the data is chunked</span>
             <span class="k">if</span> <span class="n">chunks</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">mdd</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">mdd</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
 
             <span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 
@@ -727,12 +727,16 @@
                 <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
+
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">results</span></div>
 
 
 <div class="viewcode-block" id="ObsSurface.read_multisite_aqmesh">
@@ -887,14 +891,14 @@
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">store_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">MetadataAndData</span><span class="p">],</span>
         <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
 
 <span class="sd">        Args:</span>
@@ -918,10 +922,8 @@
 <span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
 <span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            Dict or None:</span>
+<span class="sd">            list of dicts containing details of stored data, or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">hash_retrieved_data</span>
-
         <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;Overwrite flag is deprecated in preference to `if_exists` input.&quot;</span>
@@ -933,29 +935,9 @@
         <span class="c1"># obs = ObsSurface.load()</span>
         <span class="c1"># metastore = load_metastore(key=obs._metakey)</span>
 
-        <span class="c1"># Very rudimentary hash of the data and associated metadata</span>
-        <span class="n">hashes</span> <span class="o">=</span> <span class="n">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-        <span class="c1"># Find the keys in data we&#39;ve seen before</span>
-        <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
-            <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
-
         <span class="c1"># Making sure data can be force overwritten if force keyword is included.</span>
         <span class="k">if</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_hashes_to_compare</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Note: There is no new data to process.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">keys_to_process</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">file_hashes_to_compare</span><span class="p">:</span>
-            <span class="c1"># TODO - add this to log</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: We&#39;ve seen </span><span class="si">{</span><span class="n">file_hashes_to_compare</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
-            <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">file_hashes_to_compare</span>
-
-        <span class="n">to_process</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_process</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">required_metakeys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">required_metakeys</span> <span class="o">=</span> <span class="p">(</span>
@@ -967,24 +949,35 @@
                 <span class="s2">&quot;network&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_level&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
         <span class="c1"># This adds the parsed data to new or existing Datasources by performing a lookup</span>
         <span class="c1"># in the metastore</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span>
-            <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-            <span class="n">required_keys</span><span class="o">=</span><span class="n">required_metakeys</span><span class="p">,</span>
-            <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
-            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">hashes</span><span class="o">=</span><span class="n">hashes</span><span class="p">)</span>
+        <span class="c1"># Workaround to maintain old behavior without using hashes</span>
+        <span class="c1"># TODO: when zarr store updates are made, make default to combine any</span>
+        <span class="c1"># new data with the existing, ignoring new data that overlaps</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">mdd</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">datasource_uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">mdd</span><span class="p">],</span>
+                    <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
+                    <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+                    <span class="n">required_keys</span><span class="o">=</span><span class="n">required_metakeys</span><span class="p">,</span>
+                    <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                    <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
+                    <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">DataOverlapError</span><span class="p">:</span>
+                <span class="n">data_info</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">mdd</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_metakeys</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping data that overlaps existing data:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">data_info</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datasource_uuid</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 

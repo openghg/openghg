@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.11.1 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.12.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="../../../../_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
-    <meta name="docbuild:last-update" content="Jan 10, 2025"/>
+  <meta name="docsearch:version" content="0.12.0" />
+    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.11.1 documentation - Home"/>
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.11.1 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
   
   
 </a></div>
@@ -335,7 +335,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset_formatter</span><span class="p">,</span> <span class="n">align_metadata_attributes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetadataFormatError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_list_of_metadata_and_data</span><span class="p">,</span> <span class="n">MetadataAndData</span><span class="p">,</span> <span class="n">MetadataFormatError</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">openghg_defs</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
@@ -358,69 +358,6 @@
     <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
-<span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
-<span class="sd">    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects</span>
-<span class="sd">    if returned, if nothing then None.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        site: Site code</span>
-<span class="sd">        species: Species name</span>
-<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
-<span class="sd">        sampling_height: Alias for inlet</span>
-<span class="sd">        start_date: Start date</span>
-<span class="sd">        end_date: End date</span>
-<span class="sd">        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal</span>
-<span class="sd">        data_level: ICOS data level (1, 2)</span>
-<span class="sd">        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).</span>
-<span class="sd">        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,</span>
-<span class="sd">                        to be distributed through the Carbon Portal.</span>
-<span class="sd">                        This level is the ICOS-data product and free available for users.</span>
-<span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
-<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
-<span class="sd">        store: Name of object to search/store data to</span>
-<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
-<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
-<span class="sd">            This includes the options:</span>
-<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
-<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
-<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        ObsData, list[ObsData] or None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">retrieve</span><span class="p">(</span>
-        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-        <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-        <span class="n">force_retrieval</span><span class="o">=</span><span class="n">force_retrieval</span><span class="p">,</span>
-        <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
-        <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
-        <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
-        <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
-    <span class="p">)</span></div>
-
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span>
-    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">dataset_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
-    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
 <span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
@@ -513,8 +450,8 @@
 
         <span class="c1"># Create the expected ObsData type</span>
         <span class="n">obs_data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">standardised_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">standardised_data</span><span class="p">:</span>
+            <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span>
             <span class="c1"># These contain URLs that are case sensitive so skip lowercasing these</span>
             <span class="n">skip_keys</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;citation_string&quot;</span><span class="p">,</span>
@@ -522,13 +459,14 @@
                 <span class="s2">&quot;dobj_pid&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;dataset_source&quot;</span><span class="p">,</span>
             <span class="p">]</span>
-            <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_lowercase</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">],</span> <span class="n">skip_keys</span><span class="o">=</span><span class="n">skip_keys</span><span class="p">)</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_lowercase</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span> <span class="n">skip_keys</span><span class="o">=</span><span class="n">skip_keys</span><span class="p">)</span>
             <span class="n">obs_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">measurement_data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">obs_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">obs_data</span>
+        <span class="k">return</span> <span class="n">obs_data</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_remote</span><span class="p">(</span>
@@ -539,7 +477,7 @@
     <span class="n">sampling_height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dataset_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetadataAndData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS data from the ICOS Carbon Portal and standardise it into</span>
 <span class="sd">    a format expected by OpenGHG. A dictionary of metadata and Datasets</span>
 
@@ -830,9 +768,11 @@
         <span class="p">}</span>
     <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">dataset_formatter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">)</span>
     <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
-    <span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">standardised_data</span>
+    <span class="n">standardised_data_list</span> <span class="o">=</span> <span class="n">convert_to_list_of_metadata_and_data</span><span class="p">(</span><span class="n">standardised_data</span><span class="p">)</span>
+    <span class="n">align_metadata_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data_list</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">standardised_data_list</span>
 
 
 <span class="c1"># def _read_site_metadata():</span>
