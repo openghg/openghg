@@ -57,6 +57,8 @@ class StoredData:
             subfolder = subfolder[self.obs_type]
         self.subfolder = subfolder
 
+        if data_version is None:
+            data_version = find_data_version(self.metadata)
         self.data_version = data_version
 
     def make_obspack_filename(
@@ -67,13 +69,13 @@ class StoredData:
         include_version: bool = True,
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
-        name_suffixes: dict | None = None,            
+        name_suffixes: dict | None = None,
     ):
 
         # Update attributes on the object if specified
         self.obspack_path = obspack_path if obspack_path is not None else self.obspack_path
         self.data_version = data_version if data_version is not None else self.data_version
-        
+
         if isinstance(subfolder, dict):
             subfolder = subfolder[self.obs_type]
         self.subfolder = subfolder if subfolder is not None else self.subfolder
@@ -90,7 +92,7 @@ class StoredData:
             name_suffixes=name_suffixes,
         )
 
-        return obspack_filename    
+        return obspack_filename
 
     def update_obspack_filename(
         self,
@@ -102,7 +104,7 @@ class StoredData:
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
     ):
-        
+
         obspack_filename = self.make_obspack_filename(
             obspack_path=obspack_path,
             subfolder=subfolder,
@@ -828,9 +830,7 @@ def add_obspack_filenames(
                             f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
                         )
                         filenames = [
-                            data.make_obspack_filename(
-                                name_components=name_components, subfolder=subfolders
-                            )
+                            data.make_obspack_filename(name_components=name_components, subfolder=subfolders)
                             for data in data_group
                         ]
             else:
