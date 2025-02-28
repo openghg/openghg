@@ -1,3 +1,27 @@
+"""
+This module is allow the creation of an output data obspack based on files stored within the object store.
+
+The default structure is to create a top level directory (obspack_name) and for this to contain subfolders for each of the obs_types.
+The output files will be in netcdf format and will be based on a naming convention dependent on the obs_type.
+
+The default obspack will also contain:
+ - obspack_README.md - general details about use of an obspack
+ - site_index_details*.txt - constructed site details based on contents of the obspack
+
+Default overall obspack structure:
+{obspack_name}/
+    obspack_README.md
+    site_index_details*.txt
+    surface-insitu/
+        {species}_{site}_{inlet}_surface-insitu_{data_version}.nc
+    ...
+
+Key functions:
+ - define_obspack_filename() - defines the full output filename for each file based on naming convention
+ - retrieve_data() - retrieve data from an object store search terms (currently from a config file)
+ - create_obspack() - this is the summary function for creating an obspack
+"""
+
 import re
 import numpy as np
 import pandas as pd
