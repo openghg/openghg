@@ -59,8 +59,40 @@ class StoredData:
 
         self.data_version = data_version
 
+    def make_obspack_filename(
+        self,
+        obspack_path: pathType | None = None,
+        subfolder: MultiSubFolder = None,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        data_version: str | None = None,
+        name_components: MultiNameComponents = None,
+        name_suffixes: dict | None = None,            
+    ):
 
-    def define_obspack_filename(
+        # Update attributes on the object if specified
+        self.obspack_path = obspack_path if obspack_path is not None else self.obspack_path
+        self.data_version = data_version if data_version is not None else self.data_version
+        
+        if isinstance(subfolder, dict):
+            subfolder = subfolder[self.obs_type]
+        self.subfolder = subfolder if subfolder is not None else self.subfolder
+
+        obspack_filename = define_obspack_filename(
+            self.metadata,
+            self.obs_type,
+            obspack_path=self.obspack_path,
+            subfolder=self.subfolder,
+            include_obs_type=include_obs_type,
+            include_version=include_version,
+            data_version=self.data_version,
+            name_components=name_components,
+            name_suffixes=name_suffixes,
+        )
+
+        return obspack_filename    
+
+    def update_obspack_filename(
         self,
         obspack_path: pathType | None = None,
         subfolder: MultiSubFolder = None,
@@ -69,27 +101,9 @@ class StoredData:
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
-        add_to_object: bool = True,
-    ) -> Path:
-        """
-        Define (and store) a suitable obspack filename for this data. This will be based
-        on the metadata associated with the stored data.
-        """
-
-        # TODO: May want to only add if add_to_object is included?
-        if obspack_path is not None:
-            self.obspack_path = obspack_path
-        if subfolder is not None:
-            if isinstance(subfolder, dict):
-                self.subfolder = subfolder[self.obs_type]
-            else:
-                self.subfolder = subfolder
-        if data_version is not None:
-            self.data_version = data_version
-
-        obspack_filename = define_obspack_filename(
-            self.metadata,
-            self.obs_type,
+    ):
+        
+        obspack_filename = self.make_obspack_filename(
             obspack_path=obspack_path,
             subfolder=subfolder,
             include_obs_type=include_obs_type,
@@ -99,8 +113,7 @@ class StoredData:
             name_suffixes=name_suffixes,
         )
 
-        if add_to_object:
-            self.obspack_filename = obspack_filename
+        self.obspack_filename = obspack_filename
 
         return obspack_filename
 
@@ -574,7 +587,6 @@ def define_obspack_filenames(
     data_version: str | None = None,
     name_components: MultiNameComponents = None,
     name_suffixes: dict | None = None,
-    add_to_objects: bool = True,
     force: bool = False,
 ) -> list[Path]:
     """
@@ -598,7 +610,6 @@ def define_obspack_filenames(
             within the filename. This can be specified per obs_type using a dictionary.
             Default will depend on obs_type - see define_name_components().
         name_suffixes: Dictionary of additional values to add to the filename as a suffix.
-        add_to_objects: Add the filename to each of the StoredData objects.
         force: Force update of the obspack_filename and recreate this.
     Returns:
         list[pathlib.Path]: Sequence of filenames associated with the files
@@ -607,7 +618,7 @@ def define_obspack_filenames(
     for data in retrieved_data:
         filename = data.obspack_filename
         if filename is None or force:
-            filename = data.define_obspack_filename(
+            filename = data.update_obspack_filename(
                 obspack_path=obspack_path,
                 subfolder=subfolders,
                 include_obs_type=include_obs_type,
@@ -615,7 +626,6 @@ def define_obspack_filenames(
                 data_version=data_version,
                 name_components=name_components,
                 name_suffixes=name_suffixes,
-                add_to_object=add_to_objects,
             )
         filenames.append(filename)
 
@@ -628,7 +638,6 @@ def check_unique_filenames(
     include_version: bool = True,
     data_version: str | None = None,
     name_components: list | None = None,
-    add_to_objects: bool = True,
     force: bool = False,
 ) -> list[list[StoredData]]:
     """
@@ -655,7 +664,6 @@ def check_unique_filenames(
         data_version=data_version,
         name_components=name_components,
         force=force,
-        add_to_objects=add_to_objects,
     )
 
     repeated_indices = find_repeats(filenames)
@@ -779,7 +787,6 @@ def add_obspack_filenames(
         data_version=data_version,
         name_components=name_components,
         force=True,
-        add_to_objects=True,
     )
 
     # Check for repeats and update names
@@ -821,8 +828,8 @@ def add_obspack_filenames(
                             f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
                         )
                         filenames = [
-                            data.define_obspack_filename(
-                                name_components=name_components, subfolder=subfolders, add_to_object=False
+                            data.make_obspack_filename(
+                                name_components=name_components, subfolder=subfolders
                             )
                             for data in data_group
                         ]
