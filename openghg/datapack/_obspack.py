@@ -35,6 +35,8 @@ class StoredData:
         obs_type: str = "surface-insitu",
         obspack_path: pathType | None = None,
         obspack_filename: pathType | None = None,
+        subfolder: MultiSubFolder = None,
+        data_version: str | None = None,
     ):
         """
         Creation of a StoredData object. This expects a retrieved data object from the object store.
@@ -49,10 +51,14 @@ class StoredData:
         self.obs_type = obs_type
         self.obspack_path = obspack_path
 
-        if isinstance(obspack_filename, str):
-            obspack_filename = Path(obspack_filename)
+        self.obspack_filename = Path(obspack_filename) if obspack_filename is not None else None
 
-        self.obspack_filename = obspack_filename
+        if isinstance(subfolder, dict):
+            subfolder = subfolder[self.obs_type]
+        self.subfolder = subfolder
+
+        self.data_version = data_version
+
 
     def define_obspack_filename(
         self,
@@ -69,6 +75,17 @@ class StoredData:
         Define (and store) a suitable obspack filename for this data. This will be based
         on the metadata associated with the stored data.
         """
+
+        # TODO: May want to only add if add_to_object is included?
+        if obspack_path is not None:
+            self.obspack_path = obspack_path
+        if subfolder is not None:
+            if isinstance(subfolder, dict):
+                self.subfolder = subfolder[self.obs_type]
+            else:
+                self.subfolder = subfolder
+        if data_version is not None:
+            self.data_version = data_version
 
         obspack_filename = define_obspack_filename(
             self.metadata,
