@@ -70,7 +70,7 @@ class StoredData:
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
-    ):
+    ) -> Path:
 
         # Update attributes on the object if specified
         self.obspack_path = obspack_path if obspack_path is not None else self.obspack_path
@@ -103,7 +103,7 @@ class StoredData:
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
-    ):
+    ) -> Path:
 
         obspack_filename = self.make_obspack_filename(
             obspack_path=obspack_path,
