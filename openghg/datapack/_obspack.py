@@ -1137,9 +1137,9 @@ def retrieve_data(
         # TODO: Decide details around catching errors for no files/multi files found.
         data_retrieved = get_fn(**kwargs)
 
-        DataRetrieved = StoredData(data_retrieved, obs_type=obs_type)
+        stored_data = StoredData(data_retrieved, obs_type=obs_type)
 
-        data_object_all.append(DataRetrieved)
+        data_object_all.append(stored_data)
 
     return data_object_all
 
