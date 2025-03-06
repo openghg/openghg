@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.12.0...HEAD)
 
-## Added
+### Added
 
 - New `datapack` submodule to allow output obspacks to be created. This includes the `create_obspack` function which takes an input search file and produces an obspack within a defined structure from this. [PR #1117](https://github.com/openghg/openghg/pull/1117)
+
+### Fixed
+
+- Bug where attributes were not preserved during some resampling operations. [PR #1233](https://github.com/openghg/openghg/pull/1233)
 
 ## [0.12.0] - 2025-02-27
 
