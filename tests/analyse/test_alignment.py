@@ -2,7 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from openghg.analyse._alignment import infer_freq_in_seconds, time_overlap, tweak_start_and_end_dates
+from openghg.analyse._alignment import (
+    extract_obs_freq,
+    infer_freq_in_seconds,
+    time_overlap,
+    tweak_start_and_end_dates,
+)
 from openghg.retrieve import get_obs_surface, get_footprint
 
 
@@ -35,6 +40,15 @@ def footprint_data():
         site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
     )
     return footprint
+
+
+def test_extract_obs_freq(obs_data):
+    # this obs data has "sampling period" attribute:
+    assert extract_obs_freq(obs_data.data) == 60.0
+
+    # without sampling period, should get None
+    del obs_data.data.attrs["sampling_period"]
+    assert extract_obs_freq(obs_data.data) is None
 
 
 def test_infer_freq_in_seconds():
