@@ -1,5 +1,5 @@
 import logging
-from typing import cast, Literal
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -70,7 +70,6 @@ def time_overlap(
         tuple of start and end dates
 
     """
-
     startdate1 = pd.to_datetime(times1[0])
     startdate2 = pd.to_datetime(times2[0])
 
@@ -100,48 +99,39 @@ def tweak_start_and_end_dates(
     return start1, start2, end
 
 
+def timedelta_to_hourly_freq(td: pd.Timedelta) -> str:
+    """Convert a Timedelta into a frequency string in units of hours."""
+    return str(round(td / pd.to_timedelta(1, "h"), 5)) + "H"
+
+
 def align_obs_and_other(
     obs: XrDataLikeMatch,
     other: XrDataLikeMatch2,
     resample_to: Literal["obs", "other", "coarsest"] | str = "coarsest",
-    platform: str | None = None,
 ) -> tuple[XrDataLikeMatch, XrDataLikeMatch2]:
-    """Slice and resample obs and footprint data to align along time.
+    """Slice and resample obs and other data to align along time.
 
-    This slices the date to the smallest time frame spanned by both the footprint and obs,
+    This slices the date to the smallest time frame spanned by both the other and obs data,
     using the sliced start date.
 
     The time dimension is resampled based on the resample_to input using the mean.
+
     The resample_to options are:
      - "coarsest" - resample to the coarsest resolution between obs and footprints
      - "obs" - resample to observation data frequency
-     - "footprint" - resample to footprint data frequency
+     - "other" - resample to footprint data frequency
      - a valid resample period e.g. "2H"
 
     Args:
         obs: obs data (either as xr.DataArray or xr.Dataset)
-        other: other data to align with (either as xr.DataArray or xr.Dataset)
+        other: other data to align with (either as xr.DataArray or xr.Dataset). This is usually
+          footprint data.
         resample_to: Resample option to use: either data based or using a valid pandas resample period.
-        platform: Observation platform used to decide whether to resample
 
     Returns:
         tuple: Two xarray DataArrays or Datasets with aligned time dimensions. The types of the returned
           data match the types of the input data.
     """
-    resample_keyword_choices = ("obs", "other", "coarsest")
-
-    # Check whether resample has been requested by specifying a specific period rather than a keyword
-    if resample_to in resample_keyword_choices:
-        force_resample = False
-    else:
-        force_resample = True
-
-    if platform is not None:
-        platform = platform.lower()
-        # Do not apply resampling for "satellite" (but have re-included "flask" for now)
-        if platform == "satellite":
-            return obs, other
-
     # try to get period/freq from attributes
     obs_data_period_s = extract_obs_freq(obs)
 
@@ -155,19 +145,11 @@ def align_obs_and_other(
     # TODO: Check regularity of the data - will need this to decide is resampling
     # is appropriate or need to do checks on a per time point basis
 
-    obs_data_period_ns = int(obs_data_period_s * 1e9)
-    obs_data_timeperiod = pd.Timedelta(obs_data_period_ns, unit="ns")
+    obs_data_timeperiod = pd.to_timedelta(obs_data_period_s, unit="s")
 
-    # Derive the footprints period from the frequency of the data
-    other_data_period_ns = np.nanmedian((other.time.data[1:] - other.time.data[0:-1]).astype("int64"))
-    other_data_timeperiod = pd.Timedelta(other_data_period_ns, unit="ns")
-
-    # If resample_to is set to "coarsest", check whether "obs" or "footprint" have lower resolution
-    if resample_to == "coarsest":
-        if obs_data_timeperiod >= other_data_timeperiod:
-            resample_to = "obs"
-        elif obs_data_timeperiod < other_data_timeperiod:
-            resample_to = "footprint"
+    # Derive the other data's period from the frequency of the data
+    other_data_period_ns = int(np.nanmedian(np.diff(other.time.values)))
+    other_data_timeperiod = pd.to_timedelta(other_data_period_ns, unit="ns")
 
     # get common start and end dates, accounting for periods in the end dates
     start_date, end_date = time_overlap(
@@ -185,25 +167,31 @@ def align_obs_and_other(
     if obs.time.size == 0 or other.time.size == 0:
         raise ValueError("Obs data and Footprint data don't overlap")
 
-    # Only non satellite datasets with different periods need to be resampled
-    timeperiod_diff_s = np.abs(obs_data_timeperiod - other_data_timeperiod).total_seconds()
-    tolerance = 1e-9  # seconds
+    # Offset for resampling
+    offset = start_date - pd.to_datetime(start_date.date())  # time past start of day
 
-    if timeperiod_diff_s >= tolerance or force_resample:
-        offset = pd.Timedelta(hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0)
-        offset = cast(pd.Timedelta, offset)
+    # If specific period has been passed, resample
+    resample_keyword_choices = ("obs", "other", "coarsest")
+
+    if resample_to not in resample_keyword_choices:
+        obs = obs.resample(indexer={"time": resample_to}, offset=offset).mean()
+        other = other.resample(indexer={"time": resample_to}, offset=offset).mean()
+
+        return obs, other
+
+    # Only resample if periods differ
+    if obs_data_timeperiod != other_data_timeperiod:
+        if resample_to == "coarsest":
+            if obs_data_timeperiod >= other_data_timeperiod:
+                resample_to = "obs"
+            elif obs_data_timeperiod < other_data_timeperiod:
+                resample_to = "other"
 
         if resample_to == "obs":
-            resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
+            resample_period = timedelta_to_hourly_freq(obs_data_timeperiod)
             other = other.resample(indexer={"time": resample_period}, offset=offset).mean()
-
-        elif resample_to == "footprint":
-            resample_period = str(round(other_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-            obs = obs.resample(indexer={"time": resample_period}, offset=offset).mean()
-
-        else:
-            resample_period = resample_to
-            other = other.resample(indexer={"time": resample_period}, offset=offset).mean()
+        else:  # "other"
+            resample_period = timedelta_to_hourly_freq(other_data_timeperiod)
             obs = obs.resample(indexer={"time": resample_period}, offset=offset).mean()
 
     return obs, other
