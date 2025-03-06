@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bug where attributes were not preserved during some resampling operations. [PR #1233](https://github.com/openghg/openghg/pull/1233)
 
+### Updated
+
+- Extracted `align_obs_and_other` from `ModelScenario.align_obs_footprint` into `analyse._alignment`. [PR #1234](https://github.com/openghg/openghg/pull/1234)
+
 ## [0.12.0] - 2025-02-27
 
 ### Updated
