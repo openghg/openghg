@@ -50,6 +50,10 @@ from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
+from pandas import Timestamp
+import xarray as xr
+from xarray import DataArray, Dataset
+
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
     get_obs_surface,
@@ -63,9 +67,8 @@ from openghg.retrieve import (
 )
 from openghg.util import synonyms
 from openghg.types import SearchError
-from pandas import Timestamp
-import xarray as xr
-from xarray import DataArray, Dataset
+from ._alignment import align_obs_and_other
+
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
 
@@ -640,131 +643,7 @@ class ModelScenario:
         obs_data = obs.data
         footprint_data = footprint.data
 
-        resample_keyword_choices = ("obs", "footprint", "coarsest")
-
-        # Check whether resample has been requested by specifying a specific period rather than a keyword
-        if resample_to in resample_keyword_choices:
-            force_resample = False
-        else:
-            force_resample = True
-
-        if platform is not None:
-            platform = platform.lower()
-            # Do not apply resampling for "satellite" (but have re-included "flask" for now)
-            if platform == "satellite":
-                return obs_data, footprint_data
-
-        # Whether sampling period is present or we need to try to infer this
-        infer_sampling_period = False
-        # Get the period of measurements in time
-        obs_attributes = obs_data.attrs
-        if "averaged_period" in obs_attributes:
-            obs_data_period_s = float(obs_attributes["averaged_period"])
-        elif "sampling_period" in obs_attributes:
-            sampling_period = obs_attributes["sampling_period"]
-            if sampling_period == "NOT_SET":
-                infer_sampling_period = True
-            elif sampling_period == "multiple":
-                # If we have a varying sampling_period, make sure we always resample to footprint
-                obs_data_period_s = 1.0
-            else:
-                obs_data_period_s = float(sampling_period)
-        elif "sampling_period_estimate" in obs_attributes:
-            estimate = obs_attributes["sampling_period_estimate"]
-            logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
-            obs_data_period_s = float(estimate)
-        else:
-            infer_sampling_period = True
-
-        if infer_sampling_period:
-            # Attempt to derive sampling period from frequency of data
-            obs_data_period_s = np.nanmedian(
-                (obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9
-            ).astype("float32")
-
-            obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
-            obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
-
-            max_diff = (obs_data_period_s_max - obs_data_period_s_min).astype(float)
-
-            # Check if the periods differ by more than 1 second
-            if max_diff > 1.0:
-                raise ValueError("Sample period can be not be derived from observations")
-
-            estimate = f"{obs_data_period_s:.1f}"
-            logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
-            obs.data.attrs["sampling_period_estimate"] = estimate
-
-        # TODO: Check regularity of the data - will need this to decide is resampling
-        # is appropriate or need to do checks on a per time point basis
-
-        obs_data_period_ns = obs_data_period_s * 1e9
-        obs_data_timeperiod = pd.Timedelta(obs_data_period_ns, unit="ns")
-
-        # Derive the footprints period from the frequency of the data
-        footprint_data_period_ns = np.nanmedian(
-            (footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64")
-        )
-        footprint_data_timeperiod = pd.Timedelta(footprint_data_period_ns, unit="ns")
-
-        # If resample_to is set to "coarsest", check whether "obs" or "footprint" have lower resolution
-        if resample_to == "coarsest":
-            if obs_data_timeperiod >= footprint_data_timeperiod:
-                resample_to = "obs"
-            elif obs_data_timeperiod < footprint_data_timeperiod:
-                resample_to = "footprint"
-
-        # Here we want timezone naive Timestamps
-        # Add sampling period to end date to make sure resample includes these values when matching
-        obs_startdate = Timestamp(obs_data.time[0].values)
-        obs_enddate = Timestamp(obs_data.time[-1].values) + obs_data_timeperiod
-        footprint_startdate = Timestamp(footprint_data.time[0].values)
-        footprint_enddate = Timestamp(footprint_data.time[-1].values) + footprint_data_timeperiod
-
-        start_date = max(obs_startdate, footprint_startdate)
-        end_date = min(obs_enddate, footprint_enddate)
-
-        # Ensure lower range is covered for obs
-        start_obs_slice = start_date - pd.Timedelta("1ns")
-        # Ensure extra buffer is added for footprint based on fp timeperiod.
-        # This is to ensure footprint can be forward-filled to obs (in later steps)
-        start_footprint_slice = start_date - (footprint_data_timeperiod - pd.Timedelta("1ns"))
-        # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
-        end_slice = end_date - pd.Timedelta("1ns")
-
-        obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
-        footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
-
-        if obs_data.time.size == 0 or footprint_data.time.size == 0:
-            raise ValueError("Obs data and Footprint data don't overlap")
-        # Only non satellite datasets with different periods need to be resampled
-        timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
-        tolerance = 1e-9  # seconds
-
-        if timeperiod_diff_s >= tolerance or force_resample:
-            offset = pd.Timedelta(
-                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-            )
-            offset = cast(pd.Timedelta, offset)
-
-            if resample_to == "obs":
-                resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                footprint_data = footprint_data.resample(
-                    indexer={"time": resample_period}, offset=offset
-                ).mean()
-
-            elif resample_to == "footprint":
-                resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                obs_data = obs_data.resample(indexer={"time": resample_period}, offset=offset).mean()
-
-            else:
-                resample_period = resample_to
-                footprint_data = footprint_data.resample(
-                    indexer={"time": resample_period}, offset=offset
-                ).mean()
-                obs_data = obs_data.resample(indexer={"time": resample_period}, offset=offset).mean()
-
-        return obs_data, footprint_data
+        return align_obs_and_other(obs_data, footprint_data, resample_to=resample_to, platform=platform)
 
     def combine_obs_footprint(
         self,

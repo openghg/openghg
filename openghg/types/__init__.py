@@ -42,6 +42,7 @@ from ._types import (
     ArrayLikeMatch,
     XrDataLike,
     XrDataLikeMatch,
+    XrDataLikeMatch2,
     TimePeriod,
     HasMetadataAndData,
     MetadataAndData,
