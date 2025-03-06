@@ -56,7 +56,6 @@ def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
     def wrapper(ds: xr.Dataset, averaging_period: str, *args: P.args, **kwargs: P.kwargs) -> xr.Dataset:
         average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
         avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
-
         return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
 
     return wrapper
@@ -117,7 +116,7 @@ def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr
         averaging_period=averaging_period,
         species=species,
         mf_variability=mf_variability,
-    )
+    ).assign_attrs(ds.attrs)
 
     return result
 
@@ -158,7 +157,7 @@ def _weighted_resample(
     Returns:
         xr.Dataset: with obs., number of obs., (and variability) resampled
     """
-    sum_kwargs: dict[str, Any] = {"skipna": True, "min_count": 1}
+    sum_kwargs: dict[str, Any] = {"skipna": True, "min_count": 1, "keep_attrs": True}
 
     with xr.set_options(keep_attrs=True):
         n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
