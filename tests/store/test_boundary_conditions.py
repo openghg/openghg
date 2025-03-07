@@ -58,7 +58,7 @@ def test_read_data_monthly(mocker):
         binary_data=binary_data,
         metadata=metadata,
         file_metadata=file_metadata,
-        source_format='openghg'
+        source_format="openghg",
     )
 
     assert proc_results is not None and len(proc_results) == 1
