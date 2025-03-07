@@ -52,13 +52,23 @@ def test_extract_obs_freq(obs_data):
 
 
 def test_infer_freq_in_seconds():
-    times = pd.date_range("2020-01-01", freq="3s", periods=10).values
+    """Test that we can infer the frequency from regular data.
 
-    assert 3 == infer_freq_in_seconds(times)
+    Also check that minor pertubations don't affect the result,
+    if they're within tolerance and don't change the median gap.
+    """
+    freq_in_seconds = 3
+    times = pd.date_range("2020-01-01", freq=f"{freq_in_seconds}s", periods=10).values
 
+    assert freq_in_seconds == infer_freq_in_seconds(times)
+
+    # Test that differences within the default tolerance of 1.0s doesn't
+    # cause problems. Adding 0.5s to one time point makes two consecutive
+    # differences 3.5s and 2.5s, so the total gap between them is 1.0s,
+    # which is within tolerance.
     times[3] += pd.Timedelta("0.5s")
 
-    assert 3 == infer_freq_in_seconds(times)
+    assert freq_in_seconds == infer_freq_in_seconds(times)
 
 
 def test_infer_freq_in_seconds_tolerance():
@@ -66,22 +76,35 @@ def test_infer_freq_in_seconds_tolerance():
 
     Also test that we can raise tolerance.
     """
+    freq_in_seconds = 3
     times = pd.date_range("2020-01-01", freq="3s", periods=10).values
+
+    # adding 1s to a time point gives consecutive differences of 2s and 4s,
+    # so the difference between the minimum and maximum gaps is 2s, which is
+    # above the default tolerance of 1s
     times[3] += pd.Timedelta("1s")
 
     with pytest.raises(ValueError):
         infer_freq_in_seconds(times)
 
-    assert 3 == infer_freq_in_seconds(times, tol=2.0)
+    # increasing the tolerance ignores this gap
+    assert freq_in_seconds == infer_freq_in_seconds(times, tol=2.0)
 
 
 def test_infer_freq_footprint():
-    times = pd.date_range("2020-01-01", freq="1h", periods=10).values
+    """Test the code used to infer the frequency of footprints.
+
+    NOTE: we're not actually testing a function here, just the code
+    that is used in another function.
+    """
+    freq = "1h"
+    times = pd.date_range("2020-01-01", freq=freq, periods=10).values
     times[3] += pd.Timedelta("1m")
 
+    # code used to infer freq of "other" (e.g. footprints) in `align_obs_and_other`
     inferred_freq = pd.to_timedelta(np.nanmedian(np.diff(times)))
 
-    assert inferred_freq == pd.to_timedelta(1, unit="h")
+    assert inferred_freq == pd.to_timedelta(freq)
 
 
 def test_time_overlap():

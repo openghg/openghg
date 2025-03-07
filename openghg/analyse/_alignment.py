@@ -12,7 +12,16 @@ logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
-def extract_obs_freq(obs: XrDataLike) -> float | None:
+def _extract_obs_freq(obs: XrDataLike) -> float | None:
+    """Find the observation sampling period based on the associated attributes.
+
+    Args:
+        obs: Observation data. Expect attributes to be included which signal the averaging or sampling period.
+
+    Returns:
+        float | None: Sampling period value or None if no value is found.
+
+    """
     obs_attributes = obs.attrs
 
     if "averaged_period" in obs_attributes:
@@ -39,6 +48,21 @@ def extract_obs_freq(obs: XrDataLike) -> float | None:
 
 
 def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
+    """Infer the frequency of a sequence of floats representing time in nanoseconds.
+
+    Args:
+        times: times in nanoseconds
+        tol: tolerance for difference between min. and max. gaps between time
+          points.
+
+    Returns:
+        float representing inferred (median) frequency in seconds.
+
+    Raises:
+        ValueError: if the difference between the min. and max. gaps in the data
+          exceeds the specified tolerance.
+
+    """
     obs_data_period_s = np.nanmedian(np.diff(times) / 1e9).astype("float32")
 
     obs_data_period_s_min = np.diff(times).min() / 1e9
@@ -83,9 +107,27 @@ def time_overlap(
     return start_date, end_date
 
 
-def tweak_start_and_end_dates(
+def _buffer_start_and_end_dates(
     start_date: pd.Timestamp, end_date: pd.Timestamp, freq2: pd.Timedelta
 ) -> tuple[pd.Timestamp, pd.Timestamp, pd.Timestamp]:
+    """Adjust start and end dates, and create a second start time including an extra period.
+
+    This is used when `start_date` and `end_date` are calculated by `time_overlap`. Suppose
+    the input times to `time_overlap` are `times1` and `times2`.
+    Then the values returned, start1, start2, and end, have the property that:
+    - selecting slice(start1, end) from `times1` is inclusive of `start_date` and
+      exclusive of `end_date`.
+    - selecting slice(start2, end) from `times2` will give a value before (or on) `start_date`
+
+    Args:
+        start_date: start date
+        end_date: end date
+        freq2: frequency/period to shift second start time back by
+
+    Returns:
+        tuple of times (start1, start2, end), where start2 is shifted back in time by freq2.
+
+    """
     # Ensure lower range is covered for times1
     start1 = start_date - pd.Timedelta("1ns")
 
@@ -114,7 +156,8 @@ def align_obs_and_other(
     This slices the date to the smallest time frame spanned by both the other and obs data,
     using the sliced start date.
 
-    The time dimension is resampled based on the resample_to input using the mean.
+    The time dimension is resampled based on the resample_to input
+    using the mean.
 
     The resample_to options are:
      - "coarsest" - resample to the coarsest resolution between obs and footprints
@@ -133,7 +176,7 @@ def align_obs_and_other(
           data match the types of the input data.
     """
     # try to get period/freq from attributes
-    obs_data_period_s = extract_obs_freq(obs)
+    obs_data_period_s = _extract_obs_freq(obs)
 
     # if None is returned, we need to try to infer the period/frequency
     if obs_data_period_s is None:
@@ -157,7 +200,7 @@ def align_obs_and_other(
     )
 
     # tweak to make end date exclusive, obs start inclusive, and other start time nearly one full period earlier
-    start_obs_slice, start_other_slice, end_slice = tweak_start_and_end_dates(
+    start_obs_slice, start_other_slice, end_slice = _buffer_start_and_end_dates(
         start_date, end_date, other_data_timeperiod
     )
 
