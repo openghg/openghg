@@ -1863,13 +1863,15 @@ def _calc_time_dim_resolution(dataset: Dataset, time_dim: str = "time") -> np.ti
         one time is present
 
     Raises:
-        ValueError: if the data type of `dataset[time_time]` is not a subtype of
-        `np.datetime64`.
+        ValueError: if the data type of `dataset[time_dim]` is not a subtype of
+        `np.datetime64`. (Note: `np.timedelta64` is a separate type, and not
+         a subtype of `np.datetime64`; differences between `np.datetime64` values
+        are `np.timedelta64`.)
 
     """
     if not np.issubdtype(dataset[time_dim].dtype, np.datetime64):
         raise ValueError(
-            f"Type {dataset[time_dim].dtype} of values in {time_dim} coordinate is not as subtype of `np.datetime64`."
+            f"Type {dataset[time_dim].dtype} of values in {time_dim} coordinate is not a subtype of `np.datetime64`."
         )
 
     try:
