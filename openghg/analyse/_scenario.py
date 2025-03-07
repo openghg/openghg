@@ -630,6 +630,9 @@ class ModelScenario:
             # Do not apply resampling for "satellite" (but have re-included "flask" for now)
             if platform == "satellite":
                 return obs_data, footprint_data
+            elif "flask" in platform:
+                fp_data = fp_data.reindex_like(obs_data, method="ffill")
+                return obs_data, fp_data
 
         if resample_to == "footprint":
             resample_to = "other"
@@ -824,7 +827,7 @@ class ModelScenario:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask".
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -893,7 +896,7 @@ class ModelScenario:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resamplee.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1256,7 +1259,7 @@ class ModelScenario:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resamplee.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1492,7 +1495,7 @@ class ModelScenario:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resamplee.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
