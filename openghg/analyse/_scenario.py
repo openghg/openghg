@@ -50,6 +50,7 @@ from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
+
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
     get_obs_surface,
@@ -1845,19 +1846,69 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
         NaN : If unsuccessful for all other dtypes.
     """
     try:
-        resolution = dataset[dim].diff(dim=dim).mean().item()
+        return _calc_time_dim_resolution(dataset, time_dim=dim)
     except ValueError:
-        if np.issubdtype(dataset[dim].dtype, np.datetime64):
-            resolution = np.timedelta64("NaT")
-        else:
-            resolution = np.NaN
-    else:
-        if np.issubdtype(dataset[dim].dtype, np.datetime64):
-            # Extract units from original datetime string and use to recreate timedelta64
-            unit = dataset[dim].dtype.name.lstrip("timedelta64").lstrip("[").rstrip("]")
-            resolution = np.timedelta64(resolution, unit)
+        return _calc_average_gap(dataset[dim])
 
-    return resolution
+
+def _calc_time_dim_resolution(dataset: Dataset, time_dim: str = "time") -> np.timedelta64:
+    """Calculate average frequency of time dimension.
+
+    Args:
+        dataset: xr.Dataset with time coordinate
+        time_dim: name of the time coordinate
+
+    Returns:
+        timedelta representing average gap between time points, or NaT if only
+        one time is present
+
+    Raises:
+        ValueError: if the data type of `dataset[time_time]` is not a subtype of
+        `np.datetime64`.
+
+    """
+    if not np.issubdtype(dataset[time_dim].dtype, np.datetime64):
+        raise ValueError(
+            f"Type {dataset[time_dim].dtype} of values in {time_dim} coordinate is not as subtype of `np.datetime64`."
+        )
+
+    try:
+        resolution = dataset[time_dim].diff(dim=time_dim).mean().values
+    except ValueError:
+        return np.timedelta64("NaT")
+    else:
+        # cast because we already checked that the values in dataset[time_dim] are compatible with `np.datetime64`
+        # so their diffs will be time deltas
+        return cast(np.timedelta64, resolution)
+
+
+def _calc_average_gap(data_array: DataArray) -> Any:
+    """Calculate average gap in DataArray.
+
+    No checking is performed to guarantee a return type.
+
+    Args:
+        data_array: xr.DataArray whose values should support arithmetic, and should be 1D.
+
+    Returns:
+        average gap between values in DataArray.
+
+    """
+    if data_array.ndim > 1:
+        raise ValueError("Input DataArray has more than 1 dimension.")
+
+    dim = data_array.dims[0]
+
+    try:
+        return data_array.diff(dim=dim).mean().values
+    except TypeError as e:
+        # UFuncTypeError from not being able to take diff
+        raise ValueError("Data in given DataArray does not support subtraction.") from e
+    except ValueError as e:
+        # check if coordinate has length 1, and return np.nan if so
+        if data_array[dim].size == 1:
+            return np.nan
+        raise e  # else, re-raise
 
 
 def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
