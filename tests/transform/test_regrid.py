@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 from openghg.transform import regrid_uniform_cc
+from openghg.util import xr_linspace_with_np_output
 
 
 @pytest.fixture()
@@ -58,8 +59,8 @@ def grid_out(grid_da):
     lon_end = lon_in[nlon * 3 // 4 - 1]
 
     # Create 2x2 for the centre points of the new grid.
-    lat_out = np.linspace(lat_start + dlat_2, lat_end + dlat_2, 2)
-    lon_out = np.linspace(lon_start + dlon_2, lon_end + dlon_2, 2)
+    lat_out = xr_linspace_with_np_output(lat_start + dlat_2, lat_end + dlat_2, 2)
+    lon_out = xr_linspace_with_np_output(lon_start + dlon_2, lon_end + dlon_2, 2)
 
     # i.e. trying to create lat and lon bounds which allow input to be
     # regridded to:

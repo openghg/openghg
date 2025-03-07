@@ -115,3 +115,4 @@ from ._util import (
     verify_site,
 )
 from ._versions import show_versions, check_if_need_new_version
+from ._xarray_fixes import xr_linspace_with_np_output
