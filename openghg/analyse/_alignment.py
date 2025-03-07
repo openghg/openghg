@@ -1,11 +1,12 @@
 import logging
-from typing import Literal
+from typing import Literal, TypeVar
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from numpy.typing import ArrayLike
 
-from openghg.types import XrDataLike, XrDataLikeMatch, XrDataLikeMatch2
+from openghg.types import XrDataLike
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -146,11 +147,15 @@ def timedelta_to_hourly_freq(td: pd.Timedelta) -> str:
     return str(round(td / pd.to_timedelta(1, "h"), 5)) + "H"
 
 
+T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
+T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
+
+
 def align_obs_and_other(
-    obs: XrDataLikeMatch,
-    other: XrDataLikeMatch2,
+    obs: T1,
+    other: T2,
     resample_to: Literal["obs", "other", "coarsest"] | str = "coarsest",
-) -> tuple[XrDataLikeMatch, XrDataLikeMatch2]:
+) -> tuple[T1, T2]:
     """Slice and resample obs and other data to align along time.
 
     This slices the date to the smallest time frame spanned by both the other and obs data,
