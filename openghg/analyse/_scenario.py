@@ -631,8 +631,8 @@ class ModelScenario:
             if platform == "satellite":
                 return obs_data, footprint_data
             elif "flask" in platform:
-                fp_data = fp_data.reindex_like(obs_data, method="ffill")
-                return obs_data, fp_data
+                footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
+                return obs_data, footprint_data
 
         if resample_to == "footprint":
             resample_to = "other"
