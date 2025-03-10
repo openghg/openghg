@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Analyse &#8212; OpenGHG 0.12.0 documentation</title>
+    <title>Analyse &#8212; OpenGHG 0.13.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=61ccb1f1"></script>
+    <script src="../_static/documentation_options.js?v=1019fba8"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -57,8 +57,8 @@
     <link rel="prev" title="User API" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.12.0" />
-    <meta name="docbuild:last-update" content="Feb 27, 2025"/>
+  <meta name="docsearch:version" content="0.13.0" />
+    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
   </head>
   
   
@@ -124,8 +124,8 @@
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.12.0 documentation - Home"/>
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.12.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
   
   
 </a></div>
@@ -481,16 +481,17 @@ to derive the time points where appropriate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
+<li><p>None to not resample and to just “ffill” footprint to obs</p></li>
 </ul>
 </dd>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
@@ -521,16 +522,17 @@ to derive the time points where appropriate.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
-<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
+<li><p>None to not resample and to just “ffill” footprint to obs</p></li>
 </ul>
 </dd>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
@@ -584,10 +586,11 @@ axis. This will both slice and resample the data to align this axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
+<li><p>None to not resample and to just “ffill” footprint to obs</p></li>
 </ul>
 </dd>
 </dl>
@@ -619,10 +622,11 @@ Can also include modelled timeseries data derived from flux.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
+<li><p>None to not resample and to just “ffill” footprint to obs</p></li>
 </ul>
 </dd>
 </dl>
@@ -658,16 +662,17 @@ All will be used and stacked if not specified.</p></li>
 - “percentile” - Calculates the 1% value across the whole time period
 - None - don’t add a baseline and only plot the modelled observations</p></li>
 <li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
-<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
+<li><p>None to not resample and to just “ffill” footprint to obs</p></li>
 </ul>
 </dd>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>

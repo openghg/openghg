@@ -1,0 +1,662 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Creating an ObsPack &#8212; OpenGHG 0.13.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Outputting_data/Creating_obspack';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="User API" href="../../../api/index.html" />
+    <link rel="prev" title="Converting an object store" href="../Managing_object_store/Converting_a_store.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.13.0" />
+    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Adding data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_observation_data.html">Adding observation data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Creating_data_from_databases.html">Using databases to add data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Metadata_and_attributes.html">Metadata and attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Updating_existing_data.html">Updating existing data</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Analysing data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Exploring data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing the object store</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Managing_data.html">Managing and deleting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Outputting data</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Creating an ObsPack</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Creating an ObsPack</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="creating-an-obspack">
+<h1>Creating an ObsPack<a class="headerlink" href="#creating-an-obspack" title="Link to this heading">#</a></h1>
+<p>In this tutorial we’re going to demonstrate how you can create an obspack
+from the observation data stored within an object store.</p>
+<p><em>At the moment this includes the data_types “surface” and “column” only
+with plans to expand this to all data types going forward.</em></p>
+<section id="using-the-tutorial-object-store">
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">initial tutorial</span></a>,
+we will use the tutorial object store to avoid cluttering your personal
+object store.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
+
+<span class="n">use_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we’ll add some data to the tutorial store.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">populate_surface_data</span>
+
+<span class="n">populate_surface_data</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="compiling-the-data">
+<h2>1. Compiling the data<a class="headerlink" href="#compiling-the-data" title="Link to this heading">#</a></h2>
+<p>At the moment the data is compiled from using search terms to find the data in the
+object store. This can either be suplied using an input search file or a DataFrame
+containing the search terms.</p>
+<p>An example of an input search file would be:</p>
+<div class="line-block">
+<div class="line">site,inlet,species,obs_type</div>
+<div class="line">tac,185m,co2,surface-insitu</div>
+<div class="line">tac,50m-100m,ch4,surface-insitu</div>
+<div class="line">bsd,42m,ch4,surface-flask</div>
+</div>
+<p>where the column headings are the names of keys in the object store and an additional
+<code class="docutils literal notranslate"><span class="pre">obs_type</span></code> key is included in the header to describe the expected data within the obspack.</p>
+<p>As with the <code class="docutils literal notranslate"><span class="pre">get_obs_surface()</span></code> function, ranges of inlets can be specified. This is shown
+in the third row of the file above to include the 50m-100m inlets for the Tacolneston site.
+This will create a combined netcdf file containing multiple inlets
+with the inlet set to “multiple” in the file naming convention.</p>
+<p>Details of the accepted observation types can be found by using the <em class="xref py py-obj">define_obs_types()</em> function:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.datapack</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_obs_types</span>
+<span class="n">define_obs_types</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If no <code class="docutils literal notranslate"><span class="pre">obs_type</span></code> column is specified, it will be assumed that all data is the “surface-insitu” type.</p>
+<p>An input search DataFrame is very similar to this format, where the column names
+within the DataFrame are the key names to use when searching with the addition of the <em class="xref py py-obj">obs_type</em> column.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">search_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="s2">&quot;bsd&quot;</span><span class="p">],</span>
+                          <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;185m&quot;</span><span class="p">,</span> <span class="s2">&quot;50m-100m&quot;</span><span class="p">,</span> <span class="s2">&quot;42m&quot;</span><span class="p">],</span>
+                          <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="s2">&quot;ch4&quot;</span><span class="p">],</span>
+                          <span class="s2">&quot;obs_type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;surface-insitu&quot;</span><span class="p">,</span> <span class="s2">&quot;surface-insitu&quot;</span><span class="p">,</span> <span class="s2">&quot;surface-flask&quot;</span><span class="p">],</span>
+                          <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">search_df</span>
+</pre></div>
+</div>
+<p><em>Note: this currently expects one entry to be found per search row. If multiple
+sets of data are found for a given search this will raise an error.</em></p>
+</section>
+<section id="id1">
+<h2>2. Creating an obspack<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>To create the obspack from your search details, the <code class="docutils literal notranslate"><span class="pre">create_obspack()</span></code> function can be
+called. For this we need to supply the output_directory and a name for the obspack.</p>
+<p>For the tutorial we’ll create a temporary directory to store the output within but
+this will default to the user’s home directory otherwise:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+<span class="n">output_folder</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.datapack</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_obspack</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obspack_name</span> <span class="o">=</span> <span class="s2">&quot;test_obspack_v1&quot;</span>
+
+<span class="n">create_obspack</span><span class="p">(</span><span class="n">search_df</span><span class="o">=</span><span class="n">search_df</span><span class="p">,</span>
+               <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+               <span class="n">obspack_name</span><span class="o">=</span><span class="n">obspack_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running this will create an new folder within the temporary folder (defined by <code class="docutils literal notranslate"><span class="pre">output_folder</span></code>)
+called “test_obspack_v1”.</p>
+<p>For this obspack the expected structure is:</p>
+<blockquote>
+<div><p>test_obspack_v1/</p>
+<blockquote>
+<div><p>obspack_README.md</p>
+<p>site_index_details*.txt</p>
+<p>surface-insitu/</p>
+<blockquote>
+<div><p>ch4_bsd_multiple_surface-insitu_v1.nc</p>
+<p>co2_tac_185m_surface-insitu_v1.nc</p>
+</div></blockquote>
+<p>surface-flask/</p>
+<blockquote>
+<div><p>ch4_bsd_42m_surface-flask_v1.nc</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p>This includes a few different elements</p>
+<p>1. The obspack_README.md is a release file which contains an overall fair use statement for an obspack.
+This is included by default unless alternative release files are specified.
+2. The site_index_details*.txt contains a summary of the site details for the data
+included within the file. This includes the data owner details so they can be contacted
+when using the data.
+3. The data itself is contained within sub-folders split by observation types. The naming
+convention is currently based on the <code class="docutils literal notranslate"><span class="pre">species</span></code>, <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">inlet</span></code> and <code class="docutils literal notranslate"><span class="pre">obs_type</span></code> but we aim to
+expand this to include other search terms as appropriate.</p>
+<p>This can be investigated within a notebook by running the <code class="docutils literal notranslate"><span class="pre">ls</span></code> command to show the local folder structure
+and files. As this is a terminal command this must be pre-fixed by the <code class="docutils literal notranslate"><span class="pre">%</span></code> character.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">ls</span> <span class="s2">&quot;</span><span class="si">{output_folder}</span><span class="s2">/test_obspack_v1&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">ls</span> <span class="s2">&quot;</span><span class="si">{output_folder}</span><span class="s2">/test_obspack_v1/surface-insitu&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">ls</span> <span class="s2">&quot;</span><span class="si">{output_folder}</span><span class="s2">/test_obspack_v1/surface-flask&quot;</span>
+</pre></div>
+</div>
+<p><em>Version included within the site filenames is currently just the version for the obspack but should be updated
+to be the internal version from the object store.</em></p>
+</section>
+<section id="obspack-versions">
+<h2>3. Obspack versions<a class="headerlink" href="#obspack-versions" title="Link to this heading">#</a></h2>
+<p>To allow different versions of the obspack to be created automatically, instead of an <code class="docutils literal notranslate"><span class="pre">obspack_name</span></code>
+an <code class="docutils literal notranslate"><span class="pre">obspack_stub</span></code> can be supplied instead. Based on other detected or supplied obspack names
+this will choose a new version. Both minor and major versions can be created depending on the inputs
+supplied.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obspack_stub</span> <span class="o">=</span> <span class="s2">&quot;test_obspack&quot;</span>
+
+<span class="n">create_obspack</span><span class="p">(</span><span class="n">search_df</span><span class="o">=</span><span class="n">search_df</span><span class="p">,</span>
+               <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+               <span class="n">obspack_stub</span><span class="o">=</span><span class="n">obspack_stub</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create a new obspack with a version based on other folder which have the same
+<code class="docutils literal notranslate"><span class="pre">obspack_stub</span></code> found within the same folder. If the previous obspack has been created as above,
+this new obspack will be called “test_obspack_v2”.</p>
+<p>To create a new minor version, this can be run with the <code class="docutils literal notranslate"><span class="pre">minor_version_only</span></code> flag:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obspack_stub</span> <span class="o">=</span> <span class="s2">&quot;test_obspack&quot;</span>
+
+<span class="n">create_obspack</span><span class="p">(</span><span class="n">search_df</span><span class="o">=</span><span class="n">search_df</span><span class="p">,</span>
+               <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+               <span class="n">obspack_stub</span><span class="o">=</span><span class="n">obspack_stub</span><span class="p">,</span>
+               <span class="n">minor_version_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the previous set of obspacks have been created, this new obspack will be called “test_obspack_v2.1”.</p>
+<p>To create a new major version,  this can be run with the <code class="docutils literal notranslate"><span class="pre">major_version_only</span></code> flag:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obspack_stub</span> <span class="o">=</span> <span class="s2">&quot;test_obspack&quot;</span>
+
+<span class="n">create_obspack</span><span class="p">(</span><span class="n">search_df</span><span class="o">=</span><span class="n">search_df</span><span class="p">,</span>
+               <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+               <span class="n">obspack_stub</span><span class="o">=</span><span class="n">obspack_stub</span><span class="p">,</span>
+               <span class="n">major_version_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the previous set of obspacks have been created, this new obspack will be called “test_obspack_v3”.</p>
+</section>
+<section id="release-files">
+<h2>4. Release files<a class="headerlink" href="#release-files" title="Link to this heading">#</a></h2>
+<p>The obspack_README.md will be included in every obspack by default but alternative files
+can be passed instead for inclusion using the <code class="docutils literal notranslate"><span class="pre">release_files</span></code> input to <code class="docutils literal notranslate"><span class="pre">create_obspack()</span></code> function.</p>
+</section>
+<section id="cleanup">
+<h2>5. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
+<p>If you’re finished with the data in this tutorial you can cleanup the
+tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../Managing_object_store/Converting_a_store.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Converting an object store</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../../api/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">User API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compiling-the-data">1. Compiling the data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">2. Creating an obspack</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#obspack-versions">3. Obspack versions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#release-files">4. Release files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">5. Cleanup</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
