@@ -640,6 +640,8 @@ class ModelScenario:
             elif "flask" in platform:
                 resample_to = None
                 align_to_obs = True
+            else:
+                logger.warning(f"Platform '{platform}' not used when determining resample strategy.")
 
         if resample_to is None:
             if align_to_obs:
