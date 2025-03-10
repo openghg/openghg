@@ -598,7 +598,9 @@ class ModelScenario:
                 platform: str = site_details.get("platform")
                 return platform
 
-    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: str | None = None) -> tuple:
+    def _align_obs_footprint(
+        self, resample_to: str | None = "coarsest", platform: str | None = None
+    ) -> tuple:
         """Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
@@ -609,6 +611,7 @@ class ModelScenario:
          - "obs" - resample to observation data frequency
          - "footprint" - resample to footprint data frequency
          - a valid resample period e.g. "2H"
+         - None to not resample and to just "ffill" footprint to obs
 
         Args:
             resample_to: Resample option to use: either data based or using a valid pandas resample period.
@@ -625,14 +628,23 @@ class ModelScenario:
         obs_data = obs.data
         footprint_data = footprint.data
 
+        # Keyword only used if not resampling (at the moment)
+        align_to_obs = True
+
         if platform is not None:
             platform = platform.lower()
-            # Do not apply resampling for "satellite" (but have re-included "flask" for now)
+            # Do not apply resampling for "satellite" or "flask"
             if platform == "satellite":
-                return obs_data, footprint_data
+                resample_to = None
+                align_to_obs = False
             elif "flask" in platform:
+                resample_to = None
+                align_to_obs = True
+
+        if resample_to is None:
+            if align_to_obs:
                 footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
-                return obs_data, footprint_data
+            return obs_data, footprint_data
 
         if resample_to == "footprint":
             resample_to = "other"
@@ -641,7 +653,7 @@ class ModelScenario:
 
     def combine_obs_footprint(
         self,
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
@@ -657,6 +669,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample
             cache: Cache this data after calculation. Default = True.
@@ -717,7 +730,7 @@ class ModelScenario:
         attributes.update(attributes_footprint)
         attributes.update(attributes_obs)
 
-        attributes["resample_to"] = resample_to
+        attributes["resample_to"] = str(resample_to)
 
         combined_dataset.attrs.update(attributes)
 
@@ -788,14 +801,14 @@ class ModelScenario:
 
         return flux_stacked
 
-    def _check_footprint_resample(self, resample_to: str) -> Dataset:
+    def _check_footprint_resample(self, resample_to: str | None) -> Dataset:
         """Check whether footprint needs resampling based on resample_to input.
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         """
         footprint = cast(FootprintData, self.footprint)
 
-        if resample_to in ("coarsest", "obs", "footprint"):
+        if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
             return footprint.data
         else:
             footprint_data = footprint.data
@@ -811,7 +824,7 @@ class ModelScenario:
     def _param_setup(
         self,
         param: str = "modelled_obs",
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         recalculate: bool = False,
     ) -> bool:
@@ -826,6 +839,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask".
             cache: Cache this data after calculation. Default = True.
@@ -859,7 +873,7 @@ class ModelScenario:
             # Check if this previous resample period matches input value
             # - if not (or explicit recalculation requested), recreate scenario
             # - if so return cached modelled observations
-            if prev_resample_to != resample_to or recalculate:
+            if prev_resample_to != str(resample_to) or recalculate:
                 self.combine_obs_footprint(resample_to, platform=platform, cache=True)
             else:
                 # return self.modelled_obs
@@ -879,7 +893,7 @@ class ModelScenario:
     def calc_modelled_obs(
         self,
         sources: str | list | None = None,
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
@@ -895,6 +909,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
@@ -929,7 +944,7 @@ class ModelScenario:
             )
             name = "mf_mod"
 
-        modelled_obs.attrs["resample_to"] = resample_to
+        modelled_obs.attrs["resample_to"] = str(resample_to)
         modelled_obs = modelled_obs.rename(name)
 
         # Cache output from calculations
@@ -1241,7 +1256,7 @@ class ModelScenario:
 
     def calc_modelled_baseline(
         self,
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         output_units: float = 1e-9,
         cache: bool = True,
@@ -1258,6 +1273,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
@@ -1373,7 +1389,7 @@ class ModelScenario:
             )
         )
 
-        modelled_baseline.attrs["resample_to"] = resample_to
+        modelled_baseline.attrs["resample_to"] = str(resample_to)
         modelled_baseline.attrs["units"] = output_units
         modelled_baseline = modelled_baseline.rename("bc_mod")
 
@@ -1396,7 +1412,7 @@ class ModelScenario:
 
     def footprints_data_merge(
         self,
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         calc_timeseries: bool = True,
         sources: str | list | None = None,
@@ -1411,6 +1427,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
@@ -1478,7 +1495,7 @@ class ModelScenario:
         self,
         baseline: str | None = "boundary_conditions",
         sources: str | list | None = None,
-        resample_to: str = "coarsest",
+        resample_to: str | None = "coarsest",
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
@@ -1494,6 +1511,7 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
