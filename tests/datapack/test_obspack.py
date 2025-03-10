@@ -10,13 +10,12 @@ from openghg.standardise import standardise_surface
 from openghg.dataobjects import ObsData
 from openghg.datapack import (
     StoredData,
+    ObsPack,
     retrieve_data,
     create_obspack,
     define_obspack_filename,
     define_obspack_name,
     check_unique,
-    check_unique_filenames,
-    add_obspack_filenames,
 )
 from openghg.datapack._obspack import _find_additional_metakeys, _construct_name
 
@@ -301,7 +300,14 @@ def stored_data_2():
     return stored_data
 
 
-def test_check_unique_filenames(stored_data_1, stored_data_2):
+@pytest.fixture
+def obspack_1(stored_data_1, stored_data_2):
+    obspack = ObsPack(output_folder="", obspack_name="test_gemma")
+    obspack.retrieved_data = [stored_data_1, stored_data_2]
+    return obspack
+
+
+def test_check_unique_filenames(obspack_1):
     """
     Check and compare the automatic filenames created for two StoredData objects.
     This function should discover that these two names
@@ -314,11 +320,10 @@ def test_check_unique_filenames(stored_data_1, stored_data_2):
     # Can come back to perhaps once we get the workflow working
     # (though may then need to rip it apart again!)
 
-    retrieved_data = [stored_data_1, stored_data_2]
-    data_grouped_repeats = check_unique_filenames(retrieved_data,
-                                                  name_components=["site", "species", "inlet"])
+    name_components = ["site", "species", "inlet"]
+    data_grouped_repeats = obspack_1.check_unique_filenames(name_components=name_components)
 
-    # Check the returned data contains 1 group and taht this group contains 2 entries.
+    # Check the returned data contains 1 group and that this group contains 2 entries.
     assert len(data_grouped_repeats) == 1
     assert len(data_grouped_repeats[0]) == 2
 
@@ -347,18 +352,14 @@ def test_find_additional_metakeys_insitu():
     assert one_expected_metakey in metakeys
 
 
-def test_add_obspack_filenames(stored_data_1, stored_data_2):
+def test_add_obspack_filenames(obspack_1):
     """
     Check add_obspack_filenames can produce unique filenames when the
     default filenames overlap.
     """
 
-    retrieved_data = [stored_data_1, stored_data_2]
-
     name_components = ["species", "site", "inlet"]
-
-    retrieved_data = add_obspack_filenames(retrieved_data,
-                          name_components=name_components)
+    retrieved_data = obspack_1.add_obspack_filenames(name_components=name_components)
 
     filename1 = retrieved_data[0].obspack_filename
     filename2 = retrieved_data[1].obspack_filename
