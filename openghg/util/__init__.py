@@ -32,7 +32,6 @@ from ._file import (
     load_transform_parser,
     read_header,
     check_function_open_nc,
-    permissions,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -48,6 +47,7 @@ from ._metadata_util import (
     get_overlap_keys,
     merge_dict,
 )
+from ._registry import AutoRegistry, Registry
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,

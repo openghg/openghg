@@ -303,7 +303,7 @@ def get_object_lock_path(bucket: str, key: str) -> Path:
     Returns:
         Path to object lock file
     """
-    lock_path = Path(f"{bucket}/{key}._data.lock")
+    lock_path = Path(f"{bucket}/{key}._data.lock_v2")
     if not lock_path.parent.exists():
         lock_path.parent.mkdir(parents=True)
 

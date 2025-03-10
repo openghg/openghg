@@ -5,7 +5,7 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.11.1...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
 
@@ -13,7 +13,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.13.0] - 2025-03-10
+
+### Added
+
+- New `datapack` submodule to allow output obspacks to be created. This includes the `create_obspack` function which takes an input search file and produces an obspack within a defined structure from this. [PR #1117](https://github.com/openghg/openghg/pull/1117)
+
+### Updated
+
+- Unpinned numpy so that we can now use numpy 2.0. [PR #1235](https://github.com/openghg/openghg/pull/1235)
+- When combining obs and footprint data in ModelScenario, allow resample_to to be set to None so that the data is aligned but not resampled. This is also turned on by default by passing the `platform` keyword and setting to any name which contains "flask" to the relevant ModelScenario methods. [PR #1236](https://github.com/openghg/openghg/pull/1236)
+- Extracted `align_obs_and_other` from `ModelScenario.align_obs_footprint` into `analyse._alignment`. [PR #1234](https://github.com/openghg/openghg/pull/1234)
+
+### Fixed
+
+- Bug where attributes were not preserved during some resampling operations. [PR #1233](https://github.com/openghg/openghg/pull/1233)
+
+## [0.12.0] - 2025-02-27
+
+### Updated
+
+- Update `standardise_column` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1217](https://github.com/openghg/openghg/pull/1217/)
+- Update `standardise_footprint` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1218](https://github.com/openghg/openghg/pull/1218/)
+- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
+
+### Added
+
+- Added parser to process and add "NIWA" network data to the object store. [PR #1208](https://github.com/openghg/openghg/pull/1208)
+- Improved resampling of variability when number of observations is present. Also added methods for customising resampling, and a `Registry` class to "register" functions. [PR #1156](https://github.com/openghg/openghg/pull/1156)
+- Allow parsers to return a list of `MetadataAndData` directly. [PR #1222](https://github.com/openghg/openghg/pull/1222)
+
+### Fixed
+
 - Changed `icos_data_level` to `data_level` in `ObsSurface.store_data` to fix bug where ICOS data was not distinguished by data level. [PR #1211](https://github.com/openghg/openghg/pull/1211)
+- Fixed permissions for file locks [PR #1221](https://github.com/openghg/openghg/pull/1221)
 
 ## [0.11.1] - 2025-01-10
 
@@ -23,15 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
 - Pinned Zarr to `2.18.3` as github runners are picking `zarr 3.0` which is still in significant development state.[PR #1205](https://github.com/openghg/openghg/pull/1205)
 - Added exist_ok = true argument to create_config_folder and removed ObjectStoreError call.[PR #1198](https://github.com/openghg/openghg/pull/1198)
-
-### Updated
-
-- Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)
-
-### Fixed
-
-- Added `align_metadata_attributes` to retrieve_remote and shifted function defination to standardise/meta. [PR #1197](https://github.com/openghg/openghg/pull/1197)
-- Added `icos flags` to handle data that is flagged bad for remote icos data.[PR #1200](https://github.com/openghg/openghg/pull/1200)
 
 ## [0.11.0] - 2024-12-16
 

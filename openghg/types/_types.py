@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
@@ -43,9 +44,21 @@ class MetadataAndData:
     data: xr.Dataset
 
 
-def convert_to_list_of_metadata_and_data(nested_dict: dict) -> list[MetadataAndData]:
+def convert_to_list_of_metadata_and_data(
+    parser_output: dict | Iterable[HasMetadataAndData],
+) -> list[MetadataAndData]:
     """Convert from old nested dict format to list of MetadataAndData."""
-    return [MetadataAndData(v["metadata"], v["data"]) for v in nested_dict.values()]
+    if isinstance(parser_output, dict):
+        return [MetadataAndData(v["metadata"], v["data"]) for v in parser_output.values()]
+    else:
+        parser_output = list(parser_output)
+
+        if all(isinstance(x, HasMetadataAndData) for x in parser_output):
+            return [MetadataAndData(v.metadata, v.data) for v in parser_output]
+
+    raise ValueError(
+        "`parser_output` must be dict or Iterable of objects with .metadata and .data attributes."
+    )
 
 
 @runtime_checkable
