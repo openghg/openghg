@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Unpinned numpy so that we can now use numpy 2.0. [PR #1235](https://github.com/openghg/openghg/pull/1235)
-- When combining obs and footprint data in ModelScenario, allow flask data to just align the data and not resample. This can be done by passing the `platform` keyword and setting to any name which contains "flask" to the ModelScenario combine_obs_footprint() method. [PR #1236](https://github.com/openghg/openghg/pull/1236)
+- When combining obs and footprint data in ModelScenario, allow resample_to to be set to None so that the data is aligned but not resampled. This is also turned on by default by passing the `platform` keyword and setting to any name which contains "flask" to the relevant ModelScenario methods. [PR #1236](https://github.com/openghg/openghg/pull/1236)
 
 ### Fixed
 
