@@ -63,7 +63,7 @@ def mhd_ds():
 
 @pytest.fixture
 def tac_ds():
-    """Make dataset with repeatability"""
+    """Make dataset with repeatability."""
     times = pd.date_range("2019-01-01", "2019-01-08", freq="1h", inclusive="left")
     n = len(times)
     ch4 = big_randoms(n)
@@ -103,9 +103,7 @@ def test_mean_resample(tac_ds):
 
 
 def test_weighted_resample(tac_ds):
-    """Weighted resample should give the same result if a resampling is done in
-    two steps or one.
-    """
+    """Weighted resample should give the same result if a resampling is done in two steps or one."""
     ds_4h = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
     ds_4h_12h = weighted_resample(ds_4h, averaging_period="12h", species="ch4")
 
@@ -118,10 +116,7 @@ def test_weighted_resample(tac_ds):
 
 
 def test_weighted_resample_with_nans(tac_ds):
-    """
-    NaN values shouldn't affect the final result of weighted resample.
-    """
-
+    """NaN values shouldn't affect the final result of weighted resample."""
     tac_ds = tac_ds.assign(ch4=tac_ds.ch4.where(tac_ds.time >= pd.to_datetime("2019-01-01 10:00:00"), other=np.nan))
 
     ds_4h = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
@@ -165,9 +160,17 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
 def test_surface_obs_resampling_with_variability(tac_ds):
     result = surface_obs_resampler(tac_ds, averaging_period="4h", species="ch4")
 
-    expected = weighted_resample(tac_ds, species="ch4", averaging_period="4h")
+    expected = weighted_resample(tac_ds, averaging_period="4h", species="ch4",)
     xr.testing.assert_allclose(result, expected)
 
 
-def test_attributes_kept():
-    pass
+@pytest.mark.parametrize(("func", "func_kwargs"),
+                         [
+                             (mean_resample, {}),
+                             (weighted_resample, {"species": "ch4"}),
+                             (surface_obs_resampler, {"species": "ch4"}),
+                         ])
+def test_attributes_kept(func, func_kwargs, tac_ds):
+    resampled_ds = func(tac_ds, "4h", **func_kwargs)
+
+    assert tac_ds.attrs.items() <= resampled_ds.attrs.items()

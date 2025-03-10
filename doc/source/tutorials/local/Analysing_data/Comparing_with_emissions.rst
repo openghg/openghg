@@ -258,6 +258,15 @@ aliases):
     modelled_observations_daily = scenario.calc_modelled_obs(resample_to="1D")
     modelled_observations_daily.plot()
 
+Explicit resampling of the data can be also be skipped by using a ``resample_to`` input
+of ``None``. This will align the footprints to the observations by forward filling the
+footprint values. Note: using ``platform="flask"`` will turn on this option as well.
+
+.. code:: ipython3
+
+    modelled_observations_align = scenario.calc_modelled_obs(resample_to=None)
+    modelled_observations_align.plot()
+
 To allow comparisons with multiple flux sources, more than one flux
 source can be linked to your ``ModelScenario``. This can be either be
 done upon creation or can be added using the ``add_flux()`` method. When

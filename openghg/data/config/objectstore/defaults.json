@@ -236,11 +236,6 @@
                     "str"
                 ]
             },
-            "sampling_period": {
-                "type": [
-                    "str"
-                ]
-            },
             "inlet": {
                 "type": [
                     "str"
@@ -252,11 +247,6 @@
                 ]
             },
             "network": {
-                "type": [
-                    "str"
-                ]
-            },
-            "source_format": {
                 "type": [
                     "str"
                 ]
@@ -277,6 +267,16 @@
                 ]                
             },
             "data_source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "sampling_period": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source_format": {
                 "type": [
                     "str"
                 ]
