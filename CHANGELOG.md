@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.12.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
+
+## [0.13.0] - 2025-03-10
 
 ### Added
 
@@ -14,14 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Unpinned numpy so that we can now use numpy 2.0. [PR #1235](https://github.com/openghg/openghg/pull/1235)
+- When combining obs and footprint data in ModelScenario, allow resample_to to be set to None so that the data is aligned but not resampled. This is also turned on by default by passing the `platform` keyword and setting to any name which contains "flask" to the relevant ModelScenario methods. [PR #1236](https://github.com/openghg/openghg/pull/1236)
+- Extracted `align_obs_and_other` from `ModelScenario.align_obs_footprint` into `analyse._alignment`. [PR #1234](https://github.com/openghg/openghg/pull/1234)
 
 ### Fixed
 
 - Bug where attributes were not preserved during some resampling operations. [PR #1233](https://github.com/openghg/openghg/pull/1233)
-
-### Updated
-
-- Extracted `align_obs_and_other` from `ModelScenario.align_obs_footprint` into `analyse._alignment`. [PR #1234](https://github.com/openghg/openghg/pull/1234)
 
 ## [0.12.0] - 2025-02-27
 
