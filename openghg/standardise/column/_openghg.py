@@ -69,6 +69,10 @@ def parse_openghg(
 
     data = xr.open_dataset(filepath).chunk(chunks)
 
+    # TODO: Remove this once ragged arrays from xarray is handled
+    if "exposure_id" in data:
+        data = data.drop_vars("exposure_id")
+
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)
 
