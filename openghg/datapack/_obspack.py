@@ -43,9 +43,8 @@ logger = logging.getLogger("openghg.obspack")
 ObsOutputType = ObsData | ObsColumnData
 NameComponents = list[str | list]
 
-# TODO: Tidy up - remove None from definitions
-MultiNameComponents = dict[str, NameComponents] | NameComponents | None
-MultiSubFolder = dict[str, pathType] | pathType | None
+MultiNameComponents = dict[str, NameComponents] | NameComponents
+MultiSubFolder = dict[str, pathType] | pathType
 
 
 class StoredData:
@@ -60,7 +59,7 @@ class StoredData:
         obs_type: str = "surface-insitu",
         output_folder: pathType | None = None,
         obspack_name: str | None = None,
-        subfolder: MultiSubFolder = None,
+        subfolder: MultiSubFolder | None = None,
         obspack_filename: pathType | None = None,
         data_version: str | None = None,
     ):
@@ -88,7 +87,7 @@ class StoredData:
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
     ) -> Path:
         """
@@ -126,7 +125,7 @@ class StoredData:
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
     ) -> Path:
         """
@@ -157,7 +156,7 @@ class StoredData:
 
         return obspack_filename
 
-    def add_subfolder(self, subfolder: MultiSubFolder = None) -> None:
+    def add_subfolder(self, subfolder: MultiSubFolder | None = None) -> None:
         """
         Add the subfolder based on input and defaults.
         See define_subfolder() function.
@@ -362,7 +361,7 @@ class ObsPack:
         filename: pathType | None = None,
         search_df: pd.DataFrame | None = None,
         store: str | None = None,
-        subfolders: MultiSubFolder = None,
+        subfolders: MultiSubFolder | None = None,
     ) -> list:
         """
         Use search parameters to get data from object store. This expects either a filename for an input
@@ -463,7 +462,7 @@ class ObsPack:
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
         force: bool = False,
     ) -> list[Path]:
@@ -503,7 +502,7 @@ class ObsPack:
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
         force: bool = False,
     ) -> list[list[StoredData]]:
@@ -548,7 +547,7 @@ class ObsPack:
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
         store: str | None = None,
     ) -> list[StoredData]:
@@ -925,7 +924,7 @@ def define_name_components(obs_type: str, metadata: dict | None = None) -> NameC
     return name_components
 
 
-def define_subfolder(subfolder: MultiSubFolder, obs_type: str | None = None) -> Path:
+def define_subfolder(subfolder: MultiSubFolder | None, obs_type: str | None = None) -> Path:
     """
     Define the default subfolder within the obspack for a file based on obs_type.
 
@@ -1101,7 +1100,7 @@ def define_full_obspack_filename(
     obspack_filename: pathType,
     obspack_name: str | None = None,
     output_folder: pathType | None = None,
-    subfolder: MultiSubFolder = None,
+    subfolder: MultiSubFolder | None = None,
     obs_type: str | None = None,
 ) -> Path:
     """
@@ -1136,7 +1135,7 @@ def define_obspack_filename(
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
-    name_components: MultiNameComponents = None,
+    name_components: MultiNameComponents | None = None,
     name_suffixes: dict | None = None,
 ) -> Path:
     """
@@ -1537,10 +1536,10 @@ def create_obspack(
     minor_version_only: bool = False,
     current_obspacks: list | None = None,
     release_files: Sequence | None = None,
-    subfolders: MultiSubFolder = None,
+    subfolders: MultiSubFolder | None = None,
     include_obs_type: bool = True,
     include_data_versions: bool = True,
-    name_components: MultiNameComponents = None,
+    name_components: MultiNameComponents | None = None,
     store: str | None = None,
 ) -> Path:
     """
