@@ -518,7 +518,7 @@ class ModelScenario:
         self.footprint = footprint
 
         if self.footprint is not None:
-            if self.footprint.metadata["satellite"] is not None:
+            if "satellite" in self.footprint.metadata and self.footprint.metadata["satellite"] is not None:
                 self.satellite = self.footprint.metadata["satellite"]
             else:
                 fp_inlet = self.footprint.metadata["inlet"]
