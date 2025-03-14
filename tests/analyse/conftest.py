@@ -254,6 +254,7 @@ def data_read():
         store="user",
     )
 
+    # Populating with satellite data for footprints
     datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
 
     satellite = "GOSAT"
