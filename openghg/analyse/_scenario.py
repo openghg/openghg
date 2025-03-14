@@ -427,6 +427,8 @@ class ModelScenario:
         height: str | None = None,
         domain: str | None = None,
         model: str | None = None,
+        satellite: str | None = None,
+        obs_region: str | None = None,
         met_model: str | None = None,
         start_date: str | Timestamp | None = None,
         end_date: str | Timestamp | None = None,
@@ -490,6 +492,8 @@ class ModelScenario:
                 footprint_keywords = {
                     "site": site,
                     "height": fp_inlet_option,
+                    "satellite": satellite,
+                    "obs_region": obs_region,
                     "inlet": fp_inlet_option,
                     "domain": domain,
                     "model": model,
@@ -514,10 +518,13 @@ class ModelScenario:
         self.footprint = footprint
 
         if self.footprint is not None:
-            fp_inlet = self.footprint.metadata["inlet"]
-            self.fp_inlet = fp_inlet
-            if not hasattr(self, "site"):
-                self.site = self.footprint.metadata["site"]
+            if self.footprint.metadata["satellite"] is not None:
+                self.satellite = self.footprint.metadata["satellite"]
+            else:
+                fp_inlet = self.footprint.metadata["inlet"]
+                self.fp_inlet = fp_inlet
+                if not hasattr(self, "site"):
+                    self.site = self.footprint.metadata["site"]
 
     def add_flux(
         self,
