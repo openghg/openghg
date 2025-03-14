@@ -70,51 +70,43 @@ def test_construct_name_fails_missing_key():
 
 
 @pytest.mark.parametrize(
-        "metadata, obs_type, obspack_path, out_filename",
+        "metadata, obs_type, out_filename",
         [
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-insitu", "",
-                "./surface-insitu/ch4_WAO_10m_surface-insitu.nc"
+                "surface-insitu", "ch4_WAO_10m_surface-insitu.nc"
             ),
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-insitu", "/path/to/obspack/",
-                "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"
+                "surface-insitu", "ch4_WAO_10m_surface-insitu.nc"
             ),
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"},
-                "surface-insitu", "/path/to/obspack/",
-                "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"
+                "surface-insitu", "ch4_WAO_10m_surface-insitu_v1.nc"
             ),
             (
                 {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-flask", "",
-                "./surface-flask/ch4_WAO_10m_surface-flask.nc"
+                "surface-flask", "ch4_WAO_10m_surface-flask.nc"
             ),
             (
                 {"platform": "site", "species": "ch4", "site": "WAO"},
-                "column", "",
-                "./column/ch4_WAO_site_column.nc"
+                "column", "ch4_WAO_site_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
-                "column", "",
-                "./column/ch4_GOSAT-BRAZIL_satellite_column.nc"
+                "column", "ch4_GOSAT-BRAZIL_satellite_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
-                "column", "",
-                "./column/ch4_GOSAT-BRAZIL_satellite_column.nc"
+                "column", "ch4_GOSAT-BRAZIL_satellite_column.nc"
             ),
             (
                 {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
-                "column", "",
-                "./column/ch4_GOSAT-SOUTHAMERICA_satellite_column.nc"
+                "column", "ch4_GOSAT-SOUTHAMERICA_satellite_column.nc"
             ),
         ]
 )
-def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename):
+def test_define_obspack_filename(metadata, obs_type, out_filename):
     """
     Test creation of filename matches to naming scheme
     1. surface-insitu data
@@ -127,7 +119,7 @@ def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename)
     8. column, satellite data, satellite name and domain specified
     """
     out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata, obs_type=obs_type, obspack_path=obspack_path)
+    filename = define_obspack_filename(metadata, obs_type=obs_type)
 
     assert filename == out_filename
 
@@ -135,11 +127,11 @@ def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename)
 @pytest.mark.parametrize(
         "latest_version, data_version, include_version, out_filename",
         [
-            ("v52", None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v52.nc"),
-            (None, "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
-            ("v52", "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
-            (None, None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
-            ("v52", "v34", False, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
+            ("v52", None, True, "ch4_WAO_10m_surface-insitu_v52.nc"),
+            (None, "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
+            ("v52", "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
+            (None, None, True, "ch4_WAO_10m_surface-insitu.nc"),
+            ("v52", "v34", False, "ch4_WAO_10m_surface-insitu.nc"),
         ]
 )
 def test_define_obspack_filename_version(latest_version, data_version, include_version, out_filename):
@@ -156,11 +148,9 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
         metadata["latest_version"] = latest_version
 
     obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
     out_filename = Path(out_filename)
     filename = define_obspack_filename(metadata,
                                        obs_type=obs_type,
-                                       obspack_path=obspack_path,
                                        include_version=include_version,
                                        data_version=data_version)
 
@@ -170,9 +160,9 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
 @pytest.mark.parametrize(
         "name_components, out_filename",
         [
-            (["species", "site", "inlet"], "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
-            (["site", "inlet", "species"], "/path/to/obspack/surface-insitu/WAO_10m_ch4_surface-insitu_v1.nc"),
-            (["site", "data_source", "data_level"], "/path/to/obspack/surface-insitu/WAO_icos_1_surface-insitu_v1.nc"),
+            (["species", "site", "inlet"], "ch4_WAO_10m_surface-insitu_v1.nc"),
+            (["site", "inlet", "species"], "WAO_10m_ch4_surface-insitu_v1.nc"),
+            (["site", "data_source", "data_level"], "WAO_icos_1_surface-insitu_v1.nc"),
         ]
 )
 def test_define_obspack_filename_name_components(name_components, out_filename):
@@ -190,11 +180,9 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
                 "latest_version": "v1"}
 
     obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
     out_filename = Path(out_filename)
     filename = define_obspack_filename(metadata,
                                        obs_type=obs_type,
-                                       obspack_path=obspack_path,
                                        name_components=name_components)
 
     assert filename == out_filename
@@ -203,9 +191,9 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
 @pytest.mark.parametrize(
         "name_suffixes, out_filename",
         [
-            ({"obs_type": "surface-insitu", "data_version": "v1"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
-            ({"latest_version": "v51"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_v51.nc"),
-            ({"project": "gemma", "source": "noaa"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_gemma_noaa.nc"),
+            ({"obs_type": "surface-insitu", "data_version": "v1"}, "ch4_WAO_10m_surface-insitu_v1.nc"),
+            ({"latest_version": "v51"}, "ch4_WAO_10m_v51.nc"),
+            ({"project": "gemma", "source": "noaa"}, "ch4_WAO_10m_gemma_noaa.nc"),
         ]
 )
 def test_define_obspack_filename_name_components(name_suffixes, out_filename):
@@ -221,11 +209,9 @@ def test_define_obspack_filename_name_components(name_suffixes, out_filename):
                 "latest_version": "v1"}
 
     obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
     out_filename = Path(out_filename)
     filename = define_obspack_filename(metadata,
                                        obs_type=obs_type,
-                                       obspack_path=obspack_path,
                                        name_suffixes=name_suffixes)
 
     assert filename == out_filename
@@ -368,8 +354,8 @@ def test_add_obspack_filenames(obspack_1):
 
     # Note: this could change if value and/or order of the metakeys change
     # at the moment this is using the distinct data_level values to create the filenames.
-    expected_filename1 = "surface-insitu/ch4_WAO_10m_1_surface-insitu_v1.nc"
-    expected_filename2 = "surface-insitu/ch4_WAO_10m_2_surface-insitu_v1.nc"
+    expected_filename1 = "ch4_WAO_10m_1_surface-insitu_v1.nc"
+    expected_filename2 = "ch4_WAO_10m_2_surface-insitu_v1.nc"
 
     assert str(filename1) == expected_filename1
     assert str(filename2) == expected_filename2

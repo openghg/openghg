@@ -42,6 +42,8 @@ logger = logging.getLogger("openghg.obspack")
 # TODO: Move to types submodule?
 ObsOutputType = ObsData | ObsColumnData
 NameComponents = list[str | list]
+
+# TODO: Tidy up - remove None from definitions
 MultiNameComponents = dict[str, NameComponents] | NameComponents | None
 MultiSubFolder = dict[str, pathType] | pathType | None
 
@@ -56,9 +58,10 @@ class StoredData:
         self,
         data: ObsOutputType,
         obs_type: str = "surface-insitu",
-        obspack_path: pathType | None = None,
-        obspack_filename: pathType | None = None,
+        output_folder: pathType | None = None,
+        obspack_name: str | None = None,
         subfolder: MultiSubFolder = None,
+        obspack_filename: pathType | None = None,
         data_version: str | None = None,
     ):
         """
@@ -72,11 +75,9 @@ class StoredData:
         self.metadata = data.metadata
 
         self.obs_type = obs_type
-        self.obspack_path = obspack_path
+        self.obspack_name = obspack_name
 
-        # Q: Should obspack_filename already include obspack_path and subfolder?
-        # Or should we expect to be constructing this?
-
+        self.output_folder = Path(output_folder) if output_folder is not None else None
         self.obspack_filename = Path(obspack_filename) if obspack_filename is not None else None
 
         self.add_subfolder(subfolder)  # Right to add default subfolder here?
@@ -84,28 +85,33 @@ class StoredData:
 
     def make_obspack_filename(
         self,
-        obspack_path: pathType | None = None,
-        subfolder: MultiSubFolder = None,
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
     ) -> Path:
+        """
+        Create the obspack_filename for the StoredData based on the associated metadata
+        and the obs_type.
 
-        # Update attributes on the object if specified
-        self.obspack_path = obspack_path if obspack_path is not None else self.obspack_path
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+        Returns:
+            Path: obspack filename
+        """
         self.data_version: str | None = data_version if data_version is not None else self.data_version
-
-        if isinstance(subfolder, dict):
-            subfolder = subfolder[self.obs_type]
-        self.subfolder: Path | None = Path(subfolder) if subfolder is not None else self.subfolder
 
         obspack_filename = define_obspack_filename(
             self.metadata,
             self.obs_type,
-            obspack_path=self.obspack_path,
-            subfolder=self.subfolder,
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=self.data_version,
@@ -117,18 +123,29 @@ class StoredData:
 
     def update_obspack_filename(
         self,
-        obspack_path: pathType | None = None,
-        subfolder: MultiSubFolder = None,
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
         name_components: MultiNameComponents = None,
         name_suffixes: dict | None = None,
     ) -> Path:
+        """
+        Define the obspack_filename and update on the StoredData object based on the associated metadata
+        and the obs_type.
 
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+        Returns:
+            Path: obspack filename
+        """
         obspack_filename = self.make_obspack_filename(
-            obspack_path=obspack_path,
-            subfolder=subfolder,
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=data_version,
@@ -141,28 +158,42 @@ class StoredData:
         return obspack_filename
 
     def add_subfolder(self, subfolder: MultiSubFolder = None) -> None:
-        """ """
-        obs_type = self.obs_type
+        """
+        Add the subfolder based on input and defaults.
+        See define_subfolder() function.
 
-        if isinstance(subfolder, dict):
-            if obs_type in subfolder:
-                subfolder = subfolder[obs_type]
-            else:
-                subfolder = obs_type
-        elif subfolder is None:
-            subfolder = self.obs_type
-
-        self.subfolder = Path(subfolder)
+        Returns:
+            None
+        """
+        self.subfolder = define_subfolder(subfolder, obs_type=self.obs_type)
 
     def add_data_version(self, data_version: str | None = None) -> None:
-        """ """
+        """
+        Add data_version associated with StoredData.
+        See find_data_version() function.
+
+        Returns:
+            None
+        """
         if data_version is None:
             data_version = find_data_version(self.metadata)
         self.data_version = data_version
 
-    # TODO: Add something like this:
-    # def define_full_path(self):
-    #     return self.output_path / self.obspack_name / self.subfolder / self.obspack_filename
+    def define_full_path(self) -> Path:
+        """
+        Define full path for the output filename. This is based on the structure:
+            {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+
+        Returns:
+            Path: full output file path
+        """
+
+        if self.obspack_filename is None:
+            raise ValueError("Obspack filename must be defined to create output path")
+
+        return define_full_obspack_filename(
+            self.obspack_filename, self.obspack_name, self.output_folder, self.subfolder, self.obs_type
+        )
 
     def define_site_details(self, strict: bool = False) -> dict:
         """
@@ -224,12 +255,11 @@ class StoredData:
     def write(self) -> None:
         """ """
 
-        # TODO: At the moment obspack_filename contains the full path to the filename
-        # - may be better to allow the full path to be constructed as a part of this
-        #   write step instead on a separate method.
-
         ds = self.data
-        ds.to_netcdf(self.obspack_filename)
+        output_filename = self.define_full_path()
+
+        output_filename.parent.mkdir(parents=True, exist_ok=True)
+        ds.to_netcdf(output_filename)
 
 
 class ObsPack:
@@ -327,14 +357,12 @@ class ObsPack:
 
         return self.output_folder / self.obspack_name
 
-    # TODO: Add check for retrieved_data being present?
-
     def find_and_retrieve_data(
         self,
         filename: pathType | None = None,
         search_df: pd.DataFrame | None = None,
-        subfolders: MultiSubFolder = None,
         store: str | None = None,
+        subfolders: MultiSubFolder = None,
     ) -> list:
         """
         Use search parameters to get data from object store. This expects either a filename for an input
@@ -345,21 +373,24 @@ class ObsPack:
             filename: Filename containing search parameters.
             search_df: pandas DataFrame containing search parameters
             store: Name of specific object store to use to search for data
+            subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
+            this. This can be specified as:
+             - no subfolder(s) - pass empty string
+             - one subfolder for all files - pass a string
+             - dictionary of subfolders per obs_type.
         Returns:
             list [StoredData]: List of extracted data from the object store based on search parameters
         """
 
         retrieved_data = retrieve_data(filename=filename, search_df=search_df, store=store)
 
-        # When would be best to add subfolders etc. for this?
-
         self.retrieved_data = retrieved_data
 
         for data in retrieved_data:
+            data.output_folder = self.output_folder
+            data.obspack_name = self.obspack_name
+
             data.add_subfolder(subfolders)
-            # TODO: May want to tidy this up and make StoredData have
-            # output_folder and obspack_name instead of obspack_path
-            data.obspack_path = self.define_obspack_path()
 
         return retrieved_data
 
@@ -613,7 +644,14 @@ class ObsPack:
         return retrieved_data
 
     def define_site_index(self) -> pd.DataFrame:
-        """ """
+        """
+        Define site index for all StoredData associated with the ObsPack.
+        This compiles the details a pandas DataFrame, combining rows for
+        inlets of the same site.
+
+        Returns:
+            pandas.DataFrame: Site details collated as a DataFrame
+        """
         site_detail_rows = []
         retrieved_data = self.check_retrieved_data()
 
@@ -676,7 +714,7 @@ class ObsPack:
         """
         Write constructed ObsPack to disc.
         Currently this will write:
-            - retrieved_data -
+            - retrieved_data
 
         # TODO: Add writing of release files? (if removed from create_obspack_structure)
         # TODO: Add writing of site_index file? Currently done in a separate step.
@@ -762,7 +800,6 @@ def define_filename(
     name_components: list,
     metadata: dict,
     name_suffixes: dict,
-    output_path: pathType | None = None,
     separators: str | tuple = ("_", "-"),
 ) -> Path:
     """
@@ -779,10 +816,9 @@ def define_filename(
             within the filename.
         metadata: Dictionary containing the metadata keys to use
         name_suffixes: Dictionary of additional values to add to the filename as a suffix.
-        output_path: Full output folder path for file
         separators: Seperators to use between name_components. Default = ("_", "-")
     Returns:
-        Path: Full path for filename
+        Path: Filename within obspack
 
     Examples:
         >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m"})
@@ -793,15 +829,9 @@ def define_filename(
 
         >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m", }, obs_type="surface-insitu")
         Path("ch4_tac_42m_surface-insitu_v1.nc")
-
-        >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m", }, obs_type="surface-insitu", output_path="/path/to/output")
-        Path("/path/to/output/ch4_tac_42m_surface-insitu_v1.nc")
     """
 
     file_extension = ".nc"
-
-    if output_path is not None:
-        output_path = Path(output_path)
 
     if isinstance(separators, str):
         separators = (separators,)
@@ -814,9 +844,6 @@ def define_filename(
     filename_stub = separators[0].join(all_components)
 
     filename = Path(f"{filename_stub}{file_extension}")
-
-    if output_path is not None:
-        filename = Path(output_path) / filename
 
     return filename
 
@@ -898,10 +925,45 @@ def define_name_components(obs_type: str, metadata: dict | None = None) -> NameC
     return name_components
 
 
+def define_subfolder(subfolder: MultiSubFolder, obs_type: str | None = None) -> Path:
+    """
+    Define the default subfolder within the obspack for a file based on obs_type.
+
+    Args:
+        subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
+            this. This can be specified as:
+                - no subfolder(s) - pass empty string
+                - one subfolder for all files
+                - dictionary of subfolders per obs_type.
+                  - if obs_type is not within dictionary - obs_type will be used as subfolder name
+        obs_type: Name of the observation type to be included in the obspack.
+            See define_obs_types() for details of obs_type values.
+    Returns:
+        Path: subfolder
+    """
+    if isinstance(subfolder, dict):
+        if obs_type is not None:
+            if obs_type in subfolder:
+                subfolder = subfolder[obs_type]
+            else:
+                subfolder = None
+        else:
+            msg = f"Unable to use subfolder input: {subfolder} if obs_type is not specified."
+            logger.exception(msg)
+            raise ValueError(msg)
+
+    if subfolder is None:
+        if obs_type is not None:
+            subfolder = obs_type
+
+    subfolder = _create_path(subfolder)
+
+    return subfolder
+
+
 def define_surface_filename(
     metadata: dict,
     obs_type: str | None = None,
-    output_path: pathType | None = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -917,7 +979,6 @@ def define_surface_filename(
             "species" and "inlet" to be present.
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        output_path: Full output folder path for file
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -954,7 +1015,6 @@ def define_surface_filename(
         name_components,
         metadata=metadata,
         name_suffixes=name_suffixes,
-        output_path=output_path,
     )
 
     return filename
@@ -963,7 +1023,6 @@ def define_surface_filename(
 def define_column_filename(
     metadata: dict,
     obs_type: str = "column",
-    output_path: pathType | None = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -978,7 +1037,6 @@ def define_column_filename(
             and "species" to be present.
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        output_path: Full output folder path for file
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -1010,7 +1068,6 @@ def define_column_filename(
         name_components,
         metadata=metadata,
         name_suffixes=name_suffixes,
-        output_path=output_path,
     )
 
     return filename
@@ -1029,12 +1086,53 @@ def find_data_version(metadata: dict) -> str | None:
     return metadata.get(version_key)
 
 
-# CALLED BY OBSPACK
+def _create_path(input: pathType | None) -> Path:
+
+    if input is None:
+        input = Path("")
+    else:
+        input = Path(input)
+
+    return input
+
+
+# CALLED BY StoredData
+def define_full_obspack_filename(
+    obspack_filename: pathType,
+    obspack_name: str | None = None,
+    output_folder: pathType | None = None,
+    subfolder: MultiSubFolder = None,
+    obs_type: str | None = None,
+) -> Path:
+    """
+    Define full path for the output filename. This is based on the structure:
+
+        {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+
+    Args:
+        obspack_name: Full name for the obspack
+        output_folder: Top level directory.
+        subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
+            this. This can be specified as:
+                - no subfolder(s) - pass empty string
+                - one subfolder for all files
+                - dictionary of subfolders per obs_type.
+                  - if obs_type is not within dictionary - obs_type will be used as subfolder name
+    Returns:
+        Path: full output file path
+    """
+
+    obspack_name = obspack_name if obspack_name is not None else ""
+    output_folder = _create_path(output_folder)
+    subfolder = define_subfolder(subfolder, obs_type)
+
+    return output_folder / obspack_name / subfolder / obspack_filename
+
+
+# CALLED BY StoredData
 def define_obspack_filename(
     metadata: dict,
     obs_type: str,
-    obspack_path: pathType | None = None,
-    subfolder: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -1049,9 +1147,6 @@ def define_obspack_filename(
         metadata: Dictionary containing metadata values
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        obspack_path: Top level directory for obspack
-        subfolder: By default the obs_type will be used to create a subfolder. Specifying a subfolder directly
-            supercedes this. Pass an empty string for no subfolder.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -1064,28 +1159,8 @@ def define_obspack_filename(
         Path: Full path for filename
     """
     obs_types = define_obs_types()
-    if obspack_path is not None:
-        obspack_path = Path(obspack_path)
 
     if obs_type in obs_types:
-
-        if isinstance(subfolder, dict):
-            try:
-                subfolder = Path(subfolder[obs_type])
-            except KeyError:
-                raise ValueError(
-                    f"If subfolder is specified as a dict this should use the obs_type values for the keys. Currently: {list(subfolder.keys())}"  # type:ignore
-                )
-
-        if subfolder is None:
-            subfolder = obs_type
-        else:
-            subfolder = Path(subfolder)
-
-        if obspack_path is not None:
-            full_obspack_path = Path(obspack_path) / subfolder
-        else:
-            full_obspack_path = Path(subfolder)
 
         if isinstance(name_components, dict):
             try:
@@ -1099,7 +1174,6 @@ def define_obspack_filename(
             filename = define_surface_filename(
                 metadata=metadata,
                 obs_type=obs_type,
-                output_path=full_obspack_path,
                 include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
@@ -1110,7 +1184,6 @@ def define_obspack_filename(
             filename = define_column_filename(
                 metadata=metadata,
                 obs_type=obs_type,
-                output_path=full_obspack_path,
                 include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
