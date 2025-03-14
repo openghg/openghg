@@ -243,6 +243,7 @@ def data_read():
     selection = "LAND"
     species = "CH4"
     obs_region = "BRAZIL"
+    domain = "SOUTHAMERICA"
 
     standardise_column(
         filepath=filepath,
