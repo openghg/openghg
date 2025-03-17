@@ -660,13 +660,16 @@ class ObsPack:
             logger.exception(msg)
             raise ValueError(msg)
 
-        logger.info(f"Writing site details to: {output_filename}")
-        output_file = open(output_filename, "w")
+        obspack_path = self.define_obspack_path()
+        full_output_filename = obspack_path / output_filename
+
+        obspack_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Writing site details to: {full_output_filename}")
+        output_file = open(full_output_filename, "w")
 
         site_details = site_details.groupby(site_column).apply(collate_strings, include_groups=False)
         site_details = site_details.dropna(axis=1, how="all")
-
-        # index_output_name = open(obspack_folder / f"site_index_details_{version}.txt", "w")
 
         # Add header to file
         output_file.write("++++++++++++\n")
@@ -683,13 +686,16 @@ class ObsPack:
         self,
         include_release_files: bool = True,
         release_files: Sequence | None = None,
+        include_site_index: bool = True,
+        site_index_filename: pathType | None = None,
     ) -> None:
         """
         Write constructed ObsPack to disc.
         Currently this will write:
             - retrieved_data
+            - release files
+            - site index file
 
-        # TODO: Add writing of site_index file? Currently done in a separate step.
         """
         retrieved_data = self.check_retrieved_data()
 
@@ -703,8 +709,15 @@ class ObsPack:
                 self.release_files = ObsPack.default_release_files()
 
             obspack_path = self.define_obspack_path()
+            obspack_path.mkdir(parents=True, exist_ok=True)
+
             for file in self.release_files:
                 shutil.copy(file, obspack_path)
+
+        if include_site_index:
+            if site_index_filename is None:
+                site_index_filename = f"site_index_details_{self.version}.txt"
+            self.write_site_index_file(site_index_filename)
 
 
 def define_obs_types() -> list:
@@ -1504,7 +1517,10 @@ def create_obspack(
     major_version_only: bool = False,
     minor_version_only: bool = False,
     current_obspacks: list | None = None,
+    include_release_files: bool = True,
     release_files: Sequence | None = None,
+    include_site_index: bool = True,
+    site_index_filename: pathType | None = None,
     subfolders: MultiSubFolder | None = None,
     include_obs_type: bool = True,
     include_data_versions: bool = True,
@@ -1578,10 +1594,13 @@ def create_obspack(
         name_components=name_components,
     )
 
-    obspack.write(release_files=release_files)
+    obspack.write(
+        include_release_files=include_release_files,
+        release_files=release_files,
+        include_site_index=include_site_index,
+        site_index_filename=site_index_filename,
+    )
 
     obspack_path = obspack.define_obspack_path()
-    index_output_filename = obspack_path / f"site_index_details_{version}.txt"
-    obspack.write_site_index_file(index_output_filename)
 
     return obspack_path
