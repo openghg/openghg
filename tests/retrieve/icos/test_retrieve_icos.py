@@ -229,3 +229,12 @@ def test_retrieve_sac_data_update_attrs_with_bool():
     """Test that ValueError is raised if invalid value `True` is passed to `update_mismatch`."""
     with pytest.raises(ValueError):
         retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", update_mismatch=True, store="user")
+
+@pytest.mark.icos
+def test_icos_obspack():
+    """Test the combined obspack data retrieval"""
+    retrieved_data = retrieve_atmospheric(
+        site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
+    )
+
+    assert "icos_smr" in retrieved_data.data
