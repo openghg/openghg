@@ -405,11 +405,24 @@ class ObsPack:
 
         return obs_types
 
+    @staticmethod
+    def default_release_files() -> list:
+        """
+        Release files which will be included in the created obspack by default.
+        This will return a list of filepaths to these default files.
+        """
+        release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
+
+        with importlib.resources.as_file(release_file_ref) as f:
+            release_file_path = f
+
+        release_files = [release_file_path]
+        return release_files
+
     def create_obspack_structure(
         self,
         obs_types: Sequence | None = None,
         subfolder_names: Sequence | None = None,
-        release_files: Sequence | None = None,
     ) -> Path:
         """
         Create the structure for the new obspack and add initial release files to be included.
@@ -433,9 +446,6 @@ class ObsPack:
             if obs_types is None:
                 obs_types = define_obs_types()
 
-        if release_files is None:
-            release_files = default_release_files()
-
         if subfolder_names is None:
             subfolder_names = obs_types
 
@@ -443,9 +453,6 @@ class ObsPack:
         for subfolder in subfolder_names:
             subfolder = obspack_path / subfolder
             subfolder.mkdir(parents=True)
-
-        for file in release_files:
-            shutil.copy(file, obspack_path)
 
         return obspack_path
 
@@ -709,7 +716,11 @@ class ObsPack:
 
         output_file.close()
 
-    def write(self) -> None:
+    def write(
+        self,
+        include_release_files: bool = True,
+        release_files: Sequence | None = None,
+    ) -> None:
         """
         Write constructed ObsPack to disc.
         Currently this will write:
@@ -722,6 +733,16 @@ class ObsPack:
 
         for data in retrieved_data:
             data.write()
+
+        if include_release_files:
+            if release_files is not None:
+                self.release_files = release_files
+            elif not hasattr(self, "release_files") or self.release_files is None:
+                self.release_files = ObsPack.default_release_files()
+
+            obspack_path = self.define_obspack_path()
+            for file in self.release_files:
+                shutil.copy(file, obspack_path)
 
 
 def define_obs_types() -> list:
@@ -1399,20 +1420,6 @@ def define_obspack_name(
     return obspack_name, version
 
 
-def default_release_files() -> list:
-    """
-    Release files which will be included in the created obspack by default.
-    This will return a list of filepaths to these default files.
-    """
-    release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
-
-    with importlib.resources.as_file(release_file_ref) as f:
-        release_file_path = f
-
-    release_files = [release_file_path]
-    return release_files
-
-
 def read_input_file(filename: pathType) -> pd.DataFrame:
     """
     Read input file containing search parameters as a pandas DataFrame.
@@ -1613,9 +1620,7 @@ def create_obspack(
     else:
         subfolder_names = None
 
-    obspack_path = obspack.create_obspack_structure(
-        subfolder_names=subfolder_names, release_files=release_files
-    )
+    obspack_path = obspack.create_obspack_structure(subfolder_names=subfolder_names)
 
     # Create default obspack filenames for data
     # If any duplicates are found and update to use more of the metadata be more specific
@@ -1625,8 +1630,9 @@ def create_obspack(
         name_components=name_components,
     )
 
-    obspack.write()
+    obspack.write(release_files=release_files)
 
+    obspack_path = obspack.define_obspack_path()
     index_output_filename = obspack_path / f"site_index_details_{version}.txt"
     obspack.write_site_index_file(index_output_filename)
 
