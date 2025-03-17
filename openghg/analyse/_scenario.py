@@ -389,7 +389,7 @@ class ModelScenario:
         # Search for obs data based on keywords
         if site is not None and obs_column is None and satellite is None:
             site = clean_string(site)
-        else:
+        elif obs_column is None:
             verify_site_with_satellite(
                 site=site, satellite=satellite, obs_region=obs_region, selection=selection
             )
