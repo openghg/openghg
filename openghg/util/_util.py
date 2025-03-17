@@ -263,7 +263,9 @@ def verify_site_with_satellite(
 
             if site:
                 clean_string(site) != expected_site
-                raise ValueError(f"Mismatch: expected site '{expected_site}', but got '{site}'. Please specify just 'site' OR 'satellite' and 'obs_region' and 'selection' as appropriate.")
+                raise ValueError(
+                    f"Mismatch: expected site '{expected_site}', but got '{site}'. Please specify just 'site' OR 'satellite' and 'obs_region' and 'selection' as appropriate."
+                )
 
         elif site and (obs_region or selection):
             raise ValueError("Cannot specify obs_region or selection without a satellite.")
