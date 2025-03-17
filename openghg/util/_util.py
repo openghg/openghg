@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from collections.abc import Iterator
 import logging
+from openghg.util import clean_string
 
 from openghg.types import multiPathType
 
@@ -222,3 +223,50 @@ def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
     return sorted(filepath)
+
+
+def verify_site_with_satellite(
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
+    selection: str | None = None,
+) -> None:
+    """
+    Validates the `site` parameter for processing `ModelScenario` with satellite data.
+
+    In the old framework, the `site` value was expected to align with satellite data(an type of alias) And contained below mentioned structure.
+
+    - If `site` and `satellite` are specified, site should be equal to satellite.
+    - If `site`, `satellite` and `obs_region` are specified, `site` should be `{satellite}-{obs_region}`.
+    - If `site`, `satellite`, `obs_region`, and `selection` are specified, `site` should be `{satellite}-{obs_region}-{selection}`.
+    - If `site` does not match the expected format, an error is raised.
+    - If `site` is specified without a `satellite` but includes `obs_region` or `selection`, an error is raised.
+
+    The function verifies site parameter conforms with the known structure by comparing against `satellite`, `obs_region`, and `selection` over `site`.
+
+
+    Args:
+        site: Site Name containing satellite/ satellie-obs_region/ satellite-obs_region-selection
+        satellite: Satellite name
+        obs_region:
+        selection:
+
+    Returns: None
+    """
+    try:
+        if satellite:
+            expected_site = clean_string(satellite)
+            if obs_region:
+                expected_site += f"-{clean_string(obs_region)}"
+            if selection:
+                expected_site += f"-{clean_string(selection)}"
+
+            if site:
+                clean_string(site) != expected_site
+                raise ValueError(f"Mismatch: expected site '{expected_site}', but got '{site}'")
+
+        elif site and (obs_region or selection):
+            raise ValueError("Cannot specify obs_region or selection without a satellite.")
+
+    except ValueError as e:
+        print(f"Error: {e}")
