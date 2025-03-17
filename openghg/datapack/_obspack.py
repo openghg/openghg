@@ -419,43 +419,6 @@ class ObsPack:
         release_files = [release_file_path]
         return release_files
 
-    def create_obspack_structure(
-        self,
-        obs_types: Sequence | None = None,
-        subfolder_names: Sequence | None = None,
-    ) -> Path:
-        """
-        Create the structure for the new obspack and add initial release files to be included.
-
-        Args:
-            output_folder: Path to top level directory where obspack folder will be created
-            obspack_name: Name of obspack to be created
-            obs_types: Observation types to include in obspack. By default, sub-folders will be created for these obs_types.
-            subfolder_names: Alternatively, can specify a list of subfolders to create directly. This will supercede obs_types input.
-            release_files: Release files to be included within the output obspack.
-                - If release_files=None (default) this will use the files defined by default_release_files() function.
-                - If release_files=[] no release files will be included in the obspack.
-        Returns:
-            Path: Path to top level obspack directory {output_folder}/{obspack_name}
-        """
-
-        obspack_path = self.define_obspack_path()
-
-        if obs_types is None:
-            obs_types = self.contained_obs_types()
-            if obs_types is None:
-                obs_types = define_obs_types()
-
-        if subfolder_names is None:
-            subfolder_names = obs_types
-
-        logger.info(f"Creating top level obspack folder: {obspack_path} and subfolder(s): {subfolder_names}")
-        for subfolder in subfolder_names:
-            subfolder = obspack_path / subfolder
-            subfolder.mkdir(parents=True)
-
-        return obspack_path
-
     def check_retrieved_data(self) -> list[StoredData]:
         """ """
         if self.retrieved_data is None:
@@ -726,7 +689,6 @@ class ObsPack:
         Currently this will write:
             - retrieved_data
 
-        # TODO: Add writing of release files? (if removed from create_obspack_structure)
         # TODO: Add writing of site_index file? Currently done in a separate step.
         """
         retrieved_data = self.check_retrieved_data()
@@ -1607,20 +1569,6 @@ def create_obspack(
             msg = "Either obspack_name or obspack_stub must be specified when creating an obspack."
             logger.exception(msg)
             raise ValueError(msg)
-
-    # TODO: See if we can remove create_obspack_structure entirely and rely
-    # on individual file creation including parent paths instead?
-    # - One note is that currently create_obspack_structure adds the release files
-    #   so would need to move that to somewhere else!
-
-    if isinstance(subfolders, dict):
-        subfolder_names = list(subfolders.values())
-    elif isinstance(subfolders, str):
-        subfolder_names = [subfolders]
-    else:
-        subfolder_names = None
-
-    obspack_path = obspack.create_obspack_structure(subfolder_names=subfolder_names)
 
     # Create default obspack filenames for data
     # If any duplicates are found and update to use more of the metadata be more specific
