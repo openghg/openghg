@@ -7,8 +7,9 @@ import xarray as xr
 from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
-from helpers import clear_test_stores
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, get_obs_column
+from helpers import clear_test_stores, get_column_datapath
+from openghg.standardise import standardise_column
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
 
@@ -1568,6 +1569,33 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     expected_flux = 1 + 11  # All values should be 12
     output_flux = dataset_stacked.flux.values
     np.testing.assert_allclose(output_flux, expected_flux)
+
+
+def test_scenario_with_satellite_data():
+    """ Test to ensure ModelScenario instance can be created from obs_column satellite data and footprints satellite data"""
+
+    satellite = "gosat"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
+    species = "ch4"
+
+    obs_column = get_obs_column(
+        species=species, max_level = 3, satellite=satellite,
+    )
+
+    footprint = get_footprint(
+        satellite=satellite, domain=domain, obs_region=obs_region
+    )
+
+    model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint,  platform="satellite")
+
+    # Check values have been stored in ModelScenario object correctly
+    assert model_scenario.obs is not None
+    assert model_scenario.footprint is not None
+
+    # Check values stored within model_scenario object match inputs
+    xr.testing.assert_equal(model_scenario.obs.data, obs_column.data)
+    xr.testing.assert_equal(model_scenario.footprint.data, footprint.data)
 
 
 def test_scenario_infer_flux_source_ch4():

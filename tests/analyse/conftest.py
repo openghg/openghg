@@ -5,12 +5,14 @@ from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
     get_surface_datapath,
+    get_column_datapath
 )
 from openghg.standardise import (
     standardise_bc,
     standardise_flux,
     standardise_footprint,
     standardise_surface,
+    standardise_column
 )
 
 
@@ -233,3 +235,44 @@ def data_read():
         domain=domain2,
         species=species2,
     )
+
+    # Populating with satellite data for ObsColumn
+    filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+
+    satellite = "GOSAT"
+    selection = "LAND"
+    species = "CH4"
+    obs_region = "BRAZIL"
+    domain = "SOUTHAMERICA"
+
+    standardise_column(
+        filepath=filepath,
+        source_format="OPENGHG",
+        satellite=satellite,
+        species=species,
+        obs_region=obs_region,
+        selection=selection,
+        store="user",
+    )
+
+    # Populating with satellite data for footprints
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
+
+    standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            inlet="column",
+            period='1S',
+            domain=domain,
+            obs_region=obs_region,
+            selection="LAND",
+            store="user",
+            continuous=False,
+        )

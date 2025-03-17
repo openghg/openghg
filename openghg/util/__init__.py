@@ -113,5 +113,6 @@ from ._util import (
     sort_by_filenames,
     unanimous,
     verify_site,
+    verify_site_with_satellite,
 )
 from ._versions import show_versions, check_if_need_new_version
