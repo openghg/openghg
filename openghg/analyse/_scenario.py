@@ -66,7 +66,7 @@ from openghg.retrieve import (
     search_footprints,
     search_column,
 )
-from openghg.util import synonyms
+from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
 from openghg.types import SearchError
 from ._alignment import align_obs_and_other
 
@@ -339,7 +339,6 @@ class ModelScenario:
         store: str | None = None,
     ) -> None:
         """Add observation data based on keywords or direct ObsData object."""
-        from openghg.util import clean_string, format_inlet
 
         # Search for obs data based on keywords
         if site is not None and obs is None:
@@ -386,11 +385,14 @@ class ModelScenario:
         store: str | None = None,
     ) -> None:
         """Add column data based on keywords or direct ObsColumnData object."""
-        from openghg.util import clean_string
 
         # Search for obs data based on keywords
-        if site is not None and obs_column is None:
+        if site is not None and obs_column is None and satellite is None:
             site = clean_string(site)
+        else:
+            verify_site_with_satellite(
+                site=site, satellite=satellite, obs_region=obs_region, selection=selection
+            )
 
             # search for obs based on suitable keywords - site, species, inlet
             obs_column_keywords = {
@@ -440,8 +442,6 @@ class ModelScenario:
     ) -> None:
         """Add footprint data based on keywords or direct FootprintData object."""
         from openghg.util import (
-            clean_string,
-            format_inlet,
             species_lifetime,
             extract_height_name,
         )
