@@ -234,7 +234,7 @@ def test_retrieve_sac_data_update_attrs_with_bool():
 def test_icos_obspack():
     """Test the combined obspack data retrieval"""
     retrieve_atmospheric(
-        site="BIR", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
+        site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
     )
 
     assert "icos_smr" in result.data

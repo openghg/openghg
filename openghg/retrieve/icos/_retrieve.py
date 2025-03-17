@@ -44,7 +44,9 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify "ICOS
+            Combined" here in order to retrieve the combined timeseries including all Obspack and ICOS
+            data (e.g. https://doi.org/10.18160/0HYS-FF7X)
         store: Name of object to search/store data to
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
@@ -147,8 +149,7 @@ def _retrieve_remote(
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
     Args:
-        site: ICOS site code, for site codes see
-        https://www.icos-cp.eu/observations/atmosphere/stations
+        site: Site code
         data_level: ICOS data level (1, 2)
         - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
         - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
@@ -158,7 +159,9 @@ def _retrieve_remote(
         species: Species name
         inlet: Height of the inlet for sampling in metres.
         sampling_height: Alias for inlet
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify "ICOS
+            Combined" here in order to retrieve the combined timeseries including all Obspack and ICOS
+            data (e.g. https://doi.org/10.18160/0HYS-FF7X)
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
             This includes the options:
