@@ -196,7 +196,7 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
             ({"project": "gemma", "source": "noaa"}, "ch4_WAO_10m_gemma_noaa.nc"),
         ]
 )
-def test_define_obspack_filename_name_components(name_suffixes, out_filename):
+def test_define_obspack_filename_name_suffixes(name_suffixes, out_filename):
     """
     Check name components for the file name can be used correctly.
     1. Check the standard suffix values create the expected output
@@ -232,6 +232,98 @@ def test_check_unique(input, expected_result):
     """
     result = check_unique(input)
     assert result == expected_result
+
+
+def test_find_additional_metakeys_insitu():
+    """
+    Check additional metakeys can be found for surface-insitu data.
+    Assumptions:
+    - The following keys are defaults when defining surface data:
+      - "site", "species", "inlet", "data_level"
+    This test will need updating is this stops being the case.
+    """
+
+    obs_type = "surface-insitu"
+    name_components = ["site", "species", "inlet"]
+
+    metakeys = _find_additional_metakeys(obs_type=obs_type,
+                                         name_components=name_components)
+
+    # Define a metakey we would expect for surface data
+    # Note: Will need to update if the surface definition changes to remove this
+    one_expected_metakey = "data_level"
+
+    # Check name_components are not in metakeys
+    assert not set(name_components) <= set(metakeys)
+    assert one_expected_metakey in metakeys
+
+
+@pytest.mark.parametrize(
+        "version,current_obspacks,expected_output",
+        [
+            ("v1", [], "gemma_obspack_v1"),
+            (None, ["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next version
+            (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
+            (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+            (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+            (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+        ]
+)
+def test_define_obspack_name(version, current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                 version=version,
+                                 current_obspacks=current_obspacks)
+
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+        "current_obspacks,expected_output",
+        [
+            ([], "gemma_obspack_v1.0"),
+            (["gemma_obspack"], "gemma_obspack_v1.1"),  # If no version is found, assume v1 and use next minor version
+            (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
+            (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
+            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+        ]
+)
+def test_define_obspack_name_minor(current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
+    minor_version_only = True
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                          minor_version_only=minor_version_only,
+                                          current_obspacks=current_obspacks)
+
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+        "current_obspacks,expected_output",
+        [
+            ([], "gemma_obspack_v1"),
+            (["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next major version
+            (["gemma_obspack_v1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
+            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
+            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
+        ]
+)
+def test_define_obspack_name_major(current_obspacks, expected_output):
+    obspack_stub = "gemma_obspack"
+    major_version_only = True
+    output, version = define_obspack_name(obspack_stub=obspack_stub,
+                                          major_version_only=major_version_only,
+                                          current_obspacks=current_obspacks)
+
+    assert output == expected_output
 
 
 @pytest.fixture
@@ -314,30 +406,6 @@ def test_check_unique_filenames(obspack_1):
     assert len(data_grouped_repeats[0]) == 2
 
 
-def test_find_additional_metakeys_insitu():
-    """
-    Check additional metakeys can be found for surface-insitu data.
-    Assumptions:
-    - The following keys are defaults when defining surface data:
-      - "site", "species", "inlet", "data_level"
-    This test will need updating is this stops being the case.
-    """
-
-    obs_type = "surface-insitu"
-    name_components = ["site", "species", "inlet"]
-
-    metakeys = _find_additional_metakeys(obs_type=obs_type,
-                                         name_components=name_components)
-
-    # Define a metakey we would expect for surface data
-    # Note: Will need to update if the surface definition changes to remove this
-    one_expected_metakey = "data_level"
-
-    # Check name_components are not in metakeys
-    assert not set(name_components) <= set(metakeys)
-    assert one_expected_metakey in metakeys
-
-
 def test_add_obspack_filenames(obspack_1):
     """
     Check add_obspack_filenames can produce unique filenames when the
@@ -359,74 +427,6 @@ def test_add_obspack_filenames(obspack_1):
 
     assert str(filename1) == expected_filename1
     assert str(filename2) == expected_filename2
-
-
-@pytest.mark.parametrize(
-        "version,current_obspacks,expected_output",
-        [
-            ("v1", [], "gemma_obspack_v1"),
-            (None, ["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next version
-            (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
-            (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-            (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-            (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-        ]
-)
-def test_define_obspack_name(version, current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                 version=version,
-                                 current_obspacks=current_obspacks)
-
-    assert output == expected_output
-
-
-@pytest.mark.parametrize(
-        "current_obspacks,expected_output",
-        [
-            ([], "gemma_obspack_v1.0"),
-            (["gemma_obspack"], "gemma_obspack_v1.1"),  # If no version is found, assume v1 and use next minor version
-            (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
-            (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
-            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-        ]
-)
-def test_define_obspack_name_minor(current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    minor_version_only = True
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                          minor_version_only=minor_version_only,
-                                          current_obspacks=current_obspacks)
-
-    assert output == expected_output
-
-
-@pytest.mark.parametrize(
-        "current_obspacks,expected_output",
-        [
-            ([], "gemma_obspack_v1"),
-            (["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next major version
-            (["gemma_obspack_v1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
-            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
-        ]
-)
-def test_define_obspack_name_major(current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    major_version_only = True
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                          major_version_only=major_version_only,
-                                          current_obspacks=current_obspacks)
-
-    assert output == expected_output
 
 
 def populate_object_store():
