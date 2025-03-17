@@ -233,8 +233,8 @@ def test_retrieve_sac_data_update_attrs_with_bool():
 @pytest.mark.icos
 def test_icos_obspack():
     """Test the combined obspack data retrieval"""
-    retrieve_atmospheric(
+    retrieved_data = retrieve_atmospheric(
         site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
     )
 
-    assert "icos_smr" in result.data
+    assert "icos_smr" in retrieved_data.data
