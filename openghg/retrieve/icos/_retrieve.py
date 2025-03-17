@@ -179,7 +179,7 @@ def _retrieve_remote(
 
     import re
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import format_inlet, format_data_level
+    from openghg.util import format_inlet, format_data_level, load_internal_json
     from pandas import to_datetime, Timedelta
 
     if species is None:
@@ -309,19 +309,20 @@ def _retrieve_remote(
         # Hack to convert units for Obspack nc files
         if dataset_source == "ICOS Combined":
             if spec == "co2":
-                dataframe["value"] = dataframe["value"] * 1e6
-                dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e6
-                dataframe["icos_LTR"] = dataframe["icos_LTR"] * 1e6
-                dataframe["icos_SMR"] = dataframe["icos_SMR"] * 1e6
-                dataframe["icos_STTB"] = dataframe["icos_STTB"] * 1e6
                 units = "ppm"
             else:
-                dataframe["value"] = dataframe["value"] * 1e9
-                dataframe["value_std_dev"] = dataframe["value_std_dev"] * 1e9
-                dataframe["icos_LTR"] = dataframe["icos_LTR"] * 1e9
-                dataframe["icos_SMR"] = dataframe["icos_SMR"] * 1e9
-                dataframe["icos_STTB"] = dataframe["icos_STTB"] * 1e9
                 units = "ppb"
+
+            attributes_data = load_internal_json("attributes.json")
+            unit_interpret = attributes_data["unit_interpret"]
+            unit_value = float(unit_interpret.get(units, "1"))
+
+            dataframe["value"] = dataframe["value"] / unit_value
+            dataframe["value_std_dev"] = dataframe["value_std_dev"] / unit_value
+            dataframe["icos_LTR"] = dataframe["icos_LTR"] / unit_value
+            dataframe["icos_SMR"] = dataframe["icos_SMR"] / unit_value
+            dataframe["icos_STTB"] = dataframe["icos_STTB"] / unit_value
+
         else:
             units = species_info["valueType"]["unit"].lower()
 
