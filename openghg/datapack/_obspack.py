@@ -1570,7 +1570,9 @@ def create_obspack(
             raise ValueError(msg)
 
     obspack = ObsPack(output_folder, obspack_name)
-    obspack.find_and_retrieve_data(filename=search_filename, search_df=search_df, store=store)
+    obspack.find_and_retrieve_data(
+        filename=search_filename, search_df=search_df, store=store, subfolders=subfolders
+    )
 
     if obspack_name is None:
         if obspack_stub:
