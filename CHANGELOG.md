@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bug where attributes were not preserved during some resampling operations. [PR #1233](https://github.com/openghg/openghg/pull/1233)
+- Removing variable "id" to avoid merging conflicts when standardising obs. [PR #1257](https://github.com/openghg/openghg/pull/1257)
 
 ## [0.12.0] - 2025-02-27
 
