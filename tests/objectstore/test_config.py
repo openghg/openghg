@@ -2,7 +2,7 @@ import pytest
 from openghg.objectstore import (
     check_metakeys,
     get_metakey_defaults,
-    create_default_config,
+    create_custom_config,
     get_metakeys,
     write_metakeys,
 )
@@ -25,17 +25,17 @@ def test_get_metakey_defaults():
     assert defaults.keys() == storage_classes.keys()
 
 
-def test_create_default_config(tmp_store):
+def test_create_custom_config(tmp_store):
 
-    create_default_config(bucket=str(tmp_store))
+    create_custom_config(bucket=str(tmp_store))
 
     assert (tmp_store / "config" / "metadata_keys.json").exists()
 
 
-def test_get_metakeys(tmp_store):
-    create_default_config(bucket=tmp_store)
-
-    metakeys = get_metakeys(bucket=tmp_store)
+def test_get_metakeys():
+    """Test metakeys can be extracted.
+    """
+    metakeys = get_metakeys()
 
     assert metakeys.keys() == data_class_info().keys()
 
