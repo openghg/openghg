@@ -158,7 +158,7 @@ def infer_date_range(
                 if input_freq != null_freq:
                     inferred_freq = input_freq
                     logger.warning(
-                        "\n*** WARNING:Inferred frequency is set to the provided 'period'. This could indicate that the 'period' value may be incorrect. Exercise caution when using this value. ***\n"
+                        "Inferred frequency is set to the provided 'period'. This could indicate that the 'period' value may be incorrect. Exercise caution when using this value."
                     )
                 else:
                     inferred_freq = null_freq
@@ -188,7 +188,7 @@ def infer_date_range(
         else:
             period_str = "varies"
             logger.warning(
-                "\n*** WARNING: The `time_period` is set to `varies`. Defaults to a `1 second` period for further processing and updates the `time_period` in metadata with the default value. ***\n"
+                "The `time_period` is set to `varies`. Defaults to a `1 second` period for further processing and updates the `time_period` in metadata with the default value."
             )
 
     return start_date, end_date, period_str
