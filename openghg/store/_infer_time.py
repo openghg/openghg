@@ -181,6 +181,9 @@ def infer_date_range(
             period_str = create_frequency_str(time_value, time_unit)
         else:
             period_str = "varies"
+            logger.warning(
+                "\n*** WARNING: `time_period`, is set to `varies` in metadata. Defaults period to `1 seconds` to process further. ***\n"
+            )
 
     return start_date, end_date, period_str
 
