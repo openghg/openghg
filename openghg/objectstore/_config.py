@@ -22,16 +22,21 @@ def _get_custom_config_folderpath(bucket: str) -> Path:
     return Path(bucket, "config")
 
 
-def _get_custom_metakeys_filepath(bucket: str) -> Path:
+def _get_custom_metakeys_filepath(bucket: str, previous: bool = False) -> Path:
     """Get the expected path from the metakeys JSON file
     within an object store.
 
     Args:
         bucket: Object store bucket path
+        previous: Get previous name for the file (now deprecated)
     Returns:
         Path: Path to metakeys JSON
     """
-    return _get_custom_config_folderpath(bucket=bucket) / "metadata_keys_v2.json"
+    if previous:
+        filename = "metadata_keys.json"
+    else:
+        filename = "metadata_keys_v2.json"
+    return _get_custom_config_folderpath(bucket=bucket) / filename
 
 
 def get_metakeys_defaults_filepath() -> Path:
@@ -222,6 +227,13 @@ def get_metakeys(bucket: str | None = None) -> dict[str, dict]:
 
     if metakey_path is None or not metakey_path.exists():
         metakey_path = get_metakeys_defaults_filepath()
+
+    if bucket is not None:
+        prev_metakey_path = _get_custom_metakeys_filepath(bucket=bucket, previous=False)
+        if prev_metakey_path.exists():
+            logger.warning(
+                f"Previous config file: '{prev_metakey_path}' exists in the object store. This is now deprecated and so is no longer used."
+            )
 
     metakeys = _get_metakeys_from_file(metakey_path)
 
