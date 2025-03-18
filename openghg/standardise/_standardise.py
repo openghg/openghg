@@ -66,6 +66,7 @@ def standardise_surface(
     dataset_source: str | None = None,
     sampling_period: Timedelta | str | None = None,
     calibration_scale: str | None = None,
+    platform: str | None = None,
     measurement_type: str = "insitu",
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
@@ -105,6 +106,7 @@ def standardise_surface(
         dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06".
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
+        platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
         measurement_type: Type of measurement e.g. insitu, flask
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
@@ -166,6 +168,7 @@ def standardise_surface(
         dataset_source=dataset_source,
         sampling_period=sampling_period,
         calibration_scale=calibration_scale,
+        platform=platform,
         measurement_type=measurement_type,
         overwrite=overwrite,
         verify_site_code=verify_site_code,
