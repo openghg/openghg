@@ -1587,7 +1587,11 @@ def test_scenario_with_satellite_data():
         satellite=satellite, domain=domain, obs_region=obs_region
     )
 
-    model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint,  platform="satellite")
+    with pytest.raises(AttributeError):
+        # checks that ModelScenario fails if passing platform=satellite but not max_level
+        model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint,  platform="satellite")
+
+    model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint, max_level = 3, platform="satellite")
 
     # Check values have been stored in ModelScenario object correctly
     assert model_scenario.obs is not None
