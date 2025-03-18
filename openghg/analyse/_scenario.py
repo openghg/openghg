@@ -191,9 +191,17 @@ class ModelScenario:
 
         accepted_column_data_types = ["satellite", "site-column"]
 
+        if satellite is not None and platform is None:
+            logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
+            platform = "satellite"
+
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
+            if max_level is None:
+                raise AttributeError(
+                    "If you are using column-based data (i.e. platform is 'satellite' or 'site-column'), you need to pass max_level"
+                )
             self.add_obs_column(
                 site=site,
                 satellite=satellite,
@@ -238,6 +246,7 @@ class ModelScenario:
             domain=domain,
             model=model,
             met_model=met_model,
+            satellite=satellite,
             fp_inlet=fp_inlet,
             start_date=start_date,
             end_date=end_date,
@@ -448,10 +457,15 @@ class ModelScenario:
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, met_model
-        if site is not None and footprint is None:
-            site = clean_string(site)
 
-            if fp_inlet is None:
+        if footprint is None and (site is not None or satellite is not None):
+            if site is not None:
+                site = clean_string(site)
+
+            if satellite is not None and fp_inlet is None:
+                fp_inlet = "column"
+
+            if site is not None and fp_inlet is None:
                 # use obs network if we're trying to infer the height from site info
                 if self.obs is not None:
                     network = network or self.obs.metadata.get("network")
