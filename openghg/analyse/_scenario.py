@@ -739,7 +739,7 @@ class ModelScenario:
             # Do not apply resampling for "satellite" or "flask"
             if platform == "satellite":
                 resample_to = None
-                align_to_obs = False
+                align_to_obs = True
             elif "flask" in platform:
                 resample_to = None
                 align_to_obs = True
@@ -748,7 +748,10 @@ class ModelScenario:
 
         if resample_to is None:
             if align_to_obs:
-                footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
+                if platform == "satellite":
+                    footprint_data = footprint_data.reindex_like(obs_data, tolerance=pd.Timedelta("1ms"))
+                else:
+                    footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
 
         if resample_to == "footprint":
