@@ -294,7 +294,7 @@ class Footprints(BaseStore):
             satellite = clean_string(satellite)
             obs_region = clean_string(obs_region)
             continuous = False
-            logger.warning("\n*** WARNING: For satellite data, 'continuous' is set to `False` ***\n")
+            logger.info("For satellite data, 'continuous' is set to `False`")
         else:
             raise ValueError("Please pass either site or satellite and obs_region values")
 
