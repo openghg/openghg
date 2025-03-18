@@ -155,7 +155,10 @@ def infer_date_range(
                     "Continuous data with no gaps is expected but no time period can be inferred. Run with continuous=False (and optionally specify period input) to remove this constraint."
                 )
             else:
-                inferred_freq = null_freq
+                if input_freq != null_freq:
+                    inferred_freq = input_freq
+                else:
+                    inferred_freq = null_freq
         else:
             inferred_freq = parse_period(inferred_period)
 
