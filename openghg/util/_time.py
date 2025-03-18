@@ -714,8 +714,10 @@ def parse_period(period: str | tuple) -> TimePeriod:
             unit = period.lstrip(value_str).strip()  # Strip found value and any whitespace.
         else:
             value = 1
-            unit = "seconds"
-            logging.warning("For time period 'varies' value is set `1` and unit is set to `seconds`")
+            unit = period
+            if period == "varies":
+                unit = "seconds"
+                logging.warning("For time period 'varies' value is set `1` and unit is set to `seconds`")
 
     offset_naming = time_offset_definition()
 
@@ -832,7 +834,7 @@ def relative_time_offset(
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
-    relative_units = ("weeks", "months", "years")
+    relative_units = ("seconds", "weeks", "months", "years")
 
     if unit in relative_units:
         time_delta = DateOffset(**{unit: value})
