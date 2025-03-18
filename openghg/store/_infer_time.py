@@ -182,7 +182,7 @@ def infer_date_range(
         else:
             period_str = "varies"
             logger.warning(
-                "\n*** WARNING: `time_period`, is set to `varies`. Defaults period to `1 seconds` to process further and updates `time_period` in metadata with the default value. ***\n"
+                "\n*** WARNING: The `time_period` is set to `varies`. Defaults to a `1 second` period for further processing and updates the `time_period` in metadata with the default value. ***\n"
             )
 
     return start_date, end_date, period_str
