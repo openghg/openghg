@@ -157,6 +157,9 @@ def infer_date_range(
             else:
                 if input_freq != null_freq:
                     inferred_freq = input_freq
+                    logger.warning(
+                        "\n*** WARNING:Inferred frequency is set to the provided 'period'. This could indicate that the 'period' value may be incorrect. Exercise caution when using this value. ***\n"
+                    )
                 else:
                     inferred_freq = null_freq
         else:
