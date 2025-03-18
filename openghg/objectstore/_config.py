@@ -31,7 +31,7 @@ def _get_custom_metakeys_filepath(bucket: str) -> Path:
     Returns:
         Path: Path to metakeys JSON
     """
-    return _get_custom_config_folderpath(bucket=bucket) / "metadata_keys.json"
+    return _get_custom_config_folderpath(bucket=bucket) / "metadata_keys_v2.json"
 
 
 def get_metakeys_defaults_filepath() -> Path:

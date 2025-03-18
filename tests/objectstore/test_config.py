@@ -35,7 +35,7 @@ def test_create_custom_config(tmp_store):
     """
     create_custom_config(bucket=str(tmp_store))
 
-    assert (tmp_store / "config" / "metadata_keys.json").exists()
+    assert (tmp_store / "config" / "metadata_keys_v2.json").exists()
 
 
 def test_get_metakeys():
