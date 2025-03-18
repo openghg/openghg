@@ -31,6 +31,9 @@ def test_read_file():
 
     assert "ch4" in data
 
+    assert "exposure_id" not in data
+    assert "id" not in data
+
     output_ch4 = data["ch4"]
     data_ch4 = output_ch4["data"]
 
