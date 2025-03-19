@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
 import re
@@ -714,6 +715,9 @@ def parse_period(period: str | tuple) -> TimePeriod:
         else:
             value = 1
             unit = period
+            if period == "varies":
+                unit = "s"
+                logging.warning("For time period 'varies' value is set `1` and unit is set to `seconds`")
 
     offset_naming = time_offset_definition()
 

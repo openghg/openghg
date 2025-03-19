@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
 
+### Updated
+- Introduced functionality to process data with the time_period set to "varies," with a default value of '1 second'. Additionally, the inferred_freq has been updated to input_freq when the continuous flag is set to False.[#1259](https://github.com/openghg/openghg/pull/1259)
+
 ## [0.13.0] - 2025-03-10
 
 ### Added
