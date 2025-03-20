@@ -46,6 +46,7 @@ from ._metadata_util import (
     check_not_set_value,
     get_overlap_keys,
     merge_dict,
+    set_period_str,
 )
 from ._registry import AutoRegistry, Registry
 from ._site import get_site_info, sites_in_network
