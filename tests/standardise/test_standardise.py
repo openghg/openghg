@@ -718,7 +718,7 @@ def test_standardise_footprint_satellite(caplog):
         obs_region=obs_region
     )
 
-    assert data.metadata["time_period"] == '1 second'
+    assert data.metadata["time_period"] == 'varies'
     assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == domain.lower()
