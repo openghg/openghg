@@ -11,7 +11,6 @@ from openghg.util import (
     timestamp_now,
     # open_and_align_dataset,
     check_function_open_nc,
-    set_period_str,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType, ParseError
@@ -200,9 +199,6 @@ def parse_acrg_org(
     start_date, end_date, period_str = infer_date_range(
         fp_time, filepath=input_filepath, period=period, continuous=continuous
     )
-
-    if satellite is not None and period_str is not None:
-        period_str = set_period_str(satellite=satellite, period_str=period_str)
 
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)

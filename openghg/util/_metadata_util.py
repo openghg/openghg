@@ -290,18 +290,3 @@ def merge_dict(
         raise ValueError(msg)
 
     return merged_dict
-
-
-def set_period_str(satellite: str, period_str: str) -> str:
-    """This is function created to check if period is set as 1 second for satellite data and updates it to be `varies` for attributes
-
-    Args:
-        satellite: Satellite name
-        period_str: Time period
-    Returns:
-        period_str
-    """
-    if satellite:
-        if period_str == "1 second":
-            period_str = "varies"
-    return period_str
