@@ -81,7 +81,8 @@ def test_parse_acrg_org_satellite_key():
                    domain=domain,
                    obs_region=obs_region,
                    inlet=inlet,
-                   continuous=False
+                   continuous=False,
+                   period = "varies"
                    )
 
     expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"

@@ -191,6 +191,9 @@ def infer_date_range(
                 "The `time_period` is set to `varies`. Defaults to a `1 second` period for further processing and updates the `time_period` in metadata with the default value."
             )
 
+        if period == "varies" and inferred_freq == TimePeriod(value=1, unit="seconds"):
+            period_str = "varies"
+
     return start_date, end_date, period_str
 
 

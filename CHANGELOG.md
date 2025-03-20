@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
 
+### Updated
+- Updated `time_period` to be "varies" instead of "1 second" for non-continuous and period = varies.[#PR 1267](https://github.com/openghg/openghg/pull/1267)
+
 ### Fixed
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
 
