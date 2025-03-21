@@ -25,13 +25,12 @@ Key functions:
 import re
 import numpy as np
 import pandas as pd
-import xarray as xr
 import shutil
 import pathlib
 from pathlib import Path
 
 import importlib.resources
-from typing import Sequence, cast
+from typing import Sequence
 import logging
 
 from openghg.dataobjects import ObsData, ObsColumnData
@@ -43,8 +42,9 @@ logger = logging.getLogger("openghg.obspack")
 # TODO: Move to types submodule?
 ObsOutputType = ObsData | ObsColumnData
 NameComponents = list[str | list]
-MultiNameComponents = dict[str, NameComponents] | NameComponents | None
-MultiSubFolder = dict[str, pathType] | pathType | None
+
+MultiNameComponents = dict[str, NameComponents] | NameComponents
+MultiSubFolder = dict[str, pathType] | pathType
 
 
 class StoredData:
@@ -57,9 +57,10 @@ class StoredData:
         self,
         data: ObsOutputType,
         obs_type: str = "surface-insitu",
-        obspack_path: pathType | None = None,
+        output_folder: pathType | None = None,
+        obspack_name: str | None = None,
+        subfolder: MultiSubFolder | None = None,
         obspack_filename: pathType | None = None,
-        subfolder: MultiSubFolder = None,
         data_version: str | None = None,
     ):
         """
@@ -73,42 +74,43 @@ class StoredData:
         self.metadata = data.metadata
 
         self.obs_type = obs_type
-        self.obspack_path = obspack_path
+        self.obspack_name = obspack_name
 
+        self.output_folder = Path(output_folder) if output_folder is not None else None
         self.obspack_filename = Path(obspack_filename) if obspack_filename is not None else None
 
-        if isinstance(subfolder, dict):
-            subfolder = subfolder[self.obs_type]
-        self.subfolder = subfolder
-
-        if data_version is None:
-            data_version = find_data_version(self.metadata)
-        self.data_version = data_version
+        self.add_subfolder(subfolder)  # Right to add default subfolder here?
+        self.add_data_version(data_version)
 
     def make_obspack_filename(
         self,
-        obspack_path: pathType | None = None,
-        subfolder: MultiSubFolder = None,
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
     ) -> Path:
+        """
+        Create the obspack_filename for the StoredData based on the associated metadata
+        and the obs_type.
 
-        # Update attributes on the object if specified
-        self.obspack_path = obspack_path if obspack_path is not None else self.obspack_path
-        self.data_version = data_version if data_version is not None else self.data_version
-
-        if isinstance(subfolder, dict):
-            subfolder = subfolder[self.obs_type]
-        self.subfolder = subfolder if subfolder is not None else self.subfolder
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+        Returns:
+            Path: obspack filename
+        """
+        self.data_version: str | None = data_version if data_version is not None else self.data_version
 
         obspack_filename = define_obspack_filename(
             self.metadata,
             self.obs_type,
-            obspack_path=self.obspack_path,
-            subfolder=self.subfolder,
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=self.data_version,
@@ -120,18 +122,29 @@ class StoredData:
 
     def update_obspack_filename(
         self,
-        obspack_path: pathType | None = None,
-        subfolder: MultiSubFolder = None,
         include_obs_type: bool = True,
         include_version: bool = True,
         data_version: str | None = None,
-        name_components: MultiNameComponents = None,
+        name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
     ) -> Path:
+        """
+        Define the obspack_filename and update on the StoredData object based on the associated metadata
+        and the obs_type.
 
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+        Returns:
+            Path: obspack filename
+        """
         obspack_filename = self.make_obspack_filename(
-            obspack_path=obspack_path,
-            subfolder=subfolder,
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=data_version,
@@ -142,6 +155,569 @@ class StoredData:
         self.obspack_filename = obspack_filename
 
         return obspack_filename
+
+    def add_subfolder(self, subfolder: MultiSubFolder | None = None) -> None:
+        """
+        Add the subfolder based on input and defaults.
+        See define_subfolder() function.
+
+        Returns:
+            None
+        """
+        self.subfolder = define_subfolder(subfolder, obs_type=self.obs_type)
+
+    def add_data_version(self, data_version: str | None = None) -> None:
+        """
+        Add data_version associated with StoredData.
+        See find_data_version() function.
+
+        Returns:
+            None
+        """
+        if data_version is None:
+            data_version = find_data_version(self.metadata)
+        self.data_version = data_version
+
+    def define_full_path(self) -> Path:
+        """
+        Define full path for the output filename. This is based on the structure:
+            {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+
+        Returns:
+            Path: full output file path
+        """
+
+        if self.obspack_filename is None:
+            raise ValueError("Obspack filename must be defined to create output path")
+
+        return define_full_obspack_filename(
+            self.obspack_filename, self.obspack_name, self.output_folder, self.subfolder, self.obs_type
+        )
+
+    def define_site_details(self, strict: bool = False) -> dict:
+        """
+        Extract associated site details as a dictionary for a given Dataset. Expect these details to
+        be included within the dataset attributes.
+        This can be used as a way to build up a DataFrame from a set of dictionaries and defines friendly
+        column names for this output.
+
+        Overall attributes which this will attempt to extract are:
+            - "site"
+            - "station_long_name"
+            - "inlet"
+            - "station_latitude"
+            - "station_longitude"
+            - "instrument"
+            - "network"
+            - "data_owner"
+            - "data_owner_email"
+
+        Args:
+            ds: Expect this dataset to contain useful attributes describing the site data.
+            obs_type: Observation type associated with this dataset (see define_obs_types() for full list)
+            strict: Whether to raise an error if any key is missing. Default = False
+        Returns:
+            dict: Dictionary containing extracted site details from Dataset
+        """
+        ds = self.data
+        attrs = ds.attrs
+
+        key_names = {
+            "site": "Site code",
+            "station_long_name": "Name",
+            "inlet": "Inlet height(s)",
+            "station_latitude": "Latitude",
+            "station_longitude": "Longitude",
+            "instrument": "Instrument",
+            "network": "Associated network",
+            "data_owner": "Data owner",
+            "data_owner_email": "Email",
+        }
+
+        params = {}
+        for key, new_name in key_names.items():
+            if key in attrs:
+                params[new_name] = attrs[key]
+            else:
+                msg = f"Unable to find '{key}' key in site data attributes"
+                if strict:
+                    logger.exception(msg)
+                    raise ValueError(msg)
+                else:
+                    logger.warning(msg)
+                    params[new_name] = np.nan
+
+        params["Observation type"] = self.obs_type
+
+        return params
+
+    def write(self) -> None:
+        """ """
+
+        ds = self.data
+        output_filename = self.define_full_path()
+
+        output_filename.parent.mkdir(parents=True, exist_ok=True)
+        ds.to_netcdf(output_filename)
+
+
+class ObsPack:
+    """ """
+
+    def __init__(self, output_folder: pathType, obspack_name: str | None = None):
+        """ """
+        self.output_folder = Path(output_folder)
+        if obspack_name is not None:
+            self.obspack_name: str | None = obspack_name
+            self.version: str | None = "v1"
+        else:
+            self.obspack_name = None
+            self.version = None
+
+        self.retrieved_data: list[StoredData] | None = None
+
+    def find_current_obspacks(self, obspack_stub: str) -> list[Path]:
+        """
+        Find obspacks within the supplied output folder. Expect these will start with
+        the obspack_stub string.
+
+        Args:
+            obspack_stub: Start of the obspack_name. This will be assumed to be standard for
+                other obspacks of the same type.
+        Returns:
+            list : Path to current folders identified as current obspacks within output_folder
+        """
+        current_obspacks = find_current_obspacks(self.output_folder, obspack_stub)
+        return current_obspacks
+
+    def define_obspack_name(
+        self,
+        obspack_stub: str,
+        version: str | None = None,
+        major_version_only: bool = False,
+        minor_version_only: bool = False,
+        current_obspacks: list | None = None,
+    ) -> tuple[str, str]:
+        """
+        Define the name of the obspack based on an obspack_stub and version.
+        This will be formatted as:
+            "{obspack_stub}_{version}"
+
+        If version is not specified the version will be extracted by looking
+        for folders following the same naming scheme either using the output_folder
+        or a supplied list of current obspack names.
+
+        If the only obspack_stub from previous obspacks has no associated version, this will
+        be treated as "v1" and the new obspack name as the next version.
+
+        Args:
+            output_folder: Path to top level directory where obspack folder will be created.
+                When looking for previous obspacks, will look here for these.
+            obspack_stub: Start of the obspack_name. This will be assumed to be standard for
+                other obspacks of the same type.
+            version: Can explicitly define a version to be used to create the obspack_name
+            major_version_only: Only increase the major version.
+            minor_version_only: Only increase the minor version.
+            current_obspacks: List of previous obspacks to use when defining the new version
+                in obspack_name
+        Returns:
+            (str, str): Obspack name and the version associated with this
+
+        TODO: Decide if to also incorporate rough date of creation
+        """
+
+        output_folder = self.output_folder
+
+        obspack_name, version = define_obspack_name(
+            obspack_stub,
+            version=version,
+            major_version_only=major_version_only,
+            minor_version_only=minor_version_only,
+            output_folder=output_folder,
+            current_obspacks=current_obspacks,
+        )
+
+        self.obspack_name = obspack_name
+        self.version = version
+
+        return obspack_name, version
+
+    def define_obspack_path(self) -> Path:
+        """
+        Define the full output path for the obspack folder.
+        Args:
+            output_folder: Path to top level directory where obspack folder will be created
+            obspack_name: Name of obspack to be created
+        Returns:
+            Path: Full obspack folder name
+        """
+        if self.obspack_name is None:
+            raise ValueError("Please define obspack_name directly or via define_obspack_name() method.")
+
+        return self.output_folder / self.obspack_name
+
+    def find_and_retrieve_data(
+        self,
+        filename: pathType | None = None,
+        search_df: pd.DataFrame | None = None,
+        store: str | None = None,
+        subfolders: MultiSubFolder | None = None,
+    ) -> list:
+        """
+        Use search parameters to get data from object store. This expects either a filename for an input
+        file containing search parameters (see read_input_file() for more details) or a DataFrame containing
+        the search parameters.
+
+        Args:
+            filename: Filename containing search parameters.
+            search_df: pandas DataFrame containing search parameters
+            store: Name of specific object store to use to search for data
+            subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
+            this. This can be specified as:
+             - no subfolder(s) - pass empty string
+             - one subfolder for all files - pass a string
+             - dictionary of subfolders per obs_type.
+        Returns:
+            list [StoredData]: List of extracted data from the object store based on search parameters
+        """
+
+        retrieved_data = retrieve_data(filename=filename, search_df=search_df, store=store)
+
+        self.retrieved_data = retrieved_data
+
+        for data in retrieved_data:
+            data.output_folder = self.output_folder
+            data.obspack_name = self.obspack_name
+
+            data.add_subfolder(subfolders)
+
+        return retrieved_data
+
+    def contained_obs_types(self) -> list | None:
+        """ """
+
+        if self.retrieved_data is not None:
+            data_obs_types = [data.obs_type for data in self.retrieved_data]
+            obs_types = list(np.unique(data_obs_types))
+        else:
+            logger.warning("No retrieved data is present on ObsPack to find obs_types")
+            obs_types = None
+
+        return obs_types
+
+    @staticmethod
+    def default_release_files() -> list:
+        """
+        Release files which will be included in the created obspack by default.
+        This will return a list of filepaths to these default files.
+        """
+        release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
+
+        with importlib.resources.as_file(release_file_ref) as f:
+            release_file_path = f
+
+        release_files = [release_file_path]
+        return release_files
+
+    def check_retrieved_data(self) -> list[StoredData]:
+        """ """
+        if self.retrieved_data is None:
+            msg = "ObsPack does not contain details to write to disc. Please populate ObsPack.retrieved_data"
+            logger.exception(msg)
+            raise ValueError(msg)
+
+        return self.retrieved_data
+
+    def define_obspack_filenames(
+        self,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        name_components: MultiNameComponents | None = None,
+        name_suffixes: dict | None = None,
+        force: bool = False,
+    ) -> list[Path]:
+        """
+        Define the obspack_filename values for multiple StoredData objects.
+        If the obspack_filename is already present, this will not update by default and will
+        use the stored value.
+
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+            force: Force update of the obspack_filename and recreate this.
+        Returns:
+            list[pathlib.Path]: Sequence of filenames associated with the files
+        """
+        retrieved_data = self.check_retrieved_data()
+
+        filenames = []
+        for data in retrieved_data:
+            filename = data.obspack_filename
+            if filename is None or force:
+                filename = data.update_obspack_filename(
+                    include_obs_type=include_obs_type,
+                    include_version=include_version,
+                    name_components=name_components,
+                    name_suffixes=name_suffixes,
+                )
+            filenames.append(filename)
+
+        return filenames
+
+    def check_unique_filenames(
+        self,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        name_components: MultiNameComponents | None = None,
+        name_suffixes: dict | None = None,
+        force: bool = False,
+    ) -> list[list[StoredData]]:
+        """
+        Check whether filenames associated with retrieved data are unique.
+
+        Args:
+            retrieved_data: List of StoredData objects.
+            obspack_path: Top level directory for obspack
+            include_version: Whether to include the data version in the filename. Default = True.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename.
+            add_to_objects: Add the filename to each of the StoredData objects.
+            force: Force update of the obspack_filename and recreate this.
+        Returns:
+            list: Groups of StoredData objects with have overlapping obspack_filenames
+        """
+
+        filenames = self.define_obspack_filenames(
+            include_obs_type=include_obs_type,
+            include_version=include_version,
+            name_components=name_components,
+            name_suffixes=name_suffixes,
+            force=force,
+        )
+
+        retrieved_data = self.check_retrieved_data()
+
+        repeated_indices = find_repeats(filenames)
+
+        data_grouped_repeats: list[list] = []
+        if repeated_indices:
+            data_grouped_repeats = [
+                [retrieved_data[index] for index in index_set] for index_set in repeated_indices
+            ]
+
+        return data_grouped_repeats
+
+    def add_obspack_filenames(
+        self,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        name_components: MultiNameComponents | None = None,
+        name_suffixes: dict | None = None,
+        store: str | None = None,
+    ) -> list[StoredData]:
+        """
+        Add obspack filenames to StoredData objects in retrieved_data. This is based
+        on the metadata associated with the retrieved data.
+        If any filenames within the retrieved_data list are not unique, update the filename
+        using more keywords within the metadata.
+
+        Note: updates the obspack_filename attributes in place within StoredData objects.
+
+        Args:
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+            include_version: Whether to include the data version in the filename. Default = True.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+            store: Name of the object store to use if we need to find the config file for the data type.
+                This will be used if names are not unique to work out which keys to create a more
+                descriptive filename.
+        Returns:
+            list: Same list of StoredData objects passed to the function with filenames added.
+        """
+
+        # Create default obspack names
+        self.define_obspack_filenames(
+            include_obs_type=include_obs_type,
+            include_version=include_version,
+            # data_version=data_version,
+            name_components=name_components,
+            force=True,
+        )
+
+        retrieved_data = self.check_retrieved_data()
+
+        # Check for repeats and update names
+        data_grouped_repeats = data_grouped_repeats = self.check_unique_filenames(
+            include_obs_type=include_obs_type,
+            include_version=include_version,
+            name_components=name_components,
+            name_suffixes=name_suffixes,
+        )
+        if data_grouped_repeats:
+            for data_group in data_grouped_repeats:
+
+                example_data = data_group[0]
+                example_metadata = example_data.metadata
+                obs_type = example_data.obs_type
+
+                if name_components is None:
+                    name_components = define_name_components(obs_type, example_metadata)
+                elif isinstance(name_components, dict):
+                    try:
+                        name_components = name_components[obs_type]
+                    except KeyError:
+                        raise ValueError(
+                            f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
+                        )
+
+                metakeys = _find_additional_metakeys(
+                    obs_type,
+                    metadata=example_metadata,
+                    name_components=name_components,
+                    store=store,
+                )
+
+                filenames = [data.obspack_filename for data in data_group]
+                for additional_key in metakeys:
+                    if check_unique(filenames):
+                        break
+                    else:
+                        key_present = [additional_key in data.metadata for data in data_group]
+                        if all(key_present):
+                            name_components = name_components + [additional_key]
+
+                            logger.info(
+                                f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
+                            )
+                            filenames = [
+                                data.make_obspack_filename(name_components=name_components)
+                                for data in data_group
+                            ]
+                else:
+                    raise ValueError(
+                        f"Unable to find unique name for {data_group}. Please specify name_components to use."
+                    )
+
+                # Once unique names have been found add them to the data entries.
+                # **Better way to do this?
+                for data, filename in zip(data_group, filenames):
+                    data.obspack_filename = filename
+
+        return retrieved_data
+
+    def define_site_index(self) -> pd.DataFrame:
+        """
+        Define site index for all StoredData associated with the ObsPack.
+        This compiles the details a pandas DataFrame, combining rows for
+        inlets of the same site.
+
+        Returns:
+            pandas.DataFrame: Site details collated as a DataFrame
+        """
+        site_detail_rows = []
+        retrieved_data = self.check_retrieved_data()
+
+        for data in retrieved_data:
+            site_details = data.define_site_details()
+            site_detail_rows.append(site_details)
+
+        site_details_df = pd.DataFrame(site_detail_rows)
+        self.site_details = site_details_df
+
+        return site_details_df
+
+    def write_site_index_file(self, output_filename: pathType) -> None:
+        """
+        Creates the site index file including data provider details.
+        Args:
+            df : DataFrame containing the collated details for the site from the associated metadata.
+            output_filename : Filename to use for writing site details.
+        Returns:
+            None
+        """
+
+        # Site index should include key metadata for each file (enough to be distinguishable but not too much?)
+        # Want to create a DataFrame and pass a file object to this - then can add comments before and after the table as needed
+
+        if not hasattr(self, "site_details"):
+            self.define_site_index()
+
+        site_details = self.site_details
+
+        site_column = "Site code"
+
+        if site_column not in site_details.columns:
+            msg = (
+                "Unable to create site details file: 'Site code' column is not present in provided DataFrame."
+            )
+            logger.exception(msg)
+            raise ValueError(msg)
+
+        obspack_path = self.define_obspack_path()
+        full_output_filename = obspack_path / output_filename
+
+        obspack_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Writing site details to: {full_output_filename}")
+        output_file = open(full_output_filename, "w")
+
+        site_details = site_details.groupby(site_column).apply(collate_strings, include_groups=False)
+        site_details = site_details.dropna(axis=1, how="all")
+
+        # Add header to file
+        output_file.write("++++++++++++\n")
+        output_file.write("Site details\n")
+        output_file.write(f"File created: {pd.to_datetime('today').normalize()}\n")
+        output_file.write("++++++++++++\n")
+        output_file.write("\n")
+
+        site_details.to_csv(output_file, index=False, sep="\t")
+
+        output_file.close()
+
+    def write(
+        self,
+        include_release_files: bool = True,
+        release_files: Sequence | None = None,
+        include_site_index: bool = True,
+        site_index_filename: pathType | None = None,
+    ) -> None:
+        """
+        Write constructed ObsPack to disc.
+        Currently this will write:
+            - retrieved_data
+            - release files
+            - site index file
+
+        """
+        retrieved_data = self.check_retrieved_data()
+
+        for data in retrieved_data:
+            data.write()
+
+        if include_release_files:
+            if release_files is not None:
+                self.release_files = release_files
+            elif not hasattr(self, "release_files") or self.release_files is None:
+                self.release_files = ObsPack.default_release_files()
+
+            obspack_path = self.define_obspack_path()
+            obspack_path.mkdir(parents=True, exist_ok=True)
+
+            for file in self.release_files:
+                shutil.copy(file, obspack_path)
+
+        if include_site_index:
+            if site_index_filename is None:
+                site_index_filename = f"site_index_details_{self.version}.txt"
+            self.write_site_index_file(site_index_filename)
 
 
 def define_obs_types() -> list:
@@ -219,7 +795,6 @@ def define_filename(
     name_components: list,
     metadata: dict,
     name_suffixes: dict,
-    output_path: pathType | None = None,
     separators: str | tuple = ("_", "-"),
 ) -> Path:
     """
@@ -236,10 +811,9 @@ def define_filename(
             within the filename.
         metadata: Dictionary containing the metadata keys to use
         name_suffixes: Dictionary of additional values to add to the filename as a suffix.
-        output_path: Full output folder path for file
         separators: Seperators to use between name_components. Default = ("_", "-")
     Returns:
-        Path: Full path for filename
+        Path: Filename within obspack
 
     Examples:
         >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m"})
@@ -250,15 +824,9 @@ def define_filename(
 
         >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m", }, obs_type="surface-insitu")
         Path("ch4_tac_42m_surface-insitu_v1.nc")
-
-        >>> define_filename(["species", "site", "inlet"], metadata: {"species":"ch4", "site":"tac", "inlet":"42m", }, obs_type="surface-insitu", output_path="/path/to/output")
-        Path("/path/to/output/ch4_tac_42m_surface-insitu_v1.nc")
     """
 
     file_extension = ".nc"
-
-    if output_path is not None:
-        output_path = Path(output_path)
 
     if isinstance(separators, str):
         separators = (separators,)
@@ -271,9 +839,6 @@ def define_filename(
     filename_stub = separators[0].join(all_components)
 
     filename = Path(f"{filename_stub}{file_extension}")
-
-    if output_path is not None:
-        filename = Path(output_path) / filename
 
     return filename
 
@@ -355,10 +920,45 @@ def define_name_components(obs_type: str, metadata: dict | None = None) -> NameC
     return name_components
 
 
+def define_subfolder(subfolder: MultiSubFolder | None, obs_type: str | None = None) -> Path:
+    """
+    Define the default subfolder within the obspack for a file based on obs_type.
+
+    Args:
+        subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
+            this. This can be specified as:
+                - no subfolder(s) - pass empty string
+                - one subfolder for all files
+                - dictionary of subfolders per obs_type.
+                  - if obs_type is not within dictionary - obs_type will be used as subfolder name
+        obs_type: Name of the observation type to be included in the obspack.
+            See define_obs_types() for details of obs_type values.
+    Returns:
+        Path: subfolder
+    """
+    if isinstance(subfolder, dict):
+        if obs_type is not None:
+            if obs_type in subfolder:
+                subfolder = subfolder[obs_type]
+            else:
+                subfolder = None
+        else:
+            msg = f"Unable to use subfolder input: {subfolder} if obs_type is not specified."
+            logger.exception(msg)
+            raise ValueError(msg)
+
+    if subfolder is None:
+        if obs_type is not None:
+            subfolder = obs_type
+
+    subfolder = _create_path(subfolder)
+
+    return subfolder
+
+
 def define_surface_filename(
     metadata: dict,
     obs_type: str | None = None,
-    output_path: pathType | None = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -374,7 +974,6 @@ def define_surface_filename(
             "species" and "inlet" to be present.
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        output_path: Full output folder path for file
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -411,7 +1010,6 @@ def define_surface_filename(
         name_components,
         metadata=metadata,
         name_suffixes=name_suffixes,
-        output_path=output_path,
     )
 
     return filename
@@ -420,7 +1018,6 @@ def define_surface_filename(
 def define_column_filename(
     metadata: dict,
     obs_type: str = "column",
-    output_path: pathType | None = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
@@ -435,7 +1032,6 @@ def define_column_filename(
             and "species" to be present.
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        output_path: Full output folder path for file
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -467,12 +1063,12 @@ def define_column_filename(
         name_components,
         metadata=metadata,
         name_suffixes=name_suffixes,
-        output_path=output_path,
     )
 
     return filename
 
 
+# CALLED BY STOREDDATA
 def find_data_version(metadata: dict) -> str | None:
     """
     Find the latest version from within the metadata by looking for the "latest_version" key.
@@ -485,15 +1081,57 @@ def find_data_version(metadata: dict) -> str | None:
     return metadata.get(version_key)
 
 
+def _create_path(input: pathType | None) -> Path:
+
+    if input is None:
+        input = Path("")
+    else:
+        input = Path(input)
+
+    return input
+
+
+# CALLED BY StoredData
+def define_full_obspack_filename(
+    obspack_filename: pathType,
+    obspack_name: str | None = None,
+    output_folder: pathType | None = None,
+    subfolder: MultiSubFolder | None = None,
+    obs_type: str | None = None,
+) -> Path:
+    """
+    Define full path for the output filename. This is based on the structure:
+
+        {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+
+    Args:
+        obspack_name: Full name for the obspack
+        output_folder: Top level directory.
+        subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
+            this. This can be specified as:
+                - no subfolder(s) - pass empty string
+                - one subfolder for all files
+                - dictionary of subfolders per obs_type.
+                  - if obs_type is not within dictionary - obs_type will be used as subfolder name
+    Returns:
+        Path: full output file path
+    """
+
+    obspack_name = obspack_name if obspack_name is not None else ""
+    output_folder = _create_path(output_folder)
+    subfolder = define_subfolder(subfolder, obs_type)
+
+    return output_folder / obspack_name / subfolder / obspack_filename
+
+
+# CALLED BY StoredData
 def define_obspack_filename(
     metadata: dict,
     obs_type: str,
-    obspack_path: pathType | None = None,
-    subfolder: MultiSubFolder = None,
     include_obs_type: bool = True,
     include_version: bool = True,
     data_version: str | None = None,
-    name_components: MultiNameComponents = None,
+    name_components: MultiNameComponents | None = None,
     name_suffixes: dict | None = None,
 ) -> Path:
     """
@@ -504,9 +1142,6 @@ def define_obspack_filename(
         metadata: Dictionary containing metadata values
         obs_type: Name of the observation type to be included in the obspack.
             See define_obs_types() for details of obs_type values.
-        obspack_path: Top level directory for obspack
-        subfolder: By default the obs_type will be used to create a subfolder. Specifying a subfolder directly
-            supercedes this. Pass an empty string for no subfolder.
         include_obs_type: Whether to include obs_type in the filename. Default = True.
         include_version: Whether to include the data version in the filename. Default = True.
         data_version: Version of the data. If not specified and include_version is True this
@@ -519,28 +1154,8 @@ def define_obspack_filename(
         Path: Full path for filename
     """
     obs_types = define_obs_types()
-    if obspack_path is not None:
-        obspack_path = Path(obspack_path)
 
     if obs_type in obs_types:
-
-        if isinstance(subfolder, dict):
-            try:
-                subfolder = Path(subfolder[obs_type])
-            except KeyError:
-                raise ValueError(
-                    f"If subfolder is specified as a dict this should use the obs_type values for the keys. Currently: {list(subfolder.keys())}"  # type:ignore
-                )
-
-        if subfolder is None:
-            subfolder = obs_type
-        else:
-            subfolder = Path(subfolder)
-
-        if obspack_path is not None:
-            full_obspack_path = Path(obspack_path) / subfolder
-        else:
-            full_obspack_path = Path(subfolder)
 
         if isinstance(name_components, dict):
             try:
@@ -554,7 +1169,6 @@ def define_obspack_filename(
             filename = define_surface_filename(
                 metadata=metadata,
                 obs_type=obs_type,
-                output_path=full_obspack_path,
                 include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
@@ -565,7 +1179,6 @@ def define_obspack_filename(
             filename = define_column_filename(
                 metadata=metadata,
                 obs_type=obs_type,
-                output_path=full_obspack_path,
                 include_obs_type=include_obs_type,
                 include_version=include_version,
                 data_version=data_version,
@@ -582,7 +1195,6 @@ def check_unique(values: Sequence) -> bool:
     """
     Check whether sequence is unique. Returns True/False.
     """
-
     return len(values) == len(set(values))
 
 
@@ -602,105 +1214,6 @@ def find_repeats(values: Sequence) -> list[np.ndarray] | None:
     repeated_org_indices = [np.where(indices == repeat)[0] for repeat in repeated_indices]
 
     return repeated_org_indices
-
-
-def define_obspack_filenames(
-    retrieved_data: list[StoredData],
-    obspack_path: pathType | None = None,
-    subfolders: MultiSubFolder = None,
-    include_obs_type: bool = True,
-    include_version: bool = True,
-    data_version: str | None = None,
-    name_components: MultiNameComponents = None,
-    name_suffixes: dict | None = None,
-    force: bool = False,
-) -> list[Path]:
-    """
-    Define the obspack_filename values for multiple StoredData objects.
-    If the obspack_filename is already present, this will not update by default and will
-    use the stored value.
-
-    Args:
-        retrieved_data: List of StoredData objects.
-        obspack_path: Top level directory for obspack
-        subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
-            this. This can be specified as:
-             - no subfolder(s) - pass empty string
-             - one subfolder for all files
-             - dictionary of subfolders per obs_type.
-        include_obs_type: Whether to include obs_type in the filename. Default = True.
-        include_version: Whether to include the data version in the filename. Default = True.
-        data_version: Version of the data. If not specified and include_version is True this
-            will attempt to extract the latest version details from the metadata.
-        name_components: Keys to use when extracting names from the metadata and to use
-            within the filename. This can be specified per obs_type using a dictionary.
-            Default will depend on obs_type - see define_name_components().
-        name_suffixes: Dictionary of additional values to add to the filename as a suffix.
-        force: Force update of the obspack_filename and recreate this.
-    Returns:
-        list[pathlib.Path]: Sequence of filenames associated with the files
-    """
-    filenames = []
-    for data in retrieved_data:
-        filename = data.obspack_filename
-        if filename is None or force:
-            filename = data.update_obspack_filename(
-                obspack_path=obspack_path,
-                subfolder=subfolders,
-                include_obs_type=include_obs_type,
-                include_version=include_version,
-                data_version=data_version,
-                name_components=name_components,
-                name_suffixes=name_suffixes,
-            )
-        filenames.append(filename)
-
-    return filenames
-
-
-def check_unique_filenames(
-    retrieved_data: list[StoredData],
-    obspack_path: pathType | None = None,
-    include_version: bool = True,
-    data_version: str | None = None,
-    name_components: list | None = None,
-    force: bool = False,
-) -> list[list[StoredData]]:
-    """
-    Check whether filenames associated with retrieved data are unique.
-
-    Args:
-        retrieved_data: List of StoredData objects.
-        obspack_path: Top level directory for obspack
-        include_version: Whether to include the data version in the filename. Default = True.
-        data_version: Version of the data. If not specified and include_version is True this
-            will attempt to extract the latest version details from the metadata.
-        name_components: Keys to use when extracting names from the metadata and to use
-            within the filename.
-        add_to_objects: Add the filename to each of the StoredData objects.
-        force: Force update of the obspack_filename and recreate this.
-    Returns:
-        list: Groups of StoredData objects with have overlapping obspack_filenames
-    """
-
-    filenames = define_obspack_filenames(
-        retrieved_data,
-        obspack_path=obspack_path,
-        include_version=include_version,
-        data_version=data_version,
-        name_components=name_components,
-        force=force,
-    )
-
-    repeated_indices = find_repeats(filenames)
-
-    data_grouped_repeats: list[list] = []
-    if repeated_indices:
-        data_grouped_repeats = [
-            [retrieved_data[index] for index in index_set] for index_set in repeated_indices
-        ]
-
-    return data_grouped_repeats
 
 
 def _find_additional_metakeys(
@@ -763,113 +1276,7 @@ def _find_additional_metakeys(
     return metakeys
 
 
-def add_obspack_filenames(
-    retrieved_data: list[StoredData],
-    obspack_path: pathType | None = None,
-    subfolders: MultiSubFolder = None,
-    include_obs_type: bool = True,
-    include_version: bool = True,
-    data_version: str | None = None,
-    name_components: MultiNameComponents = None,
-    store: str | None = None,
-) -> list[StoredData]:
-    """
-    Add obspack filenames to StoredData objects in retrieved_data. This is based
-    on the metadata associated with the retrieved data.
-    If any filenames within the retrieved_data list are not unique, update the filename
-    using more keywords within the metadata.
-
-    Note: updates the obspack_filename attributes in place within StoredData objects.
-
-    Args:
-        retrieved_data: List of StoredData objects.
-        obspack_path: Top level directory for obspack
-        subfolders: By default the obs_types will be used to create a subfolder structure. Specifying subfolders directly, supercedes
-            this. This can be specified as:
-             - no subfolder(s) - pass empty string
-             - one subfolder for all files
-             - dictionary of subfolders per obs_type.
-        include_obs_type: Whether to include obs_type in the filename. Default = True.
-        include_version: Whether to include the data version in the filename. Default = True.
-        data_version: Version of the data. If not specified and include_version is True this
-            will attempt to extract the latest version details from the metadata.
-        name_components: Keys to use when extracting names from the metadata and to use
-            within the filename. This can be specified per obs_type using a dictionary.
-            Default will depend on obs_type - see define_name_components().
-        store: Name of the object store to use if we need to find the config file for the data type.
-            This will be used if names are not unique to work out which keys to create a more
-            descriptive filename.
-    Returns:
-        list: Same list of StoredData objects passed to the function with filenames added.
-    """
-
-    # Create default obspack names
-    define_obspack_filenames(
-        retrieved_data,
-        obspack_path=obspack_path,
-        subfolders=subfolders,
-        include_obs_type=include_obs_type,
-        include_version=include_version,
-        data_version=data_version,
-        name_components=name_components,
-        force=True,
-    )
-
-    # Check for repeats and update names
-    data_grouped_repeats = check_unique_filenames(retrieved_data)
-    if data_grouped_repeats:
-        for data_group in data_grouped_repeats:
-
-            example_data = data_group[0]
-            example_metadata = example_data.metadata
-            obs_type = example_data.obs_type
-
-            if name_components is None:
-                name_components = define_name_components(obs_type, example_metadata)
-            elif isinstance(name_components, dict):
-                try:
-                    name_components = name_components[obs_type]
-                except KeyError:
-                    raise ValueError(
-                        f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
-                    )
-
-            metakeys = _find_additional_metakeys(
-                obs_type,
-                metadata=example_metadata,
-                name_components=name_components,
-                store=store,
-            )
-
-            filenames = [data.obspack_filename for data in data_group]
-            for additional_key in metakeys:
-                if check_unique(filenames):
-                    break
-                else:
-                    key_present = [additional_key in data.metadata for data in data_group]
-                    if all(key_present):
-                        name_components = name_components + [additional_key]
-
-                        logger.info(
-                            f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
-                        )
-                        filenames = [
-                            data.make_obspack_filename(name_components=name_components, subfolder=subfolders)
-                            for data in data_group
-                        ]
-            else:
-                raise ValueError(
-                    f"Unable to find unique name for {data_group}. Please specify name_components to use."
-                )
-
-            # Once unique names have been found add them to the data entries.
-            # **Better way to do this?
-            for data, filename in zip(data_group, filenames):
-                data.obspack_filename = filename
-
-    return retrieved_data
-
-
+# CALLED BY OBSPACK
 def find_current_obspacks(output_folder: pathType, obspack_stub: str) -> list[Path]:
     """
     Find obspacks within the supplied output folder. Expect these will start with
@@ -891,6 +1298,7 @@ def find_current_obspacks(output_folder: pathType, obspack_stub: str) -> list[Pa
     return current_obspacks
 
 
+# CALLED BY OBSPACK
 def define_obspack_name(
     obspack_stub: str,
     version: str | None = None,
@@ -987,73 +1395,6 @@ def define_obspack_name(
     return obspack_name, version
 
 
-def define_obspack_path(output_folder: pathType, obspack_name: str) -> Path:
-    """
-    Define the full output path for the obspack folder.
-    Args:
-        output_folder: Path to top level directory where obspack folder will be created
-        obspack_name: Name of obspack to be created
-    Returns:
-        Path: Full obspack folder name
-    """
-    return Path(output_folder) / obspack_name
-
-
-def default_release_files() -> list:
-    """
-    Release files which will be included in the created obspack by default.
-    This will return a list of filepaths to these default files.
-    """
-    release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
-
-    with importlib.resources.as_file(release_file_ref) as f:
-        release_file_path = f
-
-    release_files = [release_file_path]
-    return release_files
-
-
-def create_obspack_structure(
-    output_folder: pathType,
-    obspack_name: str,
-    obs_types: Sequence = define_obs_types(),
-    subfolder_names: Sequence | None = None,
-    release_files: Sequence | None = None,
-) -> Path:
-    """
-    Create the structure for the new obspack and add initial release files to be included.
-
-    Args:
-        output_folder: Path to top level directory where obspack folder will be created
-        obspack_name: Name of obspack to be created
-        obs_types: Observation types to include in obspack. By default, sub-folders will be created for these obs_types.
-        subfolder_names: Alternatively, can specify a list of subfolders to create directly. This will supercede obs_types input.
-        release_files: Release files to be included within the output obspack.
-            - If release_files=None (default) this will use the files defined by default_release_files() function.
-            - If release_files=[] no release files will be included in the obspack.
-    Returns:
-        Path: Path to top level obspack directory {output_folder}/{obspack_name}
-    """
-
-    obspack_path = define_obspack_path(output_folder, obspack_name)
-
-    if release_files is None:
-        release_files = default_release_files()
-
-    if subfolder_names is None:
-        subfolder_names = obs_types
-
-    logger.info(f"Creating top level obspack folder: {obspack_path} and subfolder(s): {subfolder_names}")
-    for subfolder in subfolder_names:
-        subfolder = obspack_path / subfolder
-        subfolder.mkdir(parents=True)
-
-    for file in release_files:
-        shutil.copy(file, obspack_path)
-
-    return obspack_path
-
-
 def read_input_file(filename: pathType) -> pd.DataFrame:
     """
     Read input file containing search parameters as a pandas DataFrame.
@@ -1098,7 +1439,9 @@ def retrieve_data(
         search_df = read_input_file(filename)
 
     if search_df is None:
-        raise ValueError("Either filename or extracted search dataframe must be supplied to retrieve data")
+        msg = "Either filename or extracted search dataframe must be supplied to retrieve data"
+        logger.exception(msg)
+        raise ValueError(msg)
 
     obs_type_name = "obs_type"
     default_obs_type = "surface-insitu"
@@ -1164,103 +1507,6 @@ def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
     return df_new
 
 
-def define_site_details(ds: xr.Dataset, obs_type: str, strict: bool = False) -> dict:
-    """
-    Extract associated site details as a dictionary for a given Dataset. Expect these details to
-    be included within the dataset attributes.
-    This can be used as a way to build up a DataFrame from a set of dictionaries and defines friendly
-    column names for this output.
-
-    Overall attributes which this will attempt to extract are:
-        - "site"
-        - "station_long_name"
-        - "inlet"
-        - "station_latitude"
-        - "station_longitude"
-        - "instrument"
-        - "network"
-        - "data_owner"
-        - "data_owner_email"
-
-    Args:
-        ds: Expect this dataset to contain useful attributes describing the site data.
-        obs_type: Observation type associated with this dataset (see define_obs_types() for full list)
-        strict: Whether to raise an error if any key is missing. Default = False
-    Returns:
-        dict: Dictionary containing extracted site details from Dataset
-    """
-    attrs = ds.attrs
-
-    key_names = {
-        "site": "Site code",
-        "station_long_name": "Name",
-        "inlet": "Inlet height(s)",
-        "station_latitude": "Latitude",
-        "station_longitude": "Longitude",
-        "instrument": "Instrument",
-        "network": "Associated network",
-        "data_owner": "Data owner",
-        "data_owner_email": "Email",
-    }
-
-    params = {}
-    for key, new_name in key_names.items():
-        if key in attrs:
-            params[new_name] = attrs[key]
-        else:
-            msg = f"Unable to find '{key}' key in site data attributes"
-            if strict:
-                logger.exception(msg)
-                raise ValueError(msg)
-            else:
-                logger.warning(msg)
-                params[new_name] = np.nan
-
-    params["Observation type"] = obs_type
-
-    return params
-
-
-def create_site_index(df: pd.DataFrame, output_filename: pathType) -> None:
-    """
-    Creates the site index file including data provider details.
-    Args:
-        df : DataFrame containing the collated details for the site from the associated metadata.
-        output_filename : Filename to use for writing site details.
-    Returns:
-        None
-    """
-
-    # Site index should include key metadata for each file (enough to be distinguishable but not too much?)
-    # Want to create a DataFrame and pass a file object to this - then can add comments before and after the table as needed
-
-    site_column = "Site code"
-
-    if site_column not in df.columns:
-        msg = "Unable to create site details file: 'Site code' column is not present in provided DataFrame."
-        logger.exception(msg)
-        raise ValueError(msg)
-
-    logger.info(f"Writing site details to: {output_filename}")
-    output_file = open(output_filename, "w")
-
-    site_details = df.groupby(site_column).apply(collate_strings, include_groups=False)
-    site_details = site_details.dropna(axis=1, how="all")
-
-    # index_output_name = open(obspack_folder / f"site_index_details_{version}.txt", "w")
-
-    # Add header to file
-    output_file.write("++++++++++++\n")
-    output_file.write("Site details\n")
-    output_file.write(f"File created: {pd.to_datetime('today').normalize()}\n")
-    output_file.write("++++++++++++\n")
-    output_file.write("\n")
-
-    site_details.to_csv(output_file, index=False, sep="\t")
-
-    output_file.close()
-
-
 def create_obspack(
     search_filename: pathType | None = None,
     search_df: pd.DataFrame | None = None,
@@ -1271,11 +1517,14 @@ def create_obspack(
     major_version_only: bool = False,
     minor_version_only: bool = False,
     current_obspacks: list | None = None,
+    include_release_files: bool = True,
     release_files: Sequence | None = None,
-    subfolders: MultiSubFolder = None,
+    include_site_index: bool = True,
+    site_index_filename: pathType | None = None,
+    subfolders: MultiSubFolder | None = None,
     include_obs_type: bool = True,
     include_data_versions: bool = True,
-    name_components: MultiNameComponents = None,
+    name_components: MultiNameComponents | None = None,
     store: str | None = None,
 ) -> Path:
     """
@@ -1320,66 +1569,40 @@ def create_obspack(
             logger.exception(msg)
             raise ValueError(msg)
 
-    retrieved_data = retrieve_data(search_df=search_df, store=store)
-
-    unique_obs_types = search_df["obs_type"].unique()
+    obspack = ObsPack(output_folder, obspack_name)
+    obspack.find_and_retrieve_data(
+        filename=search_filename, search_df=search_df, store=store, subfolders=subfolders
+    )
 
     if obspack_name is None:
         if obspack_stub:
-            obspack_name, version = define_obspack_name(
+            obspack_name, version = obspack.define_obspack_name(
                 obspack_stub,
                 version=version,
                 major_version_only=major_version_only,
                 minor_version_only=minor_version_only,
                 current_obspacks=current_obspacks,
-                output_folder=output_folder,
             )
         else:
             msg = "Either obspack_name or obspack_stub must be specified when creating an obspack."
             logger.exception(msg)
             raise ValueError(msg)
-    elif version is None:
-        version = "v1"
-
-    obspack_name = cast(str, obspack_name)
-
-    if isinstance(subfolders, dict):
-        subfolder_names = list(subfolders.values())
-    elif isinstance(subfolders, str):
-        subfolder_names = [subfolders]
-    else:
-        subfolder_names = None
-
-    obspack_path = create_obspack_structure(
-        output_folder,
-        obspack_name,
-        obs_types=unique_obs_types,
-        subfolder_names=subfolder_names,
-        release_files=release_files,
-    )
 
     # Create default obspack filenames for data
     # If any duplicates are found and update to use more of the metadata be more specific
-    retrieved_data = add_obspack_filenames(
-        retrieved_data,
-        obspack_path=obspack_path,
-        subfolders=subfolders,
+    obspack.add_obspack_filenames(
         include_obs_type=include_obs_type,
         include_version=include_data_versions,
         name_components=name_components,
     )
 
-    site_detail_rows = []
-    for data in retrieved_data:
-        ds = data.data
-        ds.to_netcdf(data.obspack_filename)
+    obspack.write(
+        include_release_files=include_release_files,
+        release_files=release_files,
+        include_site_index=include_site_index,
+        site_index_filename=site_index_filename,
+    )
 
-        site_details = define_site_details(ds, data.obs_type)
-        site_detail_rows.append(site_details)
-
-    index_output_filename = obspack_path / f"site_index_details_{version}.txt"
-
-    site_details_df = pd.DataFrame(site_detail_rows)
-    create_site_index(site_details_df, index_output_filename)
+    obspack_path = obspack.define_obspack_path()
 
     return obspack_path
