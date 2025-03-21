@@ -151,7 +151,7 @@ To activate multiple versions of Python, you can use ``pyenv local``:
     pyenv local 3.10 3.11 3.12
 
 This makes Python 3.10, 3.11, and 3.12 available in the current directory.
-The ``python`` command will default to the first version in the list; in this case, Python 3.10
+The ``python`` command will default to the first version in the list; in this case, Python 3.10.
 
 Running tests with ``tox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -167,6 +167,13 @@ For instance
    tox run -e py312
 
 will run the tests against Python 3.12.
+
+To pass arguments to ``pytest``, you can append them after the ``tox`` command as follows:
+
+.. code-block:: bash
+
+   tox run -e py312 -- tests/analyse/test_scenario.py
+
 
 Coding Style
 ============
