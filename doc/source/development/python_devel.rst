@@ -134,7 +134,7 @@ You can use ``tox`` to run tests in isolated environments built with the latest 
 Managing different versions of Python
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To manage multiple versions of Python, you can use ``pyenv <https://github.com/pyenv/pyenv>`_.
+To manage multiple versions of Python, you can use `pyenv <https://github.com/pyenv/pyenv>`_.
 After following the installation instructions, you can install multiple versions of Python:
 
 .. code-block:: bash
