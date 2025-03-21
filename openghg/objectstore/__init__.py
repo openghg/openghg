@@ -30,6 +30,6 @@ from ._config import (
     check_metakeys,
     get_metakeys,
     write_metakeys,
-    create_default_config,
+    create_custom_config,
     get_metakey_defaults,
 )
