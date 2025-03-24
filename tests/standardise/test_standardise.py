@@ -684,7 +684,7 @@ def test_standardise_footprints_satellite_raises_error():
         )
 
 
-def test_standardise_footprint_satellite():
+def test_standardise_footprint_satellite(caplog):
     """
     Tests standardise footprint for satellite data and associated metadata keys."""
     clear_test_stores()
@@ -702,13 +702,15 @@ def test_standardise_footprint_satellite():
             network=network,
             model="CAMS",
             inlet="column",
-            period='1S',
+            period='varies',
             domain=domain,
             obs_region=obs_region,
             selection="LAND",
             store="user",
-            continuous=False,
+            continuous=True,
         )
+
+    assert "'continuous' is set to `False`" in caplog.text
 
     data = get_footprint(
         satellite=satellite,
@@ -716,6 +718,7 @@ def test_standardise_footprint_satellite():
         obs_region=obs_region
     )
 
+    assert data.metadata["time_period"] == 'varies'
     assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == domain.lower()
