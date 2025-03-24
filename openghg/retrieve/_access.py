@@ -167,6 +167,9 @@ def get_obs_surface(
 
     data = retrieved_data.data
 
+    if data.dims["time"] == 0:
+        raise SearchError('Dataset is empty.')
+
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"

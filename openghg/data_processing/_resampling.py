@@ -73,6 +73,10 @@ def mean_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
     Returns:
         xr.Dataset with all data variables mean resampled over averaging period
     """
+    import numpy as np
+    if ds.name == "flag"  and ds.data.dtype == np.dtype("<U1"):
+        ds = (ds == "O")
+
     ds_resampled = ds.resample(time=averaging_period).mean(skipna=False, keep_attrs=True)
 
     return ds_resampled
