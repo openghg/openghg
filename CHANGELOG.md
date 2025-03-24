@@ -17,13 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can stil be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
 
 ### Fixed
-
+- Fixed bug where `period="varies"` could not be used or set when determining the time period associated with the input data. [#PR 1259](https://github.com/openghg/openghg/pull/1259) and [#PR 1267](https://github.com/openghg/openghg/pull/1267)
 - Dropped `exposure_id` variable for GOSAT data to avoid change in dimension size error raised from `to_zarr`. [PR #1243](https://github.com/openghg/openghg/pull/1243) [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
-
-### Updated
-- Introduced functionality to process data with the time_period set to "varies," with a default value of '1 second'. Additionally, the inferred_freq has been updated to input_freq when the continuous flag is set to False.[#1259](https://github.com/openghg/openghg/pull/1259)
 
 ## [0.13.0] - 2025-03-10
 
