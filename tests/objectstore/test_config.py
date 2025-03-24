@@ -1,10 +1,15 @@
 import pytest
+import json
 from openghg.objectstore import (
     check_metakeys,
     get_metakey_defaults,
-    create_default_config,
+    create_custom_config,
     get_metakeys,
     write_metakeys,
+)
+from openghg.objectstore._config import (
+    _get_custom_metakeys_filepath,
+    _get_metakeys_from_file
 )
 from openghg.store import data_class_info
 from openghg.types import ConfigFileError
@@ -25,20 +30,38 @@ def test_get_metakey_defaults():
     assert defaults.keys() == storage_classes.keys()
 
 
-def test_create_default_config(tmp_store):
+def test_create_custom_config(tmp_store):
+    """Test custom config can be created and detected in the object store.
+    """
+    create_custom_config(bucket=str(tmp_store))
 
-    create_default_config(bucket=str(tmp_store))
-
-    assert (tmp_store / "config" / "metadata_keys.json").exists()
+    assert (tmp_store / "config" / "metadata_keys_v2.json").exists()
 
 
-def test_get_metakeys(tmp_store):
-    create_default_config(bucket=tmp_store)
-
-    metakeys = get_metakeys(bucket=tmp_store)
+def test_get_metakeys():
+    """Test metakeys can be extracted.
+    """
+    metakeys = get_metakeys()
 
     assert metakeys.keys() == data_class_info().keys()
 
+
+def test_custom_metakeys(tmp_store):
+    """Check metakeys can be read from a custom file
+    """
+    create_custom_config(tmp_store)
+
+    metakeys_filepath = _get_custom_metakeys_filepath(tmp_store)
+    config_data = _get_metakeys_from_file(metakeys_filepath)
+
+    new_key = "new_key"
+    config_data["surface"]["required"][new_key] = {"type": ["str"]}
+
+    with open(metakeys_filepath, "w") as filepath:
+        json.dump(config_data, filepath)
+    
+    metakeys = get_metakeys(bucket=tmp_store)
+    assert new_key in metakeys["surface"]["required"]
 
 def test_write_metakeys(tmp_store):
     mock_keys = {"required": {"site": {"type": ["str"]}}}
