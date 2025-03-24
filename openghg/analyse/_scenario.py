@@ -182,6 +182,8 @@ class ModelScenario:
         """
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
+        if self.obs_column is not None:
+            platform = platform
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -234,6 +236,7 @@ class ModelScenario:
         self.add_footprint(
             site=site,
             inlet=inlet,
+            satellite=satellite,
             height=height,
             domain=domain,
             model=model,
@@ -448,15 +451,19 @@ class ModelScenario:
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, met_model
-        if site is not None and footprint is None:
-            site = clean_string(site)
+        if site is not None or satellite is not None and footprint is None:
+            if site is not None:
+                site = clean_string(site)
+            elif satellite is not None:
+                satellite = clean_string(satellite)
 
             if fp_inlet is None:
                 # use obs network if we're trying to infer the height from site info
                 if self.obs is not None:
                     network = network or self.obs.metadata.get("network")
 
-                height_name = extract_height_name(site, network, inlet)
+                if site is not None:
+                    height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
                     logger.info(
@@ -749,7 +756,10 @@ class ModelScenario:
         if resample_to is None:
             if align_to_obs:
                 if platform == "satellite":
-                    footprint_data = footprint_data.reindex_like(obs_data, tolerance=pd.Timedelta("1ms"))
+                    footprint_data = footprint_data.reindex_like(
+                        obs_data, method="nearest", tolerance=pd.Timedelta("1ms")
+                    )
+                    logger.info("Reindexing footprint data to satellite observation data.")
                 else:
                     footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
@@ -967,7 +977,7 @@ class ModelScenario:
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
-            if self.obs is not None:
+            if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
