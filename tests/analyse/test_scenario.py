@@ -1580,11 +1580,11 @@ def test_scenario_with_satellite_data():
     species = "ch4"
 
     obs_column = get_obs_column(
-        species=species, max_level = 3, satellite=satellite,
+        species=species, max_level = 3, satellite=satellite, store="user"
     )
 
     footprint = get_footprint(
-        satellite=satellite, domain=domain, obs_region=obs_region
+        satellite=satellite, domain=domain, obs_region=obs_region, store="user"
     )
 
     with pytest.raises(AttributeError):
@@ -1600,6 +1600,33 @@ def test_scenario_with_satellite_data():
     # Check values stored within model_scenario object match inputs
     xr.testing.assert_equal(model_scenario.obs.data, obs_column.data)
     xr.testing.assert_equal(model_scenario.footprint.data, footprint.data)
+
+
+def test_model_scenario_col_fp_data_merge():
+    """This is to test satellite data aligns fp to obs and satifies the fp_data_merge functionality"""
+
+    obs_column_data = get_obs_column(species="ch4", max_level=3,
+                     satellite="gosat", domain='southamerica', store="group")
+    fp_column_data = get_footprint(domain="southamerica",
+                satellite= 'gosat',
+                store="group")
+    flux_data = get_flux(species="ch4", source="all", domain="southamerica",store="group")
+
+    satellite_scenario = ModelScenario(obs_column=obs_column_data,
+                                       footprint=fp_column_data,
+                                       flux=flux_data, platform="satellite", max_level=3)
+
+    fp_data_merge = satellite_scenario.footprints_data_merge(platform="satellite",
+                                             calc_timeseries=True,
+                                             sources="all",
+                                             cache=False)
+
+    assert "mf_mod" in fp_data_merge
+    attributes = fp_data_merge.attrs
+
+    attributes["model"] == "name"
+    attributes["data_type"] == "column"
+    len(attributes["heights"]) == 20
 
 
 def test_scenario_infer_flux_source_ch4():
