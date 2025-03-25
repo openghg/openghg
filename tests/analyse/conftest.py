@@ -276,3 +276,30 @@ def data_read():
             store="user",
             continuous=False,
         )
+
+    # Testing footprint realignment with obs column data
+
+    col_filepath = get_column_datapath("gosat-fts_gosat_20160101_ch4-column.nc")
+    col_fp_filepath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc")
+    flux_filepath = get_flux_datapath("ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc")
+
+    standardise_column(filepath=col_filepath,
+                       species="ch4",
+                       platform="satellite",
+                       satellite="gosat",
+                       domain="southamerica",
+                       store="group")
+
+    standardise_footprint(filepath=col_fp_filepath,
+                          model="name",
+                          domain="southamerica",
+                          satellite="gosat",
+                          obs_region="brazil",
+                          inlet="column",
+                          store="group")
+
+    standardise_flux(filepath=flux_filepath,
+                     species="ch4",
+                     source="all",
+                     domain="southamerica",
+                     store="group")
