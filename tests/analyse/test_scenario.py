@@ -1580,11 +1580,11 @@ def test_scenario_with_satellite_data():
     species = "ch4"
 
     obs_column = get_obs_column(
-        species=species, max_level = 3, satellite=satellite, store="user"
+        species=species, max_level = 3, satellite=satellite, selection="land", store="user"
     )
 
     footprint = get_footprint(
-        satellite=satellite, domain=domain, obs_region=obs_region, store="user"
+        satellite=satellite, domain=domain, obs_region=obs_region, model="cams", store="user"
     )
 
     with pytest.raises(AttributeError):
