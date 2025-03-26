@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dropped `exposure_id` variable for GOSAT data to avoid change in dimension size error raised from `to_zarr`. [PR #1243](https://github.com/openghg/openghg/pull/1243) [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
-- Fixed `get_*` functions if passed with `start_date` or `end_date` in format of ""dd:mm:yy T 00:00:0000" can still fetch the relevant data.[#PR 1272](https://github.com/openghg/openghg/issues/1272)
+- Fixed `get_*` functions if passed with `start_date` or `end_date` in format of ""dd:mm:yy T 00:00:0000" can still fetch the relevant data.[#PR 1273](https://github.com/openghg/openghg/issues/1273)
 
 ## [0.13.0] - 2025-03-10
 
