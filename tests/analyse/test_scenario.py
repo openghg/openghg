@@ -1605,25 +1605,27 @@ def test_scenario_with_satellite_data():
 def test_model_scenario_col_fp_data_merge():
     """This is to test satellite data aligns fp to obs and satifies the fp_data_merge functionality"""
 
+    satellite = 'gosat'
+    domain = 'southamerica'
+    obs_region = 'brazil'
+
     obs_column_data = get_obs_column(species="ch4", max_level=3,
-                     satellite="gosat", domain='southamerica', store="group")
-    fp_column_data = get_footprint(domain="southamerica",
-                satellite= 'gosat',
-                store="group")
-    flux_data = get_flux(species="ch4", source="all", domain="southamerica",store="group")
+                      satellite=satellite, start_date="2016-01-01 14:59:12.500000+00:00",
+                      end_date="2016-01-01 18:10:16.500000+00:00",  obs_region='brazil', store="user")
+    fp_column_data = get_footprint(satellite=satellite, domain=domain, obs_region=obs_region,start_date="2016-01-01 14:59:12.500000+00:00",
+                      end_date="2016-01-01 19:10:16.500000+00:00",  model="name", store="user")
+    flux_data = get_flux(species="ch4", source="all", domain="southamerica")
 
     satellite_scenario = ModelScenario(obs_column=obs_column_data,
                                        footprint=fp_column_data,
                                        flux=flux_data, platform="satellite", max_level=3)
 
-    fp_data_merge = satellite_scenario.footprints_data_merge(platform="satellite",
-                                             calc_timeseries=True,
-                                             sources="all",
-                                             cache=False)
+    fp_data_merge = satellite_scenario.footprints_data_merge(platform="satellite",                                            calc_timeseries=True,                                             sources="all",  cache=False)
 
     assert "mf_mod" in fp_data_merge
     attributes = fp_data_merge.attrs
 
+    obs_column_data.data["time"] == fp_data_merge['time']
     attributes["model"] == "name"
     attributes["data_type"] == "column"
     len(attributes["heights"]) == 20

@@ -287,8 +287,9 @@ def data_read():
                        species="ch4",
                        platform="satellite",
                        satellite="gosat",
-                       domain="southamerica",
-                       store="group")
+                       obs_region="brazil",
+                       network="gosat",
+                       store="user")
 
     standardise_footprint(filepath=col_fp_filepath,
                           model="name",
@@ -296,10 +297,10 @@ def data_read():
                           satellite="gosat",
                           obs_region="brazil",
                           inlet="column",
-                          store="group")
+                          store="user")
 
     standardise_flux(filepath=flux_filepath,
                      species="ch4",
                      source="all",
                      domain="southamerica",
-                     store="group")
+                     store="user")
