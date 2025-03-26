@@ -4,6 +4,7 @@ the object store.
 """
 
 import logging
+import pandas as pd
 from typing import Any
 import warnings
 from openghg.objectstore.metastore import open_metastore
@@ -459,6 +460,9 @@ def search(**kwargs: Any) -> SearchResults:
             v = {key: clean_string(value) for key, value in v.items() if value is not None}
             if not v:  # Check empty dict
                 v = None
+        elif k.lower() in ["start_date", "end_date"]:
+            if v is not None:
+                v = pd.Timestamp(v)
         else:
             v = clean_string(v)
 
