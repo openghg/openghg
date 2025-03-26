@@ -1571,8 +1571,8 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
-def test_scenario_with_satellite_data():
-    """ Test to ensure ModelScenario instance can be created from obs_column satellite data and footprints satellite data"""
+def test_satellite_scenario_raises_error():
+    """ Test to ensure ModelScenario instance raises error if max_level is not passed when platform argument is satellite"""
 
     satellite = "gosat"
     domain = "SOUTHAMERICA"
@@ -1590,16 +1590,6 @@ def test_scenario_with_satellite_data():
     with pytest.raises(AttributeError):
         # checks that ModelScenario fails if passing platform=satellite but not max_level
         model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint,  platform="satellite")
-
-    model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint, max_level = 3, platform="satellite")
-
-    # Check values have been stored in ModelScenario object correctly
-    assert model_scenario.obs is not None
-    assert model_scenario.footprint is not None
-
-    # Check values stored within model_scenario object match inputs
-    xr.testing.assert_equal(model_scenario.obs.data, obs_column.data)
-    xr.testing.assert_equal(model_scenario.footprint.data, footprint.data)
 
 
 def test_model_scenario_col_fp_data_merge():
@@ -1619,6 +1609,14 @@ def test_model_scenario_col_fp_data_merge():
     satellite_scenario = ModelScenario(obs_column=obs_column_data,
                                        footprint=fp_column_data,
                                        flux=flux_data, platform="satellite", max_level=3)
+
+    # Check values have been stored in ModelScenario object correctly
+    assert satellite_scenario.obs is not None
+    assert satellite_scenario.footprint is not None
+
+    # Check values stored within model_scenario object match inputs
+    xr.testing.assert_equal(satellite_scenario.obs.data, obs_column_data.data)
+    xr.testing.assert_equal(satellite_scenario.footprint.data, fp_column_data.data)
 
     fp_data_merge = satellite_scenario.footprints_data_merge(platform="satellite",                                            calc_timeseries=True,                                             sources="all",  cache=False)
 
