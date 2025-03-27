@@ -18,6 +18,7 @@ def test_read_data_monthly(mocker):
         It only returns one uuid, but could be changed to return a different UUID
         each time.
         """
+
         hex_num = 0
         uuid_num = 0
 
@@ -58,12 +59,18 @@ def test_read_data_monthly(mocker):
         binary_data=binary_data,
         metadata=metadata,
         file_metadata=file_metadata,
-        source_format='openghg'
+        source_format="openghg",
     )
 
     assert proc_results is not None and len(proc_results) == 1
 
-    expected_info = {"uuid": "test-uuid-1", "new": True, "species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    expected_info = {
+        "uuid": "test-uuid-1",
+        "new": True,
+        "species": "ch4",
+        "bc_input": "mozart",
+        "domain": "europe",
+    }
     assert expected_info.items() <= proc_results[0].items()
 
 

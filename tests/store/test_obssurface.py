@@ -418,7 +418,12 @@ def test_read_openghg_format(bucket):
     datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     results = standardise_surface(
-        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC", update_mismatch="metadata",
+        store="user",
+        filepath=datafile,
+        source_format="OPENGHG",
+        site="TAC",
+        network="DECC",
+        update_mismatch="metadata",
     )
 
     uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
@@ -789,7 +794,6 @@ def test_store_icos_carbonportal_data(bucket):
 
     assert result is not None
     assert filt(result, species="co2")[0]["new"] is True
-
 
 
 @pytest.mark.parametrize(

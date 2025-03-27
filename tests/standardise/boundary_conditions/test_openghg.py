@@ -2,6 +2,7 @@ import logging
 
 from helpers import get_bc_datapath
 from openghg.standardise.boundary_conditions import parse_openghg
+
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
@@ -13,10 +14,7 @@ def test_parse_openghg():
 
     data_path = get_bc_datapath(filename="ch4_EUROPE_201208.nc")
 
-    results = parse_openghg(filepath=data_path,
-                                        species="ch4",
-                                        bc_input="MOZART",
-                                        domain="EUROPE")
+    results = parse_openghg(filepath=data_path, species="ch4", bc_input="MOZART", domain="EUROPE")
 
     metadata = results["ch4_mozart_europe"]["metadata"]
 
