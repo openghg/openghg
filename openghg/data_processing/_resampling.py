@@ -419,12 +419,15 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
 
     # if we didn't do a weighted resample for variability, report the stdev of the mole fraction
     if not variability_set and species in data_vars:
-        func_dict["variability"] = [species]
+        if variability in data_vars: 
+            func_dict["mean"] = [variability]
+        else:
+            func_dict["variability"] = [species]
 
         # since species is mapped to species_variability, it will not be mean resampled by `resampler` by
-        # default, so set this explicitly
+        # default, so set this explicitly --->>> Don't understand this comment
         if species not in func_dict.get("weighted", []):
-            func_dict["mean"] = [species]
+            func_dict["mean"] = [species] + func_dict.get("mean",[])
 
     return func_dict
 
