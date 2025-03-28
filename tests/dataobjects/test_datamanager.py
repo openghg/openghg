@@ -4,7 +4,7 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
     key_to_local_filepath,
-    print_dict_diff
+    print_dict_diff,
 )
 from openghg.dataobjects import DataManager, data_manager
 from openghg.objectstore import get_writable_bucket, exists

@@ -60,7 +60,9 @@ def dataset():
             "ch4_number_of_observations": (["time"], np.arange(24)),
             "ch4_variability": (["time"], np.arange(24)),
         },
-        coords={"time": ("time", np.array([f"2020-01-01T{h:0>2}:00:00" for h in range(24)], dtype="datetime64"))},
+        coords={
+            "time": ("time", np.array([f"2020-01-01T{h:0>2}:00:00" for h in range(24)], dtype="datetime64"))
+        },
         attrs={
             "Conventions": "CF-1.8",
             "comment": "Cavity ring-down measurements. Output from GCWerks",
@@ -91,9 +93,14 @@ def dataset():
             "type": "air",
         },
     )
-    ds["ch4"].attrs = {'long_name': 'mole_fraction_of_methane_in_air', 'units': '1e-9'}
-    ds["ch4_number_of_observations"].attrs = {'long_name': 'mole_fraction_of_methane_in_air_number_of_observations'}
-    ds["ch4_variability"].attrs = {'long_name': 'mole_fraction_of_methane_in_air_variability', 'units': '1e-9'}
+    ds["ch4"].attrs = {"long_name": "mole_fraction_of_methane_in_air", "units": "1e-9"}
+    ds["ch4_number_of_observations"].attrs = {
+        "long_name": "mole_fraction_of_methane_in_air_number_of_observations"
+    }
+    ds["ch4_variability"].attrs = {
+        "long_name": "mole_fraction_of_methane_in_air_variability",
+        "units": "1e-9",
+    }
 
     return ds
 

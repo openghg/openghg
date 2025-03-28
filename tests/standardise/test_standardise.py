@@ -296,7 +296,7 @@ def test_standardise_column():
 
     assert "ch4" == results[0].get("species")
 
-    data = get_obs_column(species='ch4', max_level=3, satellite="gosat")
+    data = get_obs_column(species="ch4", max_level=3, satellite="gosat")
 
     assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection"] == "land"
@@ -445,7 +445,7 @@ def test_standardise_flux():
     )
 
     expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
-    result  = proc_results[0]
+    result = proc_results[0]
 
     for k, v in expected_metadata.items():
         assert result[k].lower() == v.lower()
@@ -493,7 +493,7 @@ def test_standardise_non_standard_flux_domain():
     )
 
     expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "test"}
-    result  = proc_results[0]
+    result = proc_results[0]
 
     for k, v in expected_metadata.items():
         assert result[k].lower() == v.lower()
@@ -581,7 +581,7 @@ def test_standardise_flux_timeseries():
     )
 
     expected_metadata = {"species": "ch4", "source": "crf", "region": "uk"}
-    result  = flux_results[0]
+    result = flux_results[0]
     print(result)
     for k, v in expected_metadata.items():
         assert result[k].lower() == v.lower()
@@ -639,18 +639,19 @@ def test_standardise_sorting_false(caplog):
 
 
 def test_standardise_surface_niwa(caplog):
-    """ Testing NIWA network file gets standardised here"""
+    """Testing NIWA network file gets standardised here"""
 
     data = get_surface_datapath(filename="niwa.nc", source_format="NIWA")
 
-    results = standardise_surface(filepath=data,
-                    source_format="niwa",
-                    network="NIWA",
-                    site="LAU",
-                    store="user",
-                    verify_site_code=False,
-                    inlet="10m"
-                    )
+    results = standardise_surface(
+        filepath=data,
+        source_format="niwa",
+        network="NIWA",
+        site="LAU",
+        store="user",
+        verify_site_code=False,
+        inlet="10m",
+    )
 
     assert "ch4" in results[0]["species"]
     assert "LAU" in results[0]["site"]
@@ -675,7 +676,7 @@ def test_standardise_footprints_satellite_raises_error():
             network=network,
             model="CAMS",
             inlet="column",
-            period='1S',
+            period="1S",
             domain=domain,
             selection="LAND",
             force=True,
@@ -697,28 +698,24 @@ def test_standardise_footprint_satellite(caplog):
     obs_region = "BRAZIL"
 
     standardise_footprint(
-            filepath=datapath,
-            satellite=satellite,
-            network=network,
-            model="CAMS",
-            inlet="column",
-            period='varies',
-            domain=domain,
-            obs_region=obs_region,
-            selection="LAND",
-            store="user",
-            continuous=True,
-        )
+        filepath=datapath,
+        satellite=satellite,
+        network=network,
+        model="CAMS",
+        inlet="column",
+        period="varies",
+        domain=domain,
+        obs_region=obs_region,
+        selection="LAND",
+        store="user",
+        continuous=True,
+    )
 
     assert "'continuous' is set to `False`" in caplog.text
 
-    data = get_footprint(
-        satellite=satellite,
-        domain=domain,
-        obs_region=obs_region
-    )
+    data = get_footprint(satellite=satellite, domain=domain, obs_region=obs_region)
 
-    assert data.metadata["time_period"] == 'varies'
+    assert data.metadata["time_period"] == "varies"
     assert data.metadata["obs_region"] == obs_region.lower()
-    assert data.metadata["selection" ] == "land"
+    assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == domain.lower()
