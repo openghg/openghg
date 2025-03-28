@@ -166,15 +166,13 @@ def get_obs_surface(
     )
 
     data = retrieved_data.data
-    if data.dims["time"] == 0:
-        raise SearchError(f"Dataset is empty for obs. in {kwargs['store']} at {site}.")
 
     if "flag" in data:
         if all(data["flag"] == "O"):
             del data["flag"]
         else:
             raise ValueError(
-                f"'flag' variable is present for obs. in {kwargs['store']} at {site} and values are not equal to 'O'. Please check your data."
+                f"'flag' variable is present for obs. with {surface_keywords} and values are not equal to 'O'. Please check your data."
             )
 
     if data.attrs["inlet"] == "multiple":
@@ -188,20 +186,23 @@ def get_obs_surface(
         # which makes resampling extremely slow with Dask >= 2024.8.0
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
-        var_to_delete = []
-        import numpy as np
 
+        var_to_delete = []
         for var in data:
-            if np.isnan(data[var].values).all():
+            if data[var].isnull().all():
                 var_to_delete.append(var)
         logger.info(
             f"{var_to_delete} contain only nan for obs. in {kwargs['store']} at {site}. They are thus deleted."
         )
-        for var in var_to_delete:
-            del data[var]
+        data.drop_vars(var_to_delete)
+        
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
+    
+    # Check if data set is empty
+    if data.dims["time"] == 0:
+        raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
 
     # Rename variables
     if rename_vars:
