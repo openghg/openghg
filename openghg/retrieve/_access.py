@@ -195,11 +195,11 @@ def get_obs_surface(
             f"{var_to_delete} contain only nan for obs. in {kwargs['store']} at {site}. They are thus deleted."
         )
         data.drop_vars(var_to_delete)
-        
+
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
-    
+
     # Check if data set is empty
     if data.dims["time"] == 0:
         raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
