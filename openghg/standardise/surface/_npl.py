@@ -13,7 +13,6 @@ def parse_npl(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
-    measurement_type: str | None = None,
     update_mismatch: str = "never",
 ) -> dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
@@ -26,7 +25,6 @@ def parse_npl(
         inlet: Inlet height. Will be inferred if not specified
         instrument: Instrument name
         sampling_period: Sampling period
-        measurement_type: Type of measurement taken e.g."flask", "insitu"
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:

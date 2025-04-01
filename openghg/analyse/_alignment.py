@@ -73,7 +73,7 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
 
     # Check if the periods differ by more than 1 second
     if max_diff > tol:
-        raise ValueError("Sample period can be not be derived from observations")
+        raise ValueError("Sample period cannot be derived from observations")
 
     return float(obs_data_period_s)
 

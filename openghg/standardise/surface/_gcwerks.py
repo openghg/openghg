@@ -58,7 +58,6 @@ def parse_gcwerks(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
-    measurement_type: str | None = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
 ) -> dict:

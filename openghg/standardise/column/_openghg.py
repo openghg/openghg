@@ -72,6 +72,7 @@ def parse_openghg(
     # TODO: Remove this once ragged arrays from xarray is handled
     if "exposure_id" in data:
         data = data.drop_vars("exposure_id")
+        data = data.drop_vars("id")
 
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)

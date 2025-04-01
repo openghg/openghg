@@ -21,7 +21,6 @@ def parse_agage(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
-    measurement_type: str | None = None,
     update_mismatch: str = "from_source",
     site_filepath: optionalPathType = None,
 ) -> dict:
@@ -34,7 +33,6 @@ def parse_agage(
         network: Network name
         inlet: inlet name (optional)
         sampling_period: sampling period for this instrument. If not supplied, will be read from the file.
-        measurement_type: measurement type
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:

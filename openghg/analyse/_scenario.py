@@ -180,8 +180,12 @@ class ModelScenario:
         TODO: For obs, footprint, flux should we also allow Dataset input and turn
         these into the appropriate class?
         """
+        self.platform: str | None = platform
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
+        if self.obs_column is not None:
+            if platform is not None:
+                self.platform = platform
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -191,9 +195,17 @@ class ModelScenario:
 
         accepted_column_data_types = ["satellite", "site-column"]
 
+        if satellite is not None and platform is None:
+            logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
+            self.platform = "satellite"
+
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
+            if max_level is None:
+                raise AttributeError(
+                    "If you are using column-based data (i.e. platform is 'satellite' or 'site-column'), you need to pass max_level"
+                )
             self.add_obs_column(
                 site=site,
                 satellite=satellite,
@@ -234,6 +246,7 @@ class ModelScenario:
         self.add_footprint(
             site=site,
             inlet=inlet,
+            satellite=satellite,
             height=height,
             domain=domain,
             model=model,
@@ -448,15 +461,21 @@ class ModelScenario:
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, met_model
-        if site is not None and footprint is None:
-            site = clean_string(site)
 
-            if fp_inlet is None:
+        if footprint is None and (site is not None or satellite is not None):
+            if site is not None:
+                site = clean_string(site)
+
+            if satellite is not None and fp_inlet is None:
+                fp_inlet = "column"
+
+            if site is not None and fp_inlet is None:
                 # use obs network if we're trying to infer the height from site info
                 if self.obs is not None:
                     network = network or self.obs.metadata.get("network")
 
-                height_name = extract_height_name(site, network, inlet)
+                if site is not None:
+                    height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
                     logger.info(
@@ -739,7 +758,7 @@ class ModelScenario:
             # Do not apply resampling for "satellite" or "flask"
             if platform == "satellite":
                 resample_to = None
-                align_to_obs = False
+                align_to_obs = True
             elif "flask" in platform:
                 resample_to = None
                 align_to_obs = True
@@ -748,7 +767,13 @@ class ModelScenario:
 
         if resample_to is None:
             if align_to_obs:
-                footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
+                if platform == "satellite":
+                    footprint_data = footprint_data.reindex_like(
+                        obs_data, method="nearest", tolerance=pd.Timedelta("1ms")
+                    )
+                    logger.info("Reindexing footprint data to satellite observation data.")
+                else:
+                    footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
 
         if resample_to == "footprint":
@@ -964,7 +989,7 @@ class ModelScenario:
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
-            if self.obs is not None:
+            if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
