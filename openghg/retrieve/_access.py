@@ -192,7 +192,7 @@ def get_obs_surface(
             if data[var].isnull().all():
                 var_to_delete.append(var)
         logger.info(
-            f"{var_to_delete} contain only nan for obs. in {kwargs['store']} at {site}. They are thus deleted."
+            f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
         )
         data.drop_vars(var_to_delete)
 
