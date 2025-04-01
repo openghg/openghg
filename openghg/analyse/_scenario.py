@@ -180,12 +180,8 @@ class ModelScenario:
         TODO: For obs, footprint, flux should we also allow Dataset input and turn
         these into the appropriate class?
         """
-        self.platform: str | None = platform
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
-        if self.obs_column is not None:
-            if platform is not None:
-                self.platform = platform
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -195,6 +191,7 @@ class ModelScenario:
 
         accepted_column_data_types = ["satellite", "site-column"]
 
+        self.platform: str | None = platform
         if satellite is not None and platform is None:
             logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
             self.platform = "satellite"
