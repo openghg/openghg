@@ -949,32 +949,30 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
 
 
 @pytest.mark.parametrize(
-    "platform,pass_via",
+    "platform_metadata,platform_keyword",
     [
-        ("surface-flask", "keyword"),
-        ("surface-flask", "metadata"),
-        ("surface-flask", "metadata and keyword"),
+        ("surface-flask", None),
+        (None, "surface-flask"),
+        ("surface-flask", "surface-flask"),
+        ("not_set", "surface-flask"),
     ]
 )
-def test_model_align_flask(model_scenario_ch4_dummy, platform, pass_via):
+def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform_keyword):
     """
     Test expected aligned values for obs with known dummy data when:
-     1. "platform" is NOT present in the metadata, pass platform="surface-flask" keyword
-     2. "platform" is present in the metadata, don't pass platform keyword
-     3. "platform" is present in the metadata AND keyword is passed
+     1. platform is NOT present in the metadata, pass platform="surface-flask" keyword
+     2. platform="surface-flask" in the metadata, don't pass platform keyword
+     3. platform="surface-flask" in the metadata AND same keyword is passed
+     4. platform="not_set" in the metadata AND "surface-flask" passed as a platform keyword
 
     Expect data to be aligned but not resampled.
     """
 
     # Add keyword to the metadata
-    if "metadata" in pass_via:
-        model_scenario_ch4_dummy.obs.metadata["platform"] = platform
-    
-    # Don't pass platform keyword if not within pass_via input
-    if "keyword" not in pass_via:
-        platform = None
+    if platform_metadata is not None:
+        model_scenario_ch4_dummy.obs.metadata["platform"] = platform_metadata
 
-    combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint(platform=platform)
+    combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint(platform=platform_keyword)
 
     obs_data = model_scenario_ch4_dummy.obs.data
     footprint_data = model_scenario_ch4_dummy.footprint.data

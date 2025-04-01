@@ -701,7 +701,7 @@ class ModelScenario:
             - obs metadata
             - the "site_info.json" file from openghg_defs dependency.
         """
-        from openghg.util import get_platform_from_info
+        from openghg.util import get_platform_from_info, not_set_metadata_values
 
         platform_keyword = "platform"
 
@@ -709,6 +709,9 @@ class ModelScenario:
             metadata = self.obs.metadata
             if platform_keyword in metadata:
                 platform: str | None = self.obs.metadata[platform_keyword]
+                not_set_values = not_set_metadata_values()
+                if platform in not_set_values:
+                    platform = None
             else:
                 platform = None
 
