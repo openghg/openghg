@@ -750,30 +750,17 @@ class ModelScenario:
         obs_data = obs.data
         footprint_data = footprint.data
 
-        # Keyword only used if not resampling (at the moment)
-        align_to_obs = True
-
         if platform is not None:
             platform = platform.lower()
             # Do not apply resampling for "satellite" or "flask"
             if platform == "satellite":
                 resample_to = None
-                align_to_obs = True
             elif "flask" in platform:
                 resample_to = None
-                align_to_obs = True
             else:
                 logger.warning(f"Platform '{platform}' not used when determining resample strategy.")
 
         if resample_to is None:
-            if align_to_obs:
-                if platform == "satellite":
-                    footprint_data = footprint_data.reindex_like(
-                        obs_data, method="nearest", tolerance=pd.Timedelta("1ms")
-                    )
-                    logger.info("Reindexing footprint data to satellite observation data.")
-                else:
-                    footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
 
         if resample_to == "footprint":
@@ -819,15 +806,20 @@ class ModelScenario:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
 
-        # As we're not processing any satellite data yet just set tolerance to None
-        tolerance = None
         if platform is None:
             platform = self._get_platform()
 
-        # Align and merge the observation and footprint Datasets
+        if platform == "satellite":
+            merge_method: methodType = "nearest"
+            tolerance = pd.Timedelta("1ms")
+        else:
+            merge_method = "ffill"
+            tolerance = None
+
+        # Resample, align and merge the observation and footprint Datasets
         aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
         combined_dataset = combine_datasets(
-            dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance
+            dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance, method=merge_method
         )
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
