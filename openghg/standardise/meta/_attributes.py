@@ -2,7 +2,7 @@ from typing import Any, cast
 from collections.abc import Hashable
 import logging
 from xarray import Dataset
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 __all__ = [
     "assign_attributes",
@@ -24,8 +24,8 @@ def assign_attributes(
     network: str | None = None,
     sampling_period: str | float | int | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-    species_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
+    species_filepath: pathType | None = None,
 ) -> dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -94,8 +94,8 @@ def get_attributes(
     scale: str | None = None,
     sampling_period: str | float | int | None = None,
     date_range: list[str] | None = None,
-    site_filepath: optionalPathType = None,
-    species_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
+    species_filepath: pathType | None = None,
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
@@ -293,7 +293,7 @@ def get_attributes(
     return ds
 
 
-def define_species_label(species: str, species_filepath: optionalPathType = None) -> tuple[str, str]:
+def define_species_label(species: str, species_filepath: pathType | None = None) -> tuple[str, str]:
     """Define standardised label to use for observation datasets.
     This uses the data stored within openghg_defs/data/site_info JSON file
     by default with alternative names ('alt') defined within.
@@ -342,7 +342,7 @@ def define_species_label(species: str, species_filepath: optionalPathType = None
 
 
 def _site_info_attributes(
-    site: str, network: str | None = None, site_filepath: optionalPathType = None
+    site: str, network: str | None = None, site_filepath: pathType | None = None
 ) -> dict:
     """Reads site attributes from JSON
 

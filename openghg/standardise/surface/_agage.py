@@ -10,7 +10,7 @@ from openghg.standardise.meta import (
     attributes_default_keys,
     dataset_formatter,
 )
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.util import clean_string, format_inlet
 
 
@@ -22,7 +22,7 @@ def parse_agage(
     instrument: str | None = None,
     sampling_period: str | None = None,
     update_mismatch: str = "from_source",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 

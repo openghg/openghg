@@ -3,7 +3,7 @@ from typing import cast
 import logging
 import xarray as xr
 
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -21,7 +21,7 @@ def parse_openghg(
     data_owner: str | None = None,
     data_owner_email: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwargs: str,
 ) -> dict:
     """
