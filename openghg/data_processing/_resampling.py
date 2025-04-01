@@ -24,6 +24,7 @@ If custom resampling is needed, the user can write their own resampling function
 possible using `surface_obs_resampler` as a base.
 """
 
+from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
 from typing import Any, Concatenate, Literal
@@ -181,6 +182,30 @@ def _weighted_resample(
 
     return xr.Dataset(data_vars=data_vars)
 
+@register
+@add_averaging_attrs
+def mean_and_variability_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr.Dataset:
+    """Resample concentration and variability, using weighted_resample and assuming number of observations uniformely equal to 1.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species data applies to; a data variable with this name, as well as
+            a data variable named {species}_number_of_observations must be present in `ds`.
+
+    Returns:
+        xr.Dataset with obs. (and variability) resampled.
+    """
+
+    n_obs = f"{species}_number_of_observations"
+    ds[n_obs] = xr.full_like(ds[species], fill_value=1)
+    ds[n_obs].attrs = {'long_name' : 'faked number of observations for weighted_resample function'}
+
+    result = weighted_resample(ds, averaging_period, species)
+
+    del result[n_obs]
+
+    return result
 
 @register
 @add_averaging_attrs
@@ -373,12 +398,6 @@ def resampler(
 
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
-    # delete "{species}_number_of_observations" if faked created for weighted_resample
-    data_vars = [str(dv) for dv in result.data_vars]
-    n_obs = [dv for dv in data_vars if "_number_of_observations" in dv]
-    if n_obs and ds[n_obs[0]].attrs['long_name'] == 'faked number of observations for weighted_resample function':
-        del result[n_obs[0]]
-
     if drop_na:
         result = result.dropna("time")
 
@@ -398,7 +417,7 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
         dict mapping resampler function names to lists of data variables.
     """
     # build dict of resampling functions
-    func_dict = {}
+    func_dict = defaultdict(list)
     data_vars = [str(dv) for dv in ds.data_vars]
 
     # check for repeatability
@@ -413,13 +432,12 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
 
     n_obs = f"{species}_number_of_observations"
 
-    # if variability is present without number of obs, assume equal weighting in weighted_resample
     if species in data_vars and n_obs not in data_vars and variability in data_vars:
-            ds[n_obs] = xr.full_like(ds[species], fill_value=1)
-            ds[n_obs].attrs = {'long_name' : 'faked number of observations for weighted_resample function'}
-            data_vars.append(n_obs)
+        func_dict["mean_and_variability"] = [species,variability]
 
-    if n_obs in data_vars and species in data_vars:
+        variability_set = True
+
+    elif n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
         if variability in data_vars:
@@ -431,15 +449,12 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
 
     # if we didn't do a weighted resample for variability, report the stdev of the mole fraction
     if not variability_set and species in data_vars:
-        if variability in data_vars:
-            func_dict["mean"] = [variability]
-        else:
-            func_dict["variability"] = [species]
+        func_dict["variability"] = [species]
 
         # since species is mapped to species_variability, it will not be mean resampled by `resampler` by
         # default, so set this explicitly
         if species not in func_dict.get("weighted", []):
-            func_dict["mean"] = [species] + func_dict.get("mean", [])
+            func_dict["mean"].append(species)
 
     return func_dict
 
