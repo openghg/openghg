@@ -13,7 +13,7 @@ def get_platform_from_info(site: str, site_filepath: optionalPathType = None) ->
     Returns:
         str | None: platform name from site_info.json if present
     """
-    
+
     site_data = get_site_info(site_filepath=site_filepath)
 
     site_upper = site.upper()
