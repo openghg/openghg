@@ -373,6 +373,12 @@ def resampler(
 
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
+    # delete "{species}_number_of_observations" if faked created for weighted_resample
+    data_vars = [str(dv) for dv in result.data_vars]
+    n_obs = [dv for dv in data_vars if "_number_of_observations" in dv]
+    if n_obs and ds[n_obs[0]].attrs['long_name'] == 'faked number of observations for weighted_resample function':
+        del result[n_obs[0]]
+
     if drop_na:
         result = result.dropna("time")
 
@@ -406,6 +412,12 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
     variability_set = False
 
     n_obs = f"{species}_number_of_observations"
+
+    # if variability is present without number of obs, assume equal weighting in weighted_resample
+    if species in data_vars and n_obs not in data_vars and variability in data_vars:
+            ds[n_obs] = xr.full_like(ds[species], fill_value=1)
+            ds[n_obs].attrs = {'long_name' : 'faked number of observations for weighted_resample function'}
+            data_vars.append(n_obs)
 
     if n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]

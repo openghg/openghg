@@ -166,7 +166,12 @@ def get_obs_surface(
     )
 
     data = retrieved_data.data
-
+    
+    # check if data set is empty
+    if data.sizes["time"] == 0:
+        raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
+    
+    # remove "flag" variable if present to avoid resampling error
     if "flag" in data:
         if all(data["flag"] == "O") or all(data["flag"] == "U"):
             del data["flag"]
@@ -194,15 +199,11 @@ def get_obs_surface(
         logger.info(
             f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
         )
-        data.drop_vars(var_to_delete)
+        data = data.drop_vars(var_to_delete)
 
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
-
-    # Check if data set is empty
-    if data.sizes["time"] == 0:
-        raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
 
     # Rename variables
     if rename_vars:
