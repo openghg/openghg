@@ -972,6 +972,7 @@ def test_drop_only_correct_nan():
         ("data_level", "1", "2"),
         ("data_sublevel", "1.1", "1.2"),
         ("dataset_source", "InGOS", "European ObsPack"),
+        ("platform", "surface-insitu", "surface-flask")
     ],
 )
 def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
