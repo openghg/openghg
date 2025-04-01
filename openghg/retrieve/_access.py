@@ -168,7 +168,7 @@ def get_obs_surface(
     data = retrieved_data.data
 
     if "flag" in data:
-        if all(data["flag"] == "O"):
+        if all(data["flag"] == "O") or all(data["flag"] == "U"):
             del data["flag"]
         else:
             raise ValueError(
@@ -201,7 +201,7 @@ def get_obs_surface(
         )
 
     # Check if data set is empty
-    if data.dims["time"] == 0:
+    if data.sizes["time"] == 0:
         raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
 
     # Rename variables
