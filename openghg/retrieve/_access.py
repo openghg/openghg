@@ -166,11 +166,11 @@ def get_obs_surface(
     )
 
     data = retrieved_data.data
-    
+
     # check if data set is empty
     if data.sizes["time"] == 0:
         raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
-    
+
     # remove "flag" variable if present to avoid resampling error
     if "flag" in data:
         if all(data["flag"] == "O") or all(data["flag"] == "U"):

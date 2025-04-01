@@ -182,6 +182,7 @@ def _weighted_resample(
 
     return xr.Dataset(data_vars=data_vars)
 
+
 @register
 @add_averaging_attrs
 def mean_and_variability_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr.Dataset:
@@ -199,13 +200,14 @@ def mean_and_variability_resample(ds: xr.Dataset, averaging_period: str, species
 
     n_obs = f"{species}_number_of_observations"
     ds[n_obs] = xr.full_like(ds[species], fill_value=1)
-    ds[n_obs].attrs = {'long_name' : 'faked number of observations for weighted_resample function'}
+    ds[n_obs].attrs = {"long_name": "faked number of observations for weighted_resample function"}
 
     result = weighted_resample(ds, averaging_period, species)
 
     del result[n_obs]
 
     return result
+
 
 @register
 @add_averaging_attrs
@@ -433,7 +435,7 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
     n_obs = f"{species}_number_of_observations"
 
     if species in data_vars and n_obs not in data_vars and variability in data_vars:
-        func_dict["mean_and_variability"] = [species,variability]
+        func_dict["mean_and_variability"] = [species, variability]
 
         variability_set = True
 
