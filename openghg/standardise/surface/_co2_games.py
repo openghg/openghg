@@ -3,7 +3,7 @@ from pathlib import Path
 import copy
 import xarray as xr
 
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.standardise.meta import (
     assign_attributes,
     dataset_formatter,
@@ -22,7 +22,7 @@ def parse_co2_games(
     instrument: str | None = None,
     sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     units: str = "mol/mol",
     **kwarg: dict,
 ) -> dict:

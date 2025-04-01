@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, optionalPathType, MetadataAndData, DataOverlapError
+from openghg.types import multiPathType, pathType, MetadataAndData, DataOverlapError
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -31,7 +31,7 @@ class ObsSurface(BaseStore):
         metadata: dict,
         file_metadata: dict,
         precision_data: bytes | None = None,
-        site_filepath: optionalPathType = None,
+        site_filepath: pathType | None = None,
     ) -> list[dict]:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
@@ -122,7 +122,7 @@ class ObsSurface(BaseStore):
         platform: str | None = None,
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
-        site_filepath: optionalPathType = None,
+        site_filepath: pathType | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
         save_current: str = "auto",

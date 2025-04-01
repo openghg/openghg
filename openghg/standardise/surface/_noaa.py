@@ -5,7 +5,7 @@ from collections.abc import Hashable
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.util import check_and_set_null_variable, not_set_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -21,7 +21,7 @@ def parse_noaa(
     instrument: str | None = None,
     sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwarg: dict,
 ) -> dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
@@ -287,7 +287,7 @@ def _read_obspack(
     inlet: str | None = None,
     instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict[str, dict]:
     """Read NOAA ObsPack NetCDF files
 
@@ -432,7 +432,7 @@ def _read_raw_file(
     inlet: str | None = None,
     instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.

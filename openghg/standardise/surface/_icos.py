@@ -2,7 +2,7 @@ from pathlib import Path
 import logging
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -18,7 +18,7 @@ def parse_icos(
     measurement_type: str | None = None,
     header_type: str = "large",
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwargs: dict,
 ) -> dict:
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
