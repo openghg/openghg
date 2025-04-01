@@ -119,6 +119,7 @@ class ObsSurface(BaseStore):
         dataset_source: str | None = None,
         sampling_period: Timedelta | str | None = None,
         calibration_scale: str | None = None,
+        platform: str | None = None,
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
@@ -158,7 +159,11 @@ class ObsSurface(BaseStore):
                 before data is finalised.
             dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
-            measurement_type: Type of measurement e.g. insitu, flask
+            platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
+            measurement_type: Type of measurement. For some source_formats this value is added
+                to the attributes. Platform should be used in preference.
+                If platform is specified and measurement_type is not, this will be
+                set to match the platform.
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -243,15 +248,20 @@ class ObsSurface(BaseStore):
 
         sampling_period = evaluate_sampling_period(sampling_period)
 
+        if measurement_type is None and platform is not None:
+            measurement_type = platform
+
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
         if data_sublevel is not None:
             data_sublevel = str(data_sublevel)
 
+        platform = check_and_set_null_variable(platform)
         data_level = check_and_set_null_variable(data_level)
         data_sublevel = check_and_set_null_variable(data_sublevel)
         dataset_source = check_and_set_null_variable(dataset_source)
 
+        platform = clean_string(platform)
         data_level = clean_string(data_level)
         data_sublevel = clean_string(data_sublevel)
         dataset_source = clean_string(dataset_source)
