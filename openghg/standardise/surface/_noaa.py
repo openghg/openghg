@@ -15,7 +15,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def parse_noaa(
     filepath: str | Path,
     site: str,
-    measurement_type: str,
+    measurement_type: str | None,
     inlet: str | None = None,
     network: str = "NOAA",
     instrument: str | None = None,
@@ -49,6 +49,15 @@ def parse_noaa(
         sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
+
+    valid_types = ("flask", "insitu", "pfp")
+
+    if measurement_type is None:
+        raise ValueError(
+            f"measurement_type must be specified for source_format='noaa'. This must be one of {valid_types}"
+        )
+    elif measurement_type not in valid_types:
+        raise ValueError(f"measurement_type is '{measurement_type}' but must be one of {valid_types}")
 
     file_extension = Path(filepath).suffix
 
@@ -302,11 +311,6 @@ def _read_obspack(
     """
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
-
-    valid_types = ("flask", "insitu", "pfp")
-
-    if measurement_type not in valid_types:
-        raise ValueError(f"measurement_type must be one of {valid_types}")
 
     with xr.open_dataset(filepath) as temp:
         obspack_ds = temp
