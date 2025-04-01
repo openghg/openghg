@@ -66,7 +66,6 @@ def test_read_file():
     expected_info = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
     assert expected_info.items() <= proc_results[0].items()
 
-
     search_results = search(
         species="co2",
         source="gpp-cardamom",
