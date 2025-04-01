@@ -107,7 +107,10 @@ def standardise_surface(
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
         platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
-        measurement_type: Type of measurement e.g. insitu, flask
+        measurement_type: Type of measurement. For some source_formats this value is added
+            to the attributes. Platform should be used in preference.
+            If platform is specified and measurement_type is not, this will be
+            set to match the platform.
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.

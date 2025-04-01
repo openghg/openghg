@@ -149,7 +149,6 @@ class ObsSurface(BaseStore):
             height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
-            platform: Type of measurement platform e.g. "site-insitu", "site-flask"
             data_level: The level of quality control which has been applied to the data.
                 This should follow the convention of:
                     - "0": raw sensor output
@@ -161,7 +160,10 @@ class ObsSurface(BaseStore):
             dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
-            measurement_type: Type of measurement e.g. insitu, flask
+            measurement_type: Type of measurement. For some source_formats this value is added
+                to the attributes. Platform should be used in preference.
+                If platform is specified and measurement_type is not, this will be
+                set to match the platform.
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -245,6 +247,9 @@ class ObsSurface(BaseStore):
         instrument = clean_string(instrument)
 
         sampling_period = evaluate_sampling_period(sampling_period)
+
+        if measurement_type is None and platform is not None:
+            measurement_type = platform
 
         # Ensure we have a clear missing value for data_level, data_sublevel
         data_level = format_data_level(data_level)
