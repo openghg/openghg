@@ -697,25 +697,33 @@ class ModelScenario:
     def _get_platform(self) -> str | None:
         """Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to
-        find this information.
+        To find this information this will look within:
+            - obs metadata
+            - the "site_info.json" file from openghg_defs dependency.
         """
-        from openghg.util import get_site_info
+        from openghg.util import get_platform_from_info
 
-        try:
-            site = self.site
-            site_upper = site.upper()
-        except AttributeError:
-            return None
-        else:
-            site_data = get_site_info()
-            try:
-                site_details = site_data[site_upper]
-            except KeyError:
-                return None
+        platform_keyword = "platform"
+
+        if self.obs is not None:
+            metadata = self.obs.metadata
+            if platform_keyword in metadata:
+                platform: str | None = self.obs.metadata[platform_keyword]
             else:
-                platform: str = site_details.get("platform")
-                return platform
+                platform = None
+
+        if hasattr(self, "site") and self.site is not None:
+            platform_from_site = get_platform_from_info(self.site)
+            if platform is None:
+                logger.info(f"Platform of '{platform}' for site '{self.site}' extracted from site_info.json")
+                platform = platform_from_site
+            elif platform_from_site is not None:
+                if platform != platform_from_site:
+                    logger.warning(
+                        f"Platform from metadata and site_info details do not match ({platform}, {platform_from_site}). Using platform value from metadata."
+                    )
+
+        return platform
 
     def _align_obs_footprint(
         self, resample_to: str | None = "coarsest", platform: str | None = None
