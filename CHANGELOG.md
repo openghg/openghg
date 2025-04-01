@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
 - Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
-- The `platform` keyword can be specified within the `standardise_surface` function to indicate the type of data (e.g. "surface-insitu", "surface-flask"). [PR #1278](https://github.com/openghg/openghg/pull/1278)
+- The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278) and [PR #1279](https://github.com/openghg/openghg/pull/1279).
 - Added ability to reindex footprint data to obs data with tolerance of `1ms` with method="nearest".[#PR 1264](https://github.com/openghg/openghg/pull/1264)
 
 ### Updated
