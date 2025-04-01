@@ -66,7 +66,7 @@ def standardise_surface(
     dataset_source: str | None = None,
     sampling_period: Timedelta | str | None = None,
     calibration_scale: str | None = None,
-    measurement_type: str = "insitu",
+    measurement_type: str | None = None,
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
     store: str | None = None,
