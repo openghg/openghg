@@ -707,12 +707,11 @@ class ModelScenario:
 
         if self.obs is not None:
             metadata = self.obs.metadata
-            if platform_keyword in metadata:
-                platform: str | None = self.obs.metadata[platform_keyword]
-                not_set_values = not_set_metadata_values()
-                if platform in not_set_values:
-                    platform = None
-            else:
+            platform: str | None = metadata.get("platform")
+
+            # Check for values which indicate this has not been specified
+            not_set_values = not_set_metadata_values()
+            if platform in not_set_values:
                 platform = None
 
         if hasattr(self, "site") and self.site is not None:
