@@ -192,7 +192,7 @@ def mean_and_variability_resample(ds: xr.Dataset, averaging_period: str, species
         ds: xr.Dataset to resample
         averaging_period: period to resample to; should be a valid pandas "offset alias"
         species: species data applies to; a data variable with this name, as well as
-            a data variable named {species}_number_of_observations must be present in `ds`.
+            a data variable named {species}_variability must be present in `ds`.
 
     Returns:
         xr.Dataset with obs. (and variability) resampled.
