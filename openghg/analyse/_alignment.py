@@ -151,7 +151,7 @@ T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
 
 
-def align_obs_and_other(
+def resample_obs_and_other(
     obs: T1,
     other: T2,
     resample_to: Literal["obs", "other", "coarsest"] | str = "coarsest",

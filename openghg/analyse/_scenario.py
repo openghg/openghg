@@ -68,7 +68,7 @@ from openghg.retrieve import (
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
 from openghg.types import SearchError
-from ._alignment import align_obs_and_other
+from ._alignment import resample_obs_and_other
 
 
 __all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_dataset_dims", "stack_datasets"]
@@ -720,7 +720,7 @@ class ModelScenario:
                 platform: str = site_details.get("platform")
                 return platform
 
-    def _align_obs_footprint(
+    def _resample_obs_footprint(
         self, resample_to: str | None = "coarsest", platform: str | None = None
     ) -> tuple:
         """Slice and resample obs and footprint data to align along time
@@ -766,7 +766,7 @@ class ModelScenario:
         if resample_to == "footprint":
             resample_to = "other"
 
-        return align_obs_and_other(obs_data, footprint_data, resample_to=resample_to)
+        return resample_obs_and_other(obs_data, footprint_data, resample_to=resample_to)
 
     def combine_obs_footprint(
         self,
@@ -806,6 +806,8 @@ class ModelScenario:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
 
+        # Extract platform and set associated keywords
+        # - platform will also be used within self._resample_obs_footprint()
         if platform is None:
             platform = self._get_platform()
 
@@ -817,9 +819,9 @@ class ModelScenario:
             tolerance = None
 
         # Resample, align and merge the observation and footprint Datasets
-        aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to, platform=platform)
         combined_dataset = combine_datasets(
-            dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance, method=merge_method
+            dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
