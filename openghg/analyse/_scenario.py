@@ -703,8 +703,6 @@ class ModelScenario:
         """
         from openghg.util import get_platform_from_info, not_set_metadata_values
 
-        platform_keyword = "platform"
-
         if self.obs is not None:
             metadata = self.obs.metadata
             platform: str | None = metadata.get("platform")
