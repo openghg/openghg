@@ -44,7 +44,7 @@ on which data types are missing.
 """
 
 import logging
-from typing import Any, Literal, Optional, Union, cast
+from typing import Any, Union, cast
 from collections.abc import Sequence
 
 import numpy as np
@@ -67,8 +67,8 @@ from openghg.retrieve import (
     search_column,
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
-from openghg.types import SearchError
-from ._alignment import resample_obs_and_other
+from openghg.types import SearchError, methodType
+from ._alignment import resample_obs_and_other, combine_datasets
 
 
 __all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_dataset_dims", "stack_datasets"]
@@ -82,7 +82,6 @@ __all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_da
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[list[dict[str, str | int | None]], dict[str, str | int | None]]
-methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -819,7 +818,9 @@ class ModelScenario:
             tolerance = None
 
         # Resample, align and merge the observation and footprint Datasets
-        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to, platform=platform)
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(
+            resample_to=resample_to, platform=platform
+        )
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
@@ -1692,77 +1693,6 @@ class ModelScenario:
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
         return fig
-
-
-def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
-    """Check if two datasets need to be reindexed_like for combine_datasets
-
-    Args:
-        dataset_A: First dataset to check
-        dataset_B: Second dataset to check
-    Returns:
-        bool: True if indexes match, else False
-    """
-    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
-
-    for index in common_indices:
-        if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
-            return False
-
-        # Check number of values that are not close (testing for equality with floating point)
-        if index == "time":
-            # For time override the default to have ~ second precision
-            rtol = 1e-10
-        else:
-            rtol = 1e-5
-
-        index_diff = np.sum(
-            ~np.isclose(
-                dataset_A.indexes[index].values.astype(float),
-                dataset_B.indexes[index].values.astype(float),
-                rtol=rtol,
-            )
-        )
-
-        if not index_diff == 0:
-            return False
-
-    return True
-
-
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: float | None = None
-) -> Dataset:
-    """Merges two datasets and re-indexes to the first dataset.
-
-    If "fp" variable is found within the combined dataset,
-    the "time" values where the "lat", "lon" dimensions didn't match are removed.
-
-    Args:
-        dataset_A: First dataset to merge
-        dataset_B: Second dataset to merge
-        method: One of None, nearest, ffill, bfill.
-                See xarray.DataArray.reindex_like for list of options and meaning.
-                Defaults to ffill (forward fill)
-        tolerance: Maximum allowed tolerance between matches.
-
-    Returns:
-        xarray.Dataset: Combined dataset indexed to dataset_A
-    """
-    if _indexes_match(dataset_A, dataset_B):
-        dataset_B_temp = dataset_B
-    else:
-        # load dataset_B to avoid performance issue (see xarray issue #8945)
-        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
-
-    merged_ds = dataset_A.merge(dataset_B_temp)
-
-    if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
-            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-            merged_ds = merged_ds[dict(time=flag[0])]
-
-    return merged_ds
 
 
 def match_dataset_dims(

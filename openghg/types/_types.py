@@ -7,6 +7,7 @@ from typing import (
     Any,
     Union,
     Optional,
+    Literal,
     TypeVar,
     NamedTuple,
     Protocol,
@@ -29,6 +30,9 @@ ArrayLike = Union[np.ndarray, xr.DataArray]
 ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
 XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
+
+# Defining literals for different (generally internal) settings
+methodType = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
 
 
 class TimePeriod(NamedTuple):
