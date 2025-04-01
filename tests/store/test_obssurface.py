@@ -444,6 +444,7 @@ def test_read_noaa_raw(bucket):
         source_format="NOAA",
         site="POCN25",
         network="NOAA",
+        measurement_type="flask",
         inlet="flask",
     )
 
@@ -474,6 +475,7 @@ def test_read_noaa_metastorepack(bucket):
         inlet="flask",
         source_format="NOAA",
         site="esp",
+        measurement_type="flask",
         network="NOAA",
         overwrite=True,
     )
@@ -1082,7 +1084,7 @@ def test_optional_metadata():
 
 
 @pytest.mark.parametrize(
-    "filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch",
+    "filepath, site, instrument, sampling_period, network, inlet, measurement_type, source_format, update_mismatch",
     [
         (
             "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
@@ -1091,15 +1093,16 @@ def test_optional_metadata():
             "1h",
             "decc",
             "185m",
+            None,
             "openghg",
             "from_definition",
         ),
-        ("ch4_bao_tower-insitu_1_ccgg_all.nc", "bao", None, None, "noaa", None, "noaa", "from_source"),
-        ("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "rgl", "g2301", None, "icos", None, "icos", "never"),
+        ("ch4_bao_tower-insitu_1_ccgg_all.nc", "bao", None, None, "noaa", None, "insitu", "noaa", "from_source"),
+        ("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "rgl", "g2301", None, "icos", None, None, "icos", "never"),
     ],
 )
 def test_sync_surface_metadata_store_level(
-    filepath, site, instrument, sampling_period, network, inlet, source_format, update_mismatch, caplog
+    filepath, site, instrument, sampling_period, network, inlet, measurement_type, source_format, update_mismatch, caplog
 ):
     clear_test_stores()
     bucket = get_writable_bucket(name="user")
@@ -1112,6 +1115,7 @@ def test_sync_surface_metadata_store_level(
         sampling_period=sampling_period,
         network=network,
         inlet=inlet,
+        measurement_type=measurement_type,
         store="user",
         source_format=source_format,
         update_mismatch=update_mismatch,
