@@ -5,7 +5,7 @@ import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
-from openghg.types import optionalPathType, multiPathType
+from openghg.types import pathType, multiPathType
 from numcodecs import Blosc
 import logging
 
@@ -69,7 +69,7 @@ def standardise_surface(
     platform: str | None = None,
     measurement_type: str | None = None,
     verify_site_code: bool = True,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     store: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",

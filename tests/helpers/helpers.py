@@ -1,5 +1,4 @@
-""" Some helper functions for things we do in tests frequently
-"""
+"""Some helper functions for things we do in tests frequently"""
 
 import shutil
 import tempfile
