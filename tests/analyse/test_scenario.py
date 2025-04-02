@@ -826,51 +826,6 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
     assert np.allclose(resampled_mf, expected_obs_mf)
 
 
-def test_model_align_flask(model_scenario_ch4_dummy):
-    """
-    Test expected aligned values for obs with known dummy data when
-    this has platform="surface-flask".
-    Expect data to be aligned but not resampled.
-    """
-    platform = "surface-flask"
-    combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint(platform=platform)
-
-    obs_data = model_scenario_ch4_dummy.obs.data
-    footprint_data = model_scenario_ch4_dummy.footprint.data
-
-    # # Create expected values for resampled observations
-    # # In our case:
-    # # - observation data contains values from 1, 48 for each time point
-    # # - footprint data contained 2 overlapping time points which should now be repeated
-
-    # Output should contain 48 time points (same as input obs data)
-    org_obs_time = obs_data["time"]
-    aligned_time = combined_dataset["time"]
-    xr.testing.assert_allclose(org_obs_time, aligned_time)
-
-    # Footprint data should not have been resampled and should now be repeated via "ffill"
-    aligned_fp = combined_dataset["fp"]
-    aligned_fp_1 = (
-        aligned_fp.sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00"))
-        .transpose("time", "lat", "lon")
-        .values
-    )
-    aligned_fp_2 = (
-        aligned_fp.sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00"))
-        .transpose("time", "lat", "lon")
-        .values
-    )
-
-    org_fp_1 = footprint_data["fp"].sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).values
-    org_fp_2 = footprint_data["fp"].sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).values
-
-    expected_fp_1 = np.repeat(org_fp_1, len(aligned_fp_1), axis=0)
-    expected_fp_2 = np.repeat(org_fp_2, len(aligned_fp_2), axis=0)
-
-    np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
-    np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
-
-
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
     """Test expected modelled observations within footprints_data_merge method with known dummy data"""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
@@ -988,6 +943,63 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
+
+# %% Test alignment when using platform keyword with dummy data (CH4)
+#  - flask data
+
+
+@pytest.mark.parametrize(
+    "platform_metadata,platform_keyword",
+    [
+        ("surface-flask", None),
+        (None, "surface-flask"),
+        ("surface-flask", "surface-flask"),
+        ("not_set", "surface-flask"),
+    ]
+)
+def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform_keyword):
+    """
+    Test expected aligned values for obs with known dummy data when:
+     1. platform is NOT present in the metadata, pass platform="surface-flask" keyword
+     2. platform="surface-flask" in the metadata, don't pass platform keyword
+     3. platform="surface-flask" in the metadata AND same keyword is passed
+     4. platform="not_set" in the metadata AND "surface-flask" passed as a platform keyword
+
+    Expect data to be aligned but not resampled.
+    """
+
+    # Add keyword to the metadata
+    if platform_metadata is not None:
+        model_scenario_ch4_dummy.obs.metadata["platform"] = platform_metadata
+
+    combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint(platform=platform_keyword)
+
+    obs_data = model_scenario_ch4_dummy.obs.data
+    footprint_data = model_scenario_ch4_dummy.footprint.data
+
+    # # Create expected values for resampled observations
+    # # In our case:
+    # # - observation data contains values from 1, 48 for each time point
+    # # - footprint data contained 2 overlapping time points which should now be repeated
+
+    # Output should contain 48 time points (same as input obs data)
+    org_obs_time = obs_data["time"]
+    aligned_time = combined_dataset["time"]
+    xr.testing.assert_allclose(org_obs_time, aligned_time)
+
+    # Footprint data should not have been resampled and should now be repeated via "ffill"
+    aligned_fp = combined_dataset["fp"]
+    aligned_fp_1 = aligned_fp.sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).transpose("time", "lat", "lon").values
+    aligned_fp_2 = aligned_fp.sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).transpose("time", "lat", "lon").values
+
+    org_fp_1 = footprint_data["fp"].sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).values
+    org_fp_2 = footprint_data["fp"].sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).values
+
+    expected_fp_1 = np.repeat(org_fp_1, len(aligned_fp_1), axis=0)
+    expected_fp_2 = np.repeat(org_fp_2, len(aligned_fp_2), axis=0)
+
+    np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
+    np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
 
 
 # %% Test method functionality with dummy data (CO2)
