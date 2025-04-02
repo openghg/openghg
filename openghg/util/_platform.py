@@ -1,8 +1,8 @@
 from openghg.util._site import get_site_info
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 
-def get_platform_from_info(site: str, site_filepath: optionalPathType = None) -> str | None:
+def get_platform_from_info(site: str, site_filepath: pathType | None = None) -> str | None:
     """Find the platform for a site, if present.
 
     This will access the "site_info.json" file from openghg_defs dependency to
