@@ -722,3 +722,14 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection" ] == "land"
     assert data.metadata["domain"] == domain.lower()
+
+def test_icos_flask_14co2():
+    standardise_surface(filepath="/group/chemistry/acrg/ES/data/obs/ICOS_ATC_L1_FAST_TRACK/ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C",
+                    source_format='icos',
+                    network='icos',
+                    instrument="flask",
+                    site="CBW",
+                    measurement_type='flask',
+                    store="user",
+                    verify_site_code=False,
+                    data_level=1)

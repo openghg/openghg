@@ -49,7 +49,7 @@ def parse_icos_corso(
         dict: Dictionary of gas data
     """
 
-    site = clean_string(site)
+    input_site = clean_string(site)
     instrument = clean_string(instrument)
     network = clean_string(network)
     sampling_period = clean_string(sampling_period)
@@ -95,7 +95,8 @@ def parse_icos_corso(
 
             species, site, inlet = initial_checks_and_setup(
                 species=species_fname,
-                site=site_fname.lower(),
+                input_site=input_site,
+                site_fname=site_fname.lower(),
                 input_inlet=inlet,
                 inlet_height_fname=inlet_height_fname,
             )
@@ -143,7 +144,8 @@ def parse_icos_corso(
 
                 species, site, inlet = initial_checks_and_setup(
                     species=species_fname,
-                    site=site_fname,
+                    input_site=input_site,
+                    site_fname=site_fname,
                     input_inlet=inlet,
                     inlet_height_fname=inlet_height_fname,
                 )
@@ -157,7 +159,7 @@ def parse_icos_corso(
                         "sampling_end",
                         species + "_variability",
                         species + "_repeatability",
-                        "number_of_observations",
+                        species + "_number_of_observations",
                         "flag",
                     ]
                 df = df = df[columns_to_keep]
@@ -170,7 +172,8 @@ def parse_icos_corso(
 
                 species, site, inlet = initial_checks_and_setup(
                     species=species_fname,
-                    site=site_fname,
+                    input_site=input_site,
+                    site_fname=site_fname,
                     input_inlet=inlet,
                     inlet_height_fname=inlet_height_fname,
                 )
@@ -178,10 +181,10 @@ def parse_icos_corso(
                 header, df = convert_icos_file_to_dataframe(filepath=filepath, rename_dict=rename_dict)
 
                 if species_fname.lower() == "14c":
-                    df["time"] = pd.to_datetime(df[["Year", "Month", "Day", "Hour", "Minute"]])
+                    df["time"] = pd.to_datetime(df[["year", "month", "day", "hour", "minute"]])
                     df.index = df["time"]
-
-                    df["sampling_start_date"] = pd.to_datetime(df[["Year", "Month", "Day"]])
+                    print(df["time"][0])
+                    df["sampling_start_date"] = pd.to_datetime(df[["year", "month", "day"]])
 
                     columns_to_keep = [
                         species,
@@ -195,8 +198,6 @@ def parse_icos_corso(
                     ]
                     df = df = df[columns_to_keep]
 
-                    df = set_time_as_dataframe_index(dataframe=df)
-
         else:
             raise NotImplementedError()
     else:
@@ -205,14 +206,17 @@ def parse_icos_corso(
         inlet_height_fname = filepath.name.split("_")[-4]
 
         species, site, inlet = initial_checks_and_setup(
-            species=species_fname, site=site_fname, input_inlet=inlet, inlet_height_fname=inlet_height_fname
+            species=species_fname,
+            input_site=input_site,
+            site_fname=site_fname,
+            input_inlet=inlet,
+            inlet_height_fname=inlet_height_fname,
         )
 
         header, df = convert_icos_file_to_dataframe(filepath=filepath, rename_dict=rename_dict)
 
     df = clean_dataframe(df=df, species_name=species)
-    # print(df)
-    # Convert to xarray Dataset
+
     data = df.to_xarray()
 
     data = data.drop_vars(["flag"])
@@ -256,8 +260,8 @@ def parse_icos_corso(
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
-        elif interval_str == "integrated sampling":
-            metadata["sampling_period"] = interval_str
+        elif "integrated sampling" in interval_str.lower():
+            metadata["sampling_period"] = "integrated sampling"
 
     species_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
@@ -330,7 +334,11 @@ def clean_dataframe(df: pd.DataFrame, species_name: str) -> pd.DataFrame:
 
 
 def initial_checks_and_setup(
-    species: str, site: str, input_inlet: str | None = None, inlet_height_fname: str | None = None
+    species: str,
+    input_site: str,
+    site_fname: str,
+    input_inlet: str | None = None,
+    inlet_height_fname: str | None = None,
 ) -> tuple[str, str, str | None]:
     """
     This function sets up the inital checks for site, inlet and standardises to internal format.
@@ -343,7 +351,8 @@ def initial_checks_and_setup(
     Returns:
         site, inlet
     """
-    if site.lower() != site:
+
+    if input_site.lower() != site_fname.lower():
         raise ValueError("Site mismatch between site argument passed and filename.")
 
     inlet_height_fname = format_inlet(inlet_height_fname)
@@ -355,10 +364,10 @@ def initial_checks_and_setup(
 
     inlet_height_magl = format_inlet(inlet_height_fname, key_name="inlet_height_magl")
 
-    return species, site, inlet_height_magl
+    return species, input_site, inlet_height_magl
 
 
-def set_time_as_dataframe_index(dataframe: pd.DataFrame) -> pd.DataFrame:
+def set_time_as_dataframe_index(dataframe: pd.DataFrame, icos_atc_l2: bool = False) -> pd.DataFrame:
     """
     Sets time as the dataframe index based on the dataset type
     """
