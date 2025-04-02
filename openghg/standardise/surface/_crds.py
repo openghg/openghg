@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from pandas import DataFrame, Timedelta
 
 
@@ -14,7 +14,7 @@ def parse_crds(
     sampling_period: str | float | int | None = None,
     drop_duplicates: bool = True,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwargs: dict,
 ) -> dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
@@ -83,7 +83,7 @@ def _read_data(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | float | int | None = None,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     drop_duplicates: bool = True,
 ) -> dict:
     """Read the datafile passed in and extract the data we require.
@@ -287,7 +287,7 @@ def _get_site_attributes(
     site: str,
     inlet: str,
     crds_metadata: dict,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Gets the site specific attributes for writing to Datsets
 

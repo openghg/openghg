@@ -5,7 +5,7 @@ import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
 
-from openghg.types import TimePeriod, optionalPathType
+from openghg.types import TimePeriod, pathType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -17,7 +17,7 @@ __all__ = ["infer_date_range", "update_zero_dim"]
 
 def infer_date_range(
     time: DataArray,
-    filepath: optionalPathType = None,
+    filepath: pathType | None = None,
     period: str | tuple | None = None,
     continuous: bool = True,
 ) -> tuple[Timestamp, Timestamp, str]:

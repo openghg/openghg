@@ -251,6 +251,11 @@
                     "str"
                 ]
             },
+            "platform": {
+                "type": [
+                    "str"
+                ]
+            },
             "data_level": {
                 "type": [
                     "str"

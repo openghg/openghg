@@ -5,7 +5,7 @@ from collections.abc import Hashable
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.util import check_and_set_null_variable, not_set_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -15,13 +15,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def parse_noaa(
     filepath: str | Path,
     site: str,
-    measurement_type: str,
+    measurement_type: str | None,
     inlet: str | None = None,
     network: str = "NOAA",
     instrument: str | None = None,
     sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwarg: dict,
 ) -> dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
@@ -49,6 +49,15 @@ def parse_noaa(
         sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
+
+    valid_types = ("flask", "insitu", "pfp")
+
+    if measurement_type is None:
+        raise ValueError(
+            f"measurement_type must be specified for source_format='noaa'. This must be one of {valid_types}"
+        )
+    elif measurement_type not in valid_types:
+        raise ValueError(f"measurement_type is '{measurement_type}' but must be one of {valid_types}")
 
     file_extension = Path(filepath).suffix
 
@@ -278,7 +287,7 @@ def _read_obspack(
     inlet: str | None = None,
     instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict[str, dict]:
     """Read NOAA ObsPack NetCDF files
 
@@ -302,11 +311,6 @@ def _read_obspack(
     """
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
-
-    valid_types = ("flask", "insitu", "pfp")
-
-    if measurement_type not in valid_types:
-        raise ValueError(f"measurement_type must be one of {valid_types}")
 
     with xr.open_dataset(filepath) as temp:
         obspack_ds = temp
@@ -428,7 +432,7 @@ def _read_raw_file(
     inlet: str | None = None,
     instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.

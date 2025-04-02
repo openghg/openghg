@@ -191,9 +191,10 @@ class ModelScenario:
 
         accepted_column_data_types = ["satellite", "site-column"]
 
+        self.platform: str | None = platform
         if satellite is not None and platform is None:
             logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
-            platform = "satellite"
+            self.platform = "satellite"
 
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
@@ -242,11 +243,11 @@ class ModelScenario:
         self.add_footprint(
             site=site,
             inlet=inlet,
+            satellite=satellite,
             height=height,
             domain=domain,
             model=model,
             met_model=met_model,
-            satellite=satellite,
             fp_inlet=fp_inlet,
             start_date=start_date,
             end_date=end_date,
@@ -470,7 +471,8 @@ class ModelScenario:
                 if self.obs is not None:
                     network = network or self.obs.metadata.get("network")
 
-                height_name = extract_height_name(site, network, inlet)
+                if site is not None:
+                    height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
                     logger.info(
@@ -695,25 +697,33 @@ class ModelScenario:
     def _get_platform(self) -> str | None:
         """Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to
-        find this information.
+        To find this information this will look within:
+            - obs metadata
+            - the "site_info.json" file from openghg_defs dependency.
         """
-        from openghg.util import get_site_info
+        from openghg.util import get_platform_from_info, not_set_metadata_values
 
-        try:
-            site = self.site
-            site_upper = site.upper()
-        except AttributeError:
-            return None
-        else:
-            site_data = get_site_info()
-            try:
-                site_details = site_data[site_upper]
-            except KeyError:
-                return None
-            else:
-                platform: str = site_details.get("platform")
-                return platform
+        if self.obs is not None:
+            metadata = self.obs.metadata
+            platform: str | None = metadata.get("platform")
+
+            # Check for values which indicate this has not been specified
+            not_set_values = not_set_metadata_values()
+            if platform in not_set_values:
+                platform = None
+
+        if hasattr(self, "site") and self.site is not None:
+            platform_from_site = get_platform_from_info(self.site)
+            if platform is None:
+                logger.info(f"Platform of '{platform}' for site '{self.site}' extracted from site_info.json")
+                platform = platform_from_site
+            elif platform_from_site is not None:
+                if platform != platform_from_site:
+                    logger.warning(
+                        f"Platform from metadata and site_info details do not match ({platform}, {platform_from_site}). Using platform value from metadata."
+                    )
+
+        return platform
 
     def _align_obs_footprint(
         self, resample_to: str | None = "coarsest", platform: str | None = None
@@ -753,7 +763,7 @@ class ModelScenario:
             # Do not apply resampling for "satellite" or "flask"
             if platform == "satellite":
                 resample_to = None
-                align_to_obs = False
+                align_to_obs = True
             elif "flask" in platform:
                 resample_to = None
                 align_to_obs = True
@@ -762,7 +772,13 @@ class ModelScenario:
 
         if resample_to is None:
             if align_to_obs:
-                footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
+                if platform == "satellite":
+                    footprint_data = footprint_data.reindex_like(
+                        obs_data, method="nearest", tolerance=pd.Timedelta("1ms")
+                    )
+                    logger.info("Reindexing footprint data to satellite observation data.")
+                else:
+                    footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
 
         if resample_to == "footprint":
@@ -978,7 +994,7 @@ class ModelScenario:
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
-            if self.obs is not None:
+            if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
