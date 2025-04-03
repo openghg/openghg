@@ -79,7 +79,7 @@ def parse_icos_corso(
         "estrep": species + "_repeatability",
         "nbpoints": species + "_number_of_observations",
         "stdev": species + "_variability",
-        "scallink": "calibration_uncertainty",
+        "scallink": species + "_calibration_uncertainty",
         "combunc": species + "_combined_uncertainty",
         "integrationtime": "integration_time",
         "weightedstderr": "weighted_std_err",
@@ -123,16 +123,17 @@ def parse_icos_corso(
 
             else:
                 columns_to_keep = [
-                    species_fname.lower(),
+                    species,
                     "sampling_start",
                     "sampling_end",
                     species + "_variability",
                     species + "_repeatability",
-                    species + "_calibration_uncertainity",
-                    species + "_combined_uncertainity",
+                    species + "_calibration_uncertainty",
+                    species + "_combined_uncertainty",
                     "flag",
                 ]
-                df = df = df[columns_to_keep]
+
+                df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
 
@@ -214,6 +215,23 @@ def parse_icos_corso(
         )
 
         header, df = convert_icos_file_to_dataframe(filepath=filepath, rename_dict=rename_dict)
+
+        df["time"] = pd.to_datetime(df[["year", "month", "day", "hour", "minute"]])
+        df.index = df["time"]
+        df["sampling_start_date"] = pd.to_datetime(df[["year", "month", "day"]])
+
+        columns_to_keep = [
+            species,
+            "time",
+            "sampling_start_date",
+            "integration_time",
+            "weighted_std_err",
+            species + "_variability",
+            "sampling_pattern",
+            "flag",
+        ]
+
+        df = df = df[columns_to_keep]
 
     df = clean_dataframe(df=df, species_name=species)
 
@@ -305,6 +323,9 @@ def convert_icos_file_to_dataframe(filepath: Path, rename_dict: dict) -> pd.Data
     df.columns = df.columns.str.lower()
     existing_columns = df.columns
     filtered_rename_dict = {col: new_col for col, new_col in rename_dict.items() if col in existing_columns}
+
+    if "o2" in existing_columns:
+        df = df.rename(columns={"o2": "deltao2n2"})
 
     df = df.rename(columns=filtered_rename_dict)
 
