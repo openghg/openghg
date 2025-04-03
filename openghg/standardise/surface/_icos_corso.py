@@ -326,6 +326,8 @@ def convert_icos_file_to_dataframe(filepath: Path, rename_dict: dict) -> pd.Data
 
     if "o2" in existing_columns:
         df = df.rename(columns={"o2": "deltao2n2"})
+    elif "14c" in existing_columns:
+        df = df.rename(columns={"14c": "dco2c14"})
 
     df = df.rename(columns=filtered_rename_dict)
 
