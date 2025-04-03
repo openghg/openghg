@@ -29,6 +29,7 @@ from collections.abc import Callable, Sequence
 from functools import partial, wraps
 from typing import Any, Concatenate, Literal
 
+import logging
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
@@ -40,6 +41,9 @@ from ._xarray_helpers import xr_sqrt
 
 registry = Registry(suffix="resample")
 register = registry.register
+
+logger = logging.getLogger("openghg.data_processing")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 # somewhat complicated typing for decorator:
