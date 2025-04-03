@@ -720,13 +720,91 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == domain.lower()
 
-def test_icos_flask_14co2():
-    standardise_surface(filepath="/group/chemistry/acrg/ES/data/obs/ICOS_ATC_L1_FAST_TRACK/ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C",
-                    source_format='icos',
-                    network='icos',
-                    instrument="flask",
+def test_icos_corso_l1_flask_data():
+    """
+    Test icos corso strandardisation flow for data_level l1 and flask measurement.
+    """
+    filepath = get_surface_datapath(filename="ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso")
+    results = standardise_surface(filepath=filepath,        source_format="icos_corso",
+                    network="icos",
                     site="CBW",
-                    measurement_type='flask',
-                    store="user",
-                    verify_site_code=False,
-                    data_level=1)
+                    instrument="flask",
+                    data_level=1,
+                    measurement_type="flask",
+                    platform="surface-flask",
+                    store="user")
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "l1" in results[0]["data_level"]
+
+def test_icos_corso_l2_integrated_naoh():
+    """
+    Test icos corso strandardisation flow for data_level l2 and integrated-naoh measurement.
+    """
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_779.14C", source_format="icos_corso")
+    results = standardise_surface(filepath=filepath,
+                        source_format="icos_corso",
+                        network="icos",
+                        site="CBW",
+                        instrument="integrated-NAOH",
+                        data_level=2,
+                        measurement_type="integrated-NAOH",
+                        platform="surface-flask",
+                        store="user")
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "2" in results[0]["data_level"]
+    assert "integrated-NAOH" in results[0]["integrated-NAOH"]
+
+def test_icos_corso_l2_flask():
+    """
+    Test icos corso strandardisation flow for data_level l2 and flask measurement.
+    """
+    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso")
+
+    results = standardise_surface(filepath=filepath,
+                    source_format="icos_corso",
+                    network="icos",
+                    site="CBW",
+                    instrument="flask",
+                    data_level=2,
+                    platform="surface-flask",
+                    store="user")
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "2" in results[0]["data_level"]
+
+def test_icos_corso_clean_14_day():
+    """
+    Test icos corso strandardisation flow for clean data and integrated-naoh measurement.
+    """
+    filepath = get_surface_datapath(filename="uheicrl_l2_2025_1_jfj_5m_int_14day_clean.c14", source_format="icos_corso")
+
+    results = standardise_surface(filepath=filepath,
+                    source_format="icos_corso",
+                    network="icos",
+                    site="jfj",
+                    instrument="integrated-NAOH",
+                    data_level=2,
+                    measurement_type="integrated-NAOH",
+                    store="user")
+
+    assert "dco2c14" in results[0]["species"]
+    assert "jfj" in results[0]["site"]
+    assert "5m" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "2" in results[0]["data_level"]
+    assert "integrated-NAOH" in results[0]["integrated-NAOH"]
