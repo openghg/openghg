@@ -173,9 +173,12 @@ def get_obs_surface(
     if data.sizes["time"] == 0:
         raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
 
-    if keep_variables : 
+    if keep_variables:
         var_list = [str(dv) for dv in data.data_vars if str(dv) in keep_variables]
-        if not var_list : raise ValueError(f"Variables among {keep_variables} expected, but none of them found. Present variables are  : {[str(dv) for dv in data.data_vars]}")
+        if not var_list:
+            raise ValueError(
+                f"Variables among {keep_variables} expected, but none of them found. Present variables are  : {[str(dv) for dv in data.data_vars]}"
+            )
         data = data[var_list]
 
     if data.attrs["inlet"] == "multiple":
