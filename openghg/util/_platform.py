@@ -1,6 +1,7 @@
 from typing import overload
 import logging
 from openghg.util._site import get_site_info
+from openghg.util._metadata_util import not_set_metadata_values
 from openghg.types import pathType, MetadataFormatError
 
 logger = logging.getLogger("openghg.util")
@@ -92,9 +93,10 @@ def format_platform(platform: str | None, data_type: str | None = None) -> str |
     """
 
     platform_values = define_platform(data_type=data_type)
+    not_set_values = not_set_metadata_values()
 
     if platform is not None:
-        if platform not in platform_values:
+        if platform not in platform_values and platform not in not_set_values:
             if platform.lower() in platform_values:
                 # Change value to lower case version only if this matches to platform_values
                 platform = platform.lower()
@@ -102,8 +104,6 @@ def format_platform(platform: str | None, data_type: str | None = None) -> str |
                 msg = f"Platform currently set to '{platform}'. This must be one of: {platform_values}"
                 logger.exception(msg)
                 raise MetadataFormatError(msg)
-        else:
-            return platform
 
     return platform
 
