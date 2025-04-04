@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import (
     Any,
     Union,
-    Optional,
     Literal,
     TypeVar,
     NamedTuple,
@@ -20,7 +19,6 @@ import xarray as xr
 
 
 pathType = Union[str, Path]
-optionalPathType = Optional[pathType]
 multiPathType = Union[str, Path, tuple, list]
 resultsType = defaultdict[str, dict]
 

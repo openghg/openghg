@@ -36,7 +36,6 @@ from ._errors import (
 from ._types import (
     multiPathType,
     pathType,
-    optionalPathType,
     resultsType,
     ArrayLike,
     ArrayLikeMatch,

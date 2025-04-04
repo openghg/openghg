@@ -179,12 +179,8 @@ class ModelScenario:
         TODO: For obs, footprint, flux should we also allow Dataset input and turn
         these into the appropriate class?
         """
-        self.platform: str | None = platform
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
-        if self.obs_column is not None:
-            if platform is not None:
-                self.platform = platform
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -194,6 +190,7 @@ class ModelScenario:
 
         accepted_column_data_types = ["satellite", "site-column"]
 
+        self.platform: str | None = platform
         if satellite is not None and platform is None:
             logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
             self.platform = "satellite"
@@ -699,25 +696,33 @@ class ModelScenario:
     def _get_platform(self) -> str | None:
         """Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to
-        find this information.
+        To find this information this will look within:
+            - obs metadata
+            - the "site_info.json" file from openghg_defs dependency.
         """
-        from openghg.util import get_site_info
+        from openghg.util import get_platform_from_info, not_set_metadata_values
 
-        try:
-            site = self.site
-            site_upper = site.upper()
-        except AttributeError:
-            return None
-        else:
-            site_data = get_site_info()
-            try:
-                site_details = site_data[site_upper]
-            except KeyError:
-                return None
-            else:
-                platform: str = site_details.get("platform")
-                return platform
+        if self.obs is not None:
+            metadata = self.obs.metadata
+            platform: str | None = metadata.get("platform")
+
+            # Check for values which indicate this has not been specified
+            not_set_values = not_set_metadata_values()
+            if platform in not_set_values:
+                platform = None
+
+        if hasattr(self, "site") and self.site is not None:
+            platform_from_site = get_platform_from_info(self.site)
+            if platform is None:
+                logger.info(f"Platform of '{platform}' for site '{self.site}' extracted from site_info.json")
+                platform = platform_from_site
+            elif platform_from_site is not None:
+                if platform != platform_from_site:
+                    logger.warning(
+                        f"Platform from metadata and site_info details do not match ({platform}, {platform_from_site}). Using platform value from metadata."
+                    )
+
+        return platform
 
     def _resample_obs_footprint(
         self, resample_to: str | None = "coarsest", platform: str | None = None
