@@ -332,6 +332,10 @@ def convert_icos_file_to_dataframe(filepath: Path, rename_dict: dict) -> pd.Data
     return header, df
 
 
+# TODO: Evaluate in separate issue if below function can be generalised, especially for both of the icos parsers
+
+
+# These are some of the util functions specific to icos corso.
 def clean_dataframe(df: pd.DataFrame, species_name: str) -> pd.DataFrame:
     """Cleans the dataframe by removing duplicates, sorting, and filtering flags.
 
@@ -366,11 +370,13 @@ def initial_checks_and_setup(
 
     Args:
         species: species_fname
-        site: site fname
-        inlet: inlet height from fname
+        input_site: user specified site name
+        site_fname: site name fetched from filename
+        input_inlet: user specified site name
+        inlet_height_fname: inlet fetched from filename
 
     Returns:
-        site, inlet
+        site, input_site, inlet_height_magl
     """
 
     if input_site.lower() != site_fname.lower():
@@ -388,9 +394,14 @@ def initial_checks_and_setup(
     return species, input_site, inlet_height_magl
 
 
-def set_time_as_dataframe_index(dataframe: pd.DataFrame, icos_atc_l2: bool = False) -> pd.DataFrame:
+def set_time_as_dataframe_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Sets time as the dataframe index based on the dataset type
+    Args:
+        dataframe: Pandas dataframe
+
+    Returns:
+        dataframe: Pandas dataframe
     """
 
     dataframe["sampling_start"] = pd.to_datetime(dataframe["sampling_start"]).values.astype("datetime64[ns]")
