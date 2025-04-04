@@ -66,17 +66,11 @@ def define_platform(data_type: str | list | None = None) -> list:
 
 
 @overload
-def format_platform(
-    platform: str,
-    data_type: str | None = None
-) -> str: ...
+def format_platform(platform: str, data_type: str | None = None) -> str: ...
 
 
 @overload
-def format_platform(
-    platform: None,
-    data_type: str | None = None
-) -> None: ...
+def format_platform(platform: None, data_type: str | None = None) -> None: ...
 
 
 def format_platform(platform: str | None, data_type: str | None = None) -> str | None:
