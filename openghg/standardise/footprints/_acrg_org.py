@@ -3,8 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import warnings
 from typing import cast
-from xarray import Dataset
-from numpy import ones
+from xarray import Dataset, ones_like
 
 from openghg.util import (
     check_species_time_resolved,
@@ -75,8 +74,9 @@ def parse_acrg_org(
 
     fp_data = xr_open_fn(filepath)
     
+    # create 'release_heigt' variable for compatibility between different footprints
     inlet_int = int(inlet.replace('magl','').replace('m',''))
-    fp_data = fp_data.assign(release_height = (('time'), inlet_int*ones(fp_data.time.size)))
+    fp_data['release_height'] = inlet_int * ones_like(fp_data['time'].astype(int))
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
