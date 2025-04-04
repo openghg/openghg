@@ -89,17 +89,16 @@ def format_platform(platform: str | None, data_type: str | None = None) -> str |
     platform_values = define_platform(data_type=data_type)
     not_set_values = not_set_metadata_values()
 
-    if platform is not None:
-        if platform not in platform_values and platform not in not_set_values:
-            if platform.lower() in platform_values:
-                # Change value to lower case version only if this matches to platform_values
-                platform = platform.lower()
-            else:
-                msg = f"Platform currently set to '{platform}'. This must be one of: {platform_values}"
-                logger.exception(msg)
-                raise MetadataFormatError(msg)
-
-    return platform
+    if platform is None or platform in not_set_values:
+        return platform
+    elif platform in platform_values:
+        return platform
+    elif platform.lower() in platform_values:
+        return platform.lower()
+    else:
+        msg = f"Platform currently set to '{platform}'. This must be one of: {platform_values}"
+        logger.exception(msg)
+        raise MetadataFormatError(msg)
 
 
 def get_platform_from_info(site: str, site_filepath: pathType | None = None) -> str | None:
