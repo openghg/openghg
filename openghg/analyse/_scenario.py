@@ -66,7 +66,7 @@ from openghg.retrieve import (
     search_footprints,
     search_column,
 )
-from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
+from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
 from openghg.types import SearchError
 from ._alignment import align_obs_and_other
 
@@ -150,7 +150,7 @@ class ModelScenario:
         height: Alias for inlet.
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
-        platform: Platform name e.g "satellite, site-column".
+        platform: Platform name e.g "satellite", "column-insitu".
         max_level: Maximum level for processing.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
@@ -189,7 +189,7 @@ class ModelScenario:
         if species is not None:
             species = synonyms(species)
 
-        accepted_column_data_types = ["satellite", "site-column"]
+        accepted_column_data_types = define_platform(data_type="column")
 
         self.platform: str | None = platform
         if satellite is not None and platform is None:
@@ -201,7 +201,7 @@ class ModelScenario:
             # Add observation column data (directly or through keywords, column or satellite)
             if max_level is None:
                 raise AttributeError(
-                    "If you are using column-based data (i.e. platform is 'satellite' or 'site-column'), you need to pass max_level"
+                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
                 )
             self.add_obs_column(
                 site=site,
@@ -760,7 +760,7 @@ class ModelScenario:
 
         if platform is not None:
             platform = platform.lower()
-            # Do not apply resampling for "satellite" or "flask"
+            # Do not apply resampling for "satellite" or "*flask*"
             if platform == "satellite":
                 resample_to = None
                 align_to_obs = True

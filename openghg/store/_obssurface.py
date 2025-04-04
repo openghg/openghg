@@ -214,6 +214,7 @@ class ObsSurface(BaseStore):
             clean_string,
             format_inlet,
             format_data_level,
+            format_platform,
             evaluate_sampling_period,
             check_and_set_null_variable,
             hash_file,
@@ -247,6 +248,8 @@ class ObsSurface(BaseStore):
         instrument = clean_string(instrument)
 
         sampling_period = evaluate_sampling_period(sampling_period)
+
+        platform = format_platform(platform, data_type=self._data_type)
 
         if measurement_type is None and platform is not None:
             measurement_type = platform
