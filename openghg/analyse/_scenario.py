@@ -897,6 +897,7 @@ class ModelScenario:
         sources: str | list | None = None,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
+        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -914,6 +915,7 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
+            output_units: Units for output modelled observations.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -948,6 +950,10 @@ class ModelScenario:
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
         modelled_obs = modelled_obs.rename(name)
+
+        units_default = 1.0
+        units = check_units(modelled_obs[name], default=units_default)
+        modelled_obs[name] = modelled_obs[name] * units / output_units
 
         # Cache output from calculations
         if cache:
@@ -1278,6 +1284,7 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
+            output_units: Units for output modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1419,6 +1426,7 @@ class ModelScenario:
         calc_timeseries: bool = True,
         sources: str | list | None = None,
         calc_bc: bool = True,
+        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Dataset:
@@ -1451,6 +1459,7 @@ class ModelScenario:
                 resample_to=resample_to,
                 sources=sources,
                 platform=platform,
+                output_units=output_units,
                 cache=cache,
                 recalculate=recalculate,
             )
@@ -1463,6 +1472,7 @@ class ModelScenario:
                 modelled_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to,
                     platform=platform,
+                    output_units=output_units,
                     cache=cache,
                     recalculate=recalculate,
                 )
