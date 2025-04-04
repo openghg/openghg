@@ -725,7 +725,8 @@ def test_icos_corso_l1_flask_data():
     Test icos corso strandardisation flow for data_level l1 and flask measurement.
     """
     filepath = get_surface_datapath(filename="ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso")
-    results = standardise_surface(filepath=filepath,        source_format="icos_corso",
+
+    results = standardise_surface(filepath=filepath,                source_format="icos_corso",
                     network="icos",
                     site="CBW",
                     instrument="flask",
@@ -739,13 +740,26 @@ def test_icos_corso_l1_flask_data():
     assert "207.0" in results[0]["inlet"]
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "surface-flask" in results[0]["platform"]
-    assert "l1" in results[0]["data_level"]
+
+
+    get_corso_data = get_obs_surface(site="cbw",
+                                     species="dco2c14",
+                                     data_level="1",
+                                     platform="surface-flask")
+
+    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+    expected_value = -20.33
+    assert np.allclose(fetched_value, expected_value)
+
+    assert "flask" in get_corso_data.metadata["measurement_type"]
+
 
 def test_icos_corso_l2_integrated_naoh():
     """
     Test icos corso strandardisation flow for data_level l2 and integrated-naoh measurement.
     """
     filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_779.14C", source_format="icos_corso")
+
     results = standardise_surface(filepath=filepath,
                         source_format="icos_corso",
                         network="icos",
@@ -762,7 +776,17 @@ def test_icos_corso_l2_integrated_naoh():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "surface-flask" in results[0]["platform"]
     assert "2" in results[0]["data_level"]
-    assert "integrated-NAOH" in results[0]["integrated-NAOH"]
+
+    get_corso_data = get_obs_surface(site="cbw",
+                                     species="dco2c14",
+                                     data_level="2",
+                                     platform="surface-flask")
+
+    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+    expected_value = -0.84
+    assert np.allclose(fetched_value, expected_value)
+
+    assert "integrated-naoh" in get_corso_data.metadata["measurement_type"]
 
 def test_icos_corso_l2_flask():
     """
@@ -786,6 +810,17 @@ def test_icos_corso_l2_flask():
     assert "surface-flask" in results[0]["platform"]
     assert "2" in results[0]["data_level"]
 
+    get_corso_data = get_obs_surface(site="cbw",
+                                     species="dco2c14",
+                                     data_level="2",
+                                     instrument="flask",
+                                     platform="surface-flask")
+
+    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+
+    expected_value = -59.87
+    assert np.allclose(fetched_value, expected_value)
+
 def test_icos_corso_clean_14_day():
     """
     Test icos corso strandardisation flow for clean data and integrated-naoh measurement.
@@ -798,13 +833,21 @@ def test_icos_corso_clean_14_day():
                     site="jfj",
                     instrument="integrated-NAOH",
                     data_level=2,
-                    measurement_type="integrated-NAOH",
+                    platform="integrated-NAOH",
                     store="user")
 
     assert "dco2c14" in results[0]["species"]
     assert "jfj" in results[0]["site"]
     assert "5m" in results[0]["inlet"]
     assert "ICOS_CORSO" in results[0]["source_format"]
-    assert "surface-flask" in results[0]["platform"]
     assert "2" in results[0]["data_level"]
-    assert "integrated-NAOH" in results[0]["integrated-NAOH"]
+    assert "integrated-naoh" in results[0]["platform"]
+
+    get_corso_data = get_obs_surface(site="jfj",
+                                     species="dco2c14",
+                                     inlet="5m",
+                                     platform="integrated-naoh")
+    fetched_value = get_corso_data.data["mf"].isel(time=0)
+
+    expected_value = 189
+    assert np.allclose(fetched_value, expected_value)
