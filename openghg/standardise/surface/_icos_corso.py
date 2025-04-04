@@ -1,6 +1,6 @@
 from pathlib import Path
 import logging
-
+import numpy as np
 import pandas as pd
 
 from openghg.standardise.meta import dataset_formatter
@@ -121,6 +121,8 @@ def parse_icos_corso(
 
                 df = set_time_as_dataframe_index(dataframe=df)
 
+                df = calculate_sampling_period(dataframe=df, species=species)
+
             else:
                 columns_to_keep = [
                     species,
@@ -136,6 +138,8 @@ def parse_icos_corso(
                 df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
+
+                df = calculate_sampling_period(dataframe=df, species=species)
 
         # icos_data_level = 2 data is classified as ICOS_ATC_L2
         elif "l2" in filepath.name.lower():
@@ -166,6 +170,8 @@ def parse_icos_corso(
                 df = df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
+
+                df = calculate_sampling_period(dataframe=df, species=species)
 
             else:
                 site_fname = filepath.name.split("_")[-3]
@@ -237,6 +243,12 @@ def parse_icos_corso(
     data = df.to_xarray()
     data["flag"] = data["flag"].astype(str)
 
+    if sampling_period is None and f"{species}_sampling_period" in data.data_vars:
+        rounded_values = np.round(data[f"{species}_sampling_period"].values, decimals=2)
+        unique_values = np.unique(rounded_values)
+        if [3600, 3601] in unique_values and len([3600, 3601]) == len(unique_values):
+            sampling_period = "3600.0"
+
     metadata = {
         "site": site,
         "species": species,
@@ -276,8 +288,8 @@ def parse_icos_corso(
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
-        elif "integrated sampling" in interval_str.lower():
-            metadata["sampling_period"] = "integrated sampling"
+        else:
+            metadata["sampling_period"] = "multiple"
 
     species_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
@@ -410,5 +422,22 @@ def set_time_as_dataframe_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe["time"] = dataframe["time"].values.astype("datetime64[ns]")
 
     dataframe.set_index("time", inplace=True)
+
+    return dataframe
+
+
+def calculate_sampling_period(dataframe: pd.DataFrame, species: str) -> pd.DataFrame:
+    """This function is used to calculate the difference between sampling_start and sampling_end to calculate the sampling period for each of the data points
+
+    Args:
+        df: Accepts pandas dataframe
+        species: species name
+
+    returns: dataframe containing sampling_period column
+    """
+
+    dataframe[f"{species}_sampling_period"] = (
+        dataframe["sampling_end"] - dataframe["sampling_start"]
+    ).dt.total_seconds()
 
     return dataframe
