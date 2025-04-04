@@ -8,6 +8,7 @@ class SurfaceTypes(Enum):
     GCWERKS = "GCWERKS"
     AGAGE = "AGAGE"
     ICOS = "ICOS"
+    ICOS_CORSO = "ICOS_CORSO"
     NOAA = "NOAA"
     BEACO2N = "BEACO2N"
     NPL = "NPL"
