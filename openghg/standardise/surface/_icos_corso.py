@@ -234,10 +234,11 @@ def parse_icos_corso(
         df = df = df[columns_to_keep]
 
     df = clean_dataframe(df=df, species_name=species)
-
+    print(df)
     data = df.to_xarray()
+    data["flag"] = data["flag"].astype(str)
 
-    data = data.drop_vars(["flag"])
+    # data = data.drop_vars(["flag"])
 
     metadata = {
         "site": site,
