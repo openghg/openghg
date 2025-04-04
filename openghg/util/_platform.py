@@ -76,6 +76,7 @@ def format_platform(platform: None, data_type: str | None = None) -> None: ...
 def format_platform(platform: str | None, data_type: str | None = None) -> str | None:
     """
     Check platform is a suitable value based on the values within define_platform.
+    This could change the case of the platform value to match to the define_platform values if the original case does not match.
 
     Args:
         platform: Platform name to check
