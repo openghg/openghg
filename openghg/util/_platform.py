@@ -65,18 +65,20 @@ def define_platform(data_type: str | list | None = None) -> list:
 
 
 @overload
-def verify_platform(
+def format_platform(
     platform: str,
+    data_type: str | None = None
 ) -> str: ...
 
 
 @overload
-def verify_platform(
+def format_platform(
     platform: None,
+    data_type: str | None = None
 ) -> None: ...
 
 
-def verify_platform(platform: str | None, data_type: str | None = None) -> str | None:
+def format_platform(platform: str | None, data_type: str | None = None) -> str | None:
     """
     Check platform is a suitable value based on the values within define_platform.
 
@@ -92,14 +94,18 @@ def verify_platform(platform: str | None, data_type: str | None = None) -> str |
     platform_values = define_platform(data_type=data_type)
 
     if platform is not None:
-        if platform.lower() not in platform_values:
-            msg = f"Platform currently set to '{platform}'. This must be one of: {platform_values}"
-            logger.exception(msg)
-            raise MetadataFormatError(msg)
+        if platform not in platform_values:
+            if platform.lower() in platform_values:
+                # Change value to lower case version only if this matches to platform_values
+                platform = platform.lower()
+            else:
+                msg = f"Platform currently set to '{platform}'. This must be one of: {platform_values}"
+                logger.exception(msg)
+                raise MetadataFormatError(msg)
         else:
             return platform
-    else:
-        return platform
+
+    return platform
 
 
 def get_platform_from_info(site: str, site_filepath: pathType | None = None) -> str | None:
