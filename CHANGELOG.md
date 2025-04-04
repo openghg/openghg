@@ -8,7 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
-- Dropped `exposure_id` variable for GOSAT data to avoid change in dimension size error raised from `to_zarr`. [PR #1243](https://github.com/openghg/openghg/pull/1243)
+
+- Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
+- Added a new resampling feature for obs where a f"{species}_variability" variable is preseent but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
+- Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
+- Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
+- The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278) and [PR #1279](https://github.com/openghg/openghg/pull/1279).
+- Added ability to reindex footprint data to obs data with tolerance of `1ms` with method="nearest".[#PR 1264](https://github.com/openghg/openghg/pull/1264)
+
+### Updated
+
+- For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can stil be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
+
+### Fixed
+- Bugs of resampling functions : delete all variables in the obs data that are filled of nan, test the emptiness of the dataset, and delete "flag" variable (removed in [#PR1283] https://github.com/openghg/openghg/pull/1283), all that before resampling to prevent errors [#PR1275](https://github.com/openghg/openghg/pull/1275)
+- Fixed bug where `period="varies"` could not be used or set when determining the time period associated with the input data. [#PR 1259](https://github.com/openghg/openghg/pull/1259) and [#PR 1267](https://github.com/openghg/openghg/pull/1267)
+- Dropped `exposure_id` variable for GOSAT data to avoid change in dimension size error raised from `to_zarr`. [PR #1243](https://github.com/openghg/openghg/pull/1243) [PR #1257](https://github.com/openghg/openghg/pull/1257)
+- Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
+- Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
+- Fixed `get_*` functions if passed with `start_date` or `end_date` in format of ""dd:mm:yy T 00:00:0000" can still fetch the relevant data.[#PR 1273](https://github.com/openghg/openghg/issues/1273)
 
 ## [0.13.0] - 2025-03-10
 
@@ -29,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.12.0] - 2025-02-27
 
 ### Updated
+
 - Update `standardise_column` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1217](https://github.com/openghg/openghg/pull/1217/)
 - Update `standardise_footprint` inputs to include more explicit keywords around selection of satellite points. This includes adding the `obs_region` keyword to describe an area selected for satellite points (not necessarily the same as `domain`) and updating the definition of `selection` to be linked to any additional selection filters included for the satellite data. [#PR 1218](https://github.com/openghg/openghg/pull/1218/)
 - Output of parsers changed from nested dictionary to list of `MetadataAndData` objects. [PR #1199](https://github.com/openghg/openghg/pull/1199)

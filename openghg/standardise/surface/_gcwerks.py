@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 
 def find_files(data_path: str | Path, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
@@ -58,9 +58,8 @@ def parse_gcwerks(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
-    measurement_type: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 

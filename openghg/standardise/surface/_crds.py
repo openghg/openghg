@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from pandas import DataFrame, Timedelta
 
 
@@ -12,10 +12,9 @@ def parse_crds(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | float | int | None = None,
-    measurement_type: str | None = None,
     drop_duplicates: bool = True,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     **kwargs: dict,
 ) -> dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
@@ -28,7 +27,6 @@ def parse_crds(
         inlet: Inlet height
         instrument: Instrument name
         sampling_period: Sampling period in seconds
-        measurement_type: Measurement type e.g. insitu, flask
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
@@ -61,7 +59,6 @@ def parse_crds(
         inlet=inlet,
         instrument=instrument,
         sampling_period=sampling_period,
-        measurement_type=measurement_type,
         drop_duplicates=drop_duplicates,
     )
 
@@ -86,8 +83,7 @@ def _read_data(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | float | int | None = None,
-    measurement_type: str | None = None,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     drop_duplicates: bool = True,
 ) -> dict:
     """Read the datafile passed in and extract the data we require.
@@ -99,7 +95,6 @@ def _read_data(
         inlet: Inlet height
         instrument: Instrument name
         sampling_period: Sampling period in seconds
-        measurement_type: Measurement type e.g. insitu, flask
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
@@ -292,7 +287,7 @@ def _get_site_attributes(
     site: str,
     inlet: str,
     crds_metadata: dict,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Gets the site specific attributes for writing to Datsets
 
