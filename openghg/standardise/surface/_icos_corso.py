@@ -121,8 +121,6 @@ def parse_icos_corso(
 
                 df = set_time_as_dataframe_index(dataframe=df)
 
-                df = calculate_sampling_period(dataframe=df, species=species)
-
             else:
                 columns_to_keep = [
                     species,
@@ -138,8 +136,6 @@ def parse_icos_corso(
                 df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
-
-                df = calculate_sampling_period(dataframe=df, species=species)
 
         # icos_data_level = 2 data is classified as ICOS_ATC_L2
         elif "l2" in filepath.name.lower():
@@ -170,8 +166,6 @@ def parse_icos_corso(
                 df = df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
-
-                df = calculate_sampling_period(dataframe=df, species=species)
 
             else:
                 site_fname = filepath.name.split("_")[-3]
@@ -240,14 +234,10 @@ def parse_icos_corso(
         df = df = df[columns_to_keep]
 
     df = clean_dataframe(df=df, species_name=species)
+    df = calculate_sampling_period(dataframe=df, species=species)
+
     data = df.to_xarray()
     data["flag"] = data["flag"].astype(str)
-
-    if sampling_period is None and f"{species}_sampling_period" in data.data_vars:
-        rounded_values = np.round(data[f"{species}_sampling_period"].values, decimals=2)
-        unique_values = np.unique(rounded_values)
-        if [3600, 3601] in unique_values and len([3600, 3601]) == len(unique_values):
-            sampling_period = "3600.0"
 
     metadata = {
         "site": site,
@@ -284,10 +274,23 @@ def parse_icos_corso(
             raise ValueError("Couldn't identify data owner email")
 
     if sampling_period is None:
+
         f_header = [s for s in header if "TIME INTERVAL" in s]
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
+        elif "integrated sampling" in interval_str.lower():
+            metadata["sampling_period"] = "integrated sampling"
+        elif f"{species}_sampling_period" in data.data_vars:
+
+            rounded_values = np.round(data[f"{species}_sampling_period"].values, decimals=2)
+            unique_values = np.unique(rounded_values)
+
+            if [3600, 3601] in unique_values and len([3600, 3601]) == len(unique_values):
+                metadata["sampling_period"] = "3600.0"
+            elif len(unique_values) == 1:
+                metadata["sampling_period"] = unique_values.astype("str")
+                print(sampling_period)
         else:
             metadata["sampling_period"] = "multiple"
 
@@ -435,9 +438,14 @@ def calculate_sampling_period(dataframe: pd.DataFrame, species: str) -> pd.DataF
 
     returns: dataframe containing sampling_period column
     """
-
-    dataframe[f"{species}_sampling_period"] = (
-        dataframe["sampling_end"] - dataframe["sampling_start"]
-    ).dt.total_seconds()
+    columns = dataframe.columns
+    if "sampling_end" in columns:
+        dataframe[f"{species}_sampling_period"] = (
+            dataframe["sampling_end"] - dataframe["sampling_start"]
+        ).dt.total_seconds()
+    elif "integration_time" in columns:
+        diffs = np.diff(dataframe["integration_time"])
+        aligned_index = dataframe.index[1:]
+        dataframe.loc[aligned_index, f"{species}_sampling_period"] = diffs
 
     return dataframe
