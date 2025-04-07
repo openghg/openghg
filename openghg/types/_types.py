@@ -30,7 +30,7 @@ XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
 
 # Defining literals for different (generally internal) settings
-methodType = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
+ReindexMethod = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
 
 
 class TimePeriod(NamedTuple):

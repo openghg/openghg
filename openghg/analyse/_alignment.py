@@ -7,7 +7,7 @@ import xarray as xr
 from xarray import Dataset
 from numpy.typing import ArrayLike
 
-from openghg.types import XrDataLike, methodType
+from openghg.types import XrDataLike, ReindexMethod
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -283,7 +283,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: float | None = None
+    dataset_A: Dataset, dataset_B: Dataset, method: ReindexMethod = "ffill", tolerance: float | None = None
 ) -> Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 

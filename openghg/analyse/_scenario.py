@@ -67,7 +67,7 @@ from openghg.retrieve import (
     search_column,
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
-from openghg.types import SearchError, methodType
+from openghg.types import SearchError, ReindexMethod
 from ._alignment import resample_obs_and_other, combine_datasets
 
 
@@ -806,7 +806,7 @@ class ModelScenario:
             platform = self._get_platform()
 
         # Set default reindex method and tolerance values
-        merge_method = "ffill"
+        merge_method: ReindexMethod = "ffill"
         tolerance = None           
 
         # If platform is specified, update resample_to, reindex and tolerance values where appropriate
@@ -815,7 +815,7 @@ class ModelScenario:
             if platform == "satellite":
                 # Update reindex method and tolerance for satellite
                 resample_to = None
-                merge_method: methodType = "nearest"
+                merge_method = "nearest"
                 tolerance = pd.Timedelta("1ms")
                 logger.info(f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance.")
             elif "flask" in platform:
@@ -1707,7 +1707,7 @@ class ModelScenario:
 def match_dataset_dims(
     datasets: Sequence[Dataset],
     dims: str | Sequence = [],
-    method: methodType = "nearest",
+    method: ReindexMethod = "nearest",
     tolerance: float | dict[str, float] = 1e-5,
 ) -> list[Dataset]:
     """Aligns datasets to the selected dimensions within a tolerance.
@@ -1845,7 +1845,7 @@ def _calc_average_gap(data_array: DataArray) -> Any:
         raise e  # else, re-raise
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
+def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: ReindexMethod = "ffill") -> Dataset:
     """Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency
     (smallest difference betweeen coordinate values).
