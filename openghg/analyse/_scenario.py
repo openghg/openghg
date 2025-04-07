@@ -725,7 +725,7 @@ class ModelScenario:
         return platform
 
     def _resample_obs_footprint(
-        self, resample_to: str | None = "coarsest", platform: str | None = None
+        self, resample_to: str | None = "coarsest"
     ) -> tuple:
         """Slice and resample obs and footprint data to align along time
 
@@ -737,11 +737,10 @@ class ModelScenario:
          - "obs" - resample to observation data frequency
          - "footprint" - resample to footprint data frequency
          - a valid resample period e.g. "2H"
-         - None to not resample and to just "ffill" footprint to obs
+         - None to not resample and just return original values
 
         Args:
             resample_to: Resample option to use: either data based or using a valid pandas resample period.
-            platform: Observation platform used to decide whether to resample
 
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
@@ -753,16 +752,6 @@ class ModelScenario:
 
         obs_data = obs.data
         footprint_data = footprint.data
-
-        if platform is not None:
-            platform = platform.lower()
-            # Do not apply resampling for "satellite" or "flask"
-            if platform == "satellite":
-                resample_to = None
-            elif "flask" in platform:
-                resample_to = None
-            else:
-                logger.warning(f"Platform '{platform}' not used when determining resample strategy.")
 
         if resample_to is None:
             return obs_data, footprint_data
@@ -792,7 +781,9 @@ class ModelScenario:
                           - or using a valid pandas resample period e.g. "2H".
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample
+            platform: Observation platform used to decide on resample and alignment steps.
+                If this is not supplied, function will attempt to extract this value from 
+                from the metadata, then the openghg_defs site_info.json details for the site.
             cache: Cache this data after calculation. Default = True.
 
         Returns:
@@ -810,21 +801,34 @@ class ModelScenario:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
 
-        # Extract platform and set associated keywords
-        # - platform will also be used within self._resample_obs_footprint()
+        # Extract platform
         if platform is None:
             platform = self._get_platform()
 
-        if platform == "satellite":
-            merge_method: methodType = "nearest"
-            tolerance = pd.Timedelta("1ms")
-        else:
-            merge_method = "ffill"
-            tolerance = None
+        # Set default reindex method and tolerance values
+        merge_method = "ffill"
+        tolerance = None           
+
+        # If platform is specified, update resample_to, reindex and tolerance values where appropriate
+        if platform is not None:
+            platform = platform.lower()
+            if platform == "satellite":
+                # Update reindex method and tolerance for satellite
+                resample_to = None
+                merge_method: methodType = "nearest"
+                tolerance = pd.Timedelta("1ms")
+                logger.info(f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance.")
+            elif "flask" in platform:
+                # TODO: Iss #253. Update this to be smarter about averaging irregular, flask data
+                # May need to access different method than resample
+                logger.info(f"Platform '{platform}' has been used to determine the resample stategy (no resampling).")
+                resample_to = None
+            else:
+                logger.warning(f"Platform '{platform}' not used when determining resample and merge strategy.")
 
         # Resample, align and merge the observation and footprint Datasets
         resampled_obs, resampled_footprint = self._resample_obs_footprint(
-            resample_to=resample_to, platform=platform
+            resample_to=resample_to
         )
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
