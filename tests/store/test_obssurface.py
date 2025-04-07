@@ -978,7 +978,7 @@ def test_drop_only_correct_nan():
         ("data_level", "1", "2"),
         ("data_sublevel", "1.1", "1.2"),
         ("dataset_source", "InGOS", "European ObsPack"),
-        ("platform", "surface-insitu", "surface-flask")
+        ("platform", "surface-insitu", "surface-flask"),
     ],
 )
 def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
@@ -1102,12 +1102,31 @@ def test_optional_metadata():
             "openghg",
             "from_definition",
         ),
-        ("ch4_bao_tower-insitu_1_ccgg_all.nc", "bao", None, None, "noaa", None, "insitu", "noaa", "from_source"),
+        (
+            "ch4_bao_tower-insitu_1_ccgg_all.nc",
+            "bao",
+            None,
+            None,
+            "noaa",
+            None,
+            "insitu",
+            "noaa",
+            "from_source",
+        ),
         ("ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", "rgl", "g2301", None, "icos", None, None, "icos", "never"),
     ],
 )
 def test_sync_surface_metadata_store_level(
-    filepath, site, instrument, sampling_period, network, inlet, measurement_type, source_format, update_mismatch, caplog
+    filepath,
+    site,
+    instrument,
+    sampling_period,
+    network,
+    inlet,
+    measurement_type,
+    source_format,
+    update_mismatch,
+    caplog,
 ):
     clear_test_stores()
     bucket = get_writable_bucket(name="user")
