@@ -724,9 +724,7 @@ class ModelScenario:
 
         return platform
 
-    def _resample_obs_footprint(
-        self, resample_to: str | None = "coarsest"
-    ) -> tuple:
+    def _resample_obs_footprint(self, resample_to: str | None = "coarsest") -> tuple:
         """Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
@@ -782,7 +780,7 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide on resample and alignment steps.
-                If this is not supplied, function will attempt to extract this value from 
+                If this is not supplied, function will attempt to extract this value from
                 from the metadata, then the openghg_defs site_info.json details for the site.
             cache: Cache this data after calculation. Default = True.
 
@@ -807,7 +805,7 @@ class ModelScenario:
 
         # Set default reindex method and tolerance values
         merge_method: ReindexMethod = "ffill"
-        tolerance = None           
+        tolerance = None
 
         # If platform is specified, update resample_to, reindex and tolerance values where appropriate
         if platform is not None:
@@ -817,19 +815,23 @@ class ModelScenario:
                 resample_to = None
                 merge_method = "nearest"
                 tolerance = pd.Timedelta("1ms")
-                logger.info(f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance.")
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance."
+                )
             elif "flask" in platform:
                 # TODO: Iss #253. Update this to be smarter about averaging irregular, flask data
                 # May need to access different method than resample
-                logger.info(f"Platform '{platform}' has been used to determine the resample stategy (no resampling).")
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample stategy (no resampling)."
+                )
                 resample_to = None
             else:
-                logger.warning(f"Platform '{platform}' not used when determining resample and merge strategy.")
+                logger.warning(
+                    f"Platform '{platform}' not used when determining resample and merge strategy."
+                )
 
         # Resample, align and merge the observation and footprint Datasets
-        resampled_obs, resampled_footprint = self._resample_obs_footprint(
-            resample_to=resample_to
-        )
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
@@ -1845,7 +1847,9 @@ def _calc_average_gap(data_array: DataArray) -> Any:
         raise e  # else, re-raise
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: ReindexMethod = "ffill") -> Dataset:
+def stack_datasets(
+    datasets: Sequence[Dataset], dim: str = "time", method: ReindexMethod = "ffill"
+) -> Dataset:
     """Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency
     (smallest difference betweeen coordinate values).
