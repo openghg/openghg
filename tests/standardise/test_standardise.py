@@ -752,7 +752,7 @@ def test_icos_corso_l1_flask_data():
     assert np.allclose(fetched_value, expected_value)
 
     assert "flask" in get_corso_data.metadata["measurement_type"]
-    assert "integrated sampling" in get_corso_data.metadata["sampling_period"]
+    assert "3600.0" in get_corso_data.metadata["sampling_period"]
 
 
 def test_icos_corso_l2_integrated_naoh():
@@ -788,7 +788,7 @@ def test_icos_corso_l2_integrated_naoh():
     assert np.allclose(fetched_value, expected_value)
 
     assert "integrated-naoh" in get_corso_data.metadata["measurement_type"]
-    assert "integrated sampling" in get_corso_data.metadata["sampling_period"]
+    assert "multiple" in get_corso_data.metadata["sampling_period"]
 
 def test_icos_corso_l2_flask():
     """
@@ -822,7 +822,7 @@ def test_icos_corso_l2_flask():
 
     expected_value = -59.87
     assert np.allclose(fetched_value, expected_value)
-    assert "integrated sampling" in get_corso_data.metadata["sampling_period"]
+    assert "3600.0" in get_corso_data.metadata["sampling_period"]
 
 def test_icos_corso_clean_14_day():
     """
@@ -854,5 +854,5 @@ def test_icos_corso_clean_14_day():
 
     expected_value = 189
     assert np.allclose(fetched_value, expected_value)
-    assert "integrated sampling" in get_corso_data.metadata["sampling_period"]
+    assert "multiple" in get_corso_data.metadata["sampling_period"]
     assert "integrated-naoh" in get_corso_data.metadata["instrument"]

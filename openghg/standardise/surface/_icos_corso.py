@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import pathType
+from openghg.types import pathType, MetadataMissingError
 from openghg.standardise.meta import assign_attributes
 from openghg.util import clean_string, format_inlet, synonyms, read_header
 
@@ -81,7 +81,7 @@ def parse_icos_corso(
         "stdev": species + "_variability",
         "scallink": species + "_calibration_uncertainty",
         "combunc": species + "_combined_uncertainty",
-        "integrationtime": "integration_time",
+        "integrationtime": species + "_sampling_period",
         "weightedstderr": "weighted_std_err",
         "analyticalstdev": species + "_variability",
         "samplingpattern": "sampling_pattern",
@@ -117,7 +117,7 @@ def parse_icos_corso(
                     "flag",
                 ]
 
-                df = df = df[columns_to_keep]
+                df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
 
@@ -163,7 +163,7 @@ def parse_icos_corso(
                         species + "_number_of_observations",
                         "flag",
                     ]
-                df = df = df[columns_to_keep]
+                df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
 
@@ -191,13 +191,13 @@ def parse_icos_corso(
                         species,
                         "time",
                         "sampling_start_date",
-                        "integration_time",
+                        f"{species}_sampling_period",
                         "weighted_std_err",
                         species + "_variability",
                         "sampling_pattern",
                         "flag",
                     ]
-                    df = df = df[columns_to_keep]
+                    df = df[columns_to_keep]
 
         else:
             raise NotImplementedError()
@@ -224,7 +224,7 @@ def parse_icos_corso(
             species,
             "time",
             "sampling_start_date",
-            "integration_time",
+            f"{species}_sampling_period",
             "weighted_std_err",
             species + "_variability",
             "sampling_pattern",
@@ -279,20 +279,25 @@ def parse_icos_corso(
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
-        elif "integrated sampling" in interval_str.lower():
-            metadata["sampling_period"] = "integrated sampling"
         elif f"{species}_sampling_period" in data.data_vars:
 
             rounded_values = np.round(data[f"{species}_sampling_period"].values, decimals=2)
             unique_values = np.unique(rounded_values)
 
-            if [3600, 3601] in unique_values and len([3600, 3601]) == len(unique_values):
+            # Set a tolerance of 1 second
+            tolerance = 1
+
+            # Check if all unique values are close to 3600 (within the tolerance)
+            if np.all(np.isclose(unique_values, 3600, atol=tolerance)):
                 metadata["sampling_period"] = "3600.0"
-            elif len(unique_values) == 1:
-                metadata["sampling_period"] = unique_values.astype("str")
-                print(sampling_period)
+            else:
+                metadata["sampling_period"] = "multiple"
         else:
-            metadata["sampling_period"] = "multiple"
+            missing_err_msg = (
+                "Unable to determine sampling_period from input header/data. Please specify value in seconds."
+            )
+            logger.exception(missing_err_msg)
+            MetadataMissingError(missing_err_msg)
 
     species_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
@@ -443,9 +448,5 @@ def calculate_sampling_period(dataframe: pd.DataFrame, species: str) -> pd.DataF
         dataframe[f"{species}_sampling_period"] = (
             dataframe["sampling_end"] - dataframe["sampling_start"]
         ).dt.total_seconds()
-    elif "integration_time" in columns:
-        diffs = np.diff(dataframe["integration_time"])
-        aligned_index = dataframe.index[1:]
-        dataframe.loc[aligned_index, f"{species}_sampling_period"] = diffs
 
     return dataframe
