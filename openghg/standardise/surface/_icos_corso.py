@@ -184,7 +184,6 @@ def parse_icos_corso(
                 if species_fname.lower() == "14c":
                     df["time"] = pd.to_datetime(df[["year", "month", "day", "hour", "minute"]])
                     df.index = df["time"]
-                    print(df["time"][0])
                     df["sampling_start_date"] = pd.to_datetime(df[["year", "month", "day"]])
 
                     columns_to_keep = [
