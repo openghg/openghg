@@ -836,7 +836,7 @@ def test_icos_corso_clean_14_day():
                     site="jfj",
                     instrument="integrated-NAOH",
                     data_level=2,
-                    platform="integrated-NAOH",
+                    platform="surface-flask",
                     store="user")
 
     assert "dco2c14" in results[0]["species"]
@@ -844,14 +844,15 @@ def test_icos_corso_clean_14_day():
     assert "5m" in results[0]["inlet"]
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "2" in results[0]["data_level"]
-    assert "integrated-naoh" in results[0]["platform"]
+    assert "surface-flask" in results[0]["platform"]
 
     get_corso_data = get_obs_surface(site="jfj",
                                      species="dco2c14",
                                      inlet="5m",
-                                     platform="integrated-naoh")
+                                     platform="surface-flask")
     fetched_value = get_corso_data.data["mf"].isel(time=0)
 
     expected_value = 189
     assert np.allclose(fetched_value, expected_value)
     assert "integrated sampling" in get_corso_data.metadata["sampling_period"]
+    assert "integrated-naoh" in get_corso_data.metadata["instrument"]
