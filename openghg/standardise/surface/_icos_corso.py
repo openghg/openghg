@@ -231,7 +231,7 @@ def parse_icos_corso(
             "flag",
         ]
 
-        df = df = df[columns_to_keep]
+        df = df[columns_to_keep]
 
     df = clean_dataframe(df=df, species_name=species)
     df = calculate_sampling_period(dataframe=df, species=species)
