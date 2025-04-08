@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import (
     Any,
     Union,
+    Literal,
     TypeVar,
     NamedTuple,
     Protocol,
@@ -27,6 +28,9 @@ ArrayLike = Union[np.ndarray, xr.DataArray]
 ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
 XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
+
+# Defining literals for different (generally internal) settings
+ReindexMethod = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
 
 
 class TimePeriod(NamedTuple):
