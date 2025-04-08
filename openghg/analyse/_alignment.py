@@ -311,7 +311,7 @@ def combine_datasets(
 
     if "fp" in merged_ds:
         if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
-            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-            merged_ds = merged_ds[dict(time=flag[0])]
+            flag = np.isfinite(merged_ds.fp.mean(["lat", "lon"]))
+            merged_ds = merged_ds.where(flag.compute(), drop=True)
 
     return merged_ds
