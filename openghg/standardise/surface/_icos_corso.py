@@ -236,6 +236,8 @@ def parse_icos_corso(
     df = calculate_sampling_period(dataframe=df, species=species)
 
     data = df.to_xarray()
+    # setting units to sampling period data var
+    data[f"{species}_sampling_period"].attrs["units"] = "s"
     data["flag"] = data["flag"].astype(str)
 
     metadata = {
