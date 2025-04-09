@@ -233,7 +233,7 @@ def parse_icos_corso(
         df = df[columns_to_keep]
 
     df = clean_dataframe(df=df, species_name=species)
-    df = calculate_sampling_period(dataframe=df, species=species)
+    df = calculate_sampling_period(dataframe=df, species=species, header=header)
 
     data = df.to_xarray()
     # setting units to sampling period data var
@@ -435,26 +435,31 @@ def set_time_as_dataframe_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def calculate_sampling_period(dataframe: pd.DataFrame, species: str) -> pd.DataFrame:
+def calculate_sampling_period(dataframe: pd.DataFrame, species: str, header: list) -> pd.DataFrame:
     """This function is used to calculate the difference between sampling_start and sampling_end to calculate the sampling period for each of the data points
 
     Args:
         df: Accepts pandas dataframe
         species: species name
+        header: file header
 
     returns: dataframe containing sampling_period column
     """
     columns = dataframe.columns
-    if "sampling_end" in columns:
-        dataframe[f"{species}_sampling_period"] = (
-            dataframe["sampling_end"] - dataframe["sampling_start"]
-        ).dt.total_seconds()
-    elif f"{species}_sampling_period" in columns:
+    integration_time_flag = any("integrationtime is given in days" in s.lower() for s in header)
+
+    if not integration_time_flag:
+        if "sampling_end" in columns:
+            dataframe[f"{species}_sampling_period"] = (
+                dataframe["sampling_end"] - dataframe["sampling_start"]
+            ).dt.total_seconds()
+        else:
+            ValueError(
+                f"Unable to find sampling_start, sampling_end, or  {species}_sampling_period in the data to convert the time values into seconds"
+            )
+    else:
         dataframe[f"{species}_sampling_period"] = pd.to_timedelta(
             dataframe[f"{species}_sampling_period"], unit="D"
         ).dt.total_seconds()
-    else:
-        ValueError(
-            f"Unable to find sampling_start, sampling_end, or  {species}_sampling_period in the data to convert the time values into seconds"
-        )
+
     return dataframe
