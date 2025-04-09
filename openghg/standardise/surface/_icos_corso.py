@@ -449,8 +449,12 @@ def calculate_sampling_period(dataframe: pd.DataFrame, species: str) -> pd.DataF
         dataframe[f"{species}_sampling_period"] = (
             dataframe["sampling_end"] - dataframe["sampling_start"]
         ).dt.total_seconds()
-    else:
+    elif f"{species}_sampling_period" in columns:
         dataframe[f"{species}_sampling_period"] = pd.to_timedelta(
             dataframe[f"{species}_sampling_period"], unit="D"
         ).dt.total_seconds()
+    else:
+        ValueError(
+            f"Unable to find sampling_start, sampling_end, or  {species}_sampling_period in the data to convert the time values into seconds"
+        )
     return dataframe
