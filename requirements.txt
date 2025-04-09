@@ -7,7 +7,7 @@ ipywidgets
 matplotlib
 msgpack
 nbformat
-numcodecs
+numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
