@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
 - Fixed `get_*` functions if passed with `start_date` or `end_date` in format of ""dd:mm:yy T 00:00:0000" can still fetch the relevant data.[#PR 1273](https://github.com/openghg/openghg/issues/1273)
+- Fixed `numcodecs` version to be less than 0.16 to avoid ci runner failing while importing zarr.[# 1296](https://github.com/openghg/openghg/pull/1296)
 
 ## [0.13.0] - 2025-03-10
 
