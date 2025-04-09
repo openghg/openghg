@@ -783,12 +783,17 @@ def test_icos_corso_l2_integrated_naoh():
                                      data_level="2",
                                      platform="surface-flask")
 
-    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
     expected_value = -0.84
     assert np.allclose(fetched_value, expected_value)
+    assert data["mf_sampling_period"].isel(time=0).values == 1209600.0
+    assert data["mf_sampling_period"].attrs["units"] == "s"
 
-    assert "integrated-naoh" in get_corso_data.metadata["measurement_type"]
-    assert "multiple" in get_corso_data.metadata["sampling_period"]
+    assert "integrated-naoh" in metadata["measurement_type"]
+    assert "multiple" in metadata["sampling_period"]
 
 def test_icos_corso_l2_flask():
     """
@@ -850,9 +855,15 @@ def test_icos_corso_clean_14_day():
                                      species="dco2c14",
                                      inlet="5m",
                                      platform="surface-flask")
-    fetched_value = get_corso_data.data["mf"].isel(time=0)
+
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0)
+    assert data["mf_sampling_period"].isel(time=0).values == 1036800.0
+    assert data["mf_sampling_period"].attrs["units"] == "s"
 
     expected_value = 189
     assert np.allclose(fetched_value, expected_value)
-    assert "multiple" in get_corso_data.metadata["sampling_period"]
-    assert "integrated-naoh" in get_corso_data.metadata["instrument"]
+    assert "multiple" in metadata["sampling_period"]
+    assert "integrated-naoh" in metadata["instrument"]
