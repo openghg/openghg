@@ -3,6 +3,7 @@ from ._tutorial import (
     populate_flux_data,
     populate_footprint_data,
     populate_surface_data,
+    populate_column_data,
     populate_flux_ch4,
     populate_flux_co2,
     populate_bc_ch4,

@@ -1,8 +1,8 @@
 Comparing observations to emissions
 ===================================
 
-In this tutorial, we will see how to combine observation data and
-acillary data into a ``ModelScenario``, which can compute modelled
+In this tutorial, we will see how to combine observation data(surface, column-site and satellite data) and
+ancillary data into a ``ModelScenario``, which can compute modelled
 outputs based on ancillary data, and compare these modelled outputs
 to observed measurements.
 

@@ -189,7 +189,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path,
+    filepath: multiPathType,
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -255,7 +255,9 @@ def standardise_column(
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
     return standardise(
         store=store,
         data_type="column",
