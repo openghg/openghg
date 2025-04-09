@@ -747,12 +747,17 @@ def test_icos_corso_l1_flask_data():
                                      data_level="1",
                                      platform="surface-flask")
 
-    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
     expected_value = -20.33
     assert np.allclose(fetched_value, expected_value)
 
-    assert "flask" in get_corso_data.metadata["measurement_type"]
-    assert "3600.0" in get_corso_data.metadata["sampling_period"]
+    assert data["mf_sampling_period"].isel(time=4).values == 3601
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert "flask" in metadata["measurement_type"]
+    assert "3600.0" in metadata["sampling_period"]
 
 
 def test_icos_corso_l2_integrated_naoh():
@@ -823,11 +828,18 @@ def test_icos_corso_l2_flask():
                                      instrument="flask",
                                      platform="surface-flask")
 
-    fetched_value = get_corso_data.data["mf"].isel(time=0).values
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
 
     expected_value = -59.87
     assert np.allclose(fetched_value, expected_value)
-    assert "3600.0" in get_corso_data.metadata["sampling_period"]
+
+    assert data["mf_sampling_period"].isel(time=5).values == 3600
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert "flask" in metadata["measurement_type"]
+    assert "3600.0" in metadata["sampling_period"]
 
 def test_icos_corso_clean_14_day():
     """
