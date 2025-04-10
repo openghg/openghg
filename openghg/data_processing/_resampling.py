@@ -405,9 +405,9 @@ def resampler(
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
     for dv in result.data_vars:
-        if 'variability' in str(dv) or 'repeatability' in str(dv):
+        if "variability" in str(dv) or "repeatability" in str(dv):
             result[dv] = result[dv].fillna(0.0)
-            
+
     if drop_na:
         result = result.dropna("time")
 

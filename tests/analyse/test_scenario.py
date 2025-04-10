@@ -944,6 +944,7 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
+
 # %% Test alignment when using platform keyword with dummy data (CH4)
 #  - flask data
 
@@ -955,7 +956,7 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
         (None, "surface-flask"),
         ("surface-flask", "surface-flask"),
         ("not_set", "surface-flask"),
-    ]
+    ],
 )
 def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform_keyword):
     """
@@ -989,8 +990,16 @@ def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform
 
     # Footprint data should not have been resampled and should now be repeated via "ffill"
     aligned_fp = combined_dataset["fp"]
-    aligned_fp_1 = aligned_fp.sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).transpose("time", "lat", "lon").values
-    aligned_fp_2 = aligned_fp.sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).transpose("time", "lat", "lon").values
+    aligned_fp_1 = (
+        aligned_fp.sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00"))
+        .transpose("time", "lat", "lon")
+        .values
+    )
+    aligned_fp_2 = (
+        aligned_fp.sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00"))
+        .transpose("time", "lat", "lon")
+        .values
+    )
 
     org_fp_1 = footprint_data["fp"].sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).values
     org_fp_2 = footprint_data["fp"].sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).values

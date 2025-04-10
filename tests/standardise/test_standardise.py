@@ -720,20 +720,27 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == domain.lower()
 
+
 def test_icos_corso_l1_flask_data():
     """
     Test icos corso strandardisation flow for data_level l1 and flask measurement.
     """
-    filepath = get_surface_datapath(filename="ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso")
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C",
+        source_format="icos_corso",
+    )
 
-    results = standardise_surface(filepath=filepath,                source_format="icos_corso",
-                    network="icos",
-                    site="CBW",
-                    instrument="flask",
-                    data_level=1,
-                    measurement_type="flask",
-                    platform="surface-flask",
-                    store="user")
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="flask",
+        data_level=1,
+        measurement_type="flask",
+        platform="surface-flask",
+        store="user",
+    )
 
     assert "dco2c14" in results[0]["species"]
     assert "cbw" in results[0]["site"]
@@ -741,11 +748,7 @@ def test_icos_corso_l1_flask_data():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "surface-flask" in results[0]["platform"]
 
-
-    get_corso_data = get_obs_surface(site="cbw",
-                                     species="dco2c14",
-                                     data_level="1",
-                                     platform="surface-flask")
+    get_corso_data = get_obs_surface(site="cbw", species="dco2c14", data_level="1", platform="surface-flask")
 
     data = get_corso_data.data
     metadata = get_corso_data.metadata
@@ -764,17 +767,21 @@ def test_icos_corso_l2_integrated_naoh():
     """
     Test icos corso strandardisation flow for data_level l2 and integrated-naoh measurement.
     """
-    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_779.14C", source_format="icos_corso")
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_779.14C", source_format="icos_corso"
+    )
 
-    results = standardise_surface(filepath=filepath,
-                        source_format="icos_corso",
-                        network="icos",
-                        site="CBW",
-                        instrument="integrated-NAOH",
-                        data_level=2,
-                        measurement_type="integrated-NAOH",
-                        platform="surface-flask",
-                        store="user")
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="integrated-NAOH",
+        data_level=2,
+        measurement_type="integrated-NAOH",
+        platform="surface-flask",
+        store="user",
+    )
 
     assert "dco2c14" in results[0]["species"]
     assert "cbw" in results[0]["site"]
@@ -783,10 +790,7 @@ def test_icos_corso_l2_integrated_naoh():
     assert "surface-flask" in results[0]["platform"]
     assert "2" in results[0]["data_level"]
 
-    get_corso_data = get_obs_surface(site="cbw",
-                                     species="dco2c14",
-                                     data_level="2",
-                                     platform="surface-flask")
+    get_corso_data = get_obs_surface(site="cbw", species="dco2c14", data_level="2", platform="surface-flask")
 
     data = get_corso_data.data
     metadata = get_corso_data.metadata
@@ -800,20 +804,25 @@ def test_icos_corso_l2_integrated_naoh():
     assert "integrated-naoh" in metadata["measurement_type"]
     assert "multiple" in metadata["sampling_period"]
 
+
 def test_icos_corso_l2_flask():
     """
     Test icos corso strandardisation flow for data_level l2 and flask measurement.
     """
-    filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso")
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso"
+    )
 
-    results = standardise_surface(filepath=filepath,
-                    source_format="icos_corso",
-                    network="icos",
-                    site="CBW",
-                    instrument="flask",
-                    data_level=2,
-                    platform="surface-flask",
-                    store="user")
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="flask",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
 
     assert "dco2c14" in results[0]["species"]
     assert "cbw" in results[0]["site"]
@@ -822,11 +831,9 @@ def test_icos_corso_l2_flask():
     assert "surface-flask" in results[0]["platform"]
     assert "2" in results[0]["data_level"]
 
-    get_corso_data = get_obs_surface(site="cbw",
-                                     species="dco2c14",
-                                     data_level="2",
-                                     instrument="flask",
-                                     platform="surface-flask")
+    get_corso_data = get_obs_surface(
+        site="cbw", species="dco2c14", data_level="2", instrument="flask", platform="surface-flask"
+    )
 
     data = get_corso_data.data
     metadata = get_corso_data.metadata
@@ -841,20 +848,25 @@ def test_icos_corso_l2_flask():
     assert "flask" in metadata["measurement_type"]
     assert "3600.0" in metadata["sampling_period"]
 
+
 def test_icos_corso_clean_14_day():
     """
     Test icos corso strandardisation flow for clean data and integrated-naoh measurement.
     """
-    filepath = get_surface_datapath(filename="uheicrl_l2_2025_1_jfj_5m_int_14day_clean.c14", source_format="icos_corso")
+    filepath = get_surface_datapath(
+        filename="uheicrl_l2_2025_1_jfj_5m_int_14day_clean.c14", source_format="icos_corso"
+    )
 
-    results = standardise_surface(filepath=filepath,
-                    source_format="icos_corso",
-                    network="icos",
-                    site="jfj",
-                    instrument="integrated-NAOH",
-                    data_level=2,
-                    platform="surface-flask",
-                    store="user")
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="jfj",
+        instrument="integrated-NAOH",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
 
     assert "dco2c14" in results[0]["species"]
     assert "jfj" in results[0]["site"]
@@ -863,10 +875,7 @@ def test_icos_corso_clean_14_day():
     assert "2" in results[0]["data_level"]
     assert "surface-flask" in results[0]["platform"]
 
-    get_corso_data = get_obs_surface(site="jfj",
-                                     species="dco2c14",
-                                     inlet="5m",
-                                     platform="surface-flask")
+    get_corso_data = get_obs_surface(site="jfj", species="dco2c14", inlet="5m", platform="surface-flask")
 
     data = get_corso_data.data
     metadata = get_corso_data.metadata
