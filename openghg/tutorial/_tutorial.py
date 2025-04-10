@@ -218,7 +218,8 @@ def populate_column_data() -> None:
 
     use_tutorial_store()
 
-    gosat_data_2016 = "https://github.com/openghg/example_data/column/raw/main/column/gosat-fts_gosat_20170318_ch4-column.nc.tar.gz"
+    gosat_data_2016 = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
     logger.info("Retrieving example data...")
     gosat_data_2016_paths = retrieve_example_data(url=gosat_data_2016)
 
@@ -249,8 +250,7 @@ def populate_column_data() -> None:
 
 
 def populate_surface_data() -> None:
-    """Populates the tutorial object store with surface measurement data from the
-    example data repository.
+    """Populates the tutorial object store with surface measurement data from the example data repository.
 
     Returns:
         None
