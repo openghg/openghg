@@ -3,10 +3,11 @@ from typing import cast
 from collections.abc import MutableMapping
 
 import xarray as xr
+from openghg.types import multiPathType
 
 
 def parse_openghg(
-    filepath: str | Path,
+    filepath: multiPathType,
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,
