@@ -2,12 +2,13 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Any, Optional
-
 from numpy import ndarray
+from xarray import DataArray
+
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray
+from openghg.types import multiPathType
 
 ArrayType = Optional[ndarray | DataArray]
 
@@ -25,7 +26,7 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: multiPathType,
         species: str,
         platform: str = "satellite",
         obs_region: Optional[str] = None,
@@ -149,80 +150,87 @@ class ObsColumn(BaseStore):
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
+        
+        if not isinstance(filepath, list):
+            filepaths = [filepath]
+        else:
+            filepaths = filepath
 
-        filepath = Path(filepath)
+        for fp in filepaths:
 
-        standardise_parsers = define_standardise_parsers()[self._data_type]
+            filepath = Path(fp)
 
-        try:
-            source_format = standardise_parsers[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
+            standardise_parsers = define_standardise_parsers()[self._data_type]
 
-        # Load the data retrieve object
-        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+            try:
+                source_format = standardise_parsers[source_format.upper()].value
+            except KeyError:
+                raise ValueError(f"Unknown data type {source_format} selected.")
 
-        # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
+            # Load the data retrieve object
+            parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
 
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+            # Get current parameter values and filter to only include function inputs
+            fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+            fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
-        if not unseen_hashes:
-            return [{}]
+            _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        filepath = next(iter(unseen_hashes.values()))
+            if not unseen_hashes:
+                return [{}]
 
-        if chunks is None:
-            chunks = {}
+            filepath = next(iter(unseen_hashes.values()))
 
-        # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
-        )
+            if chunks is None:
+                chunks = {}
 
-        obs_data = parser_fn(**parser_input_parameters)
+            # Define parameters to pass to the parser function and remaining keys
+            parser_input_parameters, additional_input_parameters = split_function_inputs(
+                fn_input_parameters, parser_fn
+            )
 
-        # TODO: Add in schema and checks for ObsColumn
-        # # Checking against expected format for ObsColumn
-        # for split_data in obs_data.values():
-        #     col_data = split_data["data"]
-        #     ObsColumn.validate_data(col_data)
+            obs_data = parser_fn(**parser_input_parameters)
 
-        # TODO: Do we need to do include a split here of some kind, since
-        # this could be "site" or "satellite" keys.
-        # platform = list(obs_data.keys())[0]["metadata"]["platform"]
+            # TODO: Add in schema and checks for ObsColumn
+            # # Checking against expected format for ObsColumn
+            # for split_data in obs_data.values():
+            #     col_data = split_data["data"]
+            #     ObsColumn.validate_data(col_data)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+            # TODO: Do we need to do include a split here of some kind, since
+            # this could be "site" or "satellite" keys.
+            # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        # Mop up and add additional keys to metadata which weren't passed to the parser
-        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
+            # Check to ensure no required keys are being passed through optional_metadata dict
+            self.check_info_keys(optional_metadata)
+            if optional_metadata is not None:
+                additional_metadata.update(optional_metadata)
 
-        data_type = "column"
-        datasource_uuids = self.assign_data(
-            data=obs_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            compressor=compressor,
-            filters=filters,
-        )
+            # Mop up and add additional keys to metadata which weren't passed to the parser
+            obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+            data_type = "column"
+            datasource_uuids = self.assign_data(
+                data=obs_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                compressor=compressor,
+                filters=filters,
+            )
 
-        # obs_store.add_datasources(
-        #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
-        # )
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
-        # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
+            # obs_store.add_datasources(
+            #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
+            # )
 
-        return datasource_uuids
+            # Record the file hash in case we see this file again
+            self.store_hashes(unseen_hashes)
+
+            return datasource_uuids
 
     # TODO: Add in transform method for gosat and tropomi raw data files
     #  - Included emissions version as starting point to be updated.
