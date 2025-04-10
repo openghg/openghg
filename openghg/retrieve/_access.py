@@ -184,6 +184,9 @@ def get_obs_surface(
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
+        if "inlet_height" in data.data_vars : 
+            data["inlet"] = data["inlet_height"]
+            del data["inlet_height"]
 
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
