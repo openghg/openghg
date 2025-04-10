@@ -221,7 +221,7 @@ def populate_column_data() -> None:
     gosat_data_2016 = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
 
     logger.info("Retrieving example data...")
-    gosat_data_2016_paths = retrieve_example_data(url=gosat_data_2016)
+    gosat_data_2016_path = retrieve_example_data(url=gosat_data_2016)
 
     selection = "LAND"
     species = "methane"
@@ -234,9 +234,8 @@ def populate_column_data() -> None:
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                print(gosat_data_2016_paths)
                 standardise_column(
-                    filepath=gosat_data_2016_paths,
+                    filepath=gosat_data_2016_path[0],
                     source_format="OPENGHG",
                     satellite=satellite,
                     species=species,
