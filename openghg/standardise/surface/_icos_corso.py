@@ -81,7 +81,7 @@ def parse_icos_corso(
         "stdev": species + "_variability",
         "scallink": species + "_calibration_uncertainty",
         "combunc": species + "_combined_uncertainty",
-        "integrationtime": species + "_sampling_period",
+        "integrationtime": "integration_time",
         "weightedstderr": "weighted_std_err",
         "analyticalstdev": species + "_variability",
         "samplingpattern": "sampling_pattern",
@@ -459,7 +459,7 @@ def calculate_sampling_period(dataframe: pd.DataFrame, species: str, header: lis
             )
     else:
         dataframe[f"{species}_sampling_period"] = pd.to_timedelta(
-            dataframe[f"{species}_sampling_period"], unit="D"
+            dataframe["integration_time"], unit="D"
         ).dt.total_seconds()
 
     return dataframe
