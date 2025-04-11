@@ -503,7 +503,11 @@ def surface_obs_resampler(
 
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
-        check_all = [str(dv) for dv in ds.data_vars if "variability" in str(dv) or "repeatability" in str(dv)]
+        check_all = [
+            str(dv)
+            for dv in ds.data_vars
+            if str(dv) in [f"{species}_variability", f"{species}_repeatability"]
+        ]
         result = result.dropna("time", subset=check_any, how="any")
         result = result.dropna("time", subset=check_all, how="all")
 
