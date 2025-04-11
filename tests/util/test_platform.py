@@ -6,10 +6,10 @@ from openghg.types import MetadataFormatError
 @pytest.mark.parametrize(
     "data_type, value",
     [
-       ("surface", "surface-flask"),
-       ("column", "column-insitu"),
-       ("column", "satellite"),
-       ("mobile", "mobile-flask")
+        ("surface", "surface-flask"),
+        ("column", "column-insitu"),
+        ("column", "satellite"),
+        ("mobile", "mobile-flask"),
     ],
 )
 def test_define_platform(data_type, value):
