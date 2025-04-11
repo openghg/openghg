@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
-
+- Improved the check for nans in resampler function: drop data for a particular where any of f"{species}" or "inlet" variables are nan, or when both f"{species}_variability" and f"{species}_repeatability" are nans.
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
-- Added a new resampling feature for obs where a f"{species}_variability" variable is preseent but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
+- Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
 - Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
 - The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278), [PR #1279](https://github.com/openghg/openghg/pull/1279) and [PR #1289](https://github.com/openghg/openghg/pull/1289).
