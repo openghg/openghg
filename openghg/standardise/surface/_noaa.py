@@ -651,7 +651,7 @@ def _estimate_sampling_period(obspack_ds: xr.Dataset, min_estimate: float = 10.0
     hourly_s = 60 * 60
     daily_s = hourly_s * 24
     weekly_s = daily_s * 7
-    monthly_s = weekly_s * 28  # approx
+    monthly_s = daily_s * 28  # approx
     yearly_s = daily_s * 365  # approx
 
     sampling_period_estimate = 0.0  # seconds
