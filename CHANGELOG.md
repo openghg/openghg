@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
-- Improved the check for nans in resampler function: drop data for a particular where any of f"{species}" or "inlet" variables are nan, or when both f"{species}_variability" and f"{species}_repeatability" are nans.
+- Improved the check for nans in resampler function: drop data for a particular where any of `f"{species}"` or `"inlet"` variables are nan, or when both `f"{species}_variability"` and `f"{species}_repeatability"` are nans. The default behaviour (if "species" is not indicated in the kwargs of `resampler`) is to drop the time data for which all the variables show nans (and not any as before).
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
 - Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
