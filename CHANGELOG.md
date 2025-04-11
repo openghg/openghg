@@ -16,10 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278), [PR #1279](https://github.com/openghg/openghg/pull/1279) and [PR #1289](https://github.com/openghg/openghg/pull/1289).
 - Added ability to reindex footprint data to obs data with tolerance of `1ms` with method="nearest".[#PR 1264](https://github.com/openghg/openghg/pull/1264)
 - Added ability to standardise CORSO radiocarbon data, added new parser named `parse_icos_corso` to handle data modifications.[PR #1285](https://github.com/openghg/openghg/pull/1285)
+- `tox` testing setup. [#PR 1268](https://github.com/openghg/openghg/pull/1268)
 
 ### Updated
 
-- For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can stil be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
+- For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can still be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
 
 ### Fixed
 - Bugs of resampling functions : delete all variables in the obs data that are filled of nan, test the emptiness of the dataset, and delete "flag" variable (removed in [#PR1283] https://github.com/openghg/openghg/pull/1283), all that before resampling to prevent errors [#PR1275](https://github.com/openghg/openghg/pull/1275)

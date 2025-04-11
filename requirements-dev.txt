@@ -8,6 +8,7 @@ pytest-cov
 pytest-mock
 pytest-timeout
 requests-mock
+tox >=4.24
 # For mypy
 mypy==1.10.0
 types-paramiko
