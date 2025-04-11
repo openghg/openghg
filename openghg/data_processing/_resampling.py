@@ -502,4 +502,17 @@ def surface_obs_resampler(
         xr.Dataset resampled according to default specification.
     """
     resampler_dict = _surface_obs_resampler_dict(ds, species)
-    return resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na)
+
+    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=False)
+
+    if drop_na:
+        check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
+        check_all = [
+            str(dv)
+            for dv in ds.data_vars
+            if str(dv) in [f"{species}_variability", f"{species}_repeatability"]
+        ]
+        result = result.dropna("time", subset=check_any, how="any")
+        result = result.dropna("time", subset=check_all, how="all")
+
+    return result
