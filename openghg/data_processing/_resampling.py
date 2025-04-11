@@ -405,13 +405,15 @@ def resampler(
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
     if drop_na:
-        if 'species' in kwargs.keys():
-            check_any = [str(dv) for dv in ds.data_vars if str(dv) in [kwargs['species'],'inlet']]
-            check_all = [str(dv) for dv in ds.data_vars if "variability" in str(dv) or "repeatability" in str(dv)]
-            result = result.dropna("time", subset = check_any, how='any')
-            result = result.dropna("time", subset = check_all, how='all')
-        else :
-            result = result.dropna("time", how='all')
+        if "species" in kwargs.keys():
+            check_any = [str(dv) for dv in ds.data_vars if str(dv) in [kwargs["species"], "inlet"]]
+            check_all = [
+                str(dv) for dv in ds.data_vars if "variability" in str(dv) or "repeatability" in str(dv)
+            ]
+            result = result.dropna("time", subset=check_any, how="any")
+            result = result.dropna("time", subset=check_all, how="all")
+        else:
+            result = result.dropna("time", how="all")
 
     return result
 
