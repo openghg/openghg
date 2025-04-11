@@ -184,7 +184,7 @@ def get_obs_surface(
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
-        if "inlet_height" in data.data_vars:
+        if "inlet_height" in data.data_vars and not "inlet" in data.data_vars:
             data["inlet"] = data["inlet_height"]
 
     if average is not None:
