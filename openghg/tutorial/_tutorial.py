@@ -208,9 +208,48 @@ def populate_bc_ch4() -> None:
     logger.info("Done.")
 
 
+def populate_column_data() -> None:
+    """Populates the tutorial object store with column measurement data from the example data repository.
+
+    Returns:
+        None
+    """
+    from openghg.standardise import standardise_column
+
+    use_tutorial_store()
+
+    gosat_data_2016 = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    logger.info("Retrieving example data...")
+    gosat_data_2016_path = retrieve_example_data(url=gosat_data_2016)
+
+    selection = "LAND"
+    species = "methane"
+    obs_region = "BRAZIL"
+    satellite = "GOSAT"
+
+    logger.info("Standardising data...")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_column(
+                    filepath=gosat_data_2016_path[0],
+                    source_format="OPENGHG",
+                    satellite=satellite,
+                    species=species,
+                    obs_region=obs_region,
+                    selection=selection,
+                    force=True,
+                    store="user",
+                )
+
+    logger.info("Done.")
+
+
 def populate_surface_data() -> None:
-    """Populates the tutorial object store with surface measurement data from the
-    example data repository.
+    """Populates the tutorial object store with surface measurement data from the example data repository.
 
     Returns:
         None
