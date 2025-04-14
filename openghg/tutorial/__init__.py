@@ -17,6 +17,5 @@ from ._tutorial import (
     unpack_example_archive,
     populate_satellite_footprint,
     populate_column_data,
-    populate_flux_data_satellite
-
+    populate_flux_data_satellite,
 )
