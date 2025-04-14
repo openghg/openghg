@@ -250,6 +250,81 @@ def populate_surface_data() -> None:
     logger.info("Done.")
 
 
+def populate_satellite_footprint():
+    """"""
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_footprint
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/footprint/GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+    print(satellite_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_footprint(
+                    filepath=satellite_data[-1],
+                    model="name",
+                    domain="southamerica",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    inlet="column"   
+                )
+
+    logger.info("Done.")
+
+
+def populate_column_data():
+    """
+    """
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_column
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+    print(satellite_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat")
+
+    logger.info("Done.")
+
+
+def populate_flux_data_satellite():
+    """
+    """
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_flux
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/flux/ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_flux(filepath=satellite_data[-1],
+                                 species="ch4", 
+                                 source="all", 
+                                 domain="southamerica")
+
+    logger.info("Done.")
+
+
 def download_edgar_data() -> Path:
     """
     Download edgar data to tutorial store to be used within parse_edgar transform

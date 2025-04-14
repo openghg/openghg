@@ -15,4 +15,8 @@ from ._tutorial import (
     example_extract_path,
     use_tutorial_store,
     unpack_example_archive,
+    populate_satellite_footprint,
+    populate_column_data,
+    populate_flux_data_satellite
+
 )

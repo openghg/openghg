@@ -38,15 +38,14 @@ We'll use helper functions from ``openghg.tutorial`` to populate example data:
 
     from openghg.tutorial import (
         populate_column_data,
-        populate_footprint_inert,
-        populate_flux_ch4,
-        populate_bc_ch4
+        populate_satellite_footprint,
+        populate_flux_data_satellite,
+,
     )
 
     populate_column_data()
-    populate_footprint_inert()
-    populate_flux_ch4()
-    populate_bc_ch4()
+    populate_satellite_footprint()
+    populate_flux_data_satellite()
 
 2. Creating a model scenario
 ----------------------------
@@ -58,20 +57,23 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
     from openghg.analyse import ModelScenario
 
     species = "ch4"
-    site = "xch4"
-    domain = "EUROPE"
+    domain = "southamerica"
+    satellite="GOSAT"
+    obs_region="brazil"
     height = "column"
-    source = "waste"
-    start_date = "2016-07-01"
-    end_date = "2016-08-01"
+    source = "all"
 
-    scenario = ModelScenario(site=site,
-                             inlet=height,
-                             domain=domain,
-                             species=species,
-                             source=source,
-                             start_date=start_date,
-                             end_date=end_date)
+
+    scenario = ModelScenario(satellite=satellite,
+                            platform="satellite",
+                            max_level=3,
+                            obs_region=obs_region,
+                            inlet=height,
+                            model="name",
+                            domain=domain,
+                            species=species,
+                            source=source,
+                            )
 
 Check attached data:
 
@@ -80,7 +82,6 @@ Check attached data:
     scenario.obs
     scenario.footprint
     scenario.fluxes
-    scenario.bc
 
 To view the underlying observation data:
 
@@ -138,22 +139,6 @@ Disable resampling (forward-fill footprints):
     modelled_obs_aligned = scenario.calc_modelled_obs(resample_to=None)
     modelled_obs_aligned.plot()
 
-4. Adding additional flux sources
----------------------------------
-
-Add more emission sources, e.g. ``energyprod``:
-
-.. code:: ipython3
-
-    scenario.add_flux(species=species, domain=domain, source="energyprod")
-    scenario.plot_comparison()
-
-Calculate modelled output for a specific source:
-
-.. code:: ipython3
-
-    modelled_energyprod = scenario.calc_modelled_obs(sources="energyprod", recalculate=True)
-    modelled_energyprod.plot()
 
 .. note::
 
