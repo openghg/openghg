@@ -296,6 +296,7 @@ def populate_column_data():
                     species="ch4",
                     platform="satellite",
                     satellite="gosat",
+                    domain="southamerica",
                     obs_region="brazil",
                     network="gosat")
 
