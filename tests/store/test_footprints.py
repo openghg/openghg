@@ -604,6 +604,18 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_w" in data_vars
 
 
+@pytest.mark.parametrize("source_format", ["PARIS", "FLEXPART"])
+def test_footprint_schema_paris(source_format):
+    """Check if `fp_time_resolved` and `fp_residual` are present if `source_format` is PARIS or FLEXPART."""
+    data_schema = Footprints.schema(time_resolved=True, source_format=source_format)
+
+    data_vars = data_schema.data_vars
+
+    assert "fp_time_resolved" in data_vars
+    assert "fp_residual" in data_vars
+    assert "fp" not in data_vars
+
+
 def test_process_footprints():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
