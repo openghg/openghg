@@ -1068,15 +1068,17 @@ class ModelScenario:
             modelled_obs = cast(DataArray, self.modelled_obs)
             return modelled_obs
 
+        flux_ds = self.combine_flux_sources(sources)
+
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=False
+                flux_ds=flux_ds, output_TS=True, output_fpXflux=False
             )
             name = "mf_mod_high_res"
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=False
+                flux_ds=flux_ds, output_TS=True, output_fpXflux=False
             )
             name = "mf_mod"
 
@@ -1096,14 +1098,14 @@ class ModelScenario:
 
     def _calc_modelled_obs_integrated(
         self,
-        sources: str | list | None = None,
+        flux_ds: xr.Dataset,
         output_TS: bool = True,
         output_fpXflux: bool = False,
     ) -> Any:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
         Args:
-            sources : Flux sources to use for the calculation. By default this will use all available sources.
+            flux_ds: flux to use for the calculation.
             output_TS : Whether to output the modelled mole fraction timeseries DataArray.
                        Default = True
             output_fpXflux : Whether to output the modelled flux map DataArray used to create
@@ -1124,11 +1126,10 @@ class ModelScenario:
             raise ValueError("Combined data must have been defined before calling this function.")
 
         scenario = self.scenario
-        flux = self.combine_flux_sources(sources)
-        scenario, flux = match_dataset_dims([scenario, flux], dims=["lat", "lon"])
+        scenario, flux_ds = match_dataset_dims([scenario, flux_ds], dims=["lat", "lon"])
 
-        flux = flux.reindex_like(scenario, "ffill")
-        flux_modelled: DataArray = scenario["fp"] * flux["flux"]
+        flux_ds = flux_ds.reindex_like(scenario, "ffill")
+        flux_modelled: DataArray = scenario["fp"] * flux_ds["flux"]
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
 
         # TODO: Add details about units to output
@@ -1142,7 +1143,7 @@ class ModelScenario:
 
     def _calc_modelled_obs_HiTRes(
         self,
-        sources: str | list | None = None,
+        flux_ds: xr.Dataset,
         averaging: str | None = None,
         output_TS: bool = True,
         output_fpXflux: bool = False,
@@ -1152,7 +1153,7 @@ class ModelScenario:
         species reliant on high time resolution footprints such as carbon dioxide (co2).
 
         Args:
-            sources : Flux sources to use for the calculation. By default this will use all available sources.
+            flux_ds: flux to use for the calculation.
             averaging : Time resolution to use to average the time dimension. Default = None
             output_TS : Whether to output the modelled mole fraction timeseries DataArray.
                        Default = True
@@ -1199,7 +1200,6 @@ class ModelScenario:
             raise ValueError("Combined data must have been defined before calling this function.")
 
         fp_HiTRes = self.scenario.fp_HiTRes
-        flux_ds = self.combine_flux_sources(sources)
         fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
         fp_HiTRes = cast(xr.DataArray, fp_HiTRes)
 
