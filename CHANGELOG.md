@@ -8,17 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
-
+- Improved the check for nans in surface_obs_resampler function: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan, or when both `f"{species}_variability"` and `f"{species}_repeatability"` are nans.
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
-- Added a new resampling feature for obs where a f"{species}_variability" variable is preseent but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
+- Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
 - Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
 - The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278), [PR #1279](https://github.com/openghg/openghg/pull/1279) and [PR #1289](https://github.com/openghg/openghg/pull/1289).
 - Added ability to reindex footprint data to obs data with tolerance of `1ms` with method="nearest".[#PR 1264](https://github.com/openghg/openghg/pull/1264)
+- Added ability to standardise CORSO radiocarbon data, added new parser named `parse_icos_corso` to handle data modifications.[PR #1285](https://github.com/openghg/openghg/pull/1285)
+- `tox` testing setup. [#PR 1268](https://github.com/openghg/openghg/pull/1268)
 
 ### Updated
 
-- For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can stil be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
+- For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can still be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
 
 ### Fixed
 - Bugs of resampling functions : delete all variables in the obs data that are filled of nan, test the emptiness of the dataset, and delete "flag" variable (removed in [#PR1283] https://github.com/openghg/openghg/pull/1283), all that before resampling to prevent errors [#PR1275](https://github.com/openghg/openghg/pull/1275)
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drop `id` coordinate for GOSAT data to avoid merging errors [PR #1257](https://github.com/openghg/openghg/pull/1257)
 - Fixed bugs in ModelScenario for satellite data e.g. requiring max_level as argument [#PR 1261](https://github.com/openghg/openghg/pull/1261)
 - Fixed `get_*` functions if passed with `start_date` or `end_date` in format of ""dd:mm:yy T 00:00:0000" can still fetch the relevant data.[#PR 1273](https://github.com/openghg/openghg/issues/1273)
+- Fixed `numcodecs` version to be less than 0.16 to avoid ci runner failing while importing zarr.[# 1296](https://github.com/openghg/openghg/pull/1296)
 
 ## [0.13.0] - 2025-03-10
 
