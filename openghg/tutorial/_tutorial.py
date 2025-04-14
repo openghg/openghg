@@ -250,8 +250,12 @@ def populate_surface_data() -> None:
     logger.info("Done.")
 
 
-def populate_satellite_footprint():
-    """"""
+def populate_satellite_footprint() -> None:
+    """Populates the tutorial object store with satellite footprint data from the example data repository.
+
+    Returns:
+        None
+    """
     use_tutorial_store()
 
     from openghg.standardise import standardise_footprint
@@ -270,14 +274,17 @@ def populate_satellite_footprint():
                     domain="southamerica",
                     satellite="gosat",
                     obs_region="brazil",
-                    inlet="column"   
+                    inlet="column",
                 )
 
     logger.info("Done.")
 
 
-def populate_column_data():
-    """
+def populate_column_data() -> None:
+    """Populates the tutorial object store with satellite observation data from the example data repository.
+
+    Returns:
+        None
     """
     use_tutorial_store()
 
@@ -298,13 +305,17 @@ def populate_column_data():
                     satellite="gosat",
                     domain="southamerica",
                     obs_region="brazil",
-                    network="gosat")
+                    network="gosat",
+                )
 
     logger.info("Done.")
 
 
-def populate_flux_data_satellite():
-    """
+def populate_flux_data_satellite() -> None:
+    """Populates the tutorial object store with flux data for similar domain as satellite data from the example data repository.
+
+    Returns:
+        None
     """
     use_tutorial_store()
 
@@ -318,10 +329,9 @@ def populate_flux_data_satellite():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                standardise_flux(filepath=satellite_data[-1],
-                                 species="ch4", 
-                                 source="all", 
-                                 domain="southamerica")
+                standardise_flux(
+                    filepath=satellite_data[-1], species="ch4", source="all", domain="southamerica"
+                )
 
     logger.info("Done.")
 
