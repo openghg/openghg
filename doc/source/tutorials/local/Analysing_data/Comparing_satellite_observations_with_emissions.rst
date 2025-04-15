@@ -3,8 +3,7 @@ Comparing Satellite Observations to Emissions
 
 In this tutorial, we will see how to combine **satellite observation data**
 instead of surface data, along with ancillary data (footprints, emissions, boundary conditions),
-into a ``ModelScenario``. This allows us to compute modelled outputs and compare them
-with satellite-based atmospheric measurements.
+into a ``ModelScenario``. This allows us to compute modelled outputs and compare them with satellite-based atmospheric measurements.
 
 This tutorial builds on the tutorials :ref:`Adding observation data`
 and :ref:`Adding ancillary spatial data`.
@@ -40,11 +39,14 @@ We'll use helper functions from ``openghg.tutorial`` to populate example data:
     populate_column_data,
     populate_satellite_footprint,
     populate_flux_data_satellite,
+    populate_bc_southamerica
     )
 
     populate_column_data()
     populate_satellite_footprint()
     populate_flux_data_satellite()
+    populate_bc_southamerica()
+
 
 2. Creating a model scenario
 ----------------------------
@@ -60,7 +62,7 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
                    platform="satellite",
                    max_level=3,
                    domain="southamerica",
-                   obs_region="brazil") 
+                   obs_region="brazil")
 
 Using these keywords, this will search the object store and attempt to collect and attach observation(satellite), footprint(satellite), flux and boundary conditions data. This collected data will be attached to your created ModelScenario. For the observations this will be stored as the ModelScenario.obs attribute. This will be an ObsColumnData object which contains metadata and data for your observations.
 
@@ -129,7 +131,7 @@ same data needs to be used for multiple different scenarios.
         end_date="2016-01-01 18:10:16.500000+00:00",
         obs_region="brazil",
     )
-    
+
     fp_column_data = get_footprint(
             satellite=satellite,
             domain=domain,
@@ -138,7 +140,7 @@ same data needs to be used for multiple different scenarios.
             end_date="2016-01-01 19:10:16.500000+00:00",
             model="name",
         )
-        
+
     flux_data = get_flux(species="ch4", source="all", domain="southamerica")
 
 .. code:: ipython3

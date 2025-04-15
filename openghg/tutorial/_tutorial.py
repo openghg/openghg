@@ -303,7 +303,6 @@ def populate_column_data() -> None:
                     species="ch4",
                     platform="satellite",
                     satellite="gosat",
-                    domain="southamerica",
                     obs_region="brazil",
                     network="gosat",
                 )
@@ -332,6 +331,29 @@ def populate_flux_data_satellite() -> None:
                 standardise_flux(
                     filepath=satellite_data[-1], species="ch4", source="all", domain="southamerica"
                 )
+
+    logger.info("Done.")
+
+
+def populate_bc_southamerica() -> None:
+    """"""
+    use_tutorial_store()
+
+    logger.info("Retrieving data...")
+    sa_2016_bc = "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_SOUTHAMERICA_201601_CAMS-inversion.nc.tar.gz"
+
+    bc_data_path = retrieve_example_data(url=sa_2016_bc)[0]
+
+    bc_input = "CAMS"
+    domain = "southamerica"
+    species = "ch4"
+
+    logger.info("Standardising boundary conditions...")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
 
     logger.info("Done.")
 
