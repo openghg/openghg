@@ -4,10 +4,9 @@ from typing import Literal, TypeVar
 import numpy as np
 import pandas as pd
 import xarray as xr
-from xarray import Dataset
 from numpy.typing import ArrayLike
 
-from openghg.types import XrDataLike, ReindexMethod
+from openghg.types import ReindexMethod, XrDataLike
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -246,7 +245,7 @@ def resample_obs_and_other(
     return obs, other
 
 
-def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
+def _indexes_match(dataset_A: xr.Dataset, dataset_B: xr.Dataset) -> bool:
     """Check if two datasets need to be reindexed_like for combine_datasets
 
     Args:
@@ -283,8 +282,11 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: ReindexMethod = "ffill", tolerance: float | None = None
-) -> Dataset:
+    dataset_A: xr.Dataset,
+    dataset_B: xr.Dataset,
+    method: ReindexMethod = "ffill",
+    tolerance: float | None = None,
+) -> xr.Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
     If "fp" variable is found within the combined dataset,

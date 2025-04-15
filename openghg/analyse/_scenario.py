@@ -50,9 +50,9 @@ from collections.abc import Sequence
 import numpy as np
 import pandas as pd
 from pandas import Timestamp
-import xarray as xr
 from xarray import DataArray, Dataset
 
+from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
@@ -68,10 +68,11 @@ from openghg.retrieve import (
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
 from openghg.types import SearchError, ReindexMethod
-from ._alignment import resample_obs_and_other, combine_datasets
+from ._alignment import combine_datasets, resample_obs_and_other
+from ._utils import check_units, match_dataset_dims, stack_datasets
 
 
-__all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_dataset_dims", "stack_datasets"]
+__all__ = ["ModelScenario"]
 
 
 # TODO: Really with the emissions, they shouldn't need to match against a domain
@@ -1125,10 +1126,7 @@ class ModelScenario:
 
         scenario = self.scenario
         flux = self.combine_flux_sources(sources)
-        scenario, flux = match_dataset_dims([scenario, flux], dims=["lat", "lon"])
-
-        flux = flux.reindex_like(scenario, "ffill")
-        flux_modelled: DataArray = scenario["fp"] * flux["flux"]
+        flux_modelled = fp_x_flux_integrated(scenario, flux)
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
 
         # TODO: Add details about units to output
@@ -1189,8 +1187,6 @@ class ModelScenario:
         TODO: mypy having trouble with different types options and incompatible types,
         included as Any for now.
         """
-        from math import gcd
-        from pandas import date_range
 
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
@@ -1200,177 +1196,8 @@ class ModelScenario:
 
         fp_HiTRes = self.scenario.fp_HiTRes
         flux_ds = self.combine_flux_sources(sources)
-        fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
-        fp_HiTRes = cast(xr.DataArray, fp_HiTRes)
 
-        # Make sure any NaN values are set to zero as this is a multiplicative and summing operation
-        fp_HiTRes = fp_HiTRes.fillna(0.0)
-        flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
-
-        def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
-            """Infer frequency of DataArray of times.
-
-            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
-            Otherwise times are assumed to be in terms of hours.
-            """
-            nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-
-            if input_nanoseconds:
-                return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
-            else:
-                return int(times.diff(dim=dim).values.mean())
-
-        # Calculate time resolution for both the flux and footprints data
-        flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
-        fp_res_time_H = calc_hourly_freq(fp_HiTRes.time, input_nanoseconds=True)
-
-        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"], dim="H_back")
-
-        # Define resolution on time dimension in number in hours
-        if averaging:
-            try:
-                time_res_H = int(averaging)
-                time_resolution = f"{time_res_H}H"
-            except (ValueError, TypeError):
-                time_res_H = int(averaging[0])
-                time_resolution = averaging
-        else:
-            # If not specified derive from time from combined dataset
-            time_res_H = fp_res_time_H
-            time_resolution = f"{time_res_H}H"
-
-        # Resample fp timeseries to match time resolution
-        if fp_res_time_H != time_res_H:
-            fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
-
-        # Define resolution on high frequency dimension in number of hours
-        # At the moment this is matched to the Hback dimension
-        time_hf_res_H = fp_res_Hback_H
-
-        # Only allow for high frequency resolution < 24 hours
-        if time_hf_res_H > 24:
-            raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H")
-        elif 24 % time_hf_res_H != 0 or 24 % time_hf_res_H != 0.0:
-            raise ValueError(
-                f"High frequency resolution must exactly divide into 24 hours. Current: {time_hf_res_H}H"
-            )
-
-        # Find the greatest common denominator between time and high frequency resolutions.
-        # This is needed to make sure suitable flux frequency is used to allow for indexing.
-        # e.g. time: 1H; hf (high frequency): 2H, highest_res_H would be 1H
-        # e.g. time: 2H; hf (high frequency): 3H, highest_res_H would be 1H
-        highest_res_H = gcd(time_res_H, time_hf_res_H)
-        highest_resolution = f"{highest_res_H}H"
-
-        # create time array to loop through, with the required resolution
-        # fp_HiTRes.time is the release time of particles into the model
-        time_array = fp_HiTRes["time"]
-
-        # Define maximum hour back
-        max_h_back = int(fp_HiTRes.H_back.max().values)
-
-        # Define full range of dates to select from the flux input
-        date_start = time_array[0]
-        date_start_back = date_start - np.timedelta64(max_h_back, "h")
-        date_end = time_array[-1] + np.timedelta64(1, "s")
-
-        # Create times for matching to the flux
-        full_dates = date_range(
-            date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
-        ).to_numpy()
-
-        # Create low frequency flux data (monthly)
-        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
-        flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
-
-        # Select and align high frequency flux data
-        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
-        if flux_res_H <= 24:
-            offset = pd.Timedelta(
-                hours=date_start_back.dt.hour.data
-                + date_start_back.dt.minute.data / 60.0
-                + date_start_back.dt.second.data / 3600.0
-            )
-            offset = cast(pd.Timedelta, offset)
-            if flux_res_H <= highest_res_H:
-                # Downsample flux to match to footprints frequency
-                flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, offset=offset
-                ).mean()
-            elif flux_res_H > highest_res_H:
-                # Upsample flux to match footprints frequency and forward fill
-                flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, offset=offset
-                ).ffill()
-            # Reindex to match to correct values
-            flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
-        elif flux_res_H > 24:
-            # TODO this case should be handled outside of the "compute_fp_x_flux" function
-            # If flux is not high frequency use the monthly averages instead.
-            flux_ds_high_freq = flux_ds_low_freq
-
-        # TODO: Add check to make sure time values are exactly aligned based on date range
-
-        # Extract flux data from dataset
-        flux_high_freq = flux_ds_high_freq.flux
-        flux_low_freq = flux_ds_low_freq.flux
-
-        def make_hf_flux_rolling_avg_array(
-            flux_high_freq: xr.DataArray,
-            fp_high_time_res: xr.DataArray,
-            highest_res_H: int,
-            max_h_back: int,
-        ) -> xr.DataArray:
-            # create windows (backwards in time) with `max_h_back` many time points,
-            # starting at each time point in flux_hf_rolling.time
-            window_size = max_h_back // highest_res_H
-            flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
-
-            # set H_back coordinates using highest_res_H frequency
-            h_back_type = fp_high_time_res.H_back.dtype
-            flux_hf_rolling = flux_hf_rolling.assign_coords(
-                {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=h_back_type)[::-1]}
-            )
-
-            # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
-            flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
-
-            return flux_hf_rolling
-
-        def compute_fp_x_flux(
-            fp_HiTRes: xr.DataArray,
-            flux_high_freq: xr.DataArray,
-            flux_low_freq: xr.DataArray,
-            highest_res_H: int,
-            max_h_back: int,
-        ) -> xr.DataArray:
-            # do low res calculation
-            fp_residual = fp_HiTRes.sel(H_back=fp_HiTRes.H_back.max(), drop=True)  # take last H_back value
-            flux_low_freq = flux_low_freq.reindex_like(fp_residual, method="ffill")  # forward fill times
-
-            fpXflux_residual = flux_low_freq * fp_residual
-
-            # get high freq fp
-            fp_high_freq = fp_HiTRes.where(fp_HiTRes.H_back != fp_HiTRes.H_back.max(), drop=True)
-
-            # if flux_res_H > 24, then flux_high_freq = flux_low_freq, and we don't take a sum over windows of flux_high_freq
-            if flux_res_H > 24:
-                fpXflux = (flux_low_freq * fp_high_freq).sum("H_back")
-            else:
-                flux_high_freq = make_hf_flux_rolling_avg_array(
-                    flux_high_freq, fp_high_freq, highest_res_H, max_h_back
-                )
-                fpXflux = (flux_high_freq * fp_high_freq).sum("H_back")
-
-            return fpXflux + fpXflux_residual
-
-        fpXflux = compute_fp_x_flux(
-            fp_HiTRes,
-            flux_high_freq,
-            flux_low_freq,
-            highest_res_H,
-            max_h_back,
-        )
+        fpXflux = fp_x_flux_time_resolved(fp_HiTRes, flux_ds, averaging=averaging)
 
         if output_TS:
             timeseries = fpXflux.sum(["lat", "lon"])
@@ -1704,207 +1531,6 @@ class ModelScenario:
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
         return fig
-
-
-def match_dataset_dims(
-    datasets: Sequence[Dataset],
-    dims: str | Sequence = [],
-    method: ReindexMethod = "nearest",
-    tolerance: float | dict[str, float] = 1e-5,
-) -> list[Dataset]:
-    """Aligns datasets to the selected dimensions within a tolerance.
-    All datasets will be aligned to the first dataset within the list.
-
-    Args:
-        datasets: List of xarray Datasets. Expect datasets to contain the same dimensions.
-        dims: Dimensions match between datasets. Can use keyword "all" to match every dimension.
-        method : Method to use for indexing. Should be one of: ("nearest", "ffill", "bfill")
-        tolerance: Tolerance value to use when matching coordinate values.
-                   This can be a single value for all dimensions or a dictionary of values to use.
-
-    Returns:
-        List (xarray.Dataset) : Datasets aligned along the matching dimensions.
-
-    TODO: Check if this supercedes or replicates _indexes_match() function too closely?
-    """
-    # Nothing to be done if only one (or less) datasets are passed
-    if len(datasets) <= 1:
-        return list(datasets)
-
-    ds0 = datasets[0]
-
-    if isinstance(dims, str):
-        if dims == "all":
-            dims = list(ds0.dims)
-        else:
-            dims = [dims]
-
-    # Extract coordinate values for the first dataset in the list
-    ds0 = datasets[0]
-    indexers = {dim: ds0[dim] for dim in dims}
-
-    if isinstance(tolerance, float):
-        tolerance = {dim: tolerance for dim in dims}
-
-    # Align datasets along selected dimensions (if not already identical)
-    datasets_aligned = [ds0]
-    for ds in datasets[1:]:
-        for dim, compare_coord in indexers.items():
-            try:
-                coord = ds[dim]
-            except KeyError:
-                raise ValueError(f"Dataset missing dimension: {dim}")
-            else:
-                if not coord.equals(compare_coord):
-                    ds = ds.reindex({dim: compare_coord}, method=method, tolerance=tolerance[dim])
-
-        datasets_aligned.append(ds)
-
-    return datasets_aligned
-
-
-# ResType = Union[np.timedelta64, float, np.floating, np.integer]
-
-
-def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
-    """Calculates the average frequency along a given dimension.
-
-    Args:
-        dataset : Dataset. Must contain the specified dimension
-        dim : Dimension name
-
-    Returns:
-        np.timedelta64 / np.float / np.int : Resolution with input dtype
-
-        NaT : If unsuccessful and input dtype is np.timedelta64
-        NaN : If unsuccessful for all other dtypes.
-    """
-    try:
-        return _calc_time_dim_resolution(dataset, time_dim=dim)
-    except ValueError:
-        return _calc_average_gap(dataset[dim])
-
-
-def _calc_time_dim_resolution(dataset: Dataset, time_dim: str = "time") -> np.timedelta64:
-    """Calculate average frequency of time dimension.
-
-    Args:
-        dataset: xr.Dataset with time coordinate
-        time_dim: name of the time coordinate
-
-    Returns:
-        timedelta representing average gap between time points, or NaT if only
-        one time is present
-
-    Raises:
-        ValueError: if the data type of `dataset[time_dim]` is not a subtype of
-        `np.datetime64`. (Note: `np.timedelta64` is a separate type, and not
-         a subtype of `np.datetime64`; differences between `np.datetime64` values
-        are `np.timedelta64`.)
-
-    """
-    if not np.issubdtype(dataset[time_dim].dtype, np.datetime64):
-        raise ValueError(
-            f"Type {dataset[time_dim].dtype} of values in {time_dim} coordinate is not a subtype of `np.datetime64`."
-        )
-
-    try:
-        resolution = dataset[time_dim].diff(dim=time_dim).mean().values
-    except ValueError:
-        return np.timedelta64("NaT")
-    else:
-        # cast because we already checked that the values in dataset[time_dim] are compatible with `np.datetime64`
-        # so their diffs will be time deltas
-        return cast(np.timedelta64, resolution)
-
-
-def _calc_average_gap(data_array: DataArray) -> Any:
-    """Calculate average gap in DataArray.
-
-    No checking is performed to guarantee a return type.
-
-    Args:
-        data_array: xr.DataArray whose values should support arithmetic, and should be 1D.
-
-    Returns:
-        average gap between values in DataArray.
-
-    """
-    if data_array.ndim > 1:
-        raise ValueError("Input DataArray has more than 1 dimension.")
-
-    dim = data_array.dims[0]
-
-    try:
-        return data_array.diff(dim=dim).mean().values
-    except TypeError as e:
-        # UFuncTypeError from not being able to take diff
-        raise ValueError("Data in given DataArray does not support subtraction.") from e
-    except ValueError as e:
-        # check if coordinate has length 1, and return np.nan if so
-        if data_array[dim].size == 1:
-            return np.nan
-        raise e  # else, re-raise
-
-
-def stack_datasets(
-    datasets: Sequence[Dataset], dim: str = "time", method: ReindexMethod = "ffill"
-) -> Dataset:
-    """Stacks multiple datasets based on the input dimension. By default this is time
-    and this will be aligned to the highest resolution / frequency
-    (smallest difference betweeen coordinate values).
-
-    At the moment, the two datasets must have identical coordinate values for all
-    other dimensions and variable names for these to be stacked.
-
-    Args:
-        datasets : Sequence of input datasets
-        dim : Name of dimension to stack along. Default = "time"
-        method: Method to use when aligning the datasets. Default = "ffill"
-
-    Returns:
-        Dataset : Stacked dataset
-
-    TODO: Could update this to only allow DataArrays to be included to reduce the phase
-    space here.
-    """
-    if len(datasets) == 1:
-        dataset = datasets[0]
-        return dataset
-
-    data_frequency = [calc_dim_resolution(ds, dim) for ds in datasets]
-    index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
-    data_highest_freq = datasets[index_highest_freq]
-    coords_to_match = data_highest_freq[dim]
-
-    for i, data in enumerate(datasets):
-        data_match = data.reindex({dim: coords_to_match}, method=method)
-        if i == 0:
-            data_stacked = data_match
-            data_stacked.attrs = {}
-        else:
-            data_stacked += data_match
-
-    return data_stacked
-
-
-def check_units(data_var: DataArray, default: float) -> float:
-    """Check "units" attribute within a DataArray. Expect this to be a float
-    or possible to convert to a float.
-    If not present, use default value.
-    """
-    attrs = data_var.attrs
-    if "units" in attrs:
-        units_from_attrs = attrs["units"]
-        if not isinstance(units_from_attrs, float):
-            try:
-                units = float(units_from_attrs)
-            except ValueError:
-                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
-    else:
-        units = default
-
-    return units
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],
