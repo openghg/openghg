@@ -57,18 +57,19 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
 
     from openghg.analyse import ModelScenario
 
-    sc = ModelScenario(satellite="gosat",
+    scenario = ModelScenario(satellite="gosat",
                    species="ch4",
                    platform="satellite",
                    max_level=3,
                    domain="southamerica",
-                   obs_region="brazil")
+                   obs_region="brazil"
+                   source="all")
 
 Using these keywords, this will search the object store and attempt to collect and attach observation(satellite), footprint(satellite), flux and boundary conditions data. This collected data will be attached to your created ModelScenario. For the observations this will be stored as the ModelScenario.obs attribute. This will be an ObsColumnData object which contains metadata and data for your observations.
 
 .. code:: ipython3
 
-    sc.obs
+    scenario.obs
 
 To access the undelying xarray Dataset containing the observation data use
 
@@ -117,11 +118,12 @@ same data needs to be used for multiple different scenarios.
 
 .. code:: ipython3
 
-    from openghg.retrieve import get_obs_column, get_footprint, get_flux
+    from openghg.retrieve import get_obs_column, get_footprint, get_flux, get_bc
 
     satellite = "gosat"
     domain = "southamerica"
     obs_region = "brazil"
+    species="ch4"
 
     obs_column_data = get_obs_column(
         species="ch4",
@@ -143,9 +145,14 @@ same data needs to be used for multiple different scenarios.
 
     flux_data = get_flux(species="ch4", source="all", domain="southamerica")
 
+    bc_results = get_bc(species=species,
+                        domain=domain,
+                        bc_input="CAMS",
+                        )
+
 .. code:: ipython3
 
-    scenario_direct = ModelScenario(obs=obs_results, footprint=footprint_results, flux=flux_results, bc=bc_results)
+    scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite", max_level=3)
 
 .. note::
 
@@ -233,7 +240,7 @@ time and stacked to create a total output:
 
 .. code:: ipython3
 
-    scenario.add_flux(species=species, domain=domain, source="energyprod")
+    scenario.add_flux(species="ch4", domain=domain, source="anthro")
 
 .. code:: ipython3
 
@@ -245,8 +252,8 @@ Output for individual sources can also be created by specifying the
 .. code:: ipython3
 
     # Included recalculate option to ensure this is updated from cached data.
-    modelled_obs_energyprod = scenario.calc_modelled_obs(sources="energyprod", recalculate=True)
-    modelled_obs_energyprod.plot()
+    modelled_obs_anthro = scenario.calc_modelled_obs(sources="anthro", recalculate=True)
+    modelled_obs_anthro.plot()
 
 *Plotting functions to be added for 2D / 3D data*
 

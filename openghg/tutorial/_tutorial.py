@@ -322,7 +322,10 @@ def populate_flux_data_satellite() -> None:
 
     satellite_data_url = "https://github.com/openghg/example_data/raw/main/flux/ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc.tar.gz"
 
+    satellite_data_anthro = "https://github.com/openghg/example_data/raw/main/flux/ch4-anthro-no-fire_SOUTHAMERICA_2011_EDGAR-sectors-yearly.nc.tar.gz"
+
     satellite_data = retrieve_example_data(url=satellite_data_url)
+    satellit_data_anhro = retrieve_example_data(url=satellite_data_anthro)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -330,6 +333,9 @@ def populate_flux_data_satellite() -> None:
             with contextlib.redirect_stdout(devnull):
                 standardise_flux(
                     filepath=satellite_data[-1], species="ch4", source="all", domain="southamerica"
+                )
+                standardise_flux(
+                    filepath=satellit_data_anhro[-1], species="ch4", source="anthro", domain="southamerica"
                 )
 
     logger.info("Done.")
