@@ -336,7 +336,11 @@ def populate_flux_data_satellite() -> None:
 
 
 def populate_bc_southamerica() -> None:
-    """"""
+    """Populates the tutorial object store with boundary conditions data for similar domain as satellite data from the example data repository.
+
+    Returns:
+        None
+    """
     use_tutorial_store()
 
     logger.info("Retrieving data...")
