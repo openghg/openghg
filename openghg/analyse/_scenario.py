@@ -1448,6 +1448,7 @@ class ModelScenario:
             Interactive plotly graph created with observations
         """
         self._check_data_is_present(need="obs")
+
         obs = cast(ObsData, self.obs)
 
         fig = obs.plot_timeseries()  # Calling method on ObsData class

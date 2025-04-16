@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.13.0...HEAD)
 
 ### Added
+- Added new tutorial for satellite ModelScenario processing.[# 1304](https://github.com/openghg/openghg/pull/1304)
 - Improved the check for nans in surface_obs_resampler function: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan, or when both `f"{species}_variability"` and `f"{species}_repeatability"` are nans.
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
 - Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Possible circular import due to `get_metakeys`; the metakey config functionality was moved to the `store` module. [#PR1318](https://github.com/openghg/openghg/pull1318)
+- Changed type definition from xr.Coordinates to xarray.core.coordinates.[PR #1316](https://github.com/openghg/openghg/pull/1316)
 - Bugs of resampling functions : delete all variables in the obs data that are filled of nan, test the emptiness of the dataset, and delete "flag" variable (removed in [#PR1283] https://github.com/openghg/openghg/pull/1283), all that before resampling to prevent errors [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Fixed bug where `period="varies"` could not be used or set when determining the time period associated with the input data. [#PR 1259](https://github.com/openghg/openghg/pull/1259) and [#PR 1267](https://github.com/openghg/openghg/pull/1267)
 - Dropped `exposure_id` variable for GOSAT data to avoid change in dimension size error raised from `to_zarr`. [PR #1243](https://github.com/openghg/openghg/pull/1243) [PR #1257](https://github.com/openghg/openghg/pull/1257)
