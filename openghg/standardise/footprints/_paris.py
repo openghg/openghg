@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 from pathlib import Path
 from collections import defaultdict
 from typing import cast
@@ -112,8 +111,8 @@ def parse_paris(
     fp_data = fp_data.transpose(*dim_reorder, ...)
 
     # Converts H_back values from timestamps to hours back
-    if "H_back" in list(fp_data.dims):
-        fp_data["H_back"] = np.arange(0, 24, 1)
+    if "H_back" in fp_data.dims:
+        fp_data["H_back"] = fp_data.H_back.dt.seconds / 3600.0
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
