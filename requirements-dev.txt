@@ -10,6 +10,7 @@ pytest-timeout
 requests-mock
 tox >=4.24
 xarray
+rich
 # For mypy
 mypy==1.10.0
 types-paramiko
