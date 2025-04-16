@@ -5,19 +5,6 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
-[project]
-name = "openghg"
-version = "0.14.0"
-description = "OpenGHG: A platform for greenhouse​ gas data analysis"
-readme = "README.md"
-requires-python = ">=3.8"
-
-authors = [
-    { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
-    { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
-    { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
-]
-
 [tool.black]
 line-length = 110
 
