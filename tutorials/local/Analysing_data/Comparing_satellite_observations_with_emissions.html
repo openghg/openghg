@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Comparing observations to emissions &#8212; OpenGHG 0.14.0 documentation</title>
+    <title>Comparing Satellite Observations to Emissions &#8212; OpenGHG 0.14.0 documentation</title>
   
   
   
@@ -49,12 +49,10 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Analysing_data/Comparing_with_emissions';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Analysing_data/Comparing_satellite_observations_with_emissions';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Working with carbon dioxide" href="Working_with_co2.html" />
-    <link rel="prev" title="Updating existing data" href="../Adding_data/Updating_existing_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.14.0" />
@@ -147,7 +145,7 @@
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../index.html">
     Tutorials
   </a>
@@ -219,8 +217,10 @@
       
       
       
+        
+      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -242,7 +242,7 @@
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../index.html">
     Tutorials
   </a>
@@ -279,44 +279,6 @@
     
   </div>
   
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Adding data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_observation_data.html">Adding observation data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Creating_data_from_databases.html">Using databases to add data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Metadata_and_attributes.html">Metadata and attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Adding_data/Updating_existing_data.html">Updating existing data</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Analysing data</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Comparing observations to emissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Working_with_co2.html">Working with carbon dioxide</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Exploring data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing the object store</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Managing_data.html">Managing and deleting data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Outputting data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Outputting_data/Creating_obspack.html">Creating an ObsPack</a></li>
-</ul>
-</div>
-</nav></div>
-    </div>
-  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
       <div class="sidebar-primary-item">
@@ -352,10 +314,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Comparing observations to emissions</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Comparing Satellite Observations to Emissions</span></li>
   </ul>
 </nav>
 </div>
@@ -372,102 +331,70 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="comparing-observations-to-emissions">
-<h1>Comparing observations to emissions<a class="headerlink" href="#comparing-observations-to-emissions" title="Link to this heading">#</a></h1>
-<p>In this tutorial, we will see how to combine observation data and
-acillary data into a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>, which can compute modelled
-outputs based on ancillary data, and compare these modelled outputs
-to observed measurements.</p>
+  <section id="comparing-satellite-observations-to-emissions">
+<h1>Comparing Satellite Observations to Emissions<a class="headerlink" href="#comparing-satellite-observations-to-emissions" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will see how to combine <strong>satellite observation data</strong>
+instead of surface data, along with ancillary data (footprints, emissions, boundary conditions),
+into a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>. This allows us to compute modelled outputs and compare them with satellite-based atmospheric measurements.</p>
 <p>This tutorial builds on the tutorials <a class="reference internal" href="../Adding_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">Adding observation data</span></a>
 and <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Plots created within this tutorial may not show up on the
-online documentation version of this notebook.</p>
+<p>Plots created within this tutorial may not show up in static or online documentation outputs.</p>
 </div>
 <section id="using-the-tutorial-object-store">
 <h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
-<p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>,
-we will use the tutorial object store to avoid cluttering your personal
-object store.</p>
+<p>As in the <a class="reference internal" href="../Adding_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>, we will use the
+tutorial object store to avoid cluttering your personal object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Omit this step if you want to analyse data in your local object store.
-(This data needs to be added following the instructions in the
-<a class="reference internal" href="../Adding_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">previous</span></a> <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">tutorials</span></a>.)</p>
+<p>Omit this step if you’re analysing data in your local object store.</p>
 </section>
 <section id="loading-data-sources-into-the-object-store">
 <h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Link to this heading">#</a></h2>
-<p>We begin by adding observation, footprint, flux, and (optionally)
-boundary conditions data to the object store.
-See <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a> for more details
-on these inputs.
-This data relates to Tacolneston (TAC) site within the DECC
-network and the area around Europe (EUROPE domain).</p>
-<p>We’ll use some helper functions from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule
-to retrieve raw data in the <a class="reference internal" href="../Adding_data/Adding_ancillary_data.html#input-format"><span class="std std-ref">expected format</span></a>:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_inert</span><span class="p">,</span> <span class="n">populate_flux_ch4</span><span class="p">,</span> <span class="n">populate_bc_ch4</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
+<p>We begin by adding <strong>satellite observation</strong>, <strong>footprint</strong>, <strong>flux</strong>, and (optionally)
+<strong>boundary conditions</strong> data to the object store.</p>
+<p>We’ll use helper functions from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> to populate example data:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="n">populate_column_data</span><span class="p">,</span>
+<span class="n">populate_satellite_footprint</span><span class="p">,</span>
+<span class="n">populate_flux_data_satellite</span><span class="p">,</span>
+<span class="n">populate_bc_southamerica</span>
+<span class="p">)</span>
 
-<span class="n">populate_footprint_inert</span><span class="p">()</span>
-
-<span class="n">populate_flux_ch4</span><span class="p">()</span>
-
-<span class="n">populate_bc_ch4</span><span class="p">()</span>
+<span class="n">populate_column_data</span><span class="p">()</span>
+<span class="n">populate_satellite_footprint</span><span class="p">()</span>
+<span class="n">populate_flux_data_satellite</span><span class="p">()</span>
+<span class="n">populate_bc_southamerica</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="creating-a-model-scenario">
 <h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Link to this heading">#</a></h2>
-<p>With this ancillary data, we can start to make comparisons between model
-data, such as bottom-up inventories, and our observations. This analysis
-is based around a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object which can be created to link
-together observation, footprint, flux / emissions data and boundary conditions
-data.</p>
-<p>Above we loaded observation data from the Tacolneston site into the
-object store. We also added both an associated footprint (sensitivity map)
-and an anthropogenic emissions map for a domain defined over Europe.</p>
-<p>To access and link this data we can set up our <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>
-instance using a similiar set of keywords. In this case we have also
-limited ourselves to a date range:</p>
+<p>We can now create a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> linking satellite observations with ancillary inputs.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.analyse</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelScenario</span>
 
-<span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span>
-<span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span>
-<span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span>
-<span class="n">source_waste</span> <span class="o">=</span> <span class="s2">&quot;waste&quot;</span>
-<span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2016-07-01&quot;</span>
-<span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2016-08-01&quot;</span>
-
-<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-                         <span class="n">inlet</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-                         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                         <span class="n">source</span><span class="o">=</span><span class="n">source_waste</span><span class="p">,</span>
-                         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-                         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">satellite</span><span class="o">=</span><span class="s2">&quot;gosat&quot;</span><span class="p">,</span>
+               <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span>
+               <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+               <span class="n">max_level</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+               <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;southamerica&quot;</span><span class="p">,</span>
+               <span class="n">obs_region</span><span class="o">=</span><span class="s2">&quot;brazil&quot;</span>
+               <span class="n">source</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Using these keywords, this will search the object store and attempt to
-collect and attach observation, footprint, flux and boundary conditions
-data. This collected data will be attached to your created
-<code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>. For the observations this will be stored as the
-<code class="docutils literal notranslate"><span class="pre">ModelScenario.obs</span></code> attribute. This will be an <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object
-which contains metadata and data for your observations:</p>
+<p>Using these keywords, this will search the object store and attempt to collect and attach observation(satellite), footprint(satellite), flux and boundary conditions data. This collected data will be attached to your created ModelScenario. For the observations this will be stored as the ModelScenario.obs attribute. This will be an ObsColumnData object which contains metadata and data for your observations.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">obs</span>
 </pre></div>
 </div>
-<p>To access the undelying xarray Dataset containing the observation data
-use <code class="docutils literal notranslate"><span class="pre">ModelScenario.obs.data</span></code>:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">data</span>
-</pre></div>
-</div>
+<p>To access the undelying xarray Dataset containing the observation data use</p>
+<p>..code:: ipython3</p>
+<blockquote>
+<div><p>ds = scenario.obs.data</p>
+</div></blockquote>
 <p>The <code class="docutils literal notranslate"><span class="pre">ModelScenario.footprint</span></code> attribute contains the linked
 FootprintData (again, use <code class="docutils literal notranslate"><span class="pre">.data</span></code> to extract xarray Dataset):</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">footprint</span>
@@ -497,46 +424,47 @@ the <code class="docutils literal notranslate"><span class="pre">ModelScenario.p
 <p>You can also set up your own searches and add this data directly.
 One benefit of this interface is to reduce searching the database if the
 same data needs to be used for multiple different scenarios.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">get_footprint</span><span class="p">,</span> <span class="n">get_flux</span><span class="p">,</span> <span class="n">get_bc</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_obs_column</span><span class="p">,</span> <span class="n">get_footprint</span><span class="p">,</span> <span class="n">get_flux</span><span class="p">,</span> <span class="n">get_bc</span>
 
-<span class="c1"># Extract obs results from object store</span>
-<span class="n">obs_results</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-                              <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                              <span class="n">inlet</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                              <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-07-01&quot;</span><span class="p">,</span>
-                              <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-08-01&quot;</span><span class="p">)</span>
+<span class="n">satellite</span> <span class="o">=</span> <span class="s2">&quot;gosat&quot;</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;southamerica&quot;</span>
+<span class="n">obs_region</span> <span class="o">=</span> <span class="s2">&quot;brazil&quot;</span>
+<span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span>
 
-<span class="c1"># Extract footprint results from object store</span>
-<span class="n">footprint_results</span> <span class="o">=</span> <span class="n">get_footprint</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-                                  <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-                                  <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                                  <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-07-01&quot;</span><span class="p">,</span>
-                                  <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-08-01&quot;</span><span class="p">)</span>
+<span class="n">obs_column_data</span> <span class="o">=</span> <span class="n">get_obs_column</span><span class="p">(</span>
+    <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span>
+    <span class="n">max_level</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01 14:59:12.500000+00:00&quot;</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01 18:10:16.500000+00:00&quot;</span><span class="p">,</span>
+    <span class="n">obs_region</span><span class="o">=</span><span class="s2">&quot;brazil&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="c1"># Extract flux results from object store</span>
-<span class="n">flux_results</span> <span class="o">=</span> <span class="n">get_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-                        <span class="n">source</span><span class="o">=</span><span class="n">source_waste</span><span class="p">,</span>
-                        <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01&quot;</span><span class="p">,</span>
-                        <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-12-31&quot;</span><span class="p">)</span>
+<span class="n">fp_column_data</span> <span class="o">=</span> <span class="n">get_footprint</span><span class="p">(</span>
+        <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01 14:59:12.500000+00:00&quot;</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01 19:10:16.500000+00:00&quot;</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-<span class="c1"># Extract specific boundary conditions from the object store</span>
+<span class="n">flux_data</span> <span class="o">=</span> <span class="n">get_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;southamerica&quot;</span><span class="p">)</span>
+
 <span class="n">bc_results</span> <span class="o">=</span> <span class="n">get_bc</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
                     <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
                     <span class="n">bc_input</span><span class="o">=</span><span class="s2">&quot;CAMS&quot;</span><span class="p">,</span>
-                    <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-07-01&quot;</span><span class="p">,</span>
-                    <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-08-01&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario_direct</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs_results</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">footprint_results</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux_results</span><span class="p">,</span> <span class="n">bc</span><span class="o">=</span><span class="n">bc_results</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario_direct</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">obs_column</span><span class="o">=</span><span class="n">obs_column_data</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">fp_column_data</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux_data</span><span class="p">,</span> <span class="n">bc</span><span class="o">=</span><span class="n">bc_results</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;satellite&quot;</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>You can create your own input objects directly and add these in the
 same way. This allows you to bypass the object store for experimental
-examples. At the moment these inputs need to be <code class="docutils literal notranslate"><span class="pre">ObsData</span></code>,
-<code class="docutils literal notranslate"><span class="pre">FootprintData</span></code>, <code class="docutils literal notranslate"><span class="pre">FluxData</span></code> or <code class="docutils literal notranslate"><span class="pre">BoundaryConditionsData</span></code> objects,
+examples. At the moment these inputs need to be <code class="docutils literal notranslate"><span class="pre">ObsData</span></code>, <code class="docutils literal notranslate"><span class="pre">ObsColumnData</span></code>, <code class="docutils literal notranslate"><span class="pre">FootprintData</span></code>, <code class="docutils literal notranslate"><span class="pre">FluxData</span></code> or <code class="docutils literal notranslate"><span class="pre">BoundaryConditionsData</span></code> objects,
 which can be created using classes from <code class="docutils literal notranslate"><span class="pre">openghg.dataobjects</span></code>.
 Simpler inputs will be made available.</p>
 </div>
@@ -599,7 +527,7 @@ source can be linked to your <code class="docutils literal notranslate"><span cl
 done upon creation or can be added using the <code class="docutils literal notranslate"><span class="pre">add_flux()</span></code> method. When
 calculating modelled observations, these flux sources will be aligned in
 time and stacked to create a total output:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;energyprod&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">()</span>
@@ -608,8 +536,8 @@ time and stacked to create a total output:</p>
 <p>Output for individual sources can also be created by specifying the
 <code class="docutils literal notranslate"><span class="pre">sources</span></code> as an input:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Included recalculate option to ensure this is updated from cached data.</span>
-<span class="n">modelled_obs_energyprod</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">calc_modelled_obs</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="s2">&quot;energyprod&quot;</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">modelled_obs_energyprod</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">modelled_obs_anthro</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">calc_modelled_obs</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">modelled_obs_anthro</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><em>Plotting functions to be added for 2D / 3D data</em></p>
@@ -637,24 +565,6 @@ tutorial object store using the <code class="docutils literal notranslate"><span
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="../Adding_data/Updating_existing_data.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Updating existing data</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="Working_with_co2.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Working with carbon dioxide</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               

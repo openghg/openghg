@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._species &#8212; OpenGHG 0.13.0 documentation</title>
+    <title>openghg.util._species &#8212; OpenGHG 0.14.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/documentation_options.js?v=9e420a66"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.0" />
-    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
+  <meta name="docsearch:version" content="0.14.0" />
+    <meta name="docbuild:last-update" content="Apr 16, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.14.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -334,7 +334,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">pathType</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -351,7 +351,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util.species&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="p">:</span> <span class="n">pathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract data from species info JSON file as a dictionary.</span>
 
 <span class="sd">    This uses the data stored within openghg_defs/species_info JSON file by default.</span>
@@ -374,7 +374,7 @@
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lower</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">allow_new_species</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species_filepath</span><span class="p">:</span> <span class="n">pathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check to see if there are other names that we should be using for</span>
 <span class="sd">    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.</span>
@@ -435,7 +435,7 @@
 
 <div class="viewcode-block" id="species_lifetime">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.species_lifetime">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">pathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find species lifetime.</span>
 <span class="sd">    This can either be labelled as &quot;lifetime&quot; or &quot;lifetime_monthly&quot;.</span>
 
@@ -540,7 +540,7 @@
 
 <div class="viewcode-block" id="molar_mass">
 <a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.molar_mass">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">pathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts the molar mass of a species.</span>
 
 <span class="sd">    Args:</span>

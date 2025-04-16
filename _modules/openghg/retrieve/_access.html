@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0.13.0 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0.14.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/documentation_options.js?v=9e420a66"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.0" />
-    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
+  <meta name="docsearch:version" content="0.14.0" />
+    <meta name="docbuild:last-update" content="Apr 16, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.14.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -429,6 +429,7 @@
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">rename_vars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">keep_variables</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
@@ -447,10 +448,11 @@
 <span class="sd">        average: Averaging period for each dataset. Each value should be a string of</span>
 <span class="sd">            the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
 <span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
-<span class="sd">        instrument: Specific instrument for the sipte (must match number of sites).</span>
+<span class="sd">        instrument: Specific instrument for the site (must match number of sites).</span>
 <span class="sd">        calibration_scale: Convert to this calibration scale</span>
 <span class="sd">        rename_vars: Rename variables from species names to use &quot;mf&quot; explictly.</span>
 <span class="sd">        keep_missing: Keep missing data points or drop them.</span>
+<span class="sd">        keep_variables: List of variables to keep. If None, keeps everything.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 
 <span class="sd">    Returns:</span>
@@ -501,9 +503,23 @@
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">data</span>
 
+    <span class="c1"># check if data set is empty</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SearchError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset is empty for obs. with </span><span class="si">{</span><span class="n">surface_keywords</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">keep_variables</span><span class="p">:</span>
+        <span class="n">var_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span> <span class="ow">in</span> <span class="n">keep_variables</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var_list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Variables among </span><span class="si">{</span><span class="n">keep_variables</span><span class="si">}</span><span class="s2"> expected, but none of them found. Present variables are  : </span><span class="si">{</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">dv</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">data</span><span class="o">.</span><span class="n">data_vars</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">var_list</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
         <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
         <span class="n">retrieved_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;inlet_height&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s2">&quot;inlet&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;inlet_height&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved</span>
@@ -512,6 +528,17 @@
         <span class="c1"># which makes resampling extremely slow with Dask &gt;= 2024.8.0</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading obs data into memory for resampling.&quot;</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+        <span class="n">var_to_delete</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">var_to_delete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">var_to_delete</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_to_delete</span><span class="si">}</span><span class="s2"> contain only nan for obs. in </span><span class="si">{</span><span class="n">surface_keywords</span><span class="si">}</span><span class="s2">. They are thus deleted.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">var_to_delete</span><span class="p">)</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="n">surface_obs_resampler</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span> <span class="n">averaging_period</span><span class="o">=</span><span class="n">average</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">drop_na</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">keep_missing</span><span class="p">)</span>
         <span class="p">)</span>

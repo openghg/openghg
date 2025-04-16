@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.13.0 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.14.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../_static/documentation_options.js?v=9e420a66"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.0" />
-    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
+  <meta name="docsearch:version" content="0.14.0" />
+    <meta name="docbuild:last-update" content="Apr 16, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.14.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -376,18 +376,19 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.analyse._modelled_obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">fp_x_flux_integrated</span><span class="p">,</span> <span class="n">fp_x_flux_time_resolved</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">,</span> <span class="n">ObsColumnData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_obs_surface</span><span class="p">,</span>
+    <span class="n">get_obs_column</span><span class="p">,</span>
     <span class="n">get_bc</span><span class="p">,</span>
     <span class="n">get_flux</span><span class="p">,</span>
     <span class="n">get_footprint</span><span class="p">,</span>
@@ -395,13 +396,15 @@
     <span class="n">search_bc</span><span class="p">,</span>
     <span class="n">search_flux</span><span class="p">,</span>
     <span class="n">search_footprints</span><span class="p">,</span>
+    <span class="n">search_column</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">synonyms</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchError</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._alignment</span><span class="w"> </span><span class="kn">import</span> <span class="n">align_obs_and_other</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">verify_site_with_satellite</span><span class="p">,</span> <span class="n">define_platform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchError</span><span class="p">,</span> <span class="n">ReindexMethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._alignment</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_datasets</span><span class="p">,</span> <span class="n">resample_obs_and_other</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_units</span><span class="p">,</span> <span class="n">match_dataset_dims</span><span class="p">,</span> <span class="n">stack_datasets</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ModelScenario&quot;</span><span class="p">,</span> <span class="s2">&quot;calc_dim_resolution&quot;</span><span class="p">,</span> <span class="s2">&quot;combine_datasets&quot;</span><span class="p">,</span> <span class="s2">&quot;match_dataset_dims&quot;</span><span class="p">,</span> <span class="s2">&quot;stack_datasets&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ModelScenario&quot;</span><span class="p">]</span>
 
 
 <span class="c1"># TODO: Really with the emissions, they shouldn&#39;t need to match against a domain</span>
@@ -411,8 +414,7 @@
 <span class="c1"># TODO: Add static methods for different ways of creating the class</span>
 <span class="c1"># e.g. from_existing_data(), from_search(), empty() , ...</span>
 
-<span class="n">ParamType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
-<span class="n">methodType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;pad&quot;</span><span class="p">,</span> <span class="s2">&quot;ffill&quot;</span><span class="p">,</span> <span class="s2">&quot;backfill&quot;</span><span class="p">,</span> <span class="s2">&quot;bfill&quot;</span><span class="p">]]</span>
+<span class="n">ParamType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.analyse&quot;</span><span class="p">)</span>
@@ -427,18 +429,29 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">)</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="ModelScenario.__init__">
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fp_inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -448,6 +461,7 @@
         <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_column</span><span class="p">:</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">flux</span><span class="p">:</span> <span class="n">FluxData</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -465,23 +479,34 @@
 <span class="sd">         - Flux data: species, sources, domain, start_date, end_date</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            site: Site code e.g. &quot;TAC&quot;</span>
-<span class="sd">            species: Species code e.g. &quot;ch4&quot;</span>
-<span class="sd">            inlet: Inlet value e.g. &quot;10m&quot;</span>
-<span class="sd">            height: Alias for inlet.</span>
-<span class="sd">            network: Network name e.g. &quot;AGAGE&quot;</span>
-<span class="sd">            domain: Domain name e.g. &quot;EUROPE&quot;</span>
-<span class="sd">            model: Model name used in creation of footprint e.g. &quot;NAME&quot;</span>
-<span class="sd">            met_model: Name of met model used in creation of footprint e.g. &quot;UKV&quot;</span>
-<span class="sd">            fp_inlet: Specify footprint release height options if this doesn&#39;t match to site value.</span>
-<span class="sd">            sources: Emissions sources</span>
-<span class="sd">            bc_input: Input keyword for boundary conditions e.g. &quot;mozart&quot; or &quot;cams&quot;</span>
-<span class="sd">            start_date: Start of date range to use. Note for flux this may not be applied</span>
-<span class="sd">            end_date: End of date range to use. Note for flux this may not be applied</span>
-<span class="sd">            obs: Supply ObsData object directly (e.g. from get_obs...() functions)</span>
-<span class="sd">            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)</span>
-<span class="sd">            flux: Supply FluxData object directly (e.g. from get_flux() function)</span>
-<span class="sd">            store: Name of object store to retrieve data from.</span>
+<span class="sd">        site: Site code e.g. &quot;TAC&quot;.</span>
+<span class="sd">        satellite: Satellite name e.g &quot;GOSAT&quot;.</span>
+<span class="sd">        species: Species code e.g. &quot;ch4&quot;.</span>
+<span class="sd">        inlet: Inlet value e.g. &quot;10m&quot;.</span>
+<span class="sd">        height: Alias for inlet.</span>
+<span class="sd">        network: Network name e.g. &quot;AGAGE&quot;.</span>
+<span class="sd">        domain: Domain name e.g. &quot;EUROPE&quot;.</span>
+<span class="sd">        platform: Platform name e.g &quot;satellite&quot;, &quot;column-insitu&quot;.</span>
+<span class="sd">        max_level: Maximum level for processing.</span>
+<span class="sd">        obs_region: The geographic region covered by the data (&quot;BRAZIL&quot;, &quot;INDIA&quot;, &quot;UK&quot;).</span>
+<span class="sd">        selection: For satellite only, identifier for any data selection which has been</span>
+<span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
+<span class="sd">            but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
+<span class="sd">            If not specified, domain will be used.</span>
+<span class="sd">        model: Model name used in creation of footprint e.g. &quot;NAME&quot;.</span>
+<span class="sd">        met_model: Name of met model used in creation of footprint e.g. &quot;UKV&quot;.</span>
+<span class="sd">        fp_inlet: Specify footprint release height options if this doesn&#39;t match the site value.</span>
+<span class="sd">        source: &quot;anthro&quot; (for &quot;TOTAL&quot;), source name from file otherwise.</span>
+<span class="sd">        sources: Emissions sources.</span>
+<span class="sd">        bc_input: Input keyword for boundary conditions e.g. &quot;mozart&quot; or &quot;cams&quot;.</span>
+<span class="sd">        start_date: Start of date range to use. Note for flux this may not be applied.</span>
+<span class="sd">        end_date: End of date range to use. Note for flux this may not be applied.</span>
+<span class="sd">        obs: Supply ObsData object directly (e.g. from get_obs...() functions).</span>
+<span class="sd">        obs_column: Supply ObsColumnData object directly.</span>
+<span class="sd">        footprint: Supply FootprintData object directly (e.g. from get_footprint() function).</span>
+<span class="sd">        flux: Supply FluxData object directly (e.g. from get_flux() function).</span>
+<span class="sd">        bc: Supply BoundaryConditionsData object directly.</span>
+<span class="sd">        store: Name of object store to retrieve data from.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
@@ -491,7 +516,8 @@
 <span class="sd">        TODO: For obs, footprint, flux should we also allow Dataset input and turn</span>
 <span class="sd">        these into the appropriate class?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="p">:</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -499,25 +525,53 @@
         <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="c1"># Add observation data (directly or through keywords)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_obs</span><span class="p">(</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-            <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-            <span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span>
-            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">accepted_column_data_types</span> <span class="o">=</span> <span class="n">define_platform</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">platform</span>
+        <span class="k">if</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">platform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;You passed a satellite but no platform. Updating the platform to &#39;satellite&#39;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span>
+
+        <span class="c1"># For ObsColumn data processing</span>
+        <span class="k">if</span> <span class="n">platform</span> <span class="ow">in</span> <span class="n">accepted_column_data_types</span><span class="p">:</span>
+            <span class="c1"># Add observation column data (directly or through keywords, column or satellite)</span>
+            <span class="k">if</span> <span class="n">max_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;If you are using column-based data (i.e. platform is </span><span class="si">{</span><span class="n">accepted_column_data_types</span><span class="si">}</span><span class="s2">), you need to pass max_level&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_obs_column</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">,</span>
+                <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span>
+                <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
+                <span class="n">obs_column</span><span class="o">=</span><span class="n">obs_column</span><span class="p">,</span>
+                <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Add observation data (directly or through keywords)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_obs</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+                <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+                <span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span>
+                <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Make sure obs data is present, make sure inputs match to metadata</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">obs_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">in</span> <span class="n">obs_metadata</span><span class="p">:</span>
+                <span class="n">satellite</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">site</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating any inputs based on observation data&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">, inlet: </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -525,6 +579,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_footprint</span><span class="p">(</span>
             <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
             <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+            <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
             <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
@@ -576,6 +631,7 @@
             <span class="s2">&quot;footprint&quot;</span><span class="p">:</span> <span class="n">get_footprint</span><span class="p">,</span>
             <span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">get_flux</span><span class="p">,</span>
             <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">:</span> <span class="n">get_bc</span><span class="p">,</span>
+            <span class="s2">&quot;obs_column&quot;</span><span class="p">:</span> <span class="n">get_obs_column</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="n">search_functions</span> <span class="o">=</span> <span class="p">{</span>
@@ -583,6 +639,7 @@
             <span class="s2">&quot;footprint&quot;</span><span class="p">:</span> <span class="n">search_footprints</span><span class="p">,</span>
             <span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">search_flux</span><span class="p">,</span>
             <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">:</span> <span class="n">search_bc</span><span class="p">,</span>
+            <span class="s2">&quot;obs_column&quot;</span><span class="p">:</span> <span class="n">search_column</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="n">get_fn</span> <span class="o">=</span> <span class="n">get_functions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
@@ -631,7 +688,6 @@
         <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add observation data based on keywords or direct ObsData object.&quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span>
 
         <span class="c1"># Search for obs data based on keywords</span>
         <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -664,6 +720,61 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="ModelScenario.add_obs_column">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_obs_column">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_obs_column</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_column</span><span class="p">:</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add column data based on keywords or direct ObsColumnData object.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Search for obs data based on keywords</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs_column</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">obs_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">verify_site_with_satellite</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span> <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="n">selection</span>
+            <span class="p">)</span>
+
+            <span class="c1"># search for obs based on suitable keywords - site, species, inlet</span>
+            <span class="n">obs_column_keywords</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+                <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
+                <span class="s2">&quot;max_level&quot;</span><span class="p">:</span> <span class="n">max_level</span><span class="p">,</span>
+                <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+                <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
+                <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span>
+                <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
+                <span class="s2">&quot;obs_region&quot;</span><span class="p">:</span> <span class="n">obs_region</span><span class="p">,</span>
+                <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
+                <span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="n">selection</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="n">obs_column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">obs_column_keywords</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;obs_column&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Updating obs to be obs_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">obs_column</span>
+
+        <span class="c1"># Add keywords to class for convenience</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">satellite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span></div>
+
+
 <div class="viewcode-block" id="ModelScenario.add_footprint">
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_footprint</span><span class="p">(</span>
@@ -673,6 +784,8 @@
         <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -684,23 +797,27 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add footprint data based on keywords or direct FootprintData object.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-            <span class="n">clean_string</span><span class="p">,</span>
-            <span class="n">format_inlet</span><span class="p">,</span>
             <span class="n">species_lifetime</span><span class="p">,</span>
             <span class="n">extract_height_name</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Search for footprint data based on keywords</span>
         <span class="c1"># - site, domain, inlet (can extract from obs / height_name), model, met_model</span>
-        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fp_inlet</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span>
+
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># use obs network if we&#39;re trying to infer the height from site info</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">network</span> <span class="o">=</span> <span class="n">network</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">)</span>
 
-                <span class="n">height_name</span> <span class="o">=</span> <span class="n">extract_height_name</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">height_name</span> <span class="o">=</span> <span class="n">extract_height_name</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">height_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">height_name</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -736,6 +853,8 @@
                 <span class="n">footprint_keywords</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
                     <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">fp_inlet_option</span><span class="p">,</span>
+                    <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
+                    <span class="s2">&quot;obs_region&quot;</span><span class="p">:</span> <span class="n">obs_region</span><span class="p">,</span>
                     <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">fp_inlet_option</span><span class="p">,</span>
                     <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
                     <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
@@ -760,10 +879,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="o">=</span> <span class="n">footprint</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fp_inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">fp_inlet</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span></div>
+            <span class="k">if</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">satellite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fp_inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">fp_inlet</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="ModelScenario.add_flux">
@@ -927,29 +1049,35 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_platform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the platform for a site, if present.</span>
 
-<span class="sd">        This will access the &quot;site_info.json&quot; file from openghg_defs dependency to</span>
-<span class="sd">        find this information.</span>
+<span class="sd">        To find this information this will look within:</span>
+<span class="sd">            - obs metadata</span>
+<span class="sd">            - the &quot;site_info.json&quot; file from openghg_defs dependency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_site_info</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_platform_from_info</span><span class="p">,</span> <span class="n">not_set_metadata_values</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span>
-            <span class="n">site_upper</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">site_details</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">site_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">platform</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_align_obs_footprint</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="c1"># Check for values which indicate this has not been specified</span>
+            <span class="n">not_set_values</span> <span class="o">=</span> <span class="n">not_set_metadata_values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">platform</span> <span class="ow">in</span> <span class="n">not_set_values</span><span class="p">:</span>
+                <span class="n">platform</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">platform_from_site</span> <span class="o">=</span> <span class="n">get_platform_from_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Platform of &#39;</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">&#39; for site &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39; extracted from site_info.json&quot;</span><span class="p">)</span>
+                <span class="n">platform</span> <span class="o">=</span> <span class="n">platform_from_site</span>
+            <span class="k">elif</span> <span class="n">platform_from_site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">platform</span> <span class="o">!=</span> <span class="n">platform_from_site</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Platform from metadata and site_info details do not match (</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">platform_from_site</span><span class="si">}</span><span class="s2">). Using platform value from metadata.&quot;</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">platform</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resample_obs_footprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice and resample obs and footprint data to align along time</span>
 
 <span class="sd">        This slices the date to the smallest time frame</span>
@@ -960,11 +1088,10 @@
 <span class="sd">         - &quot;obs&quot; - resample to observation data frequency</span>
 <span class="sd">         - &quot;footprint&quot; - resample to footprint data frequency</span>
 <span class="sd">         - a valid resample period e.g. &quot;2H&quot;</span>
-<span class="sd">         - None to not resample and to just &quot;ffill&quot; footprint to obs</span>
+<span class="sd">         - None to not resample and just return original values</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            resample_to: Resample option to use: either data based or using a valid pandas resample period.</span>
-<span class="sd">            platform: Observation platform used to decide whether to resample</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tuple: Two xarray.Dataset with aligned time dimensions</span>
@@ -977,30 +1104,13 @@
         <span class="n">obs_data</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">data</span>
         <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">footprint</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="c1"># Keyword only used if not resampling (at the moment)</span>
-        <span class="n">align_to_obs</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="c1"># Do not apply resampling for &quot;satellite&quot; or &quot;flask&quot;</span>
-            <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span><span class="p">:</span>
-                <span class="n">resample_to</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">align_to_obs</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">elif</span> <span class="s2">&quot;flask&quot;</span> <span class="ow">in</span> <span class="n">platform</span><span class="p">:</span>
-                <span class="n">resample_to</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">align_to_obs</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Platform &#39;</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">&#39; not used when determining resample strategy.&quot;</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">resample_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">align_to_obs</span><span class="p">:</span>
-                <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">footprint_data</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">obs_data</span><span class="p">,</span> <span class="n">footprint_data</span>
 
         <span class="k">if</span> <span class="n">resample_to</span> <span class="o">==</span> <span class="s2">&quot;footprint&quot;</span><span class="p">:</span>
             <span class="n">resample_to</span> <span class="o">=</span> <span class="s2">&quot;other&quot;</span>
 
-        <span class="k">return</span> <span class="n">align_obs_and_other</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">footprint_data</span><span class="p">,</span> <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resample_obs_and_other</span><span class="p">(</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">footprint_data</span><span class="p">,</span> <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ModelScenario.combine_obs_footprint">
 <a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_obs_footprint">[docs]</a>
@@ -1024,7 +1134,9 @@
 <span class="sd">                          - or using a valid pandas resample period e.g. &quot;2H&quot;.</span>
 <span class="sd">                          - None to not resample and to just &quot;ffill&quot; footprint to obs</span>
 <span class="sd">                         Default = &quot;coarsest&quot;.</span>
-<span class="sd">            platform: Observation platform used to decide whether to resample</span>
+<span class="sd">            platform: Observation platform used to decide on resample and alignment steps.</span>
+<span class="sd">                If this is not supplied, function will attempt to extract this value from</span>
+<span class="sd">                from the metadata, then the openghg_defs site_info.json details for the site.</span>
 <span class="sd">            cache: Cache this data after calculation. Default = True.</span>
 
 <span class="sd">        Returns:</span>
@@ -1042,15 +1154,41 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;resample_to&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">resample_to</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
 
-        <span class="c1"># As we&#39;re not processing any satellite data yet just set tolerance to None</span>
-        <span class="n">tolerance</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Extract platform</span>
         <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">platform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_platform</span><span class="p">()</span>
 
-        <span class="c1"># Align and merge the observation and footprint Datasets</span>
-        <span class="n">aligned_obs</span><span class="p">,</span> <span class="n">aligned_footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_obs_footprint</span><span class="p">(</span><span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">)</span>
+        <span class="c1"># Set default reindex method and tolerance values</span>
+        <span class="n">merge_method</span><span class="p">:</span> <span class="n">ReindexMethod</span> <span class="o">=</span> <span class="s2">&quot;ffill&quot;</span>
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># If platform is specified, update resample_to, reindex and tolerance values where appropriate</span>
+        <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span><span class="p">:</span>
+                <span class="c1"># Update reindex method and tolerance for satellite</span>
+                <span class="n">resample_to</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">merge_method</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span>
+                <span class="n">tolerance</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;1ms&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Platform &#39;</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">&#39; has been used to determine the resample and alignment stategy (no resampling, alignment as </span><span class="si">{</span><span class="n">merge_method</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">tolerance</span><span class="si">}</span><span class="s2"> tolerance.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;flask&quot;</span> <span class="ow">in</span> <span class="n">platform</span><span class="p">:</span>
+                <span class="c1"># TODO: Iss #253. Update this to be smarter about averaging irregular, flask data</span>
+                <span class="c1"># May need to access different method than resample</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Platform &#39;</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">&#39; has been used to determine the resample stategy (no resampling).&quot;</span>
+                <span class="p">)</span>
+                <span class="n">resample_to</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Platform &#39;</span><span class="si">{</span><span class="n">platform</span><span class="si">}</span><span class="s2">&#39; not used when determining resample and merge strategy.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Resample, align and merge the observation and footprint Datasets</span>
+        <span class="n">resampled_obs</span><span class="p">,</span> <span class="n">resampled_footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resample_obs_footprint</span><span class="p">(</span><span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">)</span>
         <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">combine_datasets</span><span class="p">(</span>
-            <span class="n">dataset_A</span><span class="o">=</span><span class="n">aligned_obs</span><span class="p">,</span> <span class="n">dataset_B</span><span class="o">=</span><span class="n">aligned_footprint</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span>
+            <span class="n">dataset_A</span><span class="o">=</span><span class="n">resampled_obs</span><span class="p">,</span> <span class="n">dataset_B</span><span class="o">=</span><span class="n">resampled_footprint</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">merge_method</span>
         <span class="p">)</span>
 
         <span class="c1"># Transpose to keep time in the last dimension position in case it has been moved in resample</span>
@@ -1216,7 +1354,7 @@
         <span class="c1"># if self.modelled_obs is None or recalculate:</span>
         <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">recalculate</span><span class="p">:</span>
             <span class="c1"># Check if observations are present and use these for resampling</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">combine_obs_footprint</span><span class="p">(</span>
                     <span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
@@ -1349,10 +1487,7 @@
 
         <span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
         <span class="n">flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_flux_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
-        <span class="n">scenario</span><span class="p">,</span> <span class="n">flux</span> <span class="o">=</span> <span class="n">match_dataset_dims</span><span class="p">([</span><span class="n">scenario</span><span class="p">,</span> <span class="n">flux</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-
-        <span class="n">flux</span> <span class="o">=</span> <span class="n">flux</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;ffill&quot;</span><span class="p">)</span>
-        <span class="n">flux_modelled</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">=</span> <span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">flux</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span>
+        <span class="n">flux_modelled</span> <span class="o">=</span> <span class="n">fp_x_flux_integrated</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
         <span class="n">timeseries</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">=</span> <span class="n">flux_modelled</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
 
         <span class="c1"># TODO: Add details about units to output</span>
@@ -1413,8 +1548,6 @@
 <span class="sd">        TODO: mypy having trouble with different types options and incompatible types,</span>
 <span class="sd">        included as Any for now.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcd</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">date_range</span>
 
         <span class="c1"># TODO: Need to work out how this fits in with high time resolution method</span>
         <span class="c1"># Do we need to flag low resolution to use a different method? natural / anthro for example</span>
@@ -1424,177 +1557,8 @@
 
         <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">fp_HiTRes</span>
         <span class="n">flux_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_flux_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
-        <span class="n">fp_HiTRes</span><span class="p">,</span> <span class="n">flux_ds</span> <span class="o">=</span> <span class="n">match_dataset_dims</span><span class="p">([</span><span class="n">fp_HiTRes</span><span class="p">,</span> <span class="n">flux_ds</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-        <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">fp_HiTRes</span><span class="p">)</span>
 
-        <span class="c1"># Make sure any NaN values are set to zero as this is a multiplicative and summing operation</span>
-        <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="n">flux_ds</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux_ds</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">calc_hourly_freq</span><span class="p">(</span><span class="n">times</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Infer frequency of DataArray of times.</span>
-
-<span class="sd">            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.</span>
-<span class="sd">            Otherwise times are assumed to be in terms of hours.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">nanosecond_to_hour</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e9</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">input_nanoseconds</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">nanosecond_to_hour</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-
-        <span class="c1"># Calculate time resolution for both the flux and footprints data</span>
-        <span class="n">flux_res_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">flux_ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">fp_res_time_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">input_nanoseconds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="n">fp_res_Hback_H</span> <span class="o">=</span> <span class="n">calc_hourly_freq</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;H_back&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Define resolution on time dimension in number in hours</span>
-        <span class="k">if</span> <span class="n">averaging</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">time_res_H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">averaging</span><span class="p">)</span>
-                <span class="n">time_resolution</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_res_H</span><span class="si">}</span><span class="s2">H&quot;</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-                <span class="n">time_res_H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">averaging</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">time_resolution</span> <span class="o">=</span> <span class="n">averaging</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If not specified derive from time from combined dataset</span>
-            <span class="n">time_res_H</span> <span class="o">=</span> <span class="n">fp_res_time_H</span>
-            <span class="n">time_resolution</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_res_H</span><span class="si">}</span><span class="s2">H&quot;</span>
-
-        <span class="c1"># Resample fp timeseries to match time resolution</span>
-        <span class="k">if</span> <span class="n">fp_res_time_H</span> <span class="o">!=</span> <span class="n">time_res_H</span><span class="p">:</span>
-            <span class="n">fp_HiTRes</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time_resolution</span><span class="p">)</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
-
-        <span class="c1"># Define resolution on high frequency dimension in number of hours</span>
-        <span class="c1"># At the moment this is matched to the Hback dimension</span>
-        <span class="n">time_hf_res_H</span> <span class="o">=</span> <span class="n">fp_res_Hback_H</span>
-
-        <span class="c1"># Only allow for high frequency resolution &lt; 24 hours</span>
-        <span class="k">if</span> <span class="n">time_hf_res_H</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;High frequency resolution must be &lt;= 24 hours. Current: </span><span class="si">{</span><span class="n">time_hf_res_H</span><span class="si">}</span><span class="s2">H&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="mi">24</span> <span class="o">%</span> <span class="n">time_hf_res_H</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="mi">24</span> <span class="o">%</span> <span class="n">time_hf_res_H</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;High frequency resolution must exactly divide into 24 hours. Current: </span><span class="si">{</span><span class="n">time_hf_res_H</span><span class="si">}</span><span class="s2">H&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Find the greatest common denominator between time and high frequency resolutions.</span>
-        <span class="c1"># This is needed to make sure suitable flux frequency is used to allow for indexing.</span>
-        <span class="c1"># e.g. time: 1H; hf (high frequency): 2H, highest_res_H would be 1H</span>
-        <span class="c1"># e.g. time: 2H; hf (high frequency): 3H, highest_res_H would be 1H</span>
-        <span class="n">highest_res_H</span> <span class="o">=</span> <span class="n">gcd</span><span class="p">(</span><span class="n">time_res_H</span><span class="p">,</span> <span class="n">time_hf_res_H</span><span class="p">)</span>
-        <span class="n">highest_resolution</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">highest_res_H</span><span class="si">}</span><span class="s2">H&quot;</span>
-
-        <span class="c1"># create time array to loop through, with the required resolution</span>
-        <span class="c1"># fp_HiTRes.time is the release time of particles into the model</span>
-        <span class="n">time_array</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
-
-        <span class="c1"># Define maximum hour back</span>
-        <span class="n">max_h_back</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-
-        <span class="c1"># Define full range of dates to select from the flux input</span>
-        <span class="n">date_start</span> <span class="o">=</span> <span class="n">time_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">date_start_back</span> <span class="o">=</span> <span class="n">date_start</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="n">max_h_back</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
-        <span class="n">date_end</span> <span class="o">=</span> <span class="n">time_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Create times for matching to the flux</span>
-        <span class="n">full_dates</span> <span class="o">=</span> <span class="n">date_range</span><span class="p">(</span>
-            <span class="n">date_start_back</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">date_end</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">highest_resolution</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-
-        <span class="c1"># Create low frequency flux data (monthly)</span>
-        <span class="n">flux_ds_low_freq</span> <span class="o">=</span> <span class="n">flux_ds</span><span class="o">.</span><span class="n">resample</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;1MS&quot;</span><span class="p">})</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">date_start_back</span><span class="p">,</span> <span class="n">date_end</span><span class="p">))</span>
-        <span class="n">flux_ds_low_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">))</span>
-
-        <span class="c1"># Select and align high frequency flux data</span>
-        <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">date_start_back</span><span class="p">,</span> <span class="n">date_end</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">flux_res_H</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">:</span>
-            <span class="n">offset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span>
-                <span class="n">hours</span><span class="o">=</span><span class="n">date_start_back</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">data</span>
-                <span class="o">+</span> <span class="n">date_start_back</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">minute</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="mf">60.0</span>
-                <span class="o">+</span> <span class="n">date_start_back</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">second</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="mf">3600.0</span>
-            <span class="p">)</span>
-            <span class="n">offset</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">flux_res_H</span> <span class="o">&lt;=</span> <span class="n">highest_res_H</span><span class="p">:</span>
-                <span class="c1"># Downsample flux to match to footprints frequency</span>
-                <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">highest_resolution</span><span class="p">},</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="n">flux_res_H</span> <span class="o">&gt;</span> <span class="n">highest_res_H</span><span class="p">:</span>
-                <span class="c1"># Upsample flux to match footprints frequency and forward fill</span>
-                <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">highest_resolution</span><span class="p">},</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
-            <span class="c1"># Reindex to match to correct values</span>
-            <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">reindex</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">full_dates</span><span class="p">},</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">flux_res_H</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
-            <span class="c1"># TODO this case should be handled outside of the &quot;compute_fp_x_flux&quot; function</span>
-            <span class="c1"># If flux is not high frequency use the monthly averages instead.</span>
-            <span class="n">flux_ds_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span>
-
-        <span class="c1"># TODO: Add check to make sure time values are exactly aligned based on date range</span>
-
-        <span class="c1"># Extract flux data from dataset</span>
-        <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">flux_ds_high_freq</span><span class="o">.</span><span class="n">flux</span>
-        <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_ds_low_freq</span><span class="o">.</span><span class="n">flux</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">make_hf_flux_rolling_avg_array</span><span class="p">(</span>
-            <span class="n">flux_high_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-            <span class="n">fp_high_time_res</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-            <span class="n">highest_res_H</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">max_h_back</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-            <span class="c1"># create windows (backwards in time) with `max_h_back` many time points,</span>
-            <span class="c1"># starting at each time point in flux_hf_rolling.time</span>
-            <span class="n">window_size</span> <span class="o">=</span> <span class="n">max_h_back</span> <span class="o">//</span> <span class="n">highest_res_H</span>
-            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_high_freq</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">window_size</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-
-            <span class="c1"># set H_back coordinates using highest_res_H frequency</span>
-            <span class="n">h_back_type</span> <span class="o">=</span> <span class="n">fp_high_time_res</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">dtype</span>
-            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_hf_rolling</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;H_back&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_h_back</span><span class="p">,</span> <span class="n">highest_res_H</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h_back_type</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
-            <span class="p">)</span>
-
-            <span class="c1"># select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)</span>
-            <span class="n">flux_hf_rolling</span> <span class="o">=</span> <span class="n">flux_hf_rolling</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">H_back</span><span class="o">=</span><span class="n">fp_high_time_res</span><span class="o">.</span><span class="n">H_back</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">flux_hf_rolling</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">compute_fp_x_flux</span><span class="p">(</span>
-            <span class="n">fp_HiTRes</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-            <span class="n">flux_high_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-            <span class="n">flux_low_freq</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-            <span class="n">highest_res_H</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">max_h_back</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-            <span class="c1"># do low res calculation</span>
-            <span class="n">fp_residual</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">H_back</span><span class="o">=</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># take last H_back value</span>
-            <span class="n">flux_low_freq</span> <span class="o">=</span> <span class="n">flux_low_freq</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">fp_residual</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span>  <span class="c1"># forward fill times</span>
-
-            <span class="n">fpXflux_residual</span> <span class="o">=</span> <span class="n">flux_low_freq</span> <span class="o">*</span> <span class="n">fp_residual</span>
-
-            <span class="c1"># get high freq fp</span>
-            <span class="n">fp_high_freq</span> <span class="o">=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span> <span class="o">!=</span> <span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">H_back</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-            <span class="c1"># if flux_res_H &gt; 24, then flux_high_freq = flux_low_freq, and we don&#39;t take a sum over windows of flux_high_freq</span>
-            <span class="k">if</span> <span class="n">flux_res_H</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
-                <span class="n">fpXflux</span> <span class="o">=</span> <span class="p">(</span><span class="n">flux_low_freq</span> <span class="o">*</span> <span class="n">fp_high_freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">flux_high_freq</span> <span class="o">=</span> <span class="n">make_hf_flux_rolling_avg_array</span><span class="p">(</span>
-                    <span class="n">flux_high_freq</span><span class="p">,</span> <span class="n">fp_high_freq</span><span class="p">,</span> <span class="n">highest_res_H</span><span class="p">,</span> <span class="n">max_h_back</span>
-                <span class="p">)</span>
-                <span class="n">fpXflux</span> <span class="o">=</span> <span class="p">(</span><span class="n">flux_high_freq</span> <span class="o">*</span> <span class="n">fp_high_freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">fpXflux</span> <span class="o">+</span> <span class="n">fpXflux_residual</span>
-
-        <span class="n">fpXflux</span> <span class="o">=</span> <span class="n">compute_fp_x_flux</span><span class="p">(</span>
-            <span class="n">fp_HiTRes</span><span class="p">,</span>
-            <span class="n">flux_high_freq</span><span class="p">,</span>
-            <span class="n">flux_low_freq</span><span class="p">,</span>
-            <span class="n">highest_res_H</span><span class="p">,</span>
-            <span class="n">max_h_back</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">fpXflux</span> <span class="o">=</span> <span class="n">fp_x_flux_time_resolved</span><span class="p">(</span><span class="n">fp_HiTRes</span><span class="p">,</span> <span class="n">flux_ds</span><span class="p">,</span> <span class="n">averaging</span><span class="o">=</span><span class="n">averaging</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="n">fpXflux</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
@@ -1853,6 +1817,7 @@
 <span class="sd">            Interactive plotly graph created with observations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">)</span>
+
         <span class="n">obs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ObsData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
 
         <span class="n">fig</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>  <span class="c1"># Calling method on ObsData class</span>
@@ -1941,276 +1906,6 @@
         <span class="k">return</span> <span class="n">fig</span></div>
 </div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_indexes_match</span><span class="p">(</span><span class="n">dataset_A</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if two datasets need to be reindexed_like for combine_datasets</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        dataset_A: First dataset to check</span>
-<span class="sd">        dataset_B: Second dataset to check</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        bool: True if indexes match, else False</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">common_indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset_A</span><span class="o">.</span><span class="n">indexes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset_B</span><span class="o">.</span><span class="n">indexes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">common_indices</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_A</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_B</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="c1"># Check number of values that are not close (testing for equality with floating point)</span>
-        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-            <span class="c1"># For time override the default to have ~ second precision</span>
-            <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-10</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span>
-
-        <span class="n">index_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-            <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
-                <span class="n">dataset_A</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
-                <span class="n">dataset_B</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
-                <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">index_diff</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="kc">True</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">combine_datasets</span><span class="p">(</span>
-    <span class="n">dataset_A</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;ffill&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merges two datasets and re-indexes to the first dataset.</span>
-
-<span class="sd">    If &quot;fp&quot; variable is found within the combined dataset,</span>
-<span class="sd">    the &quot;time&quot; values where the &quot;lat&quot;, &quot;lon&quot; dimensions didn&#39;t match are removed.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        dataset_A: First dataset to merge</span>
-<span class="sd">        dataset_B: Second dataset to merge</span>
-<span class="sd">        method: One of None, nearest, ffill, bfill.</span>
-<span class="sd">                See xarray.DataArray.reindex_like for list of options and meaning.</span>
-<span class="sd">                Defaults to ffill (forward fill)</span>
-<span class="sd">        tolerance: Maximum allowed tolerance between matches.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        xarray.Dataset: Combined dataset indexed to dataset_A</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">_indexes_match</span><span class="p">(</span><span class="n">dataset_A</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">):</span>
-        <span class="n">dataset_B_temp</span> <span class="o">=</span> <span class="n">dataset_B</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># load dataset_B to avoid performance issue (see xarray issue #8945)</span>
-        <span class="n">dataset_B_temp</span> <span class="o">=</span> <span class="n">dataset_B</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">dataset_A</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">)</span>
-
-    <span class="n">merged_ds</span> <span class="o">=</span> <span class="n">dataset_A</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dataset_B_temp</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;fp&quot;</span> <span class="ow">in</span> <span class="n">merged_ds</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">merged_ds</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">dims</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)):</span>
-            <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">merged_ds</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
-            <span class="n">merged_ds</span> <span class="o">=</span> <span class="n">merged_ds</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
-
-    <span class="k">return</span> <span class="n">merged_ds</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">match_dataset_dims</span><span class="p">(</span>
-    <span class="n">datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">dims</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aligns datasets to the selected dimensions within a tolerance.</span>
-<span class="sd">    All datasets will be aligned to the first dataset within the list.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        datasets: List of xarray Datasets. Expect datasets to contain the same dimensions.</span>
-<span class="sd">        dims: Dimensions match between datasets. Can use keyword &quot;all&quot; to match every dimension.</span>
-<span class="sd">        method : Method to use for indexing. Should be one of: (&quot;nearest&quot;, &quot;ffill&quot;, &quot;bfill&quot;)</span>
-<span class="sd">        tolerance: Tolerance value to use when matching coordinate values.</span>
-<span class="sd">                   This can be a single value for all dimensions or a dictionary of values to use.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        List (xarray.Dataset) : Datasets aligned along the matching dimensions.</span>
-
-<span class="sd">    TODO: Check if this supercedes or replicates _indexes_match() function too closely?</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Nothing to be done if only one (or less) datasets are passed</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
-
-    <span class="n">ds0</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="n">dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ds0</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">dims</span><span class="p">]</span>
-
-    <span class="c1"># Extract coordinate values for the first dataset in the list</span>
-    <span class="n">ds0</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">indexers</span> <span class="o">=</span> <span class="p">{</span><span class="n">dim</span><span class="p">:</span> <span class="n">ds0</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">}</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">tolerance</span> <span class="o">=</span> <span class="p">{</span><span class="n">dim</span><span class="p">:</span> <span class="n">tolerance</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">}</span>
-
-    <span class="c1"># Align datasets along selected dimensions (if not already identical)</span>
-    <span class="n">datasets_aligned</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds0</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-        <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">compare_coord</span> <span class="ow">in</span> <span class="n">indexers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">coord</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset missing dimension: </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">coord</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">compare_coord</span><span class="p">):</span>
-                    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">reindex</span><span class="p">({</span><span class="n">dim</span><span class="p">:</span> <span class="n">compare_coord</span><span class="p">},</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
-
-        <span class="n">datasets_aligned</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">datasets_aligned</span>
-
-
-<span class="c1"># ResType = Union[np.timedelta64, float, np.floating, np.integer]</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">calc_dim_resolution</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the average frequency along a given dimension.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        dataset : Dataset. Must contain the specified dimension</span>
-<span class="sd">        dim : Dimension name</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        np.timedelta64 / np.float / np.int : Resolution with input dtype</span>
-
-<span class="sd">        NaT : If unsuccessful and input dtype is np.timedelta64</span>
-<span class="sd">        NaN : If unsuccessful for all other dtypes.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_calc_time_dim_resolution</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">time_dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_calc_average_gap</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_calc_time_dim_resolution</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">time_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate average frequency of time dimension.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        dataset: xr.Dataset with time coordinate</span>
-<span class="sd">        time_dim: name of the time coordinate</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        timedelta representing average gap between time points, or NaT if only</span>
-<span class="sd">        one time is present</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if the data type of `dataset[time_dim]` is not a subtype of</span>
-<span class="sd">        `np.datetime64`. (Note: `np.timedelta64` is a separate type, and not</span>
-<span class="sd">         a subtype of `np.datetime64`; differences between `np.datetime64` values</span>
-<span class="sd">        are `np.timedelta64`.)</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Type </span><span class="si">{</span><span class="n">dataset</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> of values in </span><span class="si">{</span><span class="n">time_dim</span><span class="si">}</span><span class="s2"> coordinate is not a subtype of `np.datetime64`.&quot;</span>
-        <span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">resolution</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">time_dim</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="s2">&quot;NaT&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># cast because we already checked that the values in dataset[time_dim] are compatible with `np.datetime64`</span>
-        <span class="c1"># so their diffs will be time deltas</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_calc_average_gap</span><span class="p">(</span><span class="n">data_array</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate average gap in DataArray.</span>
-
-<span class="sd">    No checking is performed to guarantee a return type.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data_array: xr.DataArray whose values should support arithmetic, and should be 1D.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        average gap between values in DataArray.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">data_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input DataArray has more than 1 dimension.&quot;</span><span class="p">)</span>
-
-    <span class="n">dim</span> <span class="o">=</span> <span class="n">data_array</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">data_array</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># UFuncTypeError from not being able to take diff</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data in given DataArray does not support subtraction.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># check if coordinate has length 1, and return np.nan if so</span>
-        <span class="k">if</span> <span class="n">data_array</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="k">raise</span> <span class="n">e</span>  <span class="c1"># else, re-raise</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">stack_datasets</span><span class="p">(</span><span class="n">datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dataset</span><span class="p">],</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">methodType</span> <span class="o">=</span> <span class="s2">&quot;ffill&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stacks multiple datasets based on the input dimension. By default this is time</span>
-<span class="sd">    and this will be aligned to the highest resolution / frequency</span>
-<span class="sd">    (smallest difference betweeen coordinate values).</span>
-
-<span class="sd">    At the moment, the two datasets must have identical coordinate values for all</span>
-<span class="sd">    other dimensions and variable names for these to be stacked.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        datasets : Sequence of input datasets</span>
-<span class="sd">        dim : Name of dimension to stack along. Default = &quot;time&quot;</span>
-<span class="sd">        method: Method to use when aligning the datasets. Default = &quot;ffill&quot;</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dataset : Stacked dataset</span>
-
-<span class="sd">    TODO: Could update this to only allow DataArrays to be included to reduce the phase</span>
-<span class="sd">    space here.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">dataset</span>
-
-    <span class="n">data_frequency</span> <span class="o">=</span> <span class="p">[</span><span class="n">calc_dim_resolution</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">]</span>
-    <span class="n">index_highest_freq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_frequency</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="n">data_frequency</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
-    <span class="n">data_highest_freq</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="n">index_highest_freq</span><span class="p">]</span>
-    <span class="n">coords_to_match</span> <span class="o">=</span> <span class="n">data_highest_freq</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">datasets</span><span class="p">):</span>
-        <span class="n">data_match</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reindex</span><span class="p">({</span><span class="n">dim</span><span class="p">:</span> <span class="n">coords_to_match</span><span class="p">},</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">data_stacked</span> <span class="o">=</span> <span class="n">data_match</span>
-            <span class="n">data_stacked</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data_stacked</span> <span class="o">+=</span> <span class="n">data_match</span>
-
-    <span class="k">return</span> <span class="n">data_stacked</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">check_units</span><span class="p">(</span><span class="n">data_var</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check &quot;units&quot; attribute within a DataArray. Expect this to be a float</span>
-<span class="sd">    or possible to convert to a float.</span>
-<span class="sd">    If not present, use default value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">attrs</span> <span class="o">=</span> <span class="n">data_var</span><span class="o">.</span><span class="n">attrs</span>
-    <span class="k">if</span> <span class="s2">&quot;units&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-        <span class="n">units_from_attrs</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">units_from_attrs</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">units</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">units_from_attrs</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot extract </span><span class="si">{</span><span class="n">units_from_attrs</span><span class="si">}</span><span class="s2"> value as float&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="n">default</span>
-
-    <span class="k">return</span> <span class="n">units</span>
 
 
 <span class="c1"># def footprints_data_merge(data: Union[dict, ObsData],</span>

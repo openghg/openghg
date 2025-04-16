@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.13.0 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.14.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=1019fba8"></script>
+    <script src="../../../../_static/documentation_options.js?v=9e420a66"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -54,8 +54,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.0" />
-    <meta name="docbuild:last-update" content="Mar 10, 2025"/>
+  <meta name="docsearch:version" content="0.14.0" />
+    <meta name="docbuild:last-update" content="Apr 16, 2025"/>
   </head>
   
   
@@ -121,8 +121,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.13.0 documentation - Home"/>
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.13.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.14.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -378,7 +378,9 @@
 <span class="sd">                        to be distributed through the Carbon Portal.</span>
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
-<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
+<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify &quot;ICOS</span>
+<span class="sd">            Combined&quot; here in order to retrieve the combined timeseries including all Obspack and ICOS</span>
+<span class="sd">            data (e.g. https://doi.org/10.18160/0HYS-FF7X)</span>
 <span class="sd">        store: Name of object to search/store data to</span>
 <span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
 <span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
@@ -482,8 +484,7 @@
 <span class="sd">    a format expected by OpenGHG. A dictionary of metadata and Datasets</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        site: ICOS site code, for site codes see</span>
-<span class="sd">        https://www.icos-cp.eu/observations/atmosphere/stations</span>
+<span class="sd">        site: Site code</span>
 <span class="sd">        data_level: ICOS data level (1, 2)</span>
 <span class="sd">        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).</span>
 <span class="sd">        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,</span>
@@ -493,7 +494,9 @@
 <span class="sd">        species: Species name</span>
 <span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
 <span class="sd">        sampling_height: Alias for inlet</span>
-<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
+<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify &quot;ICOS</span>
+<span class="sd">            Combined&quot; here in order to retrieve the combined timeseries including all Obspack and ICOS</span>
+<span class="sd">            data (e.g. https://doi.org/10.18160/0HYS-FF7X)</span>
 <span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
 <span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
 <span class="sd">            This includes the options:</span>
@@ -514,8 +517,8 @@
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_attributes</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">format_data_level</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_datetime</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">format_data_level</span><span class="p">,</span> <span class="n">load_internal_json</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_datetime</span><span class="p">,</span> <span class="n">Timedelta</span>
 
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CO&quot;</span><span class="p">,</span> <span class="s2">&quot;CO2&quot;</span><span class="p">,</span> <span class="s2">&quot;CH4&quot;</span><span class="p">]</span>
@@ -551,15 +554,21 @@
         <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_upper</span><span class="p">)))</span>
 
     <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
-    <span class="c1"># We filter out any data that contains &quot;Obspack&quot; or &quot;csv&quot; in the specLabel</span>
+    <span class="c1"># If we want the combined .nc file we search for Obspack</span>
+    <span class="c1"># Otherwise filter out any data that contains &quot;Obspack&quot; or &quot;csv&quot; in the specLabel</span>
     <span class="c1"># Also filter out some drought files which cause trouble being read in</span>
     <span class="c1"># For some reason they have separate station record pages that contain &quot;ATMO_&quot;</span>
-    <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
-        <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span>
-        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
-        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
-        <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;ATMO_&quot;</span><span class="p">)</span>
-    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
+            <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span>
+            <span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Obspack&quot;</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;ATMO_&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>
@@ -584,6 +593,7 @@
 
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dobj_url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dobj_urls</span><span class="p">):</span>
         <span class="n">dobj</span> <span class="o">=</span> <span class="n">Dobj</span><span class="p">(</span><span class="n">dobj_url</span><span class="p">)</span>
+        <span class="n">dobj</span><span class="o">.</span><span class="n">dateTimeConvert</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieving </span><span class="si">{</span><span class="n">dobj_url</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">:</span>
@@ -598,6 +608,8 @@
                 <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;ICOS Combined&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">][</span><span class="s2">&quot;project&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
@@ -610,6 +622,7 @@
 
         <span class="c1"># We need to pull the data down as .info (metadata) is populated further on this step</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
         <span class="c1"># This is the metadata, dobj.info and dobj.meta are equal</span>
         <span class="n">dobj_info</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span>
 
@@ -619,48 +632,71 @@
         <span class="n">specific_info</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;specificInfo&quot;</span><span class="p">]</span>
         <span class="n">col_data</span> <span class="o">=</span> <span class="n">specific_info</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]</span>
 
-        <span class="c1"># Get the species this dobj holds information for</span>
-        <span class="n">not_the_species</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="s2">&quot;NbPoints&quot;</span><span class="p">,</span> <span class="s2">&quot;Stdev&quot;</span><span class="p">}</span>
-        <span class="n">species_info</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">col_data</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">not_the_species</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">species_info</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">col_data</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">not_the_species</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="s2">&quot;NbPoints&quot;</span><span class="p">,</span> <span class="s2">&quot;Stdev&quot;</span><span class="p">}</span>
+            <span class="n">species_info</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">col_data</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">not_the_species</span><span class="p">)</span>
 
         <span class="n">measurement_type</span> <span class="o">=</span> <span class="n">species_info</span><span class="p">[</span><span class="s2">&quot;valueType&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="n">species_info</span><span class="p">[</span><span class="s2">&quot;valueType&quot;</span><span class="p">][</span><span class="s2">&quot;unit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">the_species</span> <span class="o">=</span> <span class="n">species_info</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
-
-        <span class="n">species_info</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">col_data</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">the_species</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">the_species</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">measurement_type</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="n">acq_data</span> <span class="o">=</span> <span class="n">specific_info</span><span class="p">[</span><span class="s2">&quot;acquisition&quot;</span><span class="p">]</span>
         <span class="n">station_data</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span>
 
+        <span class="c1"># Hack to convert units for Obspack nc files</span>
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppm&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppb&quot;</span>
+
+            <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+            <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
+            <span class="n">unit_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unit_interpret</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">))</span>
+
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_LTR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_LTR&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_SMR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_SMR&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_STTB&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;icos_STTB&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="n">species_info</span><span class="p">[</span><span class="s2">&quot;valueType&quot;</span><span class="p">][</span><span class="s2">&quot;unit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
         <span class="n">to_store</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
             <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
             <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Do some tidying of the instrument attributes</span>
-            <span class="n">instruments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-            <span class="n">cleaned_instrument_attributes</span> <span class="o">=</span> <span class="p">[]</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instrument_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">instrument_attributes</span><span class="p">]</span>
-
-            <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">instrument_attributes</span><span class="p">:</span>
-                <span class="n">instrument_name</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
-                <span class="n">instruments</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">instrument_name</span><span class="p">)</span>
-                <span class="n">uri</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">]</span>
-
-                <span class="n">cleaned_instrument_attributes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">instrument_name</span><span class="p">,</span> <span class="n">uri</span><span class="p">])</span>
-
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">instrument</span> <span class="o">=</span> <span class="n">instruments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+                <span class="c1"># Do some tidying of the instrument attributes</span>
+                <span class="n">instruments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="n">cleaned_instrument_attributes</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
-            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cleaned_instrument_attributes</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instrument_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">instrument_attributes</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">instrument_attributes</span><span class="p">:</span>
+                    <span class="n">instrument_name</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+                    <span class="n">instruments</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">instrument_name</span><span class="p">)</span>
+                    <span class="n">uri</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">]</span>
+
+                    <span class="n">cleaned_instrument_attributes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">instrument_name</span><span class="p">,</span> <span class="n">uri</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">instrument</span> <span class="o">=</span> <span class="n">instruments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+
+                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cleaned_instrument_attributes</span>
 
         <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_store</span><span class="p">)</span>
 
@@ -724,37 +760,54 @@
         <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
         <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
 
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-
         <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="c1"># If there is a stdev column, replace missing values with nans</span>
+        <span class="c1"># Then rename columns</span>
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;qc_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;flag&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;icos_ltr&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">)</span>
 
         <span class="c1"># Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else</span>
         <span class="n">dataframe</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">]))</span>
-        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">dataframe</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
             <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
 
-        <span class="c1"># If there is a stdev column, replace missing values with nans</span>
-        <span class="c1"># Then rename columns</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
-        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
-
-        <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
         <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+                <span class="s2">&quot;comment&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015&quot;</span>
 
         <span class="c1"># So there isn&#39;t an easy way of getting a hash of a Dataset, can we do something</span>
         <span class="c1"># simple here we can compare data that&#39;s being added? Then we&#39;ll be able to make sure</span>
