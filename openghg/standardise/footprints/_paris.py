@@ -83,16 +83,15 @@ def parse_paris(
     dv_rename = {"srr": "fp"}
 
     # This was keyed the wrong way round!
-    #attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
-    
+    # attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
+
     attribute_rename = {"lpdm_native_output_unit": "fp_output_units"}
 
-    dim_rename = {"latitude": "lat", 
-                  "longitude": "lon"}
+    dim_rename = {"latitude": "lat", "longitude": "lon"}
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    if time_resolved==True:
+    if time_resolved == True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
         dim_rename["resolution"] = "H_back"
@@ -112,10 +111,9 @@ def parse_paris(
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
 
-    # Converts H_back values from timestamps to hours back 
+    # Converts H_back values from timestamps to hours back
     if "H_back" in list(fp_data.dims):
         fp_data["H_back"] = np.arange(0, 24, 1)
-
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
