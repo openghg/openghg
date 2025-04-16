@@ -92,8 +92,6 @@ def parse_paris(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    print("iuhtoihrt")
-
     if time_resolved==True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
@@ -116,7 +114,7 @@ def parse_paris(
 
     # Converts H_back values from timestamps to hours back 
     if "H_back" in list(fp_data.dims):
-        fp_data["H_back"] = np.arange(0, 25, 1)
+        fp_data["H_back"] = np.arange(0, 24, 1)
 
 
     for attr, new_attr in attribute_rename.items():
