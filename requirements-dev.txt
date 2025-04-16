@@ -12,6 +12,7 @@ tox >=4.24
 xarray
 rich
 addict
+toml
 # For mypy
 mypy==1.10.0
 types-paramiko
