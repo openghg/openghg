@@ -350,7 +350,7 @@ def resampler(
     ds: xr.Dataset,
     averaging_period: str,
     func_dict: dict[str, list[str]],
-    drop_na: bool = True,
+    drop_na: bool | dict = True,
     apply_func_kwargs: dict | None = None,
     **kwargs: Any,
 ) -> xr.Dataset:
@@ -376,7 +376,7 @@ def resampler(
         ds: dataset to resample
         averaging_period: period to resample over.
         func_dict: dictionary mapping function names to data variables.
-        drop_na: if True, drop NaNs along time axis.
+        drop_na: if True, drop NaNs along time axis. If dict, should be kwargs for xarray.Dataset.drop_na function (ex : {"how": "any", "subset" : ["ch4", "inlet"]})
         apply_func_kwargs: optional dict of arguments to pass to `apply_funcs`
         **kwargs: options that will be passed to the resampling functions. If
             If the key of an option has the form "<function name>__<key>", then
@@ -405,7 +405,9 @@ def resampler(
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
     if drop_na:
-        result = result.dropna("time")
+        if isinstance(drop_na,dict): result = result.dropna("time", **drop_na)
+        elif isinstance(drop_na,bool): result = result.dropna("time")
+        else: raise TypeError("`drop_na should be bool or dict.")
 
     return result
 
@@ -492,23 +494,19 @@ def surface_obs_resampler(
         ds: surface obs. data that resampler will be applied to
         averaging_period: period to resample to; should be a valid pandas "offset alias"
         species: species of the obs. data
-        drop_na: if True, drop NaNs along "time" dimension.
+        drop_na: if True, drop NaNs along "time" dimension if any of [species, "inlet"] has nan.
 
     Returns:
         xr.Dataset resampled according to default specification.
     """
     resampler_dict = _surface_obs_resampler_dict(ds, species)
 
-    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=False)
-
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
-        check_all = [
-            str(dv)
-            for dv in ds.data_vars
-            if str(dv) in [f"{species}_variability", f"{species}_repeatability"]
-        ]
-        result = result.dropna("time", subset=check_any, how="any")
-        result = result.dropna("time", subset=check_all, how="all")
+        drop_na_kwargs = {'how': 'any', 'subset': check_any}
+    else :
+        drop_na_kwargs = False
+
+    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs)
 
     return result
