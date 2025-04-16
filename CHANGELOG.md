@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ability to reindex footprint data to obs data with tolerance of `1ms` with method="nearest".[#PR 1264](https://github.com/openghg/openghg/pull/1264)
 - Added ability to standardise CORSO radiocarbon data, added new parser named `parse_icos_corso` to handle data modifications.[PR #1285](https://github.com/openghg/openghg/pull/1285)
 - `tox` testing setup. [#PR 1268](https://github.com/openghg/openghg/pull/1268)
+- Added abilty to parse reformatted NAME co2 footprints (PARIS format) to 'paris.py' [PR #1319](https://github.com/openghg/openghg/pull/1319)
 
 ### Updated
 
@@ -42,7 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `datapack` submodule to allow output obspacks to be created. This includes the `create_obspack` function which takes an input search file and produces an obspack within a defined structure from this. [PR #1117](https://github.com/openghg/openghg/pull/1117)
-- Added abilty to parse reformatted NAME co2 footprints (PARIS format) to 'paris.py' [PR #1319](https://github.com/openghg/openghg/pull/1319)
 
 ### Updated
 
