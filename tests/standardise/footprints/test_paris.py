@@ -14,6 +14,15 @@ from openghg.types import ParseError
             "ukv",
             "MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_201301.nc",
         ),
+
+        (
+            "mhd",
+            "10m",
+            "NAME",
+            "ukv",
+            "MHD-10magl_NAME_UKV_TEST_co2_PARIS-format_2013502.nc",
+        ),
+
         (
             "mhd",
             "10m",
@@ -23,6 +32,24 @@ from openghg.types import ParseError
         ),
     ],
 )
+
+
+def check_variables_exist(data, expected_vars):
+    """
+    Check if expected variables exist in an open NetCDF file.
+    """
+    existing_vars = data.variables.keys()
+    missing_vars = [var for var in expected_vars if var not in existing_vars]
+    return missing_vars
+
+def check_dimensions_exist(data, expected_dims):
+    """
+    Check if expected dimensions exist in an open NetCDF file.
+    """
+    existing_dims = data.dims.keys()
+    missing_dims = [dim for dim in expected_dims if dim not in existing_dims]
+    return missing_dims
+
 def test_paris_footprint(site, inlet, model, met_model, filename):
     """
     Test the parse_paris function is able to parse data in expected format.
@@ -32,36 +59,56 @@ def test_paris_footprint(site, inlet, model, met_model, filename):
     fp_filepath = get_footprint_datapath(filename)
 
     domain = "test"
-    species = "inert"
+    species = ["inert", "co2"]
 
-    data = parse_paris(
-        filepath=fp_filepath,
-        site=site,
-        domain=domain,
-        inlet=inlet,
-        model=model,
-        met_model=met_model,
-        species=species,
-    )
+    for s in species:
+        data = parse_paris(
+            filepath=fp_filepath,
+            site=site,
+            domain=domain,
+            inlet=inlet,
+            model=model,
+            met_model=met_model,
+            species=s,
+        )
 
-    # TODO: Remove check after keys declaration is removed from the parsers
-    expected_key = f"{site}_{domain}_{model}_{inlet}"
-    assert expected_key in data
+        # TODO: Remove check after keys declaration is removed from the parsers
+        expected_key = f"{site}_{domain}_{model}_{inlet}"
+        assert expected_key in data
 
-    fp_data = list(data.values())[0]
+        fp_data = list(data.values())[0]
 
-    metadata = fp_data["metadata"]
+        v_data = fp_data["data"]
 
-    expected_metadata = {
-        "site": site,
-        "inlet": inlet,
-        "model": model,
-        "domain": domain,
-        "species": species,
-        "data_type": "footprints",
-    }
+        expected_dims = ["lat", "lon", "time", "height"]
+        expected_vars = ["fp"]
 
-    assert metadata.items() >= expected_metadata.items()
+        if species == "co2":
+            expected_dims.append("H_back")
+            expected_vars.append("fp_time_resolved")
+            expected_vars.append("fp_residual")
+
+
+        missing_vars = check_variables_exist(v_data, expected_vars)
+        assert not missing_vars, f"Missing variables in footprint file: {missing_vars}"
+
+        missing_dims = check_dimensions_exist(v_data, expected_dims)
+        assert not missing_dims, f"Missing dimensions in footprint file: {missing_dims}"
+            
+        metadata = fp_data["metadata"]
+
+        expected_metadata = {
+            "site": site,
+            "inlet": inlet,
+            "model": model,
+            "domain": domain,
+            "species": species,
+            "data_type": "footprints",
+        }
+
+        assert metadata.items() >= expected_metadata.items()
+
+
 
     # TODO: Add data checks as required (may not be able to easily parameterize)
 
