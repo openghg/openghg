@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `datapack` submodule to allow output obspacks to be created. This includes the `create_obspack` function which takes an input search file and produces an obspack within a defined structure from this. [PR #1117](https://github.com/openghg/openghg/pull/1117)
+- Added abilty to parse reformatted NAME co2 footprints (PARIS format) to 'paris.py' [PR #1319](https://github.com/openghg/openghg/pull/1319)
 
 ### Updated
 
