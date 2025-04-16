@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For new object stores, a config file copied into this by default. If no config file is detected the internal defaults for the config are used instead. A custom config file can still be created as needed. [PR #1260](https://github.com/openghg/openghg/pull/1260)
 
 ### Fixed
+
+- Possible circular import due to `get_metakeys`; the metakey config functionality was moved to the `store` module. [#PR1318](https://github.com/openghg/openghg/pull1318)
 - Changed type definition from xr.Coordinates to xarray.core.coordinates.[PR #1316](https://github.com/openghg/openghg/pull/1316)
 - Bugs of resampling functions : delete all variables in the obs data that are filled of nan, test the emptiness of the dataset, and delete "flag" variable (removed in [#PR1283] https://github.com/openghg/openghg/pull/1283), all that before resampling to prevent errors [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Fixed bug where `period="varies"` could not be used or set when determining the time period associated with the input data. [#PR 1259](https://github.com/openghg/openghg/pull/1259) and [#PR 1267](https://github.com/openghg/openghg/pull/1267)

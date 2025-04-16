@@ -3,6 +3,7 @@ import logging
 import importlib
 from pprint import pformat
 from pathlib import Path
+from typing import cast
 
 from openghg.types import ConfigFileError
 from openghg.util import timestamp_now
@@ -54,13 +55,14 @@ def get_metakeys_defaults_filepath() -> Path:
 
 
 def get_metakey_defaults() -> dict:
-    """Return the dictionary of default values for the metadata keys
+    """Return the dictionary of default values for the metadata keys.
 
     Returns:
         dict: Dictionary of defaults
     """
     config_filepath = get_metakeys_defaults_filepath()
-    return json.loads(config_filepath.read_text())
+    default_config = json.loads(config_filepath.read_text())
+    return cast(dict, default_config)  # cast because we know this JSON file will product a dict
 
 
 def check_metakeys(metakeys: dict) -> bool:
@@ -127,7 +129,7 @@ def check_metakeys(metakeys: dict) -> bool:
                 dtype_errors.extend(errors_optional)
 
         if dtype_errors:
-            total_errors[dtype] = dtype_errors
+            total_errors[dtype] = dtype_errors  # type: ignore[assignment]
 
     if total_errors:
         logger.error("Errors found with metakeys:")
@@ -206,6 +208,9 @@ def _get_metakeys_from_file(metakey_path: Path) -> dict:
         metakeys = config_data["metakeys"]
     else:
         metakeys = config_data
+
+    if not isinstance(metakeys, dict):
+        raise ValueError(f"Format of metakeys file {metakey_path} is invalid.")
 
     return metakeys
 

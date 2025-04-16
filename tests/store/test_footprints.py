@@ -1,9 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.objectstore import get_writable_bucket, get_metakey_defaults
+from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
-from openghg.store import Footprints
+from openghg.store import Footprints, get_metakey_defaults
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
