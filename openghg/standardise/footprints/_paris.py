@@ -78,17 +78,27 @@ def parse_paris(
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
+    # Mapping NAME 2025 processed footprint variables to pre-2025
     dv_rename = {"srr": "fp"}
 
-    attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
+    # This was keyed the wrong way round!
+    # attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
+
+    attribute_rename = {"lpdm_native_output_unit": "fp_output_units"}
 
     dim_rename = {"latitude": "lat", "longitude": "lon"}
 
     dim_reorder = ("time", "height", "lat", "lon")
 
+    if time_resolved is True:
+        dv_rename["srr_time_resolved"] = "fp_time_resolved"
+        dv_rename["srr_residual"] = "fp_residual"
+        dim_rename["resolution"] = "H_back"
+
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
         fp_data = fp_data.rename(**dv_rename)  # type: ignore
+
     except ValueError:
         msg = "Unable to parse input data using source_format='paris'. "
         if "fp" in fp_data:
@@ -99,6 +109,10 @@ def parse_paris(
     fp_data = fp_data.rename(dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
+
+    # Converts H_back values from timestamps to hours back
+    if "H_back" in fp_data.dims:
+        fp_data["H_back"] = fp_data.H_back.dt.seconds / 3600.0
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
