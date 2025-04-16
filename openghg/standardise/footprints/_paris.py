@@ -91,7 +91,7 @@ def parse_paris(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    if time_resolved == True:
+    if time_resolved is True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
         dim_rename["resolution"] = "H_back"
