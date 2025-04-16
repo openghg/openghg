@@ -6,7 +6,7 @@ import pandas as pd
 import xarray as xr
 from numpy.typing import ArrayLike
 
-from openghg.types import XrDataLike
+from openghg.types import ReindexMethod, XrDataLike
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -73,7 +73,7 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
 
     # Check if the periods differ by more than 1 second
     if max_diff > tol:
-        raise ValueError("Sample period can be not be derived from observations")
+        raise ValueError("Sample period cannot be derived from observations")
 
     return float(obs_data_period_s)
 
@@ -151,7 +151,7 @@ T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
 
 
-def align_obs_and_other(
+def resample_obs_and_other(
     obs: T1,
     other: T2,
     resample_to: Literal["obs", "other", "coarsest"] | str = "coarsest",
@@ -243,3 +243,77 @@ def align_obs_and_other(
             obs = obs.resample(indexer={"time": resample_period}, offset=offset).mean()
 
     return obs, other
+
+
+def _indexes_match(dataset_A: xr.Dataset, dataset_B: xr.Dataset) -> bool:
+    """Check if two datasets need to be reindexed_like for combine_datasets
+
+    Args:
+        dataset_A: First dataset to check
+        dataset_B: Second dataset to check
+    Returns:
+        bool: True if indexes match, else False
+    """
+    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
+
+    for index in common_indices:
+        if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
+            return False
+
+        # Check number of values that are not close (testing for equality with floating point)
+        if index == "time":
+            # For time override the default to have ~ second precision
+            rtol = 1e-10
+        else:
+            rtol = 1e-5
+
+        index_diff = np.sum(
+            ~np.isclose(
+                dataset_A.indexes[index].values.astype(float),
+                dataset_B.indexes[index].values.astype(float),
+                rtol=rtol,
+            )
+        )
+
+        if not index_diff == 0:
+            return False
+
+    return True
+
+
+def combine_datasets(
+    dataset_A: xr.Dataset,
+    dataset_B: xr.Dataset,
+    method: ReindexMethod = "ffill",
+    tolerance: float | None = None,
+) -> xr.Dataset:
+    """Merges two datasets and re-indexes to the first dataset.
+
+    If "fp" variable is found within the combined dataset,
+    the "time" values where the "lat", "lon" dimensions didn't match are removed.
+
+    Args:
+        dataset_A: First dataset to merge
+        dataset_B: Second dataset to merge
+        method: One of None, nearest, ffill, bfill.
+                See xarray.DataArray.reindex_like for list of options and meaning.
+                Defaults to ffill (forward fill)
+        tolerance: Maximum allowed tolerance between matches.
+
+    Returns:
+        xarray.Dataset: Combined dataset indexed to dataset_A
+    """
+    if _indexes_match(dataset_A, dataset_B):
+        dataset_B_temp = dataset_B
+    else:
+        # load dataset_B to avoid performance issue (see xarray issue #8945)
+        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
+
+    merged_ds = dataset_A.merge(dataset_B_temp)
+
+    if "fp" in merged_ds:
+        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
+            flag = np.isfinite(merged_ds.fp.mean(["lat", "lon"]))
+            merged_ds = merged_ds.where(flag.compute(), drop=True)
+
+    return merged_ds

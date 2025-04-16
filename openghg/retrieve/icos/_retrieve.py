@@ -44,7 +44,9 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify "ICOS
+            Combined" here in order to retrieve the combined timeseries including all Obspack and ICOS
+            data (e.g. https://doi.org/10.18160/0HYS-FF7X)
         store: Name of object to search/store data to
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
@@ -147,8 +149,7 @@ def _retrieve_remote(
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
     Args:
-        site: ICOS site code, for site codes see
-        https://www.icos-cp.eu/observations/atmosphere/stations
+        site: Site code
         data_level: ICOS data level (1, 2)
         - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
         - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
@@ -158,7 +159,9 @@ def _retrieve_remote(
         species: Species name
         inlet: Height of the inlet for sampling in metres.
         sampling_height: Alias for inlet
-        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify "ICOS
+            Combined" here in order to retrieve the combined timeseries including all Obspack and ICOS
+            data (e.g. https://doi.org/10.18160/0HYS-FF7X)
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
             This includes the options:
@@ -179,8 +182,8 @@ def _retrieve_remote(
 
     import re
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import format_inlet, format_data_level
-    from pandas import to_datetime
+    from openghg.util import format_inlet, format_data_level, load_internal_json
+    from pandas import to_datetime, Timedelta
 
     if species is None:
         species = ["CO", "CO2", "CH4"]
@@ -216,15 +219,21 @@ def _retrieve_remote(
         search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
 
     # Now filter the dataframe so we can extract the PIDS
-    # We filter out any data that contains "Obspack" or "csv" in the specLabel
+    # If we want the combined .nc file we search for Obspack
+    # Otherwise filter out any data that contains "Obspack" or "csv" in the specLabel
     # Also filter out some drought files which cause trouble being read in
     # For some reason they have separate station record pages that contain "ATMO_"
-    filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str)
-        & ~data_pids["specLabel"].str.contains("Obspack")
-        & ~data_pids["specLabel"].str.contains("csv")
-        & ~data_pids["station"].str.contains("ATMO_")
-    ]
+    if dataset_source == "ICOS Combined":
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str) & data_pids["specLabel"].str.contains("Obspack")
+        ]
+    else:
+        filtered_sources = data_pids[
+            data_pids["specLabel"].str.contains(search_str)
+            & ~data_pids["specLabel"].str.contains("Obspack")
+            & ~data_pids["specLabel"].str.contains("csv")
+            & ~data_pids["station"].str.contains("ATMO_")
+        ]
 
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
@@ -249,6 +258,7 @@ def _retrieve_remote(
 
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
+        dobj.dateTimeConvert = False
         logger.info(f"Retrieving {dobj_url}...")
 
         if dataset_source == "ICOS FastTrack":
@@ -263,6 +273,8 @@ def _retrieve_remote(
                 dobj_dataset_source = "EYE-AVE-PAR"
             else:
                 continue
+        elif dataset_source == "ICOS Combined":
+            dobj_dataset_source = "ICOS Combined"
         else:
             try:
                 dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
@@ -275,6 +287,7 @@ def _retrieve_remote(
 
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
+
         # This is the metadata, dobj.info and dobj.meta are equal
         dobj_info = dobj.meta
 
@@ -284,48 +297,71 @@ def _retrieve_remote(
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
 
-        # Get the species this dobj holds information for
-        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
-        species_info = next(i for i in col_data if i["label"] not in not_the_species)
+        if dataset_source == "ICOS Combined":
+            species_info = next(i for i in col_data if i["label"] == "value")
+        else:
+            not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+            species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
         measurement_type = species_info["valueType"]["self"]["label"].lower()
-        units = species_info["valueType"]["unit"].lower()
-        the_species = species_info["label"]
-
-        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
-
-        attributes["species"] = the_species
+        spec = measurement_type.split()[0]
+        attributes["species"] = spec
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
+        # Hack to convert units for Obspack nc files
+        if dataset_source == "ICOS Combined":
+            if spec == "co2":
+                units = "ppm"
+            else:
+                units = "ppb"
+
+            attributes_data = load_internal_json("attributes.json")
+            unit_interpret = attributes_data["unit_interpret"]
+            unit_value = float(unit_interpret.get(units, "1"))
+
+            dataframe["value"] = dataframe["value"] / unit_value
+            dataframe["value_std_dev"] = dataframe["value_std_dev"] / unit_value
+            dataframe["icos_LTR"] = dataframe["icos_LTR"] / unit_value
+            dataframe["icos_SMR"] = dataframe["icos_SMR"] / unit_value
+            dataframe["icos_STTB"] = dataframe["icos_STTB"] / unit_value
+
+        else:
+            units = species_info["valueType"]["unit"].lower()
+
         to_store: dict[str, Any] = {}
-        try:
-            instrument_attributes = acq_data["instrument"]
-        except KeyError:
+
+        if dataset_source == "ICOS Combined":
             to_store["instrument"] = "NA"
             to_store["instrument_data"] = "NA"
         else:
-            # Do some tidying of the instrument attributes
-            instruments = set()
-            cleaned_instrument_attributes = []
-
-            if not isinstance(instrument_attributes, list):
-                instrument_attributes = [instrument_attributes]
-
-            for inst in instrument_attributes:
-                instrument_name = inst["label"]
-                instruments.add(instrument_name)
-                uri = inst["uri"]
-
-                cleaned_instrument_attributes.extend([instrument_name, uri])
-
-            if len(instruments) == 1:
-                instrument = instruments.pop()
+            try:
+                instrument_attributes = acq_data["instrument"]
+            except KeyError:
+                to_store["instrument"] = "NA"
+                to_store["instrument_data"] = "NA"
             else:
-                instrument = "multiple"
+                # Do some tidying of the instrument attributes
+                instruments = set()
+                cleaned_instrument_attributes = []
 
-            to_store["instrument"] = instrument
-            to_store["instrument_data"] = cleaned_instrument_attributes
+                if not isinstance(instrument_attributes, list):
+                    instrument_attributes = [instrument_attributes]
+
+                for inst in instrument_attributes:
+                    instrument_name = inst["label"]
+                    instruments.add(instrument_name)
+                    uri = inst["uri"]
+
+                    cleaned_instrument_attributes.extend([instrument_name, uri])
+
+                if len(instruments) == 1:
+                    instrument = instruments.pop()
+                else:
+                    instrument = "multiple"
+
+                to_store["instrument"] = instrument
+                to_store["instrument_data"] = cleaned_instrument_attributes
 
         attributes.update(to_store)
 
@@ -389,37 +425,54 @@ def _retrieve_remote(
         attributes.update(additional_data)
         metadata.update(additional_data)
 
-        spec = attributes["species"]
-
         dataframe.columns = [x.lower() for x in dataframe.columns]
+
+        # If there is a stdev column, replace missing values with nans
+        # Then rename columns
+        if dataset_source == "ICOS Combined":
+            dataframe["value_std_dev"] = dataframe["value_std_dev"].where(dataframe["value_std_dev"] >= 0)
+            rename_cols = {
+                "value": attributes["species"],
+                "qc_flag": "flag",
+                "value_std_dev": spec + " variability",
+                "icos_ltr": spec + " repeatability",
+            }
+        else:
+            try:
+                dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
+                rename_cols = {
+                    "timestamp": "time",
+                    "stdev": spec + " variability",
+                    "nbpoints": spec + " number_of_observations",
+                }
+            except KeyError:
+                rename_cols = {
+                    "timestamp": "time",
+                    "nbpoints": spec + " number_of_observations",
+                }
+
+        dataframe = dataframe.rename(columns=rename_cols)
 
         # Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else
         dataframe[spec] = dataframe[spec].where(dataframe["flag"].isin(["O", "U", "R"]))
-        dataframe = dataframe.dropna(axis="index")
+        dataframe = dataframe[dataframe[spec].notna()]
 
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
 
-        # If there is a stdev column, replace missing values with nans
-        # Then rename columns
-        try:
-            dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
-            rename_cols = {
-                "stdev": spec + " variability",
-                "nbpoints": spec + " number_of_observations",
-            }
-        except KeyError:
-            rename_cols = {
-                "nbpoints": spec + " number_of_observations",
-            }
+        dataframe = dataframe.set_index("time")
 
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
-
-        dataframe.index.name = "time"
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
+        if dataset_source == "ICOS Combined":
+            dataframe.index = dataframe.index - Timedelta(minutes=30)
 
         dataset = dataframe.to_xarray()
         dataset.attrs.update(attributes)
+
+        if dataset_source == "ICOS Combined":
+            dataset[spec + " repeatability"].attrs[
+                "comment"
+            ] = "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
 
         # So there isn't an easy way of getting a hash of a Dataset, can we do something
         # simple here we can compare data that's being added? Then we'll be able to make sure

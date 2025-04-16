@@ -97,6 +97,7 @@ class ObsColumn(BaseStore):
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
+            format_platform,
             load_standardise_parser,
             split_function_inputs,
             check_if_need_new_version,
@@ -106,6 +107,8 @@ class ObsColumn(BaseStore):
         # TODO: Evaluate which inputs need cleaning (if any)
         species = clean_string(species)
         species = synonyms(species)
+
+        platform = format_platform(platform)
         platform = clean_string(platform)
 
         if site is None and satellite is None:

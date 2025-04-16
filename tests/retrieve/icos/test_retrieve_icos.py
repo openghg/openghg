@@ -10,7 +10,9 @@ from openghg.types import AttrMismatchError, MetadataAndData
 
 @pytest.mark.icos
 def test_icos_retrieve_skips_datalevel_1_csv_files():
-    retrieved_data = retrieve_atmospheric(site="BIR", species="co2", store="user", data_level=1, update_mismatch="metadata")
+    retrieved_data = retrieve_atmospheric(
+        site="BIR", species="co2", store="user", data_level=1, update_mismatch="metadata"
+    )
 
     assert len(retrieved_data) == 3
 
@@ -93,7 +95,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # Results from ICOS on 07/08/2024
     expected_metadata = {
-        #"station_long_name": "weybourne observatory, uk",
+        # "station_long_name": "weybourne observatory, uk",
         "station_long_name": "wao",
         "station_latitude": 52.9504,
         "station_longitude": 1.1219,
@@ -129,10 +131,13 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata", store="user"
     )
 
-
     assert data_second_retrieval is not None
 
-    data2 = data_second_retrieval[0].data if isinstance(data_second_retrieval, list) else data_second_retrieval.data
+    data2 = (
+        data_second_retrieval[0].data
+        if isinstance(data_second_retrieval, list)
+        else data_second_retrieval.data
+    )
 
     assert retrieve_all.call_count == 1
 
@@ -191,7 +196,6 @@ def test_retrieved_prevents_storing_twice(mock_retrieve_remote, caplog):
     retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
     assert "Skipping data that overlaps existing data" not in caplog.text
 
-
     retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
     assert "Skipping data that overlaps existing data" in caplog.text
 
@@ -223,9 +227,18 @@ def test_retrieve_icos_attr_mismatch_error():
         retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", store="user")
 
 
-
 @pytest.mark.icos
 def test_retrieve_sac_data_update_attrs_with_bool():
     """Test that ValueError is raised if invalid value `True` is passed to `update_mismatch`."""
     with pytest.raises(ValueError):
         retrieve_atmospheric(site="SAC", species="ch4", inlet="100m", update_mismatch=True, store="user")
+
+
+@pytest.mark.icos
+def test_icos_obspack():
+    """Test the combined obspack data retrieval"""
+    retrieved_data = retrieve_atmospheric(
+        site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
+    )
+
+    assert "icos_smr" in retrieved_data.data

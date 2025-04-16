@@ -24,10 +24,12 @@ If custom resampling is needed, the user can write their own resampling function
 possible using `surface_obs_resampler` as a base.
 """
 
+from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
 from typing import Any, Concatenate, Literal
 
+import logging
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
@@ -39,6 +41,9 @@ from ._xarray_helpers import xr_sqrt
 
 registry = Registry(suffix="resample")
 register = registry.register
+
+logger = logging.getLogger("openghg.data_processing")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 # somewhat complicated typing for decorator:
@@ -180,6 +185,32 @@ def _weighted_resample(
             data_vars[f"{species}_variability"] = weighted_resample_mf_variability
 
     return xr.Dataset(data_vars=data_vars)
+
+
+@register
+@add_averaging_attrs
+def mean_and_variability_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr.Dataset:
+    """Resample concentration and variability, using weighted_resample and assuming number of observations uniformely equal to 1.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species data applies to; a data variable with this name, as well as
+            a data variable named {species}_variability must be present in `ds`.
+
+    Returns:
+        xr.Dataset with obs. (and variability) resampled.
+    """
+
+    n_obs = f"{species}_number_of_observations"
+    ds[n_obs] = xr.full_like(ds[species], fill_value=1)
+    ds[n_obs].attrs = {"long_name": "faked number of observations for weighted_resample function"}
+
+    result = weighted_resample(ds, averaging_period, species)
+
+    del result[n_obs]
+
+    return result
 
 
 @register
@@ -392,7 +423,7 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
         dict mapping resampler function names to lists of data variables.
     """
     # build dict of resampling functions
-    func_dict = {}
+    func_dict = defaultdict(list)
     data_vars = [str(dv) for dv in ds.data_vars]
 
     # check for repeatability
@@ -407,7 +438,12 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
 
     n_obs = f"{species}_number_of_observations"
 
-    if n_obs in data_vars and species in data_vars:
+    if species in data_vars and n_obs not in data_vars and variability in data_vars:
+        func_dict["mean_and_variability"] = [species, variability]
+
+        variability_set = True
+
+    elif n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
         if variability in data_vars:
@@ -424,7 +460,7 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
         # since species is mapped to species_variability, it will not be mean resampled by `resampler` by
         # default, so set this explicitly
         if species not in func_dict.get("weighted", []):
-            func_dict["mean"] = [species]
+            func_dict["mean"].append(species)
 
     return func_dict
 
@@ -462,4 +498,17 @@ def surface_obs_resampler(
         xr.Dataset resampled according to default specification.
     """
     resampler_dict = _surface_obs_resampler_dict(ds, species)
-    return resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na)
+
+    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=False)
+
+    if drop_na:
+        check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
+        check_all = [
+            str(dv)
+            for dv in ds.data_vars
+            if str(dv) in [f"{species}_variability", f"{species}_repeatability"]
+        ]
+        result = result.dropna("time", subset=check_any, how="any")
+        result = result.dropna("time", subset=check_all, how="all")
+
+    return result

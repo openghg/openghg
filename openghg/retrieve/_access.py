@@ -95,6 +95,7 @@ def get_obs_surface(
     calibration_scale: str | None = None,
     rename_vars: bool = True,
     keep_missing: bool = False,
+    keep_variables: list | None = None,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -113,10 +114,11 @@ def get_obs_surface(
         average: Averaging period for each dataset. Each value should be a string of
             the form e.g. "2H", "30min" (should match pandas offset aliases format).
         network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the sipte (must match number of sites).
+        instrument: Specific instrument for the site (must match number of sites).
         calibration_scale: Convert to this calibration scale
         rename_vars: Rename variables from species names to use "mf" explictly.
         keep_missing: Keep missing data points or drop them.
+        keep_variables: List of variables to keep. If None, keeps everything.
         kwargs: Additional search terms
 
     Returns:
@@ -167,9 +169,23 @@ def get_obs_surface(
 
     data = retrieved_data.data
 
+    # check if data set is empty
+    if data.sizes["time"] == 0:
+        raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
+
+    if keep_variables:
+        var_list = [str(dv) for dv in data.data_vars if str(dv) in keep_variables]
+        if not var_list:
+            raise ValueError(
+                f"Variables among {keep_variables} expected, but none of them found. Present variables are  : {[str(dv) for dv in data.data_vars]}"
+            )
+        data = data[var_list]
+
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
+        if "inlet_height" in data.data_vars and not "inlet" in data.data_vars:
+            data["inlet"] = data["inlet_height"]
 
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
@@ -178,6 +194,17 @@ def get_obs_surface(
         # which makes resampling extremely slow with Dask >= 2024.8.0
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
+
+        var_to_delete = []
+        for var in data:
+            if data[var].isnull().all():
+                var_to_delete.append(var)
+        if var_to_delete:
+            logger.info(
+                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
+            )
+            data = data.drop_vars(var_to_delete)
+
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )

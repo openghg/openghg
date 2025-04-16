@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import (
     Any,
     Union,
-    Optional,
+    Literal,
     TypeVar,
     NamedTuple,
     Protocol,
@@ -19,7 +19,6 @@ import xarray as xr
 
 
 pathType = Union[str, Path]
-optionalPathType = Optional[pathType]
 multiPathType = Union[str, Path, tuple, list]
 resultsType = defaultdict[str, dict]
 
@@ -29,6 +28,9 @@ ArrayLike = Union[np.ndarray, xr.DataArray]
 ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
 XrDataLike = Union[xr.DataArray, xr.Dataset]
 XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
+
+# Defining literals for different (generally internal) settings
+ReindexMethod = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
 
 
 class TimePeriod(NamedTuple):
