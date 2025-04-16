@@ -1,13 +1,13 @@
 import pytest
 import json
-from openghg.objectstore import (
+from openghg.store import (
     check_metakeys,
     get_metakey_defaults,
     create_custom_config,
     get_metakeys,
     write_metakeys,
 )
-from openghg.objectstore._config import _get_custom_metakeys_filepath, _get_metakeys_from_file
+from openghg.store._metakeys_config import _get_custom_metakeys_filepath, _get_metakeys_from_file
 from openghg.store import data_class_info
 from openghg.types import ConfigFileError
 

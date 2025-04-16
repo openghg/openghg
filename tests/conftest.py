@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 tmp_store_paths = temporary_store_paths()
 
-from openghg.objectstore import get_metakey_defaults
+from openghg.store import get_metakey_defaults
 
 
 @pytest.fixture(scope="session", autouse=True)
