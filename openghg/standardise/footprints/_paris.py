@@ -9,7 +9,6 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    # open_and_align_dataset,
     check_function_open_nc,
 )
 from openghg.store import infer_date_range, update_zero_dim
