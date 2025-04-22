@@ -71,7 +71,7 @@ def convert_to_ndarray(array: ndarray | xr.DataArray) -> ndarray:
     else:
         values = array
 
-    return values
+    return cast(ndarray, values)
 
 
 def regrid_uniform_cc(
