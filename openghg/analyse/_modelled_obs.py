@@ -76,7 +76,12 @@ def _fp_time_and_h_back_freq_gcd(fp: xr.DataArray | xr.Dataset) -> int:
 
     # Define resolution on high frequency dimension in number of hours
     # At the moment this is matched to the Hback dimension
-    fp_res_h_back_hours = calc_hourly_freq(fp["H_back"], dim="H_back")
+    try:
+        fp_res_h_back_hours = calc_hourly_freq(fp.H_back, dim="H_back")
+    except AttributeError as e:
+        raise ValueError(
+            "Cannot calculate GCD of time and H back frequency because given footprints do not have 'H_back' dimension."
+        ) from e
 
     # Only allow for high frequency resolution < 24 hours that divides 24 hours evenly.
     if fp_res_h_back_hours > 24:
@@ -200,20 +205,24 @@ def fp_x_flux_time_resolved(
         # TODO: we might also want to change how we resample, depending on whether we're upsampling or downsampling
         fp = fp.resample(time=averaging).ffill()
 
+    # explicit variables to make mypy happy...
+    fp_time_resolved: xr.DataArray = fp.fp_time_resolved
+    fp_residual: xr.DataArray = fp.fp_residual
+
     # create low res. (monthly) flux and calculate low res. fp x flux
     flux_low_freq = _make_low_freq_flux(flux, fp)
-    fp_x_flux_residual = fp.fp_residual * flux_low_freq
+    fp_x_flux_residual = fp_residual * flux_low_freq
 
     # Calculate time resolution for flux
     flux_res_hours = calc_hourly_freq(flux.time, input_nanoseconds=True)
 
     # if resolution coarser than "H_back" dimension, just sum over "H_back" and use low freq. flux
     if flux_res_hours > _max_h_back(fp):
-        return fp.fp_time_resolved.sum("H_back") * flux_low_freq + fp_x_flux_residual
+        return fp_time_resolved.sum("H_back") * flux_low_freq + fp_x_flux_residual
 
     # create high frequency flux (resampled to gcd of footprint time and H_back frequencies) with H_back dim
     flux_high_freq = _make_high_freq_flux(flux, fp)
 
-    fp_x_flux = (flux_high_freq * fp.fp_time_resolved).sum("H_back") + fp_x_flux_residual
+    fp_x_flux = (flux_high_freq * fp_time_resolved).sum("H_back") + fp_x_flux_residual
 
     return fp_x_flux
