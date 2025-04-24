@@ -47,7 +47,6 @@ import logging
 from typing import Any, Union, cast
 from collections.abc import Sequence
 
-import numpy as np
 import pandas as pd
 from pandas import Timestamp
 from xarray import DataArray, Dataset
@@ -69,7 +68,8 @@ from openghg.retrieve import (
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
 from openghg.types import SearchError, ReindexMethod
 from ._alignment import combine_datasets, resample_obs_and_other
-from ._utils import check_units, match_dataset_dims, stack_datasets
+from ._modelled_baseline import baseline_sensitivities
+from ._utils import match_dataset_dims, stack_datasets
 
 
 __all__ = ["ModelScenario"]
@@ -1249,8 +1249,6 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
-
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
 
@@ -1265,91 +1263,12 @@ class ModelScenario:
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        bc_data = bc_data.reindex_like(scenario, "ffill")
-
-        lifetime_value = species_lifetime(self.species)
-        check_monthly = check_lifetime_monthly(lifetime_value)
-
-        if check_monthly:
-            lifetime_monthly = cast(list[str] | None, lifetime_value)
-            lifetime: str | None = None
-        else:
-            lifetime_monthly = None
-            lifetime = cast(str | None, lifetime_value)
-
-        if lifetime is not None:
-            short_lifetime = True
-            lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: float | np.ndarray = lt_time_delta.total_seconds() / 3600.0
-        elif lifetime_monthly:
-            short_lifetime = True
-            lifetime_monthly_hrs = []
-            for lt in lifetime_monthly:
-                lt_time_delta = time_offset(period=lt)
-                lt_hrs = lt_time_delta.total_seconds() / 3600.0
-                lifetime_monthly_hrs.append(lt_hrs)
-
-            # calculate the lifetime_hrs associated with each time point in scenario data
-            # this is because lifetime can be a list of monthly values
-            time_month = scenario["time"].dt.month
-            lifetime_hrs = np.array([lifetime_monthly_hrs[item - 1] for item in time_month.values])
-        else:
-            short_lifetime = False
-
-        # Include loss condition if lifetime of species is specified
-        if short_lifetime:
-            expected_vars = (
-                "mean_age_particles_n",
-                "mean_age_particles_e",
-                "mean_age_particles_s",
-                "mean_age_particles_w",
-            )
-            for var in expected_vars:
-                if var not in scenario.data_vars:
-                    raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
-                    )
-
-            # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename(  # type: ignore
-                "loss_n"
-            )
-            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename(  # type: ignore
-                "loss_e"
-            )
-            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename(  # type: ignore
-                "loss_s"
-            )
-            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename(  # type: ignore
-                "loss_w"
-            )
-
-        else:
-            loss_n = 1.0
-            loss_e = 1.0
-            loss_s = 1.0
-            loss_w = 1.0
-
-        # Check and extract units as float, if present.
-        units_default = 1.0
-        units_n = check_units(bc_data["vmr_n"], default=units_default)
-        units_e = check_units(bc_data["vmr_e"], default=units_default)
-        units_s = check_units(bc_data["vmr_s"], default=units_default)
-        units_w = check_units(bc_data["vmr_w"], default=units_default)
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=self.species, output_units=output_units
+        )
 
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
-                ["height", "lat"]
-            )
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
-                ["height", "lat"]
-            )
+            sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
 
         modelled_baseline.attrs["resample_to"] = str(resample_to)
