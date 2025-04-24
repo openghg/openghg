@@ -1194,16 +1194,21 @@ class ModelScenario:
         if self.scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        fp_HiTRes = self.scenario.fp_HiTRes
+        if "fp_HiTRes" in self.scenario:
+            fp = self.scenario.fp_HiTRes
+        else:
+            fp = self.scenario[["fp_time_resolved", "fp_residual"]]
+
         flux_ds = self.combine_flux_sources(sources)
 
-        fpXflux = fp_x_flux_time_resolved(fp_HiTRes, flux_ds, averaging=averaging)
+        fpXflux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
 
         if output_TS:
             timeseries = fpXflux.sum(["lat", "lon"])
 
         # TODO: Add details about units to output
 
+        # TODO: remove compute statements, they're not in the "integrated" verison and both use dask
         if output_fpXflux and output_TS:
             timeseries.compute()
             fpXflux.compute()

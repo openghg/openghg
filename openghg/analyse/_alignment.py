@@ -78,6 +78,12 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
     return float(obs_data_period_s)
 
 
+def time_of_day_offset(date_time: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
+    """Return an offset with the time past the start of the day."""
+    date_time = pd.to_datetime(date_time)
+    return date_time - pd.to_datetime(date_time.date())
+
+
 def time_overlap(
     times1: np.ndarray, times2: np.ndarray, freq1: pd.Timedelta, freq2: pd.Timedelta
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
@@ -216,7 +222,7 @@ def resample_obs_and_other(
         raise ValueError("Obs data and Footprint data don't overlap")
 
     # Offset for resampling
-    offset = start_date - pd.to_datetime(start_date.date())  # time past start of day
+    offset = time_of_day_offset(start_date)
 
     # If specific period has been passed, resample
     resample_keyword_choices = ("obs", "other", "coarsest")
