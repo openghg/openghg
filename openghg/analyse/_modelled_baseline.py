@@ -23,7 +23,7 @@ def baseline_sensitivities(
           outputs by `1e9`, converting mol/mol to ppb.
 
     Returns:
-        Dataset with data variables `bc_n`, `bc_e`, `bc_s`, `bc_w` for baseline constributions.
+        Dataset with data variables `bc_n`, `bc_e`, `bc_s`, `bc_w` for baseline contributions.
 
     Raises:
         ValueError: if wrong footprints used for short-lifetime species.
