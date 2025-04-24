@@ -78,10 +78,10 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
     return float(obs_data_period_s)
 
 
-def time_of_day_offset(datetime: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
+def time_of_day_offset(date_time: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
     """Return an offset with the time past the start of the day."""
-    datetime = pd.to_datetime(datetime)
-    return datetime - pd.to_datetime(datetime.date())
+    date_time = pd.to_datetime(date_time)
+    return date_time - pd.to_datetime(date_time.date())
 
 
 def time_overlap(
