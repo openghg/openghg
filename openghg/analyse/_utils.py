@@ -1,10 +1,10 @@
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any, cast
 
 import numpy as np
 import xarray as xr
 
-from openghg.types import ReindexMethod
+from openghg.types import ReindexMethod, XrDataLikeMatch
 
 
 def _indexes_match(dataset_A: xr.Dataset, dataset_B: xr.Dataset) -> bool:
@@ -79,6 +79,39 @@ def combine_datasets(
             merged_ds = merged_ds.where(flag.compute(), drop=True)
 
     return merged_ds
+
+
+def reindex_on_dims(
+    to_reindex: XrDataLikeMatch,
+    reindex_like: xr.DataArray | xr.Dataset,
+    dims: str | Sequence[str],
+    method: ReindexMethod = "nearest",
+    tolerance: float | Iterable[float] = 1e-5,
+) -> XrDataLikeMatch:
+    """Reindex along selected dimensions.
+
+    Reindex DataArray or Dataset 'to_reindex' like the DataArray or Dataset
+    'reindex_like', but only along the specified dimensions.
+
+    Args:
+        to_reindex: DataArray or Dataset to reindex.
+        reindex_like: DataArray or Dataset to reindex like.
+        dims: dimension(s) to reindex along.
+        method: `None`, 'nearest', 'pad'/'ffill', 'backfill'/'bfill' - method
+          for filling index values in 'reindex_like' not found in 'to_reindex'.
+        tolerance: maximum distance between original and new labels for inexact
+          matches. If list-like, must has the same length as `dims`.
+
+    Returns:
+        `to_reindex` reindexed along selected dims.
+
+    """
+    if isinstance(dims, str):
+        dims = [dims]
+
+    indexers = {dim: reindex_like[dim] for dim in dims}
+
+    return to_reindex.reindex(indexers, method=method, tolerance=tolerance)
 
 
 def match_dataset_dims(
