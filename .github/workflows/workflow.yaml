@@ -42,8 +42,8 @@ jobs:
           flake8 openghg/ --count --statistics
       - name: Install openghg
         run: |
-          pip install -r requirements-dev.txt
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
           pip install .
       - name: Run mypy
         run: |
