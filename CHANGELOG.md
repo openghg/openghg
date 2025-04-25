@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.14.0...HEAD)
 
-## Updated
+### Added
+
+- Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
+- Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
+- Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
+
+### Updated
 
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
 
