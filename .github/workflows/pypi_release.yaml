@@ -1,0 +1,41 @@
+on:
+  push:
+    branches:
+      - 'feature/**'
+  workflow_dispatch:
+
+jobs:
+  release_pypi:
+    name: Build and publish Python distributions to PyPI and TestPyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Required to fetch all tags
+      - name: Fetch all tags
+        run: git fetch --tags
+      - name: Checkout specific tag (e.g., latest tag from master)
+        run: |
+          TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Checking out tag: $TAG"
+          git checkout $TAG
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+      - name: Install pypa/build
+        run: |
+          pip install --upgrade build
+      - name: Build a binary wheel and a source tarball
+        run: |
+          python -m build --sdist --wheel --outdir dist/
+      - name: Publish distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
