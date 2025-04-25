@@ -5,7 +5,7 @@ on:
     branches:
       - '**'  # allow push to any branch to trigger this
     paths:
-      - '.github/workflows/manual-pypi-release.yml'
+      - '.github/workflows/pypi_release.yml'
   workflow_dispatch:
 
 jobs:
