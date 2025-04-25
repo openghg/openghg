@@ -3,8 +3,8 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openghg"
-version = "0.14.0"
+Name = "openghg"
+Version = "0.14.0"
 description = "OpenGHG: A platform for greenhouse gas data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,8 +14,7 @@ authors = [
   { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
 ]
 keywords = ["greenhouse gas", "atmospheric science", "data analysis", "climate"]
-license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
-license-files = ["LICENSE"]
+license = {file = "LICENSE.txt"}
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
