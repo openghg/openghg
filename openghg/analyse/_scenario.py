@@ -281,7 +281,7 @@ class ModelScenario:
 
         # Initialise attributes used for caching
         self.scenario: Dataset | None = None
-        self.modelled_obs: DataArray | None = None
+        self.modelled_obs: Dataset | None = None
         self.modelled_baseline: DataArray | None = None
         self.flux_stacked: Dataset | None = None
 
@@ -1034,7 +1034,8 @@ class ModelScenario:
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
-    ) -> DataArray:
+        output_fp_x_flux: bool = False,
+    ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
         The time points returned are dependent on the resample_to option chosen.
@@ -1051,9 +1052,10 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_fp_x_flux: If true, include "fp x flux" data variable in output.
 
         Returns:
-            xarray.DataArray: Modelled observation values along the time axis
+            xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_obs attribute.
@@ -1066,23 +1068,20 @@ class ModelScenario:
         )
 
         if not param_calculate:
-            modelled_obs = cast(DataArray, self.modelled_obs)
+            modelled_obs = cast(Dataset, self.modelled_obs)
             return modelled_obs
 
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod_high_res"
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod"
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
-        modelled_obs = modelled_obs.rename(name)
 
         # Cache output from calculations
         if cache:
@@ -1099,8 +1098,10 @@ class ModelScenario:
         self,
         sources: str | list | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
-    ) -> Any:
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
         Args:
@@ -1127,24 +1128,26 @@ class ModelScenario:
         scenario = self.scenario
         flux = self.combine_flux_sources(sources)
         flux_modelled = fp_x_flux_integrated(scenario, flux)
-        timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
 
-        # TODO: Add details about units to output
+        data = {}
 
-        if output_TS and output_fpXflux:
-            return timeseries, flux_modelled
-        elif output_TS:
-            return timeseries
-        elif output_fpXflux:
-            return flux_modelled
+        if output_TS:
+            data[ts_name] = flux_modelled.sum(["lat", "lon"])
+
+        if output_fpXflux:
+            data[fp_x_flux_name] = flux_modelled
+
+        return Dataset(data)
 
     def _calc_modelled_obs_HiTRes(
         self,
         sources: str | list | None = None,
         averaging: str | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
-    ) -> Any:
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
         species reliant on high time resolution footprints such as carbon dioxide (co2).
@@ -1184,8 +1187,6 @@ class ModelScenario:
         have no effect if the time frequency was already regular but this may
         not be what we want and may want to add extra code to remove any NaNs, if
         they are introduced or to find a way to remove this requirement.
-        TODO: mypy having trouble with different types options and incompatible types,
-        included as Any for now.
         """
 
         # TODO: Need to work out how this fits in with high time resolution method
@@ -1201,26 +1202,17 @@ class ModelScenario:
 
         flux_ds = self.combine_flux_sources(sources)
 
-        fpXflux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
+        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
+
+        data = {}
 
         if output_TS:
-            timeseries = fpXflux.sum(["lat", "lon"])
+            data[ts_name] = fp_x_flux.sum(["lat", "lon"])
 
-        # TODO: Add details about units to output
+        if output_fpXflux:
+            data[fp_x_flux_name] = fp_x_flux
 
-        # TODO: remove compute statements, they're not in the "integrated" verison and both use dask
-        if output_fpXflux and output_TS:
-            timeseries.compute()
-            fpXflux.compute()
-            return timeseries, fpXflux
-        elif output_fpXflux:
-            fpXflux.compute()
-            return fpXflux
-        elif output_TS:
-            timeseries.compute()
-            return timeseries
-
-        return None
+        return Dataset(data)
 
     def calc_modelled_baseline(
         self,
@@ -1302,6 +1294,7 @@ class ModelScenario:
         resample_to: str | None = "coarsest",
         platform: str | None = None,
         calc_timeseries: bool = True,
+        calc_fp_x_flux: bool = False,
         sources: str | list | None = None,
         calc_bc: bool = True,
         cache: bool = True,
@@ -1318,6 +1311,7 @@ class ModelScenario:
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
+            calc_fp_x_flux: Calculate "fp x flux" matrix
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
             calc_baseline: Calculate modelled baseline.
@@ -1331,17 +1325,17 @@ class ModelScenario:
             resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
         )
 
-        if calc_timeseries:
+        if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
                 resample_to=resample_to,
                 sources=sources,
                 platform=platform,
                 cache=cache,
                 recalculate=recalculate,
+                output_fp_x_flux=calc_fp_x_flux,
             )
 
-            name = modelled_obs.name
-            combined_dataset = combined_dataset.assign({name: modelled_obs})
+            combined_dataset = combined_dataset.merge(modelled_obs)
 
         if calc_bc:
             if self.bc is not None:
