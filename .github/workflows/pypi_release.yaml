@@ -5,7 +5,7 @@ on:
     branches:
       - 'feature-*'
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/**'  # This ensures it triggers when a workflow file changes
   workflow_dispatch:
 
 jobs:
