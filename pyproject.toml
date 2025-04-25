@@ -3,8 +3,8 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-Name = "openghg"
-Version = "0.14.0"
+name = "openghg"
+version = "0.14.0"
 description = "OpenGHG: A platform for greenhouse gas data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
