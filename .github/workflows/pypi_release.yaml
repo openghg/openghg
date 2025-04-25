@@ -1,4 +1,4 @@
-name: Release OpenGHG PYPI
+name: Release OpenGHG PYPI run 1
 
 on:
   push:
