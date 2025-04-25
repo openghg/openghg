@@ -3,7 +3,9 @@ name: Release OpenGHG PYPI run 1
 on:
   push:
     branches:
-      - 'feature/**'
+      - 'feature-*'
+    paths:
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
