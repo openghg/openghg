@@ -1,45 +1,52 @@
-name: Release OpenGHG PYPI run 1
+name: Manual PyPI Release from Feature Branch
 
 on:
-  push:
-    branches:
-      - 'feature-*'
-    paths:
-      - '.github/workflows/**'  # This ensures it triggers when a workflow file changes
   workflow_dispatch:
 
 jobs:
-  release_pypi:
-    name: Build and publish Python distributions to PyPI and TestPyPI
+  release_pypi_from_tag:
+    name: Build and publish from latest tag
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the repository
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Required to fetch all tags
-      - name: Fetch all tags
-        run: git fetch --tags
-      - name: Checkout specific tag (e.g., latest tag from master)
+          fetch-depth: 0  # Ensure full history is available
+
+      - name: Get latest tag
+        id: get_tag
         run: |
-          TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "Checking out tag: $TAG"
-          git checkout $TAG
-      - name: Set up Python
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Checkout latest tag
+        run: |
+          git checkout tags/${{ steps.get_tag.outputs.tag }}
+
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
           cache: "pip"
+
       - name: Install pypa/build
         run: |
           pip install --upgrade build
+
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/
-      - name: Publish distribution to Test PyPI
+
+      - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
-      - name: Publish distribution to PyPI
+
+      - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}

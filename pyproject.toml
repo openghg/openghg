@@ -1,29 +1,80 @@
 [build-system]
-requires = [
-    "setuptools>=61",
-    "wheel"
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "openghg"
 version = "0.14.0"
-description = "OpenGHG: A platform for greenhouse​ gas data analysis"
+description = "OpenGHG: A platform for greenhouse gas data analysis"
 readme = "README.md"
-requires-python = ">=3.8"
-license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
-license-files = ["LICEN[CS]E.*"]
-
+requires-python = ">=3.10"
+license = { text = "MIT AND (Apache-2.0 OR BSD-2-Clause)" }
 authors = [
-    { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
-    { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
-    { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
+  { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
+  { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
+  { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
 ]
+keywords = ["greenhouse gas", "atmospheric science", "data analysis", "climate"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Atmospheric Science"
+]
+
+dependencies = [
+  # Include minimal runtime requirements, or use `requirements.txt`
+  "numpy",
+  "pandas",
+  # ...
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "mypy",
+  "black",
+  "flake8",
+  "build",
+  "twine"
+]
+
+[project.urls]
+Homepage = "https://github.com/openghg/openghg"
+Documentation = "https://www.openghg.org"
+Repository = "https://github.com/openghg/openghg"
+Issues = "https://github.com/openghg/openghg/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["openghg"]
+
+[tool.setuptools.package-data]
+# Explicitly include your package data
+"" = ["data/*", "data/config/objectstore/*", "py.typed"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+timeout = 300
+
 [tool.black]
 line-length = 110
 
-[tool.pytest.ini_options]
-pythonpath = [
-    "."
+[tool.isort]
+profile = "hug"
+src_paths = ["isort", "test"]
+
+[tool.flake8]
+ignore = ["E203", "W503", "E501", "W291", "E127", "E128", "E704"]
+max-line-length = 110
+per-file-ignores = [
+    "*/__init__.py: F401, E402"
 ]
-timeout = 300
