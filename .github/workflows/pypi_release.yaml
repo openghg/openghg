@@ -1,6 +1,11 @@
 name: Manual PyPI Release from Feature Branch
 
 on:
+  push:
+    branches:
+      - '**'  # allow push to any branch to trigger this
+    paths:
+      - '.github/workflows/manual-pypi-release.yml'
   workflow_dispatch:
 
 jobs:
