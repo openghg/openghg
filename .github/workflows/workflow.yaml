@@ -2,9 +2,6 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devel]
-    tags:
-      - "*"
     paths-ignore:
       - 'CHANGELOG.md'
   pull_request:
@@ -58,60 +55,48 @@ jobs:
         run: |
           pip install --upgrade pytest
           pytest -v --run-cfchecks
-  docs:
-    name: Build and deploy the documentation
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
-    runs-on: ubuntu-latest
-    needs: ["test"]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-          cache: "pip"
-      - name: Install openghg
-        run: |
-          pip install --upgrade pip wheel setuptools
-          pip install .
-      - name: Setup default config
-        run: openghg --default-config
-      - name: Install pandoc and requirements
-        run: |
-          sudo apt-get install -yq pandoc
-          pip install -r requirements-doc.txt
-      - name: Build documentation
-        run: |
-          cd doc
-          make
-      - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          branch: gh-pages
-          folder: "doc/build/html"
-          clean: true
-  release_pypi:
+    release_pypi:
     name: Build and publish Python distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
-    needs: ["test", "docs"]
+    needs: ["test"]  # Removed "docs"
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
           cache: "pip"
+
+      - name: Fetch all tags
+        run: git fetch --tags origin master
+
+      - name: Get latest tag from master
+        id: get_tag
+        run: |
+          git fetch origin master --tags
+          LATEST_TAG=$(git ls-remote --tags origin | grep -o 'refs/tags/.*' | sed 's/refs\/tags\///' | sort -V | tail -n1)
+          echo "Latest tag is $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Checkout latest tag
+        run: |
+          git checkout tags/${{ steps.get_tag.outputs.tag }}
+
       - name: Install pypa/build
         run: |
           pip install --upgrade build
+
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/
+
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
