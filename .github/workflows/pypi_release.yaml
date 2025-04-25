@@ -1,9 +1,9 @@
 name: Release OpenGHG PYPI
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'feature/**'
+      - devel
   workflow_dispatch:
 
 jobs:
