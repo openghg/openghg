@@ -58,8 +58,7 @@ include-package-data = true
 where = ["openghg"]
 
 [tool.setuptools.package-data]
-# Explicitly include your package data
-"" = ["data/*", "data/config/objectstore/*", "py.typed"]
+openghg = ["data/*", "data/config/objectstore/*", "py.typed"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
