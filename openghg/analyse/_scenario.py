@@ -48,6 +48,7 @@ from typing import Any, Union, cast
 from collections.abc import Sequence
 
 import pandas as pd
+import xarray as xr
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -1035,6 +1036,7 @@ class ModelScenario:
         cache: bool = True,
         recalculate: bool = False,
         output_fp_x_flux: bool = False,
+        split_by_sectors: bool = False,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1053,6 +1055,9 @@ class ModelScenario:
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_fp_x_flux: If true, include "fp x flux" data variable in output.
+            split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
+              under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
+              different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1080,6 +1085,34 @@ class ModelScenario:
             modelled_obs = self._calc_modelled_obs_integrated(
                 sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
+
+        # calculate sectoral modelled mf and fp_x_flux
+        if split_by_sectors:
+            sources = self._clean_sources_input(sources)
+            sectoral_datasets = []
+
+            for source in sources:
+                if self.species == "co2":
+                    mod_obs = self._calc_modelled_obs_HiTRes(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_high_res_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                else:
+                    mod_obs = self._calc_modelled_obs_integrated(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                mod_obs = mod_obs.expand_dims({"source": [source]})
+                sectoral_datasets.append(mod_obs)
+
+            sectoral_modelled_obs = xr.concat(sectoral_datasets, dim="source")
+            modelled_obs.update(sectoral_modelled_obs)
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
 
@@ -1296,6 +1329,7 @@ class ModelScenario:
         calc_timeseries: bool = True,
         calc_fp_x_flux: bool = False,
         sources: str | list | None = None,
+        split_by_sectors: bool = False,
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
@@ -1314,6 +1348,8 @@ class ModelScenario:
             calc_fp_x_flux: Calculate "fp x flux" matrix
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
+            split_by_sectors: if True, separate modelled obs (and footprint x flux) will be calculated
+                for each flux source ("sector").
             calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
@@ -1333,6 +1369,7 @@ class ModelScenario:
                 cache=cache,
                 recalculate=recalculate,
                 output_fp_x_flux=calc_fp_x_flux,
+                split_by_sectors=split_by_sectors,
             )
 
             combined_dataset = combined_dataset.merge(modelled_obs)
