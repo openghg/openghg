@@ -5,6 +5,7 @@ include requirements*.txt
 include py.typed
 include versioneer.py
 include openghg/_version.py
+include LICENSE
 
 graft openghg
 

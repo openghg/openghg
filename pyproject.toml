@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools>=61",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
@@ -11,6 +11,7 @@ version = "0.14.0"
 description = "OpenGHG: A platform for greenhouse​ gas data analysis"
 readme = "README.md"
 requires-python = ">=3.8"
+license = { file = "LICENSE" }
 
 authors = [
     { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
