@@ -1201,24 +1201,17 @@ class ModelScenario:
 
         flux_ds = self.combine_flux_sources(sources)
 
-        fpXflux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
+        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
 
         if output_TS:
-            timeseries = fpXflux.sum(["lat", "lon"])
+            timeseries = fp_x_flux.sum(["lat", "lon"])
 
-        # TODO: Add details about units to output
-
-        # TODO: remove compute statements, they're not in the "integrated" verison and both use dask
-        if output_fpXflux and output_TS:
-            timeseries.compute()
-            fpXflux.compute()
-            return timeseries, fpXflux
-        elif output_fpXflux:
-            fpXflux.compute()
-            return fpXflux
-        elif output_TS:
-            timeseries.compute()
+            if output_fpXflux:
+                return timeseries, fp_x_flux
             return timeseries
+
+        if output_fpXflux:
+            return fp_x_flux
 
         return None
 
@@ -1302,6 +1295,7 @@ class ModelScenario:
         resample_to: str | None = "coarsest",
         platform: str | None = None,
         calc_timeseries: bool = True,
+        calc_fp_x_flux: bool = False,
         sources: str | list | None = None,
         calc_bc: bool = True,
         cache: bool = True,
@@ -1318,6 +1312,7 @@ class ModelScenario:
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
+            calc_fp_x_flux: Calculate "fp x flux" matrix
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
             calc_baseline: Calculate modelled baseline.
