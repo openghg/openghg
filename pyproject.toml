@@ -14,11 +14,11 @@ authors = [
   { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
 ]
 keywords = ["greenhouse gas", "atmospheric science", "data analysis", "climate"]
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
+license-files = ["LICENSE"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
-  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -28,10 +28,34 @@ classifiers = [
 ]
 
 dependencies = [
-  # Include minimal runtime requirements, or use `requirements.txt`
-  "numpy",
-  "pandas",
-  # ...
+"addict",
+"dask",
+"filelock",
+"h5netcdf",
+"icoscp <= 0.1.17",
+"ipywidgets",
+"matplotlib",
+"msgpack",
+"nbformat",
+"numcodecs < 0.16",
+"nc-time-axis",
+"netcdf4",
+"numexpr",
+"numpy",
+"openghg_defs",
+"openpyxl",
+"pandas >= 2.0",
+"plotly",
+"pyvis",
+"rapidfuzz",
+"requests >= 2.25",
+"rich",
+"scipy",
+"tinydb",
+"toml",
+"urllib3 >= 1.26.3",
+"xarray",
+"zarr==2.18.3"
 ]
 
 [project.optional-dependencies]
