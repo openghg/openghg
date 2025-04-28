@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "openghg"
@@ -9,9 +9,10 @@ description = "OpenGHG: A platform for greenhouse gas data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
+  { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" },
   { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
   { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
-  { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
+  { name = "Gareth Jones"}
 ]
 keywords = ["greenhouse gas", "atmospheric science", "data analysis", "climate"]
 license = {file = "LICENSE.txt"}
