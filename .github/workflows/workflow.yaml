@@ -67,19 +67,18 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
+      - name: Fetch specific tag
+        run: |
+          git fetch origin refs/tags/0.14.0
 
-      - name: Fetch all tags
-        run: git fetch --tags origin master
-
-      - name: Get latest tag from master
+      - name: Set tag output
         id: get_tag
         run: |
-          git fetch origin master --tags
-          LATEST_TAG=$(git ls-remote --tags origin | grep -o 'refs/tags/.*' | sed 's/refs\/tags\///' | sort -V | tail -n1)
-          echo "Latest tag is $LATEST_TAG"
-          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          TAG_NAME="0.14.0"
+          echo "Using tag $TAG_NAME"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
 
-      - name: Checkout latest tag
+      - name: Checkout tag
         run: |
           git checkout tags/${{ steps.get_tag.outputs.tag }}
 
