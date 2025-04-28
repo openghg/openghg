@@ -359,11 +359,14 @@ class Footprints(BaseStore):
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
-            if_exists = "new"
+            if_exists = "new"  # TODO: Update to "combine" when available
 
-        # Making sure new version will be created by default if force keyword is included.
+        # Warning that force without new version may cause a DataOverlapError
         if force and if_exists == "auto":
-            if_exists = "new"
+            logger.warning(
+                "This skips the check that files have already been added but may still result in a DataOverlapError."
+                " If adding multiple files use if_exists='new' for the first file only and use if_exists='auto' afterwards."
+            )
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
