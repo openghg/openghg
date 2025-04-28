@@ -1251,7 +1251,7 @@ class ModelScenario:
         self,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
-        output_units: float = 1e-9,
+        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
