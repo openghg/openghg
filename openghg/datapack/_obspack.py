@@ -17,7 +17,7 @@ Default overall obspack structure:
     ...
 
 Key functions:
- - define_obspack_filename() - defines the full output filename for each file based on naming convention
+ - define_stored_data_filename() - defines the full output filename for each file based on naming convention
  - retrieve_data() - retrieve data from an object store search terms (currently from a config file)
  - create_obspack() - this is the summary function for creating an obspack
 """
@@ -60,7 +60,7 @@ class StoredData:
         output_folder: pathType | None = None,
         obspack_name: str | None = None,
         subfolder: MultiSubFolder | None = None,
-        obspack_filename: pathType | None = None,
+        filename: pathType | None = None,
         data_version: str | None = None,
     ):
         """
@@ -77,12 +77,12 @@ class StoredData:
         self.obspack_name = obspack_name
 
         self.output_folder = Path(output_folder) if output_folder is not None else None
-        self.obspack_filename = Path(obspack_filename) if obspack_filename is not None else None
+        self.filename = Path(filename) if filename is not None else None
 
         self.add_subfolder(subfolder)  # Right to add default subfolder here?
         self.add_data_version(data_version)
 
-    def make_obspack_filename(
+    def define_filename(
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
@@ -91,7 +91,7 @@ class StoredData:
         name_suffixes: dict | None = None,
     ) -> Path:
         """
-        Create the obspack_filename for the StoredData based on the associated metadata
+        Create the filename for the StoredData based on the associated metadata
         and the obs_type.
 
         Args:
@@ -108,7 +108,7 @@ class StoredData:
         """
         self.data_version: str | None = data_version if data_version is not None else self.data_version
 
-        obspack_filename = define_obspack_filename(
+        filename = define_stored_data_filename(
             self.metadata,
             self.obs_type,
             include_obs_type=include_obs_type,
@@ -118,9 +118,9 @@ class StoredData:
             name_suffixes=name_suffixes,
         )
 
-        return obspack_filename
+        return filename
 
-    def update_obspack_filename(
+    def update_filename(
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
@@ -129,7 +129,7 @@ class StoredData:
         name_suffixes: dict | None = None,
     ) -> Path:
         """
-        Define the obspack_filename and update on the StoredData object based on the associated metadata
+        Define the filename and update on the StoredData object based on the associated metadata
         and the obs_type.
 
         Args:
@@ -144,7 +144,7 @@ class StoredData:
         Returns:
             Path: obspack filename
         """
-        obspack_filename = self.make_obspack_filename(
+        filename = self.define_filename(
             include_obs_type=include_obs_type,
             include_version=include_version,
             data_version=data_version,
@@ -152,9 +152,9 @@ class StoredData:
             name_suffixes=name_suffixes,
         )
 
-        self.obspack_filename = obspack_filename
+        self.filename = filename
 
-        return obspack_filename
+        return filename
 
     def add_subfolder(self, subfolder: MultiSubFolder | None = None) -> None:
         """
@@ -181,17 +181,17 @@ class StoredData:
     def define_full_path(self) -> Path:
         """
         Define full path for the output filename. This is based on the structure:
-            {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+            {output_folder} / {obspack_name} / {subfolder} / {filename}
 
         Returns:
             Path: full output file path
         """
 
-        if self.obspack_filename is None:
+        if self.filename is None:
             raise ValueError("Obspack filename must be defined to create output path")
 
         return define_full_obspack_filename(
-            self.obspack_filename, self.obspack_name, self.output_folder, self.subfolder, self.obs_type
+            self.filename, self.obspack_name, self.output_folder, self.subfolder, self.obs_type
         )
 
     def define_site_details(self, strict: bool = False) -> dict:
@@ -428,7 +428,7 @@ class ObsPack:
 
         return self.retrieved_data
 
-    def define_obspack_filenames(
+    def define_stored_data_filenames(
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
@@ -437,8 +437,8 @@ class ObsPack:
         force: bool = False,
     ) -> list[Path]:
         """
-        Define the obspack_filename values for multiple StoredData objects.
-        If the obspack_filename is already present, this will not update by default and will
+        Define the filename values for multiple StoredData objects.
+        If the filename is already present, this will not update by default and will
         use the stored value.
 
         Args:
@@ -448,7 +448,7 @@ class ObsPack:
                 within the filename. This can be specified per obs_type using a dictionary.
                 Default will depend on obs_type - see define_name_components().
             name_suffixes: Dictionary of additional values to add to the filename as a suffix.
-            force: Force update of the obspack_filename and recreate this.
+            force: Force update of the filename and recreate this.
         Returns:
             list[pathlib.Path]: Sequence of filenames associated with the files
         """
@@ -456,9 +456,9 @@ class ObsPack:
 
         filenames = []
         for data in retrieved_data:
-            filename = data.obspack_filename
+            filename = data.filename
             if filename is None or force:
-                filename = data.update_obspack_filename(
+                filename = data.update_filename(
                     include_obs_type=include_obs_type,
                     include_version=include_version,
                     name_components=name_components,
@@ -488,12 +488,12 @@ class ObsPack:
             name_components: Keys to use when extracting names from the metadata and to use
                 within the filename.
             add_to_objects: Add the filename to each of the StoredData objects.
-            force: Force update of the obspack_filename and recreate this.
+            force: Force update of the filename and recreate this.
         Returns:
-            list: Groups of StoredData objects with have overlapping obspack_filenames
+            list: Groups of StoredData objects with have overlapping filenames
         """
 
-        filenames = self.define_obspack_filenames(
+        filenames = self.define_stored_data_filenames(
             include_obs_type=include_obs_type,
             include_version=include_version,
             name_components=name_components,
@@ -513,7 +513,7 @@ class ObsPack:
 
         return data_grouped_repeats
 
-    def add_obspack_filenames(
+    def add_stored_data_filenames(
         self,
         include_obs_type: bool = True,
         include_version: bool = True,
@@ -527,7 +527,7 @@ class ObsPack:
         If any filenames within the retrieved_data list are not unique, update the filename
         using more keywords within the metadata.
 
-        Note: updates the obspack_filename attributes in place within StoredData objects.
+        Note: updates the filename attributes in place within StoredData objects.
 
         Args:
             include_obs_type: Whether to include obs_type in the filename. Default = True.
@@ -543,7 +543,7 @@ class ObsPack:
         """
 
         # Create default obspack names
-        self.define_obspack_filenames(
+        self.define_stored_data_filenames(
             include_obs_type=include_obs_type,
             include_version=include_version,
             # data_version=data_version,
@@ -584,7 +584,7 @@ class ObsPack:
                     store=store,
                 )
 
-                filenames = [data.obspack_filename for data in data_group]
+                filenames = [data.filename for data in data_group]
                 for additional_key in metakeys:
                     if check_unique(filenames):
                         break
@@ -594,10 +594,10 @@ class ObsPack:
                             name_components = name_components + [additional_key]
 
                             logger.info(
-                                f"Checking alternative name for non-unique filename: {data_group[0].obspack_filename} with {additional_key}."
+                                f"Checking alternative name for non-unique filename: {data_group[0].filename} with {additional_key}."
                             )
                             filenames = [
-                                data.make_obspack_filename(name_components=name_components)
+                                data.define_filename(name_components=name_components)
                                 for data in data_group
                             ]
                 else:
@@ -608,7 +608,7 @@ class ObsPack:
                 # Once unique names have been found add them to the data entries.
                 # **Better way to do this?
                 for data, filename in zip(data_group, filenames):
-                    data.obspack_filename = filename
+                    data.filename = filename
 
         return retrieved_data
 
@@ -1068,7 +1068,7 @@ def define_column_filename(
     return filename
 
 
-# CALLED BY STOREDDATA
+# CALLED BY StoredData
 def find_data_version(metadata: dict) -> str | None:
     """
     Find the latest version from within the metadata by looking for the "latest_version" key.
@@ -1093,7 +1093,7 @@ def _create_path(input: pathType | None) -> Path:
 
 # CALLED BY StoredData
 def define_full_obspack_filename(
-    obspack_filename: pathType,
+    filename: pathType,
     obspack_name: str | None = None,
     output_folder: pathType | None = None,
     subfolder: MultiSubFolder | None = None,
@@ -1102,7 +1102,7 @@ def define_full_obspack_filename(
     """
     Define full path for the output filename. This is based on the structure:
 
-        {output_folder} / {obspack_name} / {subfolder} / {obspack_filename}
+        {output_folder} / {obspack_name} / {subfolder} / {filename}
 
     Args:
         obspack_name: Full name for the obspack
@@ -1121,11 +1121,11 @@ def define_full_obspack_filename(
     output_folder = _create_path(output_folder)
     subfolder = define_subfolder(subfolder, obs_type)
 
-    return output_folder / obspack_name / subfolder / obspack_filename
+    return output_folder / obspack_name / subfolder / filename
 
 
 # CALLED BY StoredData
-def define_obspack_filename(
+def define_stored_data_filename(
     metadata: dict,
     obs_type: str,
     include_obs_type: bool = True,
@@ -1230,7 +1230,7 @@ def _find_additional_metakeys(
         obs_type: Name of the observation type.
             See define_obs_types() for details of obs_type values.
         metadata: Metadata details associated with the stored data.
-        name_components: Current metadata keys used to define an obspack_filename.
+        name_components: Current metadata keys used to define a filename.
         store: Name of the object store to use when finding additional metakeys.
     Returns:
         list: Additional metakeys defined within the object store
@@ -1590,7 +1590,7 @@ def create_obspack(
 
     # Create default obspack filenames for data
     # If any duplicates are found and update to use more of the metadata be more specific
-    obspack.add_obspack_filenames(
+    obspack.add_stored_data_filenames(
         include_obs_type=include_obs_type,
         include_version=include_data_versions,
         name_components=name_components,

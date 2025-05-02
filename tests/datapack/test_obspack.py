@@ -13,7 +13,7 @@ from openghg.datapack import (
     ObsPack,
     retrieve_data,
     create_obspack,
-    define_obspack_filename,
+    define_stored_data_filename,
     define_obspack_name,
     check_unique,
 )
@@ -106,7 +106,7 @@ def test_construct_name_fails_missing_key():
             ),
         ]
 )
-def test_define_obspack_filename(metadata, obs_type, out_filename):
+def test_define_stored_data_filename(metadata, obs_type, out_filename):
     """
     Test creation of filename matches to naming scheme
     1. surface-insitu data
@@ -119,7 +119,7 @@ def test_define_obspack_filename(metadata, obs_type, out_filename):
     8. column, satellite data, satellite name and domain specified
     """
     out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata, obs_type=obs_type)
+    filename = define_stored_data_filename(metadata, obs_type=obs_type)
 
     assert filename == out_filename
 
@@ -134,7 +134,7 @@ def test_define_obspack_filename(metadata, obs_type, out_filename):
             ("v52", "v34", False, "ch4_WAO_10m_surface-insitu.nc"),
         ]
 )
-def test_define_obspack_filename_version(latest_version, data_version, include_version, out_filename):
+def test_define_stored_data_filename_version(latest_version, data_version, include_version, out_filename):
     """
     Check internal version definitions when creating filenames.
     1. Check data version can be inferred from metadata
@@ -149,7 +149,7 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata,
+    filename = define_stored_data_filename(metadata,
                                        obs_type=obs_type,
                                        include_version=include_version,
                                        data_version=data_version)
@@ -165,7 +165,7 @@ def test_define_obspack_filename_version(latest_version, data_version, include_v
             (["site", "data_source", "data_level"], "WAO_icos_1_surface-insitu_v1.nc"),
         ]
 )
-def test_define_obspack_filename_name_components(name_components, out_filename):
+def test_define_stored_data_filename_name_components(name_components, out_filename):
     """
     Check name components for the file name can be used correctly.
     1. Check the usual value create the expected output - ["species", "site", "inlet"]
@@ -183,7 +183,7 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata,
+    filename = define_stored_data_filename(metadata,
                                        obs_type=obs_type,
                                        name_components=name_components)
 
@@ -198,7 +198,7 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
             ({"project": "gemma", "source": "noaa"}, "ch4_WAO_10m_gemma_noaa.nc"),
         ]
 )
-def test_define_obspack_filename_name_suffixes(name_suffixes, out_filename):
+def test_define_stored_data_filename_name_suffixes(name_suffixes, out_filename):
     """
     Check name components for the file name can be used correctly.
     1. Check the standard suffix values create the expected output
@@ -209,7 +209,7 @@ def test_define_obspack_filename_name_suffixes(name_suffixes, out_filename):
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata,
+    filename = define_stored_data_filename(metadata,
                                        obs_type=obs_type,
                                        name_suffixes=name_suffixes)
 
@@ -414,17 +414,17 @@ def test_check_unique_filenames(obspack_1):
     assert len(data_grouped_repeats[0]) == 2
 
 
-def test_add_obspack_filenames(obspack_1):
+def test_add_stored_data_filenames(obspack_1):
     """
     Check add_obspack_filenames can produce unique filenames when the
     default filenames overlap.
     """
 
     name_components = ["species", "site", "inlet"]
-    retrieved_data = obspack_1.add_obspack_filenames(name_components=name_components)
+    retrieved_data = obspack_1.add_stored_data_filenames(name_components=name_components)
 
-    filename1 = retrieved_data[0].obspack_filename
-    filename2 = retrieved_data[1].obspack_filename
+    filename1 = retrieved_data[0].filename
+    filename2 = retrieved_data[1].filename
 
     assert filename1 != filename2
 
