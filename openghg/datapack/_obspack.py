@@ -29,7 +29,7 @@ import pathlib
 from pathlib import Path
 
 import importlib.resources
-from typing import Sequence
+from typing import Sequence, cast
 import logging
 
 from openghg.dataobjects import ObsData, ObsColumnData
@@ -158,6 +158,7 @@ class StoredData:
         )
 
         self.filename = filename
+        self.filename = cast(Path, self.filename)
 
         return filename
 
@@ -183,9 +184,16 @@ class StoredData:
             data_version = find_data_version(self.metadata)
         self.data_version = data_version
 
-    def define_full_path(self,
-                         obspack_name: str | None = None,
-                         output_folder: pathType | None = None) -> Path:
+    def define_full_path(
+        self,
+        obspack_name: str | None = None,
+        output_folder: pathType | None = None,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        data_version: str | None = None,
+        name_components: MultiNameComponents | None = None,
+        name_suffixes: dict | None = None,
+    ) -> Path:
         """
         Define full path for the output filename. This is based on the structure:
             {output_folder} / {obspack_name} / {subfolder} / {filename}
@@ -195,7 +203,15 @@ class StoredData:
         """
 
         if self.filename is None:
-            raise ValueError("Obspack filename must be defined to create output path")
+            logger.info("Creating filename before writing to file.")
+            self.update_filename(
+                include_obs_type=include_obs_type,
+                include_version=include_version,
+                data_version=data_version,
+                name_components=name_components,
+                name_suffixes=name_suffixes,
+            )
+            self.filename = cast(Path, self.filename)
 
         return define_full_obspack_filename(
             self.filename, obspack_name, output_folder, self.subfolder, self.obs_type
@@ -258,16 +274,31 @@ class StoredData:
 
         return params
 
-    def write(self,
-              obspack_name: str | None = None,
-              output_folder: pathType | None = None) -> None:
+    def write(
+        self,
+        obspack_name: str | None = None,
+        output_folder: pathType | None = None,
+        include_obs_type: bool = True,
+        include_version: bool = True,
+        data_version: str | None = None,
+        name_components: MultiNameComponents | None = None,
+        name_suffixes: dict | None = None,
+    ) -> None:
         """
-        Write stored data details to file.
+        Write stored data details to file. If filename is not already defined,
+        this will use the update_filename() method to create this.
         """
 
         ds = self.data
-        output_filename = self.define_full_path(obspack_name,
-                                                output_folder)
+        output_filename = self.define_full_path(
+            obspack_name=obspack_name,
+            output_folder=output_folder,
+            include_obs_type=include_obs_type,
+            include_version=include_version,
+            data_version=data_version,
+            name_components=name_components,
+            name_suffixes=name_suffixes,
+        )
 
         output_filename.parent.mkdir(parents=True, exist_ok=True)
         ds.to_netcdf(output_filename)
@@ -711,8 +742,7 @@ class ObsPack:
         retrieved_data = self.check_retrieved_data()
 
         for data in retrieved_data:
-            data.write(obspack_name=self.obspack_name,
-                       output_folder=self.output_folder)
+            data.write(obspack_name=self.obspack_name, output_folder=self.output_folder)
 
         if include_release_files:
             if release_files is not None:
