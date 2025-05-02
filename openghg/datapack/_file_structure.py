@@ -3,15 +3,13 @@ from pathlib import Path
 from typing import Sequence
 import logging
 
-from openghg.dataobjects import ObsData, ObsColumnData
 from openghg.types import pathType
 
 from ._specification import define_obs_types, define_data_type_for_obs_type
 
 logger = logging.getLogger("openghg.obspack")
 
-# TODO: Move to types submodule?
-ObsOutputType = ObsData | ObsColumnData
+# Define types related to filename and path creation
 NameComponents = list[str | list]
 
 MultiNameComponents = dict[str, NameComponents] | NameComponents

@@ -22,7 +22,6 @@ Key functions:
  - create_obspack() - this is the summary function for creating an obspack
 """
 
-import re
 import numpy as np
 import pandas as pd
 import shutil
@@ -46,17 +45,15 @@ from ._file_structure import (
     define_stored_data_filename,
     define_full_obspack_filename,
     _find_additional_metakeys,
+    MultiNameComponents,
+    MultiSubFolder,
 )
 from ._specification import define_get_functions
 
 logger = logging.getLogger("openghg.obspack")
 
-# TODO: Move to types submodule?
+# TODO: Perhaps move away from the overall type definitions being in classes? (openghg.types._enum.py)
 ObsOutputType = ObsData | ObsColumnData
-NameComponents = list[str | list]
-
-MultiNameComponents = dict[str, NameComponents] | NameComponents
-MultiSubFolder = dict[str, pathType] | pathType
 
 
 class StoredData:
