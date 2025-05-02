@@ -66,8 +66,6 @@ class StoredData:
         self,
         data: ObsOutputType,
         obs_type: str = "surface-insitu",
-        output_folder: pathType | None = None,
-        obspack_name: str | None = None,
         subfolder: MultiSubFolder | None = None,
         filename: pathType | None = None,
         data_version: str | None = None,
@@ -83,9 +81,7 @@ class StoredData:
         self.metadata = data.metadata
 
         self.obs_type = obs_type
-        self.obspack_name = obspack_name
 
-        self.output_folder = Path(output_folder) if output_folder is not None else None
         self.filename = Path(filename) if filename is not None else None
 
         self.add_subfolder(subfolder)  # Right to add default subfolder here?
@@ -187,7 +183,9 @@ class StoredData:
             data_version = find_data_version(self.metadata)
         self.data_version = data_version
 
-    def define_full_path(self) -> Path:
+    def define_full_path(self,
+                         obspack_name: str | None = None,
+                         output_folder: pathType | None = None) -> Path:
         """
         Define full path for the output filename. This is based on the structure:
             {output_folder} / {obspack_name} / {subfolder} / {filename}
@@ -200,7 +198,7 @@ class StoredData:
             raise ValueError("Obspack filename must be defined to create output path")
 
         return define_full_obspack_filename(
-            self.filename, self.obspack_name, self.output_folder, self.subfolder, self.obs_type
+            self.filename, obspack_name, output_folder, self.subfolder, self.obs_type
         )
 
     def define_site_details(self, strict: bool = False) -> dict:
@@ -260,11 +258,16 @@ class StoredData:
 
         return params
 
-    def write(self) -> None:
-        """ """
+    def write(self,
+              obspack_name: str | None = None,
+              output_folder: pathType | None = None) -> None:
+        """
+        Write stored data details to file.
+        """
 
         ds = self.data
-        output_filename = self.define_full_path()
+        output_filename = self.define_full_path(obspack_name,
+                                                output_folder)
 
         output_filename.parent.mkdir(parents=True, exist_ok=True)
         ds.to_netcdf(output_filename)
@@ -531,7 +534,7 @@ class ObsPack:
         store: str | None = None,
     ) -> list[StoredData]:
         """
-        Add obspack filenames to StoredData objects in retrieved_data. This is based
+        Add filenames to StoredData objects in retrieved_data. This is based
         on the metadata associated with the retrieved data.
         If any filenames within the retrieved_data list are not unique, update the filename
         using more keywords within the metadata.
@@ -708,7 +711,8 @@ class ObsPack:
         retrieved_data = self.check_retrieved_data()
 
         for data in retrieved_data:
-            data.write()
+            data.write(obspack_name=self.obspack_name,
+                       output_folder=self.output_folder)
 
         if include_release_files:
             if release_files is not None:
