@@ -388,9 +388,7 @@ class ObsPack:
     def define_obspack_path(self) -> Path:
         """
         Define the full output path for the obspack folder.
-        Args:
-            output_folder: Path to top level directory where obspack folder will be created
-            obspack_name: Name of obspack to be created
+
         Returns:
             Path: Full obspack folder name
         """
