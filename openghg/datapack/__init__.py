@@ -1,10 +1,13 @@
 from ._obspack import (
     StoredData,
     ObsPack,
-    define_obs_types,
     retrieve_data,
     create_obspack,
+)
+from ._specification import (
+    define_obs_types,
+)
+from ._file_structure import (
     define_stored_data_filename,
     define_obspack_name,
-    check_unique,
 )

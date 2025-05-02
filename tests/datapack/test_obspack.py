@@ -8,6 +8,7 @@ from pathlib import Path
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 from openghg.standardise import standardise_surface
 from openghg.dataobjects import ObsData
+from openghg.util import check_unique
 from openghg.datapack import (
     StoredData,
     ObsPack,
@@ -15,9 +16,8 @@ from openghg.datapack import (
     create_obspack,
     define_stored_data_filename,
     define_obspack_name,
-    check_unique,
 )
-from openghg.datapack._obspack import _find_additional_metakeys, _construct_name
+from openghg.datapack._file_structure import _find_additional_metakeys, _construct_name
 
 
 # %% Test filename creation functions
