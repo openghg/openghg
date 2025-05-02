@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 from numpy import ndarray
 
-from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
+from openghg.types import pathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
 import logging
 
@@ -12,7 +12,7 @@ logger = logging.getLogger("openghg.util.domain")
 __all__ = ["get_domain_info", "find_domain", "convert_lon_to_180", "convert_lon_to_360"]
 
 
-def get_domain_info(domain_filepath: optionalPathType = None) -> dict[str, Any]:
+def get_domain_info(domain_filepath: pathType | None = None) -> dict[str, Any]:
     """Extract data from domain info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/domain_info JSON file by default.
@@ -33,7 +33,7 @@ def get_domain_info(domain_filepath: optionalPathType = None) -> dict[str, Any]:
     return domain_info_json
 
 
-def find_domain(domain: str, domain_filepath: optionalPathType = None) -> tuple[ndarray, ndarray]:
+def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[ndarray, ndarray]:
     """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 

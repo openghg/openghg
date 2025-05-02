@@ -3,7 +3,7 @@ import logging
 import importlib
 from pprint import pformat
 from pathlib import Path
-import pkgutil
+from typing import cast
 
 from openghg.types import ConfigFileError
 from openghg.util import timestamp_now
@@ -12,7 +12,7 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handlerF
 
 
-def _get_config_folderpath(bucket: str) -> Path:
+def _get_custom_config_folderpath(bucket: str) -> Path:
     """Get the filepath of the config file for the object store
 
     Args:
@@ -23,25 +23,46 @@ def _get_config_folderpath(bucket: str) -> Path:
     return Path(bucket, "config")
 
 
-def _get_metakeys_filepath(bucket: str) -> Path:
-    """Get the path from the metakeys JSON file
+def _get_custom_metakeys_filepath(bucket: str, previous: bool = False) -> Path:
+    """Get the expected path from the metakeys JSON file
+    within an object store.
 
     Args:
         bucket: Object store bucket path
+        previous: Get previous name for the file (now deprecated)
     Returns:
         Path: Path to metakeys JSON
     """
-    return _get_config_folderpath(bucket=bucket) / "metadata_keys.json"
+    if previous:
+        filename = "metadata_keys.json"
+    else:
+        filename = "metadata_keys_v2.json"
+    return _get_custom_config_folderpath(bucket=bucket) / filename
+
+
+def get_metakeys_defaults_filepath() -> Path:
+    """Get path for the defaults metakeys file within openghg.
+
+    Returns:
+        Path: Path to default metakeys JSON
+    """
+    config_file_ref = importlib.resources.files("openghg") / "data/config/objectstore/defaults.json"
+
+    with importlib.resources.as_file(config_file_ref) as f:
+        config_file_path = f
+
+    return config_file_path
 
 
 def get_metakey_defaults() -> dict:
-    """Return the dictionary of default values for the metadata keys
+    """Return the dictionary of default values for the metadata keys.
 
     Returns:
         dict: Dictionary of defaults
     """
-    json_bytes = pkgutil.get_data("openghg", "data/config/objectstore/defaults.json")
-    return json.loads(json_bytes.decode(encoding="utf-8"))
+    config_filepath = get_metakeys_defaults_filepath()
+    default_config = json.loads(config_filepath.read_text())
+    return cast(dict, default_config)  # cast because we know this JSON file will product a dict
 
 
 def check_metakeys(metakeys: dict) -> bool:
@@ -108,7 +129,7 @@ def check_metakeys(metakeys: dict) -> bool:
                 dtype_errors.extend(errors_optional)
 
         if dtype_errors:
-            total_errors[dtype] = dtype_errors
+            total_errors[dtype] = dtype_errors  # type: ignore[assignment]
 
     if total_errors:
         logger.error("Errors found with metakeys:")
@@ -118,15 +139,16 @@ def check_metakeys(metakeys: dict) -> bool:
     return True
 
 
-def create_default_config(bucket: str) -> None:
-    """Creates the default configuration file for an object store
+def create_custom_config(bucket: str) -> None:
+    """Creates a copy of the default configuration file and puts this in
+    an object store so this can be modified.
 
     Args:
         bucket: Object store bucket path
     Returns:
         None
     """
-    config_folderpath = _get_config_folderpath(bucket=bucket)
+    config_folderpath = _get_custom_config_folderpath(bucket=bucket)
 
     config_folderpath.mkdir(parents=True, exist_ok=True)
 
@@ -161,7 +183,7 @@ def _write_metakey_config(bucket: str, metakeys: dict) -> None:
         "metakeys": metakeys,
     }
 
-    metakey_path = _get_metakeys_filepath(bucket=bucket)
+    metakey_path = _get_custom_metakeys_filepath(bucket=bucket)
     config_folder = metakey_path.parent
 
     if not config_folder.exists():
@@ -171,22 +193,56 @@ def _write_metakey_config(bucket: str, metakeys: dict) -> None:
     metakey_path.write_text(json.dumps(config_data))
 
 
-def get_metakeys(bucket: str) -> dict[str, dict]:
-    """Read the object store config
+def _get_metakeys_from_file(metakey_path: Path) -> dict:
+    """Get the metakeys from a JSON file. Expect this will
+    either contain 'metakeys' key containing the config data
+    or the top level will contain this data directly.
 
     Args:
-        store: Store name
+        metakey_path: Path to metakey JSON file
+    Returns:
+        dict: metakey details from the JSON file
+    """
+    config_data = json.loads(metakey_path.read_text())
+    if "metakeys" in config_data:
+        metakeys = config_data["metakeys"]
+    else:
+        metakeys = config_data
+
+    if not isinstance(metakeys, dict):
+        raise ValueError(f"Format of metakeys file {metakey_path} is invalid.")
+
+    return metakeys
+
+
+def get_metakeys(bucket: str | None = None) -> dict[str, dict]:
+    """Read the metakeys. This will look for a custom
+    config file within the object store and if one is not
+    found this will use the defaults from within openghg.
+
+    Args:
+        bucket: Path to object store
     Returns:
         dict: Configuration data
     """
-    metakey_path = _get_metakeys_filepath(bucket=bucket)
+    if bucket is not None:
+        metakey_path: Path | None = _get_custom_metakeys_filepath(bucket=bucket)
+    else:
+        metakey_path = None
 
-    if not metakey_path.exists():
-        logger.debug(f"Creating default metakeys file at {metakey_path}.")
-        create_default_config(bucket=bucket)
+    if metakey_path is None or not metakey_path.exists():
+        metakey_path = get_metakeys_defaults_filepath()
 
-    config_data = json.loads(metakey_path.read_text())
-    return config_data["metakeys"]
+    if bucket is not None:
+        prev_metakey_path = _get_custom_metakeys_filepath(bucket=bucket, previous=False)
+        if prev_metakey_path.exists():
+            logger.warning(
+                f"Previous config file: '{prev_metakey_path}' exists in the object store. This is now deprecated and so is no longer used."
+            )
+
+    metakeys = _get_metakeys_from_file(metakey_path)
+
+    return metakeys
 
 
 def write_metakeys(bucket: str, metakeys: dict) -> None:

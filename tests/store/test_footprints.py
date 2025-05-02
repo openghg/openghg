@@ -1,9 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.objectstore import get_writable_bucket, get_metakey_defaults
+from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
-from openghg.store import Footprints
+from openghg.store import Footprints, get_metakey_defaults
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
@@ -602,6 +602,18 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_e" in data_vars
     assert "mean_age_particles_s" in data_vars
     assert "mean_age_particles_w" in data_vars
+
+
+@pytest.mark.parametrize("source_format", ["PARIS", "FLEXPART"])
+def test_footprint_schema_paris(source_format):
+    """Check if `fp_time_resolved` and `fp_residual` are present if `source_format` is PARIS or FLEXPART."""
+    data_schema = Footprints.schema(time_resolved=True, source_format=source_format)
+
+    data_vars = data_schema.data_vars
+
+    assert "fp_time_resolved" in data_vars
+    assert "fp_residual" in data_vars
+    assert "fp" not in data_vars
 
 
 def test_process_footprints():

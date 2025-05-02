@@ -48,13 +48,9 @@ def test_parse_acrg_org_site_key():
     species = "Rn"
     domain = "BRAZIL"
 
-    result = parse_acrg_org(model=model,
-                   inlet=inlet,
-                   species=species,
-                   filepath=datapath,
-                   domain=domain,
-                   site=site
-                   )
+    result = parse_acrg_org(
+        model=model, inlet=inlet, species=species, filepath=datapath, domain=domain, site=site
+    )
 
     expected_key = f"{site}_{domain}_{model}_{inlet}"
     assert expected_key in result
@@ -74,15 +70,17 @@ def test_parse_acrg_org_satellite_key():
     species = "ch4"
     inlet = "column"
 
-    result = parse_acrg_org(model=model,
-                   filepath=datapath,
-                   satellite=satellite,
-                   species=species,
-                   domain=domain,
-                   obs_region=obs_region,
-                   inlet=inlet,
-                   continuous=False
-                   )
+    result = parse_acrg_org(
+        model=model,
+        filepath=datapath,
+        satellite=satellite,
+        species=species,
+        domain=domain,
+        obs_region=obs_region,
+        inlet=inlet,
+        continuous=False,
+        period="varies",
+    )
 
     expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"
     assert expected_key in result

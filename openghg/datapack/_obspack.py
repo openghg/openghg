@@ -1236,7 +1236,7 @@ def _find_additional_metakeys(
         list: Additional metakeys defined within the object store
     """
 
-    from openghg.objectstore import get_metakeys
+    from openghg.store import get_metakeys
 
     # TODO: How do we find out which bucket/store is being used? Is there a default if this is not specified?
     if store is None:

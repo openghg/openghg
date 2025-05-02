@@ -1,6 +1,6 @@
 from typing import cast, overload
 import logging
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 __all__ = ["format_inlet", "extract_height_name"]
 
@@ -168,7 +168,7 @@ def extract_height_name(
     site: str,
     network: str | None = None,
     inlet: str | None = None,
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> str | list | None:
     """
     Extract the relevant height associated with NAME from the

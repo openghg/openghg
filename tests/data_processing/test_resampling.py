@@ -57,7 +57,10 @@ def mhd_ds():
         "station_long_name": "Mace Head, Ireland",
     }
     ds.ch4.attrs = {"long_name": "mole fraction of methane in air", "units": "1e-9"}
-    ds.ch4_repeatability.attrs = {"long_name": "repeatability of mole fraction of methane in air", "units": "1e-9"}
+    ds.ch4_repeatability.attrs = {
+        "long_name": "repeatability of mole fraction of methane in air",
+        "units": "1e-9",
+    }
     return ds
 
 
@@ -85,8 +88,13 @@ def tac_ds():
         "station_long_name": "Tacolneston Tower, UK",
     }
     ds.ch4.attrs = {"long_name": "mole fraction of methane in air", "units": "1e-9"}
-    ds.ch4_variability.attrs = {"long_name": "variability of mole fraction of methane in air", "units": "1e-9"}
-    ds.ch4_number_of_observations.attrs = {"long_name": "number of observations of mole fraction of methane in air"}
+    ds.ch4_variability.attrs = {
+        "long_name": "variability of mole fraction of methane in air",
+        "units": "1e-9",
+    }
+    ds.ch4_number_of_observations.attrs = {
+        "long_name": "number of observations of mole fraction of methane in air"
+    }
     return ds
 
 
@@ -117,7 +125,9 @@ def test_weighted_resample(tac_ds):
 
 def test_weighted_resample_with_nans(tac_ds):
     """NaN values shouldn't affect the final result of weighted resample."""
-    tac_ds = tac_ds.assign(ch4=tac_ds.ch4.where(tac_ds.time >= pd.to_datetime("2019-01-01 10:00:00"), other=np.nan))
+    tac_ds = tac_ds.assign(
+        ch4=tac_ds.ch4.where(tac_ds.time >= pd.to_datetime("2019-01-01 10:00:00"), other=np.nan)
+    )
 
     ds_4h = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
     ds_4h_12h = weighted_resample(ds_4h, averaging_period="12h", species="ch4")
@@ -144,9 +154,7 @@ def test_make_surface_obs_resampler_dict(mhd_ds, tac_ds):
 def test_surface_obs_resampling_with_repeatability(mhd_ds):
     result = surface_obs_resampler(mhd_ds, averaging_period="4h", species="ch4")
 
-    expected_repeatability = uncorrelated_errors_resample(
-        mhd_ds.ch4_repeatability, averaging_period="4h"
-    )
+    expected_repeatability = uncorrelated_errors_resample(mhd_ds.ch4_repeatability, averaging_period="4h")
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
@@ -154,23 +162,48 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
 
     assert result.ch4.attrs == mhd_ds.ch4.attrs
     assert result.ch4_repeatability.attrs == mhd_ds.ch4_repeatability.attrs
-    assert result.ch4_variability.attrs == {"long_name": "mole fraction of methane in air_variability", "units": "1e-9"}
+    assert result.ch4_variability.attrs == {
+        "long_name": "mole fraction of methane in air_variability",
+        "units": "1e-9",
+    }
 
 
 def test_surface_obs_resampling_with_variability(tac_ds):
     result = surface_obs_resampler(tac_ds, averaging_period="4h", species="ch4")
 
-    expected = weighted_resample(tac_ds, averaging_period="4h", species="ch4",)
+    expected = weighted_resample(
+        tac_ds,
+        averaging_period="4h",
+        species="ch4",
+    )
     xr.testing.assert_allclose(result, expected)
 
 
-@pytest.mark.parametrize(("func", "func_kwargs"),
-                         [
-                             (mean_resample, {}),
-                             (weighted_resample, {"species": "ch4"}),
-                             (surface_obs_resampler, {"species": "ch4"}),
-                         ])
+@pytest.mark.parametrize(
+    ("func", "func_kwargs"),
+    [
+        (mean_resample, {}),
+        (weighted_resample, {"species": "ch4"}),
+        (surface_obs_resampler, {"species": "ch4"}),
+    ],
+)
 def test_attributes_kept(func, func_kwargs, tac_ds):
     resampled_ds = func(tac_ds, "4h", **func_kwargs)
 
     assert tac_ds.attrs.items() <= resampled_ds.attrs.items()
+
+
+def test_drop_na(tac_ds):
+    """NaNs should only be dropped from repeatability and variability if *both* are NaN."""
+    n = len(tac_ds.time)
+    half_n = n // 2
+
+    tac_ds["ch4_repeatability"] = (["time"], small_randoms(n))
+
+    tac_ds["ch4_variability"][:half_n] = np.nan
+    tac_ds["ch4_repeatability"][half_n:] = np.nan
+
+    result_drop = surface_obs_resampler(tac_ds, "4h", "ch4")
+    result_no_drop = surface_obs_resampler(tac_ds, "4h", "ch4", drop_na=False)
+
+    assert len(result_drop.time) == len(result_no_drop.time)

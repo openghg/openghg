@@ -10,7 +10,7 @@ from openghg.standardise.meta import (
     attributes_default_keys,
     dataset_formatter,
 )
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.util import clean_string, format_inlet
 
 
@@ -21,9 +21,8 @@ def parse_agage(
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
-    measurement_type: str | None = None,
     update_mismatch: str = "from_source",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
 ) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
@@ -34,7 +33,6 @@ def parse_agage(
         network: Network name
         inlet: inlet name (optional)
         sampling_period: sampling period for this instrument. If not supplied, will be read from the file.
-        measurement_type: measurement type
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:

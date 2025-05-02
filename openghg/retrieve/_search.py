@@ -4,6 +4,7 @@ the object store.
 """
 
 import logging
+import pandas as pd
 from typing import Any
 import warnings
 from openghg.objectstore.metastore import open_metastore
@@ -264,6 +265,7 @@ def search_surface(
     data_sublevel: str | list[str] | None = None,
     dataset_source: str | None = None,
     data_source: str | None = None,
+    platform: str | None = None,
     measurement_type: str | list[str] | None = None,
     source_format: str | list[str] | None = None,
     network: str | list[str] | None = None,
@@ -291,6 +293,7 @@ def search_surface(
             argument only needs to be used to narrow the search to data solely from retrieval methods.
         dataset_source: External name applied to source of the dataset,
             for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+        platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
@@ -302,7 +305,7 @@ def search_surface(
     Returns:
         SearchResults: SearchResults object
     """
-    from openghg.util import format_inlet, format_data_level
+    from openghg.util import format_inlet, format_data_level, format_platform
 
     if start_date is not None:
         start_date = str(start_date)
@@ -330,6 +333,8 @@ def search_surface(
             "The 'icos_data_level' argument is deprecated and will be replaced in future versions with 'data_level'.",
             DeprecationWarning,
         )
+
+    platform = format_platform(platform)
 
     results = search(
         species=species,
@@ -380,13 +385,15 @@ def search_column(
         species: Species name or synonym e.g. "ch4"
         instrument: Instrument name e.g. "TANSO-FTS"
         network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-        platform: Type of platform. Should be one of:
-            - "satellite"
-            - "site"
+        platform: Type of platform. One of "satellite", "column-insitu".
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_platform
+
+    platform = format_platform(platform)
+
     return search(
         satellite=satellite,
         domain=domain,
@@ -459,6 +466,9 @@ def search(**kwargs: Any) -> SearchResults:
             v = {key: clean_string(value) for key, value in v.items() if value is not None}
             if not v:  # Check empty dict
                 v = None
+        elif k.lower() in ["start_date", "end_date"]:
+            if v is not None:
+                v = pd.Timestamp(v)
         else:
             v = clean_string(v)
 

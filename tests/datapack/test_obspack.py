@@ -20,18 +20,18 @@ from openghg.datapack import (
 from openghg.datapack._obspack import _find_additional_metakeys, _construct_name
 
 
-#%% Test filename creation functions
+# %% Test filename creation functions
 
 
 @pytest.mark.parametrize(
-        "keys, separators, expected",
-        [
-            (["a", "c", "b"], ("_",), "start_middle_end"),
-            (["a", ["c", "b"]], ("_", "-"), "start_middle-end"),
-            (["a", ["c", "d"], "b"], ("_", "-"), "start_middle-extra_end"),
-            ([["a", ["c", "d"]], "b"], ("_", "-", "+"), "start-middle+extra_end"),
-            (["a"], ("_",), "start"),
-        ]
+    "keys, separators, expected",
+    [
+        (["a", "c", "b"], ("_",), "start_middle_end"),
+        (["a", ["c", "b"]], ("_", "-"), "start_middle-end"),
+        (["a", ["c", "d"], "b"], ("_", "-"), "start_middle-extra_end"),
+        ([["a", ["c", "d"]], "b"], ("_", "-", "+"), "start-middle+extra_end"),
+        (["a"], ("_",), "start"),
+    ],
 )
 def test_construct_name(keys, separators, expected):
     """
@@ -172,12 +172,14 @@ def test_define_obspack_filename_name_components(name_components, out_filename):
     2. Check the order of the specified values is used - ["site", "inlet", "species"]
     4. Check different values for the metadata can be selected - ["site", "data_source", "data_level"]
     """
-    metadata = {"site": "WAO",
-                "species": "ch4",
-                "inlet": "10m",
-                "data_level": 1,
-                "data_source": "icos",
-                "latest_version": "v1"}
+    metadata = {
+        "site": "WAO",
+        "species": "ch4",
+        "inlet": "10m",
+        "data_level": 1,
+        "data_source": "icos",
+        "latest_version": "v1",
+    }
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
@@ -203,10 +205,7 @@ def test_define_obspack_filename_name_suffixes(name_suffixes, out_filename):
     2. If same key exists in metadata, check values from name_suffixes are used
     3. Check new suffix values can be used to create output name
     """
-    metadata = {"site": "WAO",
-                "species": "ch4",
-                "inlet": "10m",
-                "latest_version": "v1"}
+    metadata = {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"}
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
@@ -218,13 +217,13 @@ def test_define_obspack_filename_name_suffixes(name_suffixes, out_filename):
 
 
 @pytest.mark.parametrize(
-        "input,expected_result",
-        [
-            ([1, 2, 3, 4, 5], True),  # no repeats
-            ([1, 2, 3, 4, 5, 5], False),  # repeats
-            ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
-            (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
-        ]
+    "input,expected_result",
+    [
+        ([1, 2, 3, 4, 5], True),  # no repeats
+        ([1, 2, 3, 4, 5, 5], False),  # repeats
+        ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
+        (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
+    ],
 )
 def test_check_unique(input, expected_result):
     """
@@ -246,8 +245,7 @@ def test_find_additional_metakeys_insitu():
     obs_type = "surface-insitu"
     name_components = ["site", "species", "inlet"]
 
-    metakeys = _find_additional_metakeys(obs_type=obs_type,
-                                         name_components=name_components)
+    metakeys = _find_additional_metakeys(obs_type=obs_type, name_components=name_components)
 
     # Define a metakey we would expect for surface data
     # Note: Will need to update if the surface definition changes to remove this
@@ -259,69 +257,79 @@ def test_find_additional_metakeys_insitu():
 
 
 @pytest.mark.parametrize(
-        "version,current_obspacks,expected_output",
-        [
-            ("v1", [], "gemma_obspack_v1"),
-            (None, ["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next version
-            (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
-            (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-            (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-            (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-        ]
+    "version,current_obspacks,expected_output",
+    [
+        ("v1", [], "gemma_obspack_v1"),
+        (
+            None,
+            ["gemma_obspack"],
+            "gemma_obspack_v2",
+        ),  # If no version is found, assume v1 and use next version
+        (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
+        (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+        (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+        (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+    ],
 )
 def test_define_obspack_name(version, current_obspacks, expected_output):
     obspack_stub = "gemma_obspack"
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                 version=version,
-                                 current_obspacks=current_obspacks)
+    output, version = define_obspack_name(
+        obspack_stub=obspack_stub, version=version, current_obspacks=current_obspacks
+    )
 
     assert output == expected_output
 
 
 @pytest.mark.parametrize(
-        "current_obspacks,expected_output",
-        [
-            ([], "gemma_obspack_v1.0"),
-            (["gemma_obspack"], "gemma_obspack_v1.1"),  # If no version is found, assume v1 and use next minor version
-            (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
-            (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
-            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-        ]
+    "current_obspacks,expected_output",
+    [
+        ([], "gemma_obspack_v1.0"),
+        (
+            ["gemma_obspack"],
+            "gemma_obspack_v1.1",
+        ),  # If no version is found, assume v1 and use next minor version
+        (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
+        (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+        (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
+        (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+    ],
 )
 def test_define_obspack_name_minor(current_obspacks, expected_output):
     obspack_stub = "gemma_obspack"
     minor_version_only = True
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                          minor_version_only=minor_version_only,
-                                          current_obspacks=current_obspacks)
+    output, version = define_obspack_name(
+        obspack_stub=obspack_stub, minor_version_only=minor_version_only, current_obspacks=current_obspacks
+    )
 
     assert output == expected_output
 
 
 @pytest.mark.parametrize(
-        "current_obspacks,expected_output",
-        [
-            ([], "gemma_obspack_v1"),
-            (["gemma_obspack"], "gemma_obspack_v2"),  # If no version is found, assume v1 and use next major version
-            (["gemma_obspack_v1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
-            (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-            (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
-            (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
-        ]
+    "current_obspacks,expected_output",
+    [
+        ([], "gemma_obspack_v1"),
+        (
+            ["gemma_obspack"],
+            "gemma_obspack_v2",
+        ),  # If no version is found, assume v1 and use next major version
+        (["gemma_obspack_v1"], "gemma_obspack_v2"),
+        (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
+        (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
+        (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+        (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
+        (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
+    ],
 )
 def test_define_obspack_name_major(current_obspacks, expected_output):
     obspack_stub = "gemma_obspack"
     major_version_only = True
-    output, version = define_obspack_name(obspack_stub=obspack_stub,
-                                          major_version_only=major_version_only,
-                                          current_obspacks=current_obspacks)
+    output, version = define_obspack_name(
+        obspack_stub=obspack_stub, major_version_only=major_version_only, current_obspacks=current_obspacks
+    )
 
     assert output == expected_output
 
@@ -466,14 +474,14 @@ def test_retrieve_data():
     filename = get_obspack_datapath("example_search_input_full.csv")
 
     full_data = retrieve_data(filename=filename)
-    
+
     assert len(full_data) == 3
 
     expected_details_found = [
         {"site": "tac", "species": "co2", "inlet": "185m"},
         {"site": "bsd", "species": "ch4", "inlet": "multiple"},
-        {"site": "bsd", "species": "ch4", "inlet": "42m"}
-        ]
+        {"site": "bsd", "species": "ch4", "inlet": "42m"},
+    ]
 
     for data, details in zip(full_data, expected_details_found):
         data_attrs = data.data.attrs
@@ -505,21 +513,19 @@ def test_create_obspack_structure(tmp_path):
     populate_object_store()
     filename = get_obspack_datapath("example_search_input_full.csv")
 
-    store="user"
-    obspack_path = create_obspack(search_filename=filename,
-                                  output_folder=tmp_path,
-                                  obspack_name="test_gemma_v1",
-                                  store=store)
+    store = "user"
+    obspack_path = create_obspack(
+        search_filename=filename, output_folder=tmp_path, obspack_name="test_gemma_v1", store=store
+    )
 
     # Check obspack structure
     release_file = "obspack_README.md"
     site_file_search = "site_index_details*.txt"
-    subfolder_file_num = {"surface-insitu": 2,
-                          "surface-flask": 1}
+    subfolder_file_num = {"surface-insitu": 2, "surface-flask": 1}
 
     assert obspack_path.exists()
     assert (obspack_path / release_file).exists()
-    
+
     site_index_files = list(obspack_path.glob(site_file_search))
     assert len(site_index_files) == 1
 
@@ -544,11 +550,10 @@ def test_create_obspack_file_insitu(tmp_path):
     populate_object_store()
     filename = get_obspack_datapath("example_search_input_1.csv")
 
-    store="user"
-    obspack_path = create_obspack(search_filename=filename,
-                                  output_folder=tmp_path,
-                                  obspack_name="test_gemma_v1",
-                                  store=store)
+    store = "user"
+    obspack_path = create_obspack(
+        search_filename=filename, output_folder=tmp_path, obspack_name="test_gemma_v1", store=store
+    )
 
     species = "co2"
     site = "tac"
@@ -567,24 +572,25 @@ def test_create_obspack_file_insitu(tmp_path):
     assert "time" in ds.coords
 
     # Check TAC file contains (at least) the expected attributes
-    expected_attrs = {'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
-                      'Source': 'In situ measurements of air',
-                      'conditions_of_use': 'Ensure that you contact the data owner at the outset of your project.',
-                      'data_owner': "Simon O'Doherty",
-                      'data_owner_email': 's.odoherty@bristol.ac.uk',
-                      'inlet': '185m',
-                      'inlet_height_magl': 185.0,
-                      'instrument': 'picarro',
-                      'network': 'decc',
-                      'sampling_period': '3600.0',
-                      'sampling_period_unit': 's',
-                      'site': 'tac',
-                      'species': 'co2',
-                      'station_height_masl': 64.0,
-                      'station_latitude': 52.51775,
-                      'station_long_name': 'Tacolneston Tower, UK',
-                      'station_longitude': 1.13872,
-                      'scale': 'WMO-X2019',
+    expected_attrs = {
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet": "185m",
+        "inlet_height_magl": 185.0,
+        "instrument": "picarro",
+        "network": "decc",
+        "sampling_period": "3600.0",
+        "sampling_period_unit": "s",
+        "site": "tac",
+        "species": "co2",
+        "station_height_masl": 64.0,
+        "station_latitude": 52.51775,
+        "station_long_name": "Tacolneston Tower, UK",
+        "station_longitude": 1.13872,
+        "scale": "WMO-X2019",
     }
 
     assert ds.attrs.items() > expected_attrs.items()
@@ -605,11 +611,10 @@ def test_create_obspack_file_multi_inlet(tmp_path):
     populate_object_store()
     filename = get_obspack_datapath("example_search_input_2.csv")
 
-    store="user"
-    obspack_path = create_obspack(search_filename=filename,
-                                  output_folder=tmp_path,
-                                  obspack_name="test_gemma_v1",
-                                  store=store)
+    store = "user"
+    obspack_path = create_obspack(
+        search_filename=filename, output_folder=tmp_path, obspack_name="test_gemma_v1", store=store
+    )
 
     species = "ch4"
     site = "bsd"
@@ -634,16 +639,13 @@ def test_create_obspack_search(tmp_path):
     """
 
     populate_object_store()
-    store="user"
+    store = "user"
 
-    search_df = DataFrame({"site": ["tac", "bsd"],
-                           "species": ["co2", "ch4"],
-                           "inlet": ["185m", "108m"]})
+    search_df = DataFrame({"site": ["tac", "bsd"], "species": ["co2", "ch4"], "inlet": ["185m", "108m"]})
 
-    obspack_path = create_obspack(search_df=search_df,
-                                  output_folder=tmp_path,
-                                  obspack_name="test_gemma_v1",
-                                  store=store)
+    obspack_path = create_obspack(
+        search_df=search_df, output_folder=tmp_path, obspack_name="test_gemma_v1", store=store
+    )
 
     species = "co2"
     site = "tac"

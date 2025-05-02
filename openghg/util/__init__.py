@@ -47,6 +47,7 @@ from ._metadata_util import (
     get_overlap_keys,
     merge_dict,
 )
+from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
 from ._site import get_site_info, sites_in_network
 from ._species import (
@@ -113,5 +114,6 @@ from ._util import (
     sort_by_filenames,
     unanimous,
     verify_site,
+    verify_site_with_satellite,
 )
 from ._versions import show_versions, check_if_need_new_version
