@@ -410,7 +410,7 @@ def resampler(
         elif isinstance(drop_na, bool):
             result = result.dropna("time")
         else:
-            raise TypeError("`drop_na should be bool or dict.")
+            raise TypeError("`drop_na` should be bool or dict.")
 
     return result
 
