@@ -405,9 +405,12 @@ def resampler(
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
     if drop_na:
-        if isinstance(drop_na,dict): result = result.dropna("time", **drop_na)
-        elif isinstance(drop_na,bool): result = result.dropna("time")
-        else: raise TypeError("`drop_na should be bool or dict.")
+        if isinstance(drop_na, dict):
+            result = result.dropna("time", **drop_na)
+        elif isinstance(drop_na, bool):
+            result = result.dropna("time")
+        else:
+            raise TypeError("`drop_na should be bool or dict.")
 
     return result
 
@@ -503,8 +506,8 @@ def surface_obs_resampler(
 
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
-        drop_na_kwargs = {'how': 'any', 'subset': check_any}
-    else :
+        drop_na_kwargs = {"how": "any", "subset": check_any}
+    else:
         drop_na_kwargs = False
 
     result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs)
