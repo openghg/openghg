@@ -4,10 +4,9 @@ from typing import Literal, TypeVar
 import numpy as np
 import pandas as pd
 import xarray as xr
-from xarray import Dataset
 from numpy.typing import ArrayLike
 
-from openghg.types import XrDataLike, ReindexMethod
+from openghg.types import ReindexMethod, XrDataLike
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -77,6 +76,12 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
         raise ValueError("Sample period cannot be derived from observations")
 
     return float(obs_data_period_s)
+
+
+def time_of_day_offset(date_time: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
+    """Return an offset with the time past the start of the day."""
+    date_time = pd.to_datetime(date_time)
+    return date_time - pd.to_datetime(date_time.date())
 
 
 def time_overlap(
@@ -217,7 +222,7 @@ def resample_obs_and_other(
         raise ValueError("Obs data and Footprint data don't overlap")
 
     # Offset for resampling
-    offset = start_date - pd.to_datetime(start_date.date())  # time past start of day
+    offset = time_of_day_offset(start_date)
 
     # If specific period has been passed, resample
     resample_keyword_choices = ("obs", "other", "coarsest")
@@ -246,7 +251,7 @@ def resample_obs_and_other(
     return obs, other
 
 
-def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
+def _indexes_match(dataset_A: xr.Dataset, dataset_B: xr.Dataset) -> bool:
     """Check if two datasets need to be reindexed_like for combine_datasets
 
     Args:
@@ -283,8 +288,11 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: ReindexMethod = "ffill", tolerance: float | None = None
-) -> Dataset:
+    dataset_A: xr.Dataset,
+    dataset_B: xr.Dataset,
+    method: ReindexMethod = "ffill",
+    tolerance: float | None = None,
+) -> xr.Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
     If "fp" variable is found within the combined dataset,
