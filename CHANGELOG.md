@@ -9,9 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Allow to provide a kwargs dict to `resampler` function via `drop_na` that will be used by `xarray.Dataset.dropna` [PR #1314](https://github.com/openghg/openghg/pull/1314)
-- Improved the check for nans in surface_obs_resampler function: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan [PR #1314](https://github.com/openghg/openghg/pull/1314).
-- Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
-- Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
+- Improved the check for nans in `surface_obs_resampler function`: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan [PR #1314](https://github.com/openghg/openghg/pull/1314). This removed the improvements of `surface_obs_resampler` from [PR #1298](https://github.com/openghg/openghg/pull/1298).
+- Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
+- Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
+- Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
+
+### Updated
+
+- Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
+
+## [0.14.0] - 2025-04-16
+
+### Added
+- Added new tutorial for satellite ModelScenario processing.[PR #1304](https://github.com/openghg/openghg/pull/1304)
+- Improved the check for nans in surface_obs_resampler function: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan, or when both `f"{species}_variability"` and `f"{species}_repeatability"` are nans.[PR #1298](https://github.com/openghg/openghg/pull/1298)
+- Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [PR #1283](https://github.com/openghg/openghg/pull/1283)
+- Added a new resampling feature for obs where a f"{species}_variability" variable is present but not f"{species}_number_of_observation" [PR #1275](https://github.com/openghg/openghg/pull/1275)
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
 - Added ability to process ModelScenario for Observation and Footprint satellite data. Added `platform` keyword to split the process and added ability to pass `satellite` as argument.[#PR 1244](https://github.com/openghg/openghg/pull/1244)
 - The `platform` keyword can now be used with surface data and can be passed to the standardise_surface function (e.g. "surface-insitu", "surface-flask"). This can be used to (a) separate data into different datasources based on platform when storing and (b) when deciding whether to resample data when aligning using ModelScenario methods. [PR #1278](https://github.com/openghg/openghg/pull/1278), [PR #1279](https://github.com/openghg/openghg/pull/1279) and [PR #1289](https://github.com/openghg/openghg/pull/1289).
