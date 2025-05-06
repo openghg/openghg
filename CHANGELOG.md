@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Allow to provide a kwargs dict to `resampler` function via `drop_na` that will be used by `xarray.Dataset.dropna` [PR #1314](https://github.com/openghg/openghg/pull/1314)
+- Improved the check for nans in `surface_obs_resampler function`: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan [PR #1314](https://github.com/openghg/openghg/pull/1314). This removed the improvements of `surface_obs_resampler` from [PR #1298](https://github.com/openghg/openghg/pull/1298).
 - Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
 - Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
 - Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
