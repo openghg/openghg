@@ -508,7 +508,7 @@ def surface_obs_resampler(
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
         drop_na_kwargs = {"how": "any", "subset": check_any}
     else:
-        drop_na_kwargs = False
+        drop_na_kwargs = False  # type: ignore
 
     result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs)
 
