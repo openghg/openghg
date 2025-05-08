@@ -252,9 +252,7 @@ def get_logfile_path() -> Path:
 
 
 def check_function_open_nc(
-    filepath: multiPathType, 
-    realign_on_domain: str | None = None,
-    sel_month: bool = False
+    filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
 ) -> tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -270,7 +268,6 @@ def check_function_open_nc(
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    
 
     if sel_month:
         import numpy as np
@@ -295,11 +292,11 @@ def check_function_open_nc(
             return x
 
     if isinstance(filepath, list):
-        
+
         if len(filepath) > 1:
             xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=process)
             return xr_open_fn, filepath
-        
+
         else:
             filepath = filepath[0]
 

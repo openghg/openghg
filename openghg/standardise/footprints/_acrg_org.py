@@ -73,10 +73,10 @@ def parse_acrg_org(
     xr_open_fn, filepath = check_function_open_nc(filepath, domain, sel_month=True)
 
     fp_data = xr_open_fn(filepath)
-    
+
     # create 'release_heigt' variable for compatibility between different footprints
-    inlet_int = int(inlet.replace('magl','').replace('m',''))
-    fp_data['release_height'] = inlet_int * ones_like(fp_data['time'].astype(int))
+    inlet_int = int(inlet.replace("magl", "").replace("m", ""))
+    fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
