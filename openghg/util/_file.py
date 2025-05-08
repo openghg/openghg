@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 import xarray as xr
 
-from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
 
 __all__ = [
