@@ -12,7 +12,6 @@ from openghg.datapack import (
     ObsPack,
     retrieve_data,
     create_obspack,
-    define_obspack_name,
 )
 
 

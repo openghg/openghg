@@ -1,6 +1,8 @@
 """
 This module is allow the creation of an output data obspack based on files stored within the object store.
 
+An obspack is a collection of consistent observation data which can be used by the community.
+
 The default structure is to create a top level directory (obspack_name) and for this to contain subfolders for each of the obs_types.
 The output files will be in netcdf format and will be based on a naming convention dependent on the obs_type.
 
@@ -17,7 +19,7 @@ Default overall obspack structure:
     ...
 
 Key functions:
- - define_stored_data_filename() - defines the full output filename for each file based on naming convention
+ - define_full_obspack_filename() - defines the full output filename for each file based on naming convention
  - retrieve_data() - retrieve data from an object store search terms (currently from a config file)
  - create_obspack() - this is the summary function for creating an obspack
 """
@@ -287,6 +289,26 @@ class StoredData:
         """
         Write stored data details to file. If filename is not already defined,
         this will use the update_filename() method to create this.
+
+        Args:
+            obspack_name: Name of the obspack to write this StoredData object to
+            output_folder: Top level directory containing the obspack.
+            include_obs_type: Whether to include obs_type in the filename. Default = True.
+                Only used if self.filename is not already defined.
+            include_version: Whether to include the data version in the filename. Default = True.
+                Only used if self.filename is not already defined.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+                Only used if self.filename is not already defined.
+            name_components: Keys to use when extracting names from the metadata and to use
+                within the filename. This can be specified per obs_type using a dictionary.
+                Default will depend on obs_type - see define_name_components().
+                Only used if self.filename is not already defined.
+            name_suffixes: Dictionary of additional values to add to the filename as a suffix.
+                Only used if self.filename is not already defined.
+        Returns:
+            None
+            Writes data to disc as netcdf file.
         """
 
         ds = self.data
@@ -305,10 +327,24 @@ class StoredData:
 
 
 class ObsPack:
-    """ """
+    """
+    The ObsPack object includes details associated with how to define the an
+    output obspack and what data is included within this.
+
+    This will typically include:
+        - StoredData objects (data retrieved from an object store)
+        - Static helper files to be included within the obspack (release files)
+        - Collated details of site information for the observation data
+    """
 
     def __init__(self, output_folder: pathType, obspack_name: str | None = None):
-        """ """
+        """
+        Args:
+            output_folder: Path to top level directory where obspack folder will be created.
+            obspack_name: Full name for the obspack. This can either be specified directly
+                upon initialisation of the ObsPack object or can be created using an obspack_stub
+                and the self.define_obspack_name() function.
+        """
         self.output_folder = Path(output_folder)
         if obspack_name is not None:
             self.obspack_name: str | None = obspack_name
