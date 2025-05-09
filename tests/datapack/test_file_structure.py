@@ -2,6 +2,7 @@ from pathlib import Path
 import pytest
 from openghg.datapack import (
     define_stored_data_filename,
+    define_full_obspack_filename,
     define_obspack_name,
 )
 from openghg.datapack._file_structure import _find_additional_metakeys, _construct_name
@@ -200,6 +201,39 @@ def test_define_stored_data_filename_name_suffixes(name_suffixes, out_filename):
 
     assert filename == out_filename
 
+@pytest.mark.parametrize(
+        "output_folder, subfolder",
+        [
+            (None, None),
+            ("", ""),
+            ("path/to/folder", None),
+            (None, "site-insitu"),
+            ("path/to/folder", "site-insitu"),
+        ]
+)
+def test_define_full_obspack_filename(output_folder, subfolder):
+    """
+    Fairly basic tests to just check the full path to the output file is being constructed
+    as expected.
+    """
+
+    filename = "ch4_WAO_10m_surface-insitu_v1.nc"
+    obspack_name = "gemma_obspack_v2"
+
+    full_filename = define_full_obspack_filename(filename,
+                                                 obspack_name=obspack_name,
+                                                 output_folder=output_folder,
+                                                 subfolder=subfolder)
+
+    if subfolder is None:
+        subfolder = ""
+    if output_folder is None:
+        output_folder = ""
+
+    expected_full_filename = Path(output_folder) / obspack_name / Path(subfolder) / filename
+
+    assert full_filename == expected_full_filename
+    
 
 def test_find_additional_metakeys_insitu():
     """
