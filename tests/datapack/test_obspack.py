@@ -7,7 +7,6 @@ import pytest
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 from openghg.standardise import standardise_surface
 from openghg.dataobjects import ObsData
-from openghg.util import check_unique
 from openghg.datapack import (
     StoredData,
     ObsPack,
@@ -15,26 +14,6 @@ from openghg.datapack import (
     create_obspack,
     define_obspack_name,
 )
-
-
-@pytest.mark.parametrize(
-    "input,expected_result",
-    [
-        ([1, 2, 3, 4, 5], True),  # no repeats
-        ([1, 2, 3, 4, 5, 5], False),  # repeats
-        ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
-        (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
-    ],
-)
-def test_check_unique(input, expected_result):
-    """
-    Test the check_unique function returns True/False as expected
-    """
-    result = check_unique(input)
-    assert result == expected_result
-
-
-
 
 
 @pytest.mark.parametrize(
