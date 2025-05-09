@@ -2,11 +2,13 @@
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 from collections.abc import Iterator
+import numpy as np
+import pandas as pd
 import logging
-from openghg.util import clean_string
 
+from openghg.util import clean_string
 from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.util")
@@ -272,3 +274,48 @@ def verify_site_with_satellite(
 
     except ValueError as e:
         print(f"Error: {e}")
+
+
+def check_unique(values: Sequence) -> bool:
+    """
+    Check whether sequence is unique. Returns True/False.
+    """
+    return len(values) == len(set(values))
+
+
+def find_repeats(values: Sequence) -> list[np.ndarray] | None:
+    """
+    Find repeated indices from within a sequence.
+    Returns:
+        list[numpy.ndarray]: Grouped arrays containing the repeated indices.
+    """
+
+    unique_values, indices, counts = np.unique(values, return_inverse=True, return_counts=True)
+
+    if len(unique_values) == len(values):
+        return None
+
+    repeated_indices = np.where(counts > 1)[0]
+    repeated_org_indices = [np.where(indices == repeat)[0] for repeat in repeated_indices]
+
+    return repeated_org_indices
+
+
+def collate_strings(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reduce pandas data frame rows by combining unique entries within a column into a single string separated by a semi-colon.
+    This can be used as part of applying a function to a split DataFrame (e.g. via groupby)
+
+    Args:
+        df: any pandas DataFrame
+    Returns:
+        pandas.DataFrame: A new, single row DataFrame
+    """
+    df_new = pd.DataFrame()
+    for name, series in df.items():
+        unique_values = series.unique()
+        collated_value = ",".join([str(value) for value in unique_values])
+
+        df_new[name] = [collated_value]
+
+    return df_new
