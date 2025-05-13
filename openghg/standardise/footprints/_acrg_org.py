@@ -74,10 +74,6 @@ def parse_acrg_org(
 
     fp_data = xr_open_fn(filepath)
 
-    # create 'release_heigt' variable for compatibility between different footprints
-    inlet_int = int(inlet.replace("magl", "").replace("m", ""))
-    fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
-
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
@@ -110,7 +106,6 @@ def parse_acrg_org(
         "atmosphere_boundary_layer_thickness",
         "release_lon",
         "release_lat",
-        "release_height",
     ]
 
     for dv in variable_names:
@@ -134,8 +129,14 @@ def parse_acrg_org(
     dv_attribute_updates["release_lon"]["long_name"] = "Release longitude"
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
-    dv_attribute_updates["release_height"]["units"] = "m"
-    dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
+
+    # create 'release_heigt' variable for compatibility between different footprints
+    if inlet != "column":
+        inlet_int = int(inlet.replace("magl", "").replace("m", ""))
+        fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
+        variable_names.append("release_height")
+        dv_attribute_updates["release_height"]["units"] = "m"
+        dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
