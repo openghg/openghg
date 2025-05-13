@@ -215,7 +215,6 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "atmosphere_boundary_layer_thickness",
         "release_lon",
         "release_lat",
-        "release_height",
         "particle_locations_n",
         "particle_locations_e",
         "particle_locations_s",
@@ -228,6 +227,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "fp_high",
         "index_lons",
         "index_lats",
+        "release_height",
     ]
 
     del footprint_data.attrs["processed"]
