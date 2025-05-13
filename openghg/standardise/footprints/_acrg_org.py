@@ -132,10 +132,13 @@ def parse_acrg_org(
 
     # create 'release_heigt' variable for compatibility between different footprints
     if inlet != "column":
-        dv_attribute_updates["release_height"] = {}
+
         inlet_int = int(inlet.replace("magl", "").replace("m", ""))
         fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
+
         variable_names.append("release_height")
+
+        dv_attribute_updates["release_height"] = {}
         dv_attribute_updates["release_height"]["units"] = "m"
         dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
 
