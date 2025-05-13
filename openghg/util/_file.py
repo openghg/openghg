@@ -294,13 +294,13 @@ def check_function_open_nc(
     if isinstance(filepath, list):
 
         if len(filepath) > 1:
-            xr_open_fn: Callable = partial(xr.open_mfdataset, preprocess=process)
-            return xr_open_fn, filepath
+            xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process)
+            return xr_open_fn_1, filepath
 
         else:
             filepath = filepath[0]
 
-    def xr_open_fn(x: pathType) -> xr.DataArray | xr.Dataset:
+    def xr_open_fn_2(x: pathType) -> xr.DataArray | xr.Dataset:
         return process(xr.open_dataset(x))
 
-    return xr_open_fn, filepath
+    return xr_open_fn_2, filepath
