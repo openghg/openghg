@@ -26,10 +26,3 @@ from ._local_store import (
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes
 from ._integrity import integrity_check
-from ._config import (
-    check_metakeys,
-    get_metakeys,
-    write_metakeys,
-    create_custom_config,
-    get_metakey_defaults,
-)

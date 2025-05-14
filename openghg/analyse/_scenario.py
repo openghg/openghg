@@ -44,15 +44,15 @@ on which data types are missing.
 """
 
 import logging
-from typing import Any, Literal, Optional, Union, cast
+from typing import Any, Union, cast
 from collections.abc import Sequence
 
-import numpy as np
 import pandas as pd
-from pandas import Timestamp
 import xarray as xr
+from pandas import Timestamp
 from xarray import DataArray, Dataset
 
+from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
@@ -66,12 +66,14 @@ from openghg.retrieve import (
     search_footprints,
     search_column,
 )
-from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite
-from openghg.types import SearchError
-from ._alignment import align_obs_and_other
+from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
+from openghg.types import SearchError, ReindexMethod
+from ._alignment import combine_datasets, resample_obs_and_other
+from ._modelled_baseline import baseline_sensitivities
+from ._utils import match_dataset_dims, stack_datasets
 
 
-__all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_dataset_dims", "stack_datasets"]
+__all__ = ["ModelScenario"]
 
 
 # TODO: Really with the emissions, they shouldn't need to match against a domain
@@ -82,7 +84,6 @@ __all__ = ["ModelScenario", "calc_dim_resolution", "combine_datasets", "match_da
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[list[dict[str, str | int | None]], dict[str, str | int | None]]
-methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -150,7 +151,7 @@ class ModelScenario:
         height: Alias for inlet.
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
-        platform: Platform name e.g "satellite, site-column".
+        platform: Platform name e.g "satellite", "column-insitu".
         max_level: Maximum level for processing.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
@@ -189,7 +190,7 @@ class ModelScenario:
         if species is not None:
             species = synonyms(species)
 
-        accepted_column_data_types = ["satellite", "site-column"]
+        accepted_column_data_types = define_platform(data_type="column")
 
         self.platform: str | None = platform
         if satellite is not None and platform is None:
@@ -201,7 +202,7 @@ class ModelScenario:
             # Add observation column data (directly or through keywords, column or satellite)
             if max_level is None:
                 raise AttributeError(
-                    "If you are using column-based data (i.e. platform is 'satellite' or 'site-column'), you need to pass max_level"
+                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
                 )
             self.add_obs_column(
                 site=site,
@@ -281,7 +282,7 @@ class ModelScenario:
 
         # Initialise attributes used for caching
         self.scenario: Dataset | None = None
-        self.modelled_obs: DataArray | None = None
+        self.modelled_obs: Dataset | None = None
         self.modelled_baseline: DataArray | None = None
         self.flux_stacked: Dataset | None = None
 
@@ -725,9 +726,7 @@ class ModelScenario:
 
         return platform
 
-    def _align_obs_footprint(
-        self, resample_to: str | None = "coarsest", platform: str | None = None
-    ) -> tuple:
+    def _resample_obs_footprint(self, resample_to: str | None = "coarsest") -> tuple:
         """Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
@@ -738,11 +737,10 @@ class ModelScenario:
          - "obs" - resample to observation data frequency
          - "footprint" - resample to footprint data frequency
          - a valid resample period e.g. "2H"
-         - None to not resample and to just "ffill" footprint to obs
+         - None to not resample and just return original values
 
         Args:
             resample_to: Resample option to use: either data based or using a valid pandas resample period.
-            platform: Observation platform used to decide whether to resample
 
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
@@ -755,36 +753,13 @@ class ModelScenario:
         obs_data = obs.data
         footprint_data = footprint.data
 
-        # Keyword only used if not resampling (at the moment)
-        align_to_obs = True
-
-        if platform is not None:
-            platform = platform.lower()
-            # Do not apply resampling for "satellite" or "flask"
-            if platform == "satellite":
-                resample_to = None
-                align_to_obs = True
-            elif "flask" in platform:
-                resample_to = None
-                align_to_obs = True
-            else:
-                logger.warning(f"Platform '{platform}' not used when determining resample strategy.")
-
         if resample_to is None:
-            if align_to_obs:
-                if platform == "satellite":
-                    footprint_data = footprint_data.reindex_like(
-                        obs_data, method="nearest", tolerance=pd.Timedelta("1ms")
-                    )
-                    logger.info("Reindexing footprint data to satellite observation data.")
-                else:
-                    footprint_data = footprint_data.reindex_like(obs_data, method="ffill")
             return obs_data, footprint_data
 
         if resample_to == "footprint":
             resample_to = "other"
 
-        return align_obs_and_other(obs_data, footprint_data, resample_to=resample_to)
+        return resample_obs_and_other(obs_data, footprint_data, resample_to=resample_to)
 
     def combine_obs_footprint(
         self,
@@ -806,7 +781,9 @@ class ModelScenario:
                           - or using a valid pandas resample period e.g. "2H".
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample
+            platform: Observation platform used to decide on resample and alignment steps.
+                If this is not supplied, function will attempt to extract this value from
+                from the metadata, then the openghg_defs site_info.json details for the site.
             cache: Cache this data after calculation. Default = True.
 
         Returns:
@@ -824,15 +801,41 @@ class ModelScenario:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
 
-        # As we're not processing any satellite data yet just set tolerance to None
-        tolerance = None
+        # Extract platform
         if platform is None:
             platform = self._get_platform()
 
-        # Align and merge the observation and footprint Datasets
-        aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
+        # Set default reindex method and tolerance values
+        merge_method: ReindexMethod = "ffill"
+        tolerance = None
+
+        # If platform is specified, update resample_to, reindex and tolerance values where appropriate
+        if platform is not None:
+            platform = platform.lower()
+            if platform == "satellite":
+                # Update reindex method and tolerance for satellite
+                resample_to = None
+                merge_method = "nearest"
+                tolerance = pd.Timedelta("1ms")
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance."
+                )
+            elif "flask" in platform:
+                # TODO: Iss #253. Update this to be smarter about averaging irregular, flask data
+                # May need to access different method than resample
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample stategy (no resampling)."
+                )
+                resample_to = None
+            else:
+                logger.warning(
+                    f"Platform '{platform}' not used when determining resample and merge strategy."
+                )
+
+        # Resample, align and merge the observation and footprint Datasets
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
         combined_dataset = combine_datasets(
-            dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance
+            dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
@@ -1032,7 +1035,9 @@ class ModelScenario:
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
-    ) -> DataArray:
+        output_fp_x_flux: bool = False,
+        split_by_sectors: bool = False,
+    ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
         The time points returned are dependent on the resample_to option chosen.
@@ -1049,9 +1054,13 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_fp_x_flux: If true, include "fp x flux" data variable in output.
+            split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
+              under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
+              different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
 
         Returns:
-            xarray.DataArray: Modelled observation values along the time axis
+            xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_obs attribute.
@@ -1064,23 +1073,48 @@ class ModelScenario:
         )
 
         if not param_calculate:
-            modelled_obs = cast(DataArray, self.modelled_obs)
+            modelled_obs = cast(Dataset, self.modelled_obs)
             return modelled_obs
 
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod_high_res"
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod"
+
+        # calculate sectoral modelled mf and fp_x_flux
+        if split_by_sectors:
+            sources = self._clean_sources_input(sources)
+            sectoral_datasets = []
+
+            for source in sources:
+                if self.species == "co2":
+                    mod_obs = self._calc_modelled_obs_HiTRes(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_high_res_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                else:
+                    mod_obs = self._calc_modelled_obs_integrated(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                mod_obs = mod_obs.expand_dims({"source": [source]})
+                sectoral_datasets.append(mod_obs)
+
+            sectoral_modelled_obs = xr.concat(sectoral_datasets, dim="source")
+            modelled_obs.update(sectoral_modelled_obs)
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
-        modelled_obs = modelled_obs.rename(name)
 
         # Cache output from calculations
         if cache:
@@ -1097,8 +1131,10 @@ class ModelScenario:
         self,
         sources: str | list | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
-    ) -> Any:
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
         Args:
@@ -1124,28 +1160,27 @@ class ModelScenario:
 
         scenario = self.scenario
         flux = self.combine_flux_sources(sources)
-        scenario, flux = match_dataset_dims([scenario, flux], dims=["lat", "lon"])
+        flux_modelled = fp_x_flux_integrated(scenario, flux)
 
-        flux = flux.reindex_like(scenario, "ffill")
-        flux_modelled: DataArray = scenario["fp"] * flux["flux"]
-        timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
+        data = {}
 
-        # TODO: Add details about units to output
+        if output_TS:
+            data[ts_name] = flux_modelled.sum(["lat", "lon"])
 
-        if output_TS and output_fpXflux:
-            return timeseries, flux_modelled
-        elif output_TS:
-            return timeseries
-        elif output_fpXflux:
-            return flux_modelled
+        if output_fpXflux:
+            data[fp_x_flux_name] = flux_modelled
+
+        return Dataset(data)
 
     def _calc_modelled_obs_HiTRes(
         self,
         sources: str | list | None = None,
         averaging: str | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
-    ) -> Any:
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
         species reliant on high time resolution footprints such as carbon dioxide (co2).
@@ -1185,11 +1220,7 @@ class ModelScenario:
         have no effect if the time frequency was already regular but this may
         not be what we want and may want to add extra code to remove any NaNs, if
         they are introduced or to find a way to remove this requirement.
-        TODO: mypy having trouble with different types options and incompatible types,
-        included as Any for now.
         """
-        from math import gcd
-        from pandas import date_range
 
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
@@ -1197,197 +1228,24 @@ class ModelScenario:
         if self.scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        fp_HiTRes = self.scenario.fp_HiTRes
-        flux_ds = self.combine_flux_sources(sources)
-        fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
-        fp_HiTRes = cast(xr.DataArray, fp_HiTRes)
-
-        # Make sure any NaN values are set to zero as this is a multiplicative and summing operation
-        fp_HiTRes = fp_HiTRes.fillna(0.0)
-        flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
-
-        def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
-            """Infer frequency of DataArray of times.
-
-            Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
-            Otherwise times are assumed to be in terms of hours.
-            """
-            nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-
-            if input_nanoseconds:
-                return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
-            else:
-                return int(times.diff(dim=dim).values.mean())
-
-        # Calculate time resolution for both the flux and footprints data
-        flux_res_H = calc_hourly_freq(flux_ds.time, input_nanoseconds=True)
-        fp_res_time_H = calc_hourly_freq(fp_HiTRes.time, input_nanoseconds=True)
-
-        fp_res_Hback_H = calc_hourly_freq(fp_HiTRes["H_back"], dim="H_back")
-
-        # Define resolution on time dimension in number in hours
-        if averaging:
-            try:
-                time_res_H = int(averaging)
-                time_resolution = f"{time_res_H}H"
-            except (ValueError, TypeError):
-                time_res_H = int(averaging[0])
-                time_resolution = averaging
+        if "fp_HiTRes" in self.scenario:
+            fp = self.scenario.fp_HiTRes
         else:
-            # If not specified derive from time from combined dataset
-            time_res_H = fp_res_time_H
-            time_resolution = f"{time_res_H}H"
+            fp = self.scenario[["fp_time_resolved", "fp_residual"]]
 
-        # Resample fp timeseries to match time resolution
-        if fp_res_time_H != time_res_H:
-            fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
+        flux_ds = self.combine_flux_sources(sources)
 
-        # Define resolution on high frequency dimension in number of hours
-        # At the moment this is matched to the Hback dimension
-        time_hf_res_H = fp_res_Hback_H
+        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
 
-        # Only allow for high frequency resolution < 24 hours
-        if time_hf_res_H > 24:
-            raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H")
-        elif 24 % time_hf_res_H != 0 or 24 % time_hf_res_H != 0.0:
-            raise ValueError(
-                f"High frequency resolution must exactly divide into 24 hours. Current: {time_hf_res_H}H"
-            )
-
-        # Find the greatest common denominator between time and high frequency resolutions.
-        # This is needed to make sure suitable flux frequency is used to allow for indexing.
-        # e.g. time: 1H; hf (high frequency): 2H, highest_res_H would be 1H
-        # e.g. time: 2H; hf (high frequency): 3H, highest_res_H would be 1H
-        highest_res_H = gcd(time_res_H, time_hf_res_H)
-        highest_resolution = f"{highest_res_H}H"
-
-        # create time array to loop through, with the required resolution
-        # fp_HiTRes.time is the release time of particles into the model
-        time_array = fp_HiTRes["time"]
-
-        # Define maximum hour back
-        max_h_back = int(fp_HiTRes.H_back.max().values)
-
-        # Define full range of dates to select from the flux input
-        date_start = time_array[0]
-        date_start_back = date_start - np.timedelta64(max_h_back, "h")
-        date_end = time_array[-1] + np.timedelta64(1, "s")
-
-        # Create times for matching to the flux
-        full_dates = date_range(
-            date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
-        ).to_numpy()
-
-        # Create low frequency flux data (monthly)
-        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
-        flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
-
-        # Select and align high frequency flux data
-        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
-        if flux_res_H <= 24:
-            offset = pd.Timedelta(
-                hours=date_start_back.dt.hour.data
-                + date_start_back.dt.minute.data / 60.0
-                + date_start_back.dt.second.data / 3600.0
-            )
-            offset = cast(pd.Timedelta, offset)
-            if flux_res_H <= highest_res_H:
-                # Downsample flux to match to footprints frequency
-                flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, offset=offset
-                ).mean()
-            elif flux_res_H > highest_res_H:
-                # Upsample flux to match footprints frequency and forward fill
-                flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, offset=offset
-                ).ffill()
-            # Reindex to match to correct values
-            flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
-        elif flux_res_H > 24:
-            # TODO this case should be handled outside of the "compute_fp_x_flux" function
-            # If flux is not high frequency use the monthly averages instead.
-            flux_ds_high_freq = flux_ds_low_freq
-
-        # TODO: Add check to make sure time values are exactly aligned based on date range
-
-        # Extract flux data from dataset
-        flux_high_freq = flux_ds_high_freq.flux
-        flux_low_freq = flux_ds_low_freq.flux
-
-        def make_hf_flux_rolling_avg_array(
-            flux_high_freq: xr.DataArray,
-            fp_high_time_res: xr.DataArray,
-            highest_res_H: int,
-            max_h_back: int,
-        ) -> xr.DataArray:
-            # create windows (backwards in time) with `max_h_back` many time points,
-            # starting at each time point in flux_hf_rolling.time
-            window_size = max_h_back // highest_res_H
-            flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
-
-            # set H_back coordinates using highest_res_H frequency
-            h_back_type = fp_high_time_res.H_back.dtype
-            flux_hf_rolling = flux_hf_rolling.assign_coords(
-                {"H_back": np.arange(0, max_h_back, highest_res_H, dtype=h_back_type)[::-1]}
-            )
-
-            # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
-            flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
-
-            return flux_hf_rolling
-
-        def compute_fp_x_flux(
-            fp_HiTRes: xr.DataArray,
-            flux_high_freq: xr.DataArray,
-            flux_low_freq: xr.DataArray,
-            highest_res_H: int,
-            max_h_back: int,
-        ) -> xr.DataArray:
-            # do low res calculation
-            fp_residual = fp_HiTRes.sel(H_back=fp_HiTRes.H_back.max(), drop=True)  # take last H_back value
-            flux_low_freq = flux_low_freq.reindex_like(fp_residual, method="ffill")  # forward fill times
-
-            fpXflux_residual = flux_low_freq * fp_residual
-
-            # get high freq fp
-            fp_high_freq = fp_HiTRes.where(fp_HiTRes.H_back != fp_HiTRes.H_back.max(), drop=True)
-
-            # if flux_res_H > 24, then flux_high_freq = flux_low_freq, and we don't take a sum over windows of flux_high_freq
-            if flux_res_H > 24:
-                fpXflux = (flux_low_freq * fp_high_freq).sum("H_back")
-            else:
-                flux_high_freq = make_hf_flux_rolling_avg_array(
-                    flux_high_freq, fp_high_freq, highest_res_H, max_h_back
-                )
-                fpXflux = (flux_high_freq * fp_high_freq).sum("H_back")
-
-            return fpXflux + fpXflux_residual
-
-        fpXflux = compute_fp_x_flux(
-            fp_HiTRes,
-            flux_high_freq,
-            flux_low_freq,
-            highest_res_H,
-            max_h_back,
-        )
+        data = {}
 
         if output_TS:
-            timeseries = fpXflux.sum(["lat", "lon"])
+            data[ts_name] = fp_x_flux.sum(["lat", "lon"])
 
-        # TODO: Add details about units to output
+        if output_fpXflux:
+            data[fp_x_flux_name] = fp_x_flux
 
-        if output_fpXflux and output_TS:
-            timeseries.compute()
-            fpXflux.compute()
-            return timeseries, fpXflux
-        elif output_fpXflux:
-            fpXflux.compute()
-            return fpXflux
-        elif output_TS:
-            timeseries.compute()
-            return timeseries
-
-        return None
+        return Dataset(data)
 
     def calc_modelled_baseline(
         self,
@@ -1421,8 +1279,6 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
-
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
 
@@ -1437,91 +1293,12 @@ class ModelScenario:
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        bc_data = bc_data.reindex_like(scenario, "ffill")
-
-        lifetime_value = species_lifetime(self.species)
-        check_monthly = check_lifetime_monthly(lifetime_value)
-
-        if check_monthly:
-            lifetime_monthly = cast(list[str] | None, lifetime_value)
-            lifetime: str | None = None
-        else:
-            lifetime_monthly = None
-            lifetime = cast(str | None, lifetime_value)
-
-        if lifetime is not None:
-            short_lifetime = True
-            lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: float | np.ndarray = lt_time_delta.total_seconds() / 3600.0
-        elif lifetime_monthly:
-            short_lifetime = True
-            lifetime_monthly_hrs = []
-            for lt in lifetime_monthly:
-                lt_time_delta = time_offset(period=lt)
-                lt_hrs = lt_time_delta.total_seconds() / 3600.0
-                lifetime_monthly_hrs.append(lt_hrs)
-
-            # calculate the lifetime_hrs associated with each time point in scenario data
-            # this is because lifetime can be a list of monthly values
-            time_month = scenario["time"].dt.month
-            lifetime_hrs = np.array([lifetime_monthly_hrs[item - 1] for item in time_month.values])
-        else:
-            short_lifetime = False
-
-        # Include loss condition if lifetime of species is specified
-        if short_lifetime:
-            expected_vars = (
-                "mean_age_particles_n",
-                "mean_age_particles_e",
-                "mean_age_particles_s",
-                "mean_age_particles_w",
-            )
-            for var in expected_vars:
-                if var not in scenario.data_vars:
-                    raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
-                    )
-
-            # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: DataArray | float = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename(  # type: ignore
-                "loss_n"
-            )
-            loss_e: DataArray | float = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename(  # type: ignore
-                "loss_e"
-            )
-            loss_s: DataArray | float = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename(  # type: ignore
-                "loss_s"
-            )
-            loss_w: DataArray | float = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename(  # type: ignore
-                "loss_w"
-            )
-
-        else:
-            loss_n = 1.0
-            loss_e = 1.0
-            loss_s = 1.0
-            loss_w = 1.0
-
-        # Check and extract units as float, if present.
-        units_default = 1.0
-        units_n = check_units(bc_data["vmr_n"], default=units_default)
-        units_e = check_units(bc_data["vmr_e"], default=units_default)
-        units_s = check_units(bc_data["vmr_s"], default=units_default)
-        units_w = check_units(bc_data["vmr_w"], default=units_default)
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=self.species, output_units=output_units
+        )
 
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
-                ["height", "lat"]
-            )
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
-                ["height", "lat"]
-            )
+            sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
 
         modelled_baseline.attrs["resample_to"] = str(resample_to)
@@ -1550,7 +1327,9 @@ class ModelScenario:
         resample_to: str | None = "coarsest",
         platform: str | None = None,
         calc_timeseries: bool = True,
+        calc_fp_x_flux: bool = False,
         sources: str | list | None = None,
+        split_by_sectors: bool = False,
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
@@ -1566,8 +1345,11 @@ class ModelScenario:
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
+            calc_fp_x_flux: Calculate "fp x flux" matrix
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
+            split_by_sectors: if True, separate modelled obs (and footprint x flux) will be calculated
+                for each flux source ("sector").
             calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
@@ -1579,17 +1361,18 @@ class ModelScenario:
             resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
         )
 
-        if calc_timeseries:
+        if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
                 resample_to=resample_to,
                 sources=sources,
                 platform=platform,
                 cache=cache,
                 recalculate=recalculate,
+                output_fp_x_flux=calc_fp_x_flux,
+                split_by_sectors=split_by_sectors,
             )
 
-            name = modelled_obs.name
-            combined_dataset = combined_dataset.assign({name: modelled_obs})
+            combined_dataset = combined_dataset.merge(modelled_obs)
 
         if calc_bc:
             if self.bc is not None:
@@ -1620,6 +1403,7 @@ class ModelScenario:
             Interactive plotly graph created with observations
         """
         self._check_data_is_present(need="obs")
+
         obs = cast(ObsData, self.obs)
 
         fig = obs.plot_timeseries()  # Calling method on ObsData class
@@ -1703,276 +1487,6 @@ class ModelScenario:
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
         return fig
-
-
-def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
-    """Check if two datasets need to be reindexed_like for combine_datasets
-
-    Args:
-        dataset_A: First dataset to check
-        dataset_B: Second dataset to check
-    Returns:
-        bool: True if indexes match, else False
-    """
-    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
-
-    for index in common_indices:
-        if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
-            return False
-
-        # Check number of values that are not close (testing for equality with floating point)
-        if index == "time":
-            # For time override the default to have ~ second precision
-            rtol = 1e-10
-        else:
-            rtol = 1e-5
-
-        index_diff = np.sum(
-            ~np.isclose(
-                dataset_A.indexes[index].values.astype(float),
-                dataset_B.indexes[index].values.astype(float),
-                rtol=rtol,
-            )
-        )
-
-        if not index_diff == 0:
-            return False
-
-    return True
-
-
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: float | None = None
-) -> Dataset:
-    """Merges two datasets and re-indexes to the first dataset.
-
-    If "fp" variable is found within the combined dataset,
-    the "time" values where the "lat", "lon" dimensions didn't match are removed.
-
-    Args:
-        dataset_A: First dataset to merge
-        dataset_B: Second dataset to merge
-        method: One of None, nearest, ffill, bfill.
-                See xarray.DataArray.reindex_like for list of options and meaning.
-                Defaults to ffill (forward fill)
-        tolerance: Maximum allowed tolerance between matches.
-
-    Returns:
-        xarray.Dataset: Combined dataset indexed to dataset_A
-    """
-    if _indexes_match(dataset_A, dataset_B):
-        dataset_B_temp = dataset_B
-    else:
-        # load dataset_B to avoid performance issue (see xarray issue #8945)
-        dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
-
-    merged_ds = dataset_A.merge(dataset_B_temp)
-
-    if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "lon")):
-            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-            merged_ds = merged_ds[dict(time=flag[0])]
-
-    return merged_ds
-
-
-def match_dataset_dims(
-    datasets: Sequence[Dataset],
-    dims: str | Sequence = [],
-    method: methodType = "nearest",
-    tolerance: float | dict[str, float] = 1e-5,
-) -> list[Dataset]:
-    """Aligns datasets to the selected dimensions within a tolerance.
-    All datasets will be aligned to the first dataset within the list.
-
-    Args:
-        datasets: List of xarray Datasets. Expect datasets to contain the same dimensions.
-        dims: Dimensions match between datasets. Can use keyword "all" to match every dimension.
-        method : Method to use for indexing. Should be one of: ("nearest", "ffill", "bfill")
-        tolerance: Tolerance value to use when matching coordinate values.
-                   This can be a single value for all dimensions or a dictionary of values to use.
-
-    Returns:
-        List (xarray.Dataset) : Datasets aligned along the matching dimensions.
-
-    TODO: Check if this supercedes or replicates _indexes_match() function too closely?
-    """
-    # Nothing to be done if only one (or less) datasets are passed
-    if len(datasets) <= 1:
-        return list(datasets)
-
-    ds0 = datasets[0]
-
-    if isinstance(dims, str):
-        if dims == "all":
-            dims = list(ds0.dims)
-        else:
-            dims = [dims]
-
-    # Extract coordinate values for the first dataset in the list
-    ds0 = datasets[0]
-    indexers = {dim: ds0[dim] for dim in dims}
-
-    if isinstance(tolerance, float):
-        tolerance = {dim: tolerance for dim in dims}
-
-    # Align datasets along selected dimensions (if not already identical)
-    datasets_aligned = [ds0]
-    for ds in datasets[1:]:
-        for dim, compare_coord in indexers.items():
-            try:
-                coord = ds[dim]
-            except KeyError:
-                raise ValueError(f"Dataset missing dimension: {dim}")
-            else:
-                if not coord.equals(compare_coord):
-                    ds = ds.reindex({dim: compare_coord}, method=method, tolerance=tolerance[dim])
-
-        datasets_aligned.append(ds)
-
-    return datasets_aligned
-
-
-# ResType = Union[np.timedelta64, float, np.floating, np.integer]
-
-
-def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
-    """Calculates the average frequency along a given dimension.
-
-    Args:
-        dataset : Dataset. Must contain the specified dimension
-        dim : Dimension name
-
-    Returns:
-        np.timedelta64 / np.float / np.int : Resolution with input dtype
-
-        NaT : If unsuccessful and input dtype is np.timedelta64
-        NaN : If unsuccessful for all other dtypes.
-    """
-    try:
-        return _calc_time_dim_resolution(dataset, time_dim=dim)
-    except ValueError:
-        return _calc_average_gap(dataset[dim])
-
-
-def _calc_time_dim_resolution(dataset: Dataset, time_dim: str = "time") -> np.timedelta64:
-    """Calculate average frequency of time dimension.
-
-    Args:
-        dataset: xr.Dataset with time coordinate
-        time_dim: name of the time coordinate
-
-    Returns:
-        timedelta representing average gap between time points, or NaT if only
-        one time is present
-
-    Raises:
-        ValueError: if the data type of `dataset[time_dim]` is not a subtype of
-        `np.datetime64`. (Note: `np.timedelta64` is a separate type, and not
-         a subtype of `np.datetime64`; differences between `np.datetime64` values
-        are `np.timedelta64`.)
-
-    """
-    if not np.issubdtype(dataset[time_dim].dtype, np.datetime64):
-        raise ValueError(
-            f"Type {dataset[time_dim].dtype} of values in {time_dim} coordinate is not a subtype of `np.datetime64`."
-        )
-
-    try:
-        resolution = dataset[time_dim].diff(dim=time_dim).mean().values
-    except ValueError:
-        return np.timedelta64("NaT")
-    else:
-        # cast because we already checked that the values in dataset[time_dim] are compatible with `np.datetime64`
-        # so their diffs will be time deltas
-        return cast(np.timedelta64, resolution)
-
-
-def _calc_average_gap(data_array: DataArray) -> Any:
-    """Calculate average gap in DataArray.
-
-    No checking is performed to guarantee a return type.
-
-    Args:
-        data_array: xr.DataArray whose values should support arithmetic, and should be 1D.
-
-    Returns:
-        average gap between values in DataArray.
-
-    """
-    if data_array.ndim > 1:
-        raise ValueError("Input DataArray has more than 1 dimension.")
-
-    dim = data_array.dims[0]
-
-    try:
-        return data_array.diff(dim=dim).mean().values
-    except TypeError as e:
-        # UFuncTypeError from not being able to take diff
-        raise ValueError("Data in given DataArray does not support subtraction.") from e
-    except ValueError as e:
-        # check if coordinate has length 1, and return np.nan if so
-        if data_array[dim].size == 1:
-            return np.nan
-        raise e  # else, re-raise
-
-
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
-    """Stacks multiple datasets based on the input dimension. By default this is time
-    and this will be aligned to the highest resolution / frequency
-    (smallest difference betweeen coordinate values).
-
-    At the moment, the two datasets must have identical coordinate values for all
-    other dimensions and variable names for these to be stacked.
-
-    Args:
-        datasets : Sequence of input datasets
-        dim : Name of dimension to stack along. Default = "time"
-        method: Method to use when aligning the datasets. Default = "ffill"
-
-    Returns:
-        Dataset : Stacked dataset
-
-    TODO: Could update this to only allow DataArrays to be included to reduce the phase
-    space here.
-    """
-    if len(datasets) == 1:
-        dataset = datasets[0]
-        return dataset
-
-    data_frequency = [calc_dim_resolution(ds, dim) for ds in datasets]
-    index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
-    data_highest_freq = datasets[index_highest_freq]
-    coords_to_match = data_highest_freq[dim]
-
-    for i, data in enumerate(datasets):
-        data_match = data.reindex({dim: coords_to_match}, method=method)
-        if i == 0:
-            data_stacked = data_match
-            data_stacked.attrs = {}
-        else:
-            data_stacked += data_match
-
-    return data_stacked
-
-
-def check_units(data_var: DataArray, default: float) -> float:
-    """Check "units" attribute within a DataArray. Expect this to be a float
-    or possible to convert to a float.
-    If not present, use default value.
-    """
-    attrs = data_var.attrs
-    if "units" in attrs:
-        units_from_attrs = attrs["units"]
-        if not isinstance(units_from_attrs, float):
-            try:
-                units = float(units_from_attrs)
-            except ValueError:
-                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
-    else:
-        units = default
-
-    return units
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],

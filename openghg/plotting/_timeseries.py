@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from openghg.util import get_species_info, synonyms, get_datapath
 
 if TYPE_CHECKING:
-    from openghg.dataobjects import ObsData
+    from openghg.dataobjects import ObsData, ObsColumnData
 
 
 logger = logging.getLogger("openghg.plotting")
@@ -113,7 +113,7 @@ def _plot_logo(
 
 
 def plot_timeseries(
-    data: ObsData | list[ObsData],
+    data: ObsData | ObsColumnData | list[ObsData | ObsColumnData],
     xvar: str | None = None,
     yvar: str | None = None,
     title: str | None = None,
@@ -175,12 +175,17 @@ def plot_timeseries(
         dataset = to_plot.data
 
         species = metadata["species"]
-        site = metadata["site"]
-        inlet = metadata["inlet"]
 
         species_string = _latex2html(species_info[synonyms(species, lower=False)]["print_string"])
 
-        legend_text = f"{species_string} - {site.upper()} ({inlet})"
+        if "satellite" in metadata:
+            satellite = metadata["satellite"]
+            inlet = "column"
+            legend_text = f"{species_string} - {satellite.upper()} ({inlet})"
+        else:
+            site = metadata["site"]
+            inlet = metadata["inlet"]
+            legend_text = f"{species_string} - {site.upper()} ({inlet})"
 
         if xvar is not None:
             x_data = dataset[xvar]

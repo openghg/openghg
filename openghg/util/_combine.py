@@ -3,6 +3,7 @@
 from functools import partial
 from typing import Any, cast, TypeVar
 from collections.abc import Callable
+from xarray.core.coordinates import Coordinates
 
 import numpy as np
 import xarray as xr
@@ -128,7 +129,7 @@ def combine_multisite(data_objects: list[T]) -> T:
     return combine_data_objects(data_objects, preprocess=preprocess, concat_dim="site")
 
 
-def _data_array_from_value(value: Any, coords: xr.Coordinates, name: str | None = None) -> xr.DataArray:
+def _data_array_from_value(value: Any, coords: Coordinates, name: str | None = None) -> xr.DataArray:
     """Create xr.DataArray with single value and given coords and name.
 
     Args:

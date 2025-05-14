@@ -31,6 +31,7 @@ from ._errors import (
     MetastoreError,
     ZarrStoreError,
     KeyExistsError,
+    MetadataMissingError,
     construct_xesmf_import_error,
 )
 from ._types import (
@@ -41,6 +42,7 @@ from ._types import (
     ArrayLikeMatch,
     XrDataLike,
     XrDataLikeMatch,
+    ReindexMethod,
     TimePeriod,
     HasMetadataAndData,
     MetadataAndData,

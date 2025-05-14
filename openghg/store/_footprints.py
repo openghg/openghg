@@ -405,6 +405,7 @@ class Footprints(BaseStore):
                 high_spatial_resolution=high_spatial_resolution,
                 time_resolved=time_resolved,
                 short_lifetime=short_lifetime,
+                source_format=source_format,
             )
 
         if species == "co2" and sort is True:
@@ -453,6 +454,7 @@ class Footprints(BaseStore):
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str | None = None,
     ) -> DataSchema:
         """
         Define schema for footprint Dataset.
@@ -476,6 +478,8 @@ class Footprints(BaseStore):
             high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
+            source_format: optional string containing source format; necessary for "time resolved" footprints since the
+                the schema is different for PARIS/FLEXPART and ACRG formats.
 
         Returns:
             DataSchema object describing this format.
@@ -523,8 +527,15 @@ class Footprints(BaseStore):
         if time_resolved:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
-            data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
-            dtypes["fp_HiTRes"] = np.floating
+            if source_format in ("PARIS", "FLEXPART"):
+                data_vars["fp_time_resolved"] = ("time", "lat", "lon", "H_back")
+                data_vars["fp_residual"] = ("time", "lat", "lon")
+                dtypes["fp_time_resolved"] = np.floating
+                dtypes["fp_residual"] = np.floating
+            else:
+                data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
+                dtypes["fp_HiTRes"] = np.floating
+
             dtypes["H_back"] = np.number  # float or integer
 
         # Includes particle location directions - one for each regional boundary
@@ -569,6 +580,7 @@ class Footprints(BaseStore):
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str | None = None,
     ) -> None:
         """
         Validate data against Footprint schema - definition from
