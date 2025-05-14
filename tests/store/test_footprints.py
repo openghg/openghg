@@ -227,6 +227,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "fp_high",
         "index_lons",
         "index_lats",
+        "release_height",
     ]
 
     del footprint_data.attrs["processed"]
