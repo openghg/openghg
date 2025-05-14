@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Fewes fix for footprints standardisation : add `unify_chunks` in `openghg/store/storage/_localzarrstore.py` to prevent chunking errors while checking if chunks match; change name of function `check_function_open_nc` to `footprint_open_nc_fn` in `openghg/standardise/footprints/_acrg_org.py`; rewrite `footprint_open_nc_fn` to allow selection of the month (for badly formatted footprints) and footprints (same reason); and add a `"release_height"` variable to old format footprints (`format="acrg_org"`) for compatibility with new footprint format (`format="paris"`) [#PR1287](https://github.com/openghg/openghg/pull/1287)
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [#PR1283](https://github.com/openghg/openghg/pull/1283)
 - Added a new resampling feature for obs where a f"{species}_variability" variable is preseent but not f"{species}_number_of_observation" [#PR1275](https://github.com/openghg/openghg/pull/1275)
 - Added ability to retrieve ICOS combined Obspack .nc data. [PR #1212](https://github.com/openghg/openghg/pull/1212)
