@@ -10,7 +10,7 @@ name = "openghg"
 version = "0.14.0"
 description = "OpenGHG: A platform for greenhouse​ gas data analysis"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license-files = ["LICEN[CS]E*"]
 authors = [
     { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
@@ -78,7 +78,7 @@ openghg = "openghg.util:cli"
 
 [tool.versioneer]
 VCS = "git"
-style = "pep440"
+style = "pep621"
 versionfile_source = "openghg/_version.py"
 versionfile_build = "openghg/_version.py"
 tag_prefix = ""
