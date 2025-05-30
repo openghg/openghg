@@ -303,3 +303,36 @@ def merge_dict(
         raise ValueError(msg)
 
     return merged_dict
+
+
+def merge_and_extend_dict(left: dict, right: dict) -> dict:
+    """ """
+    overlapping_keys = get_overlap_keys(left, right)
+
+    left_non_overlap = {key: value for key, value in left.items() if key not in overlapping_keys}
+    right_not_overlap = {key: value for key, value in right.items() if key not in overlapping_keys}
+
+    # Merge the two dictionaries for the keys we know don't overlap
+    merged_dict = left_non_overlap | right_not_overlap
+
+    for key in overlapping_keys:
+        if key in right:
+            value = right[key]
+            if isinstance(value, str):
+                value = [value]
+
+            if key in left:
+                combined_value: str | list = left[key]
+            else:
+                combined_value = []
+
+            if isinstance(combined_value, str):
+                combined_value = [combined_value]
+
+            for v in value:
+                if v not in combined_value:
+                    combined_value.extend(value)
+
+            merged_dict[key] = combined_value
+
+    return merged_dict

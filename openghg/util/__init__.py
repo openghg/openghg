@@ -46,6 +46,7 @@ from ._metadata_util import (
     check_not_set_value,
     get_overlap_keys,
     merge_dict,
+    merge_and_extend_dict,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
