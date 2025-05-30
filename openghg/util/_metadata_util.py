@@ -306,7 +306,14 @@ def merge_dict(
 
 
 def merge_and_extend_dict(left: dict, right: dict) -> dict:
-    """ """
+    """
+    The merge_and_extend_dict function combined two dictionaries, combining
+    keys which are repeated into lists (if the exact values are not the same).
+
+    Args:
+        left, right : Dictionaries to merge
+
+    """
     overlapping_keys = get_overlap_keys(left, right)
 
     left_non_overlap = {key: value for key, value in left.items() if key not in overlapping_keys}
