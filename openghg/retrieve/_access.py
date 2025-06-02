@@ -226,7 +226,9 @@ def get_obs_surface(
 
             if original_scale and target_scale and original_scale != target_scale:
                 logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
-                for var_name in (v for v in data.data_vars if v == "mf" or v.startswith("mf_")):
+                for var_name in (
+                    v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
+                ):
                     # Convert function from openghg_calscales
                     data[var_name] = convert(
                         c=data[var_name],
