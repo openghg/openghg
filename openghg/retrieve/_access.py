@@ -295,7 +295,7 @@ def get_obs_column(
     if return_mf:
         if max_level > max(obs_data.data.lev.values) + 1:
             logger.warning(
-                f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+                f"passed max level is above max level in data ({max(obs_data.data.lev.values) + 1}). Defaulting to highest level"
             )
             max_level = max(obs_data.data.lev.values) + 1
 
