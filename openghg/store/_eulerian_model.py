@@ -36,6 +36,7 @@ class EulerianModel(BaseStore):
         start_date: str | None = None,
         end_date: str | None = None,
         setup: str | None = None,
+        tag: str | list | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -55,6 +56,8 @@ class EulerianModel(BaseStore):
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
@@ -98,7 +101,10 @@ class EulerianModel(BaseStore):
         setup = clean_string(setup)
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata = {
+            "tag": tag,
+        }
+        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -168,6 +174,7 @@ class EulerianModel(BaseStore):
         data_type = "eulerian_model"
         datasource_uuids = self.assign_data(
             data=model_data,
+            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
