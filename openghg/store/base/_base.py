@@ -294,7 +294,7 @@ class BaseStore:
         sort: bool = True,
         drop_duplicates: bool = True,
         min_keys: int | None = None,
-        update_keys: list | None = None,
+        extend_keys: list | None = None,
         if_exists: str = "auto",
         new_version: bool = True,
         compressor: Any | None = None,
@@ -311,6 +311,7 @@ class BaseStore:
                 sort: Sort data in time dimension
                 drop_duplicates: Drop duplicate timestamps, keeping the first value
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
+                extend_keys: Keys to add to to current keys (extend a list), if present.
                 if_exists: What to do if existing data is present.
                     - "auto" - checks new and current data for timeseries overlap
                         - adds data if no overlap
@@ -372,6 +373,7 @@ class BaseStore:
                     sort=sort,
                     drop_duplicates=drop_duplicates,
                     skip_keys=skip_keys,
+                    extend_keys=extend_keys,
                     new_version=new_version,
                     if_exists=if_exists,
                     data_type=data_type,

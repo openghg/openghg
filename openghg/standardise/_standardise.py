@@ -70,6 +70,7 @@ def standardise_surface(
     measurement_type: str | None = None,
     verify_site_code: bool = True,
     site_filepath: pathType | None = None,
+    tag: str | list | None = None,
     store: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",
@@ -114,6 +115,8 @@ def standardise_surface(
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of object store to write to, required if user has access to more than one
             writable store
         update_mismatch: This determines how mismatches between the internal data
@@ -176,6 +179,7 @@ def standardise_surface(
         overwrite=overwrite,
         verify_site_code=verify_site_code,
         site_filepath=site_filepath,
+        tag=tag,
         update_mismatch=update_mismatch,
         if_exists=if_exists,
         save_current=save_current,

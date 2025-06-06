@@ -180,7 +180,7 @@ def merge_dict(
     keys_right: Iterable | None = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
-    on_overlap: Literal["check_value", "error"] = "check_value",
+    on_overlap: Literal["check_value", "ignore", "error"] = "check_value",
     on_conflict: Literal["left", "right", "drop", "error"] = "left",
     relative_tolerance: float = 1e-3,
     lower: bool = True,
@@ -204,8 +204,9 @@ def merge_dict(
         remove_null: Before comparing and merging, remove keys from left and right which have null values.
         null_values: Values which are classed as null.
             See null_metadata_values() function for list of default values.
-        on_overlap: If keys overlap, can choose to check values using or raise an error.
-            Options: ["check_value", "error"]
+        on_overlap: If keys overlap, can choose to check values or raise an error.
+            See check_value_match() function for how these values will be compared and checked.
+            Options: ["check_value", "ignore", "error"]
         on_conflict: If there is a conflict between key values, choose how to resolve this.
             Options: ["left", "right", "drop", "error"]
         relative_tolerance: Tolerance between two numbers when checking values.
@@ -244,8 +245,8 @@ def merge_dict(
     # Merge the two dictionaries for the keys we know don't overlap
     merged_dict = left_non_overlap | right_not_overlap
 
+    values_not_matching = {}
     if on_overlap == "check_value":
-        values_not_matching = {}
         for key in overlapping_keys:
             value1 = left[key]
             value2 = right[key]
@@ -278,6 +279,18 @@ def merge_dict(
                     logger.warning(msg)
                 elif on_conflict == "error":
                     values_not_matching[key] = (value1, value2)
+    elif on_overlap == "ignore":
+        if overlapping_keys:
+            if on_conflict == "left":
+                merged_dict.update(left)
+            elif on_conflict == "right":
+                merged_dict.update(right)
+            elif on_conflict == "error":
+                values_not_matching = {
+                    key: (value1, value2) for key, value1, value2 in zip(overlapping_keys, left, right)
+                }
+            # Don't need to check on_conflict == "drop" as overlapping
+            # have not been added to merged_dict
 
     if values_not_matching:
         mismatch_details = [
@@ -288,5 +301,45 @@ def merge_dict(
         msg = f"Same key(s) supplied from different sources:\n{mismatch_str}"
         logger.error(msg)
         raise ValueError(msg)
+
+    return merged_dict
+
+
+def merge_and_extend_dict(left: dict, right: dict) -> dict:
+    """
+    The merge_and_extend_dict function combined two dictionaries, combining
+    keys which are repeated into lists (if the exact values are not the same).
+
+    Args:
+        left, right : Dictionaries to merge
+
+    """
+    overlapping_keys = get_overlap_keys(left, right)
+
+    left_non_overlap = {key: value for key, value in left.items() if key not in overlapping_keys}
+    right_not_overlap = {key: value for key, value in right.items() if key not in overlapping_keys}
+
+    # Merge the two dictionaries for the keys we know don't overlap
+    merged_dict = left_non_overlap | right_not_overlap
+
+    for key in overlapping_keys:
+        if key in right:
+            value = right[key]
+            if isinstance(value, str):
+                value = [value]
+
+            if key in left:
+                combined_value: str | list = left[key]
+            else:
+                combined_value = []
+
+            if isinstance(combined_value, str):
+                combined_value = [combined_value]
+
+            for v in value:
+                if v not in combined_value:
+                    combined_value.extend(value)
+
+            merged_dict[key] = combined_value
 
     return merged_dict
