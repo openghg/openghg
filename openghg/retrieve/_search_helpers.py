@@ -78,7 +78,7 @@ def _is_neg_lookup_flag(x: Any) -> bool:
     return result
 
 
-def process_special_queries(search_terms: dict) -> dict:
+def process_special_queries(search_terms: dict, list_search: list | None = None) -> dict:
     """Separate 'function queries' and 'negative lookup keys' from normal search terms.
 
     Function queries apply a function to the value stored at a given key.
@@ -86,7 +86,8 @@ def process_special_queries(search_terms: dict) -> dict:
 
     Args:
         search_terms: dict of search terms
-
+        list_search: Keys which we expect to be a stored as a list and so should
+            search for entries in a list rather than exact matches.
     Returns:
         dict containing search_terms dict, search_functions dict, and negative_lookup_keys list, which
         are the parameters for TinyDBMetastore.search
@@ -94,9 +95,13 @@ def process_special_queries(search_terms: dict) -> dict:
     _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
     search_functions = {}
     negative_lookup_keys = []
+    search_list_keys = {}
 
     for k, v in search_terms.items():
-        if isinstance(v, slice):
+        if k in list_search:
+            search_list_keys[k] = v
+            del _search_terms[k]
+        elif isinstance(v, slice):
             search_functions[k] = _convert_slice_to_test(v, key=k)
             del _search_terms[k]
         elif _is_neg_lookup_flag(v):
@@ -105,12 +110,13 @@ def process_special_queries(search_terms: dict) -> dict:
 
     return {
         "search_terms": _search_terms,
+        "search_list_keys": search_list_keys,
         "search_functions": search_functions,
         "negative_lookup_keys": negative_lookup_keys,
     }
 
 
-def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
+def flatten_search_kwargs(search_kwargs: dict, list_search: list | None = None) -> list[dict]:
     """Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
 
     To set this up for keywords with multiple options, lists of the (key, value) pair terms are created.
@@ -128,10 +134,15 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
 
     Args:
         search_kwargs: dictionary of search terms
-
+        list_search: Keys which we expect to be a stored as a list and so should
+            search for entries in a list rather than exact matches.
     Returns:
         list of flat dictionaries containing all combinations of search terms from (nested) input search terms
     """
+
+    if list_search is None:
+        list_search = []
+
     single_options = {}
 
     # multiple_options will contain tuple pairs for the options we wish to search for. e.g. for
@@ -141,7 +152,7 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     multiple_options = []
 
     for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, (list, tuple)) and k not in list_search:
             expand_key_values = [(k, value) for value in v]
             multiple_options.append(expand_key_values)
         elif isinstance(v, dict):
@@ -164,7 +175,15 @@ def flatten_search_kwargs(search_kwargs: dict) -> list[dict]:
     return expanded_search
 
 
-def process_search_kwargs(search_kwargs: dict) -> list[dict]:
-    """Flatten search kwargs and process species queries."""
-    expanded_search = flatten_search_kwargs(search_kwargs)
-    return [process_special_queries(x) for x in expanded_search]
+def process_search_kwargs(search_kwargs: dict, list_search: list | None = None) -> list[dict]:
+    """Flatten search kwargs and process species queries.
+
+    Args:
+        search_kwargs: dictionary of search terms
+        list_search: Keys which we expect to be a stored as a list and so should
+            search for entries in a list rather than exact matches.
+    Returns:
+        dict: Search set up details
+    """
+    expanded_search = flatten_search_kwargs(search_kwargs, list_search=list_search)
+    return [process_special_queries(x, list_search=list_search) for x in expanded_search]

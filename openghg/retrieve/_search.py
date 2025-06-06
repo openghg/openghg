@@ -503,6 +503,9 @@ def search(**kwargs: Any) -> SearchResults:
     else:
         types_to_search.extend(valid_data_types)
 
+    # Keywords to apply a list search rather than exact match
+    list_search = ["tag"]
+
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
     readable_buckets = get_readable_buckets()
@@ -518,7 +521,7 @@ def search(**kwargs: Any) -> SearchResults:
     start_date = search_kwargs.pop("start_date", None)
     end_date = search_kwargs.pop("end_date", None)
 
-    expanded_search = process_search_kwargs(search_kwargs)
+    expanded_search = process_search_kwargs(search_kwargs, list_search=list_search)
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
