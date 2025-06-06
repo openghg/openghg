@@ -12,7 +12,7 @@ from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
-from ._search_helpers import process_search_kwargs
+from ._search_helpers import process_search_kwargs, define_list_search
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -503,9 +503,6 @@ def search(**kwargs: Any) -> SearchResults:
     else:
         types_to_search.extend(valid_data_types)
 
-    # Keywords to apply a list search rather than exact match
-    list_search = ["tag"]
-
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
     readable_buckets = get_readable_buckets()
@@ -517,6 +514,10 @@ def search(**kwargs: Any) -> SearchResults:
             readable_buckets = {store: readable_buckets[store]}
         except KeyError:
             raise ObjectStoreError(f"Invalid store: {store}")
+
+    # Keywords to apply a list search rather than exact match
+    # At the moment this is primarily the "tag" keyword
+    list_search = define_list_search()
 
     start_date = search_kwargs.pop("start_date", None)
     end_date = search_kwargs.pop("end_date", None)

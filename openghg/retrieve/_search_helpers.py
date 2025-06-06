@@ -187,3 +187,23 @@ def process_search_kwargs(search_kwargs: dict, list_search: list | None = None) 
     """
     expanded_search = flatten_search_kwargs(search_kwargs, list_search=list_search)
     return [process_special_queries(x, list_search=list_search) for x in expanded_search]
+
+
+def define_list_search() -> list:
+    """
+    Define the metakeys we would expect to perform a list search for.
+
+    Returns:
+        list: Keys which should be searched as a list rather than an exact match
+    """
+    from openghg.store import define_general_informational_keys
+
+    type_check = "list"
+    list_search = []
+
+    # Check and add the general informational keys for list entries
+    informational_keys = define_general_informational_keys()
+    list_info_metakeys = [k for k, v in informational_keys.items() if type_check in v["type"]]
+    list_search.extend(list_info_metakeys)
+
+    return list_search

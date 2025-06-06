@@ -259,3 +259,14 @@ def write_metakeys(bucket: str, metakeys: dict) -> None:
         raise ConfigFileError("Invalid metakeys, see errors above.")
 
     _write_metakey_config(bucket=bucket, metakeys=metakeys)
+
+
+def define_general_informational_keys():
+    """Define the general informational keys which should be available for all
+    data_types.
+    Returns:
+        dict: key names and the expected types for those keys
+    """
+
+    informational_keys = {"tag": {"type": ["list"]}}
+    return informational_keys
