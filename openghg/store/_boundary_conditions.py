@@ -137,10 +137,7 @@ class BoundaryConditions(BaseStore):
         domain = clean_string(domain)
 
         # Specify any additional metadata to be added
-        additional_metadata = {
-            "tag": tag
-        }
-        extend_keys = ["tag"]
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -208,7 +205,6 @@ class BoundaryConditions(BaseStore):
         data_type = "boundary_conditions"
         datasource_uuids = self.assign_data(
             data=boundary_conditions_data,
-            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

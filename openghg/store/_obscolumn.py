@@ -138,10 +138,7 @@ class ObsColumn(BaseStore):
             logging.info(f"Updated value of 'domain': {domain}")
 
         # Specify any additional metadata to be added
-        additional_metadata = {
-            "tag": tag
-        }
-        extend_keys = ["tag"]
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -210,7 +207,6 @@ class ObsColumn(BaseStore):
         data_type = "column"
         datasource_uuids = self.assign_data(
             data=obs_data,
-            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

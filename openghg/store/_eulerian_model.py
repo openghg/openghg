@@ -101,10 +101,7 @@ class EulerianModel(BaseStore):
         setup = clean_string(setup)
 
         # Specify any additional metadata to be added
-        additional_metadata = {
-            "tag": tag,
-        }
-        extend_keys = ["tag"]
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -174,7 +171,6 @@ class EulerianModel(BaseStore):
         data_type = "eulerian_model"
         datasource_uuids = self.assign_data(
             data=model_data,
-            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

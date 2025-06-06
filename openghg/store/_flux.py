@@ -151,10 +151,7 @@ class Flux(BaseStore):
             time_resolved = high_time_resolution
 
         # Specify any additional metadata to be added
-        additional_metadata = {
-             "tag": tag,
-        }
-        extend_keys = ["tag"]
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -221,7 +218,6 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
-            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

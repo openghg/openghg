@@ -340,10 +340,7 @@ class Footprints(BaseStore):
             )
 
         # Specify any additional metadata to be added
-        additional_metadata = {
-            "tag": tag,
-        }
-        extend_keys = ["tag"]
+        additional_metadata = {}
 
         standardise_parsers = define_standardise_parsers()[self._data_type]
         try:
@@ -433,7 +430,6 @@ class Footprints(BaseStore):
         # TODO - filter options
         datasource_uuids = self.assign_data(
             data=footprint_data,
-            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
