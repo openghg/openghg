@@ -69,6 +69,7 @@ class Flux(BaseStore):
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         chunks: dict | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -97,6 +98,8 @@ class Flux(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -148,7 +151,10 @@ class Flux(BaseStore):
             time_resolved = high_time_resolution
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata = {
+             "tag": tag,
+        }
+        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -215,6 +221,7 @@ class Flux(BaseStore):
         data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
+            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

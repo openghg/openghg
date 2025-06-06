@@ -35,6 +35,7 @@ class ObsColumn(BaseStore):
         site: str | None = None,
         network: str | None = None,
         instrument: str | None = None,
+        tag: str | list | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -64,6 +65,8 @@ class ObsColumn(BaseStore):
             site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -135,7 +138,10 @@ class ObsColumn(BaseStore):
             logging.info(f"Updated value of 'domain': {domain}")
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata = {
+            "tag": tag
+        }
+        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -204,6 +210,7 @@ class ObsColumn(BaseStore):
         data_type = "column"
         datasource_uuids = self.assign_data(
             data=obs_data,
+            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

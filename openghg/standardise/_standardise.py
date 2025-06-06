@@ -204,6 +204,7 @@ def standardise_column(
     network: str | None = None,
     instrument: str | None = None,
     source_format: str = "openghg",
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -233,6 +234,8 @@ def standardise_column(
         network: Name of the satellite or in-situ measurement network (e.g., "TCCON").
         instrument: Instrument name used to collect data (e.g., "TANSO-FTS").
         source_format: Format of the input data (default is "openghg").
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: The name of the store to write the processed data to.
         if_exists: Determines behavior if data already exists in the store.
             Can be one of:
@@ -274,6 +277,7 @@ def standardise_column(
         network=network,
         instrument=instrument,
         source_format=source_format,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -294,6 +298,7 @@ def standardise_bc(
     source_format: str = "openghg",
     period: str | tuple | None = None,
     continuous: bool = True,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -317,6 +322,8 @@ def standardise_bc(
         source_format : Type of data being input e.g. openghg (internal format).
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -355,6 +362,7 @@ def standardise_bc(
         source_format=source_format,
         period=period,
         continuous=continuous,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -385,6 +393,7 @@ def standardise_footprint(
     chunks: dict | None = None,
     continuous: bool = True,
     retrieve_met: bool = False,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -432,6 +441,8 @@ def standardise_footprint(
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -494,6 +505,7 @@ def standardise_footprint(
         high_spatial_resolution=high_spatial_resolution,
         time_resolved=time_resolved,
         short_lifetime=short_lifetime,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -521,6 +533,7 @@ def standardise_flux(
     period: str | tuple | None = None,
     chunks: dict | None = None,
     continuous: bool = True,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -549,6 +562,8 @@ def standardise_flux(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -594,6 +609,7 @@ def standardise_flux(
         period=period,
         continuous=continuous,
         chunks=chunks,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -613,6 +629,7 @@ def standardise_eulerian(
     start_date: str | None = None,
     end_date: str | None = None,
     setup: str | None = None,
+    tag: str | list | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -634,6 +651,8 @@ def standardise_eulerian(
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -672,6 +691,7 @@ def standardise_eulerian(
         start_date=start_date,
         end_date=end_date,
         setup=setup,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         force=force,
@@ -729,6 +749,7 @@ def standardise_flux_timeseries(
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -757,6 +778,8 @@ def standardise_flux_timeseries(
             - "yearly", "monthly"
             - suitable pandas Offset Alias
             - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -802,6 +825,7 @@ def standardise_flux_timeseries(
         database=database,
         database_version=database_version,
         model=model,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,

@@ -61,6 +61,7 @@ class FluxTimeseries(BaseStore):
         model: str | None = None,
         source_format: str = "crf",
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -88,6 +89,8 @@ class FluxTimeseries(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -130,7 +133,10 @@ class FluxTimeseries(BaseStore):
             domain = clean_string(domain)
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata = {
+            "tag": tag,
+        }
+        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -192,6 +198,7 @@ class FluxTimeseries(BaseStore):
         data_type = "flux_timeseries"
         datasource_uuids = self.assign_data(
             data=flux_timeseries_data,
+            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,

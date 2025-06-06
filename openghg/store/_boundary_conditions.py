@@ -69,6 +69,7 @@ class BoundaryConditions(BaseStore):
         bc_input: str,
         domain: str,
         source_format: str,
+        tag: str | list | None = None,
         period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -136,7 +137,10 @@ class BoundaryConditions(BaseStore):
         domain = clean_string(domain)
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata = {
+            "tag": tag
+        }
+        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -204,6 +208,7 @@ class BoundaryConditions(BaseStore):
         data_type = "boundary_conditions"
         datasource_uuids = self.assign_data(
             data=boundary_conditions_data,
+            extend_keys=extend_keys,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
