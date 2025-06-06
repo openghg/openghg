@@ -123,6 +123,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: pathType | None = None,
+        tag: str | list | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -171,6 +172,8 @@ class ObsSurface(BaseStore):
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             update_mismatch: This determines how mismatches between the internal data
                 "attributes" and the supplied / derived "metadata" are handled.
                 This includes the options:

@@ -69,6 +69,7 @@ class BoundaryConditions(BaseStore):
         bc_input: str,
         domain: str,
         source_format: str,
+        tag: str | list | None = None,
         period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",

@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import get_overlap_keys, merge_dict
+from openghg.util import get_overlap_keys, merge_dict, merge_and_extend_dict
 
 
 @pytest.mark.parametrize(
@@ -100,6 +100,50 @@ def test_merge_dict(left, right, expected_output):
     assert output == expected_output
 
 
+@pytest.mark.parametrize(
+    "on_conflict,left,right,expected_output",
+    [
+        (
+            None,
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+        ),
+        (
+            "left",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+        ),
+        (
+            "right",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+        ),
+        (
+            "drop",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"data_level": "1"},
+        ),
+    ],
+)
+def test_merge_dict_check_ignore(on_conflict, left, right, expected_output):
+    """
+    1. Check mismatch will be ignored and left used by default
+    2. Check mismatch will be ignored and "left" used
+    3. Check mismatch will be ignored and "right" used
+    4. Check mismatch will be ignored and overlapping keys not included
+    """
+    on_overlap = "ignore"
+    if on_conflict is None:
+        output = merge_dict(left, right, on_overlap=on_overlap)
+    else:
+        output = merge_dict(left, right, on_overlap=on_overlap, on_conflict=on_conflict)
+    assert output == expected_output
+
+
 def test_merge_dict_raises_no_value_check():
     """Test error is raised when there is an overlapping key and value isn't checked"""
     left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
@@ -152,6 +196,20 @@ def test_merge_dict_raises_mismatch():
         merge_dict(left, right, on_conflict="error")
 
     assert "Same key(s) supplied from different sources:" in str(excinfo.value)
+
+
+def test_merge_dict_raises_ignore_overlap_error():
+    """
+    Test error is raised when there is an overlapping key which we don't want
+    to check and on_conflict is 'error'
+    """
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"site": "bsd"}
+
+    with pytest.raises(ValueError) as excinfo:
+        merge_dict(left, right, on_overlap="ignore", on_conflict="error")
+
+    assert "Same key(s) supplied from different sources" in str(excinfo.value)
 
 
 def test_merge_specific_keys():
@@ -228,4 +286,38 @@ def test_merge_null_values_ignore():
     expected_output = {"site": None, "inlet": "10m", "data_level": "1"}
 
     output = merge_dict(left, right, remove_null=remove_null)
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+    "left,right,expected_output",
+    [
+        ({"tag": "decc"}, {"tag": "gemma"}, {"tag": ["decc", "gemma"]}),
+        ({"tag": ["decc"]}, {"tag": "gemma"}, {"tag": ["decc", "gemma"]}),
+        ({"tag": "decc"}, {"tag": ["gemma"]}, {"tag": ["decc", "gemma"]}),
+        (
+            {"tag": ["decc"]},
+            {"tag": ["gemma", "gemma_v2"]},
+            {"tag": ["decc", "gemma", "gemma_v2"]}
+        ),
+        (
+            {"site": "bsd", "inlet": "10m", "tag": "decc"},
+            {"tag": "gemma"},
+            {"site": "bsd", "inlet": "10m", "tag": ["decc", "gemma"]},
+        ),
+        (
+            {"site": "bsd", "inlet": "10m", "tag": ["decc"]},
+            {"tag": ["decc", "decc", "decc"]},
+            {"site": "bsd", "inlet": "10m", "tag": ["decc"]},
+        ),        
+    ],
+)
+def test_merge_and_extend_dict(left, right, expected_output):
+    """
+    1-3. Check tags can be combined into a list from str/list combinations
+    4. Check multiple tags can be added at once
+    5. Check tag and other values can be combined
+    6. Check repeated tags aren't added more than once
+    """
+    output = merge_and_extend_dict(left, right)
     assert output == expected_output
