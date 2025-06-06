@@ -287,9 +287,7 @@ class ObsSurface(BaseStore):
         # Define additional metadata which is not being passed to the parse functions
         additional_metadata = {
             "data_source": data_source,
-            "tag": tag,
         }
-        extend_keys = ["tag"]
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -399,7 +397,6 @@ class ObsSurface(BaseStore):
             data_type = "surface"
             datasource_uuids = self.assign_data(
                 data=data,
-                extend_keys=extend_keys,
                 if_exists=if_exists,
                 new_version=new_version,
                 data_type=data_type,

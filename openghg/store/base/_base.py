@@ -185,6 +185,26 @@ class BaseStore:
 
         return self.metakeys
 
+    def get_informational_dict_keys(self) -> dict:
+        """This collects together the informational keys associated with
+        this object. This currently includes general informational keys.
+        Returns:
+            dict: key name and associated details (including "type" details)
+        TODO: Update to include data_type specific keys as appropriate
+        """
+        from openghg.store._metakeys_config import define_general_informational_keys
+
+        # # Can add this if we're happy with the format of "informational" keys
+        # # being included within the config files
+        # metakeys = self.add_metakeys()
+        # informational = metakeys.get("informational", {})
+        informational = {}
+
+        gen_informational_keys = define_general_informational_keys()
+        informational.update(gen_informational_keys)
+
+        return informational
+
     MST = TypeVar("MST", bound=MutableSequence[MetadataAndData])
 
     def update_metadata(self, data: MST, input_parameters: dict, additional_metadata: dict) -> MST:
@@ -205,6 +225,9 @@ class BaseStore:
         # We might not get any optional keys
         optional = metakeys.get("optional", {})
 
+        # Informational keys add useful detail but are not used for categorisation
+        informational = self.get_informational_dict_keys()
+
         for parsed_data in data:
             metadata = parsed_data.metadata
 
@@ -223,6 +246,10 @@ class BaseStore:
             # Check if named optional keys are included in the input_parameters and add
             optional_matched = set(optional) & set(input_parameters.keys())
             metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
+
+            # Check if named informational keys are included in the input parameters and add
+            informational_matched = set(informational) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=informational_matched)
 
             # Add additional metadata keys
             if additional_metadata:
@@ -286,6 +313,20 @@ class BaseStore:
 
         return lookup_keys
 
+    def get_list_metakeys(self) -> list[str]:
+        """This defines the metakeys which are expected to be stored as lists
+        and so should be extended rather than overwritten when the metadata
+        is merged with existing metadata.
+        Returns:
+            list: list of keys to extend rather than replace
+        """
+        from openghg.store._metakeys_config import find_list_metakeys
+
+        metakeys = self.add_metakeys()
+        list_keys = find_list_metakeys(metakeys=metakeys)
+
+        return list_keys
+
     def assign_data(
         self,
         data: MutableSequence[MetadataAndData],
@@ -333,6 +374,10 @@ class BaseStore:
         # Get the metadata keys for this type
         if not required_keys:
             required_keys = self.get_lookup_keys(data=data)
+
+        # Define keys which should be extended rather than overwriting
+        if not extend_keys:
+            extend_keys = self.get_list_metakeys()
 
         with self._metastore as metastore:
             lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
