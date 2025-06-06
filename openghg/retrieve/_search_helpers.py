@@ -198,15 +198,11 @@ def define_list_search() -> list:
 
     Returns:
         list: Keys which should be searched as a list rather than an exact match
+
+    TODO: At the moment this just looks for the informational keys but could be expanded
+        to include additional metakeys as appropriate.
     """
-    from openghg.store import define_general_informational_keys
+    from openghg.store import find_info_list_metakeys
 
-    type_check = "list"
-    list_search = []
-
-    # Check and add the general informational keys for list entries
-    informational_keys = define_general_informational_keys()
-    list_info_metakeys = [k for k, v in informational_keys.items() if type_check in v["type"]]
-    list_search.extend(list_info_metakeys)
-
+    list_search = find_info_list_metakeys()
     return list_search
