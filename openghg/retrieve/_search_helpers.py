@@ -97,6 +97,9 @@ def process_special_queries(search_terms: dict, list_search: list | None = None)
     negative_lookup_keys = []
     search_list_keys = {}
 
+    if list_search is None:
+        list_search = []
+
     for k, v in search_terms.items():
         if k in list_search:
             search_list_keys[k] = v
