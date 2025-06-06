@@ -409,7 +409,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import to_lowercase
+        from openghg.util import to_lowercase, merge_dict
 
         try:
             del metadata["object_store"]
@@ -419,7 +419,8 @@ class Datasource:
             logger.warning("object_store should not be added to the metadata, removing.")
 
         lowercased: dict = to_lowercase(metadata, skip_keys=skip_keys)
-        self._metadata.update(lowercased)
+        merged_metadata = merge_dict(self._metadata, lowercased, on_overlap="ignore", on_conflict="right")
+        self._metadata = merged_metadata
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
