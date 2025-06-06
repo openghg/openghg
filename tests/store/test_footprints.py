@@ -813,7 +813,8 @@ def mock_metakeys():
     # TODO - implement this in a different way
     default_keys = get_metakey_defaults()
 
-    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]},
+                                              "special_tag": {"type": ["str"]}}
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield
