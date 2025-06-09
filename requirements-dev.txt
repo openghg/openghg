@@ -1,3 +1,6 @@
+# Install main dependencies
+-r requirements.txt
+
 # Required for testing
 cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
 flake8
