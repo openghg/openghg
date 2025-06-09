@@ -269,6 +269,37 @@ def test_optional_term_search():
     assert inlets == {"42m"}
 
 
+@pytest.mark.parametrize(
+    "tag",
+    [
+        "gemma_v1",
+        ["ceda_v1"],
+        ["gemma_v1", "ceda_v1"]
+    ],
+)
+def test_search_by_tag(tag):
+    """
+    Test to check we can search by tag. Setup
+     - "DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc" data has been added with:
+       - tag=["ceda_v1", "gemma_v1"]
+
+    1. Check passing a string with a correct tag
+    2. Check passing a list with a correct tag
+    3. Check passing both tags out of order
+    """
+    res = search_surface(tag=tag)
+    assert len(res.metadata) == 1
+
+    partial_metadata = {"site": "tac",
+                         "network": "decc",
+                         "inlet": "185m",
+                         "species": "co2"}
+
+    key = next(iter(res.metadata))
+
+    assert res.metadata[key].items() >= partial_metadata.items()
+
+
 def test_nonsense_terms():
     res = search(site="london", species="ch4")
 

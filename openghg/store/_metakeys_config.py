@@ -259,3 +259,79 @@ def write_metakeys(bucket: str, metakeys: dict) -> None:
         raise ConfigFileError("Invalid metakeys, see errors above.")
 
     _write_metakey_config(bucket=bucket, metakeys=metakeys)
+
+
+def define_general_informational_keys() -> dict:
+    """Define the general informational keys which should be available for all
+    data_types.
+    Returns:
+        dict: key names and the expected types for those keys
+    """
+
+    informational_keys = {"tag": {"type": ["list"]}}
+    return informational_keys
+
+
+def find_info_list_metakeys() -> list:
+    """Find the informational keys which represent a list type.
+    Returns:
+        list: Keys which contain a list type.
+    """
+    list_type = "list"
+
+    # Check and add the general informational keys for list entries
+    informational_keys = define_general_informational_keys()
+    list_metakeys = [k for k, v in informational_keys.items() if list_type in v["type"]]
+
+    return list_metakeys
+
+
+def find_list_metakeys(
+    metakeys: dict | None = None, data_type: str | list | None = None, bucket: str | None = None
+) -> list:
+    """Find the name of the metakeys which represent a list type. This includes
+    keys from the metakeys and general informational metakeys.
+
+    Args:
+        metakeys: Specific metakeys for a given data_type. Expect this to
+            be in the form of dict containing at least "required" entry with
+            keys containing details of the "type" as a list of strings.
+        data_type: Name of data_type (or data_types) to search for list metakeys
+            Default = None. If this and metakeys is not defined, this will look in all data_types.
+        bucket: Path to specific bucket to look within for metakey definition.
+            Default = None
+    Returns:
+        list: Keys which contain a list type.
+    """
+    from openghg.store import data_class_info
+
+    list_type = "list"
+
+    metakeys_dt = []
+    if metakeys is None:
+        if data_type is None:
+            data_types = list(data_class_info().keys())
+        elif isinstance(data_type, str):
+            data_types = [data_type]
+        else:
+            data_types = data_type
+
+        for dt in data_types:
+            metakeys = get_metakeys(bucket=bucket)[dt]
+            metakeys_dt.append(metakeys)
+    else:
+        metakeys_dt = [metakeys]
+
+    # Checking metakeys for each data_type and in each readable bucket defined as
+    # being a list.
+    list_metakeys = []
+    for metakeys in metakeys_dt:
+        for _, keys in metakeys.items():
+            list_dt_metakeys = [k for k, v in keys.items() if list_type in v["type"]]
+            list_metakeys.extend(list_dt_metakeys)
+
+    # Check and add the general informational keys for list entries
+    list_info_metakeys = find_info_list_metakeys()
+    list_metakeys.extend(list_info_metakeys)
+
+    return list_metakeys

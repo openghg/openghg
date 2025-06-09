@@ -234,3 +234,35 @@ def test_negative_lookup(metastore):
     result = metastore.search(negative_lookup_keys=["extra_KEY"])
 
     assert len(result) == 1
+
+
+@pytest.mark.parametrize(
+    "search_list_keys, expected_names",
+    [
+        ({"groups": "user"}, ["user1", "user2", "user3", "user4"]),
+        ({"groups": "sudo"}, ["user3", "user4"]),
+        ({"groups": ["another-user"]}, ["user4"]),
+        ({"groups": ["sudo", "user"]}, ["user3", "user4"]),
+        ({"groups": ["admin", "user"]}, ["user2"]),
+    ],
+)
+def test_search_list(metastore, search_list_keys, expected_names):
+    """
+    Test lists within the metastore can be searched for values contained within them.
+    1. Check "user" can be found in the groups key for all entries
+    2. Check "sudo" can be found in the groups key for selected entries
+    3. Check a list input can be used in the search
+    4. Check multiple search terms can be included and matching values in any order found (1)
+    5. Check multiple search terms can be included and matching values in any order found (2)
+    """
+    metastore.insert({'name': 'user1', 'groups': ['user']})
+    metastore.insert({'name': 'user2', 'groups': ['admin', 'user']})
+    metastore.insert({'name': 'user3', 'groups': ['sudo', 'user']})
+    metastore.insert({'name': 'user4', 'groups': ['user', 'another-user', 'sudo']})
+
+    results = metastore.search(search_list_keys=search_list_keys)
+
+    names = [result["name"] for result in results]
+
+    for name in expected_names:
+        assert name in names
