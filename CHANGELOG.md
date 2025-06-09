@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Allow to provide a kwargs dict to `resampler` function via `drop_na` that will be used by `xarray.Dataset.dropna` [PR #1314](https://github.com/openghg/openghg/pull/1314)
+- Improved the check for nans in `surface_obs_resampler function`: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan [PR #1314](https://github.com/openghg/openghg/pull/1314). This removed the improvements of `surface_obs_resampler` from [PR #1298](https://github.com/openghg/openghg/pull/1298).
+- Fews fix for footprints standardisation : add `unify_chunks` in `openghg/store/storage/_localzarrstore.py` to prevent chunking errors while checking if chunks match; change name of function `check_function_open_nc` to `footprint_open_nc_fn` in `openghg/standardise/footprints/_acrg_org.py`; rewrite `footprint_open_nc_fn` to allow selection of the month (for badly formatted footprints) and footprints (same reason); and add a `"release_height"` variable to old format footprints (`format="acrg_org"`) for compatibility with new footprint format (`format="paris"`) [#PR1287](https://github.com/openghg/openghg/pull/1287)
 - Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
 - Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
 - Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
@@ -16,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
+- Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
 
 ## [0.14.0] - 2025-04-16
 

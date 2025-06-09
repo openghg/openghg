@@ -227,6 +227,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "fp_high",
         "index_lons",
         "index_lats",
+        "release_height",
     ]
 
     del footprint_data.attrs["processed"]
@@ -813,7 +814,8 @@ def mock_metakeys():
     # TODO - implement this in a different way
     default_keys = get_metakey_defaults()
 
-    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]},
+                                              "special_tag": {"type": ["str"]}}
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield
