@@ -195,7 +195,7 @@ def merge_dict(
         - if the same keys are present in both dictionaries:
             - if one of the two values is identified as a value which has not been explicitly set (e.g. "not_set") the
             other value will be used in preference.
-            - otherwise, the value from left gets preference in the merged dictionary.
+            - otherwise, the value from left gets preference in the merged dictionary, by default.
 
     Args:
         left, right : Dictionaries to compare and merge
