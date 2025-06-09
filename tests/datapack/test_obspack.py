@@ -3,263 +3,16 @@ import pandas as pd
 import xarray as xr
 from pandas import DataFrame
 import pytest
-from pathlib import Path
 
 from helpers import clear_test_stores, get_obspack_datapath, get_surface_datapath
 from openghg.standardise import standardise_surface
 from openghg.dataobjects import ObsData
 from openghg.datapack import (
     StoredData,
+    ObsPack,
     retrieve_data,
     create_obspack,
-    define_obspack_filename,
-    define_obspack_name,
-    check_unique,
-    check_unique_filenames,
-    add_obspack_filenames,
 )
-from openghg.datapack._obspack import _find_additional_metakeys, _construct_name
-
-
-# %% Test filename creation functions
-
-
-@pytest.mark.parametrize(
-    "keys, separators, expected",
-    [
-        (["a", "c", "b"], ("_",), "start_middle_end"),
-        (["a", ["c", "b"]], ("_", "-"), "start_middle-end"),
-        (["a", ["c", "d"], "b"], ("_", "-"), "start_middle-extra_end"),
-        ([["a", ["c", "d"]], "b"], ("_", "-", "+"), "start-middle+extra_end"),
-        (["a"], ("_",), "start"),
-    ],
-)
-def test_construct_name(keys, separators, expected):
-    """
-    Check for the recurive _construct_name() function. This takes a nested list of keys,
-    a dictionary and a set of seperators and constructs an output name based on this.
-    1. Check simple list - all values separated by "_"
-    2. Check nested list (using different separators)
-    3. Check nested list can be intermixed
-    4. Check 3-level nesting
-    """
-    dictionary = {"a": "start", "b": "end", "c": "middle", "d": "extra"}
-    name = _construct_name(keys, dictionary, separators)
-    assert name == expected
-
-
-def test_construct_name_fails_sep_depth():
-    keys = [["a", ["c", "d"]], "b"]
-    separators = ("_", "-")
-    dictionary = {"a": "start", "b": "end", "c": "middle", "d": "extra"}
-
-    with pytest.raises(ValueError) as excinfo:
-        _construct_name(keys, dictionary, separators)
-
-    assert "separators must be >= depth of keys" in str(excinfo.value)
-
-
-def test_construct_name_fails_missing_key():
-    keys = ["a", "c", "b"]
-    separators = ("_", "-")
-    dictionary = {"a": "start", "b": "end"}
-
-    with pytest.raises(ValueError) as excinfo:
-        _construct_name(keys, dictionary, separators)
-
-    assert "unable to find key: 'c'" in str(excinfo.value)
-
-
-@pytest.mark.parametrize(
-    "metadata, obs_type, obspack_path, out_filename",
-    [
-        (
-            {"site": "WAO", "species": "ch4", "inlet": "10m"},
-            "surface-insitu",
-            "",
-            "./surface-insitu/ch4_WAO_10m_surface-insitu.nc",
-        ),
-        (
-            {"site": "WAO", "species": "ch4", "inlet": "10m"},
-            "surface-insitu",
-            "/path/to/obspack/",
-            "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc",
-        ),
-        (
-            {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"},
-            "surface-insitu",
-            "/path/to/obspack/",
-            "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc",
-        ),
-        (
-            {"site": "WAO", "species": "ch4", "inlet": "10m"},
-            "surface-flask",
-            "",
-            "./surface-flask/ch4_WAO_10m_surface-flask.nc",
-        ),
-        (
-            {"platform": "site", "species": "ch4", "site": "WAO"},
-            "column",
-            "",
-            "./column/ch4_WAO_site_column.nc",
-        ),
-        (
-            {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
-            "column",
-            "",
-            "./column/ch4_GOSAT-BRAZIL_satellite_column.nc",
-        ),
-        (
-            {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
-            "column",
-            "",
-            "./column/ch4_GOSAT-BRAZIL_satellite_column.nc",
-        ),
-        (
-            {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
-            "column",
-            "",
-            "./column/ch4_GOSAT-SOUTHAMERICA_satellite_column.nc",
-        ),
-    ],
-)
-def test_define_obspack_filename(metadata, obs_type, obspack_path, out_filename):
-    """
-    Test creation of filename matches to naming scheme
-    1. surface-insitu data
-    2. surface-insitu data, specified output_path
-    3. surface-insitu data, version in the metadata
-    4. surface-flask data
-    5. column, site data
-    6. column, satellite data, site name specified
-    7. column, satellite data, satellite name and selection specified
-    8. column, satellite data, satellite name and domain specified
-    """
-    out_filename = Path(out_filename)
-    filename = define_obspack_filename(metadata, obs_type=obs_type, obspack_path=obspack_path)
-
-    assert filename == out_filename
-
-
-@pytest.mark.parametrize(
-    "latest_version, data_version, include_version, out_filename",
-    [
-        ("v52", None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v52.nc"),
-        (None, "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
-        ("v52", "v34", True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v34.nc"),
-        (None, None, True, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
-        ("v52", "v34", False, "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu.nc"),
-    ],
-)
-def test_define_obspack_filename_version(latest_version, data_version, include_version, out_filename):
-    """
-    Check internal version definitions when creating filenames.
-    1. Check data version can be inferred from metadata
-    2. Check data version can be defined directly
-    3. Check data version defined directly is used in preference to metadata
-    4. Check data version is not included if this cannot be found
-    5. Check data version is not included if include_version is False
-    """
-    metadata = {"site": "WAO", "species": "ch4", "inlet": "10m"}
-    if latest_version:
-        metadata["latest_version"] = latest_version
-
-    obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
-    out_filename = Path(out_filename)
-    filename = define_obspack_filename(
-        metadata,
-        obs_type=obs_type,
-        obspack_path=obspack_path,
-        include_version=include_version,
-        data_version=data_version,
-    )
-
-    assert filename == out_filename
-
-
-@pytest.mark.parametrize(
-    "name_components, out_filename",
-    [
-        (["species", "site", "inlet"], "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc"),
-        (["site", "inlet", "species"], "/path/to/obspack/surface-insitu/WAO_10m_ch4_surface-insitu_v1.nc"),
-        (
-            ["site", "data_source", "data_level"],
-            "/path/to/obspack/surface-insitu/WAO_icos_1_surface-insitu_v1.nc",
-        ),
-    ],
-)
-def test_define_obspack_filename_name_components(name_components, out_filename):
-    """
-    Check name components for the file name can be used correctly.
-    1. Check the usual value create the expected output - ["species", "site", "inlet"]
-    2. Check the order of the specified values is used - ["site", "inlet", "species"]
-    4. Check different values for the metadata can be selected - ["site", "data_source", "data_level"]
-    """
-    metadata = {
-        "site": "WAO",
-        "species": "ch4",
-        "inlet": "10m",
-        "data_level": 1,
-        "data_source": "icos",
-        "latest_version": "v1",
-    }
-
-    obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
-    out_filename = Path(out_filename)
-    filename = define_obspack_filename(
-        metadata, obs_type=obs_type, obspack_path=obspack_path, name_components=name_components
-    )
-
-    assert filename == out_filename
-
-
-@pytest.mark.parametrize(
-    "name_suffixes, out_filename",
-    [
-        (
-            {"obs_type": "surface-insitu", "data_version": "v1"},
-            "/path/to/obspack/surface-insitu/ch4_WAO_10m_surface-insitu_v1.nc",
-        ),
-        ({"latest_version": "v51"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_v51.nc"),
-        ({"project": "gemma", "source": "noaa"}, "/path/to/obspack/surface-insitu/ch4_WAO_10m_gemma_noaa.nc"),
-    ],
-)
-def test_define_obspack_filename_name_components(name_suffixes, out_filename):
-    """
-    Check name components for the file name can be used correctly.
-    1. Check the standard suffix values create the expected output
-    2. If same key exists in metadata, check values from name_suffixes are used
-    3. Check new suffix values can be used to create output name
-    """
-    metadata = {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"}
-
-    obs_type = "surface-insitu"
-    obspack_path = "/path/to/obspack/"
-    out_filename = Path(out_filename)
-    filename = define_obspack_filename(
-        metadata, obs_type=obs_type, obspack_path=obspack_path, name_suffixes=name_suffixes
-    )
-
-    assert filename == out_filename
-
-
-@pytest.mark.parametrize(
-    "input,expected_result",
-    [
-        ([1, 2, 3, 4, 5], True),  # no repeats
-        ([1, 2, 3, 4, 5, 5], False),  # repeats
-        ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
-        (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
-    ],
-)
-def test_check_unique(input, expected_result):
-    """
-    Test the check_unique function returns True/False as expected
-    """
-    result = check_unique(input)
-    assert result == expected_result
 
 
 @pytest.fixture
@@ -271,15 +24,15 @@ def stored_data_1():
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(0, len(time), 1)
 
-    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time})
-    metadata = {
-        "site": "WAO",
-        "species": "ch4",
-        "inlet": "10m",
-        "data_level": 1,
-        "data_source": "icos",
-        "latest_version": "v1",
-    }
+    data = xr.Dataset({"mf": ("time", values)},
+                       coords={"time": time}
+    )
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "data_level": 1,
+                "data_source": "icos",
+                "latest_version": "v1"}
 
     obs_data = ObsData(data=data, metadata=metadata)
 
@@ -296,16 +49,16 @@ def stored_data_2():
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(10, len(time) + 10, 1)
 
-    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time})
+    data = xr.Dataset({"mf": ("time", values)},
+                       coords={"time": time}
+    )
 
-    metadata = {
-        "site": "WAO",
-        "species": "ch4",
-        "inlet": "10m",
-        "data_level": 2,
-        "data_source": "internal",
-        "latest_version": "v1",
-    }
+    metadata = {"site": "WAO",
+                "species": "ch4",
+                "inlet": "10m",
+                "data_level": 2,
+                "data_source": "internal",
+                "latest_version": "v1"}
 
     obs_data = ObsData(data=data, metadata=metadata)
 
@@ -314,7 +67,14 @@ def stored_data_2():
     return stored_data
 
 
-def test_check_unique_filenames(stored_data_1, stored_data_2):
+@pytest.fixture
+def obspack_1(stored_data_1, stored_data_2):
+    obspack = ObsPack(output_folder="", obspack_name="test_gemma")
+    obspack.retrieved_data = [stored_data_1, stored_data_2]
+    return obspack
+
+
+def test_check_unique_filenames(obspack_1):
     """
     Check and compare the automatic filenames created for two StoredData objects.
     This function should discover that these two names
@@ -327,141 +87,35 @@ def test_check_unique_filenames(stored_data_1, stored_data_2):
     # Can come back to perhaps once we get the workflow working
     # (though may then need to rip it apart again!)
 
-    retrieved_data = [stored_data_1, stored_data_2]
-    data_grouped_repeats = check_unique_filenames(
-        retrieved_data, name_components=["site", "species", "inlet"]
-    )
+    name_components = ["site", "species", "inlet"]
+    data_grouped_repeats = obspack_1.check_unique_filenames(name_components=name_components)
 
-    # Check the returned data contains 1 group and taht this group contains 2 entries.
+    # Check the returned data contains 1 group and that this group contains 2 entries.
     assert len(data_grouped_repeats) == 1
     assert len(data_grouped_repeats[0]) == 2
 
 
-def test_find_additional_metakeys_insitu():
-    """
-    Check additional metakeys can be found for surface-insitu data.
-    Assumptions:
-    - The following keys are defaults when defining surface data:
-      - "site", "species", "inlet", "data_level"
-    This test will need updating is this stops being the case.
-    """
-
-    obs_type = "surface-insitu"
-    name_components = ["site", "species", "inlet"]
-
-    metakeys = _find_additional_metakeys(obs_type=obs_type, name_components=name_components)
-
-    # Define a metakey we would expect for surface data
-    # Note: Will need to update if the surface definition changes to remove this
-    one_expected_metakey = "data_level"
-
-    # Check name_components are not in metakeys
-    assert not set(name_components) <= set(metakeys)
-    assert one_expected_metakey in metakeys
-
-
-def test_add_obspack_filenames(stored_data_1, stored_data_2):
+def test_add_stored_data_filenames(obspack_1):
     """
     Check add_obspack_filenames can produce unique filenames when the
     default filenames overlap.
     """
 
-    retrieved_data = [stored_data_1, stored_data_2]
-
     name_components = ["species", "site", "inlet"]
+    retrieved_data = obspack_1.add_stored_data_filenames(name_components=name_components)
 
-    retrieved_data = add_obspack_filenames(retrieved_data, name_components=name_components)
-
-    filename1 = retrieved_data[0].obspack_filename
-    filename2 = retrieved_data[1].obspack_filename
+    filename1 = retrieved_data[0].filename
+    filename2 = retrieved_data[1].filename
 
     assert filename1 != filename2
 
     # Note: this could change if value and/or order of the metakeys change
     # at the moment this is using the distinct data_level values to create the filenames.
-    expected_filename1 = "surface-insitu/ch4_WAO_10m_1_surface-insitu_v1.nc"
-    expected_filename2 = "surface-insitu/ch4_WAO_10m_2_surface-insitu_v1.nc"
+    expected_filename1 = "ch4_WAO_10m_1_surface-insitu_v1.nc"
+    expected_filename2 = "ch4_WAO_10m_2_surface-insitu_v1.nc"
 
     assert str(filename1) == expected_filename1
     assert str(filename2) == expected_filename2
-
-
-@pytest.mark.parametrize(
-    "version,current_obspacks,expected_output",
-    [
-        ("v1", [], "gemma_obspack_v1"),
-        (
-            None,
-            ["gemma_obspack"],
-            "gemma_obspack_v2",
-        ),  # If no version is found, assume v1 and use next version
-        (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
-        (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-        (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-        (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-        (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-        (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-    ],
-)
-def test_define_obspack_name(version, current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    output, version = define_obspack_name(
-        obspack_stub=obspack_stub, version=version, current_obspacks=current_obspacks
-    )
-
-    assert output == expected_output
-
-
-@pytest.mark.parametrize(
-    "current_obspacks,expected_output",
-    [
-        ([], "gemma_obspack_v1.0"),
-        (
-            ["gemma_obspack"],
-            "gemma_obspack_v1.1",
-        ),  # If no version is found, assume v1 and use next minor version
-        (["gemma_obspack_v1"], "gemma_obspack_v1.1"),
-        (["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-        (["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-        (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v2.1"),
-        (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-        (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-    ],
-)
-def test_define_obspack_name_minor(current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    minor_version_only = True
-    output, version = define_obspack_name(
-        obspack_stub=obspack_stub, minor_version_only=minor_version_only, current_obspacks=current_obspacks
-    )
-
-    assert output == expected_output
-
-
-@pytest.mark.parametrize(
-    "current_obspacks,expected_output",
-    [
-        ([], "gemma_obspack_v1"),
-        (
-            ["gemma_obspack"],
-            "gemma_obspack_v2",
-        ),  # If no version is found, assume v1 and use next major version
-        (["gemma_obspack_v1"], "gemma_obspack_v2"),
-        (["gemma_obspack_v1.1"], "gemma_obspack_v2"),
-        (["gemma_obspack_v0.23"], "gemma_obspack_v1"),
-        (["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-        (["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v2"),
-        (["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v3"),
-    ],
-)
-def test_define_obspack_name_major(current_obspacks, expected_output):
-    obspack_stub = "gemma_obspack"
-    major_version_only = True
-    output, version = define_obspack_name(
-        obspack_stub=obspack_stub, major_version_only=major_version_only, current_obspacks=current_obspacks
-    )
-
-    assert output == expected_output
 
 
 def populate_object_store():
