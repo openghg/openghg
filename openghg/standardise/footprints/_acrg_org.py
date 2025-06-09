@@ -3,14 +3,13 @@ from pathlib import Path
 from collections import defaultdict
 import warnings
 from typing import cast
-from xarray import Dataset
+from xarray import Dataset, ones_like
 
 from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    # open_and_align_dataset,
-    check_function_open_nc,
+    footprint_open_nc_fn,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType, ParseError
@@ -71,7 +70,7 @@ def parse_acrg_org(
         time_resolved = high_time_resolution
 
     # fp_data, filepath = open_and_align_dataset(filepath, domain)
-    xr_open_fn, filepath = check_function_open_nc(filepath, domain)
+    xr_open_fn, filepath = footprint_open_nc_fn(filepath, domain, sel_month=True)
 
     fp_data = xr_open_fn(filepath)
 
@@ -130,6 +129,18 @@ def parse_acrg_org(
     dv_attribute_updates["release_lon"]["long_name"] = "Release longitude"
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
+
+    # create 'release_heigt' variable for compatibility between different footprints
+    if inlet != "column":
+
+        inlet_int = int(inlet.replace("magl", "").replace("m", ""))
+        fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
+
+        variable_names.append("release_height")
+
+        dv_attribute_updates["release_height"] = {}
+        dv_attribute_updates["release_height"]["units"] = "m"
+        dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
