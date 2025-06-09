@@ -207,7 +207,7 @@ def merge_dict(
         on_overlap: If keys overlap, can choose to check values or raise an error.
             See check_value_match() function for how these values will be compared and checked.
             Options: ["check_value", "ignore", "error"]
-        on_conflict: If there is a conflict between key values, choose how to resolve this.
+        on_conflict: If there is a conflict between values for the same key, choose how to resolve this.
             Options: ["left", "right", "drop", "error"]
         relative_tolerance: Tolerance between two numbers when checking values.
         lower: Whether to apply lower case to the two input values as strings when checking values.
