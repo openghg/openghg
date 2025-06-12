@@ -303,6 +303,7 @@ def get_obs_column(
         )
         obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
 
+        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             "xch4",
