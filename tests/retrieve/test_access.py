@@ -320,6 +320,7 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
+    assert obscolumn["mf"].attrs["units"] == '1e-9'
 
 
 def test_get_obs_column_max_level():
