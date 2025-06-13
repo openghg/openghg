@@ -26,3 +26,6 @@ toml
 urllib3 >= 1.26.3
 xarray
 zarr==2.18.3
+openghg-calscales
+sympy
+networkx
