@@ -236,6 +236,7 @@ def get_obs_surface(
                         scale_original=original_scale,
                         scale_new=target_scale,
                     )
+                    data[var_name].attrs["calibration_scale"] = target_scale
 
             data.attrs["scale"] = target_scale
 
