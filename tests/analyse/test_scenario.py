@@ -7,9 +7,8 @@ import xarray as xr
 from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
-from helpers import clear_test_stores
-from pandas import Timedelta, Timestamp
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, get_obs_column
+from pandas import Timestamp
 from xarray import Dataset
 
 
@@ -650,7 +649,7 @@ def footprint_dummy():
      - Daily frequency from 2011-12-31 to 2012-01-03 (inclusive) (4 time points)
      - Small lat, lon (TEST_DOMAIN)
      - Small height
-     - "fp" values are all 1 **May change**
+     - "fp" values: 4 time points - 1.0, 1.1, 1.2, 1.3
      - "particle_locations_*" are 2, 3, 4, 5 for "n", "e", "s", "w"
      - "INERT" species
     """
@@ -665,6 +664,10 @@ def footprint_dummy():
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
     values = np.ones(shape)
+    add = 0.1
+    for i in range(1, len(values)):
+        values[i] += add
+        add += 0.1
 
     data_vars = {}
     data_vars["fp"] = (("time", "lat", "lon"), values)
@@ -940,218 +943,71 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
-# %% Test method functionality with dummy data (CO2)
+# %% Test alignment when using platform keyword with dummy data (CH4)
+#  - flask data
 
 
-@pytest.fixture
-def obs_co2_dummy():
+@pytest.mark.parametrize(
+    "platform_metadata,platform_keyword",
+    [
+        ("surface-flask", None),
+        (None, "surface-flask"),
+        ("surface-flask", "surface-flask"),
+        ("not_set", "surface-flask"),
+    ],
+)
+def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform_keyword):
     """
-    Create example ObsData object with dummy data
-     - Species is carbon dioxide (co2)
-     - 30-min frequency for 2012-01-01 (48 time points)
-     - "mf" values are from 1, 48
+    Test expected aligned values for obs with known dummy data when:
+     1. platform is NOT present in the metadata, pass platform="surface-flask" keyword
+     2. platform="surface-flask" in the metadata, don't pass platform keyword
+     3. platform="surface-flask" in the metadata AND same keyword is passed
+     4. platform="not_set" in the metadata AND "surface-flask" passed as a platform keyword
+
+    Expect data to be aligned but not resampled.
     """
 
-    time = pd.date_range("2012-01-01T00:00:00", "2012-01-01T23:30:00", freq="30min")
+    # Add keyword to the metadata
+    if platform_metadata is not None:
+        model_scenario_ch4_dummy.obs.metadata["platform"] = platform_metadata
 
-    ntime = len(time)
-    values = np.arange(0, ntime, 1)
+    combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint(platform=platform_keyword)
 
-    species = "co2"
-    site = "TEST_SITE"
-    inlet = "10m"
-    sampling_period = "60.0"
+    obs_data = model_scenario_ch4_dummy.obs.data
+    footprint_data = model_scenario_ch4_dummy.footprint.data
 
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+    # # Create expected values for resampled observations
+    # # In our case:
+    # # - observation data contains values from 1, 48 for each time point
+    # # - footprint data contained 2 overlapping time points which should now be repeated
 
-    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
-
-    # Potential metadata:
-    # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
-    #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
-    # - data_type
-    metadata = attributes
-    metadata["object_store"] = "/tmp/test-store-123"
-
-    obsdata = ObsData(data=data, metadata=metadata)
-
-    return obsdata
-
-
-@pytest.fixture
-def footprint_co2_dummy():
-    """
-    Create example FootprintData object with dummy data:
-     - Carbon dioxide high time resolution footprint
-     - Includes two sets of footprint data
-     - Integrated footprint, fp
-        - Daily frequency from 2011-12-31T23:00:00 to 2012-01-01T02:00:00 (inclusive) (4 points)
-        - "fp" values are all 1 **May change**
-     - High time resolution fp, fp_HiTRes
-        - Same frequency as fp
-        - Hourly back footprints (H_back) for 3 hours and residual integrated footprint (4 points)
-        - "fp_HiTRes" values are different along time points and H_back (0.0, 1.0, ...)
-     - Small lat, lon (TEST_DOMAIN)
-    """
-    from openghg.dataobjects import FootprintData
-
-    time = pd.date_range("2011-12-31T23:00:00", "2012-01-01T02:00:00", freq="H")
-    lat = [1.0, 2.0]
-    lon = [10.0, 20.0]
-    H_back = np.arange(0, 25, 1, dtype=int)
-
-    nlat, nlon, ntime = len(lat), len(lon), len(time)
-    shape = (ntime, nlat, nlon)
-    fp_values = np.ones(shape)
-
-    # Create array with different (but predictable) values for fp_HiTRes
-    # Set distinct values along H_back dimension
-    # Based on range of 0.0-24.0 (inclusive) in increments of 1.0
-    nh_back = len(H_back)
-    h_back_values = np.arange(0.0, nh_back, 1.0)
-    fp_HiTRes_values = np.expand_dims(h_back_values, axis=(0, 1, 2))
-
-    # Repeat (initially) along other dimensions (time, lat, lon)
-    expand_axes = (0, 1, 2)
-    for i in expand_axes:
-        fp_HiTRes_values = np.repeat(fp_HiTRes_values, shape[i], axis=i)
-
-    # Build on this to set distinct values along time dimension as well
-    # Add to each array - 0.0-24.0, 1.0-25.0, 2.0-26.0, 3.0-27.0, ... (all inclusive)
-    add = 0
-    for i in range(ntime):
-        fp_HiTRes_values[i, ...] += add
-        add += 1
-
-    data = xr.Dataset(
-        {
-            "fp": (("time", "lat", "lon"), fp_values),
-            "fp_HiTRes": (("time", "lat", "lon", "H_back"), fp_HiTRes_values),
-        },
-        coords={"lat": lat, "lon": lon, "time": time, "H_back": H_back},
-    )
-
-    # Potential metadata:
-    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
-    # - species (if applicable)
-    # - data_type="footprints"
-    species = "co2"
-    metadata = {
-        "site": "TESTSITE",
-        "inlet": "10m",
-        "domain": "TESTDOMAIN",
-        "data_type": "footprints",
-        "species": species,
-    }
-
-    footprintdata = FootprintData(data=data, metadata=metadata)
-
-    return footprintdata
-
-
-@pytest.fixture
-def flux_co2_dummy():
-    """
-    Create example FluxData object with dummy data
-     - Species is carbon dioxide (co2)
-     - Data is 2-hourly from 2011-12-31 - 2012-01-02 (inclusive)
-     - Small lat, lon (TEST_DOMAIN)
-     - "flux" values are in a range from 1, ntime+1, different along the time axis.
-    """
-    from openghg.dataobjects import FluxData
-
-    time = pd.date_range("2011-12-31", "2012-01-02", freq="2H")
-    lat = [1.0, 2.0]
-    lon = [10.0, 20.0]
-
-    nlat, nlon, ntime = len(lat), len(lon), len(time)
-    shape = (ntime, nlat, nlon)
-    values = np.arange(1.0, ntime + 1, 1.0)
-
-    expand_axes = (1, 2)
-    values = np.expand_dims(values, axis=expand_axes)
-    for j in expand_axes:
-        values = np.repeat(values, shape[j], axis=j)
-
-    flux = xr.Dataset(
-        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
-    )
-
-    # Potential metadata:
-    # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
-    # - data_type?
-    species = "co2"
-    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
-
-    fluxdata = FluxData(data=flux, metadata=metadata)
-
-    return fluxdata
-
-
-@pytest.fixture
-def model_scenario_co2_dummy(obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
-    """Create ModelScenario with input dummy data for co2"""
-    model_scenario = ModelScenario(obs=obs_co2_dummy, footprint=footprint_co2_dummy, flux=flux_co2_dummy)
-
-    return model_scenario
-
-
-def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
-    """Test expected modelled observations within footprints_dat_merge() method with known dummy data for co2"""
-    combined_dataset = model_scenario_co2_dummy.footprints_data_merge()
-
+    # Output should contain 48 time points (same as input obs data)
+    org_obs_time = obs_data["time"]
     aligned_time = combined_dataset["time"]
-    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
-    assert aligned_time[-1] == Timestamp("2012-01-01T02:00:00")
+    xr.testing.assert_allclose(org_obs_time, aligned_time)
 
-    # Create expected value(s) for modelled mole fraction, "mf_mod_high_res"
-    footprint = footprint_co2_dummy.data
-    flux = flux_co2_dummy.data
+    # Footprint data should not have been resampled and should now be repeated via "ffill"
+    aligned_fp = combined_dataset["fp"]
+    aligned_fp_1 = (
+        aligned_fp.sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00"))
+        .transpose("time", "lat", "lon")
+        .values
+    )
+    aligned_fp_2 = (
+        aligned_fp.sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00"))
+        .transpose("time", "lat", "lon")
+        .values
+    )
 
-    # Find maximum number of hours of the back run from footprint data
-    max_hours_back = footprint["H_back"].values.max()
+    org_fp_1 = footprint_data["fp"].sel(time=slice("2012-01-01T00:00:00", "2012-01-01T23:00:00")).values
+    org_fp_2 = footprint_data["fp"].sel(time=slice("2012-01-02T00:00:00", "2012-01-02T23:00:00")).values
 
-    # Loop over each time point so we can calculate expected value and compare
-    for t in range(len(aligned_time)):
-        # Extract flux data to match H_back and residual time period
-        release_time = aligned_time[t].values
-        back_time = release_time - Timedelta(max_hours_back, "hours")
-        flux_hitres = flux["flux"].sel(time=slice(back_time, release_time))
-        flux_integrated = (
-            flux["flux"].resample({"time": "1MS"}).mean().sel(time=aligned_time[0])
-        )  # This may need to be updated
+    expected_fp_1 = np.repeat(org_fp_1, len(aligned_fp_1), axis=0)
+    expected_fp_2 = np.repeat(org_fp_2, len(aligned_fp_2), axis=0)
 
-        # Update footprint data to use number of hours back to derive a time
-        footprint_at_release = footprint["fp_HiTRes"].sel(time=release_time)
-        h_back_time = np.array(
-            [release_time - Timedelta(hour, "hours") for hour in footprint["H_back"].values],
-            dtype=np.datetime64,
-        )
-        footprint_at_release = footprint_at_release.assign_coords({"H_back_time": ("H_back", h_back_time)})
-        footprint_at_release = footprint_at_release.swap_dims({"H_back": "H_back_time"})
-        footprint_at_release = footprint_at_release.rename(
-            {"time": "release_time"}
-        )  # Rename original time parameter
-        footprint_at_release = footprint_at_release.rename(
-            {"H_back_time": "time"}
-        )  # Set new time parameter based on H_back
+    np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
+    np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
 
-        # Extract footprint data covering correct time period
-        back_time_exclude = back_time + Timedelta(1, "s")  # Time to go up to but not include back_time
-        footprint_hitres = footprint_at_release.sel({"time": slice(release_time, back_time_exclude)})
-        footprint_integrated = footprint_at_release.sel({"time": back_time})
-
-        # Align flux to footprint data (flux is 2 hourly, footprint H_back is 1 hourly)
-        flux_hitres = flux_hitres.reindex_like(footprint_hitres, method="ffill")
-
-        # Calculate high time resolution and residual components of modelled mole fraction
-        modelled_mf_htres = (flux_hitres * footprint_hitres).sum().values
-        modelled_mf_residual = (flux_integrated * footprint_integrated).sum().values
-        # Combine to create expected modelled mole fraction
-        expected_modelled_mf_hr = modelled_mf_htres + modelled_mf_residual
-
-        modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
-        assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
 
 
 # %% Test baseline calculation for short-lived species
@@ -1526,6 +1382,83 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     expected_flux = 1 + 11  # All values should be 12
     output_flux = dataset_stacked.flux.values
     np.testing.assert_allclose(output_flux, expected_flux)
+
+
+def test_satellite_scenario_raises_error():
+    """Test to ensure ModelScenario instance raises error if max_level is not passed when platform argument is satellite"""
+
+    satellite = "gosat"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
+    species = "ch4"
+
+    obs_column = get_obs_column(
+        species=species, max_level=3, satellite=satellite, selection="land", store="user"
+    )
+
+    footprint = get_footprint(
+        satellite=satellite, domain=domain, obs_region=obs_region, model="cams", store="user"
+    )
+
+    with pytest.raises(AttributeError):
+        # checks that ModelScenario fails if passing platform=satellite but not max_level
+        model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint, platform="satellite")
+
+
+def test_model_scenario_col_fp_data_merge():
+    """This is to test satellite data aligns fp to obs and satifies the fp_data_merge functionality"""
+
+    satellite = "gosat"
+    domain = "southamerica"
+    obs_region = "brazil"
+
+    obs_column_data = get_obs_column(
+        species="ch4",
+        max_level=3,
+        satellite=satellite,
+        start_date="2016-01-01 14:59:12.500000+00:00",
+        end_date="2016-01-01 18:10:16.500000+00:00",
+        obs_region="brazil",
+        store="user",
+    )
+    fp_column_data = get_footprint(
+        satellite=satellite,
+        domain=domain,
+        obs_region=obs_region,
+        start_date="2016-01-01 14:59:12.500000+00:00",
+        end_date="2016-01-01 19:10:16.500000+00:00",
+        model="name",
+        store="user",
+    )
+    flux_data = get_flux(species="ch4", source="all", domain="southamerica")
+
+    satellite_scenario = ModelScenario(
+        obs_column=obs_column_data,
+        footprint=fp_column_data,
+        flux=flux_data,
+        platform="satellite",
+        max_level=3,
+    )
+
+    # Check values have been stored in ModelScenario object correctly
+    assert satellite_scenario.obs is not None
+    assert satellite_scenario.footprint is not None
+
+    # Check values stored within model_scenario object match inputs
+    xr.testing.assert_equal(satellite_scenario.obs.data, obs_column_data.data)
+    xr.testing.assert_equal(satellite_scenario.footprint.data, fp_column_data.data)
+
+    fp_data_merge = satellite_scenario.footprints_data_merge(
+        platform="satellite", calc_timeseries=True, sources="all", cache=False
+    )
+
+    assert "mf_mod" in fp_data_merge
+    attributes = fp_data_merge.attrs
+
+    obs_column_data.data["time"] == fp_data_merge["time"]
+    attributes["model"] == "name"
+    attributes["data_type"] == "column"
+    len(attributes["heights"]) == 20
 
 
 def test_scenario_infer_flux_source_ch4():

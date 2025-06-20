@@ -5,7 +5,6 @@ import os
 import threading
 from pathlib import Path
 import shutil
-from typing import Dict, List, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
@@ -34,7 +33,7 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_readable_buckets() -> Dict[str, str]:
+def get_readable_buckets() -> dict[str, str]:
     """Get a dictionary of readable buckets - {store_name: store_path, ...}
 
     Returns:
@@ -51,7 +50,7 @@ def get_readable_buckets() -> Dict[str, str]:
     }
 
 
-def get_writable_buckets() -> Dict[str, str]:
+def get_writable_buckets() -> dict[str, str]:
     """Get a dictionary of writable buckets - {store_name: store_path, ...}
 
     Returns:
@@ -65,7 +64,7 @@ def get_writable_buckets() -> Dict[str, str]:
     }
 
 
-def get_writable_bucket(name: Optional[str] = None) -> str:
+def get_writable_bucket(name: str | None = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket available.
 
@@ -118,7 +117,7 @@ def get_user_objectstore_path() -> Path:
     return Path(config["object_store"]["user"]["path"])
 
 
-def get_objectstore_info() -> Dict:
+def get_objectstore_info() -> dict:
     """Read the local config file and return the data of each of the object stores the
     user has access to.
 
@@ -129,7 +128,7 @@ def get_objectstore_info() -> Dict:
     return config["object_store"]
 
 
-def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
+def get_all_object_names(bucket: str, prefix: str | None = None, without_prefix: bool = False) -> list:
     """Returns the names of all objects in the passed bucket
 
     Args:
@@ -211,7 +210,7 @@ def delete_objects(bucket: str, prefix: str) -> None:
         shutil.rmtree(path=key, ignore_errors=True)
 
 
-def get_object_names(bucket: str, prefix: Optional[str] = None) -> List[str]:
+def get_object_names(bucket: str, prefix: str | None = None) -> list[str]:
     """List all the keys in the object store
 
     Args:
@@ -304,7 +303,7 @@ def get_object_lock_path(bucket: str, key: str) -> Path:
     Returns:
         Path to object lock file
     """
-    lock_path = Path(f"{bucket}/{key}._data.lock")
+    lock_path = Path(f"{bucket}/{key}._data.lock_v2")
     if not lock_path.parent.exists():
         lock_path.parent.mkdir(parents=True)
 
@@ -335,7 +334,7 @@ def set_object(bucket: str, key: str, data: bytes) -> None:
                 f.write(data)
 
 
-def set_object_from_json(bucket: str, key: str, data: Union[str, Dict]) -> None:
+def set_object_from_json(bucket: str, key: str, data: str | dict) -> None:
     """Set JSON data in the object store
 
     Args:
@@ -350,7 +349,7 @@ def set_object_from_json(bucket: str, key: str, data: Union[str, Dict]) -> None:
     set_object(bucket=bucket, key=key, data=data_bytes)
 
 
-def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> None:
+def set_object_from_file(bucket: str, key: str, filename: str | Path) -> None:
     """Set the contents of file at filename to key in bucket
 
     Args:
@@ -363,7 +362,7 @@ def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> N
     set_object(bucket=bucket, key=key, data=open(filename, "rb").read())
 
 
-def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
+def get_object_from_json(bucket: str, key: str) -> dict[str, str | dict]:
     """Return an object constructed from JSON stored at key.
 
     Args:
@@ -372,8 +371,8 @@ def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
     Returns:
         dict: Dictionary
     """
-    data: Union[str, bytes] = get_object(bucket, key).decode("utf-8")
-    data_dict: Dict = json.loads(data)
+    data: str | bytes = get_object(bucket, key).decode("utf-8")
+    data_dict: dict = json.loads(data)
 
     return data_dict
 
@@ -392,7 +391,7 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket(name: Optional[str] = None) -> str:
+def get_bucket(name: str | None = None) -> str:
     """Find and return the local object store path. This will return
     the path to the user's local object store if no name is given.
 
@@ -436,7 +435,7 @@ def clear_object_store() -> None:
         logger.warning("Cannot delete object store.")
 
 
-def get_folder_size(folder_path: Union[str, Path]) -> int:
+def get_folder_size(folder_path: str | Path) -> int:
     """Get the total size of a folder
 
     See https://stackoverflow.com/a/75101666/1303032
@@ -455,7 +454,7 @@ def get_folder_size(folder_path: Union[str, Path]) -> int:
     return total
 
 
-def query_store() -> Dict:
+def query_store() -> dict:
     """Create a dictionary that can be used to visualise the object store
 
     Returns:

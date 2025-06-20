@@ -68,7 +68,6 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
         "source": source,
         "database": "EDGAR",
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -127,7 +126,6 @@ def test_parse_edgar_domain():
         "source": "anthro",
         "database": "EDGAR",
         "database_version": version.replace(".", ""),
-        "date": "2015",
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -313,14 +311,15 @@ def test_parse_edgar_no_domain():
             },
         ),
         (
-            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc", 
-            {"version": "v8.0", 
-             "species": "HFC-43-10-mee", 
-             "year": 1994,
-             "source": "TOTALS", 
-             "resolution": None}
-        )
-
+            "v8.0_FT2022_GHG_HFC-43-10-mee_1994_TOTALS_flx.nc",
+            {
+                "version": "v8.0",
+                "species": "HFC-43-10-mee",
+                "year": 1994,
+                "source": "TOTALS",
+                "resolution": None,
+            },
+        ),
     ],
 )
 def test_extract_file_info(edgar_file, expected_file_info):

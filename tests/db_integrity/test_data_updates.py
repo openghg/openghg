@@ -683,7 +683,7 @@ def test_metadata_update():
 
     # Set expectations for start and end date (for GC data this is altered from file details
     # based on known sampling period).
-    sampling_period = 75
+    sampling_period = 1
     sampling_period_td = pd.Timedelta(seconds=int(sampling_period))
     time_buffer = pd.Timedelta(seconds=1)  # Buffer subtracted from end to make this exclusive end.
     expected_start_1 = str(pd.Timestamp("2014-01-01T00:13", tz="utc") - sampling_period_td / 2.0)
@@ -809,7 +809,7 @@ def test_metadata_update():
             "TAC-185magl_UKV_EUROPE_TEST_201405.nc",
             "TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc",
             "TAC",
-            "EUROPE",
+            "TEST",
             "NAME",
             "UKV",
             "185m",
@@ -819,7 +819,7 @@ def test_metadata_update():
             "HFD-100magl_UKV_EUROPE_202001_TRUNCATED.nc",
             "HFD-100magl_UKV_rn_EUROPE_202001_TRUNCATED.nc",
             "HFD",
-            "EUROPE",
+            "TEST",
             "NAME",
             "UKV",
             "100m",
@@ -863,8 +863,8 @@ def test_standardising_footprint_with_additional_keys(
         store="user",
     )
 
-    standard_dict = standard_standardised[next(iter(standard_standardised))]
-    special_dict = special_standardised[next(iter(special_standardised))]
+    standard_dict = standard_standardised[0]
+    special_dict = special_standardised[0]
 
     assert special_dict["new"] == True
     assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?
@@ -939,7 +939,9 @@ def test_standardising_footprint_met_model():
     )
 
     # Check data retrieved contains the correct concatenated date range from both 201606 and 201607 files.
-    footprint_search_no_met_model = search(site=site, domain=domain, met_model="not_set", data_type="footprints")
+    footprint_search_no_met_model = search(
+        site=site, domain=domain, met_model="not_set", data_type="footprints"
+    )
     footprint_retrieve_no_met_model = footprint_search_no_met_model.retrieve()
     footprint_data_no_met_model = footprint_retrieve_no_met_model.data
 

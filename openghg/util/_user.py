@@ -2,11 +2,10 @@ import logging
 import os
 import platform
 from pathlib import Path
-from typing import Dict, Optional
 import uuid
 import toml
 import shutil
-from openghg.types import ConfigFileError, ObjectStoreError
+from openghg.types import ConfigFileError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -196,7 +195,7 @@ def create_config(silent: bool = False) -> None:
     user_config_path.write_text(toml.dumps(config))
 
 
-def _user_multstore_input() -> Dict:
+def _user_multstore_input() -> dict:
     """Ask the user to input data about shared object stores
 
     Returns:
@@ -224,7 +223,7 @@ def _user_multstore_input() -> Dict:
     return stores
 
 
-def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[str] = None) -> Dict:
+def _combine_config(config_version: str, object_stores: dict, user_id: str | None = None) -> dict:
     """Combine parts required into the proper dictionary format
 
     Args:
@@ -247,7 +246,7 @@ def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[
 
 
 # @lru_cache
-def read_local_config() -> Dict:
+def read_local_config() -> dict:
     """Reads the local config file.
 
     Returns:
@@ -264,7 +263,7 @@ def read_local_config() -> Dict:
                 or run openghg --quickstart"
             ) from e
 
-    config: Dict = toml.loads(config_path.read_text())
+    config: dict = toml.loads(config_path.read_text())
 
     try:
         _ = config["object_store"]["user"]
@@ -379,7 +378,11 @@ def _check_valid_store(store_path: Path) -> bool:
     store_dirs = list(data_dir.glob("*"))
     # Let's take the first data directory and see if there's a zarr folder in it
     if not store_dirs:
-        raise ObjectStoreError("No data found in the object store, please check the path and try again.")
+        logger.info(
+            f"No data found in the object store {store_path}, "
+            "so we are treating this empty store as a zarr store."
+        )
+        return True
 
     store_data_dir = store_dirs[0]
 

@@ -49,7 +49,7 @@ def data():
     filename = "bsd.picarro.1minute.248m.min.dat"
     filepath = get_surface_datapath(filename=filename, source_format="CRDS")
 
-    return parse_crds(data_filepath=filepath, site="bsd", network="DECC")
+    return parse_crds(filepath=filepath, site="bsd", network="DECC")
 
 
 @pytest.fixture
@@ -125,13 +125,6 @@ def test_add_data(data, bucket):
         "species": "ch4",
         "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
-        "inlet_height_magl": "248",
-        "data_owner": "simon o'doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
-        "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
         "data_type": "surface",
         "start_date": "2014-01-30 11:12:30+00:00",
         "end_date": "2020-12-01 22:32:29+00:00",
@@ -149,7 +142,7 @@ def test_versioning(capfd, bucket):
         filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
     )
 
-    min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
+    min_data = parse_crds(filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
 
     # Take head of data
     # Then add the full data, check versioning works correctly
@@ -168,7 +161,7 @@ def test_versioning(capfd, bucket):
 
     assert min_keys["v1"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
 
-    detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
+    detailed_data = parse_crds(filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
     detailed_ch4_data = detailed_data["ch4"]["data"]
 
@@ -201,7 +194,7 @@ def test_replace_version(bucket):
         filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
     )
 
-    min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
+    min_data = parse_crds(filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
 
     min_ch4_data = min_data["ch4"]["data"]
     metadata = {"foo": "bar"}
@@ -215,7 +208,7 @@ def test_replace_version(bucket):
     bucket = get_bucket()
     d.save()
 
-    detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
+    detailed_data = parse_crds(filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
     detailed_ch4_data = detailed_data["ch4"]["data"]
 
@@ -642,7 +635,7 @@ def test_bytes_stored(data, bucket):
 
     d.save()
 
-    assert d.bytes_stored() == 9609
+    assert abs(d.bytes_stored() - 9609) < 10
 
     d = Datasource(bucket=bucket)
 

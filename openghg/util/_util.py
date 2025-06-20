@@ -1,55 +1,19 @@
-""" Utility functions that are used by multiple modules
-
-"""
+"""Utility functions that are used by multiple modules"""
 
 from collections.abc import Iterable
-from typing import Any, Dict, Iterator, Optional, Tuple
+from pathlib import Path
+from typing import Any
+from collections.abc import Iterator
 import logging
+from openghg.util import clean_string
+
+from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def running_in_cloud() -> bool:
-    """Are we running in the cloud?
-
-    Checks for the OPENGHG_CLOUD environment variable being set
-
-    Returns:
-        bool: True if running in cloud
-    """
-    from os import environ
-
-    cloud_env = environ.get("OPENGHG_CLOUD", "0")
-
-    return bool(int(cloud_env))
-
-
-def running_on_hub() -> bool:
-    """Are we running on the OpenGHG Hub?
-
-    Checks for the OPENGHG_CLOUD environment variable being set
-
-    Returns:
-        bool: True if running in cloud
-    """
-    from os import environ
-
-    hub_env = environ.get("OPENGHG_HUB", "0")
-
-    return bool(int(hub_env))
-
-
-def running_locally() -> bool:
-    """Are we running OpenGHG locally?
-
-    Returns:
-        bool: True if running locally
-    """
-    return not (running_on_hub() or running_in_cloud())
-
-
-def unanimous(seq: Dict) -> bool:
+def unanimous(seq: dict) -> bool:
     """Checks that all values in an iterable object
     are the same
 
@@ -68,7 +32,7 @@ def unanimous(seq: Dict) -> bool:
         return all(i == first for i in it)
 
 
-def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
+def pairwise(iterable: Iterable) -> Iterator[tuple[Any, Any]]:
     """Return a zip of an iterable where a is the iterable
     and b is the iterable advanced one step.
 
@@ -85,7 +49,7 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
     return zip(a, b)
 
 
-def site_code_finder(site_name: str) -> Optional[str]:
+def site_code_finder(site_name: str) -> str | None:
     """Find the site code for a given site name.
 
     Args:
@@ -100,7 +64,9 @@ def site_code_finder(site_name: str) -> Optional[str]:
 
     inverted = _create_site_lookup_dict()
 
-    matches = process.extract(query=site_name, choices=inverted.keys())
+    # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
+    matches = process.extract(query=site_name, choices=inverted.keys())  # type:ignore
+
     highest_score = matches[0][1]
 
     if highest_score < 90:
@@ -118,7 +84,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
     return site_code.lower()
 
 
-def find_matching_site(site_name: str, possible_sites: Dict) -> str:
+def find_matching_site(site_name: str, possible_sites: dict) -> str:
     """Try and find a similar name to site_name in site_list and return a suggestion or
     error string.
 
@@ -132,7 +98,8 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
 
     site_list = possible_sites.keys()
 
-    matches = process.extract(site_name, site_list)
+    # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
+    matches = process.extract(site_name, site_list)  # type:ignore
 
     scores = [s for m, s, _ in matches]
 
@@ -152,7 +119,7 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"Unknown site: {site_name}"
 
 
-def _create_site_lookup_dict() -> Dict:
+def _create_site_lookup_dict() -> dict:
     """Create a dictionary of site name: three letter site code values
 
     Returns:
@@ -184,7 +151,7 @@ def _create_site_lookup_dict() -> Dict:
     return inverted
 
 
-def verify_site(site: str) -> Optional[str]:
+def verify_site(site: str) -> str | None:
     """Check if the passed site is a valid one and returns the three
     letter site code if found. Otherwise we use fuzzy text matching to suggest
     sites with similar names.
@@ -232,3 +199,76 @@ def multiple_inlets(site: str) -> bool:
             return True
 
     return len(heights) > 1
+
+
+def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
+    """
+    Sorting time on filename basis
+
+    Args:
+        filepath: Path to the file
+
+    Returns:
+        list[Path]: List of sorted paths
+    """
+
+    # This code is to stop mypy complaints regarding file types
+    if isinstance(filepath, str):
+        filepath = [Path(filepath)]
+    elif isinstance(filepath, Path):
+        filepath = [filepath]
+    elif isinstance(filepath, (tuple, list)):
+        filepath = [Path(f) for f in filepath]
+    else:
+        raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
+
+    return sorted(filepath)
+
+
+def verify_site_with_satellite(
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
+    selection: str | None = None,
+) -> None:
+    """
+    Validates the `site` parameter for processing `ModelScenario` with satellite data.
+
+    In the old framework, the `site` value was expected to align with satellite data(an type of alias) And contained below mentioned structure.
+
+    - If `site` and `satellite` are specified, site should be equal to satellite.
+    - If `site`, `satellite` and `obs_region` are specified, `site` should be `{satellite}-{obs_region}`.
+    - If `site`, `satellite`, `obs_region`, and `selection` are specified, `site` should be `{satellite}-{obs_region}-{selection}`.
+    - If `site` does not match the expected format, an error is raised.
+    - If `site` is specified without a `satellite` but includes `obs_region` or `selection`, an error is raised.
+
+    The function verifies site parameter conforms with the known structure by comparing against `satellite`, `obs_region`, and `selection` over `site`.
+
+
+    Args:
+        site: Site Name containing satellite/ satellie-obs_region/ satellite-obs_region-selection
+        satellite: Satellite name
+        obs_region:
+        selection:
+
+    Returns: None
+    """
+    try:
+        if satellite:
+            expected_site = clean_string(satellite)
+            if obs_region:
+                expected_site += f"-{clean_string(obs_region)}"
+            if selection:
+                expected_site += f"-{clean_string(selection)}"
+
+            if site:
+                clean_string(site) != expected_site
+                raise ValueError(
+                    f"Mismatch: expected site '{expected_site}', but got '{site}'. Please specify just 'site' OR 'satellite' and 'obs_region' and 'selection' as appropriate."
+                )
+
+        elif site and (obs_region or selection):
+            raise ValueError("Cannot specify obs_region or selection without a satellite.")
+
+    except ValueError as e:
+        print(f"Error: {e}")

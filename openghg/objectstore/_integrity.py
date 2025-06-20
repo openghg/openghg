@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 import logging
-from typing import Optional
 
 from openghg.objectstore import get_readable_buckets
 from openghg.objectstore.metastore import open_metastore
@@ -14,7 +13,7 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(level=logging.DEBUG)
 
 
-def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, str]]]:
+def integrity_check(raise_error: bool = True) -> dict[str, dict[str, str]] | None:
     """Check the integrity of object stores.
 
     Args:

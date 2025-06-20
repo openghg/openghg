@@ -1,12 +1,11 @@
 import re
 from pathlib import Path
-from typing import Optional, Tuple, Union
 import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
 
-from openghg.types import TimePeriod, optionalPathType
+from openghg.types import TimePeriod, pathType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -18,10 +17,10 @@ __all__ = ["infer_date_range", "update_zero_dim"]
 
 def infer_date_range(
     time: DataArray,
-    filepath: optionalPathType = None,
-    period: Optional[Union[str, tuple]] = None,
+    filepath: pathType | None = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
-) -> Tuple[Timestamp, Timestamp, str]:
+) -> tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension.
 
@@ -156,7 +155,13 @@ def infer_date_range(
                     "Continuous data with no gaps is expected but no time period can be inferred. Run with continuous=False (and optionally specify period input) to remove this constraint."
                 )
             else:
-                inferred_freq = null_freq
+                if input_freq != null_freq:
+                    inferred_freq = input_freq
+                    logger.warning(
+                        "Inferred frequency is set to the provided 'period'. This could indicate that the 'period' value may be incorrect. Exercise caution when using this value."
+                    )
+                else:
+                    inferred_freq = null_freq
         else:
             inferred_freq = parse_period(inferred_period)
 
@@ -181,6 +186,12 @@ def infer_date_range(
         if time_value is not None:
             period_str = create_frequency_str(time_value, time_unit)
         else:
+            period_str = "varies"
+            logger.warning(
+                "The `time_period` is set to `varies`. Defaults to a `1 second` period for further processing and updates the `time_period` in metadata with the default value."
+            )
+
+        if period == "varies" and inferred_freq == TimePeriod(value=1, unit="seconds"):
             period_str = "varies"
 
     return start_date, end_date, period_str

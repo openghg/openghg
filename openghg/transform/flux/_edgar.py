@@ -48,7 +48,7 @@ import pathlib
 import re
 import zipfile
 from collections import namedtuple
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, Optional, cast
 import logging
 import numpy as np
 import xarray as xr
@@ -70,7 +70,7 @@ logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-ArrayType = Optional[Union[ndarray, xr.DataArray]]
+ArrayType = Optional[ndarray | xr.DataArray]
 
 
 _edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
@@ -81,9 +81,9 @@ _edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
 # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
 # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 def assemble_edgar_metadata(
-    filepath: Union[pathlib.Path, zipfile.Path],
-    species: Optional[str] = None,
-    version: Optional[str] = None,
+    filepath: pathlib.Path | zipfile.Path,
+    species: str | None = None,
+    version: str | None = None,
 ) -> dict[str, Any]:
     """Combine given metadata with metadata extracted from filename.
 
@@ -116,8 +116,7 @@ def assemble_edgar_metadata(
         if species:
             if species != synonyms(metadata["species"]):
                 logger.warning(
-                    "Input species does not match species extracted from",
-                    " database filenames. Please check.",
+                    "Input species does not match species extracted from database filenames. Please check."
                 )
             metadata["species"] = species
         else:
@@ -157,14 +156,13 @@ def assemble_edgar_metadata(
 def parse_edgar(
     datapath: pathlib.Path,
     date: str,
-    species: Optional[str] = None,
-    domain: Optional[str] = None,
+    species: str | None = None,
+    domain: str | None = None,
     lat_out: ArrayType = None,
     lon_out: ArrayType = None,
-    # sector: Optional[str] = None,
-    # period: Optional[Union[str, tuple]] = None,
-    edgar_version: Optional[str] = None,
-) -> Dict:
+    source: str | None = None,
+    edgar_version: str | None = None,
+) -> dict:
     """
     Read and parse input EDGAR data.
     Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
@@ -195,6 +193,7 @@ def parse_edgar(
         domain: Domain name for new or pre-existing domain
         lat_out: Latitude values for new domain
         lon_out: Longitude values for new domain
+        source: Flux source to use; overrides the source extracted from the filename.
         edgar_version: EDGAR version in file. Will be inferred otherwise.
 
     Returns:
@@ -373,11 +372,10 @@ def parse_edgar(
     if domain is None:
         domain = raw_edgar_domain
 
-    source = edgar_file_info["source"]
+    source = source if source is not None else edgar_file_info["source"]
     metadata["species"] = species_label
     metadata["domain"] = domain
     metadata["source"] = source
-    metadata["date"] = date
     metadata["database"] = "EDGAR"
     metadata["database_version"] = edgar_file_info["version"]
     metadata["author"] = author_name
@@ -412,7 +410,7 @@ def parse_edgar(
 
     key = "_".join((species_label, source, domain, date))
 
-    emissions_data: Dict[str, dict] = {}
+    emissions_data: dict[str, dict] = {}
     emissions_data[key] = {}
     emissions_data[key]["data"] = em_data
     emissions_data[key]["metadata"] = metadata
@@ -424,8 +422,8 @@ def parse_edgar(
 
 
 def _check_lat_lon(
-    domain: Optional[str] = None, lat_out: ArrayType = None, lon_out: ArrayType = None
-) -> Tuple[Optional[ndarray], Optional[ndarray]]:
+    domain: str | None = None, lat_out: ArrayType = None, lon_out: ArrayType = None
+) -> tuple[ndarray | None, ndarray | None]:
     """
     Define and check latitude and longitude values for a domain.
 
@@ -508,12 +506,12 @@ def _check_lat_lon(
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
         logger.info("Converting longitude to stay within 0 to 360 bounds")
         lon_converted = convert_lon_to_360(lon_out)
-        lon_out = cast(Optional[ndarray], lon_converted)
+        lon_out = cast(ndarray | None, lon_converted)
 
     return lat_out, lon_out
 
 
-def _check_readme_data(readme_data: str) -> Optional[str]:
+def _check_readme_data(readme_data: str) -> str | None:
     """Parse EDGAR _readme.html to find version.
 
     Args:
@@ -538,7 +536,7 @@ def _check_readme_data(readme_data: str) -> Optional[str]:
     return edgar_version
 
 
-def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Dict:
+def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
     """
     Extract details from EDGAR filename.
 

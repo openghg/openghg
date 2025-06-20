@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 class OpenGHGError(Exception):
     """Top level OpenGHG error"""
 
@@ -45,8 +42,16 @@ class SearchError(OpenGHGError):
     """Related to searching the object store"""
 
 
+class ParseError(OpenGHGError):
+    """Data is not in correct format for requested parse function"""
+
+
 class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
+
+
+class MetadataFormatError(OpenGHGError):
+    """Metadata value not within expected format"""
 
 
 class DataOverlapError(OpenGHGError):
@@ -69,7 +74,11 @@ class KeyExistsError(ZarrStoreError):
     """Raised if key already exists in zarr store"""
 
 
-def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
+class MetadataMissingError(OpenGHGError):
+    """Raised if unable to determine/find a metadata value"""
+
+
+def construct_xesmf_import_error(exception: ImportError | None = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."
         " To use transform modules please follow instructions"

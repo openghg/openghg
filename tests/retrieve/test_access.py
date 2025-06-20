@@ -48,11 +48,11 @@ def test_get_obs_surface_average_works_without_longname():
         site="mhd",
         species="ch4",
         inlet="10magl",
-        average="4H",
+        average="4h",
         instrument="gcmd",
     )
 
-    assert obsdata.data.attrs["averaged_period_str"] == "4H"
+    assert obsdata.data.attrs["averaged_period_str"] == "4h"
     assert obsdata.data.attrs["averaged_period"] == 14400
 
 
@@ -261,12 +261,13 @@ def test_timeslice_slices_correctly_exclusive():
 
     sliced_mhd_data = timeslice_data.data
 
-    sampling_period = Timedelta(75, unit="seconds")
+    sampling_period = Timedelta(1, unit="seconds")
 
     assert sliced_mhd_data.time[0] == (Timestamp("2012-01-11T00:13") - sampling_period / 2.0)
     assert sliced_mhd_data.time[-1] == (Timestamp("2012-02-04T23:47") - sampling_period / 2.0)
     assert sliced_mhd_data.mf[0] == 1849.814
     assert sliced_mhd_data.mf[-1] == 1891.094
+
 
 @pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
@@ -307,14 +308,26 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
 
 def test_get_obs_column():
-    column_data = get_obs_column(species="ch4", satellite="gosat")
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10)
 
     obscolumn = column_data.data
 
-    assert "xch4" in obscolumn
+    assert "mf" in obscolumn
+    assert "mf_prior_factor" in obscolumn
+    assert "mf_prior_upper_level_factor" in obscolumn
+    assert "mf_repeatability" in obscolumn
+
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
-    assert obscolumn.attrs["species"] == "ch4"
+    assert np.isclose(obscolumn["mf"][0], 1238.2743)
+    assert obscolumn.attrs["species"] == "CH4"
+    assert obscolumn["mf"].attrs["units"] == '1e-9'
+
+
+def test_get_obs_column_max_level():
+    # test max level defaults to highest available if out of range
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+    obscolumn = column_data.data
+    assert np.isclose(obscolumn["mf"][0], 1818.2135)
 
 
 def test_get_flux():
@@ -332,6 +345,20 @@ def test_get_flux():
     time = flux["time"]
     assert time[0] == Timestamp("2012-01-01T00:00:00")
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
@@ -400,3 +427,24 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
+
+
+def test_get_obs_surface_elevate_inlets():
+    """Test if searching by range for multiple inlets returns a combined dataset with
+    an "inlet" data variable.
+    """
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
+
+    assert "inlet" in result.data.data_vars
+    assert "WMO-X2004A" in result.metadata["calibration_scale"]
+
+def test_get_obs_convert_calibration_scale():
+    """ To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
+
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4", calibration_scale="CSIRO-94")
+
+    assert "CSIRO-94" == result.data['mf'].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data['mf_number_of_observations'].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data['mf_variability'].attrs["calibration_scale"]
+    assert "calibration_scale" not in result.data['inlet'].attrs
+    assert "CSIRO-94" in result.metadata["calibration_scale"]

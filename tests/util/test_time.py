@@ -366,6 +366,7 @@ def test_check_duplicate_timestamps():
     "test_input,expected",
     [
         ("12H", (12, "hours")),
+        ("varies", (1, "seconds")),
         ("yearly", (1, "years")),
         ("monthly", (1, "months")),
         ((1, "minute"), (1, "minutes")),
@@ -438,6 +439,7 @@ def test_relative_time_offset(kwargs, expected):
 
 def test_relative_time_offset_with_vaies():
     print(relative_time_offset)
+
 
 def test_in_daterange():
     start_a = timestamp_tzaware("2021-01-01")

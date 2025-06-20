@@ -1,41 +1,17 @@
 import os
+from pathlib import Path
 
 import pytest
 from openghg.types import InvalidSiteError
 from openghg.util import (
     read_header,
     read_local_config,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
+    synonyms,
     to_lowercase,
     verify_site,
+    sort_by_filenames,
 )
-
-
-def test_running_locally(monkeypatch):
-    monkeypatch.setenv("OPENGHG_PATH", "/tmp/this_that")
-    assert running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-
-    assert running_in_cloud()
-    assert running_on_hub()
-
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "0")
-
-    assert not running_in_cloud()
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_HUB", "0")
-
-    assert not running_on_hub()
-
-    assert running_locally()
 
 
 def test_read_header():
@@ -97,3 +73,41 @@ def test_site_code_finder():
     assert site_code_finder("jungfraujoch") == "jfj"
 
     assert site_code_finder("nonsensical") is None
+
+
+def test_synonyms():
+    """Test to check is species value is passed as Inert it should return the same"""
+
+    species = synonyms("Inert")
+
+    assert species == "inert"
+
+    with pytest.raises(ValueError):
+        synonyms(species="openghg", allow_new_species=False)
+
+
+def test_file_sorting():
+    """
+    Testing sorting of filenames
+    """
+
+    filepaths = [
+        "DECC-picarro_TAC_20130131_co2-185m-20220929.nc",
+        "DECC-picarro_TAC_20130131_co2-185m-20220928.nc",
+    ]
+
+    sorted_filepaths = sort_by_filenames(filepaths)
+
+    assert sorted_filepaths[1] == Path(filepaths[0])
+
+
+def test_sorting_with_str():
+    """
+    Testing if only string value is passed
+    """
+
+    filepaths = "DECC-picarro_TAC_20130131_co2-185m-20220929.nc"
+
+    sorted_file = sort_by_filenames(filepaths)
+
+    assert isinstance(sorted_file, list)

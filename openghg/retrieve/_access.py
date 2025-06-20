@@ -1,9 +1,9 @@
-import json
 import logging
-from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
-from openghg.types import SearchError
+from typing import Any, Union
+from openghg_calscales.functions import convert
 
+from openghg.data_processing import surface_obs_resampler
+from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
     FluxData,
@@ -11,38 +11,38 @@ from openghg.dataobjects import (
     ObsColumnData,
     ObsData,
 )
-from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
+from openghg.types import SearchError
+from openghg.util import combine_and_elevate_inlet
+
 from pandas import Timestamp
-from xarray import Dataset, load_dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 DataTypes = Union[BoundaryConditionsData, FluxData, FootprintData, ObsColumnData, ObsData]
 multDataTypes = Union[
-    List[BoundaryConditionsData], List[FluxData], List[FootprintData], List[ObsColumnData], List[ObsData]
+    list[BoundaryConditionsData], list[FluxData], list[FootprintData], list[ObsColumnData], list[ObsData]
 ]
 
 
 def _get_generic(
-    sort: bool = True,
-    elevate_inlets: bool = False,
-    ambig_check_params: Optional[list] = None,
+    combine_multiple_inlets: bool = False,
+    ambig_check_params: list | None = None,
     **kwargs: Any,
-) -> Any:
+) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
 
     Args:
         data_class: Type of dataobject to create
-        sort: Sort Dataset during recombination
-        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
+        combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
+            to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
         kwargs: Additional search terms
+
     Returns:
         dataclass
     """
     from openghg.retrieve import search
-    from openghg.store.spec import define_data_type_classes
 
     results = search(**kwargs)
 
@@ -52,60 +52,52 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
 
-    if sort:
-        logger.warning(
-            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
-        )
-
-    if elevate_inlets:
-        logger.warning(
-            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
-        )
-
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all()
+    retrieved_data = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
         logger.exception(err_msg)
         raise SearchError(err_msg)
     elif isinstance(retrieved_data, list) and len(retrieved_data) > 1:
-        param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
-        err_msg = f"""
-        Multiple entries found for input parameters for {keyword_string}.
-        Parameter differences:
-        {param_diff_formatted}
-        Please supply additional parameters or set ranking.
-        """
-        logger.exception(err_msg)
-        raise SearchError(err_msg)
+        if combine_multiple_inlets:
+            result = combine_and_elevate_inlet(retrieved_data)
+        else:
+            param_diff_formatted = _metadata_difference_formatted(
+                data=retrieved_data, params=ambig_check_params
+            )
+            err_msg = f"""
+            Multiple entries found for input parameters for {keyword_string}.
+            Parameter differences:
+            {param_diff_formatted}
+            Please supply additional parameters or set ranking.
+            """
+            logger.exception(err_msg)
+            raise SearchError(err_msg)
     elif isinstance(retrieved_data, list):
-        retrieved_data = retrieved_data[0]
+        result = retrieved_data[0]
+    else:
+        result = retrieved_data
 
-    # TODO: Included output of this as Any for now because we there are many
-    # options for types returned but can update this
-
-    # We can only get a single data object back here but mypy doesn't understand that
-    # retrieved_data = cast(ObsData, retrieved_data)
-
-    return retrieved_data
+    return result
 
 
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
+    inlet: str | slice | None = None,
+    height: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    average: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    calibration_scale: str | None = None,
+    rename_vars: bool = True,
     keep_missing: bool = False,
-    skip_ranking: bool = False,
+    keep_variables: list | None = None,
     **kwargs: Any,
-) -> Optional[ObsData]:
+) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
     Usage and return values are the same whilst implementation may differ.
@@ -113,146 +105,30 @@ def get_obs_surface(
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
         species: Species identifier e.g. ch4 for methane.
+        inlet: Inlet height above ground level in metres; This can be a single value or `slice(lower, upper)`
+            can be used to search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
+        height: Alias for inlet
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres
-        height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
+            the form e.g. "2H", "30min" (should match pandas offset aliases format).
         network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the sipte (must match number of sites).
+        instrument: Specific instrument for the site (must match number of sites).
         calibration_scale: Convert to this calibration scale
+        rename_vars: Rename variables from species names to use "mf" explictly.
+        keep_missing: Keep missing data points or drop them.
+        keep_variables: List of variables to keep. If None, keeps everything.
         kwargs: Additional search terms
+
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
-    from openghg.cloud import call_function
-    from openghg.util import format_inlet
-
-    # Allow height to be an alias for inlet but we do not expect height
-    # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
-
-    if running_on_hub():
-        raise NotImplementedError("Cloud functionality marked for rewrite.")
-        to_post: Dict[str, Union[str, Dict]] = {}
-
-        to_post["function"] = "get_obs_surface"
-
-        search_terms = {
-            "site": site,
-            "species": species,
-            "keep_missing": keep_missing,
-            "skip_ranking": skip_ranking,
-        }
-
-        if inlet is not None:
-            search_terms["inlet"] = inlet
-        if start_date is not None:
-            search_terms["start_date"] = start_date
-        if end_date is not None:
-            search_terms["end_date"] = end_date
-        if average is not None:
-            search_terms["average"] = average
-        if network is not None:
-            search_terms["network"] = network
-        if instrument is not None:
-            search_terms["instrument"] = instrument
-        if calibration_scale is not None:
-            search_terms["calibration_scale"] = calibration_scale
-
-        to_post["search_terms"] = search_terms
-
-        result = call_function(data=to_post)
-
-        content = result["content"]
-        found = content["found"]
-
-        if found:
-            binary_data = decompress(data=content["data"])
-
-            file_metadata = content["file_metadata"]
-            sha1_hash_data = file_metadata["data"]["sha1_hash"]
-
-            if sha1_hash_data != hash_bytes(data=binary_data):
-                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
-
-            buf = BytesIO(binary_data)
-            json_str = decompress_str(data=content["metadata"])
-            metadata = json.loads(json_str)
-            dataset = load_dataset(buf)
-
-            return ObsData(data=dataset, metadata=metadata)
-        else:
-            return None
-    else:
-        return get_obs_surface_local(
-            site=site,
-            species=species,
-            start_date=start_date,
-            end_date=end_date,
-            inlet=inlet,
-            average=average,
-            network=network,
-            instrument=instrument,
-            calibration_scale=calibration_scale,
-            keep_missing=keep_missing,
-            skip_ranking=skip_ranking,
-            **kwargs,
-        )
-
-
-def get_obs_surface_local(
-    site: str,
-    species: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
-    skip_ranking: Optional[bool] = False,
-    **kwargs: Any,
-) -> Optional[ObsData]:
-    """This is the equivalent of the get_obs function from the ACRG repository.
-
-    Usage and return values are the same whilst implementation may differ.
-
-    This function should not be used on the OpenGHG Hub.
-
-    Args:
-        site: Site of interest e.g. MHD for the Mace Head site.
-        species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet height above ground level in metres
-        height: Alias for inlet
-        average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
-        network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the sipte (must match number of sites).
-        calibration_scale: Convert to this calibration scale
-        kwargs: Additional search terms
-    Returns:
-        ObsData or None: ObsData object if data found, else None
-    """
-    import numpy as np
-    from openghg.retrieve import search_surface
-    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
-    from pandas import Timedelta
-    from openghg.util import synonyms
-
-    if running_on_hub():
-        raise ValueError(
-            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
-        )
+    from openghg.util import (
+        format_inlet,
+        get_site_info,
+        synonyms,
+    )
 
     if species is not None:
         species = synonyms(species)
@@ -284,203 +160,111 @@ def get_obs_surface_local(
     }
     surface_keywords.update(kwargs)
 
-    # # Get the observation data
-    # obs_results = search_surface(**surface_keywords)
+    # Get the observation data
     retrieved_data = _get_generic(
-        sort=True,
-        elevate_inlets=False,
+        combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
         **surface_keywords,  # type: ignore
     )
 
     data = retrieved_data.data
 
+    # check if data set is empty
+    if data.sizes["time"] == 0:
+        raise SearchError(f"Dataset is empty for obs. with {surface_keywords}.")
+
+    if keep_variables:
+        var_list = [str(dv) for dv in data.data_vars if str(dv) in keep_variables]
+        if not var_list:
+            raise ValueError(
+                f"Variables among {keep_variables} expected, but none of them found. Present variables are  : {[str(dv) for dv in data.data_vars]}"
+            )
+        data = data[var_list]
+
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
-
-    if start_date is not None and end_date is not None:
-        # Check if underlying data is timezone aware.
-        data_time_index = data.indexes["time"]
-        tzinfo = data_time_index.tzinfo
-
-        if tzinfo:
-            start_date_filter = timestamp_tzaware(start_date)
-            end_date_filter = timestamp_tzaware(end_date)
-        else:
-            start_date_filter = Timestamp(start_date)
-            end_date_filter = Timestamp(end_date)
-
-        end_date_filter_exclusive = end_date_filter - Timedelta(
-            1, unit="nanosecond"
-        )  # Deduct 1 ns to make the end day (date) exclusive.
-
-        # Slice the data to only cover the dates we're interested in
-        data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
-
-    try:
-        start_date_data = timestamp_tzaware(data.time[0].values)
-        end_date_data = timestamp_tzaware(data.time[-1].values)
-    except AttributeError:
-        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
-    except IndexError:
-        return None
+        if "inlet_height" in data.data_vars and "inlet" not in data.data_vars:
+            data["inlet"] = data["inlet_height"]
 
     if average is not None:
-        # We need to compute the value here for the operations done further down
-        logger.info("Loading Dataset data into memory for resampling operations.")
+        # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
+        # then it may be possible to avoid calling `.compute()`
+        # Currently, large gaps in the data could blow up the number of chunks when resampling
+        # which makes resampling extremely slow with Dask >= 2024.8.0
+        logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
-        # GJ - 2021-03-09
-        # TODO - check by RT
 
-        # # Average the Dataset over a given period
-        # if keep_missing is True:
-        #     # Create a dataset with one element and NaNs to prepend or append
-        #     ds_single_element = data[{"time": 0}]
+        var_to_delete = []
+        for var in data:
+            if data[var].isnull().all():
+                var_to_delete.append(var)
+        if var_to_delete:
+            logger.info(
+                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
+            )
+            data = data.drop_vars(var_to_delete)
 
-        #     for v in ds_single_element.variables:
-        #         if v != "time":
-        #             ds_single_element[v].values = np.nan
-
-        #     ds_concat = []
-
-        #     # Pad with an empty entry at the start date
-        #     if timestamp_tzaware(data.time.min()) > start_date:
-        #         ds_single_element_start = ds_single_element.copy()
-        #         ds_single_element_start.time.values = Timestamp(start_date)
-        #         ds_concat.append(ds_single_element_start)
-
-        #     ds_concat.append(data)
-
-        #     # Pad with an empty entry at the end date
-        #     if data.time.max() < Timestamp(end_date):
-        #         ds_single_element_end = ds_single_element.copy()
-        #         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta("1ns")
-        #         ds_concat.append(ds_single_element_end)
-
-        #     data = xr_concat(ds_concat, dim="time")
-
-        #     # Now sort to get everything in the right order
-        #     data = data.sortby("time")
-
-        # First do a mean resample on all variables
-        ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
-        # keep_attrs doesn't seem to work for some reason, so manually copy
-        ds_resampled.attrs = data.attrs.copy()
-
-        average_in_seconds = Timedelta(average).total_seconds()
-        ds_resampled.attrs["averaged_period"] = average_in_seconds
-        ds_resampled.attrs["averaged_period_str"] = average
-
-        # For some variables, need a different type of resampling
-        data_variables: List[str] = [str(v) for v in data.variables]
-
-        for var in data_variables:
-            if "repeatability" in var:
-                ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum())
-                    / data[var].resample(time=average).count()
-                )
-
-            # Copy over some attributes
-            if "long_name" in data[var].attrs:
-                ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
-
-            if "units" in data[var].attrs:
-                ds_resampled[var].attrs["units"] = data[var].attrs["units"]
-
-        # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = (
-            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        data = surface_obs_resampler(
+            data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
 
-        # If there are any periods where only one measurement was resampled, just use the median variability
-        ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
-            f"{species}_variability"
-        ].median()
-
-        # Create attributes for variability variable
-        if "long_name" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs[
-                "long_name"
-            ] = f"{data[species].attrs['long_name']}_variability"
-
-        if "units" in data[species].attrs:
-            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
-
-        # Resampling may introduce NaNs, so remove, if not keep_missing
-        if keep_missing is False:
-            ds_resampled = ds_resampled.dropna(dim="time")
-
-        data = ds_resampled
-
     # Rename variables
-    rename: Dict[str, str] = {}
-
-    data_variables = [str(v) for v in data.variables]
-    for var in data_variables:
-        if var.lower() == species.lower():
-            rename[var] = "mf"
-        if "repeatability" in var:
-            rename[var] = "mf_repeatability"
-        if "variability" in var:
-            rename[var] = "mf_variability"
-        if "number_of_observations" in var:
-            rename[var] = "mf_number_of_observations"
-        if "status_flag" in var:
-            rename[var] = "status_flag"
-        if "integration_flag" in var:
-            rename[var] = "integration_flag"
-
-    data = data.rename_vars(rename)  # type: ignore
+    if rename_vars:
+        rename_dict = {str(dv): str(dv).lower().replace(species, "mf") for dv in data.data_vars}
+        data = data.rename(rename_dict)
 
     data.attrs["species"] = species
 
     if "calibration_scale" in data.attrs:
         data.attrs["scale"] = data.attrs.pop("calibration_scale")
+        existing_calibration_scale = data.attrs["scale"]
 
-    if calibration_scale is not None:
-        data = _scale_convert(data, species, calibration_scale)
+        if calibration_scale is not None:
+            target_scale = calibration_scale
+            original_scale = existing_calibration_scale
+
+            if original_scale and target_scale and original_scale != target_scale:
+                logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
+                for var_name in (
+                    v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
+                ):
+                    # Convert function from openghg_calscales
+                    data[var_name] = convert(
+                        c=data[var_name],
+                        species=species,
+                        scale_original=original_scale,
+                        scale_new=target_scale,
+                    )
+                    data[var_name].attrs["calibration_scale"] = target_scale
+
+            data.attrs["scale"] = target_scale
 
     metadata = retrieved_data.metadata
+    metadata["calibration_scale"] = data.attrs["scale"]
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
-
-    # It doesn't make sense to do this now as we've only got a single Dataset
-    # # Now check if the units match for each of the observation Datasets
-    # units = set((f.data.mf.attrs["units"] for f in obs_files))
-    # scales = set((f.data.attrs["scale"] for f in obs_files))
-
-    # if len(units) > 1:
-    #     raise ValueError(
-    #         f"Units do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-
-    # if len(scales) > 1:
-    #     print(
-    #         f"Scales do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-    #     )
-    #     print("Suggestion: set calibration_scale to convert scales")
 
     return obs_data
 
 
 def get_obs_column(
     species: str,
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    max_level: int,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     platform: str = "satellite",
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    return_mf: bool = True,
     **kwargs: Any,
 ) -> ObsColumnData:
-    """
-    Extract available column data from the object store using keywords.
+    """Extract available column data from the object store using keywords.
 
     Args:
         species: Species name
@@ -489,12 +273,12 @@ def get_obs_column(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        return_mf: Return mole fraction rather than column data. Default=True
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
     """
     obs_data = _get_generic(
-        sort=False,
         species=species,
         satellite=satellite,
         domain=domain,
@@ -509,6 +293,73 @@ def get_obs_column(
         **kwargs,
     )
 
+    if return_mf:
+        if max_level > max(obs_data.data.lev.values) + 1:
+            logger.warning(
+                f"passed max level is above max level in data ({max(obs_data.data.lev.values) + 1}). Defaulting to highest level"
+            )
+            max_level = max(obs_data.data.lev.values) + 1
+
+        # processing taken from acrg/acrg/obs/read.py get_gosat()
+        lower_levels = list(range(0, max_level))
+
+        prior_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
+            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+        ).sum(dim="lev")
+
+        upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
+        prior_upper_level_factor = (
+            obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
+            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+        ).sum(dim="lev")
+
+        obs_data.data["mf_prior_factor"] = prior_factor
+        obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
+        obs_data.data["mf"] = (
+            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+        )
+        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+
+        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
+        # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
+        drop_data_vars = [
+            "xch4",
+            "xch4_uncertainty",
+            "lon",
+            "lat",
+            "ch4_profile_apriori",
+            "xch4_averaging_kernel",
+            "pressure_levels",
+            "pressure_weights",
+            "exposure_id",
+        ]
+        drop_coords = ["lev", "id"]
+
+        for dv in drop_data_vars:
+            if dv in obs_data.data.data_vars:
+                obs_data.data = obs_data.data.drop_vars(dv)
+        for coord in drop_coords:
+            if coord in obs_data.data.coords:
+                obs_data.data = obs_data.data.drop_vars(coord)
+
+        obs_data.data.attrs["max_level"] = max_level
+        if species.upper() == "CH4":
+            # obs_data.data.mf.attrs["units"] = "1e-9"
+            obs_data.data.attrs["species"] = "CH4"
+        if species.upper() == "CO2":
+            # obs_data.data.mf.attrs["units"] = "1e-6"
+            obs_data.data.attrs["species"] = "CO2"
+
+        # obs_data.data.attrs["scale"] = "GOSAT"
+
+        obs_data.metadata["transforms"] = (
+            f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
+        )
+
+    obs_data.data = obs_data.data.sortby("time")
+
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
 
@@ -516,16 +367,15 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    time_resolution: Optional[str] = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    time_resolution: str | None = None,
     **kwargs: Any,
 ) -> FluxData:
-    """
-    The flux function reads in all flux files for the domain and species as an xarray Dataset.
+    """The flux function reads in all flux files for the domain and species as an xarray Dataset.
     Note that at present ALL flux data is read in per species per domain or by emissions name.
     To be consistent with the footprints, fluxes should be in mol/m2/s.
 
@@ -541,7 +391,6 @@ def get_flux(
         FluxData: FluxData object
     """
     em_data = _get_generic(
-        sort=False,
         species=species,
         source=source,
         domain=domain,
@@ -569,13 +418,12 @@ def get_flux(
 def get_bc(
     species: str,
     domain: str,
-    bc_input: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
+    bc_input: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
-    """
-    Get boundary conditions for a given species, domain and bc_input name.
+    """Get boundary conditions for a given species, domain and bc_input name.
 
     Args:
         species: Species name
@@ -589,7 +437,6 @@ def get_bc(
         BoundaryConditionsData: BoundaryConditionsData object
     """
     bc_data = _get_generic(
-        sort=False,
         species=species,
         bc_input=bc_input,
         domain=domain,
@@ -603,26 +450,29 @@ def get_bc(
 
 
 def get_footprint(
-    site: str,
     domain: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    species: Optional[str] = None,
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    model: str | None = None,
+    start_date: str | Timestamp | None = None,
+    end_date: str | Timestamp | None = None,
+    species: str | None = None,
     **kwargs: Any,
 ) -> FootprintData:
-    """
-    Get footprints from one site.
+    """Get footprints from one site.
 
     Args:
+        domain: Domain name for the footprints
         site: The name of the site given in the footprints. This often matches
               to the site name but  if the same site footprints are run with a
               different met and they are named slightly differently from the obs
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
-        domain : Domain name for the footprints
+        satellite: The name of the satellite footprints data. e.g GOSAT
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         inlet: Height above ground level in metres
         height: Alias for inlet
         model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -636,7 +486,7 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.util import clean_string, synonyms, format_inlet
+    from openghg.util import clean_string, format_inlet, synonyms
 
     # Find the correct synonym for the passed species
     if species is not None:
@@ -650,6 +500,8 @@ def get_footprint(
     fp_data = _get_generic(
         site=site,
         domain=domain,
+        satellite=satellite,
+        obs_region=obs_region,
         inlet=inlet,
         height=height,
         model=model,
@@ -667,62 +519,60 @@ def get_footprint(
     #     species = metadata.get("species", "INERT")
 
 
-def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
-    """Convert to a new calibration scale
+# TODO: Discuss its importance, or any useful bits that can be picked up before removing the function
 
-    Args:
-        data: Must contain an mf variable (mole fraction), and scale must be in global attributes
-        species: species name
-        to_scale: Calibration scale to convert to
-    Returns:
-        xarray.Dataset: Dataset with mole fraction data scaled
-    """
-    from numexpr import evaluate
-    from openghg.util import get_datapath
-    from pandas import read_csv
+# def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
+#     """Convert to a new calibration scale
 
-    # If scale is already correct, return
-    ds_scale = data.attrs["scale"]
-    if ds_scale == to_scale:
-        return data
+#     Args:
+#         data: Must contain an mf variable (mole fraction), and scale must be in global attributes
+#         species: species name
+#         to_scale: Calibration scale to convert to
+#     Returns:
+#         xarray.Dataset: Dataset with mole fraction data scaled
+#     """
+#     from numexpr import evaluate
+#     from openghg.util import get_datapath
+#     from pandas import read_csv
 
-    scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
+#     # If scale is already correct, return
+#     ds_scale = data.attrs["scale"]
+#     if ds_scale == to_scale:
+#         return data
 
-    scale_converter = read_csv(scale_convert_filepath)
-    scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
-        ["species", "scale1", "scale2"]
-    ].dropna(axis=0, how="any")
+#     scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
 
-    if len(scale_converter_scales) == 0:
-        raise ValueError(
-            f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
-        )
-    elif len(scale_converter_scales) > 1:
-        raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
-    else:
-        row = scale_converter_scales.index[0]
+#     scale_converter = read_csv(scale_convert_filepath)
+#     scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
+#         ["species", "scale1", "scale2"]
+#     ].dropna(axis=0, how="any")
 
-    converter = scale_converter.loc[row]
+#     if len(scale_converter_scales) == 0:
+#         raise ValueError(
+#             f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
+#         )
+#     elif len(scale_converter_scales) > 1:
+#         raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
+#     else:
+#         row = scale_converter_scales.index[0]
 
-    if to_scale == converter["scale1"]:
-        direction = "2to1"
-    else:
-        direction = "1to2"
+#     converter = scale_converter.loc[row]
 
-    # flake8: noqa: F841
-    # scale_convert file has variable X in equations, so let's create it
-    X = 1.0
-    scale_factor = evaluate(converter[direction])
-    data["mf"].values *= scale_factor
+#     direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
-    data.attrs["scale"] = to_scale
+#     # flake8: noqa: F841
+#     # scale_convert file has variable X in equations, so let's create it
+#     X = 1.0
+#     scale_factor = evaluate(converter[direction])
+#     data["mf"].values *= scale_factor
 
-    return data
+#     data.attrs["scale"] = to_scale
+
+#     return data
 
 
 def _create_keyword_string(**kwargs: Any) -> str:
-    """
-    Create a formatted string for supplied keyword values. This will ignore
+    """Create a formatted string for supplied keyword values. This will ignore
     keywords where the value is None.
     This is used for printing details of keywords passed to the search functions.
     """
@@ -733,8 +583,8 @@ def _create_keyword_string(**kwargs: Any) -> str:
 
 
 def _metadata_difference(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
-) -> Dict[str, list]:
+    data: multDataTypes, params: list | None = None, print_output: bool = True
+) -> dict[str, list]:
     """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
 
@@ -742,6 +592,7 @@ def _metadata_difference(
         data: Multiple data objects e.g. multiple ObsData as a list
         params: Specific metadata parameters to check. If None all parameters will be checked
         print_output: Summarise and print output to screen.
+
     Returns:
         Dict[str, list]: Keys and lists of values from the metadata with differences.
     """
@@ -789,16 +640,13 @@ def _metadata_difference(
     #         continue
 
     # - Collate summary of differences as a dictionary which maps as param: list of values
-    summary_difference: Dict[str, list] = {}
+    summary_difference: dict[str, list] = {}
     for param in param_difference:
         summary_difference[param] = []
         if print_output:
             logger.info(f" {param}: ")
         for m in metadata:
-            if param in m:
-                value = m[param]
-            else:
-                value = "NOT PRESENT"
+            value = m.get(param, "NOT PRESENT")
             summary_difference[param].append(value)
             if print_output:
                 logger.info(f" '{value}', ")
@@ -817,10 +665,9 @@ def _metadata_difference(
 
 
 def _metadata_difference_formatted(
-    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+    data: multDataTypes, params: list | None = None, print_output: bool = True
 ) -> str:
-    """
-    Create formatted string for the difference in metadata between input objects.
+    """Create formatted string for the difference in metadata between input objects.
 
     Args:
         data : Multiple data objects e.g. multiple ObsData as a list

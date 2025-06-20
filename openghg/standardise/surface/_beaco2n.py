@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
 
 from pandas import DataFrame
 
@@ -7,18 +6,18 @@ __all__ = ["parse_beaco2n"]
 
 
 def parse_beaco2n(
-    data_filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     network: str,
     inlet: str,
-    instrument: Optional[str] = "shinyei",
-    sampling_period: Optional[str] = None,
-    **kwargs: Dict,
-) -> Dict:
+    instrument: str | None = "shinyei",
+    sampling_period: str | None = None,
+    **kwargs: dict,
+) -> dict:
     """Read BEACO2N data files
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         site: Site name
         network: Network name
         inlet: Inlet height in metres
@@ -35,7 +34,7 @@ def parse_beaco2n(
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
     datetime_columns = {"time": ["datetime"]}
     use_cols = [1, 5, 6, 7, 8, 9, 10]
     na_values = [-999.0]
@@ -44,7 +43,7 @@ def parse_beaco2n(
 
     try:
         data = pd.read_csv(
-            data_filepath,
+            filepath,
             index_col="time",
             usecols=use_cols,
             parse_dates=datetime_columns,
@@ -84,7 +83,7 @@ def parse_beaco2n(
 
     units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
-    gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
+    gas_data: defaultdict[str, dict[str, DataFrame | dict]] = defaultdict(dict)
     for mt in measurement_types:
         m_data = data[[mt, f"{mt}_qc"]]
         m_data = m_data.dropna(axis="rows", subset=[mt])

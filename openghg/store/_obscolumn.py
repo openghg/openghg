@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 from numpy import ndarray
 
@@ -9,7 +9,7 @@ from numpy import ndarray
 from openghg.store.base import BaseStore
 from xarray import DataArray
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[ndarray | DataArray]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -25,30 +25,35 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
-        satellite: Optional[str] = None,
-        domain: Optional[str] = None,
-        selection: Optional[str] = None,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        network: Optional[str] = None,
-        instrument: Optional[str] = None,
+        filepath: str | Path,
+        species: str,
         platform: str = "satellite",
+        obs_region: Optional[str] = None,
+        satellite: str | None = None,
+        domain: str | None = None,
+        selection: str | None = None,
+        site: str | None = None,
+        network: str | None = None,
+        instrument: str | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Read column observation file
 
         Args:
             filepath: Path of observation file
-            satellite: Name of satellite (if relevant)
+            species: Species name or synonym e.g. "ch4"
+            platform: Type of platform. Should be one of:
+                - "satellite"
+                - "site"
+            satellite: Name of satellite (if relevant). Should include satellite OR site.
             domain: For satellite only. If data has been selected on an area include the
                 identifier name for domain covered. This can map to previously defined domains
                 (see openghg_defs "domain_info.json" file) or a newly defined domain.
@@ -56,13 +61,9 @@ class ObsColumn(BaseStore):
                 performed on satellite data. This can be based on any form of filtering, binning etc.
                 but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
                 If not specified, domain will be used.
-            site : Site code/name (if relevant). Can include satellite OR site.
-            species: Species name or synonym e.g. "ch4"
+            site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-            platform: Type of platform. Should be one of:
-                - "satellite"
-                - "site"
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -89,21 +90,52 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import ColumnTypes
+        # Get initial values which exist within this function scope using locals
+        # MUST be at the top of the function
+        fn_input_parameters = locals().copy()
+
+        from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
-            load_column_parser,
+            format_platform,
+            load_standardise_parser,
+            split_function_inputs,
             check_if_need_new_version,
+            synonyms,
         )
 
         # TODO: Evaluate which inputs need cleaning (if any)
-        satellite = clean_string(satellite)
-        site = clean_string(site)
         species = clean_string(species)
+        species = synonyms(species)
+
+        platform = format_platform(platform)
+        platform = clean_string(platform)
+
+        if site is None and satellite is None:
+            raise ValueError("Value for 'site' or 'satellite' must be specified")
+        elif site is not None and satellite is not None:
+            raise ValueError("Only one of 'site' or 'satellite' should be specified")
+
+        site = clean_string(site)
+        satellite = clean_string(satellite)
         domain = clean_string(domain)
+        obs_region = clean_string(obs_region)
         network = clean_string(network)
         instrument = clean_string(instrument)
-        platform = clean_string(platform)
+
+        if domain is not None and obs_region is not None:
+            err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
+            logger.exception(err_msg)
+            raise ValueError(err_msg)
+        elif domain is not None and obs_region is None:
+            obs_region = domain
+            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
+        elif obs_region is not None and domain is None:
+            domain = "NOT_SET"
+            logging.info(f"Updated value of 'domain': {domain}")
+
+        # Specify any additional metadata to be added
+        additional_metadata = {}
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -120,39 +152,36 @@ class ObsColumn(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
         try:
-            source_format = ColumnTypes[source_format.upper()].value
+            source_format = standardise_parsers[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(source_format=source_format)
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
+        # Get current parameter values and filter to only include function inputs
+        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
+        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
         if chunks is None:
             chunks = {}
 
-        # Define parameters to pass to the parser function
-        param = {
-            "data_filepath": filepath,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "species": species,
-            "network": network,
-            "instrument": instrument,
-            "platform": platform,
-            "chunks": chunks,
-        }
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        obs_data = parser_fn(**param)
+        obs_data = parser_fn(**parser_input_parameters)
 
         # TODO: Add in schema and checks for ObsColumn
         # # Checking against expected format for ObsColumn
@@ -164,18 +193,13 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in obs_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
 
         data_type = "column"
         datasource_uuids = self.assign_data(
@@ -183,8 +207,6 @@ class ObsColumn(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required,
-            min_keys=3,
             compressor=compressor,
             filters=filters,
         )

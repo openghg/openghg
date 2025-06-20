@@ -1,22 +1,23 @@
 from pathlib import Path
-from typing import Dict, List, MutableMapping, Optional, Union, cast
+from typing import cast
+from collections.abc import MutableMapping
 
 import xarray as xr
 
 
 def parse_openghg(
-    data_filepath: Union[str, Path],
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    filepath: str | Path,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     platform: str = "satellite",
-    chunks: Optional[Dict] = None,
+    chunks: dict | None = None,
     **kwargs: str,
-) -> Dict:
+) -> dict:
     """
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
@@ -31,7 +32,7 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        data_filepath: Path of observation file
+        filepath: Path of observation file
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
@@ -59,14 +60,19 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    # from openghg.standardise.meta import metadata_default_keys, assign_attributes
+    # from openghg.standardise.meta import attributes_default_keys, assign_attributes
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
 
-    if data_filepath.suffix.lower() != ".nc":
+    if filepath.suffix.lower() != ".nc":
         raise ValueError("Input file must be a .nc (netcdf) file.")
 
-    data = xr.open_dataset(data_filepath).chunk(chunks)
+    data = xr.open_dataset(filepath).chunk(chunks)
+
+    # TODO: Remove this once ragged arrays from xarray is handled
+    if "exposure_id" in data:
+        data = data.drop_vars("exposure_id")
+        data = data.drop_vars("id")
 
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)
@@ -271,7 +277,7 @@ def parse_openghg(
     return gas_data
 
 
-def metadata_default_satellite_column() -> List[str]:
+def metadata_default_satellite_column() -> list[str]:
     """
     Define default keys for satellite column data
     """
@@ -290,7 +296,7 @@ def metadata_default_satellite_column() -> List[str]:
     return default_keys
 
 
-def metadata_default_site_column() -> List[str]:
+def metadata_default_site_column() -> list[str]:
     """
     Define default keys for site column data
     """
@@ -307,7 +313,7 @@ def metadata_default_site_column() -> List[str]:
     return default_keys
 
 
-TranslationDict = Dict[str, Union[str, List[str]]]
+TranslationDict = dict[str, str | list[str]]
 
 
 def satellite_attribute_translation() -> TranslationDict:

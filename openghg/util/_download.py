@@ -1,6 +1,5 @@
 from pathlib import Path
 from rich.progress import wrap_file
-from typing import Optional, Union
 import logging
 
 logger = logging.getLogger("openghg.util")
@@ -20,9 +19,7 @@ def parse_url_filename(url: str) -> str:
     return Path(urlparse(url).path).name
 
 
-def download_data(
-    url: str, filepath: Optional[Union[str, Path]] = None, timeout: int = 10
-) -> Optional[bytes]:
+def download_data(url: str, filepath: str | Path | None = None, timeout: int = 10) -> bytes | None:
     """Download data file, with progress bar.
 
     Based on https://stackoverflow.com/a/63831344/1303032
@@ -34,7 +31,6 @@ def download_data(
     Returns:
         bytes / None: Bytes if no filepath given
     """
-    import functools
     import io
     import shutil
     from urllib.parse import urlparse
@@ -83,9 +79,11 @@ def download_data(
     file_size = int(r.headers.get("Content-Length", 0))
 
     desc = f"Downloading {filename}"
-    r.raw.read = functools.partial(r.raw.read, decode_content=True)
+    r.raw.decode_content = True
 
-    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:
+    # mypy error ignored
+    # rich and requests libraries not quite aligning but urllib3.response.HTTPResponse should be very similiar to BinaryIO object expected.
+    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:  # type:ignore
         with io.BytesIO() as buf:
             shutil.copyfileobj(r_raw, buf)
 

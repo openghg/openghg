@@ -1,5 +1,4 @@
-"""
-The ModelScenario class allows users to collate related data sources and calculate
+"""The ModelScenario class allows users to collate related data sources and calculate
 modelled output based on this data. The types of data currently included are:
  - Timeseries observation data (ObsData)
  - Fixed domain sensitivity maps known as footprints (FootprintData)
@@ -45,13 +44,19 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Union, cast
+from collections.abc import Sequence
 
-import numpy as np
-from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+import pandas as pd
+import xarray as xr
+from pandas import Timestamp
+from xarray import DataArray, Dataset
+
+from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
+from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
+    get_obs_column,
     get_bc,
     get_flux,
     get_footprint,
@@ -59,13 +64,16 @@ from openghg.retrieve import (
     search_bc,
     search_flux,
     search_footprints,
+    search_column,
 )
-from openghg.util import synonyms
-from openghg.types import SearchError
-from pandas import Timestamp
-from xarray import DataArray, Dataset
+from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
+from openghg.types import SearchError, ReindexMethod
+from ._alignment import combine_datasets, resample_obs_and_other
+from ._modelled_baseline import baseline_sensitivities
+from ._utils import match_dataset_dims, stack_datasets
 
-__all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
+
+__all__ = ["ModelScenario"]
 
 
 # TODO: Really with the emissions, they shouldn't need to match against a domain
@@ -75,8 +83,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
 
-ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
-methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
+ParamType = Union[list[dict[str, str | int | None]], dict[str, str | int | None]]
 
 
 logger = logging.getLogger("openghg.analyse")
@@ -84,38 +91,48 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
 class ModelScenario:
-    """
-    This class stores together observation data with ancillary data and allows
+    """This class stores together observation data with ancillary data and allows
     operations to be performed combining these inputs.
     """
 
     def __bool__(self) -> bool:
-        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
+        return (
+            bool(self.obs)
+            or bool(self.obs_column)
+            or bool(self.footprint)
+            or bool(self.fluxes)
+            or bool(self.bc)
+        )
 
     def __init__(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        fp_inlet: Union[str, list, None] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        bc_input: Optional[str] = None,
-        start_date: Union[str, Timestamp, None] = None,
-        end_date: Union[str, Timestamp, None] = None,
-        obs: Optional[ObsData] = None,
-        footprint: Optional[FootprintData] = None,
-        flux: Union[FluxData, Dict[str, FluxData], None] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        satellite: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        domain: str | None = None,
+        platform: str | None = None,
+        max_level: int | None = None,
+        obs_region: str | None = None,
+        selection: str | None = None,
+        model: str | None = None,
+        met_model: str | None = None,
+        fp_inlet: str | list | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        bc_input: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        obs_column: ObsColumnData | None = None,
+        footprint: FootprintData | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ):
-        """
-        Create a ModelScenario instance based on a set of keywords to be
+        """Create a ModelScenario instance based on a set of keywords to be
         or directly supplied objects. This can be created as an empty class to be
         populated.
 
@@ -127,23 +144,35 @@ class ModelScenario:
          - Flux data: species, sources, domain, start_date, end_date
 
         Args:
-            site: Site code e.g. "TAC"
-            species: Species code e.g. "ch4"
-            inlet: Inlet value e.g. "10m"
-            height: Alias for inlet.
-            network: Network name e.g. "AGAGE"
-            domain: Domain name e.g. "EUROPE"
-            model: Model name used in creation of footprint e.g. "NAME"
-            met_model: Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet: Specify footprint release height options if this doesn't match to site value.
-            sources: Emissions sources
-            bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams"
-            start_date: Start of date range to use. Note for flux this may not be applied
-            end_date: End of date range to use. Note for flux this may not be applied
-            obs: Supply ObsData object directly (e.g. from get_obs...() functions)
-            footprint: Supply FootprintData object directly (e.g. from get_footprint() function)
-            flux: Supply FluxData object directly (e.g. from get_flux() function)
-            store: Name of object store to retrieve data from.
+        site: Site code e.g. "TAC".
+        satellite: Satellite name e.g "GOSAT".
+        species: Species code e.g. "ch4".
+        inlet: Inlet value e.g. "10m".
+        height: Alias for inlet.
+        network: Network name e.g. "AGAGE".
+        domain: Domain name e.g. "EUROPE".
+        platform: Platform name e.g "satellite", "column-insitu".
+        max_level: Maximum level for processing.
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        selection: For satellite only, identifier for any data selection which has been
+            performed on satellite data. This can be based on any form of filtering, binning etc.
+            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
+            If not specified, domain will be used.
+        model: Model name used in creation of footprint e.g. "NAME".
+        met_model: Name of met model used in creation of footprint e.g. "UKV".
+        fp_inlet: Specify footprint release height options if this doesn't match the site value.
+        source: "anthro" (for "TOTAL"), source name from file otherwise.
+        sources: Emissions sources.
+        bc_input: Input keyword for boundary conditions e.g. "mozart" or "cams".
+        start_date: Start of date range to use. Note for flux this may not be applied.
+        end_date: End of date range to use. Note for flux this may not be applied.
+        obs: Supply ObsData object directly (e.g. from get_obs...() functions).
+        obs_column: Supply ObsColumnData object directly.
+        footprint: Supply FootprintData object directly (e.g. from get_footprint() function).
+        flux: Supply FluxData object directly (e.g. from get_flux() function).
+        bc: Supply BoundaryConditionsData object directly.
+        store: Name of object store to retrieve data from.
+
         Returns:
             None
 
@@ -152,34 +181,62 @@ class ModelScenario:
         TODO: For obs, footprint, flux should we also allow Dataset input and turn
         these into the appropriate class?
         """
-
-        self.obs: Optional[ObsData] = None
-        self.footprint: Optional[FootprintData] = None
-        self.fluxes: Optional[Dict[str, FluxData]] = None
-        self.bc: Optional[BoundaryConditionsData] = None
+        self.obs: ObsData | ObsColumnData | None = None
+        self.obs_column: ObsColumnData | None = None
+        self.footprint: FootprintData | None = None
+        self.fluxes: dict[str, FluxData] | None = None
+        self.bc: BoundaryConditionsData | None = None
 
         if species is not None:
             species = synonyms(species)
 
-        # Add observation data (directly or through keywords)
-        self.add_obs(
-            site=site,
-            species=species,
-            inlet=inlet,
-            height=height,
-            network=network,
-            start_date=start_date,
-            end_date=end_date,
-            obs=obs,
-            store=store,
-        )
+        accepted_column_data_types = define_platform(data_type="column")
+
+        self.platform: str | None = platform
+        if satellite is not None and platform is None:
+            logger.info("You passed a satellite but no platform. Updating the platform to 'satellite'")
+            self.platform = "satellite"
+
+        # For ObsColumn data processing
+        if platform in accepted_column_data_types:
+            # Add observation column data (directly or through keywords, column or satellite)
+            if max_level is None:
+                raise AttributeError(
+                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
+                )
+            self.add_obs_column(
+                site=site,
+                satellite=satellite,
+                species=species,
+                max_level=max_level,
+                obs_region=obs_region,
+                selection=selection,
+                obs_column=obs_column,
+                store=store,
+            )
+        else:
+            # Add observation data (directly or through keywords)
+            self.add_obs(
+                site=site,
+                species=species,
+                inlet=inlet,
+                height=height,
+                network=network,
+                start_date=start_date,
+                end_date=end_date,
+                obs=obs,
+                store=store,
+            )
 
         # Make sure obs data is present, make sure inputs match to metadata
         if self.obs is not None:
             obs_metadata = self.obs.metadata
-            site = obs_metadata["site"]
+            if "satellite" in obs_metadata:
+                satellite = obs_metadata["satellite"]
+            else:
+                site = obs_metadata["site"]
+                inlet = obs_metadata["inlet"]
             species = obs_metadata["species"]
-            inlet = obs_metadata["inlet"]
             logger.info("Updating any inputs based on observation data")
             logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
 
@@ -187,6 +244,7 @@ class ModelScenario:
         self.add_footprint(
             site=site,
             inlet=inlet,
+            satellite=satellite,
             height=height,
             domain=domain,
             model=model,
@@ -223,23 +281,21 @@ class ModelScenario:
         )
 
         # Initialise attributes used for caching
-        self.scenario: Optional[Dataset] = None
-        self.modelled_obs: Optional[DataArray] = None
-        self.modelled_baseline: Optional[DataArray] = None
-        self.flux_stacked: Optional[Dataset] = None
+        self.scenario: Dataset | None = None
+        self.modelled_obs: Dataset | None = None
+        self.modelled_baseline: DataArray | None = None
+        self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
 
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
-        """
-        Use appropriate get function to search for data in object store.
-        """
-
+        """Use appropriate get function to search for data in object store."""
         get_functions = {
             "obs_surface": get_obs_surface,
             "footprint": get_footprint,
             "flux": get_flux,
             "boundary_conditions": get_bc,
+            "obs_column": get_obs_column,
         }
 
         search_functions = {
@@ -247,6 +303,7 @@ class ModelScenario:
             "footprint": search_footprints,
             "flux": search_flux,
             "boundary_conditions": search_bc,
+            "obs_column": search_column,
         }
 
         get_fn = get_functions[data_type]
@@ -282,20 +339,17 @@ class ModelScenario:
 
     def add_obs(
         self,
-        site: Optional[str] = None,
-        species: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        network: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        obs: Optional[ObsData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        species: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        network: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        obs: ObsData | None = None,
+        store: str | None = None,
     ) -> None:
-        """
-        Add observation data based on keywords or direct ObsData object.
-        """
-        from openghg.util import clean_string, format_inlet
+        """Add observation data based on keywords or direct ObsData object."""
 
         # Search for obs data based on keywords
         if site is not None and obs is None:
@@ -327,46 +381,110 @@ class ModelScenario:
             self.species = self.obs.metadata["species"]
             self.inlet = self.obs.metadata["inlet"]
 
+    def add_obs_column(
+        self,
+        site: str | None = None,
+        satellite: str | None = None,
+        max_level: int | None = None,
+        species: str | None = None,
+        platform: str | None = None,
+        obs_region: str | None = None,
+        domain: str | None = None,
+        selection: str | None = None,
+        network: str | None = None,
+        obs_column: ObsColumnData | None = None,
+        store: str | None = None,
+    ) -> None:
+        """Add column data based on keywords or direct ObsColumnData object."""
+
+        # Search for obs data based on keywords
+        if site is not None and obs_column is None and satellite is None:
+            site = clean_string(site)
+        elif obs_column is None:
+            verify_site_with_satellite(
+                site=site, satellite=satellite, obs_region=obs_region, selection=selection
+            )
+
+            # search for obs based on suitable keywords - site, species, inlet
+            obs_column_keywords = {
+                "site": site,
+                "satellite": satellite,
+                "max_level": max_level,
+                "species": species,
+                "network": network,
+                "store": store,
+                "platform": platform,
+                "obs_region": obs_region,
+                "domain": domain,
+                "selection": selection,
+            }
+
+            obs_column = self._get_data(obs_column_keywords, data_type="obs_column")
+
+        # Updating obs to be obs_column
+        self.obs = obs_column
+
+        # Add keywords to class for convenience
+        if self.obs_column is not None:
+            if self.site is not None:
+                self.site = self.obs_column.metadata["site"]
+            else:
+                self.satellite = self.obs_column.metadata["satellite"]
+
+            self.species = self.obs_column.metadata["species"]
+
     def add_footprint(
         self,
-        site: Optional[str] = None,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        domain: Optional[str] = None,
-        model: Optional[str] = None,
-        met_model: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        species: Optional[str] = None,
-        fp_inlet: Optional[Union[str, list]] = None,
-        network: Optional[str] = None,
-        footprint: Optional[FootprintData] = None,
-        store: Optional[str] = None,
+        site: str | None = None,
+        inlet: str | None = None,
+        height: str | None = None,
+        domain: str | None = None,
+        model: str | None = None,
+        satellite: str | None = None,
+        obs_region: str | None = None,
+        met_model: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        species: str | None = None,
+        fp_inlet: str | list | None = None,
+        network: str | None = None,
+        footprint: FootprintData | None = None,
+        store: str | None = None,
     ) -> None:
-        """
-        Add footprint data based on keywords or direct FootprintData object.
-        """
+        """Add footprint data based on keywords or direct FootprintData object."""
         from openghg.util import (
-            clean_string,
-            format_inlet,
             species_lifetime,
             extract_height_name,
         )
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, met_model
-        if site is not None and footprint is None:
-            site = clean_string(site)
 
-            if fp_inlet is None:
-                height_name = extract_height_name(site, network, inlet)
+        if footprint is None and (site is not None or satellite is not None):
+            if site is not None:
+                site = clean_string(site)
+
+            if satellite is not None and fp_inlet is None:
+                fp_inlet = "column"
+
+            if site is not None and fp_inlet is None:
+                # use obs network if we're trying to infer the height from site info
+                if self.obs is not None:
+                    network = network or self.obs.metadata.get("network")
+
+                if site is not None:
+                    height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
-                    logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
+                    logger.info(
+                        f"Using height_name option(s) for footprint inlet: {fp_inlet}."
+                        f"\nInferred from site={site}, network={network}, inlet={inlet}"
+                    )
 
             if fp_inlet is None:
                 if inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
+                    logger.info(f"Using observations' inlet height for footprints: {fp_inlet}")
                 elif inlet is None and height is not None:
                     fp_inlet = clean_string(height)
                 else:
@@ -391,6 +509,8 @@ class ModelScenario:
                 footprint_keywords = {
                     "site": site,
                     "height": fp_inlet_option,
+                    "satellite": satellite,
+                    "obs_region": obs_region,
                     "inlet": fp_inlet_option,
                     "domain": domain,
                     "model": model,
@@ -415,24 +535,26 @@ class ModelScenario:
         self.footprint = footprint
 
         if self.footprint is not None:
-            fp_inlet = self.footprint.metadata["inlet"]
-            self.fp_inlet = fp_inlet
-            if not hasattr(self, "site"):
-                self.site = self.footprint.metadata["site"]
+            if "satellite" in self.footprint.metadata and self.footprint.metadata["satellite"] is not None:
+                self.satellite = self.footprint.metadata["satellite"]
+            else:
+                fp_inlet = self.footprint.metadata["inlet"]
+                self.fp_inlet = fp_inlet
+                if not hasattr(self, "site"):
+                    self.site = self.footprint.metadata["site"]
 
     def add_flux(
         self,
-        species: Optional[str] = None,
-        domain: Optional[str] = None,
-        source: Optional[str] = None,
-        sources: Optional[Union[str, Sequence]] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        domain: str | None = None,
+        source: str | None = None,
+        sources: str | Sequence | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        flux: FluxData | dict[str, FluxData] | None = None,
+        store: str | None = None,
     ) -> None:
-        """
-        Add flux data based on keywords or direct FluxData object.
+        """Add flux data based on keywords or direct FluxData object.
         Can add flux datasets for multiple sources.
         """
         if self.fluxes is not None:
@@ -500,10 +622,9 @@ class ModelScenario:
         if self.fluxes is not None:
             if flux:
                 self.fluxes.update(flux)
-        else:
-            # Flux can be None or empty dict.
-            if flux:
-                self.fluxes = flux
+        # Flux can be None or empty dict.
+        elif flux:
+            self.fluxes = flux
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
@@ -516,18 +637,15 @@ class ModelScenario:
 
     def add_bc(
         self,
-        species: Optional[str] = None,
-        bc_input: Optional[str] = None,
-        domain: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
-        bc: Optional[BoundaryConditionsData] = None,
-        store: Optional[str] = None,
+        species: str | None = None,
+        bc_input: str | None = None,
+        domain: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
+        bc: BoundaryConditionsData | None = None,
+        store: str | None = None,
     ) -> None:
-        """
-        Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
-        """
-
+        """Add boundary conditions data based on keywords or direct BoundaryConditionsData object."""
         # Search for boundary conditions data based on keywords
         # - domain, species, bc_input
         if domain is not None and bc is None:
@@ -544,9 +662,8 @@ class ModelScenario:
 
         self.bc = bc
 
-    def _check_data_is_present(self, need: Optional[Union[str, Sequence]] = None) -> None:
-        """
-        Check whether correct data types have been included. This should
+    def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
+        """Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
         operation with the data types available.
 
@@ -578,33 +695,39 @@ class ModelScenario:
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
-    def _get_platform(self) -> Optional[str]:
-        """
-        Find the platform for a site, if present.
+    def _get_platform(self) -> str | None:
+        """Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to
-        find this information.
+        To find this information this will look within:
+            - obs metadata
+            - the "site_info.json" file from openghg_defs dependency.
         """
-        from openghg.util import get_site_info
+        from openghg.util import get_platform_from_info, not_set_metadata_values
 
-        try:
-            site = self.site
-            site_upper = site.upper()
-        except AttributeError:
-            return None
-        else:
-            site_data = get_site_info()
-            try:
-                site_details = site_data[site_upper]
-            except KeyError:
-                return None
-            else:
-                platform: str = site_details.get("platform")
-                return platform
+        if self.obs is not None:
+            metadata = self.obs.metadata
+            platform: str | None = metadata.get("platform")
 
-    def _align_obs_footprint(self, resample_to: str = "coarsest", platform: Optional[str] = None) -> Tuple:
-        """
-        Slice and resample obs and footprint data to align along time
+            # Check for values which indicate this has not been specified
+            not_set_values = not_set_metadata_values()
+            if platform in not_set_values:
+                platform = None
+
+        if hasattr(self, "site") and self.site is not None:
+            platform_from_site = get_platform_from_info(self.site)
+            if platform is None:
+                logger.info(f"Platform of '{platform}' for site '{self.site}' extracted from site_info.json")
+                platform = platform_from_site
+            elif platform_from_site is not None:
+                if platform != platform_from_site:
+                    logger.warning(
+                        f"Platform from metadata and site_info details do not match ({platform}, {platform_from_site}). Using platform value from metadata."
+                    )
+
+        return platform
+
+    def _resample_obs_footprint(self, resample_to: str | None = "coarsest") -> tuple:
+        """Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
         spanned by both the footprint and obs, using the sliced start date
@@ -614,16 +737,14 @@ class ModelScenario:
          - "obs" - resample to observation data frequency
          - "footprint" - resample to footprint data frequency
          - a valid resample period e.g. "2H"
+         - None to not resample and just return original values
 
         Args:
             resample_to: Resample option to use: either data based or using a valid pandas resample period.
-            platform: Observation platform used to decide whether to resample
 
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
         """
-        from pandas import Timedelta
-
         # Check data is present (not None) and cast to correct type
         self._check_data_is_present(need=["obs", "footprint"])
         obs = cast(ObsData, self.obs)
@@ -632,131 +753,22 @@ class ModelScenario:
         obs_data = obs.data
         footprint_data = footprint.data
 
-        resample_keyword_choices = ("obs", "footprint", "coarsest")
+        if resample_to is None:
+            return obs_data, footprint_data
 
-        # Check whether resample has been requested by specifying a specific period rather than a keyword
-        if resample_to in resample_keyword_choices:
-            force_resample = False
-        else:
-            force_resample = True
+        if resample_to == "footprint":
+            resample_to = "other"
 
-        if platform is not None:
-            platform = platform.lower()
-            # Do not apply resampling for "satellite" (but have re-included "flask" for now)
-            if platform == "satellite":
-                return obs_data, footprint_data
-
-        # Whether sampling period is present or we need to try to infer this
-        infer_sampling_period = False
-        # Get the period of measurements in time
-        obs_attributes = obs_data.attrs
-        if "averaged_period" in obs_attributes:
-            obs_data_period_s = float(obs_attributes["averaged_period"])
-        elif "sampling_period" in obs_attributes:
-            sampling_period = obs_attributes["sampling_period"]
-            if sampling_period == "NOT_SET":
-                infer_sampling_period = True
-            else:
-                obs_data_period_s = float(sampling_period)
-        elif "sampling_period_estimate" in obs_attributes:
-            estimate = obs_attributes["sampling_period_estimate"]
-            logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
-            obs_data_period_s = float(estimate)
-        else:
-            infer_sampling_period = True
-
-        if infer_sampling_period:
-            # Attempt to derive sampling period from frequency of data
-            obs_data_period_s = np.nanmedian(
-                (obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9
-            ).astype("float32")
-
-            obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
-            obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
-
-            max_diff = (obs_data_period_s_max - obs_data_period_s_min).astype(float)
-
-            # Check if the periods differ by more than 1 second
-            if max_diff > 1.0:
-                raise ValueError("Sample period can be not be derived from observations")
-
-            estimate = f"{obs_data_period_s:.1f}"
-            logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
-            obs.data.attrs["sampling_period_estimate"] = estimate
-
-        # TODO: Check regularity of the data - will need this to decide is resampling
-        # is appropriate or need to do checks on a per time point basis
-
-        obs_data_period_ns = obs_data_period_s * 1e9
-        obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
-
-        # Derive the footprints period from the frequency of the data
-        footprint_data_period_ns = np.nanmedian(
-            (footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64")
-        )
-        footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
-
-        # If resample_to is set to "coarsest", check whether "obs" or "footprint" have lower resolution
-        if resample_to == "coarsest":
-            if obs_data_timeperiod >= footprint_data_timeperiod:
-                resample_to = "obs"
-            elif obs_data_timeperiod < footprint_data_timeperiod:
-                resample_to = "footprint"
-
-        # Here we want timezone naive Timestamps
-        # Add sampling period to end date to make sure resample includes these values when matching
-        obs_startdate = Timestamp(obs_data.time[0].values)
-        obs_enddate = Timestamp(obs_data.time[-1].values) + obs_data_timeperiod
-        footprint_startdate = Timestamp(footprint_data.time[0].values)
-        footprint_enddate = Timestamp(footprint_data.time[-1].values) + footprint_data_timeperiod
-
-        start_date = max(obs_startdate, footprint_startdate)
-        end_date = min(obs_enddate, footprint_enddate)
-
-        # Ensure lower range is covered for obs
-        start_obs_slice = start_date - Timedelta("1ns")
-        # Ensure extra buffer is added for footprint based on fp timeperiod.
-        # This is to ensure footprint can be forward-filled to obs (in later steps)
-        start_footprint_slice = start_date - (footprint_data_timeperiod - Timedelta("1ns"))
-        # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
-        end_slice = end_date - Timedelta("1ns")
-
-        obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
-        footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
-
-        if obs_data.time.size == 0 or footprint_data.time.size == 0:
-            raise ValueError("Obs data and Footprint data don't overlap")
-        # Only non satellite datasets with different periods need to be resampled
-        timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
-        tolerance = 1e-9  # seconds
-
-        if timeperiod_diff_s >= tolerance or force_resample:
-            base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-
-            if resample_to == "obs":
-                resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
-
-            elif resample_to == "footprint":
-                resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-                obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
-
-            else:
-                resample_period = resample_to
-                footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
-                obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
-
-        return obs_data, footprint_data
+        return resample_obs_and_other(obs_data, footprint_data, resample_to=resample_to)
 
     def combine_obs_footprint(
         self,
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Dataset:
-        """
-        Combine observation and footprint data so these are on the same time
+        """Combine observation and footprint data so these are on the same time
         axis. This will both slice and resample the data to align this axis.
 
         - Data is slices to smallest timeframe spanned by both footprint and obs
@@ -767,8 +779,11 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample
+            platform: Observation platform used to decide on resample and alignment steps.
+                If this is not supplied, function will attempt to extract this value from
+                from the metadata, then the openghg_defs site_info.json details for the site.
             cache: Cache this data after calculation. Default = True.
 
         Returns:
@@ -777,7 +792,6 @@ class ModelScenario:
             If cache is True:
                 This data will be also be cached as the ModelScenario.scenario attribute.
         """
-
         self._check_data_is_present(need=["obs", "footprint"])
         obs = cast(ObsData, self.obs)
         footprint = cast(FootprintData, self.footprint)
@@ -787,15 +801,41 @@ class ModelScenario:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
 
-        # As we're not processing any satellite data yet just set tolerance to None
-        tolerance = None
+        # Extract platform
         if platform is None:
             platform = self._get_platform()
 
-        # Align and merge the observation and footprint Datasets
-        aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
+        # Set default reindex method and tolerance values
+        merge_method: ReindexMethod = "ffill"
+        tolerance = None
+
+        # If platform is specified, update resample_to, reindex and tolerance values where appropriate
+        if platform is not None:
+            platform = platform.lower()
+            if platform == "satellite":
+                # Update reindex method and tolerance for satellite
+                resample_to = None
+                merge_method = "nearest"
+                tolerance = pd.Timedelta("1ms")
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample and alignment stategy (no resampling, alignment as {merge_method} with {tolerance} tolerance."
+                )
+            elif "flask" in platform:
+                # TODO: Iss #253. Update this to be smarter about averaging irregular, flask data
+                # May need to access different method than resample
+                logger.info(
+                    f"Platform '{platform}' has been used to determine the resample stategy (no resampling)."
+                )
+                resample_to = None
+            else:
+                logger.warning(
+                    f"Platform '{platform}' not used when determining resample and merge strategy."
+                )
+
+        # Resample, align and merge the observation and footprint Datasets
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
         combined_dataset = combine_datasets(
-            dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance
+            dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
@@ -804,7 +844,7 @@ class ModelScenario:
         # Save the observation data units
         try:
             mf = obs.data["mf"]
-            units: Optional[float] = float(mf.attrs["units"])
+            units: float | None = float(mf.attrs["units"])
         except (ValueError, KeyError):
             units = None
         except AttributeError:
@@ -828,7 +868,7 @@ class ModelScenario:
         attributes.update(attributes_footprint)
         attributes.update(attributes_obs)
 
-        attributes["resample_to"] = resample_to
+        attributes["resample_to"] = str(resample_to)
 
         combined_dataset.attrs.update(attributes)
 
@@ -837,13 +877,12 @@ class ModelScenario:
 
         return combined_dataset
 
-    def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
-        """
-        Check sources input and make sure this is a list. If None, this will extract
+    def _clean_sources_input(self, sources: str | list | None = None) -> list:
+        """Check sources input and make sure this is a list. If None, this will extract
         all sources from self.fluxes.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         if sources is None:
             sources = list(flux_dict.keys())
@@ -853,10 +892,9 @@ class ModelScenario:
         return sources
 
     def combine_flux_sources(
-        self, sources: Optional[Union[str, List]] = None, cache: bool = True, recalculate: bool = False
+        self, sources: str | list | None = None, cache: bool = True, recalculate: bool = False
     ) -> Dataset:
-        """
-        Combine together flux sources on the time dimension. This will align to
+        """Combine together flux sources on the time dimension. This will align to
         the time of the highest frequency flux source both for time range and frequency.
 
         Args:
@@ -867,7 +905,7 @@ class ModelScenario:
             Dataset: All flux sources stacked on the time dimension.
         """
         self._check_data_is_present(need=["fluxes"])
-        flux_dict = cast(Dict[str, FluxData], self.fluxes)
+        flux_dict = cast(dict[str, FluxData], self.fluxes)
 
         time_dim = "time"
 
@@ -901,33 +939,34 @@ class ModelScenario:
 
         return flux_stacked
 
-    def _check_footprint_resample(self, resample_to: str) -> Dataset:
-        """
-        Check whether footprint needs resampling based on resample_to input.
+    def _check_footprint_resample(self, resample_to: str | None) -> Dataset:
+        """Check whether footprint needs resampling based on resample_to input.
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         """
         footprint = cast(FootprintData, self.footprint)
 
-        if resample_to in ("coarsest", "obs", "footprint"):
+        if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
             return footprint.data
         else:
             footprint_data = footprint.data
             time = footprint_data["time"].values
             start_date = Timestamp(time[0])
-            base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-            footprint_data = footprint_data.resample(indexer={"time": resample_to}, base=base).mean()
+            offset = pd.Timedelta(
+                hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            )
+            offset = cast(pd.Timedelta, offset)  # mypy thinks this could be NaT
+            footprint_data = footprint_data.resample(indexer={"time": resample_to}, offset=offset).mean()
             return footprint_data
 
     def _param_setup(
         self,
         param: str = "modelled_obs",
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
         recalculate: bool = False,
     ) -> bool:
-        """
-        Decide if calculation is needed for input parameter and set up
+        """Decide if calculation is needed for input parameter and set up
         underlying parameters accordingly. This will populate the
         self.scenario attribute if not already present or if this needs
         to be recalculated.
@@ -938,8 +977,9 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask".
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -948,7 +988,6 @@ class ModelScenario:
 
             Populates details of ModelScenario.scenario to use in calculation.
         """
-
         try:
             parameter = getattr(self, param)
         except AttributeError:
@@ -958,48 +997,48 @@ class ModelScenario:
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
-            if self.obs is not None:
+            if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        else:
-            if self.obs is not None:
-                # Check previous resample_to input for cached data
-                # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
-                prev_resample_to = parameter.attrs.get("resample_to")
+        elif self.obs is not None:
+            # Check previous resample_to input for cached data
+            # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
+            prev_resample_to = parameter.attrs.get("resample_to")
 
-                # Check if this previous resample period matches input value
-                # - if not (or explicit recalculation requested), recreate scenario
-                # - if so return cached modelled observations
-                if prev_resample_to != resample_to or recalculate:
-                    self.combine_obs_footprint(resample_to, platform=platform, cache=True)
-                else:
-                    # return self.modelled_obs
-                    return False
-            elif recalculate:
-                # Recalculate based on footprint data if obs not present
-                self.scenario = self._check_footprint_resample(resample_to)
-
-            # TODO: Add check for matching sources and recalculate otherwise
+            # Check if this previous resample period matches input value
+            # - if not (or explicit recalculation requested), recreate scenario
+            # - if so return cached modelled observations
+            if prev_resample_to != str(resample_to) or recalculate:
+                self.combine_obs_footprint(resample_to, platform=platform, cache=True)
             else:
-                # Return cached modelled observations if explicit recalculation not requested
                 # return self.modelled_obs
                 return False
+        elif recalculate:
+            # Recalculate based on footprint data if obs not present
+            self.scenario = self._check_footprint_resample(resample_to)
+
+        # TODO: Add check for matching sources and recalculate otherwise
+        else:
+            # Return cached modelled observations if explicit recalculation not requested
+            # return self.modelled_obs
+            return False
 
         return True
 
     def calc_modelled_obs(
         self,
-        sources: Optional[Union[str, List]] = None,
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        sources: str | list | None = None,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
-    ) -> DataArray:
-        """
-        Calculate the modelled observation points based on site footprint and fluxes.
+        output_fp_x_flux: bool = False,
+        split_by_sectors: bool = False,
+    ) -> Dataset:
+        """Calculate the modelled observation points based on site footprint and fluxes.
 
         The time points returned are dependent on the resample_to option chosen.
         If obs data is also linked to the ModelScenario instance, this will be used
@@ -1010,19 +1049,23 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_fp_x_flux: If true, include "fp x flux" data variable in output.
+            split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
+              under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
+              different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
 
         Returns:
-            xarray.DataArray: Modelled observation values along the time axis
+            xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_obs attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-
         self._check_data_is_present(need=["footprint", "fluxes"])
 
         param_calculate = self._param_setup(
@@ -1030,23 +1073,48 @@ class ModelScenario:
         )
 
         if not param_calculate:
-            modelled_obs = cast(DataArray, self.modelled_obs)
+            modelled_obs = cast(Dataset, self.modelled_obs)
             return modelled_obs
 
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod_high_res"
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=False
+                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
-            name = "mf_mod"
 
-        modelled_obs.attrs["resample_to"] = resample_to
-        modelled_obs = modelled_obs.rename(name)
+        # calculate sectoral modelled mf and fp_x_flux
+        if split_by_sectors:
+            sources = self._clean_sources_input(sources)
+            sectoral_datasets = []
+
+            for source in sources:
+                if self.species == "co2":
+                    mod_obs = self._calc_modelled_obs_HiTRes(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_high_res_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                else:
+                    mod_obs = self._calc_modelled_obs_integrated(
+                        sources=sources,
+                        output_TS=True,
+                        ts_name="mf_mod_sectoral",
+                        output_fpXflux=output_fp_x_flux,
+                        fp_x_flux_name="fp_x_flux_sectoral",
+                    )
+                mod_obs = mod_obs.expand_dims({"source": [source]})
+                sectoral_datasets.append(mod_obs)
+
+            sectoral_modelled_obs = xr.concat(sectoral_datasets, dim="source")
+            modelled_obs.update(sectoral_modelled_obs)
+
+        modelled_obs.attrs["resample_to"] = str(resample_to)
 
         # Cache output from calculations
         if cache:
@@ -1061,12 +1129,13 @@ class ModelScenario:
 
     def _calc_modelled_obs_integrated(
         self,
-        sources: Optional[Union[str, List]] = None,
+        sources: str | list | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
-    ) -> Any:
-        """
-        Calculate modelled mole fraction timeseries using integrated footprints data.
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
+        """Calculate modelled mole fraction timeseries using integrated footprints data.
 
         Args:
             sources : Flux sources to use for the calculation. By default this will use all available sources.
@@ -1086,36 +1155,33 @@ class ModelScenario:
             If both output_TS and output_fpXflux are both True:
                 Both DataArrays are returned.
         """
-
         if self.scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
         scenario = self.scenario
         flux = self.combine_flux_sources(sources)
-        scenario, flux = match_dataset_dims([scenario, flux], dims=["lat", "lon"])
+        flux_modelled = fp_x_flux_integrated(scenario, flux)
 
-        flux = flux.reindex_like(scenario, "ffill")
-        flux_modelled: DataArray = scenario["fp"] * flux["flux"]
-        timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
+        data = {}
 
-        # TODO: Add details about units to output
+        if output_TS:
+            data[ts_name] = flux_modelled.sum(["lat", "lon"])
 
-        if output_TS and output_fpXflux:
-            return timeseries, flux_modelled
-        elif output_TS:
-            return timeseries
-        elif output_fpXflux:
-            return flux_modelled
+        if output_fpXflux:
+            data[fp_x_flux_name] = flux_modelled
+
+        return Dataset(data)
 
     def _calc_modelled_obs_HiTRes(
         self,
-        sources: Optional[Union[str, List]] = None,
-        averaging: Optional[str] = None,
+        sources: str | list | None = None,
+        averaging: str | None = None,
         output_TS: bool = True,
+        ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
-    ) -> Any:
-        """
-        Calculate modelled mole fraction timeseries using high time resolution
+        fp_x_flux_name: str = "fp_x_flux",
+    ) -> Dataset:
+        """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
         species reliant on high time resolution footprints such as carbon dioxide (co2).
 
@@ -1154,13 +1220,7 @@ class ModelScenario:
         have no effect if the time frequency was already regular but this may
         not be what we want and may want to add extra code to remove any NaNs, if
         they are introduced or to find a way to remove this requirement.
-        TODO: mypy having trouble with different types options and incompatible types,
-        included as Any for now.
         """
-        from math import gcd
-
-        import dask.array as da  # type: ignore
-        from pandas import date_range
 
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
@@ -1168,230 +1228,34 @@ class ModelScenario:
         if self.scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        fp_HiTRes = self.scenario.fp_HiTRes
-        flux_ds = self.combine_flux_sources(sources)
-        fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
-
-        # Make sure any NaN values are set to zero as this is a multiplicative and summing operation
-        fp_HiTRes = fp_HiTRes.fillna(0.0)
-        flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
-
-        # Calculate time resolution for both the flux and footprints data
-        nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-        flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-        fp_res_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-
-        fp_res_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
-
-        # Define resolution on time dimension in number in hours
-        if averaging:
-            try:
-                time_res_H = int(averaging)
-                time_resolution = f"{time_res_H}H"
-            except (ValueError, TypeError):
-                time_res_H = int(averaging[0])
-                time_resolution = averaging
+        if "fp_HiTRes" in self.scenario:
+            fp = self.scenario.fp_HiTRes
         else:
-            # If not specified derive from time from combined dataset
-            time_res_H = fp_res_time_H
-            time_resolution = f"{time_res_H}H"
+            fp = self.scenario[["fp_time_resolved", "fp_residual"]]
 
-        # Resample fp timeseries to match time resolution
-        if fp_res_time_H != time_res_H:
-            fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
+        flux_ds = self.combine_flux_sources(sources)
 
-        # Define resolution on high frequency dimension in number of hours
-        # At the moment this is matched to the Hback dimension
-        time_hf_res_H = fp_res_Hback_H
+        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
 
-        # Only allow for high frequency resolution < 24 hours
-        if time_hf_res_H > 24:
-            raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H")
-        elif 24 % time_hf_res_H != 0 or 24 % time_hf_res_H != 0.0:
-            raise ValueError(
-                f"High frequency resolution must exactly divide into 24 hours. Current: {time_hf_res_H}H"
-            )
-
-        # Find the greatest common denominator between time and high frequency resolutions.
-        # This is needed to make sure suitable flux frequency is used to allow for indexing.
-        # e.g. time: 1H; hf (high frequency): 2H, highest_res_H would be 1H
-        # e.g. time: 2H; hf (high frequency): 3H, highest_res_H would be 1H
-        highest_res_H = gcd(time_res_H, time_hf_res_H)
-        highest_resolution = f"{highest_res_H}H"
-
-        # create time array to loop through, with the required resolution
-        # fp_HiTRes.time is the release time of particles into the model
-        time_array = fp_HiTRes["time"]
-        lat = fp_HiTRes["lat"]
-        lon = fp_HiTRes["lon"]
-        hback = fp_HiTRes["H_back"]
-
-        ntime = len(time_array)
-        nlat = len(lat)
-        nlon = len(lon)
-        # nh_back = len(hback)
-
-        # Define maximum hour back
-        max_h_back = int(hback.values[-1])
-
-        # Define full range of dates to select from the flux input
-        date_start = time_array[0]
-        date_start_back = date_start - np.timedelta64(max_h_back, "h")
-        date_end = time_array[-1] + np.timedelta64(1, "s")
-
-        start = {
-            dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd)
-            for dd in ["month", "year"]
-        }
-
-        # Create times for matching to the flux
-        full_dates = date_range(
-            date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
-        ).to_numpy()
-
-        # Create low frequency flux data (monthly)
-        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
-        flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
-
-        # Select and align high frequency flux data
-        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
-        if flux_res_H <= 24:
-            base = (
-                date_start_back.dt.hour.data
-                + date_start_back.dt.minute.data / 60.0
-                + date_start_back.dt.second.data / 3600.0
-            )
-            if flux_res_H <= highest_res_H:
-                # Downsample flux to match to footprints frequency
-                flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).mean()
-            elif flux_res_H > highest_res_H:
-                # Upsample flux to match footprints frequency and forward fill
-                flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, base=base
-                ).ffill()
-            # Reindex to match to correct values
-            flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
-        elif flux_res_H > 24:
-            # If flux is not high frequency use the monthly averages instead.
-            flux_ds_high_freq = flux_ds_low_freq
-
-        # TODO: Add check to make sure time values are exactly aligned based on date range
-
-        # Make sure the dimensions match the expected order for indexing
-        fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
-        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
-
-        # Extract footprints array to use in numba loop
-        fp_HiTRes = da.array(fp_HiTRes)
-
-        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
-        if output_fpXflux:
-            fpXflux = da.zeros((nlat, nlon, ntime))
+        data = {}
 
         if output_TS:
-            timeseries = da.zeros(ntime)
-
-        # Iterate through the time coord to get the total mf at each time step using the H back coord
-        # at each release time we disaggregate the particles backwards over the previous 24hrs
-        # The final value then contains the 29-day integrated residual footprints
-        logger.info("Calculating modelled timeseries comparison:")
-        iters = track(time_array.values)
-        for tt, time in enumerate(iters):
-            # Get correct index for low resolution data based on start and current date
-            current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
-            tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
-
-            # get 4 dimensional chunk of high time res footprints for this timestep
-            # units : mol/mol/mol/m2/s
-            # reverse the time coordinate to be chronological
-            fp_time = fp_HiTRes[:, :, tt, ::-1]
-
-            fp_high_freq = fp_time[:, :, 1:]
-            fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
-
-            # Extract flux data from dataset
-            flux_high_freq = flux_ds_high_freq.flux
-            flux_low_freq = flux_ds_low_freq.flux
-
-            # Define high and low frequency fluxes based on inputs
-            # Allow for variable frequency within 24 hours
-            flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
-            if flux_res_H <= 24:
-                # Define indices to correctly select matching date range from flux data
-                # This will depend on the various frequencies of the inputs
-                # At present, highest_res_H matches the flux frequency
-                tt_start = tt * int(time_res_H / highest_res_H) + 1
-                tt_end = tt_start + int(max_h_back / highest_res_H)
-                selection = int(time_hf_res_H / highest_res_H)
-
-                # Extract matching time range from whole flux array
-                flux_high_freq = flux_high_freq[..., tt_start:tt_end]
-                if selection > 1:
-                    # If flux frequency does not match to the high frequency (hf, H_back)
-                    # dimension, select entries which do. Reversed to make sure
-                    # entries matching to the correct times are selected
-                    flux_high_freq = flux_high_freq[..., ::-selection]
-                    flux_high_freq = flux_high_freq[..., ::-1]
-            else:
-                flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
-
-            # convert to array to use in numba loop
-            flux_high_freq = da.array(flux_high_freq)
-            flux_low_freq = da.array(flux_low_freq)
-
-            # Multiply the HiTRes footprints with the HiTRes emissions to give mf
-            # Multiply residual footprints by low frequency emissions data to give residual mf
-            # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
-            # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
-            fpXflux_time = flux_high_freq * fp_high_freq
-            fpXflux_residual = flux_low_freq * fp_residual
-
-            # append the residual emissions
-            fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
-
-            if output_fpXflux:
-                # Sum over time (H back) to give the total mf at this timestep
-                fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
-
-            if output_TS:
-                # work out timeseries by summing over lat, lon (24 hrs)
-                timeseries[tt] = fpXflux_time.sum()
-
-        # TODO: Add details about units to output
+            data[ts_name] = fp_x_flux.sum(["lat", "lon"])
 
         if output_fpXflux:
-            fpXflux = DataArray(
-                fpXflux,
-                dims=("lat", "lon", "time"),
-                coords={"lat": lat, "lon": lon, "time": time_array},
-            )
+            data[fp_x_flux_name] = fp_x_flux
 
-        if output_TS:
-            timeseries = DataArray(timeseries, dims=("time"), coords={"time": time_array})
-
-        if output_fpXflux and output_TS:
-            timeseries.compute()
-            fpXflux.compute()
-            return timeseries, fpXflux
-        elif output_fpXflux:
-            fpXflux.compute()
-            return fpXflux
-        elif output_TS:
-            timeseries.compute()
-            return timeseries
-
-        return None
+        return Dataset(data)
 
     def calc_modelled_baseline(
         self,
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
-        output_units: float = 1e-9,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
+        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
-        """
-        Calculate the modelled baseline points based on site footprint and boundary conditions.
+        """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
 
         The time points returned are dependent on the resample_to option chosen.
@@ -1402,8 +1266,9 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1414,8 +1279,6 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
-
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
 
@@ -1430,86 +1293,15 @@ class ModelScenario:
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        bc_data = bc_data.reindex_like(scenario, "ffill")
-
-        lifetime_value = species_lifetime(self.species)
-        check_monthly = check_lifetime_monthly(lifetime_value)
-
-        if check_monthly:
-            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
-            lifetime: Optional[str] = None
-        else:
-            lifetime_monthly = None
-            lifetime = cast(Optional[str], lifetime_value)
-
-        if lifetime is not None:
-            short_lifetime = True
-            lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.0
-        elif lifetime_monthly:
-            short_lifetime = True
-            lifetime_monthly_hrs = []
-            for lt in lifetime_monthly:
-                lt_time_delta = time_offset(period=lt)
-                lt_hrs = lt_time_delta.total_seconds() / 3600.0
-                lifetime_monthly_hrs.append(lt_hrs)
-
-            # calculate the lifetime_hrs associated with each time point in scenario data
-            # this is because lifetime can be a list of monthly values
-            time_month = scenario["time"].dt.month
-            lifetime_hrs = np.array([lifetime_monthly_hrs[item - 1] for item in time_month.values])
-        else:
-            short_lifetime = False
-
-        # Include loss condition if lifetime of species is specified
-        if short_lifetime:
-            expected_vars = (
-                "mean_age_particles_n",
-                "mean_age_particles_e",
-                "mean_age_particles_s",
-                "mean_age_particles_w",
-            )
-            for var in expected_vars:
-                if var not in scenario.data_vars:
-                    raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
-                    )
-
-            # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
-            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
-            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
-            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
-
-        else:
-            loss_n = 1.0
-            loss_e = 1.0
-            loss_s = 1.0
-            loss_w = 1.0
-
-        # Check and extract units as float, if present.
-        units_default = 1.0
-        units_n = check_units(bc_data["vmr_n"], default=units_default)
-        units_e = check_units(bc_data["vmr_e"], default=units_default)
-        units_s = check_units(bc_data["vmr_s"], default=units_default)
-        units_w = check_units(bc_data["vmr_w"], default=units_default)
-
-        modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
-                ["height", "lat"]
-            )
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
-                ["height", "lon"]
-            )
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
-                ["height", "lat"]
-            )
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=self.species, output_units=output_units
         )
 
-        modelled_baseline.attrs["resample_to"] = resample_to
+        modelled_baseline = (
+            sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
+        )
+
+        modelled_baseline.attrs["resample_to"] = str(resample_to)
         modelled_baseline.attrs["units"] = output_units
         modelled_baseline = modelled_baseline.rename("bc_mod")
 
@@ -1532,27 +1324,32 @@ class ModelScenario:
 
     def footprints_data_merge(
         self,
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
         calc_timeseries: bool = True,
-        sources: Optional[Union[str, List]] = None,
+        calc_fp_x_flux: bool = False,
+        sources: str | list | None = None,
+        split_by_sectors: bool = False,
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Dataset:
-        """
-        Produce combined object containing aligned footprint and observation data.
+        """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
 
         Args:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
+            calc_fp_x_flux: Calculate "fp x flux" matrix
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
+            split_by_sectors: if True, separate modelled obs (and footprint x flux) will be calculated
+                for each flux source ("sector").
             calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
@@ -1564,17 +1361,18 @@ class ModelScenario:
             resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
         )
 
-        if calc_timeseries:
+        if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
                 resample_to=resample_to,
                 sources=sources,
                 platform=platform,
                 cache=cache,
                 recalculate=recalculate,
+                output_fp_x_flux=calc_fp_x_flux,
+                split_by_sectors=split_by_sectors,
             )
 
-            name = modelled_obs.name
-            combined_dataset = combined_dataset.assign({name: modelled_obs})
+            combined_dataset = combined_dataset.merge(modelled_obs)
 
         if calc_bc:
             if self.bc is not None:
@@ -1597,8 +1395,7 @@ class ModelScenario:
         return combined_dataset
 
     def plot_timeseries(self) -> Any:
-        """
-        Plot the observation timeseries data.
+        """Plot the observation timeseries data.
 
         Returns:
             Plotly Figure
@@ -1606,6 +1403,7 @@ class ModelScenario:
             Interactive plotly graph created with observations
         """
         self._check_data_is_present(need="obs")
+
         obs = cast(ObsData, self.obs)
 
         fig = obs.plot_timeseries()  # Calling method on ObsData class
@@ -1614,15 +1412,14 @@ class ModelScenario:
 
     def plot_comparison(
         self,
-        baseline: Optional[str] = "boundary_conditions",
-        sources: Optional[Union[str, List]] = None,
-        resample_to: str = "coarsest",
-        platform: Optional[str] = None,
+        baseline: str | None = "boundary_conditions",
+        sources: str | list | None = None,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
     ) -> Any:
-        """
-        Plot comparison between observation and modelled timeseries data.
+        """Plot comparison between observation and modelled timeseries data.
 
         Args:
             baseline: Add baseline to data. One of:
@@ -1633,8 +1430,9 @@ class ModelScenario:
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
+                          - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
-            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1689,231 +1487,6 @@ class ModelScenario:
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
         return fig
-
-
-def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
-    """
-    Check if two datasets need to be reindexed_like for combine_datasets
-
-    Args:
-        dataset_A: First dataset to check
-        dataset_B: Second dataset to check
-    Returns:
-        bool: True if indexes match, else False
-    """
-    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
-
-    for index in common_indices:
-        if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
-            return False
-
-        # Check number of values that are not close (testing for equality with floating point)
-        if index == "time":
-            # For time override the default to have ~ second precision
-            rtol = 1e-10
-        else:
-            rtol = 1e-5
-
-        index_diff = np.sum(
-            ~np.isclose(
-                dataset_A.indexes[index].values.astype(float),
-                dataset_B.indexes[index].values.astype(float),
-                rtol=rtol,
-            )
-        )
-
-        if not index_diff == 0:
-            return False
-
-    return True
-
-
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
-) -> Dataset:
-    """
-    Merges two datasets and re-indexes to the first dataset.
-
-    If "fp" variable is found within the combined dataset,
-    the "time" values where the "lat", "lon" dimensions didn't match are removed.
-
-    Args:
-        dataset_A: First dataset to merge
-        dataset_B: Second dataset to merge
-        method: One of None, nearest, ffill, bfill.
-                See xarray.DataArray.reindex_like for list of options and meaning.
-                Defaults to ffill (forward fill)
-        tolerance: Maximum allowed tolerance between matches.
-    Returns:
-        xarray.Dataset: Combined dataset indexed to dataset_A
-    """
-    if _indexes_match(dataset_A, dataset_B):
-        dataset_B_temp = dataset_B
-    else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
-
-    merged_ds = dataset_A.merge(dataset_B_temp)
-
-    if "fp" in merged_ds:
-        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
-            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-            merged_ds = merged_ds[dict(time=flag[0])]
-
-    return merged_ds
-
-
-def match_dataset_dims(
-    datasets: Sequence[Dataset],
-    dims: Union[str, Sequence] = [],
-    method: methodType = "nearest",
-    tolerance: Union[float, Dict[str, float]] = 1e-5,
-) -> List[Dataset]:
-    """
-    Aligns datasets to the selected dimensions within a tolerance.
-    All datasets will be aligned to the first dataset within the list.
-
-    Args:
-        datasets: List of xarray Datasets. Expect datasets to contain the same dimensions.
-        dims: Dimensions match between datasets. Can use keyword "all" to match every dimension.
-        method : Method to use for indexing. Should be one of: ("nearest", "ffill", "bfill")
-        tolerance: Tolerance value to use when matching coordinate values.
-                   This can be a single value for all dimensions or a dictionary of values to use.
-
-    Returns:
-        List (xarray.Dataset) : Datasets aligned along the matching dimensions.
-
-    TODO: Check if this supercedes or replicates _indexes_match() function too closely?
-    """
-
-    # Nothing to be done if only one (or less) datasets are passed
-    if len(datasets) <= 1:
-        return list(datasets)
-
-    ds0 = datasets[0]
-
-    if isinstance(dims, str):
-        if dims == "all":
-            dims = list(ds0.dims)
-        else:
-            dims = [dims]
-
-    # Extract coordinate values for the first dataset in the list
-    ds0 = datasets[0]
-    indexers = {dim: ds0[dim] for dim in dims}
-
-    if isinstance(tolerance, float):
-        tolerance = {dim: tolerance for dim in dims}
-
-    # Align datasets along selected dimensions (if not already identical)
-    datasets_aligned = [ds0]
-    for ds in datasets[1:]:
-        for dim, compare_coord in indexers.items():
-            try:
-                coord = ds[dim]
-            except KeyError:
-                raise ValueError(f"Dataset missing dimension: {dim}")
-            else:
-                if not coord.equals(compare_coord):
-                    ds = ds.reindex({dim: compare_coord}, method=method, tolerance=tolerance[dim])
-
-        datasets_aligned.append(ds)
-
-    return datasets_aligned
-
-
-# ResType = Union[np.timedelta64, float, np.floating, np.integer]
-
-
-def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
-    """
-    Calculates the average frequency along a given dimension.
-
-    Args:
-        dataset : Dataset. Must contain the specified dimension
-        dim : Dimension name
-
-    Returns:
-        np.timedelta64 / np.float / np.int : Resolution with input dtype
-
-        NaT : If unsuccessful and input dtype is np.timedelta64
-        NaN : If unsuccessful for all other dtypes.
-    """
-    try:
-        resolution = dataset[dim].diff(dim=dim).mean().item()
-    except ValueError:
-        if np.issubdtype(dataset[dim].dtype, np.datetime64):
-            resolution = np.timedelta64("NaT")
-        else:
-            resolution = np.NaN
-    else:
-        if np.issubdtype(dataset[dim].dtype, np.datetime64):
-            # Extract units from original datetime string and use to recreate timedelta64
-            unit = dataset[dim].dtype.name.lstrip("timedelta64").lstrip("[").rstrip("]")
-            resolution = np.timedelta64(resolution, unit)
-
-    return resolution
-
-
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
-    """
-    Stacks multiple datasets based on the input dimension. By default this is time
-    and this will be aligned to the highest resolution / frequency
-    (smallest difference betweeen coordinate values).
-
-    At the moment, the two datasets must have identical coordinate values for all
-    other dimensions and variable names for these to be stacked.
-
-    Args:
-        datasets : Sequence of input datasets
-        dim : Name of dimension to stack along. Default = "time"
-        method: Method to use when aligning the datasets. Default = "ffill"
-
-    Returns:
-        Dataset : Stacked dataset
-
-    TODO: Could update this to only allow DataArrays to be included to reduce the phase
-    space here.
-    """
-
-    if len(datasets) == 1:
-        dataset = datasets[0]
-        return dataset
-
-    data_frequency = [calc_dim_resolution(ds, dim) for ds in datasets]
-    index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
-    data_highest_freq = datasets[index_highest_freq]
-    coords_to_match = data_highest_freq[dim]
-
-    for i, data in enumerate(datasets):
-        data_match = data.reindex({dim: coords_to_match}, method=method)
-        if i == 0:
-            data_stacked = data_match
-            data_stacked.attrs = {}
-        else:
-            data_stacked += data_match
-
-    return data_stacked
-
-
-def check_units(data_var: DataArray, default: float) -> float:
-    """
-    Check "units" attribute within a DataArray. Expect this to be a float
-    or possible to convert to a float.
-    If not present, use default value.
-    """
-
-    attrs = data_var.attrs
-    if "units" in attrs:
-        units_from_attrs = attrs["units"]
-        if not isinstance(units_from_attrs, float):
-            try:
-                units = float(units_from_attrs)
-            except ValueError:
-                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
-    else:
-        units = default
-
-    return units
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],

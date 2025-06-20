@@ -2,17 +2,18 @@ addict
 dask
 filelock
 h5netcdf
-icoscp
+icoscp <= 0.1.17
 ipywidgets
 matplotlib
 msgpack
 nbformat
-numcodecs
+numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
 numpy
 openghg_defs
+openpyxl
 pandas >= 2.0
 plotly
 pyvis
@@ -24,4 +25,7 @@ tinydb
 toml
 urllib3 >= 1.26.3
 xarray
-zarr
+zarr==2.18.3
+openghg-calscales
+sympy
+networkx

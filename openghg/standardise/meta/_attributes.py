@@ -1,7 +1,8 @@
-from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
+from typing import Any, cast
+from collections.abc import Hashable
 import logging
 from xarray import Dataset
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 __all__ = [
     "assign_attributes",
@@ -9,6 +10,8 @@ __all__ = [
     "define_species_label",
     "assign_flux_attributes",
     "get_flux_attributes",
+    "dataset_formatter",
+    "data_variable_formatter",
 ]
 
 logger = logging.getLogger("openghg.standardise")
@@ -16,20 +19,20 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def assign_attributes(
-    data: Dict,
-    site: Optional[str] = None,
-    network: Optional[str] = None,
-    sampling_period: Optional[Union[str, float, int]] = None,
+    data: dict,
+    site: str | None = None,
+    network: str | None = None,
+    sampling_period: str | float | int | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-    species_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+    species_filepath: pathType | None = None,
+) -> dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
     to the Datasource allowing more detailed searching of data.
 
     If accessing underlying stored site or species definitions, this will
-    be accessed from the openghg/supplementary_data repository by default.
+    be accessed from the openghg/openghg_defs repository by default.
 
     Args:
         data: Dictionary containing data, metadata and attributes
@@ -49,7 +52,6 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    from openghg.standardise.meta import sync_surface_metadata
 
     for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
@@ -79,19 +81,6 @@ def assign_attributes(
             species_filepath=species_filepath,
         )
 
-        measurement_data = gas_data["data"]
-        metadata = gas_data["metadata"]
-
-        attrs = measurement_data.attrs
-
-        metadata_aligned, attrs_aligned = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
-        )
-
-        gas_data["metadata"] = metadata_aligned
-        gas_data["attributes"] = attrs_aligned
-        measurement_data.attrs = gas_data["attributes"]
-
     return data
 
 
@@ -99,14 +88,14 @@ def get_attributes(
     ds: Dataset,
     species: str,
     site: str,
-    network: Optional[str] = None,
-    global_attributes: Optional[Dict[str, str]] = None,
-    units: Optional[str] = None,
-    scale: Optional[str] = None,
-    sampling_period: Optional[Union[str, float, int]] = None,
-    date_range: Optional[List[str]] = None,
-    site_filepath: optionalPathType = None,
-    species_filepath: optionalPathType = None,
+    network: str | None = None,
+    global_attributes: dict[str, str] | None = None,
+    units: str | None = None,
+    scale: str | None = None,
+    sampling_period: str | float | int | None = None,
+    date_range: list[str] | None = None,
+    site_filepath: pathType | None = None,
+    species_filepath: pathType | None = None,
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
@@ -115,7 +104,7 @@ def get_attributes(
     Attributes of the xarray DataSet are modified, and variable names are changed
 
     If accessing underlying stored site or species definitions, this will
-    be accessed from the openghg/supplementary_data repository by default.
+    be accessed from the openghg/openghg_defs repository by default.
 
     Variable naming related to species name will be defined using
     define_species_label() function.
@@ -145,28 +134,6 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.8) demand that valid variable names
-    # begin with a letter and be composed of letters, digits and underscores
-    # Here variable names are also made lowercase to enable easier matching below
-
-    # TODO - could I just cast ds.variables as as type for mypy instead of doing this?
-    # variable_names = [str(v) for v in ds.variables]
-    # Is this better?
-    variable_names = cast(Dict[str, Any], ds.variables)
-    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
-    to_underscores.pop("time")  # Added to remove warning around resetting time index.
-    ds = ds.rename(to_underscores)  # type: ignore
-
-    species_lower = species.lower()
-    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
-
-    variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var]
-
-    # If we don't have any variables to rename, raise an error
-    if not matched_keys:
-        raise NameError(f"Cannot find species {species_search} in Dataset variables")
-
     # Load attributes files
     species_attrs = get_species_info()
     attributes_data = load_internal_json(filename="attributes.json")
@@ -178,12 +145,6 @@ def get_attributes(
     # Extract both label to use for species and key for attributes
     # Typically species_label will be the lower case version of species_key
     species_label, species_key = define_species_label(species, species_filepath)
-
-    species_rename = {}
-    for var in matched_keys:
-        species_rename[var] = var.replace(species_search, species_label)
-
-    ds = ds.rename(species_rename)  # type: ignore
 
     # Global attributes
     global_attributes_default = {
@@ -244,8 +205,7 @@ def get_attributes(
 
     ancillary_variables = []
 
-    variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_search in var.lower()]
+    variable_names = cast(dict[str, Any], ds.variables)
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
@@ -280,7 +240,7 @@ def get_attributes(
 
     # Add quality flag attributes
     # NOTE - I've removed the whitespace before status_flag and integration_flag here
-    variable_names = cast(Dict[str, Any], ds.variables)
+    variable_names = cast(dict[str, Any], ds.variables)
     quality_flags = [key for key in variable_names if "status_flag" in key]
 
     for key in quality_flags:
@@ -295,7 +255,7 @@ def get_attributes(
             "long_name": f"{long_name} status_flag",
         }
 
-    variable_names = cast(Dict[str, Any], ds.variables)
+    variable_names = cast(dict[str, Any], ds.variables)
     # Add integration flag attributes
     integration_flags = [key for key in variable_names if "integration_flag" in key]
 
@@ -312,7 +272,7 @@ def get_attributes(
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 
-    time_attributes: Dict[str, str] = {}
+    time_attributes: dict[str, str] = {}
     time_attributes["label"] = "left"
     time_attributes["standard_name"] = "time"
     time_attributes["comment"] = (
@@ -333,7 +293,7 @@ def get_attributes(
     return ds
 
 
-def define_species_label(species: str, species_filepath: optionalPathType = None) -> Tuple[str, str]:
+def define_species_label(species: str, species_filepath: pathType | None = None) -> tuple[str, str]:
     """Define standardised label to use for observation datasets.
     This uses the data stored within openghg_defs/data/site_info JSON file
     by default with alternative names ('alt') defined within.
@@ -382,8 +342,8 @@ def define_species_label(species: str, species_filepath: optionalPathType = None
 
 
 def _site_info_attributes(
-    site: str, network: Optional[str] = None, site_filepath: optionalPathType = None
-) -> Dict:
+    site: str, network: str | None = None, site_filepath: pathType | None = None
+) -> dict:
     """Reads site attributes from JSON
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.
@@ -402,6 +362,13 @@ def _site_info_attributes(
     # Read site info file
     site_data = get_site_info(site_filepath)
 
+    if site not in site_data:
+        logger.info(
+            f"We haven't seen site {site} before, please let us know so we can update our records."
+            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/openghg_defs"
+        )
+        return {}
+
     if network is None:
         network = next(iter(site_data[site]))
     else:
@@ -415,34 +382,27 @@ def _site_info_attributes(
     }
 
     attributes = {}
-    if site in site_data:
-        for attr in attributes_dict:
-            try:
-                if attr in site_data[site][network]:
-                    attr_key = attributes_dict[attr]
 
-                    attributes[attr_key] = site_data[site][network][attr]
-            except KeyError:
-                pass
-    else:
-        logger.info(
-            f"We haven't seen site {site} before, please let us know so we can update our records."
-            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/supplementary_data"
-        )
-        # TODO - log not seen site message here
-        # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
+    for attr in attributes_dict:
+        try:
+            if attr in site_data[site][network]:
+                attr_key = attributes_dict[attr]
+
+                attributes[attr_key] = site_data[site][network][attr]
+        except KeyError:
+            pass
 
     return attributes
 
 
 def assign_flux_attributes(
-    data: Dict,
-    species: Optional[str] = None,
-    source: Optional[str] = None,
-    domain: Optional[str] = None,
+    data: dict,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
     units: str = "mol/m2/s",
-    prior_info_dict: Optional[dict] = None,
-) -> Dict:
+    prior_info_dict: dict | None = None,
+) -> dict:
     """
     Assign attributes for the input flux dataset within dictionary based on
     metadata and passed arguments.
@@ -480,7 +440,7 @@ def assign_flux_attributes(
                 except KeyError:
                     raise ValueError(f"Attribute {attr} must be specified.")
 
-        input_attributes = cast(Dict[str, str], attribute_values)
+        input_attributes = cast(dict[str, str], attribute_values)
 
         flux_dict["data"] = get_flux_attributes(
             ds=flux_dict["data"],
@@ -499,8 +459,8 @@ def get_flux_attributes(
     source: str,
     domain: str,
     units: str = "mol/m2/s",
-    prior_info_dict: Optional[dict] = None,
-    global_attributes: Optional[Dict[Hashable, Any]] = None,
+    prior_info_dict: dict | None = None,
+    global_attributes: dict[Hashable, Any] | None = None,
 ) -> Dataset:
     """
     Assign additional attributes for the flux dataset.
@@ -549,7 +509,7 @@ def get_flux_attributes(
     ds["lon"].attrs = lon_attrs
 
     # Define default values for global attributes
-    global_attributes_default: Dict[Hashable, Any] = {
+    global_attributes_default: dict[Hashable, Any] = {
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "Conventions": "CF-1.8",
     }
@@ -601,5 +561,66 @@ def get_flux_attributes(
 
     global_attributes.update(current_attributes)
     ds.attrs = global_attributes
+
+    return ds
+
+
+def dataset_formatter(
+    data: dict,
+) -> dict:
+    """
+    Formats species/variables from the dataset by removing the whitespaces
+    with underscores and species to lower case
+
+    Args:
+        data: Dict containing dataset information(gas_data)
+
+    Returns:
+        Dict: Dictionary of source_name : data, metadata, attributes
+    """
+    for _, gas_data in data.items():
+        species = gas_data["metadata"]["species"]
+        species_label, species_key = define_species_label(species)
+        gas_data["data"] = data_variable_formatter(
+            ds=gas_data["data"], species=species, species_label=species_label
+        )
+
+    return data
+
+
+def data_variable_formatter(ds: Dataset, species: str, species_label: str) -> Dataset:
+    """
+    Formats variables from the dataset by removing the whitespaces
+    with underscores and species data var to lower case
+
+    Args:
+        ds: Should contain variables such as "ch4", "ch4 repeatability".
+            Must have a "time" dimension.
+        species: Species name
+        species_label: Species label
+
+    Returns:
+        ds: xarray dataset
+    """
+    variable_names = cast(dict[str, Any], ds.variables)
+    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores.pop("time")  # Added to remove warning around resetting time index.
+    ds = ds.rename(to_underscores)  # type: ignore
+
+    species_lower = species.lower()
+    species_search = species_lower.replace(" ", "_")
+
+    variable_names = cast(dict[str, Any], ds.variables)
+    matched_keys = [var for var in variable_names if species_search in var]
+
+    # If we don't have any variables to rename, raise an error
+    if not matched_keys:
+        raise NameError(f"Cannot find species {species_search} in Dataset variables")
+
+    species_rename = {}
+    for var in matched_keys:
+        species_rename[var] = var.replace(species_search, species_label)
+
+    ds = ds.rename(species_rename)
 
     return ds

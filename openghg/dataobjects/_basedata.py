@@ -2,7 +2,6 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from typing import Dict, Optional, Union
 from openghg.store.storage import LocalZarrStore
 import xarray as xr
 from pandas import Timestamp, Timedelta
@@ -15,15 +14,15 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class _BaseData:
     def __init__(
         self,
-        metadata: Dict,
-        data: Optional[xr.Dataset] = None,
-        uuid: Optional[str] = None,
-        version: Optional[str] = None,
-        start_date: Optional[Union[str, Timestamp]] = None,
-        end_date: Optional[Union[str, Timestamp]] = None,
+        metadata: dict,
+        data: xr.Dataset | None = None,
+        uuid: str | None = None,
+        version: str | None = None,
+        start_date: str | Timestamp | None = None,
+        end_date: str | Timestamp | None = None,
         sort: bool = True,
         elevate_inlet: bool = False,
-        attrs_to_check: Optional[Dict] = None,
+        attrs_to_check: dict | None = None,
     ) -> None:
         """
         This handles data for each of the data type classes. It accepts either a Dataset
@@ -37,7 +36,7 @@ class _BaseData:
             version: Version of data requested from Datasource
             start_date: Start date of data to retrieve
             end_date: End date of data to retrieve
-            sort: Sort the resulting Dataset by the time dimension, defaults to False
+            sort: Sort the resulting Dataset by the time dimension, defaults to True
             elevate_inlet: Force the elevation of the inlet attribute
             attrs_to_check: Attributes to check for duplicates. If duplicates are present
                 a new data variable will be created containing the values from each dataset
@@ -62,6 +61,8 @@ class _BaseData:
         if attrs_to_check is not None:
             raise NotImplementedError("attrs_to_check not implemented yet")
 
+        sorted = False  # Check so we don't sort more than once
+
         if data is not None:
             self.data = data
         elif uuid is not None and version is not None:
@@ -80,8 +81,18 @@ class _BaseData:
 
             self.data = self._zarrstore.get(version=version)
             if slice_time:
+                # If slicing by time, this must be sorted along the time dimension
+                if sort is False:
+                    logger.warning(
+                        f"Ignoring sort={sort} input as it is necessary to sort the data when extracting a start and end date range."
+                    )
+
+                self.data = self.data.sortby("time")
+                sorted = True
+
                 if self.data.time.size > 1:
                     start_date = start_date - Timedelta("1s")
+                    # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
                     end_date = end_date - Timedelta("1s")
 
                     # TODO - I feel we should do this in a tider way
@@ -94,7 +105,7 @@ class _BaseData:
                 "Must supply either data or uuid and version, cannot create an empty data object."
             )
 
-        if sort:
+        if sort and not sorted:
             try:
                 self.data = self.data.sortby("time")
             except KeyError:
