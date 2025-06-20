@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
 - Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
 
+### Fixed
+
+- Added unit of `xch4` data var as units attribute to `mf` inside `get_obs_column`. [PR #1360](https://github.com/openghg/openghg/pull/1360)
+
 ## [0.14.0] - 2025-04-16
 
 ### Added
