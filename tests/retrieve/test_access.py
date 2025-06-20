@@ -436,3 +436,15 @@ def test_get_obs_surface_elevate_inlets():
     result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
 
     assert "inlet" in result.data.data_vars
+    assert "WMO-X2004A" in result.metadata["calibration_scale"]
+
+def test_get_obs_convert_calibration_scale():
+    """ To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
+
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4", calibration_scale="CSIRO-94")
+
+    assert "CSIRO-94" == result.data['mf'].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data['mf_number_of_observations'].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data['mf_variability'].attrs["calibration_scale"]
+    assert "calibration_scale" not in result.data['inlet'].attrs
+    assert "CSIRO-94" in result.metadata["calibration_scale"]
