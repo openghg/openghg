@@ -178,14 +178,7 @@ this is displayed:
 
     from openghg.plotting import plot_timeseries
 
-    # without calibration_scale conversion
     plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm")
-
-    # with calibration scale conversion
-    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm", calibration_scale="TU-87")
-
-.. note::
-    Passing `calibration_scale="TU-87"` in the function call will change the calibration scale of the existing data before plotting.
 
 .. raw:: html
 
@@ -211,11 +204,7 @@ and and responsive, even with relatively large amounts of data.
 
 .. code:: ipython3
 
-    # without calibration scale conversion
     plot_timeseries(data=all_ch4_tac, units="ppb")
-
-    # with calibration scale conversion
-    plot_timeseries(data=all_ch4_tac, units="ppb", calibration_scale="TU-87")
 
 .. raw:: html
 
@@ -248,3 +237,5 @@ we want to compare and make a plot
 .. raw:: html
 
    <iframe src="../../../_static/bsd_tac_ch4.html" width="100%" height="400"></iframe>
+
+
