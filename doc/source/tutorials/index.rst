@@ -21,6 +21,7 @@ They'll also help you with managing and customising your object store.
    :caption: Analysing data
 
    local/Analysing_data/Comparing_with_emissions
+   local/Analysing_data/Comparing_satellite_observations_with_emissions
    local/Analysing_data/Working_with_co2
 
 .. toctree::
