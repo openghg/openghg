@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Union
+from openghg_calscales.functions import convert
 
 from openghg.data_processing import surface_obs_resampler
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
@@ -14,7 +15,6 @@ from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
 
 from pandas import Timestamp
-from xarray import Dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -184,6 +184,8 @@ def get_obs_surface(
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
+        if "inlet_height" in data.data_vars and "inlet" not in data.data_vars:
+            data["inlet"] = data["inlet_height"]
 
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
@@ -216,11 +218,30 @@ def get_obs_surface(
 
     if "calibration_scale" in data.attrs:
         data.attrs["scale"] = data.attrs.pop("calibration_scale")
+        existing_calibration_scale = data.attrs["scale"]
 
-    if calibration_scale is not None:
-        data = _scale_convert(data, species, calibration_scale)
+        if calibration_scale is not None:
+            target_scale = calibration_scale
+            original_scale = existing_calibration_scale
+
+            if original_scale and target_scale and original_scale != target_scale:
+                logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
+                for var_name in (
+                    v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
+                ):
+                    # Convert function from openghg_calscales
+                    data[var_name] = convert(
+                        c=data[var_name],
+                        species=species,
+                        scale_original=original_scale,
+                        scale_new=target_scale,
+                    )
+                    data[var_name].attrs["calibration_scale"] = target_scale
+
+            data.attrs["scale"] = target_scale
 
     metadata = retrieved_data.metadata
+    metadata["calibration_scale"] = data.attrs["scale"]
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
@@ -275,11 +296,11 @@ def get_obs_column(
     if return_mf:
         if max_level > max(obs_data.data.lev.values) + 1:
             logger.warning(
-                f"passed max level is above max level in data ({max(obs_data.data.lev.values)+1}). Defaulting to highest level"
+                f"passed max level is above max level in data ({max(obs_data.data.lev.values) + 1}). Defaulting to highest level"
             )
             max_level = max(obs_data.data.lev.values) + 1
 
-        ## processing taken from acrg/acrg/obs/read.py get_gosat()
+        # processing taken from acrg/acrg/obs/read.py get_gosat()
         lower_levels = list(range(0, max_level))
 
         prior_factor = (
@@ -301,6 +322,7 @@ def get_obs_column(
         )
         obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
 
+        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             "xch4",
@@ -497,54 +519,56 @@ def get_footprint(
     #     species = metadata.get("species", "INERT")
 
 
-def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
-    """Convert to a new calibration scale
+# TODO: Discuss its importance, or any useful bits that can be picked up before removing the function
 
-    Args:
-        data: Must contain an mf variable (mole fraction), and scale must be in global attributes
-        species: species name
-        to_scale: Calibration scale to convert to
-    Returns:
-        xarray.Dataset: Dataset with mole fraction data scaled
-    """
-    from numexpr import evaluate
-    from openghg.util import get_datapath
-    from pandas import read_csv
+# def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
+#     """Convert to a new calibration scale
 
-    # If scale is already correct, return
-    ds_scale = data.attrs["scale"]
-    if ds_scale == to_scale:
-        return data
+#     Args:
+#         data: Must contain an mf variable (mole fraction), and scale must be in global attributes
+#         species: species name
+#         to_scale: Calibration scale to convert to
+#     Returns:
+#         xarray.Dataset: Dataset with mole fraction data scaled
+#     """
+#     from numexpr import evaluate
+#     from openghg.util import get_datapath
+#     from pandas import read_csv
 
-    scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
+#     # If scale is already correct, return
+#     ds_scale = data.attrs["scale"]
+#     if ds_scale == to_scale:
+#         return data
 
-    scale_converter = read_csv(scale_convert_filepath)
-    scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
-        ["species", "scale1", "scale2"]
-    ].dropna(axis=0, how="any")
+#     scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
 
-    if len(scale_converter_scales) == 0:
-        raise ValueError(
-            f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
-        )
-    elif len(scale_converter_scales) > 1:
-        raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
-    else:
-        row = scale_converter_scales.index[0]
+#     scale_converter = read_csv(scale_convert_filepath)
+#     scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
+#         ["species", "scale1", "scale2"]
+#     ].dropna(axis=0, how="any")
 
-    converter = scale_converter.loc[row]
+#     if len(scale_converter_scales) == 0:
+#         raise ValueError(
+#             f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
+#         )
+#     elif len(scale_converter_scales) > 1:
+#         raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
+#     else:
+#         row = scale_converter_scales.index[0]
 
-    direction = "2to1" if to_scale == converter["scale1"] else "1to2"
+#     converter = scale_converter.loc[row]
 
-    # flake8: noqa: F841
-    # scale_convert file has variable X in equations, so let's create it
-    X = 1.0
-    scale_factor = evaluate(converter[direction])
-    data["mf"].values *= scale_factor
+#     direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
-    data.attrs["scale"] = to_scale
+#     # flake8: noqa: F841
+#     # scale_convert file has variable X in equations, so let's create it
+#     X = 1.0
+#     scale_factor = evaluate(converter[direction])
+#     data["mf"].values *= scale_factor
 
-    return data
+#     data.attrs["scale"] = to_scale
+
+#     return data
 
 
 def _create_keyword_string(**kwargs: Any) -> str:

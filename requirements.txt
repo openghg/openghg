@@ -7,7 +7,7 @@ ipywidgets
 matplotlib
 msgpack
 nbformat
-numcodecs
+numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
@@ -26,3 +26,6 @@ toml
 urllib3 >= 1.26.3
 xarray
 zarr==2.18.3
+openghg-calscales
+sympy
+networkx

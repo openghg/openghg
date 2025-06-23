@@ -1,9 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.objectstore import get_writable_bucket, get_metakey_defaults
+from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
-from openghg.store import Footprints
+from openghg.store import Footprints, get_metakey_defaults
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
@@ -227,6 +227,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "fp_high",
         "index_lons",
         "index_lats",
+        "release_height",
     ]
 
     del footprint_data.attrs["processed"]
@@ -604,6 +605,18 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_w" in data_vars
 
 
+@pytest.mark.parametrize("source_format", ["PARIS", "FLEXPART"])
+def test_footprint_schema_paris(source_format):
+    """Check if `fp_time_resolved` and `fp_residual` are present if `source_format` is PARIS or FLEXPART."""
+    data_schema = Footprints.schema(time_resolved=True, source_format=source_format)
+
+    data_vars = data_schema.data_vars
+
+    assert "fp_time_resolved" in data_vars
+    assert "fp_residual" in data_vars
+    assert "fp" not in data_vars
+
+
 def test_process_footprints():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
@@ -801,7 +814,8 @@ def mock_metakeys():
     # TODO - implement this in a different way
     default_keys = get_metakey_defaults()
 
-    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]},
+                                              "special_tag": {"type": ["str"]}}
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield

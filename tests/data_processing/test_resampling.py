@@ -191,3 +191,19 @@ def test_attributes_kept(func, func_kwargs, tac_ds):
     resampled_ds = func(tac_ds, "4h", **func_kwargs)
 
     assert tac_ds.attrs.items() <= resampled_ds.attrs.items()
+
+
+def test_drop_na(tac_ds):
+    """NaNs should only be dropped from repeatability and variability if *both* are NaN."""
+    n = len(tac_ds.time)
+    half_n = n // 2
+
+    tac_ds["ch4_repeatability"] = (["time"], small_randoms(n))
+
+    tac_ds["ch4_variability"][:half_n] = np.nan
+    tac_ds["ch4_repeatability"][half_n:] = np.nan
+
+    result_drop = surface_obs_resampler(tac_ds, "4h", "ch4")
+    result_no_drop = surface_obs_resampler(tac_ds, "4h", "ch4", drop_na=False)
+
+    assert len(result_drop.time) == len(result_no_drop.time)

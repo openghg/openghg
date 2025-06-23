@@ -38,7 +38,8 @@
     "1e-3": "mmol mol$^{-1}$",
     "1e-6": "μmol mol$^{-1}$",
     "1e-9": "nmol mol$^{-1}$",
-    "1e-12": "pmol mol$^{-1}$"
+    "1e-12": "pmol mol$^{-1}$",
+    "1": "mol mol$^{-1}$"
   },
   "TMB": {
     "unit_species": {

@@ -11,3 +11,10 @@ from ._populate import add_noaa_obspack
 from ._metstore import METStore
 from ._meta import data_class_info, get_data_class
 from ._flux_timeseries import FluxTimeseries
+from ._metakeys_config import (
+    check_metakeys,
+    get_metakeys,
+    write_metakeys,
+    create_custom_config,
+    get_metakey_defaults,
+)

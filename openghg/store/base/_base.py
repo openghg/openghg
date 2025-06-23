@@ -13,11 +13,13 @@ from collections.abc import MutableSequence, Sequence
 from pandas import Timestamp
 import xarray as xr
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json, get_metakeys
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType, MetadataAndData
 from openghg.util import timestamp_now, to_lowercase, hash_file
+
+from .._metakeys_config import get_metakeys
 
 
 T = TypeVar("T", bound="BaseStore")
