@@ -14,6 +14,8 @@ from openghg.dataobjects import (
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
 
+from openghg.retrieve import _units
+
 from pandas import Timestamp
 
 logger = logging.getLogger("openghg.retrieve")
@@ -245,8 +247,11 @@ def get_obs_surface(
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
+    
+    # Attribute pint units to observations
+    obs_data_u = _units.AssignUnits(obs_data).attribute()
 
-    return obs_data
+    return obs_data_u
 
 
 def get_obs_column(
@@ -412,7 +417,12 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    return FluxData(data=em_data.data, metadata=em_data.metadata)
+    fluxdata = FluxData(data=em_data.data, metadata=em_data.metadata)
+    
+    # Attribute pint units to flux data
+    fluxdata_u = _units.AssignUnits(fluxdata).attribute()
+    
+    return fluxdata_u
 
 
 def get_bc(
@@ -446,7 +456,12 @@ def get_bc(
         **kwargs,
     )
 
-    return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
+    bcdata = BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
+    
+    # Attribute pint units to BC data
+    bcdata_u = _units.AssignUnits(bcdata).attribute()
+
+    return bcdata_u
 
 
 def get_footprint(
@@ -512,7 +527,12 @@ def get_footprint(
         **kwargs,
     )
 
-    return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
+    fpdata= FootprintData(data=fp_data.data, metadata=fp_data.metadata)
+    
+    # Attribute pint units to footprint data
+    fpdata_u = _units.AssignUnits(fpdata).attribute()
+    
+    return fpdata_u
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?
     # if species is None:
