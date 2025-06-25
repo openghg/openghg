@@ -226,7 +226,7 @@ class StoredData:
         """
 
         if filename:
-            self.filename = filename
+            self.filename = Path(filename)
 
         if self.filename is None:
             logger.info("Creating filename for stored data before writing to the obspack.")
