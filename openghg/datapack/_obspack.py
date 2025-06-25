@@ -361,18 +361,40 @@ class ObsPack:
         - Collated details of site information for the observation data
     """
 
-    def __init__(self, output_folder: pathType, obspack_name: str | None = None):
+    def __init__(self,
+                 output_folder: pathType,
+                 obspack_name: str | None = None,
+                 obspack_stub: str | None = None,
+                 version: str | None = None,
+                 major_version_only: bool = False,
+                 minor_version_only: bool = False,
+                 current_obspacks: list | None = None):
         """
         Args:
             output_folder: Path to top level directory where obspack folder will be created.
             obspack_name: Full name for the obspack. This can either be specified directly
                 upon initialisation of the ObsPack object or can be created using an obspack_stub
                 and the self.define_obspack_name() function.
+            obspack_stub: Start of the obspack_name. This will be assumed to be standard for
+                other obspacks of the same type.
+            version: Can explicitly define a version to be used to create the obspack_name
+            major_version_only: Only increase the major version.
+            minor_version_only: Only increase the minor version.
+            current_obspacks: List of previous obspacks to use when defining the new version
+                in obspack_name.            
         """
         self.output_folder = Path(output_folder)
         if obspack_name is not None:
             self.obspack_name: str | None = obspack_name
             self.version: str | None = "v1"
+        elif obspack_stub is not None:
+            self.obspack_name, self.version = define_obspack_name(
+                obspack_stub=obspack_stub,
+                version=version,
+                major_version_only=major_version_only,
+                minor_version_only=minor_version_only,
+                current_obspacks=current_obspacks,                
+            )
         else:
             self.obspack_name = None
             self.version = None
