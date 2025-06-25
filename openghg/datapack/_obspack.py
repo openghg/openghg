@@ -229,7 +229,7 @@ class StoredData:
             self.filename = filename
 
         if self.filename is None:
-            logger.info("Creating filename before writing to file.")
+            logger.info("Creating filename for stored data before writing to the obspack.")
             self.update_filename(
                 include_obs_type=include_obs_type,
                 include_version=include_version,
