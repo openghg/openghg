@@ -75,8 +75,23 @@ class StoredData:
         """
         Creation of a StoredData object. This expects a retrieved data object from the object store.
 
+        Args:
+            data: ObsData or ObsColumnData object. This is the object returned when retrieving data
+                from an object store.
+            obs_type: Observation type associated with this dataset (see define_obs_types() for full list)
+            subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
+                this. This can be specified as:
+                    - no subfolder(s) - pass empty string
+                    - one subfolder for all files
+                    - dictionary of subfolders per obs_type.
+                    - if obs_type is not within dictionary - obs_type will be used as subfolder name
+            filename: Output filename. See define_full_path() method for how full path to
+                the file stored is constructed.
+            data_version: Version of the data. If not specified and include_version is True this
+                will attempt to extract the latest version details from the metadata.
+
         Note: at the moment this is specific to observation types but this could be expanded
-        to include all output data types
+        to include all output data types.
         """
         self.stored_data = data
         self.data = data.data
