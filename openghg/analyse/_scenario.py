@@ -1251,7 +1251,7 @@ class ModelScenario:
         self,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
-        output_units: float = 1e-9,
+        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1453,7 +1453,7 @@ class ModelScenario:
             sources=sources, resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
         )
         x_data = modelled_obs["time"]
-        y_data = modelled_obs.data
+        y_data = modelled_obs["mf_mod"]
 
         species = self.species
         if sources is None:

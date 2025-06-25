@@ -214,7 +214,7 @@ This could then be plotted directly using the xarray plotting methods:
 
 .. code:: ipython3
 
-    modelled_observations.plot()  # Can plot using xarray plotting methods
+    modelled_observations["mf_mod"].plot()  # Can plot using xarray plotting methods
 
 The modelled baseline, based on the linked boundary conditions, can also
 be calculated in a similar way:
