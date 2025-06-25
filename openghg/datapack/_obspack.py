@@ -85,9 +85,9 @@ class StoredData:
                     - one subfolder for all files
                     - dictionary of subfolders per obs_type.
                     - if obs_type is not within dictionary - obs_type will be used as subfolder name
-            filename: Output filename. See define_full_path() method for how full path to
+            filename: Output filename within obspack folder structure. See define_full_path() method for how full path to
                 the file stored is constructed.
-            data_version: Version of the data. If not specified and include_version is True this
+            data_version: Version of the data. If not specified this
                 will attempt to extract the latest version details from the metadata.
 
         Note: at the moment this is specific to observation types but this could be expanded
@@ -100,6 +100,11 @@ class StoredData:
         self.obs_type = obs_type
 
         self.filename = Path(filename) if filename is not None else None
+
+        # If input filename already has folder structure, don't add a default subfolder
+        if str(self.filename.parent) != ".":
+            if subfolder is None:
+                subfolder = ""
 
         self.add_subfolder(subfolder)  # Right to add default subfolder here?
         self.add_data_version(data_version)
@@ -210,6 +215,7 @@ class StoredData:
         data_version: str | None = None,
         name_components: MultiNameComponents | None = None,
         name_suffixes: dict | None = None,
+        filename: pathType | None = None,
     ) -> Path:
         """
         Define full path for the output filename. This is based on the structure:
@@ -218,6 +224,9 @@ class StoredData:
         Returns:
             Path: full output file path
         """
+
+        if filename:
+            self.filename = filename
 
         if self.filename is None:
             logger.info("Creating filename before writing to file.")

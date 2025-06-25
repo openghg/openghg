@@ -358,6 +358,7 @@ def define_full_obspack_filename(
         {output_folder} / {obspack_name} / {subfolder} / {filename}
 
     Args:
+        filename: Descriptive filename for the output file
         obspack_name: Full name for the obspack
         output_folder: Top level directory.
         subfolder: By default the obs_type will be used to create a subfolder structure. Specifying subfolder directly, supercedes
