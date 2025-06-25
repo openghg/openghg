@@ -28,6 +28,16 @@
     "nanomol mol-1",
     "pmol mol-1"
   ],
+
+  "unit_non_standard_interpret": {
+    "permil": "permille",
+    "permille": "permille",
+    "permeg": "permeg",
+    "per mil": "permille",
+    "per mille": "permille",
+    "per meg": "permeg"
+  }, 
+
   "unit_non_standard": [
     "permil",
     "permille",
