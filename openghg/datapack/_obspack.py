@@ -102,7 +102,7 @@ class StoredData:
         self.filename = Path(filename) if filename is not None else None
 
         # If input filename already has folder structure, don't add a default subfolder
-        if str(self.filename.parent) != ".":
+        if self.filename is not None and str(self.filename.parent) != ".":
             if subfolder is None:
                 subfolder = ""
 
