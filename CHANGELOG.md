@@ -16,12 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
 - Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
 - Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function.[PR #1361](https://github.com/openghg/openghg/pull/1361)
+- Added option for attributing pint units to different datasets in `_units.py`
+
 
 ### Updated
 
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
 - Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
 - Updated '_scale_convert' to 'convert' function from openghg_calscales package. [PR #1349](https://github.com/openghg/openghg/pull/1349)
+- Updated `_access` to call the `_units` class for assigning pint units for each DataObject 
 
 ### Fixed
 
