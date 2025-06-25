@@ -361,14 +361,16 @@ class ObsPack:
         - Collated details of site information for the observation data
     """
 
-    def __init__(self,
-                 output_folder: pathType,
-                 obspack_name: str | None = None,
-                 obspack_stub: str | None = None,
-                 version: str | None = None,
-                 major_version_only: bool = False,
-                 minor_version_only: bool = False,
-                 current_obspacks: list | None = None):
+    def __init__(
+        self,
+        output_folder: pathType,
+        obspack_name: str | None = None,
+        obspack_stub: str | None = None,
+        version: str | None = None,
+        major_version_only: bool = False,
+        minor_version_only: bool = False,
+        current_obspacks: list | None = None,
+    ):
         """
         Args:
             output_folder: Path to top level directory where obspack folder will be created.
@@ -381,7 +383,7 @@ class ObsPack:
             major_version_only: Only increase the major version.
             minor_version_only: Only increase the minor version.
             current_obspacks: List of previous obspacks to use when defining the new version
-                in obspack_name.            
+                in obspack_name.
         """
         self.output_folder = Path(output_folder)
         if obspack_name is not None:
@@ -393,7 +395,7 @@ class ObsPack:
                 version=version,
                 major_version_only=major_version_only,
                 minor_version_only=minor_version_only,
-                current_obspacks=current_obspacks,                
+                current_obspacks=current_obspacks,
             )
         else:
             self.obspack_name = None
