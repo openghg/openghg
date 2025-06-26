@@ -14,7 +14,7 @@
         "per mil": "1",
         "permeg": "1",
         "per meg": "1",
-        "else": "unknown",
+        "else": "unknown"
     },
     "unit_mol_fraction": [
         "ppm",
@@ -26,7 +26,7 @@
         "micromol mol-1",
         "nmol mol-1",
         "nanomol mol-1",
-        "pmol mol-1",
+        "pmol mol-1"
     ],
     "unit_non_standard_interpret": {
         "permil": "permille",
@@ -34,7 +34,7 @@
         "permeg": "permeg",
         "per mil": "permille",
         "per mille": "permille",
-        "per meg": "permeg",
+        "per meg": "permeg"
     },
     "unit_non_standard": ["permil", "permille", "permeg", "per mil", "per mille", "per meg"],
     "unit_pint": {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq"},
@@ -43,7 +43,7 @@
         "1e-6": "μmol mol$^{-1}$",
         "1e-9": "nmol mol$^{-1}$",
         "1e-12": "pmol mol$^{-1}$",
-        "1": "mol mol$^{-1}$",
+        "1": "mol mol$^{-1}$"
     },
     "TMB": {
         "unit_species": {"CO2": "ppm", "CH4": "ppb", "CO": "ppm"},
@@ -53,8 +53,8 @@
         "global_attributes": {
             "data_owner": "Valerio Ferracci",
             "data_owner_email": "V.Ferracci@cranfield.ac.uk",
-            "Notes": "~5m above high tide water level, in tidal region of the Thames",
-        },
+            "Notes": "~5m above high tide water level, in tidal region of the Thames"
+        }
     },
     "NPL": {
         "unit_species": {"CO2": "ppm", "CH4": "ppb"},
@@ -64,8 +64,8 @@
         "global_attributes": {
             "data_owner": "Tim Arnold",
             "data_owner_email": "tim.arnold@npl.co.uk",
-            "Notes": "Rooftop instrument at NPL campus in Teddington",
-        },
+            "Notes": "Rooftop instrument at NPL campus in Teddington"
+        }
     },
     "NIWA": {
         "unit_species": {"CH4": "ppb"},
@@ -74,8 +74,8 @@
         "inlet": "10m",
         "global_attributes": {
             "data_owner": "Sara Mikaloff-Fletcher",
-            "data_owner_email": "Sara.Mikaloff-Fletcher@niwa.co.nz",
-        },
+            "data_owner_email": "Sara.Mikaloff-Fletcher@niwa.co.nz"
+        }
     },
     "BTT": {
         "unit_species": {"CO2": "ppm", "CH4": "ppb", "N2O": "1e-9", "CO": "ppm"},
@@ -83,7 +83,7 @@
         "instrument": "Picarro 2311-f",
         "inlet": "192m",
         "sampling_period": 1800,
-        "global_attributes": {"data_owner": "Carole Helfter", "data_owner_email": "caro2@ceh.ac.uk"},
+        "global_attributes": {"data_owner": "Carole Helfter", "data_owner_email": "caro2@ceh.ac.uk"}
     },
     "NOAA": {
         "unit_species": {"CH4": "ppb", "C2H6": "ppb", "CO2": "ppm", "CH4C13": "permil", "CO": "ppb"},
@@ -92,19 +92,19 @@
             "C2H6": "GC-FID",
             "CO2": "NDIR",
             "CH4C13": "IRMS",
-            "CO": "GC-HgO-VUV",
+            "CO": "GC-HgO-VUV"
         },
         "scale": {
             "CH4": "NOAA04",
             "C2H6": "NOAA12",
             "CO2": "WMO_X2007",
             "CH4C13": "NOAA-INSTAAR",
-            "CO": "WMO CO_X2014A",
+            "CO": "WMO CO_X2014A"
         },
         "global_attributes": {
             "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
-            "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
-        },
+            "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov"
+        }
     },
     "EUROCOM": {
         "global_attributes": {
@@ -113,7 +113,7 @@
             "main_provider_name": "See Obspack",
             "main_provider_affiliation": "See Obspack",
             "main_provider_email": "See Obspack",
-            "fair_usage": "Contact dataprovider with Obspack details before use",
+            "fair_usage": "Contact dataprovider with Obspack details before use"
         },
         "instrument_dict": {
             "MHD": "CRDS",
@@ -140,7 +140,7 @@
             "PRS": "CRDS",
             "TTA": "CRDS",
             "HFD": "CRDS",
-            "SVB": "CRDS",
+            "SVB": "CRDS"
         },
         "intake_height": {
             "MHD": 10,
@@ -167,7 +167,7 @@
             "PRS": 10,
             "TTA": 222,
             "HFD": 100,
-            "SVB": 150,
+            "SVB": 150
         },
         "calibration": {
             "MHD": {"695": "WMOX2007", "41": "Unknown,WMOX2007", "54": "Unknown,WMOX2007"},
@@ -187,7 +187,7 @@
                 "187": "WMOX2007",
                 "75": "Unknown,WMOX2007",
                 "91": "WMOX2007",
-                "379": "WMOX2007",
+                "379": "WMOX2007"
             },
             "TRN": {"472": "WMOX2007", "108": "WMOX2007"},
             "WAO": "WMO CO2 X2007",
@@ -200,7 +200,7 @@
             "PRS": "WMO CO2 X2007",
             "TTA": "WMO CO2 X2007",
             "HFD": "WMO CO2 X2007",
-            "SVB": "WMO CO2 X2007",
+            "SVB": "WMO CO2 X2007"
         },
         "locations": {
             "MHD": {"latitude": 53.32611, "longitude": -9.90389},
@@ -227,7 +227,7 @@
             "BIK": {"latitude": 53.23, "longitude": 23.01},
             "BIR": {"latitude": 58.23, "longitude": 8.15},
             "PRS": {"latitude": 45.935, "longitude": 7.707},
-            "SVB": {"latitude": 64.14, "longitude": 19.46},
-        },
-    },
+            "SVB": {"latitude": 64.14, "longitude": 19.46}
+        }
+    }
 }
