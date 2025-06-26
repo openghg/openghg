@@ -2,6 +2,17 @@
 Adding observation data
 =======================
 
+.. jupyter-execute::
+    :hide-code:
+
+    import logging
+    import openghg
+
+    logger = logging.getLogger("openghg")
+    for handler in logger.handlers:
+        handler.setLevel(logging.ERROR)
+
+
 This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
@@ -27,7 +38,7 @@ this we use the ``use_tutorial_store`` function from ``openghg.tutorial``.
 This sets the ``OPENGHG_TUT_STORE`` environment variable for this session and
 won't affect your use of OpenGHG outside of this tutorial.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import use_tutorial_store
 
@@ -55,7 +66,7 @@ not be relevant.
 For the full list of accepted observation inputs and source formats, call
 the function ``summary_source_formats``:
 
-.. ipython:: python
+.. jupyter-execute::
 
     from openghg.standardise import summary_source_formats
 
@@ -69,7 +80,7 @@ the function ``summary_source_formats``:
 There may be multiple source formats for a given site.
 For instance, the Tacolneston site in the UK (site code “TAC”) has four entries:
 
-.. ipython:: python
+.. jupyter-execute::
 
     summary[summary["Site code"] == "TAC"]
 
@@ -77,13 +88,13 @@ For instance, the Tacolneston site in the UK (site code “TAC”) has four entr
 Let's see what data is available for a given source.
 First, we'll list all source formats.
 
-.. ipython:: python
+.. jupyter-execute::
 
     summary["Source format"].unique()
 
 Now we'll find all data with source format ``"CRDS"``.
 
-.. ipython:: python
+.. jupyter-execute::
 
     summary[summary["Source format"] == "CRDS"]
 
@@ -95,7 +106,7 @@ in the DECC network. (Data at surface sites is measured in-situ.)
 
 First we retrieve the raw data.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import retrieve_example_data
 
@@ -112,18 +123,13 @@ following arguments:
 * ``network``: ``"DECC"``
 * ``source_format``: ``"CRDS"``, the type of data we want to process
 
-.. ipython::
+.. jupyter-execute::
 
-    In [1]: from openghg.standardise import standardise_surface
+    from openghg.standardise import standardise_surface
 
-    @verbatim
-    In [2]: decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC")
+    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC")
 
-    @verbatim
-    In [3]: decc_results
-    Out[3]: {'processed': {'tac.picarro.hourly.54m.dat': {'ch4': {'uuid': 'e2339fdf-c0d5-46b8-b5b9-3d682610e9fe', 'new': True}, 'co2': {'uuid': '1b4603e6-cac2-458c-b47e-e441864b29eb', 'new': True}},
-    'tac.picarro.hourly.100m.dat': {'ch4': {'uuid': '2e5935cc-07e3-4c0f-bd7c-8c6e4e2b13b7', 'new': True}, 'co2': {'uuid': '64c020b8-35dd-483f-b38c-99de83ea412d', 'new': True}},
-    'tac.picarro.hourly.185m.dat': {'ch4': {'uuid': '13172db7-7859-4f38-90cf-219c1fbe3b99', 'new': True}, 'co2': {'uuid': 'c79a3473-9f50-47d8-83d8-66a62fd085f7', 'new': True}}}}
+    decc_results
 
 This extracts the data and metadata from the files,
 standardises them, and adds them to our object store. The keywords of ``site`` and ``network``,
@@ -179,7 +185,7 @@ to use this form of input file, we create a tuple with the data filename and the
 
 First we retrieve example data from the  Cape Grim station in Australia (site code "CGO"").
 
-.. code:: ipython3
+.. jupyter-execute::
 
     cgo_url = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
 
@@ -187,14 +193,14 @@ First we retrieve example data from the  Cape Grim station in Australia (site co
 
 ``capegrim_data`` is a list of two file paths, one for the data file and one for the precisions file:
 
-.. code::
+.. code:: python
 
     [PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.C'),
     PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C')]
 
 We put the data file and precisions file into a tuple:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     capegrim_tuple = (capegrim_data[0], capegrim_data[1])
 
@@ -207,34 +213,15 @@ data by including the right arguments:
 * ``instrument``: ``"medusa"``
 * ``source_format`` (data type): ``"GCWERKS"``
 
-.. code:: ipython3
+.. jupyter-execute::
 
     agage_results = standardise_surface(filepath=capegrim_tuple, source_format="GCWERKS", site="CGO",
                                   network="AGAGE", instrument="medusa")
+    agage_results
 
 When viewing ``agage_results`` there will be a large number of
 Datasource UUIDs shown due to the large number of gases in each data
 file
-
-.. ipython::
-   :verbatim:
-
-   In [15]: agage_results
-   Out[15]:
-   {'processed': {'capegrim.18.C': {'ch4_70m': {'uuid': '200d8a1b-bc41-4f9f-86c4-448c2427d780',
-   'new': True},
-   'cfc12_70m': {'uuid': 'e507358e-ade3-4c83-914e-e486628640ce', 'new': True},
-   'n2o_70m': {'uuid': 'ad381148-76af-4d8c-aaec-f7cc2a0088b7', 'new': True},
-   'cfc11_70m': {'uuid': '2563a11b-2a54-4287-8705-670f34330e33', 'new': True},
-   'cfc113_70m': {'uuid': '6a6e28d9-4242-4c6f-a71a-0d56915a485b', 'new': True},
-   'chcl3_70m': {'uuid': '36af68d9-f421-4feb-9bfd-c719ec603f05', 'new': True},
-   'ch3ccl3_70m': {'uuid': 'f096f4c3-e86f-4d99-8a92-e35dd193cfbc',
-   'new': True},
-   'ccl4_70m': {'uuid': '396be43c-f29a-408e-9a88-c16ffd79da3b', 'new': True},
-   'h2_70m': {'uuid': '62045a91-bac9-4b7d-84b8-696ec8484002', 'new': True},
-   'co_70m': {'uuid': 'a1bd7ab9-4ae0-46aa-8570-ec961f929431', 'new': True},
-   'ne_70m': {'uuid': '950e94fe-6cf9-48e3-b920-275935761885', 'new': True}}}}
-
 
 However, recently the AGAGE network has begun to also produce netCDF files, which are processed by Matt
 Rigby's `agage-archive <https://github.com/mrghg/agage-archive>`_ repository. These files are split by site, 
@@ -280,23 +267,19 @@ We can search the object store by property using the
 For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the ``species`` keyword:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.retrieve import search_surface
 
     cfc_results = search_surface(species="cfc11")
-    cfc_results
+    cfc_results.results
 
 We could also look for details of all the data measured at the Tacolneston
 (“TAC”) site using the ``site`` keyword:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     tac_results = search_surface(site="tac")
-    tac_results
-
-.. code:: ipython3
-
     tac_results.results
 
 For this site you can see this contains details of each of the species
@@ -312,18 +295,15 @@ object to be returned. If no results are found ``None`` is returned.
 .. |SearchResults| replace:: ``SearchResults``
 .. _SearchResults: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult
 
-.. code:: ipython3
+.. jupyter-execute::
 
     results = search_surface(site="tac", species="co2")
-
-.. code:: ipython3
-
     results.results
 
 We can retrieve either some or all of the data easily using the
 ``retrieve`` function.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     inlet_54m_data = results.retrieve(inlet="54m")
     inlet_54m_data
@@ -331,12 +311,9 @@ We can retrieve either some or all of the data easily using the
 Or we can retrieve all of the data and get a list of ``ObsData``
 objects.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     all_co2_data = results.retrieve_all()
-
-.. code:: ipython3
-
     all_co2_data
 
 4. Retrieving data
@@ -353,7 +330,7 @@ species and inlet height to retrieve our data. Using `get_*` functions will only
 In this case we want to extract the carbon dioxide (“co2”) data from the
 Tacolneston data (“TAC”) site measured at the “185m” inlet:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.retrieve import get_obs_surface
 
@@ -367,9 +344,17 @@ If we view our returned ``obs_data`` variable this will contain:
 -  ``metadata`` - The associated metadata (accessed using
    e.g. ``obs_data.metadata``).
 
-.. code:: ipython3
+.. jupyter-execute::
 
     co2_data
+
+.. jupyter-execute::
+
+    co2_data.data
+
+.. jupyter-execute::
+
+    co2_data.metadata
 
 We can now make a simple plot using the ``plot_timeseries`` method of
 the ``ObsData`` object.
@@ -377,7 +362,7 @@ the ``ObsData`` object.
    **NOTE:** the plot created below may not show up on the online
    documentation version of this notebook.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     co2_data.plot_timeseries()
 
@@ -390,10 +375,10 @@ to the ``plot_timeseries`` function to modify the labels.
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import clear_tutorial_store
 
-.. code:: ipython3
+.. jupyter-execute::
 
     clear_tutorial_store()
