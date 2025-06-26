@@ -201,7 +201,7 @@ We put the data file and precisions file into a tuple:
 We can add these files to the object store in the same way as the DECC
 data by including the right arguments:
 
-* ``filepaths``: tuple (or list of tuples) with paths to data and precision files
+* ``filepath``: tuple (or list of tuples) with paths to data and precision files
 * ``site`` (site code): ``"CGO"``
 * ``network``: ``"AGAGE"``
 * ``instrument``: ``"medusa"``
@@ -209,7 +209,7 @@ data by including the right arguments:
 
 .. code:: ipython3
 
-    agage_results = standardise_surface(filepaths=capegrim_tuple, source_format="GCWERKS", site="CGO",
+    agage_results = standardise_surface(filepath=capegrim_tuple, source_format="GCWERKS", site="CGO",
                                   network="AGAGE", instrument="medusa")
 
 When viewing ``agage_results`` there will be a large number of
