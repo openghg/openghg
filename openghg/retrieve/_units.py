@@ -18,7 +18,7 @@ class AssignUnits:
 
     def __init__(
         self,
-        data,
+        data: ObsData | FootprintData | FluxData | BoundaryConditionsData,
     ):
         self.data = data
 
@@ -35,14 +35,14 @@ class AssignUnits:
 
         return ureg
 
-    def read_attributes_json(self):
+    def read_attributes_json(self) -> dict:
         """
         Read in OpenGHG attributes.json file
         """
         attrs = load_internal_json("attributes.json")
         return attrs
 
-    def _obs_units(self):
+    def _obs_units(self) -> ObsData | FootprintData | FluxData | BoundaryConditionsData:
         """
         Method for quantifying pint units to
         atmospheric trace gas observations
@@ -87,7 +87,7 @@ class AssignUnits:
 
         return self.data
 
-    def _footprint_units(self):
+    def _footprint_units(self) -> ObsData | FootprintData | FluxData | BoundaryConditionsData:
         """
         Method for quantifying pint units to
         atmospheric transport model data
@@ -121,7 +121,7 @@ class AssignUnits:
 
         return self.data
 
-    def _isoflux_units(self):
+    def _isoflux_units(self) -> ObsData | FootprintData | FluxData | BoundaryConditionsData:
         """
         Method for quantifying pint units to
         (iso)flux data
@@ -145,7 +145,7 @@ class AssignUnits:
 
         return self.data
 
-    def _bc_units(self):
+    def _bc_units(self) -> ObsData | FootprintData | FluxData | BoundaryConditionsData:
         """
         Method for quantifying pint units to
         boundary conditions data
@@ -165,7 +165,7 @@ class AssignUnits:
 
         return self.data
 
-    def attribute(self):
+    def attribute(self) -> ObsData | FootprintData | FluxData | BoundaryConditionsData:
         """
         Method for attributing pint units to different
         OpenGHG dataobjects

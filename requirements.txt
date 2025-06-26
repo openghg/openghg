@@ -16,7 +16,7 @@ openghg_defs
 openpyxl
 pandas >= 2.0
 pint
-pint_xarray
+pint-xarray
 plotly
 pyvis
 rapidfuzz
