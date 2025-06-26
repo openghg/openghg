@@ -11,7 +11,7 @@ from helpers import (
 )
 from openghg.objectstore import get_writable_bucket
 from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux, search
+from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
 from openghg.store.base import Datasource
 from openghg.types import DataOverlapError
@@ -109,7 +109,7 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd():
+def bsd_data_read_gcmd(force=False):
     """
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
@@ -129,6 +129,7 @@ def bsd_data_read_gcmd():
         site=site,
         network=network,
         instrument=instrument,
+        force=force,
     )
 
 
@@ -488,8 +489,24 @@ def test_obs_data_read_data_overwrite_version():
     metadata_sf6 = obs_data_sf6.metadata
     assert metadata_sf6["latest_version"] == "v1"
 
-
 # TODO: Add test for different time values as well.
+
+def test_obs_data_force_update():
+    """
+    Loading same obs surface data twice and checking if using the force=True
+    keyword allows the same data to be added again and a new version created.
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    bsd_data_read_gcmd(force=True)
+
+    # Search for an expected species
+    # GCMD data
+    data_sf6 = get_obs_surface(site="bsd", species="sf6", inlet="108m")
+
+    assert data_sf6 is not None
+    assert data_sf6.metadata["latest_version"] == "v2"
 
 
 #  Look at different data frequencies for the same data
