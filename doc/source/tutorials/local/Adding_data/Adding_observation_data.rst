@@ -2,6 +2,17 @@
 Adding observation data
 =======================
 
+.. jupyter-execute::
+    :hide-code:
+
+    import logging
+    import openghg
+
+    logger = logging.getLogger("openghg")
+    for handler in logger.handlers:
+        handler.setLevel(logging.ERROR)
+
+
 This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
