@@ -259,20 +259,20 @@ added using the same `tag`. For example below we show how to add the same data a
 
     from openghg.standardise import standardise_surface
 
-    standardise_surface(filepath=tac_data,
-                        source_format="CRDS",
-                        site="TAC",
-                        network="DECC",
-                        tag="project1",
-                        force=True)
+    decc_results = standardise_surface(filepath=tac_data,
+                                       source_format="CRDS",
+                                       site="TAC",
+                                       network="DECC",
+                                       tag="project1",
+                                       force=True)
     
-    standardise_surface(filepath=capegrim_tuple,
-                        source_format="GCWERKS",
-                        site="CGO",
-                        network="AGAGE",
-                        instrument="medusa",
-                        tag=["project1", "project2"],
-                        force=True)
+    agage_results = standardise_surface(filepath=capegrim_tuple,
+                                        source_format="GCWERKS",
+                                        site="CGO",
+                                        network="AGAGE",
+                                        instrument="medusa",
+                                        tag=["project1", "project2"],
+                                        force=True)
 
     
 *Note: here we included the force=True keyword as we are adding the same data which has been added in 
