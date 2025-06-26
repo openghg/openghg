@@ -342,7 +342,7 @@ class ObsSurface(BaseStore):
             # the added complication of the GCWERKS precision file handling,
             # so we'll just use the old method for now.
             file_hash = hash_file(filepath=filepath)
-            if file_hash in self._file_hashes and overwrite is False:
+            if file_hash in self._file_hashes and overwrite is False and force is False:
                 logger.warning(
                     "This file has been uploaded previously with the filename : "
                     f"{self._file_hashes[file_hash]} - skipping."
