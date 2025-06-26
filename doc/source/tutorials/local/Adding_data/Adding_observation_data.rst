@@ -112,13 +112,18 @@ following arguments:
 * ``network``: ``"DECC"``
 * ``source_format``: ``"CRDS"``, the type of data we want to process
 
-.. code:: ipython3
+.. ipython::
 
-    from openghg.standardise import standardise_surface
+    In [1]: from openghg.standardise import standardise_surface
 
-    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC")
+    @verbatim
+    In [2]: decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC")
 
-    decc_results
+    @verbatim
+    In [3]: decc_results
+    Out[3]: {'processed': {'tac.picarro.hourly.54m.dat': {'ch4': {'uuid': 'e2339fdf-c0d5-46b8-b5b9-3d682610e9fe', 'new': True}, 'co2': {'uuid': '1b4603e6-cac2-458c-b47e-e441864b29eb', 'new': True}},
+    'tac.picarro.hourly.100m.dat': {'ch4': {'uuid': '2e5935cc-07e3-4c0f-bd7c-8c6e4e2b13b7', 'new': True}, 'co2': {'uuid': '64c020b8-35dd-483f-b38c-99de83ea412d', 'new': True}},
+    'tac.picarro.hourly.185m.dat': {'ch4': {'uuid': '13172db7-7859-4f38-90cf-219c1fbe3b99', 'new': True}, 'co2': {'uuid': 'c79a3473-9f50-47d8-83d8-66a62fd085f7', 'new': True}}}}
 
 This extracts the data and metadata from the files,
 standardises them, and adds them to our object store. The keywords of ``site`` and ``network``,
