@@ -2,6 +2,8 @@ from collections import defaultdict
 import copy
 import logging
 
+import zarr
+
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
@@ -219,6 +221,69 @@ class DataManager:
                     # Update the metadata stored internally so we're up to date
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
+
+    def update_attributes(
+        self,
+        uuid: list | str,
+        version: str | list[str] = "latest",
+        to_update: dict | None = None,
+        to_delete: str | list | None = None,
+    ) -> None:
+        """Update the attributes of the stored Dataset.
+
+        This takes UUIDs of Datasources (and optionally a version tag) and updates
+        the associated attributes:
+        - to update attributes pass in a dictionary of key/value pairs to update.
+        - to delete attributes pass in a list of keys to delete.
+
+        Args:
+            uuid: UUID(s) of Datasources to be updated.
+            version: optional version string
+            to_update: Dictionary of metadata to add/update. New key/value pairs will be added.
+            If the key already exists in the metadata the value will be updated.
+            to_delete: Key(s) to delete from the metadata
+        Returns:
+            None
+        """
+        if to_update is None and to_delete is None:
+            return None
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        if not isinstance(version, list):
+            version = [version] * len(uuid)
+
+        if len(uuid) != len(version):
+            raise ValueError("List passed for 'version' must have same length as 'uuid'.")
+
+        for u, v in zip(uuid, version):
+            updated = False
+
+            d = Datasource(bucket=self._bucket, uuid=u)
+
+            if v == "latest":
+                v = d._latest_version
+
+            zs = d._store._stores[v]  # zarr store for specified version
+            group = zarr.open_group(zs)
+
+            if to_delete is not None and to_delete:
+                if not isinstance(to_delete, list):
+                    to_delete = [to_delete]
+
+                for k in to_delete:
+                    group.attrs.pop(k)
+
+                updated = True
+
+            if to_update is not None and to_update:
+                group.attrs.update(to_update)
+                updated = True
+
+            if updated:
+                zarr.consolidate_metadata(zs)
+                logger.info(f"Modified attributes for {u}.")
 
     def delete_datasource(self, uuid: list | str) -> None:
         """Delete Datasource(s) in the object store.
