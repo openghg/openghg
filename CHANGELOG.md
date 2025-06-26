@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added unit of `xch4` data var as units attribute to `mf` inside `get_obs_column`. [PR #1360](https://github.com/openghg/openghg/pull/1360)
 - Added missing reference to mf_mod while plotting in the tutorial.[PR #1365](https://github.com/openghg/openghg/pull/1365)
+- Fixed bug where `force` keyword was not being used correctly for `standardise_surface` and wasn't allowing the same data to be added again. [PR #1374](https://github.com/openghg/openghg/pull/1374)
 
 ## [0.14.0] - 2025-04-16
 
