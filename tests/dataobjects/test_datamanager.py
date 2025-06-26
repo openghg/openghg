@@ -101,6 +101,28 @@ def test_footprint_attribute_modification(footprint_read):
     assert "author" not in new_attrs
 
 
+def test_footprint_data_variable_attribute_modification(footprint_read):
+    """Test updating units for 'fp' data variable only (not globally or for other data variables)."""
+    search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
+
+    # modify attributes
+    uuid = next(iter(search_res.metadata))
+    to_update = {"units": "bananas"}
+
+    search_res.update_attributes(uuid=uuid, to_update=to_update, data_vars="fp", update_global=False)
+
+    # check new attributes
+    fp_data = get_footprint(site = "TMB",
+                        network = "LGHG",
+                        height = "10m",
+                        domain = "EUROPE",
+                        model = "test_model",
+                        store="user",
+                        )
+    assert fp_data.data.fp.units == "bananas"
+    assert fp_data.data.attrs.get("units") != "bananas"
+
+
 def test_delete_footprint_data(footprint_read):
     res = data_manager(data_type="footprints", site="tmb", store="user")
 

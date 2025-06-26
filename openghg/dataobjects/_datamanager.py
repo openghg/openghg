@@ -1,6 +1,7 @@
 from collections import defaultdict
 import copy
 import logging
+from typing import MutableMapping
 
 import zarr
 
@@ -226,6 +227,8 @@ class DataManager:
         self,
         uuid: list | str,
         version: str | list[str] = "latest",
+        data_vars: str | list[str] | None = None,
+        update_global: bool = True,
         to_update: dict | None = None,
         to_delete: str | list | None = None,
     ) -> None:
@@ -239,6 +242,9 @@ class DataManager:
         Args:
             uuid: UUID(s) of Datasources to be updated.
             version: optional version string
+            data_vars: optional list of data vars to update; if None, then only global attributes
+                will be updated.
+            update_global: if True, update global attributes.
             to_update: Dictionary of metadata to add/update. New key/value pairs will be added.
             If the key already exists in the metadata the value will be updated.
             to_delete: Key(s) to delete from the metadata
@@ -246,6 +252,9 @@ class DataManager:
             None
         """
         if to_update is None and to_delete is None:
+            return None
+
+        if update_global is False and data_vars is None:
             return None
 
         if not isinstance(uuid, list):
@@ -256,6 +265,25 @@ class DataManager:
 
         if len(uuid) != len(version):
             raise ValueError("List passed for 'version' must have same length as 'uuid'.")
+
+        def updater(
+            attrs: MutableMapping, to_update: dict | None = None, to_delete: str | list | None = None
+        ) -> bool:
+            updated = False
+            if to_delete is not None and to_delete:
+                if not isinstance(to_delete, list):
+                    to_delete = [to_delete]
+
+                for k in to_delete:
+                    attrs.pop(k)
+
+                updated = True
+
+            if to_update is not None and to_update:
+                attrs.update(to_update)
+                updated = True
+
+            return updated
 
         for u, v in zip(uuid, version):
             updated = False
@@ -268,18 +296,22 @@ class DataManager:
             zs = d._store._stores[v]  # zarr store for specified version
             group = zarr.open_group(zs)
 
-            if to_delete is not None and to_delete:
-                if not isinstance(to_delete, list):
-                    to_delete = [to_delete]
+            # update global
+            if update_global:
+                updated = updated or updater(group.attrs, to_update, to_delete)
+            # update data vars
+            if data_vars is not None:
+                if not isinstance(data_vars, list):
+                    data_vars = [data_vars]
 
-                for k in to_delete:
-                    group.attrs.pop(k)
-
-                updated = True
-
-            if to_update is not None and to_update:
-                group.attrs.update(to_update)
-                updated = True
+                for dv in data_vars:
+                    try:
+                        arr = group[dv]
+                    except KeyError:
+                        logger.warning(f"Data variable {dv} not present in zarr store. Skipping.")
+                        continue
+                    else:
+                        updated = updated or updater(arr.attrs, to_update, to_delete)
 
             if updated:
                 zarr.consolidate_metadata(zs)
