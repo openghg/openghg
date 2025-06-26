@@ -107,24 +107,18 @@ First we retrieve the raw data.
 Now we add this data to the object store using ``standardise_surface``, passing the
 following arguments:
 
-* ``filepaths``: list of paths to ``.dat`` files
+* ``filepath``: list of paths to ``.dat`` files
 * ``site``:  ``"TAC"``, the site code for Tacolneston
 * ``network``: ``"DECC"``
 * ``source_format``: ``"CRDS"``, the type of data we want to process
 
-.. ipython::
+.. jupyter-execute::
 
-    In [1]: from openghg.standardise import standardise_surface
+    from openghg.standardise import standardise_surface
 
-    @verbatim
-    In [2]: decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
+    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC")
 
-    @verbatim
-    In [3]: decc_results
-    Out[3]: {'processed': {'tac.picarro.hourly.54m.dat': {'ch4': {'uuid': 'e2339fdf-c0d5-46b8-b5b9-3d682610e9fe', 'new': True}, 'co2': {'uuid': '1b4603e6-cac2-458c-b47e-e441864b29eb', 'new': True}},
-    'tac.picarro.hourly.100m.dat': {'ch4': {'uuid': '2e5935cc-07e3-4c0f-bd7c-8c6e4e2b13b7', 'new': True}, 'co2': {'uuid': '64c020b8-35dd-483f-b38c-99de83ea412d', 'new': True}},
-    'tac.picarro.hourly.185m.dat': {'ch4': {'uuid': '13172db7-7859-4f38-90cf-219c1fbe3b99', 'new': True}, 'co2': {'uuid': 'c79a3473-9f50-47d8-83d8-66a62fd085f7', 'new': True}}}}
-
+    decc_results
 
 This extracts the data and metadata from the files,
 standardises them, and adds them to our object store. The keywords of ``site`` and ``network``,
@@ -165,7 +159,7 @@ created when we run ``openghg --quickstart``.
 
     from openghg.standardise import standardise_surface
 
-    decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC", store="user")
+    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC", store="user")
 
 The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
 to more than one store.
@@ -251,12 +245,7 @@ species and instrument and do not need an accompanying precisions file. These ca
 The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly. 
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible. 
 
-
 .. _note-on-datasources:
-
-
-
-
 
 Note on Datasources
 ^^^^^^^^^^^^^^^^^^^
