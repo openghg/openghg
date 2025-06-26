@@ -1,8 +1,5 @@
-import os
-import json
 import pint
 import pint_xarray
-from pathlib import Path
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -11,9 +8,13 @@ from openghg.dataobjects import (
     ObsData,
 )
 
+from openghg.util._file import load_internal_json
+
 
 class AssignUnits:
-    """ """
+    """
+    Class for assigning pint units to OpenGHG objects
+    """
 
     def __init__(
         self,
@@ -38,10 +39,7 @@ class AssignUnits:
         """
         Read in OpenGHG attributes.json file
         """
-        filedir = Path("/user/home/wz22079/my_openghg/openghg/openghg/data")
-        filename = "attributes.json"
-        with open(os.path.join(filedir, filename)) as f:
-            attrs = json.load(f)
+        attrs = load_internal_json("attributes.json")
         return attrs
 
     def _obs_units(self):
@@ -117,7 +115,7 @@ class AssignUnits:
                     for coord in self.data.data[key].coords:
                         self.data.data[key][coord].attrs.pop("units", None)
                     self.data.data[key] = self.data.data[key].pint.quantify(ureg.parse_units(i_unit))
-                except:
+                except ValueError:
                     print(f"Skipping {key} as pint could not parse {i_unit}")
                     pass
 
