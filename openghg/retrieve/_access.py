@@ -247,7 +247,7 @@ def get_obs_surface(
     metadata.update(data.attrs)
 
     obs_data = ObsData(data=data, metadata=metadata)
-    
+
     # Attribute pint units to observations
     obs_data_u = _units.AssignUnits(obs_data).attribute()
 
@@ -418,10 +418,10 @@ def get_flux(
         em_ds = em_ds.drop_vars(names="lev")
 
     fluxdata = FluxData(data=em_data.data, metadata=em_data.metadata)
-    
+
     # Attribute pint units to flux data
     fluxdata_u = _units.AssignUnits(fluxdata).attribute()
-    
+
     return fluxdata_u
 
 
@@ -457,7 +457,7 @@ def get_bc(
     )
 
     bcdata = BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
-    
+
     # Attribute pint units to BC data
     bcdata_u = _units.AssignUnits(bcdata).attribute()
 
@@ -527,11 +527,11 @@ def get_footprint(
         **kwargs,
     )
 
-    fpdata= FootprintData(data=fp_data.data, metadata=fp_data.metadata)
-    
+    fpdata = FootprintData(data=fp_data.data, metadata=fp_data.metadata)
+
     # Attribute pint units to footprint data
     fpdata_u = _units.AssignUnits(fpdata).attribute()
-    
+
     return fpdata_u
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?
