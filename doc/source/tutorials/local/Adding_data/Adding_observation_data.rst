@@ -144,37 +144,6 @@ us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.
 
-Other keywords
-~~~~~~~~~~~~~~
-
-When adding data in this way there are other keywords which can be used to 
-distinguish between different data sets as required including:
-
-* ``instrument``: Name of the instrument
-* ``sampling_period``: The time taken for each measurement to be sampled
-* ``data_level``: The level of quality control which has been applied to the data.
-* ``data_sublevel``:  Optional level to include between data levels. Typically for level 1 data where multiple steps of initial QA may have been applied.
-* ``dataset_source``: Name of the dataset if data is taken from a larger source e.g. from an ObsPack
-
-See the `standardise_surface` documentation for a full list of inputs.
-
-Multiple stores
-~~~~~~~~~~~~~~~
-
-If you have write access to more than one object store you'll need to pass in the name of that store
-to the ``store`` argument.
-So instead of the standardise_surface call above, we'll tell it to write to our default ``user`` object store. This is our default local object store
-created when we run ``openghg --quickstart``.
-
-.. code:: ipython3
-
-    from openghg.standardise import standardise_surface
-
-    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC", store="user")
-
-The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
-to more than one store.
-
 AGAGE data
 ~~~~~~~~~~
 
@@ -255,6 +224,80 @@ Datasources can also handle multiple versions of data from a single
 site, so if scales or other factors change multiple versions may be
 stored for easy future comparison.
 
+Other keywords
+~~~~~~~~~~~~~~
+
+When adding data in this way there are other keywords which can be used to 
+distinguish between different data sets as required including:
+
+* ``instrument``: Name of the instrument
+* ``sampling_period``: The time taken for each measurement to be sampled
+* ``data_level``: The level of quality control which has been applied to the data.
+* ``data_sublevel``:  Optional level to include between data levels. Typically for level 1 data where multiple steps of initial QA may have been applied.
+* ``dataset_source``: Name of the dataset if data is taken from a larger source e.g. from an ObsPack
+
+See the `standardise_surface` documentation for a full list of inputs.
+
+
+Informational keywords
+~~~~~~~~~~~~~~~~~~~~~~
+
+In addition to the keywords demonstrated for adding data and described above which are used to distinguish
+between different data sets being stored, the following informational details can also be added to help describe the data.
+
+Using the `tag` keyword
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The `tag` keyword allows one or multiple short labels to be specified which can be the same across multiple
+data sources. For instance, data from different sites which is associated with a particular project could all be
+added using the same `tag`. For example below we show how to add the same data as above with a `tag`:
+
+* Tacolneston (TAC) data with a tag of "project1"
+* Cape Grim (CGO) data with a tag of both "project1" and "project2"
+
+.. jupyter-execute::
+
+    from openghg.standardise import standardise_surface
+
+    standardise_surface(filepath=tac_data,
+                        source_format="CRDS",
+                        site="TAC",
+                        network="DECC",
+                        tag="project1",
+                        force=True)
+    
+    standardise_surface(filepath=capegrim_tuple,
+                        source_format="GCWERKS",
+                        site="CGO",
+                        network="AGAGE",
+                        instrument="medusa",
+                        tag=["project1", "project2"],
+                        force=True)
+
+    
+*Note: here we included the `force=True` keyword as we are adding the same data which has been added in 
+a previous step of the tutorial - see ++Updating existing data++ tutorial for more details of this.*
+
+As will be covered in the section on ++3. Searching for data++, these keywords can then used when searching the
+object store. For the `tag` keyword this can be used to return all data which includes the chosen tag.
+
+Multiple stores
+~~~~~~~~~~~~~~~
+
+If you have write access to more than one object store you'll need to pass in the name of that store
+to the ``store`` argument.
+So instead of the standardise_surface call above, we'll tell it to write to our default ``user`` object store. This is our default local object store
+created when we run ``openghg --quickstart``.
+
+.. code:: ipython3
+
+    from openghg.standardise import standardise_surface
+
+    decc_results = standardise_surface(filepath=tac_data, source_format="CRDS", site="TAC", network="DECC", store="user")
+
+The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
+to more than one store.
+
 2. Searching for data
 ---------------------
 
@@ -284,6 +327,29 @@ We could also look for details of all the data measured at the Tacolneston
 
 For this site you can see this contains details of each of the species
 as well as the inlet heights these were measured at.
+
+Searching by `tag` keyword
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can also search by the `tag` keyword when this has been set. Even though the `tag`
+keyword can contain multiple values, this will find all the datasources where the
+tag value is included (rather than needing an exact match like the other keywords).
+
+For the "TAC" and "CGO" data we added the "project1" tag and so this data can be found
+using this keyword:
+
+.. jupyter-execute::
+
+    results = search_surface(tag="project1")
+    results.results
+
+For the "CGO" data we also included the "project2" tag and we can find this
+data by searching for this:
+
+.. jupyter-execute::
+
+    results = search_surface(tag="project2")
+    results.results
 
 Quickly retrieve data
 ~~~~~~~~~~~~~~~~~~~~~
