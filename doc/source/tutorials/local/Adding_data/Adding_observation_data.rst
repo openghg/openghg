@@ -112,7 +112,7 @@ following arguments:
 * ``network``: ``"DECC"``
 * ``source_format``: ``"CRDS"``, the type of data we want to process
 
-.. jupyter-execute::
+.. code:: ipython3
 
     from openghg.standardise import standardise_surface
 
