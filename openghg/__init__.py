@@ -45,7 +45,7 @@ __revisionid__ = v.get("full-revisionid")
 del v, get_versions
 
 # Start module level logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("openghg")
 logger.setLevel(logging.DEBUG)
 logging.captureWarnings(capture=True)
 
