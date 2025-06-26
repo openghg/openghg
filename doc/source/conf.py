@@ -58,6 +58,7 @@ extensions = [
     "sphinx_issues",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
+    "jupyter_sphinx",
 ]
 
 # -- Options for HTML output -------------------------------------------------
