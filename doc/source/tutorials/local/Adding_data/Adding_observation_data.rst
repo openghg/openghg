@@ -275,10 +275,10 @@ added using the same `tag`. For example below we show how to add the same data a
                         force=True)
 
     
-*Note: here we included the `force=True` keyword as we are adding the same data which has been added in 
-a previous step of the tutorial - see ++Updating existing data++ tutorial for more details of this.*
+*Note: here we included the force=True keyword as we are adding the same data which has been added in 
+a previous step of the tutorial - see "Updating existing data" tutorial for more details of this.*
 
-As will be covered in the section on ++3. Searching for data++, these keywords can then used when searching the
+As will be covered in the :ref:`2. Searching for data` section, these keywords can then used when searching the
 object store. For the `tag` keyword this can be used to return all data which includes the chosen tag.
 
 Multiple stores
