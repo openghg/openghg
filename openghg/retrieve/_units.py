@@ -115,7 +115,7 @@ class AssignUnits:
                     for coord in self.data.data[key].coords:
                         self.data.data[key][coord].attrs.pop("units", None)
                     self.data.data[key] = self.data.data[key].pint.quantify(ureg.parse_units(i_unit))
-                except ValueError:
+                except pint.errors.UndefinedUnitError:
                     print(f"Skipping {key} as pint could not parse {i_unit}")
                     pass
 
