@@ -20,15 +20,15 @@ analysis and visualisation.
 .. _what-is-object-store:
 
 What is an object store?
----------------------
+------------------------
 
 Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ``~/.config/openghg/openghg.conf``.
 
 
 .. _using-the-tutorial-object-store:
 
-Using the tutorial object store
--------------------------------
+0. Using the tutorial object store
+----------------------------------
 
 An object store is a folder with a fixed structure within which openghg
 can read and write data. To avoid adding the example data we use in this
@@ -255,7 +255,7 @@ Datasources can also handle multiple versions of data from a single
 site, so if scales or other factors change multiple versions may be
 stored for easy future comparison.
 
-3. Searching for data
+2. Searching for data
 ---------------------
 
 Searching the object store
@@ -316,7 +316,7 @@ objects.
     all_co2_data = results.retrieve_all()
     all_co2_data
 
-4. Retrieving data
+3. Retrieving data
 ------------------
 
 To retrieve the standardised data from the object store there are
@@ -369,7 +369,7 @@ the ``ObsData`` object.
 You can also pass any of ``title``, ``xlabel``, ``ylabel`` and ``units``
 to the ``plot_timeseries`` function to modify the labels.
 
-5. Cleanup
+4. Cleanup
 ----------
 
 If you're finished with the data in this tutorial you can cleanup the
