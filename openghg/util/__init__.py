@@ -1,5 +1,5 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
 
 from ._cli import cli
@@ -31,7 +31,7 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    check_function_open_nc,
+    footprint_open_nc_fn,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -47,6 +47,8 @@ from ._metadata_util import (
     get_overlap_keys,
     merge_dict,
 )
+from ._platform import define_platform, format_platform, get_platform_from_info
+from ._registry import AutoRegistry, Registry
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,
@@ -108,12 +110,10 @@ from ._util import (
     find_matching_site,
     multiple_inlets,
     pairwise,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     sort_by_filenames,
     unanimous,
     verify_site,
+    verify_site_with_satellite,
 )
 from ._versions import show_versions, check_if_need_new_version

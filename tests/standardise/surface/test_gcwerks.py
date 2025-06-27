@@ -97,6 +97,7 @@ def test_read_file_thd():
     assert meas_data["ch3ccl3"][-1] == 34.649
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
@@ -125,9 +126,7 @@ def test_no_precisions_species_raises():
     )
 
     with pytest.raises(ValueError):
-        parse_gcwerks(
-            filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage"
-        )
+        parse_gcwerks(filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage")
 
 
 def test_read_ridgehill_window_inlet_all_NaNs():
@@ -157,6 +156,7 @@ def test_read_thd_window_inlet():
     assert data["ch4"][-1] == pytest.approx(1840.432)
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_thd_cf_compliance(thd_data):

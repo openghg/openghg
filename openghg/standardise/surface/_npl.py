@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes, dataset_formatter
 from openghg.types import pathType
@@ -11,12 +10,11 @@ def parse_npl(
     filepath: pathType,
     site: str = "NPL",
     network: str = "LGHG",
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-) -> Dict:
+) -> dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
 
@@ -27,7 +25,6 @@ def parse_npl(
         inlet: Inlet height. Will be inferred if not specified
         instrument: Instrument name
         sampling_period: Sampling period
-        measurement_type: Type of measurement taken e.g."flask", "insitu"
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -90,7 +87,7 @@ def parse_npl(
 
         # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
         # when averaging
-        processed_data["{} variability".format(species)] = processed_data[species_column] * 0.0
+        processed_data[f"{species} variability"] = processed_data[species_column] * 0.0
 
         site_attributes = npl_params["global_attributes"]
         site_attributes["inlet"] = inlet

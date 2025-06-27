@@ -1,24 +1,22 @@
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[Union[str, float, int]] = None,
-    measurement_type: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | float | int | None = None,
     drop_duplicates: bool = True,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-    **kwargs: Dict,
-) -> Dict:
+    site_filepath: pathType | None = None,
+    **kwargs: dict,
+) -> dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
     ready for storage in the object store.
 
@@ -29,7 +27,6 @@ def parse_crds(
         inlet: Inlet height
         instrument: Instrument name
         sampling_period: Sampling period in seconds
-        measurement_type: Measurement type e.g. insitu, flask
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
@@ -62,7 +59,6 @@ def parse_crds(
         inlet=inlet,
         instrument=instrument,
         sampling_period=sampling_period,
-        measurement_type=measurement_type,
         drop_duplicates=drop_duplicates,
     )
 
@@ -84,13 +80,12 @@ def _read_data(
     filepath: Path,
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[Union[str, float, int]] = None,
-    measurement_type: Optional[str] = None,
-    site_filepath: optionalPathType = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | float | int | None = None,
+    site_filepath: pathType | None = None,
     drop_duplicates: bool = True,
-) -> Dict:
+) -> dict:
     """Read the datafile passed in and extract the data we require.
 
     Args:
@@ -100,7 +95,6 @@ def _read_data(
         inlet: Inlet height
         instrument: Instrument name
         sampling_period: Sampling period in seconds
-        measurement_type: Measurement type e.g. insitu, flask
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
@@ -242,7 +236,7 @@ def _read_data(
     return combined_data
 
 
-def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
+def _read_metadata(filepath: Path, data: DataFrame) -> dict:
     """Parse CRDS files and create a metadata dict
 
     Args:
@@ -292,9 +286,9 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
 def _get_site_attributes(
     site: str,
     inlet: str,
-    crds_metadata: Dict,
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    crds_metadata: dict,
+    site_filepath: pathType | None = None,
+) -> dict:
     """Gets the site specific attributes for writing to Datsets
 
     Args:
@@ -309,8 +303,8 @@ def _get_site_attributes(
     from openghg.util import get_site_info, format_inlet
 
     try:
-        site_attributes: Dict = crds_metadata["sites"][site.upper()]
-        global_attributes: Dict = site_attributes["global_attributes"]
+        site_attributes: dict = crds_metadata["sites"][site.upper()]
+        global_attributes: dict = site_attributes["global_attributes"]
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
@@ -338,7 +332,7 @@ def _get_site_attributes(
     return attributes
 
 
-def _gas_info(data: DataFrame) -> Tuple[int, int]:
+def _gas_info(data: DataFrame) -> tuple[int, int]:
     """Returns the number of columns of data for each gas
     that is present in the dataframe
 
@@ -353,7 +347,7 @@ def _gas_info(data: DataFrame) -> Tuple[int, int]:
     # Slice the dataframe
     head_row = data.head(1)
 
-    gases: Dict[str, int] = {}
+    gases: dict[str, int] = {}
     # Loop over the gases and find each unique value
     for column in head_row.columns:
         s = head_row[column][0]

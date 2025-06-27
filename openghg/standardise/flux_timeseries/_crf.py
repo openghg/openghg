@@ -1,6 +1,5 @@
 import numpy as np
 from pathlib import Path
-from typing import Dict, Optional, Union
 from openghg.store import infer_date_range
 
 
@@ -9,14 +8,14 @@ def parse_crf(
     species: str,
     source: str = "anthro",
     region: str = "UK",
-    domain: Optional[str] = None,
+    domain: str | None = None,
     data_type: str = "flux_timeseries",
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
-) -> Dict:
+) -> dict:
     """
     Parse CRF emissions data from the specified file.
 
@@ -57,7 +56,7 @@ def parse_crf(
         dataframe = dataframe.iloc[49]
 
     dataframe = pd.DataFrame(dataframe).iloc[2:-1]
-    dataframe = dataframe.rename(columns={dataframe.columns[0]: "flux_timeseries"}).astype(np.floating)
+    dataframe = dataframe.rename(columns={dataframe.columns[0]: "flux_timeseries"}).astype(np.float64)
     dataframe.index = pd.to_datetime(dataframe.index, format="%Y")
 
     metadata = {}
@@ -92,7 +91,7 @@ def parse_crf(
 
     key = "_".join((species, source, region))
 
-    flux_timeseries_data: Dict[str, dict] = {}
+    flux_timeseries_data: dict[str, dict] = {}
     flux_timeseries_data[key] = {}
     flux_timeseries_data[key]["data"] = dataarray
     flux_timeseries_data[key]["metadata"] = metadata

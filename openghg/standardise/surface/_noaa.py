@@ -1,10 +1,11 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Hashable, Optional, Union, cast
+from typing import Any, cast
+from collections.abc import Hashable
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType
 from openghg.util import check_and_set_null_variable, not_set_metadata_values
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -12,17 +13,17 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_noaa(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
-    measurement_type: str,
-    inlet: Optional[str] = None,
+    measurement_type: str | None,
+    inlet: str | None = None,
     network: str = "NOAA",
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-    **kwarg: Dict,
-) -> Dict:
+    site_filepath: pathType | None = None,
+    **kwarg: dict,
+) -> dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
 
     Args:
@@ -48,6 +49,15 @@ def parse_noaa(
         sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
+
+    valid_types = ("flask", "insitu", "pfp")
+
+    if measurement_type is None:
+        raise ValueError(
+            f"measurement_type must be specified for source_format='noaa'. This must be one of {valid_types}"
+        )
+    elif measurement_type not in valid_types:
+        raise ValueError(f"measurement_type is '{measurement_type}' but must be one of {valid_types}")
 
     file_extension = Path(filepath).suffix
 
@@ -154,9 +164,7 @@ def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     return processed_ds
 
 
-def _split_inlets(
-    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
-) -> Dict:
+def _split_inlets(obspack_ds: xr.Dataset, attributes: dict, metadata: dict, inlet: str | None = None) -> dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -186,7 +194,7 @@ def _split_inlets(
     # If so we need to select the data for each inlet and indicate this is a separate Datasource
     # Each data key is labelled based on the species and the inlet (if needed)
 
-    gas_data: Dict[str, Dict] = {}
+    gas_data: dict[str, dict] = {}
     if height_var in obspack_ds.data_vars:
         if inlet is not None:
             # TODO: Add to logging?
@@ -272,15 +280,15 @@ def _split_inlets(
 
 
 def _read_obspack(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict[str, Dict]:
+    site_filepath: pathType | None = None,
+) -> dict[str, dict]:
     """Read NOAA ObsPack NetCDF files
 
     Args:
@@ -303,11 +311,6 @@ def _read_obspack(
     """
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
-
-    valid_types = ("flask", "insitu", "pfp")
-
-    if measurement_type not in valid_types:
-        raise ValueError(f"measurement_type must be one of {valid_types}")
 
     with xr.open_dataset(filepath) as temp:
         obspack_ds = temp
@@ -389,7 +392,7 @@ def _read_obspack(
     metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", not_set_value)
 
     # Create attributes with copy of metadata values
-    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
+    attributes = cast(dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
@@ -422,15 +425,15 @@ def _read_obspack(
 
 
 def _read_raw_file(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+) -> dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.
 
@@ -491,7 +494,7 @@ def _read_raw_data(
     inlet: str,
     sampling_period: str,
     measurement_type: str = "flask",
-) -> Dict:
+) -> dict:
     """Separates the gases stored in the dataframe in
     separate dataframes and returns a dictionary of gases
     with an assigned UUID as gas:UUID and a list of the processed
@@ -648,7 +651,7 @@ def _estimate_sampling_period(obspack_ds: xr.Dataset, min_estimate: float = 10.0
     hourly_s = 60 * 60
     daily_s = hourly_s * 24
     weekly_s = daily_s * 7
-    monthly_s = weekly_s * 28  # approx
+    monthly_s = daily_s * 28  # approx
     yearly_s = daily_s * 365  # approx
 
     sampling_period_estimate = 0.0  # seconds

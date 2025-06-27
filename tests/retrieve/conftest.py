@@ -24,7 +24,9 @@ def data_read():
 
     # DECC network sites
     network = "DECC"
-    bsd_250_path = get_surface_datapath(filename="bsd.picarro.1minute.250m.min.dat", source_format="CRDS")  # fake, for elevate inlets
+    bsd_250_path = get_surface_datapath(
+        filename="bsd.picarro.1minute.250m.min.dat", source_format="CRDS"
+    )  # fake, for elevate inlets
     bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     bsd_108_path = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_42_path = get_surface_datapath(filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
@@ -92,6 +94,7 @@ def data_read():
         network="DECC",
         instrument="picarro",
         sampling_period="1h",
+        update_mismatch="metadata",
     )
 
     # Obs Column data

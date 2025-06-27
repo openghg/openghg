@@ -13,6 +13,8 @@ from openghg.retrieve import (
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
 
+from tests.helpers.helpers import print_dict_diff
+
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -103,8 +105,10 @@ def test_search_surface_range():
 
     assert res.metadata[key].items() >= partial_metdata.items()
 
+
 @pytest.mark.parametrize(
-    "keyword,value", [
+    "keyword,value",
+    [
         ("data_type", "surface"),
         ("data_source", "internal"),
     ],
@@ -141,15 +145,16 @@ def test_search_site():
         "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(
@@ -174,15 +179,16 @@ def test_search_site():
         "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(site="atlantis")
@@ -632,7 +638,6 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
-
 
 
 def test_search_for_float_inlet(tmp_path):

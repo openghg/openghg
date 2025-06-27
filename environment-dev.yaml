@@ -27,6 +27,7 @@ dependencies:
   - rapidfuzz
   - requests>=2.25
   - scipy
+  - setuptools
   - tinydb
   - toml
   - rich
@@ -35,7 +36,7 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
-  - zarr
+  - zarr==2.18.3
   - numcodecs
   - git
   - flake8
@@ -46,10 +47,12 @@ dependencies:
   - requests-mock
   - pytest-tornasync
   - mypy==1.7.1
+  - tox>=4.24
   - types-PyYAML
   - types-requests
   - types-toml
   - types-urllib3
+  - openghg_calscales
   - pip:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types

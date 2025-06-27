@@ -1,4 +1,5 @@
-from typing import Any, Union, Iterable, List, Literal, Optional
+from typing import Any, Literal
+from collections.abc import Iterable
 import logging
 import math
 
@@ -20,7 +21,7 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
-def null_metadata_values() -> List:
+def null_metadata_values() -> list:
     """
     Defines values which indicate metadata key should be ignored and not retained within
     the metadata (or added to the metastore).
@@ -33,7 +34,7 @@ def null_metadata_values() -> List:
     return null_values
 
 
-def not_set_metadata_values() -> List:
+def not_set_metadata_values() -> list:
     """
     Defines values which indicate metadata value has not been explicitly specified
     but that we still want to retain within the metadata (and metastore) so the key is present.
@@ -60,7 +61,7 @@ def remove_null_keys(dictionary: dict, null_values: Iterable = null_metadata_val
 
 
 def check_number_match(
-    number1: Union[str, int, float], number2: Union[str, int, float], relative_tolerance: float = 1e-3
+    number1: str | int | float, number2: str | int | float, relative_tolerance: float = 1e-3
 ) -> bool:
     """
     Check values that can be identified as numbers match within a specified tolerance.
@@ -160,7 +161,7 @@ def get_overlap_keys(left: dict, right: dict) -> list:
     return overlapping_keys
 
 
-def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool = False) -> dict:
+def _filter_keys(dictionary: dict, keys: Iterable | None = None, negate: bool = False) -> dict:
     """
     Convenience function to filter a dictionary by a set of keys.
     """
@@ -174,12 +175,12 @@ def _filter_keys(dictionary: dict, keys: Optional[Iterable] = None, negate: bool
 def merge_dict(
     left: dict,
     right: dict,
-    keys: Optional[Iterable] = None,
-    keys_left: Optional[Iterable] = None,
-    keys_right: Optional[Iterable] = None,
+    keys: Iterable | None = None,
+    keys_left: Iterable | None = None,
+    keys_right: Iterable | None = None,
     remove_null: bool = True,
     null_values: Iterable = null_metadata_values(),
-    on_overlap: Literal["check_value", "error"] = "check_value",
+    on_overlap: Literal["check_value", "ignore", "error"] = "check_value",
     on_conflict: Literal["left", "right", "drop", "error"] = "left",
     relative_tolerance: float = 1e-3,
     lower: bool = True,
@@ -194,7 +195,7 @@ def merge_dict(
         - if the same keys are present in both dictionaries:
             - if one of the two values is identified as a value which has not been explicitly set (e.g. "not_set") the
             other value will be used in preference.
-            - otherwise, the value from left gets preference in the merged dictionary.
+            - otherwise, the value from left gets preference in the merged dictionary, by default.
 
     Args:
         left, right : Dictionaries to compare and merge
@@ -203,9 +204,10 @@ def merge_dict(
         remove_null: Before comparing and merging, remove keys from left and right which have null values.
         null_values: Values which are classed as null.
             See null_metadata_values() function for list of default values.
-        on_overlap: If keys overlap, can choose to check values using or raise an error.
-            Options: ["check_value", "error"]
-        on_conflict: If there is a conflict between key values, choose how to resolve this.
+        on_overlap: If keys overlap, can choose to check values or raise an error.
+            See check_value_match() function for how these values will be compared and checked.
+            Options: ["check_value", "ignore", "error"]
+        on_conflict: If there is a conflict between values for the same key, choose how to resolve this.
             Options: ["left", "right", "drop", "error"]
         relative_tolerance: Tolerance between two numbers when checking values.
         lower: Whether to apply lower case to the two input values as strings when checking values.
@@ -243,8 +245,8 @@ def merge_dict(
     # Merge the two dictionaries for the keys we know don't overlap
     merged_dict = left_non_overlap | right_not_overlap
 
+    values_not_matching = {}
     if on_overlap == "check_value":
-        values_not_matching = {}
         for key in overlapping_keys:
             value1 = left[key]
             value2 = right[key]
@@ -277,6 +279,18 @@ def merge_dict(
                     logger.warning(msg)
                 elif on_conflict == "error":
                     values_not_matching[key] = (value1, value2)
+    elif on_overlap == "ignore":
+        if overlapping_keys:
+            if on_conflict == "left":
+                merged_dict.update(left)
+            elif on_conflict == "right":
+                merged_dict.update(right)
+            elif on_conflict == "error":
+                values_not_matching = {
+                    key: (value1, value2) for key, value1, value2 in zip(overlapping_keys, left, right)
+                }
+            # Don't need to check on_conflict == "drop" as overlapping
+            # have not been added to merged_dict
 
     if values_not_matching:
         mismatch_details = [

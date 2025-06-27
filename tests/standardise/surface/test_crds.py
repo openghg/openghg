@@ -58,6 +58,7 @@ def test_read_file():
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_crds_cf_compliance(crds_data):

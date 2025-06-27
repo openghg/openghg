@@ -1,9 +1,14 @@
 import bz2
+from functools import partial, wraps
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Optional, Union
+from typing import Any
+from collections.abc import Callable
 
-from openghg.types import pathType, multiPathType
+import xarray as xr
+
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
+from openghg.util import align_lat_lon
 
 __all__ = [
     "load_parser",
@@ -43,7 +48,11 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     function_name = f"parse_{data_name.lower()}"
     fn: Callable = getattr(module, function_name)
 
-    return fn
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):  # type: ignore
+        return convert_to_list_of_metadata_and_data(fn(*args, **kwargs))
+
+    return wrapped_fn
 
 
 def load_standardise_parser(data_type: str, source_format: str) -> Callable:
@@ -95,7 +104,7 @@ def load_transform_parser(data_type: str, source_format: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+def get_datapath(filename: pathType, directory: str | None = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
@@ -113,7 +122,7 @@ def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(path: Union[str, Path]) -> Dict:
+def load_json(path: str | Path) -> dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -121,13 +130,13 @@ def load_json(path: Union[str, Path]) -> Dict:
     Returns:
         dict: Dictionary created from JSON
     """
-    with open(path, "r") as f:
-        data: Dict[str, Any] = json.load(f)
+    with open(path) as f:
+        data: dict[str, Any] = json.load(f)
 
     return data
 
 
-def load_internal_json(filename: str) -> Dict:
+def load_internal_json(filename: str) -> dict:
     """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
     openghg/data directory or pass a full filepath to path to load from any file.
 
@@ -141,7 +150,7 @@ def load_internal_json(filename: str) -> Dict:
     return load_json(path=file_path)
 
 
-def read_header(filepath: pathType, comment_char: str = "#") -> List:
+def read_header(filepath: pathType, comment_char: str = "#") -> list:
     """Reads the header lines denoted by the comment_char
 
     Args:
@@ -155,7 +164,7 @@ def read_header(filepath: pathType, comment_char: str = "#") -> List:
 
     header = []
     # Get the number of header lines
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         for line in f:
             if line.startswith(comment_char):
                 header.append(line)
@@ -239,15 +248,12 @@ def get_logfile_path() -> Path:
     Returns:
         Path: Path to logfile
     """
-    from openghg.util import running_locally
-
-    if running_locally():
-        return Path.home().joinpath("openghg.log")
-    else:
-        return Path("/tmp/openghg.log")
+    return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPathType]:
+def footprint_open_nc_fn(
+    filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
+) -> tuple[Callable, multiPathType]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -255,19 +261,46 @@ def check_function_open_nc(filepath: multiPathType) -> Tuple[Callable, multiPath
 
     Args:
         filepath: Path or list of filepaths
+        realign_on_domain: When present, realign the data on the given domain. Option usable
+            when opening footprints or flux data but not observations and boundary conditions.
+        sel_month : when present keep only one month of data
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
-    import xarray as xr
+
+    if sel_month:
+        import numpy as np
+
+        def select_time(x: xr.Dataset) -> xr.Dataset:
+            # WARNING : designed for a specific case where a day from another month was present
+            # in a monthly file (concerns file from an old NAME_processing version).
+            # Not designed for a general case.
+            month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+            start_date = month.astype("datetime64[D]")
+            end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
+            return x.sel(time=slice(start_date, end_date))
+
+    def process(x: xr.Dataset) -> xr.Dataset:
+        if realign_on_domain and sel_month:
+            return align_lat_lon(select_time(x), realign_on_domain)
+        elif realign_on_domain:
+            return align_lat_lon(x, realign_on_domain)
+        elif sel_month:
+            return select_time(x)
+        else:
+            return x
 
     if isinstance(filepath, list):
-        if len(filepath) > 1:
-            xr_open_fn: Callable = xr.open_mfdataset
-        else:
-            xr_open_fn = xr.open_dataset
-            filepath = filepath[0]
-    else:
-        xr_open_fn = xr.open_dataset
 
-    return xr_open_fn, filepath
+        if len(filepath) > 1:
+            xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process)
+            return xr_open_fn_1, filepath
+
+        else:
+            filepath = filepath[0]
+
+    def xr_open_fn_2(x: pathType) -> xr.DataArray | xr.Dataset:
+        return process(xr.open_dataset(x))
+
+    return xr_open_fn_2, filepath

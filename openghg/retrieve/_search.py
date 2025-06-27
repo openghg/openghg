@@ -4,12 +4,12 @@ the object store.
 """
 
 import logging
-from typing import Any, Optional, Union
+import pandas as pd
+from typing import Any
 import warnings
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
 from ._search_helpers import process_search_kwargs
@@ -19,13 +19,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def search_bc(
-    species: Optional[str] = None,
-    bc_input: Optional[str] = None,
-    domain: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
+    species: str | None = None,
+    bc_input: str | None = None,
+    domain: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Search for boundary condition data.
@@ -67,10 +67,10 @@ def search_bc(
 
 
 def search_eulerian(
-    model: Optional[str] = None,
-    species: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    model: str | None = None,
+    species: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Search for eulerian data.
@@ -100,18 +100,18 @@ def search_eulerian(
 
 
 def search_flux(
-    species: Optional[str] = None,
-    source: Optional[str] = None,
-    domain: Optional[str] = None,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    time_resolved: Optional[bool] = None,
-    high_time_resolution: Optional[bool] = None,  # DEPRECATED: use time_resolved instead
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    time_resolved: bool | None = None,
+    high_time_resolution: bool | None = None,  # DEPRECATED: use time_resolved instead
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Search for flux / emissions data.
@@ -159,22 +159,22 @@ def search_flux(
 
 
 def search_footprints(
-    site: Optional[str] = None,
-    inlet: Optional[str] = None,
-    domain: Optional[str] = None,
-    model: Optional[str] = None,
-    height: Optional[str] = None,
-    met_model: Optional[str] = None,
-    species: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    network: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
-    high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
-    time_resolved: Optional[bool] = None,
-    high_time_resolution: Optional[bool] = None,  # DEPRECATED: use time_resolved instead
-    short_lifetime: Optional[bool] = None,
+    site: str | None = None,
+    inlet: str | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    height: str | None = None,
+    met_model: str | None = None,
+    species: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    network: str | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
+    high_spatial_resolution: bool | None = None,  # TODO need to give False to get only low spatial res
+    time_resolved: bool | None = None,
+    high_time_resolution: bool | None = None,  # DEPRECATED: use time_resolved instead
+    short_lifetime: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Search for footprints data.
@@ -256,22 +256,23 @@ def search_footprints(
 
 
 def search_surface(
-    species: Union[str, list[str], None] = None,
-    site: Union[str, list[str], None] = None,
-    inlet: Union[str, slice, None, list[Union[str, slice, None]]] = None,
-    height: Union[str, slice, None, list[Union[str, slice, None]]] = None,
-    instrument: Union[str, list[str], None] = None,
-    data_level: Union[str, list[str], dict, None] = None,
-    data_sublevel: Union[str, list[str], None] = None,
-    dataset_source: Optional[str] = None,
-    data_source: Optional[str] = None,
-    measurement_type: Union[str, list[str], None] = None,
-    source_format: Union[str, list[str], None] = None,
-    network: Union[str, list[str], None] = None,
-    start_date: Union[str, list[str], None] = None,
-    end_date: Union[str, list[str], None] = None,
-    sampling_height: Optional[str] = None,
-    icos_data_level: Union[int, str, None] = None,
+    species: str | list[str] | None = None,
+    site: str | list[str] | None = None,
+    inlet: str | slice | None | list[str | slice | None] = None,
+    height: str | slice | None | list[str | slice | None] = None,
+    instrument: str | list[str] | None = None,
+    data_level: str | list[str] | dict | None = None,
+    data_sublevel: str | list[str] | None = None,
+    dataset_source: str | None = None,
+    data_source: str | None = None,
+    platform: str | None = None,
+    measurement_type: str | list[str] | None = None,
+    source_format: str | list[str] | None = None,
+    network: str | list[str] | None = None,
+    start_date: str | list[str] | None = None,
+    end_date: str | list[str] | None = None,
+    sampling_height: str | None = None,
+    icos_data_level: int | str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search.
@@ -292,6 +293,7 @@ def search_surface(
             argument only needs to be used to narrow the search to data solely from retrieval methods.
         dataset_source: External name applied to source of the dataset,
             for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+        platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
@@ -303,7 +305,7 @@ def search_surface(
     Returns:
         SearchResults: SearchResults object
     """
-    from openghg.util import format_inlet, format_data_level
+    from openghg.util import format_inlet, format_data_level, format_platform
 
     if start_date is not None:
         start_date = str(start_date)
@@ -332,6 +334,8 @@ def search_surface(
             DeprecationWarning,
         )
 
+    platform = format_platform(platform)
+
     results = search(
         species=species,
         site=site,
@@ -356,14 +360,14 @@ def search_surface(
 
 
 def search_column(
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    platform: Optional[str] = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    platform: str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Search column data.
@@ -381,13 +385,15 @@ def search_column(
         species: Species name or synonym e.g. "ch4"
         instrument: Instrument name e.g. "TANSO-FTS"
         network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-        platform: Type of platform. Should be one of:
-            - "satellite"
-            - "site"
+        platform: Type of platform. One of "satellite", "column-insitu".
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_platform
+
+    platform = format_platform(platform)
+
     return search(
         satellite=satellite,
         domain=domain,
@@ -434,63 +440,6 @@ def search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from openghg.cloud import call_function
-
-    if running_on_hub():
-        post_data: dict[str, Union[str, dict]] = {}
-        post_data["function"] = "search"
-        post_data["search_terms"] = kwargs
-
-        result = call_function(data=post_data)
-
-        content = result["content"]
-
-        found = content["found"]
-        compressed_response = content["result"]
-
-        if found:
-            data_str = decompress(compressed_response)
-            sr = SearchResults.from_json(data=data_str)
-        else:
-            sr = SearchResults()
-    else:
-        sr = _base_search(**kwargs)
-
-    return sr
-
-
-def _base_search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
-    the function and these keywords will be used to search metadata.
-
-    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
-     - None - argument will be ignored.
-     - list/tuple - an OR search will be created for the argument and each of the values.
-     - dict - an OR search will be created for the key, value pairs.
-       - Note: in this case the name of argument itself will be ignored.
-     - str/other - argument used directly.
-
-    All input search values are formatted (openghg.utils.clean_string).
-
-    This function will only perform a "local" search. It may be used either by a cloud function
-    or when using OpenGHG locally, it does no environment detection.
-    We suggest using the search function that takes care of everything for you.
-
-    Example / commonly used arguments are given below.
-
-    Args:
-        species: Terms to search for in Datasources
-        locations: Where to search for the terms in species
-        inlet: Inlet height such as 100m
-        instrument: Instrument name such as picarro
-        find_all: Require all search terms to be satisfied
-        start_date: Start datetime for search.
-        If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_date: End datetime for search.
-        If None an end datetime of the current datetime is set
-    Returns:
-        SearchResults or None: SearchResults object is results found, otherwise None
-    """
     from openghg.util import (
         clean_string,
         dates_overlap,
@@ -501,11 +450,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
-
-    if running_on_hub():
-        raise ValueError(
-            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
-        )
 
     # Select and format the search terms
     # - ignore any kwargs which are None
@@ -522,6 +466,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
             v = {key: clean_string(value) for key, value in v.items() if value is not None}
             if not v:  # Check empty dict
                 v = None
+        elif k.lower() in ["start_date", "end_date"]:
+            if v is not None:
+                v = pd.Timestamp(v)
         else:
             v = clean_string(v)
 

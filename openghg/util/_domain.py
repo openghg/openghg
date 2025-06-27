@@ -1,9 +1,9 @@
-from typing import Any, Dict, Tuple, List, Optional
+from typing import Any
 
 import numpy as np
 from numpy import ndarray
 
-from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
+from openghg.types import pathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
 import logging
 
@@ -12,7 +12,7 @@ logger = logging.getLogger("openghg.util.domain")
 __all__ = ["get_domain_info", "find_domain", "convert_lon_to_180", "convert_lon_to_360"]
 
 
-def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_domain_info(domain_filepath: pathType | None = None) -> dict[str, Any]:
     """Extract data from domain info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/domain_info JSON file by default.
@@ -33,7 +33,7 @@ def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
     return domain_info_json
 
 
-def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[ndarray, ndarray]:
+def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[ndarray, ndarray]:
     """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
@@ -62,7 +62,7 @@ def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[
     return latitude, longitude
 
 
-def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
+def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
     """Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
     this can be derived from 'domain_info.json' file).
@@ -122,7 +122,7 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
+def find_coord_name(data: XrDataLike, options: list[str]) -> str | None:
     """
     Find the name of a coordinate based on input options.
     Only the first found value will be returned.
@@ -179,7 +179,7 @@ def convert_lon_to_360(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
 
 
 def convert_internal_longitude(
-    data: XrDataLikeMatch, lon_name: Optional[str] = None, reorder: bool = True
+    data: XrDataLikeMatch, lon_name: str | None = None, reorder: bool = True
 ) -> XrDataLikeMatch:
     """
     Convert longitude coordinate within an xarray data structure (DataArray or Dataset).
@@ -213,8 +213,8 @@ def cut_data_extent(
     data: XrDataLikeMatch,
     lat_out: ArrayLike,
     lon_out: ArrayLike,
-    lat_name: Optional[str] = None,
-    lon_name: Optional[str] = None,
+    lat_name: str | None = None,
+    lon_name: str | None = None,
     copy: bool = False,
 ) -> XrDataLikeMatch:
     """
@@ -280,12 +280,12 @@ def cut_data_extent(
 
 def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrDataLikeMatch:
     """
-    Check that the values of a given coordinate (lat/lon) in spatial data matches the
-    openghg_defs values for that domain. If they don't match roughly (i.e. within 5%),
-    an exception is raised to alert the user to the fact that they may have the wrong
-    domain altogether. An exception is also raised if the length of the arrays don't
-    match. If the lat or lon don't match exactly, the old coordinates are replaced with
-    the 'correct' values from openghg_defs.
+    Check that the values of a given coordinate (lat/lon or latitude/longitude) in
+    spatial data matches the openghg_defs values for that domain. If they don't match
+    roughly (i.e. within 5%), an exception is raised to alert the user to the fact that
+    they may have the wrong domain altogether. An exception is also raised if the length
+    of the arrays don't match. If the lat or lon don't match exactly, the old coordinates
+    are replaced with the 'correct' values from openghg_defs.
 
     If the domain is not one of the domains listed in openghg_defs
     (i.e. ARCTIC, EASTASIA, EUROPE, PACIFIC, SOUTHAFRICA, USA) then the checks are not
@@ -313,9 +313,9 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
     coords_in = data[coord].values
 
     true_lats, true_lons = find_domain(domain)
-    if coord == "lat":
+    if coord in ["lat", "latitude"]:
         true_coords = true_lats
-    elif coord == "lon":
+    elif coord in ["lon", "longitude"]:
         true_coords = true_lons
 
     if len(coords_in) != len(true_coords):
@@ -337,14 +337,22 @@ def align_lat_lon(data: XrDataLikeMatch, domain: str) -> XrDataLikeMatch:
     the 'check_coord_alignment' function.
 
     Args:
-        data: spatial data to be checked. Must have 'lat' and 'lon' dimensions
+        data: spatial data to be checked. Must have 'lat'/'latitude' and 'lon'/'longitude' dimensions
         domain: domain in question. Must be a valid domain in openghg_defs
 
     Returns:
         xarray.DataArray / xarray.Dataset: data with lat, lon ranges aligned to openghg domain.
     """
-
-    data = check_coord_alignment(data=data, domain=domain, coord="lat")
-    data = check_coord_alignment(data=data, domain=domain, coord="lon")
+    dims = data.dims
+    if "longitude" in dims and "latitude" in dims:
+        data = check_coord_alignment(data=data, domain=domain, coord="latitude")
+        data = check_coord_alignment(data=data, domain=domain, coord="longitude")
+    elif "lon" in dims and "lat" in dims:
+        data = check_coord_alignment(data=data, domain=domain, coord="lat")
+        data = check_coord_alignment(data=data, domain=domain, coord="lon")
+    else:
+        raise ValueError(
+            'Dimensions "lon" and "lat" (or "longitude" and "latitude") could not be found in dataset.'
+        )
 
     return data

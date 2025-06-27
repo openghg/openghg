@@ -1,4 +1,4 @@
-from typing import Optional, Union, overload
+from typing import overload
 import logging
 from openghg.types import MetadataFormatError
 
@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 @overload
 def format_data_level(
-    data_level: Union[str, int, float],
+    data_level: str | int | float,
 ) -> str: ...
 
 
@@ -20,7 +20,7 @@ def format_data_level(
 ) -> None: ...
 
 
-def format_data_level(data_level: Optional[Union[str, int, float]]) -> Optional[str]:
+def format_data_level(data_level: str | int | float | None) -> str | None:
     """
     Check the input data_level to ensure this is in the expected format.
 

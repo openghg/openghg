@@ -5,15 +5,11 @@ from openghg.util import get_overlap_keys, merge_dict
 @pytest.mark.parametrize(
     "left,right,expected_output",
     [
+        ({"site": "bsd", "inlet": "10m", "species": "ch4"}, {"data_level": "1"}, []),
         (
             {"site": "bsd", "inlet": "10m", "species": "ch4"},
-            {"data_level": "1"}, 
-            []
-        ),
-        (
-            {"site": "bsd", "inlet": "10m", "species": "ch4"},
-            {"site": "bsd", "inlet": "10m", "data_level": "1"}, 
-            ["inlet", "site"]
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+            ["inlet", "site"],
         ),
         ({}, {}, []),
     ],
@@ -35,27 +31,27 @@ def test_get_overlap_keys(left, right, expected_output):
     [
         (
             {"site": "bsd", "inlet": "10m"},
-            {"data_level": "1"}, 
+            {"data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m"},
-            {"site": "bsd", "data_level": "1"}, 
+            {"site": "bsd", "data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m"},
-            {"site": "BSD", "data_level": "1"}, 
+            {"site": "BSD", "data_level": "1"},
             {"site": "bsd", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "BSD", "data_level": "1"},
-            {"site": "bsd", "inlet": "10m"}, 
+            {"site": "bsd", "inlet": "10m"},
             {"site": "BSD", "inlet": "10m", "data_level": "1"},
         ),
         (
             {"site": "bsd", "inlet": "10m", "latitude": 56.733},
-            {"latitude": "56.7330001"}, 
+            {"latitude": "56.7330001"},
             {"site": "bsd", "inlet": "10m", "latitude": 56.733},
         ),
         (
@@ -82,7 +78,7 @@ def test_get_overlap_keys(left, right, expected_output):
             {"site": "bsd", "inlet": None},
             {"site": None, "inlet": "10m", "data_level": None},
             {"site": "bsd", "inlet": "10m"},
-        ),       
+        ),
     ],
 )
 def test_merge_dict(left, right, expected_output):
@@ -101,6 +97,50 @@ def test_merge_dict(left, right, expected_output):
     For 3, 4 & 5, expect value from left to be used (order matters)
     """
     output = merge_dict(left, right)
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+    "on_conflict,left,right,expected_output",
+    [
+        (
+            None,
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+        ),
+        (
+            "left",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "bsd", "inlet": "10m", "data_level": "1"},
+        ),
+        (
+            "right",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+        ),
+        (
+            "drop",
+            {"site": "bsd", "inlet": "10m"},
+            {"site": "tac", "inlet": "21m", "data_level": "1"},
+            {"data_level": "1"},
+        ),
+    ],
+)
+def test_merge_dict_check_ignore(on_conflict, left, right, expected_output):
+    """
+    1. Check mismatch will be ignored and left used by default
+    2. Check mismatch will be ignored and "left" used
+    3. Check mismatch will be ignored and "right" used
+    4. Check mismatch will be ignored and overlapping keys not included
+    """
+    on_overlap = "ignore"
+    if on_conflict is None:
+        output = merge_dict(left, right, on_overlap=on_overlap)
+    else:
+        output = merge_dict(left, right, on_overlap=on_overlap, on_conflict=on_conflict)
     assert output == expected_output
 
 
@@ -135,7 +175,7 @@ def test_merge_dict_raises_no_value_check():
             {"site": "bsd", "inlet": "10m"},
             {"site": "TAC"},
             {"inlet": "10m"},
-        ),      
+        ),
     ],
 )
 def test_merge_dict_mismatch(left, right, on_conflict, expected_output):
@@ -156,6 +196,20 @@ def test_merge_dict_raises_mismatch():
         merge_dict(left, right, on_conflict="error")
 
     assert "Same key(s) supplied from different sources:" in str(excinfo.value)
+
+
+def test_merge_dict_raises_ignore_overlap_error():
+    """
+    Test error is raised when there is an overlapping key which we don't want
+    to check and on_conflict is 'error'
+    """
+    left = {"site": "bsd", "inlet": "10m", "species": "ch4"}
+    right = {"site": "bsd"}
+
+    with pytest.raises(ValueError) as excinfo:
+        merge_dict(left, right, on_overlap="ignore", on_conflict="error")
+
+    assert "Same key(s) supplied from different sources" in str(excinfo.value)
 
 
 def test_merge_specific_keys():
@@ -230,6 +284,6 @@ def test_merge_null_values_ignore():
     left = {"site": None, "inlet": "10m"}
     right = {"site": "bsd", "data_level": "1"}
     expected_output = {"site": None, "inlet": "10m", "data_level": "1"}
-    
+
     output = merge_dict(left, right, remove_null=remove_null)
     assert output == expected_output

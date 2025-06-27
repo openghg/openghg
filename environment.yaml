@@ -5,17 +5,17 @@ channels:
   - defaults
   - anaconda
 dependencies:
-  - python>=3.9
+  - python>=3.10
   - addict
   - dask
   - h5netcdf
   - filelock
   - matplotlib
   - msgpack-python
-  - netcdf4<=1.6.5
+  - netcdf4
   - nbformat
   - numexpr
-  - numpy<2.0
+  - numpy
   - nc-time-axis
   - openghg_defs
   - openpyxl
@@ -25,6 +25,7 @@ dependencies:
   - pyvis
   - rapidfuzz
   - requests>=2.25
+  - setuptools
   - scipy
   - tinydb
   - toml
@@ -34,7 +35,10 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
-  - zarr
+  - zarr==2.18.3
   - numcodecs
+  - sympy
+  - networkx
   - pip:
     - icoscp<=0.1.17
+    - openghg-calscales

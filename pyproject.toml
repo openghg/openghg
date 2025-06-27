@@ -1,12 +1,95 @@
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools>=77.0.3",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "openghg"
+version = "0.14.0"
+description = "OpenGHG: A platform for greenhouse​ gas data analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license-files = ["LICEN[CS]E*"]
+authors = [
+    { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
+    { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
+    { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" },
+    { name = "Gareth Jones", email = "g.m.jones@bristol.ac.uk" }
+]
+maintainers = [
+    { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
+    { name = "Brendan Murphy", email = "brendan.murphy@bristol.ac.uk" },
+    { name = "Rachel Tunnicliffe", email = "rachel.tunnicliffe@bristol.ac.uk" }
+]
+
+dependencies = [
+"addict",
+"dask",
+"filelock",
+"h5netcdf",
+"icoscp <= 0.1.17",
+"ipywidgets",
+"matplotlib",
+"msgpack",
+"nbformat",
+"numcodecs < 0.16",
+"nc-time-axis",
+"netcdf4",
+"numexpr",
+"numpy",
+"openghg_defs",
+"openpyxl",
+"pandas >= 2.0",
+"plotly",
+"pyvis",
+"rapidfuzz",
+"requests >= 2.25",
+"rich",
+"scipy",
+"tinydb",
+"toml",
+"urllib3 >= 1.26.3",
+"xarray",
+"zarr==2.18.3",
+"openghg-calscales"
+]
+
+classifiers = [
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS"]
+
+[tool.setuptools.packages.find]
+include = ["openghg*", "recipes*"]
+
+[project.urls]
+Documentation = "https://www.openghg.org"
+Code = "https://github.com/openghg/openghg"
+Issue-Tracker = "https://github.com/openghg/openghg/issues"
+
+[project.scripts]
+openghg = "openghg.util:cli"
+
+[tool.setuptools.package-data]
+"*" = ["data/*", "data/config/objectstore/*", "py.typed"]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep621"
+versionfile_source = "openghg/_version.py"
+versionfile_build = "openghg/_version.py"
+tag_prefix = ""
+parentdir_prefix_version = "openghg-"
 
 [tool.black]
 line-length = 110
 
 [tool.pytest.ini_options]
+pythonpath = [
+    "."
+]
 timeout = 300

@@ -1,15 +1,15 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union
 import warnings
-from xarray import Dataset
+from typing import cast
+from xarray import Dataset, ones_like
 
 from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    check_function_open_nc,
+    footprint_open_nc_fn,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType, ParseError
@@ -20,31 +20,35 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def parse_acrg_org(
     filepath: multiPathType,
-    site: str,
     domain: str,
     model: str,
     inlet: str,
     species: str,
-    met_model: Optional[str] = None,
-    network: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    obs_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
+    met_model: str | None = None,
+    network: str | None = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-) -> Dict:
+) -> dict:
     """
     Read and parse input emissions data in original ACRG format.
 
     Args:
         filepath: Path of file to load
-        site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name
+        satellite: Satellite name
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
@@ -65,7 +69,8 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = check_function_open_nc(filepath)
+    # fp_data, filepath = open_and_align_dataset(filepath, domain)
+    xr_open_fn, filepath = footprint_open_nc_fn(filepath, domain, sel_month=True)
 
     fp_data = xr_open_fn(filepath)
 
@@ -90,7 +95,7 @@ def parse_acrg_org(
 
     dim_reorder = ("time", "height", "lat", "lon")
 
-    dv_attribute_updates: Dict[str, Dict[str, str]] = {}
+    dv_attribute_updates: dict[str, dict[str, str]] = {}
     variable_names = [
         # "srr",
         "fp",
@@ -125,6 +130,18 @@ def parse_acrg_org(
     dv_attribute_updates["release_lat"]["units"] = "degree_north"
     dv_attribute_updates["release_lat"]["long_name"] = "Release latitude"
 
+    # create 'release_heigt' variable for compatibility between different footprints
+    if inlet != "column":
+
+        inlet_int = int(inlet.replace("magl", "").replace("m", ""))
+        fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
+
+        variable_names.append("release_height")
+
+        dv_attribute_updates["release_height"] = {}
+        dv_attribute_updates["release_height"]["units"] = "m"
+        dv_attribute_updates["release_height"]["long_name"] = "Release height above model ground"
+
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
         fp_data = fp_data.rename(**dv_rename)  # type: ignore
@@ -150,17 +167,21 @@ def parse_acrg_org(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: Dict[str, Union[str, float, List[float]]] = {}
+    metadata: dict[str, str | float | list[float]] = {}
 
-    metadata["data_type"] = "footprints"
-    metadata["site"] = site
-    metadata["domain"] = domain
-    metadata["model"] = model
+    default_metadata: dict = {
+        "data_type": "footprints",
+        "site": site,
+        "satellite": satellite,
+        "domain": domain,
+        "model": model,
+        "obs_region": obs_region,
+        "inlet": inlet,
+        "height": inlet,
+        "species": species,
+    }
 
-    # Include both inlet and height keywords for backwards compatability
-    metadata["inlet"] = inlet
-    metadata["height"] = inlet
-    metadata["species"] = species
+    metadata = {key: value for key, value in default_metadata.items() if value is not None}
 
     if met_model is not None:
         metadata["met_model"] = met_model
@@ -227,9 +248,27 @@ def parse_acrg_org(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    if site is None:
+        key_parts = [
+            cast(str, satellite),
+            cast(str, obs_region),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+    else:
+        key_parts = [
+            cast(str, site),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
 
-    footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+    key_parts = [str(part) for part in key_parts if part is not None]
+
+    key = "_".join(key_parts)
+
+    footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
     footprint_data[key]["metadata"] = metadata
 

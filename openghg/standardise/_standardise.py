@@ -1,19 +1,20 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any
+from typing import Any
 from pandas import Timedelta
 import warnings
 
-from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub, sort_by_filenames
-from openghg.types import optionalPathType, multiPathType
+from openghg.util import sort_by_filenames
+from openghg.types import pathType, multiPathType
 from numcodecs import Blosc
 import logging
 
 logger = logging.getLogger("openghg.standardise")
 
 
-def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> Dict:
+def standardise(
+    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
     Args:
@@ -57,30 +58,31 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    instrument: Optional[str] = None,
-    data_level: Union[str, int, float, None] = None,
-    data_sublevel: Union[str, float, None] = None,
-    dataset_source: Optional[str] = None,
-    sampling_period: Optional[Union[Timedelta, str]] = None,
-    calibration_scale: Optional[str] = None,
-    measurement_type: str = "insitu",
+    inlet: str | None = None,
+    height: str | None = None,
+    instrument: str | None = None,
+    data_level: str | int | float | None = None,
+    data_sublevel: str | float | None = None,
+    dataset_source: str | None = None,
+    sampling_period: Timedelta | str | None = None,
+    calibration_scale: str | None = None,
+    platform: str | None = None,
+    measurement_type: str | None = None,
     verify_site_code: bool = True,
-    site_filepath: optionalPathType = None,
-    store: Optional[str] = None,
+    site_filepath: pathType | None = None,
+    store: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
     sort_files: bool = False,
-) -> Dict:
+) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -104,7 +106,11 @@ def standardise_surface(
         dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06".
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
         calibration_scale: Calibration scale for data
-        measurement_type: Type of measurement e.g. insitu, flask
+        platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
+        measurement_type: Type of measurement. For some source_formats this value is added
+            to the attributes. Platform should be used in preference.
+            If platform is specified and measurement_type is not, this will be
+            set to match the platform.
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -143,264 +149,158 @@ def standardise_surface(
     Returns:
         dict: Dictionary of result data
     """
-    from openghg.cloud import call_function
-
     if not isinstance(filepath, list):
         filepath = [filepath]
 
-    if running_on_hub():
-        # TODO: Use input for site_filepath here? How to include this?
+    if sort_files:
+        if source_format.lower() != "gcwerks":
+            filepath = sort_by_filenames(filepath=filepath)
 
-        # To convert bytes to megabytes
-        MB = 1e6
-        # The largest file we'll just directly POST to the standardisation
-        # function will be this big (megabytes)
-        post_limit = 40  # MB
-
-        metadata = {}
-        metadata["site"] = site
-        metadata["source_format"] = source_format
-        metadata["network"] = network
-        metadata["data_type"] = "surface"
-
-        if inlet is not None:
-            metadata["inlet"] = inlet
-        if instrument is not None:
-            metadata["instrument"] = instrument
-        if sampling_period is not None:
-            metadata["sampling_period"] = sampling_period
-
-        responses = {}
-        for fpath in filepath:
-            gcwerks = False
-            if source_format.lower() in ("gc", "gcwerks"):
-                metadata["source_format"] = "gcwerks"
-
-                try:
-                    filepath = Path(fpath[0])
-                except TypeError:
-                    raise TypeError("We require both data and precision files for GCWERKS data.")
-                else:
-                    gcwerks = True
-            else:
-                filepath = Path(fpath)
-
-            compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="surface")
-            compressed_size = len(compressed_data) / MB
-
-            if compressed_size > post_limit:
-                raise NotImplementedError("Compressed size over 40 MB, not currently supported.")
-
-            to_post = {
-                "function": "standardise",
-                "data": compressed_data,
-                "metadata": metadata,
-                "file_metadata": file_metadata,
-            }
-
-            if gcwerks:
-                precision_filepath = Path(fpath[1])
-                compressed_prec, prec_file_metadata = create_file_package(
-                    filepath=precision_filepath, obs_type="surface"
-                )
-
-                to_post["precision_data"] = compressed_prec
-                to_post["precision_file_metadata"] = prec_file_metadata
-
-            # else:
-            # If we want chunked uploading what do we do?
-            # raise NotImplementedError
-            # tmp_dir = tempfile.TemporaryDirectory()
-            # compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
-            # # Compress in place and then upload
-            # with tarfile.open(compressed_filepath, mode="w:gz") as tar:
-            #     tar.add(filepath)
-            # compressed_data = compressed_filepath.read_bytes()
-
-            fn_response = call_function(data=to_post)
-
-            responses[filepath.name] = fn_response["content"]
-
-        return responses
-    else:
-
-        if sort_files:
-            if source_format.lower() != "gcwerks":
-                filepath = sort_by_filenames(filepath=filepath)
-
-        return standardise(
-            store=store,
-            data_type="surface",
-            filepath=filepath,
-            source_format=source_format,
-            network=network,
-            site=site,
-            inlet=inlet,
-            height=height,
-            instrument=instrument,
-            data_level=data_level,
-            data_sublevel=data_sublevel,
-            dataset_source=dataset_source,
-            sampling_period=sampling_period,
-            calibration_scale=calibration_scale,
-            measurement_type=measurement_type,
-            overwrite=overwrite,
-            verify_site_code=verify_site_code,
-            site_filepath=site_filepath,
-            update_mismatch=update_mismatch,
-            if_exists=if_exists,
-            save_current=save_current,
-            force=force,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            chunks=chunks,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        store=store,
+        data_type="surface",
+        filepath=filepath,
+        source_format=source_format,
+        network=network,
+        site=site,
+        inlet=inlet,
+        height=height,
+        instrument=instrument,
+        data_level=data_level,
+        data_sublevel=data_sublevel,
+        dataset_source=dataset_source,
+        sampling_period=sampling_period,
+        calibration_scale=calibration_scale,
+        platform=platform,
+        measurement_type=measurement_type,
+        overwrite=overwrite,
+        verify_site_code=verify_site_code,
+        site_filepath=site_filepath,
+        update_mismatch=update_mismatch,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        chunks=chunks,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_column(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     platform: str = "satellite",
-    site: Optional[str] = None,
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    obs_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     source_format: str = "openghg",
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
+) -> list[dict]:
     """Read column observation file
 
     Args:
-        filepath: Path of observation file
-        species: Species name or synonym e.g. "ch4"
-        platform: Type of platform. Should be one of:
+        filepath: Path to the input observation file.
+        species: Species name or synonym (e.g., "ch4").
+        platform: Type of platform (default is "satellite"). Can be one of:
             - "satellite"
             - "site"
-        satellite: Name of satellite (if relevant). Should include satellite OR site.
-        domain: For satellite only. If data has been selected on an area include the
-            identifier name for domain covered. This can map to previously defined domains
-            (see openghg_defs "domain_info.json" file) or a newly defined domain.
-        selection: For satellite only, identifier for any data selection which has been
-            performed on satellite data. This can be based on any form of filtering, binning etc.
-            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
-            If not specified, domain will be used.
-        site : Site code/name (if relevant). Should include satellite OR site.
-        instrument: Instrument name e.g. "TANSO-FTS"
-        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"        source_format : Type of data being input e.g. openghg (internal format)
-        store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
-        overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
-        compression: Enable compression in the store
-        compressor: A custom compressor to use. If None, this will default to
-            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-        filters: Filters to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name or code, if platform is site-based.
+        satellite: Satellite name (if platform is satellite-based).
+        domain: For satellite data, specifies the geographical domain identifier.
+            This can either map to an existing domain or define a new domain.
+        selection: A unique identifier for a data selection (e.g., "land", "glint").
+            If not specified, `domain` is used.
+        network: Name of the satellite or in-situ measurement network (e.g., "TCCON").
+        instrument: Instrument name used to collect data (e.g., "TANSO-FTS").
+        source_format: Format of the input data (default is "openghg").
+        store: The name of the store to write the processed data to.
+        if_exists: Determines behavior if data already exists in the store.
+            Can be one of:
+            - "auto" (default): Checks for overlap and decides whether to add or raise an error.
+            - "new": Only includes new data, ignoring existing data.
+            - "combine": Replaces and inserts new data into the existing timeseries.
+        save_current: Decides whether to save the current version of the data:
+            - "auto" (default): Automatically saves based on `if_exists` behavior.
+            - "yes" or "y": Save current data as a separate version.
+            - "no" or "n": Allow updates or deletion of current data.
+        overwrite: Deprecated. Replaced by `if_exists="new"`.
+        force: Forces the addition of data even if it's identical to the existing data.
+        compression: Enables or disables compression during data storage (default is True).
+        compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
+        filters: Filters to apply during data storage. Defaults to no filtering.
+        https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        optional_metadata: Additional metadata to tag the data (e.g., `{"project": "paris"}`).
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    from openghg.cloud import call_function
-
     filepath = Path(filepath)
-
-    if running_on_hub():
-        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
-
-        metadata = {
-            "species": species,
-            "platform": platform,
-            "site": site,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "network": network,
-            "instrument": instrument,
-            "source_format": source_format,
-            "overwrite": overwrite,
-        }
-
-        metadata = {k: v for k, v in metadata.items() if v is not None}
-
-        to_post = create_post_dict(
-            function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
-        )
-
-        fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
-        return response_content
-    else:
-        return standardise(
-            store=store,
-            data_type="column",
-            filepath=filepath,
-            species=species,
-            platform=platform,
-            satellite=satellite,
-            domain=domain,
-            selection=selection,
-            site=site,
-            network=network,
-            instrument=instrument,
-            source_format=source_format,
-            overwrite=overwrite,
-            if_exists=if_exists,
-            save_current=save_current,
-            force=force,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            chunks=chunks,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        store=store,
+        data_type="column",
+        filepath=filepath,
+        species=species,
+        platform=platform,
+        obs_region=obs_region,
+        satellite=satellite,
+        domain=domain,
+        selection=selection,
+        site=site,
+        network=network,
+        instrument=instrument,
+        source_format=source_format,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        chunks=chunks,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_bc(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     bc_input: str,
     domain: str,
-    period: Optional[Union[str, tuple]] = None,
+    source_format: str = "openghg",
+    period: str | tuple | None = None,
     continuous: bool = True,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
+) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -410,6 +310,7 @@ def standardise_bc(
             - a model name such as "MOZART" or "CAMS"
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
+        source_format : Type of data being input e.g. openghg (internal format).
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
@@ -439,69 +340,48 @@ def standardise_bc(
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    from openghg.cloud import call_function
-
     filepath = Path(filepath)
-
-    if running_on_hub():
-        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="bc")
-
-        metadata = {
-            "species": species,
-            "bc_input": bc_input,
-            "domain": domain,
-            "continuous": continuous,
-            "overwrite": overwrite,
-        }
-
-        if period is not None:
-            metadata["period"] = period
-
-        to_post = create_post_dict(
-            function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
-        )
-
-        fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
-        return response_content
-    else:
-        return standardise(
-            store=store,
-            data_type="boundary_conditions",
-            filepath=filepath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-            period=period,
-            continuous=continuous,
-            overwrite=overwrite,
-            if_exists=if_exists,
-            save_current=save_current,
-            force=force,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            chunks=chunks,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        store=store,
+        data_type="boundary_conditions",
+        filepath=filepath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        source_format=source_format,
+        period=period,
+        continuous=continuous,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        chunks=chunks,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_footprint(
-    filepath: Union[str, Path, List],
-    site: str,
-    domain: str,
+    filepath: str | Path | list,
     model: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    met_model: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
+    domain: str,
+    site: str | None = None,
+    satellite: str | None = None,
+    obs_region: str | None = None,
+    selection: str | None = None,
+    inlet: str | None = None,
+    height: str | None = None,
+    met_model: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
     source_format: str = "acrg_org",
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    period: str | tuple | None = None,
+    chunks: dict | None = None,
     continuous: bool = True,
     retrieve_met: bool = False,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -513,19 +393,22 @@ def standardise_footprint(
     sort: bool = False,
     drop_duplicates: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    optional_metadata: dict | None = None,
     sort_files: bool = False,
-) -> Dict:
+) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
     Args:
         filepath: Path(s) of file to standardise
-        site: Site name
-        domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
+        domain: Domain of footprints
+        site: Site name
+        satellite: Satellite name
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        selection: For satellite only, identifier for any data selection which has been performed on satellite data. This can be based on any form of filtering, binning etc. but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         height: Alias for inlet. One of height or inlet must be included.
         met_model: Underlying meteorlogical model used (e.g. UKV)
@@ -571,8 +454,6 @@ def standardise_footprint(
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
     """
-    from openghg.cloud import call_function
-
     if high_time_resolution:
         warnings.warn(
             "This argument is deprecated and will be replaced in future versions with time_resolved.",
@@ -586,95 +467,66 @@ def standardise_footprint(
     if sort_files:
         filepath = sort_by_filenames(filepath=filepath)
 
-    if running_on_hub():
-        raise NotImplementedError("Cloud support not yet implemented.")
-        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
-
-        metadata = {
-            "site": site,
-            "domain": domain,
-            "model": model,
-            "inlet": inlet,
-            "height": height,
-            "continuous": continuous,
-            "retrieve_met": retrieve_met,
-            "high_spatial_resolution": high_spatial_resolution,
-            "time_resolved": time_resolved,
-            "overwrite": overwrite,
-            "met_model": met_model,
-            "species": species,
-            "network": network,
-            "period": period,
-            "chunks": chunks,
-        }
-
-        metadata = {k: v for k, v in metadata.items() if v is not None}
-
-        to_post = create_post_dict(
-            function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
-        )
-
-        fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
-        return response_content
-    else:
-        return standardise(
-            store=store,
-            data_type="footprints",
-            filepath=filepath,
-            site=site,
-            domain=domain,
-            model=model,
-            inlet=inlet,
-            height=height,
-            met_model=met_model,
-            species=species,
-            network=network,
-            source_format=source_format,
-            period=period,
-            chunks=chunks,
-            continuous=continuous,
-            retrieve_met=retrieve_met,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            short_lifetime=short_lifetime,
-            overwrite=overwrite,
-            if_exists=if_exists,
-            save_current=save_current,
-            force=force,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            sort=sort,
-            drop_duplicates=drop_duplicates,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        store=store,
+        data_type="footprints",
+        filepath=filepath,
+        site=site,
+        domain=domain,
+        model=model,
+        satellite=satellite,
+        obs_region=obs_region,
+        selection=selection,
+        inlet=inlet,
+        height=height,
+        met_model=met_model,
+        species=species,
+        network=network,
+        source_format=source_format,
+        period=period,
+        chunks=chunks,
+        continuous=continuous,
+        retrieve_met=retrieve_met,
+        high_spatial_resolution=high_spatial_resolution,
+        time_resolved=time_resolved,
+        short_lifetime=short_lifetime,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        sort=sort,
+        drop_duplicates=drop_duplicates,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_flux(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     source: str,
     domain: str,
-    database: Optional[str] = None,
+    database: str | None = None,
     source_format: str = "openghg",
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
+    database_version: str | None = None,
+    model: str | None = None,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
-    period: Optional[Union[str, tuple]] = None,
-    chunks: Optional[Dict] = None,
+    period: str | tuple | None = None,
+    chunks: dict | None = None,
     continuous: bool = True,
-    store: Optional[str] = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    optional_metadata: dict | None = None,
+) -> list[dict]:
     """Process flux / emissions data
 
     Args:
@@ -716,8 +568,6 @@ def standardise_flux(
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
-    from openghg.cloud import call_function
-
     filepath = Path(filepath)
 
     if high_time_resolution:
@@ -726,86 +576,57 @@ def standardise_flux(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
-
-    if running_on_hub():
-        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="flux")
-
-        metadata = {
-            "species": species,
-            "source": source,
-            "domain": domain,
-            "time_resolved": time_resolved,
-            "continuous": continuous,
-            "overwrite": overwrite,
-            "chunks": chunks,
-            "period": period,
-            "source_format": source_format,
-        }
-
-        optional_keywords = {"database": database, "database_version": database_version, "model": model}
-        for key, value in optional_keywords.items():
-            if value is not None:
-                metadata[key] = value
-
-        metadata = {k: v for k, v in metadata.items()}
-
-        to_post = create_post_dict(
-            function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
-        )
-
-        fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
-        return response_content
-    else:
-        return standardise(
-            data_type="flux",
-            store=store,
-            filepath=filepath,
-            species=species,
-            source=source,
-            domain=domain,
-            database=database,
-            database_version=database_version,
-            model=model,
-            time_resolved=time_resolved,
-            period=period,
-            continuous=continuous,
-            chunks=chunks,
-            overwrite=overwrite,
-            if_exists=if_exists,
-            save_current=save_current,
-            force=force,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        data_type="flux",
+        store=store,
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        database=database,
+        database_version=database_version,
+        model=model,
+        time_resolved=time_resolved,
+        period=period,
+        continuous=continuous,
+        chunks=chunks,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_eulerian(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     model: str,
     species: str,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    setup: Optional[str] = None,
+    source_format: str = "openghg",
+    start_date: str | None = None,
+    end_date: str | None = None,
+    setup: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
-    store: Optional[str] = None,
+    store: str | None = None,
     force: bool = False,
     compression: bool = True,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    chunks: Optional[Dict] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    chunks: dict | None = None,
+    optional_metadata: dict | None = None,
+) -> list[dict]:
     """Read Eulerian model output
 
     Args:
         filepath: Path of Eulerian model species output
         model: Eulerian model name
         species: Species name
+        source_format: Data format, for example openghg (internal format)
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
@@ -837,28 +658,26 @@ def standardise_eulerian(
     Returns:
         dict: Dictionary of result data
     """
-    if running_on_hub():
-        raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
-    else:
-        return standardise(
-            store=store,
-            data_type="eulerian_model",
-            filepath=filepath,
-            model=model,
-            species=species,
-            start_date=start_date,
-            end_date=end_date,
-            setup=setup,
-            overwrite=overwrite,
-            if_exists=if_exists,
-            force=force,
-            save_current=save_current,
-            compression=compression,
-            compressor=compressor,
-            filters=filters,
-            chunks=chunks,
-            optional_metadata=optional_metadata,
-        )
+    return standardise(
+        store=store,
+        data_type="eulerian_model",
+        filepath=filepath,
+        source_format=source_format,
+        model=model,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        setup=setup,
+        overwrite=overwrite,
+        if_exists=if_exists,
+        force=force,
+        save_current=save_current,
+        compression=compression,
+        compressor=compressor,
+        filters=filters,
+        chunks=chunks,
+        optional_metadata=optional_metadata,
+    )
 
 
 def standardise_from_binary_data(
@@ -868,7 +687,7 @@ def standardise_from_binary_data(
     metadata: dict,
     file_metadata: dict,
     **kwargs: Any,
-) -> Optional[Dict]:
+) -> list[dict] | None:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -897,26 +716,26 @@ def standardise_from_binary_data(
 
 
 def standardise_flux_timeseries(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     species: str,
     source: str,
     region: str = "UK",
     source_format: str = "crf",
-    domain: Optional[str] = None,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    store: Optional[str] = None,
+    domain: str | None = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
-    compressor: Optional[Any] = None,
-    filters: Optional[Any] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
-    optional_metadata: Optional[Dict] = None,
-) -> Dict:
+    compressor: Any | None = None,
+    filters: Any | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
+    optional_metadata: dict | None = None,
+) -> list[dict]:
     """Process one dimension timeseries file
 
     Args:
@@ -967,8 +786,6 @@ def standardise_flux_timeseries(
             "Please supply region in future instances"
         )
         region = domain
-    if running_on_hub():
-        raise NotImplementedError("Serverless not implemented yet for Flux timeseries model.")
     return standardise(
         data_type="flux_timeseries",
         store=store,

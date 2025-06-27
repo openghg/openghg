@@ -8,8 +8,9 @@ from helpers import (
     get_flux_timeseries_datapath,
     clear_test_stores,
     clear_test_store,
+    filt,
 )
-from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint
+from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint, get_obs_column
 from openghg.standardise import (
     standardise_column,
     standardise_flux,
@@ -52,11 +53,12 @@ def test_standardise_obs_two_writable_stores():
         store="user",
     )
 
-    results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
+    results = filt(results, file="hfd.picarro.1minute.100m.min.dat")
 
-    assert "error" not in results
-    assert "ch4" in results
-    assert "co2" in results
+    processed_species = [res.get("species") for res in results]
+
+    assert "ch4" in processed_species
+    assert "co2" in processed_species
 
     results = search(site="hfd", inlet="100m", store="user")
     assert results
@@ -76,7 +78,7 @@ def test_standardise_obs_two_writable_stores():
         store="group",
     )
 
-    assert "ch4" in results["processed"]["ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"]
+    assert "ch4" == filt(results, file="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")[0].get("species")
 
     results = search(site="rgl", instrument="g2301", store="group")
     assert results
@@ -106,12 +108,11 @@ def test_standardise_obs_openghg():
         sampling_period="1h",
         force=True,
         store="user",
+        update_mismatch="metadata",
     )
 
-    results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
-
-    assert "error" not in results
-    assert "co2" in results
+    results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
+    assert "co2" == results[0].get("species")
 
 
 def test_standardise_obs_metadata_mismatch():
@@ -149,13 +150,15 @@ def test_standardise_obs_metadata_mismatch():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="999m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -207,13 +210,15 @@ def test_local_obs_metadata_mismatch_meta():
     )
 
     # Check data has been successfully processed
-    results = results["processed"][filename]
+    results = filt(results, file=filename)
 
-    assert "error" not in results
-    assert "co2" in results
+    assert "co2" == results[0].get("species")
 
     # Check retrieved data from the object store contains the updated metadata
     data = get_obs_surface(site="TAC", inlet="998m", species="co2")
+
+    assert data is not None
+
     metadata = data.metadata
 
     # Check attribute value has been used for this key
@@ -267,24 +272,34 @@ def test_local_obs_metadata_mismatch_fail():
 
 
 def test_standardise_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
     satellite = "GOSAT"
-    domain = "BRAZIL"
+    selection = "LAND"
     species = "methane"
+    obs_region = "BRAZIL"
 
     results = standardise_column(
         filepath=filepath,
         source_format="OPENGHG",
         satellite=satellite,
-        domain=domain,
         species=species,
+        obs_region=obs_region,
+        selection=selection,
         force=True,
         store="user",
     )
 
-    assert "error" not in results
-    assert "ch4" in results  # Should this be a more descriprive key?
+    assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species="ch4", max_level=3, satellite="gosat")
+
+    assert data.metadata["obs_region"] == "brazil"
+    assert data.metadata["selection"] == "land"
 
 
 def test_standardise_footprint():
@@ -309,11 +324,15 @@ def test_standardise_footprint():
         store="user",
     )
 
-    assert "error" not in results
-    assert "tmb_europe_test_model_10m" in results
+    result = results[0]
+
+    assert result["site"] == "tmb"
+    assert result["domain"] == "europe"
+    assert result["model"] == "test_model"
+    assert result["inlet"] == "10m"
 
 
-@pytest.mark.parametrize("source_format", ["paris","flexpart"])
+@pytest.mark.parametrize("source_format", ["paris", "flexpart"])
 def test_standardise_footprint_flexpart(source_format):
     """
     Checking FLEXPART footprints can be added using either "paris" or "flexpart"
@@ -343,8 +362,10 @@ def test_standardise_footprint_flexpart(source_format):
         store="user",
     )
 
-    assert "error" not in results
-    assert "mhd_test_FLEXPART_10m" in results
+    result = results[0]
+    expected_metadata = {"domain": "test", "site": "mhd", "model": "FLEXPART", "inlet": "10m"}
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_align_footprint():
@@ -423,7 +444,11 @@ def test_standardise_flux():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_europe" in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
+    result = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_flux_additional_keywords():
@@ -439,7 +464,11 @@ def test_standardise_flux_additional_keywords():
         store="user",
     )
 
-    assert "ch4_anthro_globaledgar" in proc_results
+    result = proc_results[0]
+    expected_metadata = {"species": "ch4", "source": "anthro", "domain": "globaledgar"}
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_non_standard_flux_domain():
@@ -463,8 +492,11 @@ def test_standardise_non_standard_flux_domain():
         store="user",
     )
 
-    assert "co2_gpp-cardamom_test" in proc_results
-    assert "error" not in proc_results
+    expected_metadata = {"species": "co2", "source": "gpp-cardamom", "domain": "test"}
+    result = proc_results[0]
+
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
 def test_standardise_incomplete_flux():
@@ -487,48 +519,6 @@ def test_standardise_incomplete_flux():
             force=True,
             store="user",
         )
-
-
-def test_cloud_standardise(monkeypatch, mocker, tmpdir):
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-    call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
-    test_string = "some_text"
-    tmppath = Path(tmpdir).joinpath("test_file.txt")
-    tmppath.write_text(test_string)
-
-    packed = compress((tmppath.read_bytes()))
-
-    standardise_surface(
-        filepath=tmppath,
-        site="bsd",
-        inlet="248m",
-        network="decc",
-        source_format="crds",
-        sampling_period="1m",
-        instrument="picarro",
-    )
-
-    assert call_fn_mock.call_args == mocker.call(
-        data={
-            "function": "standardise",
-            "data": packed,
-            "metadata": {
-                "site": "bsd",
-                "source_format": "crds",
-                "network": "decc",
-                "inlet": "248m",
-                "instrument": "picarro",
-                "sampling_period": "1m",
-                "data_type": "surface",
-            },
-            "file_metadata": {
-                "compressed": True,
-                "sha1_hash": "56ba5dd8ea2fd49024b91792e173c70e08a4ddd1",
-                "filename": "test_file.txt",
-                "obs_type": "surface",
-            },
-        }
-    )
 
 
 def test_standardise_footprint_different_chunking_schemes(caplog):
@@ -590,17 +580,22 @@ def test_standardise_flux_timeseries():
         filepath=data_path, species="ch4", source="crf", period="years", continuous=False, store="user"
     )
 
-    assert "ch4_crf_uk" in flux_results
+    expected_metadata = {"species": "ch4", "source": "crf", "region": "uk"}
+    result = flux_results[0]
+    print(result)
+    for k, v in expected_metadata.items():
+        assert result[k].lower() == v.lower()
 
 
-def test_standardise_sorting_true(caplog):
-    """ Testing only the sorting of files here"""
+def test_standardise_sorting_true():
+    """Testing only the sorting of files here"""
 
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
-    standardise_surface(
+    results = standardise_surface(
         store="user",
         filepath=filepaths,
         source_format="OPENGHG",
@@ -610,21 +605,20 @@ def test_standardise_sorting_true(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=True
+        sort_files=True,
     )
 
-    log_messages = [record.message for record in caplog.records]
-
-    assert "20220928.nc" in log_messages[0]
+    assert "20220928.nc" in results[0]["file"]
 
 
 def test_standardise_sorting_false(caplog):
-    """ Testing only the sorting of files here"""
+    """Testing only the sorting of files here"""
 
     clear_test_stores()
     filepaths = [
         get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg")]
+        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
+    ]
 
     standardise_surface(
         store="user",
@@ -636,9 +630,261 @@ def test_standardise_sorting_false(caplog):
         sampling_period="1h",
         update_mismatch="attributes",
         if_exists="new",
-        sort_files=False
+        sort_files=False,
     )
 
     log_messages = [record.message for record in caplog.records]
 
     assert "20220928.nc" in log_messages[-1]
+
+
+def test_standardise_surface_niwa(caplog):
+    """Testing NIWA network file gets standardised here"""
+
+    data = get_surface_datapath(filename="niwa.nc", source_format="NIWA")
+
+    results = standardise_surface(
+        filepath=data,
+        source_format="niwa",
+        network="NIWA",
+        site="LAU",
+        store="user",
+        verify_site_code=False,
+        inlet="10m",
+    )
+
+    assert "ch4" in results[0]["species"]
+    assert "LAU" in results[0]["site"]
+    assert "10m" in results[0]["inlet"]
+    assert "niwa" in results[0]["source_format"]
+
+
+def test_standardise_footprints_satellite_raises_error():
+    """
+    Tests standardise footprint raises value error when site and obs_region values are not supplied.
+    """
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+
+    with pytest.raises(ValueError):
+        standardise_footprint(
+            filepath=datapath,
+            satellite=satellite,
+            network=network,
+            model="CAMS",
+            inlet="column",
+            period="1S",
+            domain=domain,
+            selection="LAND",
+            force=True,
+            store="user",
+            continuous=False,
+        )
+
+
+def test_standardise_footprint_satellite(caplog):
+    """
+    Tests standardise footprint for satellite data and associated metadata keys."""
+    clear_test_stores()
+
+    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
+
+    satellite = "GOSAT"
+    network = "GOSAT"
+    domain = "SOUTHAMERICA"
+    obs_region = "BRAZIL"
+
+    standardise_footprint(
+        filepath=datapath,
+        satellite=satellite,
+        network=network,
+        model="CAMS",
+        inlet="column",
+        period="varies",
+        domain=domain,
+        obs_region=obs_region,
+        selection="LAND",
+        store="user",
+        continuous=True,
+    )
+
+    assert "'continuous' is set to `False`" in caplog.text
+
+    data = get_footprint(satellite=satellite, domain=domain, obs_region=obs_region)
+
+    assert data.metadata["time_period"] == "varies"
+    assert data.metadata["obs_region"] == obs_region.lower()
+    assert data.metadata["selection"] == "land"
+    assert data.metadata["domain"] == domain.lower()
+
+
+def test_icos_corso_l1_flask_data():
+    """
+    Test icos corso strandardisation flow for data_level l1 and flask measurement.
+    """
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L1_FAST_TRACK_L1-FastTrack-2025.1_CBW_207.0_1480_FLASK.14C",
+        source_format="icos_corso",
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="flask",
+        data_level=1,
+        measurement_type="flask",
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+
+    get_corso_data = get_obs_surface(site="cbw", species="dco2c14", data_level="1", platform="surface-flask")
+
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
+    expected_value = -20.33
+    assert np.allclose(fetched_value, expected_value)
+
+    assert data["mf_sampling_period"].isel(time=4).values == 3601
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert "flask" in metadata["measurement_type"]
+    assert "3600.0" in metadata["sampling_period"]
+
+
+def test_icos_corso_l2_integrated_naoh():
+    """
+    Test icos corso strandardisation flow for data_level l2 and integrated-naoh measurement.
+    """
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_779.14C", source_format="icos_corso"
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="integrated-NAOH",
+        data_level=2,
+        measurement_type="integrated-NAOH",
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "2" in results[0]["data_level"]
+
+    get_corso_data = get_obs_surface(site="cbw", species="dco2c14", data_level="2", platform="surface-flask")
+
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
+    expected_value = -0.84
+    assert np.allclose(fetched_value, expected_value)
+    assert data["mf_sampling_period"].isel(time=0).values == 1209600.0
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+
+    assert "integrated-naoh" in metadata["measurement_type"]
+    assert "multiple" in metadata["sampling_period"]
+
+
+def test_icos_corso_l2_flask():
+    """
+    Test icos corso strandardisation flow for data_level l2 and flask measurement.
+    """
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1480_FLASK.14C", source_format="icos_corso"
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="CBW",
+        instrument="flask",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "dco2c14" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "207.0" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "surface-flask" in results[0]["platform"]
+    assert "2" in results[0]["data_level"]
+
+    get_corso_data = get_obs_surface(
+        site="cbw", species="dco2c14", data_level="2", instrument="flask", platform="surface-flask"
+    )
+
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0).values
+
+    expected_value = -59.87
+    assert np.allclose(fetched_value, expected_value)
+
+    assert data["mf_sampling_period"].isel(time=5).values == 3600
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert "flask" in metadata["measurement_type"]
+    assert "3600.0" in metadata["sampling_period"]
+
+
+def test_icos_corso_clean_14_day():
+    """
+    Test icos corso strandardisation flow for clean data and integrated-naoh measurement.
+    """
+    filepath = get_surface_datapath(
+        filename="uheicrl_l2_2025_1_jfj_5m_int_14day_clean.c14", source_format="icos_corso"
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="jfj",
+        instrument="integrated-NAOH",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "dco2c14" in results[0]["species"]
+    assert "jfj" in results[0]["site"]
+    assert "5m" in results[0]["inlet"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "2" in results[0]["data_level"]
+    assert "surface-flask" in results[0]["platform"]
+
+    get_corso_data = get_obs_surface(site="jfj", species="dco2c14", inlet="5m", platform="surface-flask")
+
+    data = get_corso_data.data
+    metadata = get_corso_data.metadata
+
+    fetched_value = data["mf"].isel(time=0)
+    assert data["mf_sampling_period"].isel(time=0).values == 1036800.0
+    assert data["mf_sampling_period"].attrs["units"] == "s"
+
+    expected_value = 189
+    assert np.allclose(fetched_value, expected_value)
+    assert "multiple" in metadata["sampling_period"]
+    assert "integrated-naoh" in metadata["instrument"]

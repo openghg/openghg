@@ -3,15 +3,19 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING
+
 import numpy as np
 from xarray import Dataset
-from openghg.util import synonyms
+
+from openghg.util import align_lat_lon, load_standardise_parser, split_function_inputs, synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
+from openghg.store.spec import define_standardise_parsers
+
 
 __all__ = ["BoundaryConditions"]
 
@@ -27,13 +31,21 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(
+        self,
+        binary_data: bytes,
+        metadata: dict,
+        file_metadata: dict,
+        source_format: str,
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
             binary_data: Footprint data
             metadata: Dictionary of metadata
             file_metadat: File metadata
+            source_format : Type of data being input e.g. openghg (internal format)
+
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -48,25 +60,26 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         bc_input: str,
         domain: str,
-        period: Optional[Union[str, tuple]] = None,
+        source_format: str,
+        period: str | tuple | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Read boundary conditions file
 
         Args:
@@ -76,6 +89,7 @@ class BoundaryConditions(BaseStore):
               - a model name such as "MOZART" or "CAMS"
               - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
             domain: Region for boundary conditions
+            source_format : Type of data being input e.g. openghg (internal format)
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
                      - "yearly", "monthly"
@@ -105,23 +119,16 @@ class BoundaryConditions(BaseStore):
                 To disable chunking pass in an empty dictionary.
             optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
-            dict: Dictionary of datasource UUIDs data assigned to
+            list: of dictionaries of files processed and datasource UUIDs data assigned to, plus "required" metadata
         """
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
 
-        from openghg.store import (
-            infer_date_range,
-            update_zero_dim,
-        )
         from openghg.util import (
             clean_string,
-            timestamp_now,
             check_if_need_new_version,
         )
-
-        from xarray import open_dataset
 
         species = clean_string(species)
         species = synonyms(species)
@@ -146,10 +153,20 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
+        standardise_parsers = define_standardise_parsers()[self._data_type]
+
+        try:
+            source_format = standardise_parsers[source_format.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {source_format} selected.")
+
+        # Loading parser
+        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 
@@ -160,109 +177,46 @@ class BoundaryConditions(BaseStore):
         fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
         fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
 
-        with open_dataset(filepath).chunk(chunks) as bc_data:
-            # Some attributes are numpy types we can't serialise to JSON so convert them
-            # to their native types here
-            attrs = {}
-            for key, value in bc_data.attrs.items():
-                try:
-                    attrs[key] = value.item()
-                except AttributeError:
-                    attrs[key] = value
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-            author_name = "OpenGHG Cloud"
-            bc_data.attrs["author"] = author_name
+        # Checking against expected format for BoundaryConditions, and align to expected lat/lons if necessary.
+        boundary_conditions_data = parser_fn(**parser_input_parameters)
 
-            metadata = {}
-            metadata.update(attrs)
+        for mdd in boundary_conditions_data:
+            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
+            BoundaryConditions.validate_data(mdd.data)
 
-            metadata["species"] = species
-            metadata["domain"] = domain
-            metadata["bc_input"] = bc_input
-            metadata["author"] = author_name
-            metadata["processed"] = str(timestamp_now())
+        # Check to ensure no required keys are being passed through optional_metadata dict
+        self.check_info_keys(optional_metadata)
+        if optional_metadata is not None:
+            additional_metadata.update(optional_metadata)
 
-            # Check if time has 0-dimensions and, if so, expand this so time is 1D
-            if "time" in bc_data.coords:
-                bc_data = update_zero_dim(bc_data, dim="time")
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        boundary_conditions_data = self.update_metadata(
+            boundary_conditions_data, additional_input_parameters, additional_metadata
+        )
 
-            # Currently ACRG boundary conditions are split by month or year
-            bc_time = bc_data["time"]
+        # This performs the lookup and assignment of data to new or
+        # existing Datasources
+        data_type = "boundary_conditions"
+        datasource_uuids = self.assign_data(
+            data=boundary_conditions_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            compressor=compressor,
+            filters=filters,
+        )
 
-            start_date, end_date, period_str = infer_date_range(
-                bc_time, filepath=filepath, period=period, continuous=continuous
-            )
+        logger.info(f"Completed processing: {filepath.name}.")
 
-            # Checking against expected format for boundary conditions
-            BoundaryConditions.validate_data(bc_data)
-            data_type = "boundary_conditions"
+        # Record the file hash in case we see this file again
+        self.store_hashes(unseen_hashes)
 
-            metadata["start_date"] = str(start_date)
-            metadata["end_date"] = str(end_date)
-            metadata["data_type"] = data_type
-
-            metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-            metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-            metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-            metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-            metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-            metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-
-            metadata["input_filename"] = filepath.name
-
-            metadata["time_period"] = period_str
-
-            key = "_".join((species, bc_input, domain))
-
-            boundary_conditions_data: dict[str, dict] = {}
-            boundary_conditions_data[key] = {}
-            boundary_conditions_data[key]["data"] = bc_data
-            boundary_conditions_data[key]["metadata"] = metadata
-
-            matched_keys = set(metadata) & set(fn_input_parameters)
-            additional_input_parameters = {
-                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-            }
-
-            # Check to ensure no required keys are being passed through optional_metadata dict
-            self.check_info_keys(optional_metadata)
-
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
-
-            # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_conditions_data = self.update_metadata(
-                boundary_conditions_data, additional_input_parameters, additional_metadata
-            )
-
-            # This performs the lookup and assignment of data to new or
-            # existing Datasources
-            datasource_uuids = self.assign_data(
-                data=boundary_conditions_data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                compressor=compressor,
-                filters=filters,
-            )
-
-            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-            # update_keys = ["start_date", "end_date", "latest_version"]
-            # boundary_conditions_data = update_metadata(
-            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-            # )
-
-            # bc_store.add_datasources(
-            #     uuids=datasource_uuids,
-            #     data=boundary_conditions_data,
-            #     metastore=metastore,
-            #     update_keys=update_keys,
-            # )
-
-            # Record the file hash in case we see this file again
-            self.store_hashes(unseen_hashes)
-
-            return datasource_uuids
+        return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:
@@ -282,7 +236,7 @@ class BoundaryConditions(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {
+        data_vars: dict[str, tuple[str, ...]] = {
             "vmr_n": ("time", "height", "lon"),
             "vmr_e": ("time", "height", "lat"),
             "vmr_s": ("time", "height", "lon"),

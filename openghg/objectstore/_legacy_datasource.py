@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, Literal, TypeVar
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
@@ -28,7 +28,7 @@ class Datasource:
 
     _datasource_root = "datasource"
 
-    def __init__(self, bucket: str, uuid: Optional[str] = None, mode: Literal["r", "rw"] = "rw") -> None:
+    def __init__(self, bucket: str, uuid: str | None = None, mode: Literal["r", "rw"] = "rw") -> None:
         from openghg.util import timestamp_now
         from openghg.store.storage import LocalZarrStore
 
@@ -37,21 +37,21 @@ class Datasource:
             if exists(bucket=bucket, key=key):
                 stored_data = get_object_from_json(bucket=bucket, key=key)
                 self.__dict__.update(stored_data)
-                self._data_keys: Dict[str, List] = defaultdict(list, self._data_keys)
+                self._data_keys: dict[str, list] = defaultdict(list, self._data_keys)
             else:
                 raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
-            self._metadata: Dict[str, Union[str, List, Dict]] = {}
+            self._metadata: dict[str, str | list | dict] = {}
             self._start_date = None
             self._end_date = None
-            self._status: Optional[Dict] = None
+            self._status: dict | None = None
             self._data_keys = defaultdict(list)
             self._data_type: str = ""
             # Hold information regarding the versions of the data
             self._latest_version: str = ""
-            self._timestamps: Dict[str, str] = {}
+            self._timestamps: dict[str, str] = {}
 
         if mode not in ("r", "rw"):
             raise ValueError("Invalid mode. Please select r or rw.")
@@ -69,9 +69,9 @@ class Datasource:
 
     def __exit__(
         self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: BaseException | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
@@ -109,16 +109,16 @@ class Datasource:
 
     def add_data(
         self,
-        metadata: Dict,
+        metadata: dict,
         data: xr.Dataset,
         data_type: str,
         sort: bool = False,
         drop_duplicates: bool = False,
-        skip_keys: Optional[List] = None,
+        skip_keys: list | None = None,
         new_version: bool = True,
         if_exists: str = "auto",
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -166,8 +166,8 @@ class Datasource:
         drop_duplicates: bool,
         new_version: bool = True,
         if_exists: str = "auto",
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
     ) -> None:
         """Add data to this Datasource
 
@@ -393,7 +393,7 @@ class Datasource:
         del self._data_keys[version]
         del self._timestamps[version]
 
-    def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
+    def add_metadata(self, metadata: dict, skip_keys: list | None = None) -> None:
         """Add all metadata in the dictionary to this Datasource
 
         Args:
@@ -402,7 +402,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import to_lowercase
+        from openghg.util import to_lowercase, merge_dict
 
         try:
             del metadata["object_store"]
@@ -411,10 +411,11 @@ class Datasource:
         else:
             logger.warning("object_store should not be added to the metadata, removing.")
 
-        lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
-        self._metadata.update(lowercased)
+        lowercased: dict = to_lowercase(metadata, skip_keys=skip_keys)
+        merged_metadata = merge_dict(self._metadata, lowercased, on_overlap="ignore", on_conflict="right")
+        self._metadata = merged_metadata
 
-    def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
+    def get_dataframe_daterange(self, dataframe: DataFrame) -> tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
 
         Args:
@@ -435,7 +436,7 @@ class Datasource:
 
         return start, end
 
-    def get_dataset_daterange(self, dataset: xr.Dataset) -> Tuple[Timestamp, Timestamp]:
+    def get_dataset_daterange(self, dataset: xr.Dataset) -> tuple[Timestamp, Timestamp]:
         """Get the daterange for the passed Dataset
 
         Args:
@@ -465,7 +466,7 @@ class Datasource:
 
         return daterange_str
 
-    def get_representative_daterange_str(self, dataset: xr.Dataset, period: Optional[str] = None) -> str:
+    def get_representative_daterange_str(self, dataset: xr.Dataset, period: str | None = None) -> str:
         """
         Get representative daterange which incorporates any period the data covers.
 
@@ -536,7 +537,7 @@ class Datasource:
 
         return daterange_str1_clipped
 
-    def _clip_daterange_label(self, labelled_datasets: Dict[str, xr.Dataset]) -> Dict[str, xr.Dataset]:
+    def _clip_daterange_label(self, labelled_datasets: dict[str, xr.Dataset]) -> dict[str, xr.Dataset]:
         """
         Check the daterange string labels for the datasets and ensure neighbouring
         date ranges are not overlapping. The daterange string labels will be updated
@@ -565,7 +566,7 @@ class Datasource:
 
         return labelled_datasets_clipped
 
-    def get_period(self) -> Optional[str]:
+    def get_period(self) -> str | None:
         """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
         "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
 
@@ -586,10 +587,10 @@ class Datasource:
                 # For sampling period data, expect this to be in seconds
                 if attr == "sampling_period":
                     if value.endswith("s"):  # Check if str includes "s"
-                        period: Optional[str] = value
+                        period: str | None = value
                     else:
                         try:
-                            value_num: Optional[int] = int(value)
+                            value_num: int | None = int(value)
                         except ValueError:
                             try:
                                 value_num = int(float(value))
@@ -659,7 +660,7 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def _copy_to_memorystore(self, version: str = "latest") -> Dict:
+    def _copy_to_memorystore(self, version: str = "latest") -> dict:
         """Copy the compressed data for a version from the zarr store into memory.
         Most users should use get_data in place of this function as it offers a simpler
         way of retrieving data.
@@ -723,7 +724,7 @@ class Datasource:
         self._start_date = start  # type: ignore
         self._end_date = end  # type: ignore
 
-    def daterange(self) -> Tuple[Timestamp, Timestamp]:
+    def daterange(self) -> tuple[Timestamp, Timestamp]:
         """Get the daterange the data in this Datasource covers as tuple
         of start, end datetime objects
 
@@ -748,7 +749,7 @@ class Datasource:
 
         return create_daterange_str(start=start, end=end)
 
-    def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
+    def in_daterange(self, start_date: str | Timestamp, end_date: str | Timestamp) -> bool:
         """Check if the data contained within this Datasource overlaps with the
         dates given.
 
@@ -768,9 +769,7 @@ class Datasource:
             start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
         )
 
-    def keys_in_daterange(
-        self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
-    ) -> List[str]:
+    def keys_in_daterange(self, start_date: str | Timestamp, end_date: str | Timestamp) -> list[str]:
         """Return the keys for data between the two passed dates
 
         Args:
@@ -783,7 +782,7 @@ class Datasource:
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
-    def keys_in_daterange_str(self, daterange: str) -> List[str]:
+    def keys_in_daterange_str(self, daterange: str) -> list[str]:
         """Return the keys for data within the specified daterange string
 
         Args:
@@ -807,7 +806,7 @@ class Datasource:
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
-    def key_date_compare(self, keys: List, start_date: Timestamp, end_date: Timestamp) -> List:
+    def key_date_compare(self, keys: list, start_date: Timestamp, end_date: Timestamp) -> list:
         """Returns the keys in the key list that are between the given dates
 
         Args:
@@ -845,7 +844,7 @@ class Datasource:
         """
         return self._uuid
 
-    def metadata(self) -> Dict:
+    def metadata(self) -> dict:
         """Return the metadata of this Datasource
 
         Returns:
@@ -861,7 +860,7 @@ class Datasource:
         """
         return self._data_type
 
-    def raw_keys(self) -> Dict[str, List]:
+    def raw_keys(self) -> dict[str, list]:
         """Returns the raw keys dictionary
 
         Returns:
@@ -869,7 +868,7 @@ class Datasource:
         """
         return self._data_keys
 
-    def data_keys(self, version: str = "latest") -> List:
+    def data_keys(self, version: str = "latest") -> list:
         """Returns the dateranges of data covered by a specific version of the data stored.
 
         Args:
@@ -887,7 +886,7 @@ class Datasource:
 
         return keys
 
-    def all_data_keys(self) -> Dict:
+    def all_data_keys(self) -> dict:
         """Return a summary of the versions of data stored for
         this Datasource
 

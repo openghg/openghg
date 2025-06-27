@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
-from typing import Any, Dict, Literal, Iterator, Union, Optional, MutableMapping
+from typing import Any, Literal, Union
+from collections.abc import Iterator, MutableMapping
 import xarray as xr
 import zarr
 import os
@@ -46,7 +47,7 @@ class LocalZarrStore(Store):
                     full_path = Path(self._stores_path, f).expanduser().resolve()
                     self._stores[f] = zarr.storage.DirectoryStore(full_path)
         # An in memory store used if data is popped from the store
-        self._memory_store: Dict[str, bytes] = {}
+        self._memory_store: dict[str, bytes] = {}
 
     def __bool__(self) -> bool:
         return any(self._stores)
@@ -132,8 +133,8 @@ class LocalZarrStore(Store):
         self,
         version: str,
         dataset: xr.Dataset,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
         append_dim: str = "time",
     ) -> None:
         """Add an xr.Dataset to the zarr store.
@@ -221,7 +222,7 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=self._memory_store)
         return ds
 
-    def _copy_to_memorystore(self, version: str) -> Dict:
+    def _copy_to_memorystore(self, version: str) -> dict:
         """Copies the compressed data from the filesystem store to an in-memory store.
         This preserves the compression and chunking of the data and the store
         can be opened as a single dataset. This may be useful for testing
@@ -233,7 +234,7 @@ class LocalZarrStore(Store):
         """
         version = self._check_version(version)
         store = self._stores[version]
-        mem_store: Dict[str, bytes] = {}
+        mem_store: dict[str, bytes] = {}
         zarr.copy_store(source=store, dest=mem_store)
         return mem_store
 
@@ -272,8 +273,8 @@ class LocalZarrStore(Store):
         self,
         version: str,
         dataset: xr.Dataset,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
     ) -> None:
         """Update a version of the data. This first deletes the current version
         and then adds the new version. To update a version in place, keeping the current data,
@@ -303,7 +304,7 @@ class LocalZarrStore(Store):
 
         return bytes_stored
 
-    def match_chunking(self, version: str, dataset: xr.Dataset) -> Dict[str, int]:
+    def match_chunking(self, version: str, dataset: xr.Dataset) -> dict[str, int]:
         """Ensure that chunks of incoming data match the chunking of the stored data.
 
         If no chunking is found then an empty dictionary is returned.
@@ -318,7 +319,7 @@ class LocalZarrStore(Store):
         """
         version = self._check_version(version)
 
-        incoming_chunks = dict(dataset.chunks)
+        incoming_chunks = dict(dataset.unify_chunks().chunks)
         incoming_actually_chunked = {k: max(v) for k, v in incoming_chunks.items() if len(v) > 1}
 
         stored_chunks = {str(k): v for k, v in self.get(version=version).chunksizes.items()}
@@ -352,7 +353,7 @@ class LocalZarrStore(Store):
 
         return {}
 
-    def match_attributes(self, version: str, dataset: xr.Dataset) -> Dict:
+    def match_attributes(self, version: str, dataset: xr.Dataset) -> dict:
         """Ensure the attributes of the stored and incoming data are matched,
         any attributes that differ will be added as a new key with a number appended.
         e.g. author_1 for a differing author value.

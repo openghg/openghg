@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING
 
 from openghg.store.base import BaseStore
 from pandas import Timestamp
@@ -38,7 +38,7 @@ class METStore(BaseStore):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def retrieve(site: str, network: str, years: Union[str, List[str]]) -> METData:
+    def retrieve(site: str, network: str, years: str | list[str]) -> METData:
         """Retrieve data from either the local METStore or from a
         remote store if we don't have it locally
 
@@ -78,9 +78,9 @@ class METStore(BaseStore):
         self,
         site: str,
         network: str,
-        start_date: Union[str, Timestamp],
-        end_date: Union[str, Timestamp],
-    ) -> Union[METData, None]:
+        start_date: str | Timestamp,
+        end_date: str | Timestamp,
+    ) -> METData | None:
         """Search the stored MET data
 
         Args:

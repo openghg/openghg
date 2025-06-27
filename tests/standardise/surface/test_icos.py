@@ -3,6 +3,7 @@ import logging
 import pytest
 from helpers import get_surface_datapath
 from openghg.standardise.surface import parse_icos
+from tests.helpers.helpers import print_dict_diff
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -11,9 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 def test_read_icos_large_header():
     filepath = get_surface_datapath(filename="ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4", source_format="ICOS")
 
-    data = parse_icos(
-        filepath=filepath, site="rgl", instrument="g2301", header_type="large", inlet="90m"
-    )
+    data = parse_icos(filepath=filepath, site="rgl", instrument="g2301", header_type="large", inlet="90m")
 
     expected_metadata = {
         "site": "rgl",
@@ -100,16 +99,16 @@ def test_read_icos_small_header_file():
         "species": "co2",
         "sampling_period": "60.0",
         "sampling_period_unit": "s",
-        'inlet_height_magl': '222m',
-        'calibration_scale': 'unknown',
-        'data_owner': 'NOT_SET',
-        'station_height_masl': 300.0,
-        'station_latitude': 56.55511,
-        'station_long_name': 'Angus Tower, UK',
-        'station_longitude': -2.98598
-
+        "inlet_height_magl": "222m",
+        "calibration_scale": "unknown",
+        "data_owner": "NOT_SET",
+        "station_height_masl": 315.0,
+        "station_latitude": 56.55519,
+        "station_long_name": "Angus Tower, UK",
+        "station_longitude": -2.98604,
     }
 
+    print_dict_diff(attrs, expected_attrs)
     assert attrs == expected_attrs
 
     co2_data = data["co2"]["data"]

@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import cast
 import warnings
 from xarray import Dataset
 
@@ -9,7 +9,7 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    check_function_open_nc,
+    footprint_open_nc_fn,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import multiPathType, ParseError
@@ -20,31 +20,35 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def parse_paris(
     filepath: multiPathType,
-    site: str,
     domain: str,
     model: str,
     inlet: str,
     species: str,
-    met_model: Optional[str] = None,
-    network: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    obs_region: str | None = None,
+    site: str | None = None,
+    satellite: str | None = None,
+    met_model: str | None = None,
+    network: str | None = None,
+    period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
-) -> Dict:
+) -> dict:
     """
     Read and parse input footprints data in "paris" format.
 
     Args:
         filepath: Path of file to load
-        site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
         met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. For a long-lived species this should be "inert".
+        obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
+        site: Site name
+        satellite: Satellite name
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
@@ -65,24 +69,35 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = check_function_open_nc(filepath)
+    # fp_data, filepath = open_and_align_dataset(filepath, domain)
+    xr_open_fn, filepath = footprint_open_nc_fn(filepath, domain)
 
     fp_data = xr_open_fn(filepath)
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
+    # Mapping NAME 2025 processed footprint variables to pre-2025
     dv_rename = {"srr": "fp"}
 
-    attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
+    # This was keyed the wrong way round!
+    # attribute_rename = {"fp_output_units": "LPDM_native_output_units"}
+
+    attribute_rename = {"lpdm_native_output_unit": "fp_output_units"}
 
     dim_rename = {"latitude": "lat", "longitude": "lon"}
 
     dim_reorder = ("time", "height", "lat", "lon")
 
+    if time_resolved is True:
+        dv_rename["srr_time_resolved"] = "fp_time_resolved"
+        dv_rename["srr_residual"] = "fp_residual"
+        dim_rename["resolution"] = "H_back"
+
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
         fp_data = fp_data.rename(**dv_rename)  # type: ignore
+
     except ValueError:
         msg = "Unable to parse input data using source_format='paris'. "
         if "fp" in fp_data:
@@ -90,9 +105,13 @@ def parse_paris(
         logger.exception(msg)
         raise ParseError(msg)
 
-    fp_data = fp_data.rename(**dim_rename)
+    fp_data = fp_data.rename(dim_rename)
 
     fp_data = fp_data.transpose(*dim_reorder, ...)
+
+    # Converts H_back values from timestamps to hours back
+    if "H_back" in fp_data.dims:
+        fp_data["H_back"] = fp_data.H_back.dt.seconds / 3600.0
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
@@ -100,17 +119,21 @@ def parse_paris(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: Dict[str, Union[str, float, List[float]]] = {}
+    metadata: dict[str, str | float | list[float]] = {}
 
-    metadata["data_type"] = "footprints"
-    metadata["site"] = site
-    metadata["domain"] = domain
-    metadata["model"] = model
+    default_metadata: dict = {
+        "data_type": "footprints",
+        "site": site,
+        "satellite": satellite,
+        "domain": domain,
+        "model": model,
+        "obs_region": obs_region,
+        "inlet": inlet,
+        "height": inlet,
+        "species": species,
+    }
 
-    # Include both inlet and height keywords for backwards compatability
-    metadata["inlet"] = inlet
-    metadata["height"] = inlet
-    metadata["species"] = species
+    metadata = {key: value for key, value in default_metadata.items() if value is not None}
 
     if met_model is not None:
         metadata["met_model"] = met_model
@@ -177,9 +200,27 @@ def parse_paris(
     # This might seem longwinded now but will help when we want to read
     # more than one footprints at a time
     # TODO - remove this once assign_attributes has been refactored
-    key = "_".join((site, domain, model, inlet))
+    if site is None:
+        key_parts = [
+            cast(str, satellite),
+            cast(str, obs_region),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
+    else:
+        key_parts = [
+            cast(str, site),
+            cast(str, domain),
+            model,
+            inlet,
+        ]
 
-    footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+    key_parts = [str(part) for part in key_parts if part is not None]
+
+    key = "_".join(key_parts)
+
+    footprint_data: defaultdict[str, dict[str, dict | Dataset]] = defaultdict(dict)
     footprint_data[key]["data"] = fp_data
     footprint_data[key]["metadata"] = metadata
 

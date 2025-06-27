@@ -36,9 +36,7 @@ def test_read_obspack_2020():
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )
 
-    data = parse_noaa(
-        filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
-    )
+    data = parse_noaa(filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA")
 
     ch4_data = data["ch4"]["data"]
 
@@ -71,9 +69,7 @@ def test_read_obspack_flask_2021():
     '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
     filepath = get_surface_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", source_format="NOAA")
 
-    data = parse_noaa(
-        filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
-    )
+    data = parse_noaa(filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA")
 
     # TODO: Replace this test data example when possible.
     # This ObsPack file contains negative heights because SPF is Antarctic Firn Air (ice cores)
@@ -164,6 +160,7 @@ def test_read_file_site_filepath_read(scsn06_data):
         assert attrs[key] == value
 
 
+@pytest.mark.xfail(reason="broken link to cf conventions")
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filepath_cf_compliance(scsn06_data):
@@ -190,6 +187,7 @@ def test_read_raw_file():
     assert co_data["co"][-1] == pytest.approx(73.16)
     assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
     assert co_data["co_selection_flag"][-1] == 0
+
 
 def test_read_incorrect_site_raises():
     filepath = get_surface_datapath(

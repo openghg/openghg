@@ -1,6 +1,5 @@
 from pathlib import Path
 from rich.progress import wrap_file
-from typing import Optional, Union
 import logging
 
 logger = logging.getLogger("openghg.util")
@@ -20,9 +19,7 @@ def parse_url_filename(url: str) -> str:
     return Path(urlparse(url).path).name
 
 
-def download_data(
-    url: str, filepath: Optional[Union[str, Path]] = None, timeout: int = 10
-) -> Optional[bytes]:
+def download_data(url: str, filepath: str | Path | None = None, timeout: int = 10) -> bytes | None:
     """Download data file, with progress bar.
 
     Based on https://stackoverflow.com/a/63831344/1303032

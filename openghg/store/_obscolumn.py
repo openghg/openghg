@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 from numpy import ndarray
 
@@ -9,7 +9,7 @@ from numpy import ndarray
 from openghg.store.base import BaseStore
 from xarray import DataArray
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[ndarray | DataArray]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -25,25 +25,26 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         species: str,
         platform: str = "satellite",
-        satellite: Optional[str] = None,
-        domain: Optional[str] = None,
-        selection: Optional[str] = None,
-        site: Optional[str] = None,
-        network: Optional[str] = None,
-        instrument: Optional[str] = None,
+        obs_region: Optional[str] = None,
+        satellite: str | None = None,
+        domain: str | None = None,
+        selection: str | None = None,
+        site: str | None = None,
+        network: str | None = None,
+        instrument: str | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        optional_metadata: dict | None = None,
+    ) -> list[dict]:
         """Read column observation file
 
         Args:
@@ -96,6 +97,7 @@ class ObsColumn(BaseStore):
         from openghg.store.spec import define_standardise_parsers
         from openghg.util import (
             clean_string,
+            format_platform,
             load_standardise_parser,
             split_function_inputs,
             check_if_need_new_version,
@@ -105,18 +107,32 @@ class ObsColumn(BaseStore):
         # TODO: Evaluate which inputs need cleaning (if any)
         species = clean_string(species)
         species = synonyms(species)
+
+        platform = format_platform(platform)
         platform = clean_string(platform)
 
         if site is None and satellite is None:
-            raise ValueError("One of 'site' or 'satellite' must be specified")
+            raise ValueError("Value for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")
 
         site = clean_string(site)
         satellite = clean_string(satellite)
         domain = clean_string(domain)
+        obs_region = clean_string(obs_region)
         network = clean_string(network)
         instrument = clean_string(instrument)
+
+        if domain is not None and obs_region is not None:
+            err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
+            logger.exception(err_msg)
+            raise ValueError(err_msg)
+        elif domain is not None and obs_region is None:
+            obs_region = domain
+            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
+        elif obs_region is not None and domain is None:
+            domain = "NOT_SET"
+            logging.info(f"Updated value of 'domain': {domain}")
 
         # Specify any additional metadata to be added
         additional_metadata = {}
@@ -153,7 +169,7 @@ class ObsColumn(BaseStore):
         _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
         if not unseen_hashes:
-            return {}
+            return [{}]
 
         filepath = next(iter(unseen_hashes.values()))
 

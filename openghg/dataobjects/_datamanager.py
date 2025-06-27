@@ -1,7 +1,6 @@
 from collections import defaultdict
 import copy
 import logging
-from typing import DefaultDict, Dict, List, Set, Optional, Union
 
 from openghg.objectstore import Datasource
 from openghg.objectstore.metastore import open_metastore
@@ -13,13 +12,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 class DataManager:
-    def __init__(self, metadata: Dict[str, Dict], store: str):
+    def __init__(self, metadata: dict[str, dict], store: str):
         # We don't want the object store in this metadata as we want it to be the
         # unadulterated metadata to properly reflect what's stored.
         self.metadata = self._clean_metadata(metadata=metadata)
         self._store = store
         self._bucket = get_writable_bucket(name=store)
-        self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
+        self._backup: defaultdict[str, dict[str, dict]] = defaultdict(dict)
         self._latest = "latest"
 
     def __str__(self) -> str:
@@ -28,7 +27,7 @@ class DataManager:
     def __bool__(self) -> bool:
         return bool(self.metadata)
 
-    def _clean_metadata(self, metadata: Dict) -> Dict:
+    def _clean_metadata(self, metadata: dict) -> dict:
         """Ensures the metadata we give to the user is the metadata
         stored in the metastore and the Datasource and hasn't been modified by the
         search function. Currently this just removes the object_store key
@@ -47,7 +46,7 @@ class DataManager:
 
         return metadata
 
-    def _check_datatypes(self, uuid: Union[str, List]) -> str:
+    def _check_datatypes(self, uuid: str | list) -> str:
         """Check the UUIDs are correct and ensure they all
         belong to a single data type
 
@@ -65,7 +64,7 @@ class DataManager:
             raise ValueError(f"Invalid UUIDs: {invalid_keys}")
 
         # We should only have one data type
-        data_types: Set[str] = {self.metadata[i]["data_type"] for i in uuid}
+        data_types: set[str] = {self.metadata[i]["data_type"] for i in uuid}
 
         if not data_types:
             raise ValueError("Unable to read data_type from metadata.")
@@ -97,7 +96,7 @@ class DataManager:
 
         self.metadata = self._clean_metadata(metadata=res.metadata)
 
-    def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
+    def restore(self, uuid: str, version: str | int = "latest") -> None:
         """Restore a backed-up version of a Datasource's metadata.
 
         Args:
@@ -123,7 +122,7 @@ class DataManager:
             d._metadata = backup
             d.save()
 
-    def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
+    def view_backup(self, uuid: str | None = None, version: str | None = None) -> dict:
         """View backed-up metadata for all Datasources
         or a single Datasource if a UUID is passed in.
 
@@ -143,9 +142,9 @@ class DataManager:
 
     def update_metadata(
         self,
-        uuid: Union[List, str],
-        to_update: Optional[Dict] = None,
-        to_delete: Union[str, List, None] = None,
+        uuid: list | str,
+        to_update: dict | None = None,
+        to_delete: str | list | None = None,
     ) -> None:
         """Update the metadata associated with data. This takes UUIDs of Datasources and updates
         the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
@@ -221,7 +220,7 @@ class DataManager:
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
 
-    def delete_datasource(self, uuid: Union[List, str]) -> None:
+    def delete_datasource(self, uuid: list | str) -> None:
         """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
@@ -256,7 +255,7 @@ class DataManager:
                 logger.info(f"Deleted Datasource with UUID {uid}.")
 
 
-def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+def data_manager(data_type: str, store: str, **kwargs: dict) -> DataManager:
     """Lookup the data / metadata you'd like to modify.
 
     Args:

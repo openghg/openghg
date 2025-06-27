@@ -23,18 +23,20 @@ These methods are only needed by `store.BaseStore`.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
-import json
-from typing import Any, cast, Literal, Optional, Type
+from types import TracebackType
+from typing import Any, Literal, cast
 
+import tinydb
 from filelock import FileLock
-from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
+from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 from openghg.util import hash_string
-import tinydb
 from tinydb.middlewares import Middleware
+from typing_extensions import Self
 
 
 def get_metakey(data_type: str) -> str:
@@ -82,7 +84,7 @@ class BucketKeyStorage(tinydb.Storage):
         self._bucket = bucket
         self._mode = mode
 
-    def read(self) -> Optional[dict]:
+    def read(self) -> dict | None:
         """Read data from database.
 
         Returns:
@@ -139,7 +141,7 @@ class SafetyCachingMiddleware(Middleware):
     has changed since it was first accessed by the storage class.
     """
 
-    def __init__(self, storage_cls: Type[tinydb.Storage]) -> None:
+    def __init__(self, storage_cls: type[tinydb.Storage]) -> None:
         """Follows the standard pattern for middleware.
 
         Args:
@@ -237,7 +239,31 @@ class DataClassMetaStore(TinyDBMetaStore):
         super().__init__(database=database)
 
         lock_path = get_object_lock_path(bucket, self.key)
-        self.lock = FileLock(lock_path, timeout=600)  # file lock with 10 minute timeout
+
+        # If lock is created for first time, make sure group has 'rw' permissions
+        if not lock_path.exists():
+            lock_path.touch(mode=0o664)
+
+        try:
+            self.lock = FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
+        except PermissionError as e:
+            raise PermissionError(
+                "You do not have the correct permissions to add data to this object store."
+                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
+                f"e.g. using `chmod +664 {lock_path}`"
+            ) from e
+
+    def __enter__(self) -> Self:
+        self.acquire_lock()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None:
+        self.release_lock()
 
     def acquire_lock(self) -> None:
         """Acquire a lock for the object store."""

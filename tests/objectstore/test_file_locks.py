@@ -1,8 +1,11 @@
+import os
+import stat
 from threading import Thread
 from timeit import default_timer
 
 import pytest
 from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.objectstore import get_object_lock_path
 
 
 @pytest.fixture
@@ -91,3 +94,14 @@ def test_lock_is_advisory(tmp_path, mocker):
 
     assert len(ms3._db.all()) == 0
     ms3.close()
+
+
+def test_lock_permissions(tmp_path, get_metastores):
+    ms1, ms2 = get_metastores
+
+    with ms1:
+        ms1.insert({"key": "val"})
+
+    permissions = os.stat(get_object_lock_path(tmp_path, "key")).st_mode
+
+    assert stat.filemode(permissions) == "-rw-rw-r--"
