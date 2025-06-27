@@ -1047,7 +1047,7 @@ def test_optional_parameters():
         )
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -1062,11 +1062,11 @@ def test_optional_metadata_raise_error():
             network="DECC",
             site="RGL",
             store="group",
-            optional_metadata={"species": "openghg_tests"},
+            info_metadata={"species": "openghg_tests"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -1079,7 +1079,7 @@ def test_optional_metadata():
         network="DECC",
         site="RGL",
         store="group",
-        optional_metadata={"project": "openghg_tests"},
+        info_metadata={"project": "openghg_tests"},
     )
 
     rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")

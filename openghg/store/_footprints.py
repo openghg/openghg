@@ -216,7 +216,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -266,7 +266,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -416,10 +416,10 @@ class Footprints(BaseStore):
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         footprint_data = self.update_metadata(

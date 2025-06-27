@@ -51,7 +51,7 @@ def test_read_file():
         assert metadata[key] == expected_value
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -65,11 +65,11 @@ def test_optional_metadata_raise_error():
             filepath=test_datapath,
             model="GEOSChem",
             species="ch4",
-            optional_metadata={"species": "ch4", "tag": "tests"},
+            info_metadata={"species": "ch4", "tag": "tests"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -80,7 +80,7 @@ def test_optional_metadata():
         filepath=test_datapath,
         model="GEOSChem",
         species="ch4",
-        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+        info_metadata={"project": "openghg_tests", "tag": "tests"},
     )
 
     search_results = search(

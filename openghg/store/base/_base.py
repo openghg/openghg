@@ -261,22 +261,22 @@ class BaseStore:
 
         return data
 
-    def check_info_keys(self, optional_metadata: dict | None) -> None:
+    def check_info_keys(self, info_metadata: dict | None) -> None:
         """Check the informational metadata is not being used to set required keys.
 
         Args:
-            optional_metadata: Additional informational metadata
+            info_metadata: Additional informational metadata
         Returns:
             None
         Raises:
-            ValueError: if any keys within optional_metadata are within the required set of keys.
+            ValueError: if any keys within info_metadata are within the required set of keys.
         """
         metakeys = self.add_metakeys()
         required = metakeys["required"]
 
-        # Check if anything in optional_metadata tries to override our required keys
-        if optional_metadata is not None:
-            common_keys = set(required) & set(optional_metadata.keys())
+        # Check if anything in info_metadata tries to override our required keys
+        if info_metadata is not None:
+            common_keys = set(required) & set(info_metadata.keys())
 
             if common_keys:
                 raise ValueError(
@@ -285,7 +285,7 @@ class BaseStore:
 
     def get_lookup_keys(self, data: MutableSequence[MetadataAndData]) -> list[str]:
         """This creates the list of keys required to perform the Datasource lookup.
-        If optional_metadata is passed in then those keys may be taken into account
+        If info_metadata is passed in then those keys may be taken into account
         if they exist in the list of stored optional keys.
 
         Args:
