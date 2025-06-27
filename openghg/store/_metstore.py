@@ -94,7 +94,7 @@ class METStore(BaseStore):
         """
         raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.dataobjects import METData
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
 
         datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
 
@@ -120,7 +120,7 @@ class METStore(BaseStore):
             None
         """
         raise NotImplementedError("We are working to replace the MetStore.")
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
 
         metadata = met_data.metadata
 

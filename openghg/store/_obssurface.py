@@ -659,7 +659,7 @@ class ObsSurface(BaseStore):
             None
         """
         from openghg.objectstore import delete_object
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
 
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them

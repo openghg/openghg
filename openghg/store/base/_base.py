@@ -316,7 +316,7 @@ class BaseStore:
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
         from openghg.util import not_set_metadata_values
 
         uuids = {}
