@@ -281,6 +281,23 @@ a previous step of the tutorial - see "Updating existing data" tutorial for more
 As will be covered in the :ref:`2. Searching for data` section, these keywords can then used when searching the
 object store. For the `tag` keyword this can be used to return all data which includes the chosen tag.
 
+Adding informational keys
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Informational keys and associated values can also be added using the `info_metadata` input. The most
+common example for this would be to add a `comment` input. For example:
+
+.. code:: ipython3
+
+    decc_results = standardise_surface(filepath=tac_data,
+                                       source_format="CRDS",
+                                       site="TAC",
+                                       network="DECC",
+                                       info_metadata={"comment": "Automatic quality checks have been applied."})
+
+Note that for both `info_metadata` and `tag` that these options are available for all data types (not just
+observations).
+
 Multiple stores
 ~~~~~~~~~~~~~~~
 
