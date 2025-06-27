@@ -269,6 +269,18 @@ class DataManager:
         def updater(
             attrs: MutableMapping, to_update: dict | None = None, to_delete: str | list | None = None
         ) -> bool:
+            """Update/delete attributes.
+
+            Can be used on either global attributes or the attributes of a data variable.
+
+            Args:
+                attrs: dict (or MutableMapping) of attributes to update.
+                to_update: dict of attributes to update.
+                to_delete: key or list of keys of attributes to delete.
+
+            Returns:
+                True if attributes either updated or deleted, False otherwise.
+            """
             updated = False
             if to_delete is not None and to_delete:
                 if not isinstance(to_delete, list):
@@ -298,7 +310,8 @@ class DataManager:
 
             # update global
             if update_global:
-                updated = updated or updater(group.attrs, to_update, to_delete)
+                global_updated = updater(group.attrs, to_update, to_delete)
+                updated = updated or global_updated
             # update data vars
             if data_vars is not None:
                 if not isinstance(data_vars, list):
@@ -311,7 +324,8 @@ class DataManager:
                         logger.warning(f"Data variable {dv} not present in zarr store. Skipping.")
                         continue
                     else:
-                        updated = updated or updater(arr.attrs, to_update, to_delete)
+                        data_var_updated = updater(arr.attrs, to_update, to_delete)
+                        updated = updated or data_var_updated
 
             if updated:
                 zarr.consolidate_metadata(zs)
