@@ -81,7 +81,7 @@ def standardise_surface(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
@@ -147,7 +147,7 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         sort_files: Sorts multiple files date-wise.
     Returns:
         dict: Dictionary of result data
@@ -188,7 +188,7 @@ def standardise_surface(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -214,7 +214,7 @@ def standardise_column(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Read column observation file
 
@@ -257,7 +257,7 @@ def standardise_column(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Additional metadata to tag the data (e.g., `{"project": "paris"}`).
+        info_metadata: Additional metadata to tag the data (e.g., `{"project": "paris"}`).
 
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -286,7 +286,7 @@ def standardise_column(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -308,7 +308,7 @@ def standardise_bc(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -347,7 +347,7 @@ def standardise_bc(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -371,7 +371,7 @@ def standardise_bc(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -408,7 +408,7 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
@@ -463,7 +463,7 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         sort_files: Sort multiple files datewise
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
@@ -515,7 +515,7 @@ def standardise_footprint(
         filters=filters,
         sort=sort,
         drop_duplicates=drop_duplicates,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -542,7 +542,7 @@ def standardise_flux(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -583,7 +583,7 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -617,7 +617,7 @@ def standardise_flux(
         compression=compression,
         compressor=compressor,
         filters=filters,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -639,7 +639,7 @@ def standardise_eulerian(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -677,7 +677,7 @@ def standardise_eulerian(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict: Dictionary of result data
     """
@@ -700,7 +700,7 @@ def standardise_eulerian(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -759,7 +759,7 @@ def standardise_flux_timeseries(
     filters: Any | None = None,
     period: str | tuple | None = None,
     continuous: bool | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Process one dimension timeseries file
 
@@ -802,7 +802,7 @@ def standardise_flux_timeseries(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
@@ -834,5 +834,5 @@ def standardise_flux_timeseries(
         filters=filters,
         period=period,
         continuous=continuous,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )

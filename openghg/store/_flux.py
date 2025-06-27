@@ -78,7 +78,7 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Read flux / emissions file
 
@@ -122,7 +122,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -207,10 +207,10 @@ class Flux(BaseStore):
 
             Flux.validate_data(mdd.data)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
@@ -239,7 +239,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
         **kwargs: dict,
     ) -> list[dict]:
         """
@@ -316,8 +316,8 @@ class Flux(BaseStore):
 
         required_keys = ("species", "source", "domain")
 
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
 
             if common_keys:
                 raise ValueError(
@@ -325,7 +325,7 @@ class Flux(BaseStore):
                 )
             else:
                 for parsed_data in flux_data:
-                    parsed_data.metadata.update(optional_metadata)
+                    parsed_data.metadata.update(info_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(
