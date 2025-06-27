@@ -62,6 +62,15 @@ def define_data_type_classes() -> Dict[str, Any]:
     return data_type_classes
 
 
+def validate_data_type(data_type: str) -> None:
+    """Raise TypeError if given data type is not a valid data type class."""
+    expected_data_types = define_data_types()
+
+    data_type = data_type.lower()
+    if data_type not in expected_data_types:
+        raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
+
+
 def define_standardise_parsers() -> Dict[str, Any]:
     """
     Define mapping between data_types and standardise parser details

@@ -10,7 +10,6 @@ import numpy as np
 from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str, timestamp_tzaware
-from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
 
@@ -143,12 +142,6 @@ class Datasource:
         Returns:
             None
         """
-        expected_data_types = define_data_types()
-
-        data_type = data_type.lower()
-        if data_type not in expected_data_types:
-            raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
-
         self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
