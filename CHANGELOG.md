@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
 - Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
 - Updated '_scale_convert' to 'convert' function from openghg_calscales package. [PR #1349](https://github.com/openghg/openghg/pull/1349)
+- Renamed `optional_metadata` to `info_metadata` within `standardise_*` functions so this is more descriptive of how these keys are currently used [PR #1377](https://github.com/openghg/openghg/pull/1377)
 
 ### Fixed
 
