@@ -48,7 +48,7 @@ def test_read_openghg_format():
         assert np.isclose(ch4_data["xch4"][0], 1844.2019)
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -69,11 +69,11 @@ def test_optional_metadata_raise_error():
             satellite=satellite,
             domain=domain,
             species=species,
-            optional_metadata={"species": "ch4"},
+            info_metadata={"species": "ch4"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify required keys present in optional metadata supplied as dictionary is
     added to metadata
@@ -92,7 +92,7 @@ def test_optional_metadata():
         satellite=satellite,
         domain=domain,
         species=species,
-        optional_metadata={"project": "openghg_test"},
+        info_metadata={"project": "openghg_test"},
     )
     col_data = search_column(species="ch4").retrieve_all()
     metadata = col_data.metadata

@@ -46,6 +46,7 @@ from ._metadata_util import (
     check_not_set_value,
     get_overlap_keys,
     merge_dict,
+    merge_and_extend_dict,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
@@ -115,5 +116,8 @@ from ._util import (
     unanimous,
     verify_site,
     verify_site_with_satellite,
+    check_unique,
+    find_repeats,
+    collate_strings,
 )
 from ._versions import show_versions, check_if_need_new_version
