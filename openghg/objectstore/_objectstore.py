@@ -19,12 +19,12 @@ from typing import Generic, TypeVar
 from typing import Any
 from uuid import uuid4
 
-from openghg.objectstore._datasource import Datasource, DatasourceFactory
+from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
 from openghg.objectstore.metastore import MetaStore
 from openghg.types import ObjectStoreError
 
 
-DS = TypeVar("DS", bound="Datasource")
+DS = TypeVar("DS", bound="AbstractDatasource")
 
 
 MetaData = dict[str, Any]
@@ -47,7 +47,8 @@ class ObjectStore(Generic[DS]):
         """
         return self.metastore.search(metadata)
 
-    def get_uuids(self, metadata: MetaData = dict()) -> list[UUID]:
+    def get_uuids(self, metadata: MetaData | None = None) -> list[UUID]:
+        metadata = metadata or {}
         results = self.metastore.search(metadata)
         return [result["uuid"] for result in results]
 
@@ -71,13 +72,14 @@ class ObjectStore(Generic[DS]):
 
         uuid: UUID = str(uuid4())
         datasource = self.datasource_factory.new(uuid)
+
         try:
             datasource.add(data)
         except Exception as e:
             raise e
         else:
             metadata["uuid"] = uuid
-            self.metastore.add(metadata)
+            self.metastore.insert(metadata)
             del metadata["uuid"]  # don't mutate the metadata
             datasource.save()
 

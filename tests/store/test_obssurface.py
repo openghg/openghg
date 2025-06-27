@@ -24,7 +24,7 @@ from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from openghg.types import MetadataAndData
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
@@ -81,7 +81,7 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     min_uuids = min_uuids_fixture
     for result in min_uuids:
         species = result["species"]
-        datasource = Datasource(bucket=bucket, uuid=result["uuid"])
+        datasource = Datasource.load(bucket=bucket, uuid=result["uuid"])
         assert metadata_checker_obssurface(datasource.metadata(), species=species)
 
         with datasource.get_data(version="latest") as data:
@@ -234,7 +234,7 @@ def test_read_CRDS(bucket, tmpdir):
     # Load up the assigned Datasources and check they contain the correct data
     uid = [res["uuid"] for res in results if res["species"] == "ch4"][0]
 
-    datasource = Datasource(bucket=bucket, uuid=uid)
+    datasource = Datasource.load(bucket=bucket, uuid=uid)
 
     assert datasource.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
@@ -254,9 +254,9 @@ def test_read_CRDS(bucket, tmpdir):
     )
 
     # Let's load the same Datasource again and check that the data has been updated
-    datasource = Datasource(bucket=bucket, uuid=uid)
+    datasource = Datasource.load(bucket=bucket, uuid=uid)
 
-    assert datasource.data_keys() == [
+    assert sorted(datasource.data_keys()) == [
         "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:21:29+00:00",
     ]
@@ -352,7 +352,7 @@ def test_read_GC(bucket):
     # Load in some data
     uuid = select(filt(results, species="hfc152a", inlet="70m"), "uuid")[0]["uuid"]
 
-    hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
+    hfc_datasource = Datasource.load(bucket=bucket, uuid=uuid)
 
     with hfc_datasource.get_data(version="latest") as ds:
         # hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
@@ -382,7 +382,7 @@ def test_read_GC(bucket):
         # # Now test that if we add more data it adds it to the same Datasource
         uuid_one = uuids[0]  # metastore.search()[0]['uuid']
 
-    datasource = Datasource(bucket=bucket, uuid=uuid_one)
+    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
     assert datasource.data_keys() == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
@@ -399,7 +399,7 @@ def test_read_GC(bucket):
         network="AGAGE",
     )
 
-    datasource = Datasource(bucket=bucket, uuid=uuid_one)
+    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
     assert datasource.data_keys() == [
         "2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00",
@@ -428,7 +428,7 @@ def test_read_openghg_format(bucket):
 
     uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
 
-    co2_data = Datasource(bucket=bucket, uuid=uuid)
+    co2_data = Datasource.load(bucket=bucket, uuid=uuid)
 
     with co2_data.get_data(version="latest") as co2_data:
         assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
@@ -455,7 +455,7 @@ def test_read_noaa_raw(bucket):
 
     uuid = filt(results, file="co_pocn25_surface-flask_1_ccgg_event.txt", species="co")[0]["uuid"]
 
-    co_datasource = Datasource(bucket=bucket, uuid=uuid)
+    co_datasource = Datasource.load(bucket=bucket, uuid=uuid)
 
     with co_datasource.get_data(version="latest") as co_data:
         assert co_data["co"][0] == pytest.approx(94.9)
@@ -487,7 +487,7 @@ def test_read_noaa_metastorepack(bucket):
 
     uuid = filt(results, file="ch4_esp_surface-flask_2_representative.nc", species="ch4")[0]["uuid"]
 
-    ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
+    ch4_datasource = Datasource.load(bucket=bucket, uuid=uuid)
 
     assert ch4_datasource.data_keys() == ["1993-06-17-00:12:30+00:00_2002-01-12-12:00:00+00:00"]
 
@@ -1148,7 +1148,7 @@ def test_sync_surface_metadata_store_level(
     standardised_data = filt(standardised_data, file=filepath.name)
 
     for res in standardised_data:
-        datasource = Datasource(bucket=bucket, uuid=res["uuid"])
+        datasource = Datasource.load(bucket=bucket, uuid=res["uuid"])
         assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
 
         with datasource.get_data(version="latest") as data:

@@ -13,7 +13,7 @@ from openghg.objectstore import get_writable_bucket
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from openghg.types import DataOverlapError
 
 
@@ -381,8 +381,8 @@ def test_obs_data_read_data_diff():
 
     bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = Datasource.load(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = Datasource.load(uuid=uuid_n2o, bucket=bucket)
 
     assert d_sf6._latest_version == "v2"
     assert d_n2o._latest_version == "v2"
@@ -470,8 +470,8 @@ def test_obs_data_read_data_overwrite_version():
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
     bucket = get_writable_bucket(name="user")
-    d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
+    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
 
     assert d_sf6._latest_version == "v1"
     assert d_n2o._latest_version == "v1"
@@ -604,8 +604,8 @@ def test_obs_data_read_two_frequencies():
 
     bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = Datasource.load(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = Datasource.load(uuid=uuid_co_minutely, bucket=bucket)
 
     assert d_co_hourly._latest_version == "v1"
     assert d_co_minutely._latest_version == "v1"

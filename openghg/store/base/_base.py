@@ -9,6 +9,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, TypeVar
 from collections.abc import MutableSequence, Sequence
+from uuid import uuid4
 
 from pandas import Timestamp
 import xarray as xr
@@ -353,17 +354,17 @@ class BaseStore:
 
                 # Take a copy of the metadata so we can update it
                 meta_copy = metadata.copy()
-                new_ds = uuid is None
 
-                if new_ds:
-                    datasource = Datasource(bucket=self._bucket)
+                if new_ds := uuid is None:  # use := so mypy knows uuid is not None in "else" clause
+                    uid = str(uuid4())
+                    datasource = Datasource(uuid=uid, bucket=self._bucket)
                     uid = datasource.uuid()
                     meta_copy["uuid"] = uid
                     # Make sure all the metadata is lowercase for easier searching later
                     # TODO - do we want to do this or should be just perform lowercase comparisons?
                     meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 else:
-                    datasource = Datasource(bucket=self._bucket, uuid=uuid)
+                    datasource = Datasource.load(uuid=uuid, bucket=self._bucket)
 
                 # Add the dataframe to the datasource
                 datasource.add_data(

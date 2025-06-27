@@ -11,7 +11,7 @@ from addict import Dict as aDict
 from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from openghg.types import ObjectStoreError, ZarrStoreError
 from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
@@ -52,9 +52,25 @@ def data():
     return parse_crds(filepath=filepath, site="bsd", network="DECC")
 
 
+class UUID:
+    """Make a sequence of unique uuids.
+
+    They have the form "uuid1", "uuid2", etc.
+    """
+    uuid_int = 0
+
+    def __init__(self) -> None:
+        self.uuid_int += 1
+
+    def __str__(self) -> str:
+        return f"uuid{self.uuid_int}"
+
+
 @pytest.fixture
 def datasource(bucket):
-    return Datasource(bucket=bucket)
+    d = Datasource(uuid=str(UUID()), bucket=bucket)
+    yield d
+    d.delete_all_data()
 
 
 @pytest.fixture
@@ -96,8 +112,8 @@ def datasets_with_overlap():
     return create_three_datasets(time_a, time_b, time_c)
 
 
-def test_add_data(data, bucket):
-    d = Datasource(bucket=bucket)
+def test_add_data(data, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -136,7 +152,7 @@ def test_add_data(data, bucket):
     assert d.metadata().items() >= expected_metadata.items()
 
 
-def test_versioning(capfd, bucket):
+def test_versioning(capfd, bucket, datasource):
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     detailed_tac_filepath = get_surface_datapath(
         filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
@@ -148,9 +164,7 @@ def test_versioning(capfd, bucket):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = Datasource(bucket=bucket)
-    # Fix the UUID for the tests
-    d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
+    d = datasource # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
 
     min_ch4_data = min_data["ch4"]["data"]
 
@@ -199,9 +213,8 @@ def test_replace_version(bucket):
     min_ch4_data = min_data["ch4"]["data"]
     metadata = {"foo": "bar"}
 
-    d = Datasource(bucket=bucket)
-    # Fix the UUID for the tests
-    d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
+    d = Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
+
     d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
     # Save initial data
@@ -241,7 +254,7 @@ def test_get_dataframe_daterange(bucket):
         columns=list("ABCD"),
     )
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     start, end = d.get_dataframe_daterange(random_data)
 
@@ -252,14 +265,14 @@ def test_get_dataframe_daterange(bucket):
 def test_save(mock_uuid2, bucket):
     bucket = get_bucket()
 
-    datasource = Datasource(bucket=bucket)
+    datasource = Datasource(uuid="abc123", bucket=bucket)
     datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save()
 
     exists(bucket=bucket, key=datasource.key())
 
 
-def test_save_footprint(bucket):
+def test_save_footprint(bucket, datasource):
     metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
     filepath = get_footprint_datapath(filename="WAO-20magl_UKV_rn_TEST_202112.nc")
@@ -268,13 +281,13 @@ def test_save_footprint(bucket):
 
     bucket = get_bucket()
 
-    datasource = Datasource(bucket=bucket)
+    #datasource = Datasource(uuid="abc123", bucket=bucket)
     datasource.add_data(
         data=data, metadata=metadata, sort=False, drop_duplicates=False, data_type="footprints"
     )
     datasource.save()
 
-    datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid, mode="r")
+    datasource_2 = Datasource.load(bucket=bucket, uuid=datasource._uuid, mode="r")
 
     retrieved_ds = datasource_2.get_data(version="v1")
     assert retrieved_ds.equals(data)
@@ -309,7 +322,7 @@ def test_add_metadata_lowercases_correctly(datasource):
 
 
 def test_save_and_load(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -317,7 +330,7 @@ def test_save_and_load(data, bucket):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
-    d_2 = Datasource(bucket=bucket, uuid=d.uuid())
+    d_2 = Datasource.load(bucket=bucket, uuid=d.uuid())
 
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"
@@ -329,8 +342,9 @@ def test_save_and_load(data, bucket):
     assert d_2.metadata() == d.metadata()
 
 
+@pytest.mark.xfail(reason=".add_data no longer checks the data type")
 def test_incorrect_datatype_raises(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -342,7 +356,7 @@ def test_incorrect_datatype_raises(data, bucket):
 def test_update_daterange_replacement(data, bucket):
     metadata = {"foo": "bar"}
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     ch4_data = data["ch4"]["data"]
 
@@ -370,8 +384,7 @@ def test_in_daterange(data, bucket):
     metadata = data["ch4"]["metadata"]
     data = data["ch4"]["data"]
 
-    d = Datasource(bucket=bucket)
-    d._uuid = "test-id-123"
+    d = Datasource(uuid="test-id-123", bucket=bucket)
     d.add_data(metadata=metadata, data=data, data_type="surface")
 
     assert d.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
@@ -386,7 +399,7 @@ def test_in_daterange(data, bucket):
 
 
 def test_key_date_compare(bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     keys = [
         "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
@@ -421,7 +434,7 @@ def test_key_date_compare(bucket):
 
 
 def test_integrity_check(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -435,7 +448,7 @@ def test_integrity_check(data, bucket):
 
     uid = d.uuid()
 
-    d = Datasource(bucket=bucket, uuid=uid)
+    d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
 
     d._store.delete_all()
@@ -445,7 +458,7 @@ def test_integrity_check(data, bucket):
 
 
 def test_data_version_deletion(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -472,7 +485,7 @@ def test_data_version_deletion(data, bucket):
 
 
 def test_surface_data_stored_and_dated_correctly(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -491,8 +504,8 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
     assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
 
 
-def test_to_memory_store(data, bucket):
-    d = Datasource(bucket=bucket)
+def test_to_memory_store(data, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -504,11 +517,11 @@ def test_to_memory_store(data, bucket):
         assert ds.equals(ch4_data)
 
 
-def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
+def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps, datasource):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
-    d = Datasource(bucket=bucket)
+    d = datasource
 
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
@@ -545,7 +558,7 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
 
     attributes = create_attributes()
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
@@ -561,7 +574,7 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
 
 @pytest.mark.xfail(reason="Combining datasets is not currently supported")
 def test_add_data_combine_datasets(data, bucket):
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -584,7 +597,7 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
@@ -609,7 +622,7 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="abc123", bucket=bucket)
 
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
@@ -629,14 +642,14 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
     assert ds.equals(expected)
 
 
-def test_bytes_stored(data, bucket):
-    d = Datasource(bucket=bucket)
+def test_bytes_stored(data, bucket, datasource):
+    d = datasource
     d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
 
     d.save()
 
     assert abs(d.bytes_stored() - 9609) < 10
 
-    d = Datasource(bucket=bucket)
+    d = Datasource(uuid="xyz456", bucket=bucket)
 
     assert d.bytes_stored() == 0

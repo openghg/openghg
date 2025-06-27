@@ -4,7 +4,7 @@ from openghg.standardise import standardise_flux, standardise_footprint
 from openghg.objectstore import get_writable_bucket
 from openghg.types import ObjectStoreError
 from helpers import get_footprint_datapath, get_flux_datapath, clear_test_stores
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from openghg.objectstore.metastore import open_metastore
 
 
@@ -49,7 +49,7 @@ def test_integrity_check_delete_datasource_keys():
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="flux") as metastore:
         uid = metastore.select("uuid")[0]
-        ds = Datasource(bucket=bucket, uuid=uid)
+        ds = Datasource.load(bucket=bucket, uuid=uid)
 
         ds._store.delete_all()
 

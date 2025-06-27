@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 from typing import Any
 
-DS = TypeVar("DS", bound="Datasource")
+DS = TypeVar("DS", bound="AbstractDatasource")
 
 
 UUID = str
@@ -49,7 +49,7 @@ class DatasourceFactory(Generic[DS]):
         return self.datasource_class.load(uuid=uuid, **self.load_kwargs)
 
 
-class Datasource(ABC):
+class AbstractDatasource(ABC):
     """Interface for Datasource-like objects.
 
     The data stored in a Datasource is assumed to be related in some way.
@@ -62,16 +62,16 @@ class Datasource(ABC):
     to support this.
     """
 
-    def __init__(self, uuid: UUID) -> None:
+    def __init__(self, uuid: UUID, *args: Any, **kwargs: Any) -> None:
         self.uuid = uuid
 
     @classmethod
     @abstractmethod
-    def load(cls: type[DS], uuid: UUID) -> DS:
+    def load(cls: type[DS], uuid: UUID, *args: Any, **kwargs: Any) -> DS:
         pass
 
     @abstractmethod
-    def add(self, data: Data) -> None:
+    def add(self, data: Data, *args, **kwargs: Any) -> None:
         """Add data to the datasource.
 
         TODO: add `overwrite` argument, with expected error type
@@ -93,12 +93,12 @@ class Datasource(ABC):
 T = TypeVar("T", bound="InMemoryDatasource")
 
 
-class InMemoryDatasource(Datasource):
+class InMemoryDatasource(AbstractDatasource):
     """Minimal class implementing the Datasource interface."""
 
     datasources: dict[UUID, list[Data]] = {}
 
-    def __init__(self, uuid: UUID, data: list[Data] | None = None) -> None:
+    def __init__(self, uuid: UUID, data: list[Data] | None = None, **kwargs: Any) -> None:
         super().__init__(uuid)
         if data:
             self.data: list[Data] = data

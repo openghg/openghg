@@ -11,7 +11,7 @@ from openghg.objectstore import get_writable_bucket, exists
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_footprint, standardise_surface
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from openghg.types import ObjectStoreError
 
 
@@ -99,7 +99,7 @@ def test_delete_footprint_data(footprint_read):
 
     # Let's open the Datasource again and make sure we get a new empty object
     with pytest.raises(ObjectStoreError):
-        Datasource(bucket=bucket, uuid=uuid)
+        Datasource.load(bucket=bucket, uuid=uuid)
 
     assert not exists(bucket=bucket, key=zarr_store_key)
 
@@ -306,7 +306,7 @@ def test_delete_data():
     uid = next(iter(res.metadata))
 
     bucket = get_writable_bucket(name="user")
-    d = Datasource(bucket=bucket, uuid=uid)
+    d = Datasource.load(bucket=bucket, uuid=uid)
     key = d.key()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:

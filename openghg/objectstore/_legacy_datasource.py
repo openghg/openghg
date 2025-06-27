@@ -2,16 +2,17 @@ from __future__ import annotations
 from collections import defaultdict
 import warnings
 from typing import Any, cast, Literal, TypeVar
+from typing_extensions import Self
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 import numpy as np
-from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.types import DataOverlapError, ObjectStoreError
 
+from ._datasource import AbstractDatasource
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
@@ -21,37 +22,28 @@ __all___ = ["Datasource"]
 T = TypeVar("T", bound="Datasource")
 
 
-class Datasource:
+class Datasource(AbstractDatasource):
     """A Datasource holds data relating to a single source, such as a specific species
     at a certain height on a specific instrument
     """
 
     _datasource_root = "datasource"
 
-    def __init__(self, bucket: str, uuid: str | None = None, mode: Literal["r", "rw"] = "rw") -> None:
+    def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
         from openghg.util import timestamp_now
         from openghg.store.storage import LocalZarrStore
 
-        if uuid is not None:
-            key = f"{Datasource._datasource_root}/uuid/{uuid}"
-            if exists(bucket=bucket, key=key):
-                stored_data = get_object_from_json(bucket=bucket, key=key)
-                self.__dict__.update(stored_data)
-                self._data_keys: dict[str, list] = defaultdict(list, self._data_keys)
-            else:
-                raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
-        else:
-            self._uuid = str(uuid4())
-            self._creation_datetime = str(timestamp_now())
-            self._metadata: dict[str, str | list | dict] = {}
-            self._start_date = None
-            self._end_date = None
-            self._status: dict | None = None
-            self._data_keys = defaultdict(list)
-            self._data_type: str = ""
-            # Hold information regarding the versions of the data
-            self._latest_version: str = ""
-            self._timestamps: dict[str, str] = {}
+        self._uuid = uuid
+        self._creation_datetime = str(timestamp_now())
+        self._metadata: dict[str, str | list | dict] = {}
+        self._start_date = None
+        self._end_date = None
+        self._status: dict | None = None
+        self._data_keys = defaultdict(list)
+        self._data_type = data_type
+        # Hold information regarding the versions of the data
+        self._latest_version: str = ""
+        self._timestamps: dict[str, str] = {}
 
         if mode not in ("r", "rw"):
             raise ValueError("Invalid mode. Please select r or rw.")
@@ -63,6 +55,20 @@ class Datasource:
         self._bucket = bucket
 
         self.update_daterange()
+
+    @classmethod
+    def load(cls, uuid: str, bucket: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> Self:
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
+        if exists(bucket=bucket, key=key):
+            stored_data = get_object_from_json(bucket=bucket, key=key)
+        else:
+            raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
+
+        ds = cls(bucket, uuid, mode, data_type)
+        ds.__dict__.update(stored_data)
+        ds._data_keys = defaultdict(list, ds._data_keys)
+        print("Classmethod data keys", ds._data_keys)
+        return ds
 
     def __enter__(self) -> Datasource:
         return self
@@ -106,6 +112,12 @@ class Datasource:
         """
         value = str(value)
         self._metadata[key.lower()] = value.lower()
+
+    def add(self, data: xr.Dataset, **kwargs) -> None:
+        self.add_data(metadata={}, data=data, data_type=self._data_type, **kwargs)
+
+    def delete(self) -> None:
+        self.delete_all_data()
 
     def add_data(
         self,

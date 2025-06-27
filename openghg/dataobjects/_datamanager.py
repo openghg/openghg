@@ -118,7 +118,7 @@ class DataManager:
             metastore.delete({"uuid": uuid})
             metastore.insert(backup)
 
-            d = Datasource(bucket=self._bucket, uuid=uuid)
+            d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
             d.save()
 
@@ -169,7 +169,7 @@ class DataManager:
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for u in uuid:
                 updated = False
-                d = Datasource(bucket=self._bucket, uuid=u)
+                d = Datasource.load(bucket=self._bucket, uuid=u)
                 # Save a backup of the metadata for now
                 found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
@@ -246,7 +246,7 @@ class DataManager:
 
                 # Delete all the data associated with a Datasource and the
                 # data in its zarr store.
-                d = Datasource(bucket=self._bucket, uuid=uid)
+                d = Datasource.load(bucket=self._bucket, uuid=uid)
                 d.delete_all_data()
 
                 # Then delete the Datasource itself

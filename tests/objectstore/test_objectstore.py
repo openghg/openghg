@@ -24,7 +24,7 @@ def metastore(tmp_path):
     """
     metastore_path = tmp_path / "metastore._data"
     with tinydb.TinyDB(metastore_path) as session:
-        metastore = TinyDBMetaStore(session=session)
+        metastore = TinyDBMetaStore(database=session)
         yield metastore
 
 
