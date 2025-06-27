@@ -35,6 +35,7 @@ class ObsColumn(BaseStore):
         site: str | None = None,
         network: str | None = None,
         instrument: str | None = None,
+        tag: str | list | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -64,6 +65,8 @@ class ObsColumn(BaseStore):
             site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap

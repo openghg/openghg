@@ -199,6 +199,7 @@ class Footprints(BaseStore):
         species: str | None = None,
         network: str | None = None,
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         continuous: bool = True,
         chunks: dict | None = None,
         source_format: str = "acrg_org",
@@ -233,6 +234,8 @@ class Footprints(BaseStore):
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             continuous: Whether time stamps have to be continuous.
             chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.

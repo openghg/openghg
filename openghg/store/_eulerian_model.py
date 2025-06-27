@@ -36,6 +36,7 @@ class EulerianModel(BaseStore):
         start_date: str | None = None,
         end_date: str | None = None,
         setup: str | None = None,
+        tag: str | list | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -55,6 +56,8 @@ class EulerianModel(BaseStore):
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
