@@ -1,6 +1,9 @@
 from collections import defaultdict
 import copy
 import logging
+from typing import MutableMapping
+
+import zarr
 
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
@@ -219,6 +222,114 @@ class DataManager:
                     # Update the metadata stored internally so we're up to date
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
+
+    def update_attributes(
+        self,
+        uuid: list | str,
+        version: str | list[str] = "latest",
+        data_vars: str | list[str] | None = None,
+        update_global: bool = True,
+        to_update: dict | None = None,
+        to_delete: str | list | None = None,
+    ) -> None:
+        """Update the attributes of the stored Dataset.
+
+        This takes UUIDs of Datasources (and optionally a version tag) and updates
+        the associated attributes:
+        - to update attributes pass in a dictionary of key/value pairs to update.
+        - to delete attributes pass in a list of keys to delete.
+
+        Args:
+            uuid: UUID(s) of Datasources to be updated.
+            version: optional version string
+            data_vars: optional list of data vars to update; if None, then only global attributes
+                will be updated.
+            update_global: if True, update global attributes.
+            to_update: Dictionary of metadata to add/update. New key/value pairs will be added.
+            If the key already exists in the metadata the value will be updated.
+            to_delete: Key(s) to delete from the metadata
+        Returns:
+            None
+        """
+        if to_update is None and to_delete is None:
+            return None
+
+        if update_global is False and data_vars is None:
+            return None
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        if not isinstance(version, list):
+            version = [version] * len(uuid)
+
+        if len(uuid) != len(version):
+            raise ValueError("List passed for 'version' must have same length as 'uuid'.")
+
+        def updater(
+            attrs: MutableMapping, to_update: dict | None = None, to_delete: str | list | None = None
+        ) -> bool:
+            """Update/delete attributes.
+
+            Can be used on either global attributes or the attributes of a data variable.
+
+            Args:
+                attrs: dict (or MutableMapping) of attributes to update.
+                to_update: dict of attributes to update.
+                to_delete: key or list of keys of attributes to delete.
+
+            Returns:
+                True if attributes either updated or deleted, False otherwise.
+            """
+            updated = False
+            if to_delete is not None and to_delete:
+                if not isinstance(to_delete, list):
+                    to_delete = [to_delete]
+
+                for k in to_delete:
+                    attrs.pop(k)
+
+                updated = True
+
+            if to_update is not None and to_update:
+                attrs.update(to_update)
+                updated = True
+
+            return updated
+
+        for u, v in zip(uuid, version):
+            updated = False
+
+            d = Datasource(bucket=self._bucket, uuid=u)
+
+            if v == "latest":
+                v = d._latest_version
+
+            zs = d._store._stores[v]  # zarr store for specified version
+            group = zarr.open_group(zs)
+
+            # update global
+            if update_global:
+                global_updated = updater(group.attrs, to_update, to_delete)
+                updated = updated or global_updated
+            # update data vars
+            if data_vars is not None:
+                if not isinstance(data_vars, list):
+                    data_vars = [data_vars]
+
+                for dv in data_vars:
+                    try:
+                        arr = group[dv]
+                    except KeyError:
+                        logger.warning(f"Data variable {dv} not present in zarr store. Skipping.")
+                        continue
+                    else:
+                        data_var_updated = updater(arr.attrs, to_update, to_delete)
+                        updated = updated or data_var_updated
+
+            if updated:
+                zarr.consolidate_metadata(zs)
+                logger.info(f"Modified attributes for {u}.")
 
     def delete_datasource(self, uuid: list | str) -> None:
         """Delete Datasource(s) in the object store.
