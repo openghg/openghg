@@ -13,7 +13,7 @@ from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.types import DataOverlapError, ObjectStoreError
 
 
-logger = logging.getLogger("openghg.store.base")
+logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
 
 __all___ = ["Datasource"]
