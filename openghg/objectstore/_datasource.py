@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
-from typing import Any, List, Optional
+from typing import Any
 
 DS = TypeVar("DS", bound="Datasource")
 
@@ -24,8 +24,8 @@ class DatasourceFactory(Generic[DS]):
     def __init__(
         self,
         datasource_class: type[DS],
-        new_kwargs: Optional[dict[str, Any]] = None,
-        load_kwargs: Optional[dict[str, Any]] = None,
+        new_kwargs: dict[str, Any] | None = None,
+        load_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Initialise DatasourceFactory.
 
@@ -96,14 +96,14 @@ T = TypeVar("T", bound="InMemoryDatasource")
 class InMemoryDatasource(Datasource):
     """Minimal class implementing the Datasource interface."""
 
-    datasources: dict[UUID, List[Data]] = {}
+    datasources: dict[UUID, list[Data]] = {}
 
-    def __init__(self, uuid: UUID, data: Optional[List[Data]] = None) -> None:
+    def __init__(self, uuid: UUID, data: list[Data] | None = None) -> None:
         super().__init__(uuid)
         if data:
-            self.data: List[Data] = data
+            self.data: list[Data] = data
         else:
-            self.data: List[Data] = []
+            self.data: list[Data] = []
 
     @classmethod
     def load(cls: type[T], uuid: UUID) -> T:

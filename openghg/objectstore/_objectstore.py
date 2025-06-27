@@ -1,5 +1,4 @@
-"""
-This module defines an interface for object stores.
+"""This module defines an interface for object stores.
 
 Object stores comprise a metastore for storing metadata
 and a collecton of data, which is accessible via the metadata.
@@ -13,10 +12,11 @@ In particular, it manages UUIDs and controls any operation that involves
 both metadata and data.
 
 """
+
 from __future__ import annotations
 
 from typing import Generic, TypeVar
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 from openghg.objectstore._datasource import Datasource, DatasourceFactory
@@ -27,19 +27,15 @@ from openghg.types import ObjectStoreError
 DS = TypeVar("DS", bound="Datasource")
 
 
-MetaData = Dict[str, Any]
-QueryResults = List[Any]
+MetaData = dict[str, Any]
+QueryResults = list[Any]
 UUID = str
 Data = Any
 Bucket = str
 
 
 class ObjectStore(Generic[DS]):
-    def __init__(
-        self,
-        metastore: MetaStore,
-        datasource_factory: DatasourceFactory
-    ) -> None:
+    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory) -> None:
         self.metastore = metastore
         self.datasource_factory = datasource_factory
 
@@ -85,7 +81,7 @@ class ObjectStore(Generic[DS]):
             del metadata["uuid"]  # don't mutate the metadata
             datasource.save()
 
-    def update(self, uuid: UUID, metadata: Optional[MetaData] = None, data: Optional[Data] = None) -> None:
+    def update(self, uuid: UUID, metadata: MetaData | None = None, data: Data | None = None) -> None:
         """Update metadata and/or data associated with a given UUID.
 
         Args:
