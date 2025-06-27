@@ -147,7 +147,7 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sorts multiple files date-wise.
     Returns:
         dict: Dictionary of result data
@@ -257,7 +257,7 @@ def standardise_column(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        info_metadata: Additional metadata to tag the data (e.g., `{"project": "paris"}`).
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
 
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -347,7 +347,7 @@ def standardise_bc(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -463,7 +463,7 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sort multiple files datewise
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
@@ -583,7 +583,7 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -677,7 +677,7 @@ def standardise_eulerian(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     Returns:
         dict: Dictionary of result data
     """
@@ -802,7 +802,7 @@ def standardise_flux_timeseries(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        info_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
