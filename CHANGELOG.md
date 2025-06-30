@@ -15,13 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
 - Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
 - Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
-- Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function.[PR #1361](https://github.com/openghg/openghg/pull/1361)
+- Added "tag" keyword as an option when standardising data. This allows a list of user-specified tags to be included. This allows users to search and connect data which includes the chosen tags. [PR #1354](https://github.com/openghg/openghg/pull/1354)
+- Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function. [PR #1361](https://github.com/openghg/openghg/pull/1361)
 
 ### Updated
 
 - Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
 - Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
 - Updated '_scale_convert' to 'convert' function from openghg_calscales package. [PR #1349](https://github.com/openghg/openghg/pull/1349)
+- Renamed `optional_metadata` to `info_metadata` within `standardise_*` functions so this is more descriptive of how these keys are currently used [PR #1377](https://github.com/openghg/openghg/pull/1377)
 
 ### Fixed
 

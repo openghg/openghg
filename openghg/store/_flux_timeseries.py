@@ -61,6 +61,7 @@ class FluxTimeseries(BaseStore):
         model: str | None = None,
         source_format: str = "crf",
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -68,7 +69,7 @@ class FluxTimeseries(BaseStore):
         force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Read one dimension timeseries file
 
@@ -88,6 +89,8 @@ class FluxTimeseries(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -106,7 +109,7 @@ class FluxTimeseries(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -179,10 +182,10 @@ class FluxTimeseries(BaseStore):
         for mdd in flux_timeseries_data:
             FluxTimeseries.validate_data(mdd.data)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_timeseries_data = self.update_metadata(

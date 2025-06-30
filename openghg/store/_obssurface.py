@@ -123,6 +123,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: pathType | None = None,
+        tag: str | list | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -131,7 +132,7 @@ class ObsSurface(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         chunks: dict | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -171,6 +172,8 @@ class ObsSurface(BaseStore):
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             update_mismatch: This determines how mismatches between the internal data
                 "attributes" and the supplied / derived "metadata" are handled.
                 This includes the options:
@@ -198,7 +201,7 @@ class ObsSurface(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -381,11 +384,11 @@ class ObsSurface(BaseStore):
 
             align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
-            # Check to ensure no required keys are being passed through optional_metadata dict
+            # Check to ensure no required keys are being passed through info_metadata dict
             # before adding details
-            self.check_info_keys(optional_metadata)
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
+            self.check_info_keys(info_metadata)
+            if info_metadata is not None:
+                additional_metadata.update(info_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.update_metadata(data, additional_input_parameters, additional_metadata)
