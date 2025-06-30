@@ -30,7 +30,7 @@ from types import TracebackType
 from typing import Any, Literal, cast
 
 import tinydb
-from filelock import FileLock
+from filelock import FileLock as _FileLock
 from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
@@ -222,6 +222,32 @@ def open_metastore(
         yield metastore
 
 
+class FileLock:
+    """Convenience wrapper around filelock.FileLock."""
+
+    def __init__(self, bucket: str, key: str) -> None:
+        lock_path = get_object_lock_path(bucket, key)
+
+        # If lock is created for first time, make sure group has 'rw' permissions
+        if not lock_path.exists():
+            lock_path.touch(mode=0o664)
+
+        try:
+            self.lock = _FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
+        except PermissionError as e:
+            raise PermissionError(
+                "You do not have the correct permissions to add data to this object store."
+                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
+                f"e.g. using `chmod +664 {lock_path}`"
+            ) from e
+
+    def acquire(self) -> None:
+        self.lock.acquire(poll_interval=1)
+
+    def release(self) -> None:
+        self.lock.release()
+
+
 class DataClassMetaStore(TinyDBMetaStore):
     """Class that allows:
     - creating a TinyDB MetaStore via bucket and data type
@@ -238,23 +264,10 @@ class DataClassMetaStore(TinyDBMetaStore):
         )
         super().__init__(database=database)
 
-        lock_path = get_object_lock_path(bucket, self.key)
-
-        # If lock is created for first time, make sure group has 'rw' permissions
-        if not lock_path.exists():
-            lock_path.touch(mode=0o664)
-
-        try:
-            self.lock = FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
-        except PermissionError as e:
-            raise PermissionError(
-                "You do not have the correct permissions to add data to this object store."
-                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
-                f"e.g. using `chmod +664 {lock_path}`"
-            ) from e
+        self.lock = FileLock(bucket, self.key)
 
     def __enter__(self) -> Self:
-        self.acquire_lock()
+        self.lock.acquire()
         return self
 
     def __exit__(
@@ -263,14 +276,6 @@ class DataClassMetaStore(TinyDBMetaStore):
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> bool | None:
-        self.release_lock()
-
-    def acquire_lock(self) -> None:
-        """Acquire a lock for the object store."""
-        self.lock.acquire(poll_interval=1)
-
-    def release_lock(self) -> None:
-        """Acquire a lock for the object store."""
         self.lock.release()
 
     def close(self) -> None:

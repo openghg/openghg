@@ -31,7 +31,7 @@ def test_lock(get_metastores):
     ms1, ms2 = get_metastores
     expected_duration = 2.0
 
-    ms1.acquire_lock()
+    ms1.lock.acquire()
 
     # attempt to acquire lock, but give up if
     # it takes longer than 'expected_duration'
@@ -78,7 +78,7 @@ def test_lock_is_advisory(tmp_path, mocker):
     ms1 = DataClassMetaStore(bucket, key)
     ms1.insert({"key": "val"})
     ms1.close()  # need to call close to write due to SafetyCachingMiddleware
-    ms1.acquire_lock()  # this is actually still possible...
+    ms1.lock.acquire()  # this is actually still possible...
 
     assert len(ms1._db.all()) == 1
 
@@ -86,7 +86,7 @@ def test_lock_is_advisory(tmp_path, mocker):
     ms2.delete({"key": "val"})
     ms2.close()  # commit changes
 
-    ms1.release_lock()
+    ms1.lock.release()
 
     # now check length (with new instance to be sure
     # the metastore is read from disk)
