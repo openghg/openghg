@@ -9,7 +9,7 @@ from helpers import (
 from openghg.dataobjects import DataManager, data_manager
 from openghg.objectstore import get_writable_bucket, exists
 from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import search_surface
+from openghg.retrieve import search_surface, get_footprint
 from openghg.standardise import standardise_footprint, standardise_surface
 from openghg.objectstore import Datasource
 from openghg.types import ObjectStoreError
@@ -72,6 +72,55 @@ def test_footprint_metadata_modification(footprint_read):
     assert metadata["model"] == "peugeot"
 
     assert "max_latitude_high" not in metadata
+
+
+def test_footprint_attribute_modification(footprint_read):
+    search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
+
+    # modify attributes
+    uuid = next(iter(search_res.metadata))
+    to_update = {"domain": "antarctica", "model": "peugeot"}
+    to_delete = ["author"]
+
+    search_res.update_attributes(uuid=uuid, to_update=to_update, to_delete=to_delete)
+
+    # check new attributes
+    fp_data = get_footprint(site = "TMB",
+                        network = "LGHG",
+                        height = "10m",
+                        domain = "EUROPE",
+                        model = "test_model",
+                        store="user",
+                        )
+    new_attrs = fp_data.data.attrs
+
+
+    assert new_attrs["domain"] == "antarctica"
+    assert new_attrs["model"] == "peugeot"
+
+    assert "author" not in new_attrs
+
+
+def test_footprint_data_variable_attribute_modification(footprint_read):
+    """Test updating units for 'fp' data variable only (not globally or for other data variables)."""
+    search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
+
+    # modify attributes
+    uuid = next(iter(search_res.metadata))
+    to_update = {"units": "bananas"}
+
+    search_res.update_attributes(uuid=uuid, to_update=to_update, data_vars="fp", update_global=False)
+
+    # check new attributes
+    fp_data = get_footprint(site = "TMB",
+                        network = "LGHG",
+                        height = "10m",
+                        domain = "EUROPE",
+                        model = "test_model",
+                        store="user",
+                        )
+    assert fp_data.data.fp.units == "bananas"
+    assert fp_data.data.attrs.get("units") != "bananas"
 
 
 def test_delete_footprint_data(footprint_read):
