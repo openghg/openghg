@@ -300,7 +300,7 @@ class DataManager:
         for u, v in zip(uuid, version):
             updated = False
 
-            d = Datasource(bucket=self._bucket, uuid=u)
+            d = Datasource.load(bucket=self._bucket, uuid=u)
 
             if v == "latest":
                 v = d._latest_version
