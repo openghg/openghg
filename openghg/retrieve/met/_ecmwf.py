@@ -48,9 +48,35 @@ def retrieve_met(
     network: str,
     years: str | list[str],
     variables: list[str] | None = None,
+    local_save_path: str | None = None,
+):
+    """
+    Retrieve and store Met data from Copernicus Climate Data Store.
+
+    See `pull_met` function for more details on the data.
+
+    ...
+    """
+    from openghg.standardise import standardise_met
+
+    filepaths = pull_met(
+        site=site, network=network, years=years, variables=variables, save_path=local_save_path
+    )
+
+    met_source = "ecmwf"
+
+    for filepath in filepaths:
+        standardise_met(filepath, site=site, network=network, met_source=met_source)
+
+
+def pull_met(
+    site: str,
+    network: str,
+    years: str | list[str],
+    variables: list[str] | None = None,
     save_path: str | None = None,
-) -> None:
-    """Retrieve METData data. Note that this function will only download a
+) -> list:
+    """Pull METData data and store on disc. Note that this function will only download a
     full year of data which may take some time.
 
     This function currently on retrieves data from the "reanalysis-era5-pressure-levels"
@@ -114,6 +140,8 @@ def retrieve_met(
         save_path
     ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
 
+    dataset_savepaths = []
+
     # TODO - we might need to customise this further in the future to
     # request other types of weather data
     for year in years:
@@ -141,12 +169,13 @@ def retrieve_met(
                 save_path,
                 f"Met_{site}_{network}_{month}{year}.nc",
             )
+            dataset_savepaths.append(dataset_savepath)
 
             logger.info(f"Retrieving data for {site} and {month}/{year} to {dataset_savepath}")
 
             _ = cds_client.retrieve(name=dataset_name, request=request, target=dataset_savepath)
 
-    return None
+    return dataset_savepaths
 
     # We replace the date data with a start and end date here
     # start_date = str(timestamp_tzaware(f"{years[0]}-1-1"))
