@@ -12,7 +12,7 @@ from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.types import DataOverlapError, ObjectStoreError
 
-from ._datasource import AbstractDatasource
+from ._datasource import AbstractDatasource, DatasourceFactory
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
@@ -980,3 +980,36 @@ class Datasource(AbstractDatasource):
                     raise ValueError(
                         f"Timestamp mismatch between expected ({end_keys}) and stored {end_data}"
                     )
+
+
+def get_legacy_datasource_factory(
+    bucket: str,
+    data_type: str,
+    new_kwargs: dict | None = None,
+    load_kwargs: dict | None = None,
+    **kwargs: Any,
+) -> DatasourceFactory[Datasource]:
+    """Create DatasourceFactory for legacy Datasource class.
+
+    Args:
+        bucket: bucket of object store
+        data_type: data type for saved data
+        new_kwargs: keyword args for creating new Datasources (e.g. `mode`)
+        load_kwargs: keyword args for loading existing Datasources (e.g. `mode`)
+        kwargs: keyword args to add to both new_kwargs and load_kwargs
+
+    Returns:
+        DatasourceFactory for creating/loading Datasources from specified
+        bucket.
+
+    """
+    kwargs_to_add = {"bucket": bucket, "data_type": data_type}
+    kwargs_to_add.update(kwargs)
+
+    new_kwargs = new_kwargs or {}
+    new_kwargs.update(kwargs_to_add)
+
+    load_kwargs = load_kwargs or {}
+    load_kwargs.update(kwargs_to_add)
+
+    return DatasourceFactory[Datasource](Datasource, new_kwargs, load_kwargs)

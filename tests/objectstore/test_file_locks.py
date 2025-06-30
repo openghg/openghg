@@ -35,7 +35,7 @@ def test_lock(get_metastores):
 
     # attempt to acquire lock, but give up if
     # it takes longer than 'expected_duration'
-    t = Thread(target=ms2.acquire_lock)
+    t = Thread(target=ms2.lock.acquire)
     start = default_timer()
     t.start()
     t.join(timeout=expected_duration)
@@ -52,7 +52,7 @@ def test_no_lock(get_metastores):
     ms1, ms2 = get_metastores
     expected_duration = 2.0
 
-    t = Thread(target=ms2.acquire_lock)
+    t = Thread(target=ms2.lock.acquire)
     start = default_timer()
     t.start()
     t.join(timeout=expected_duration)

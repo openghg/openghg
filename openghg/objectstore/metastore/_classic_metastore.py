@@ -222,6 +222,9 @@ def open_metastore(
         yield metastore
 
 
+class LockingError(Exception): ...
+
+
 class FileLock:
     """Convenience wrapper around filelock.FileLock."""
 
@@ -235,7 +238,7 @@ class FileLock:
         try:
             self.lock = _FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
         except PermissionError as e:
-            raise PermissionError(
+            raise LockingError(
                 "You do not have the correct permissions to add data to this object store."
                 f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
                 f"e.g. using `chmod +664 {lock_path}`"
@@ -246,6 +249,9 @@ class FileLock:
 
     def release(self) -> None:
         self.lock.release()
+
+    def is_locked(self) -> bool:
+        return self.lock.is_locked
 
 
 class DataClassMetaStore(TinyDBMetaStore):
