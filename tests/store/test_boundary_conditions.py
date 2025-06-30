@@ -35,7 +35,7 @@ def test_read_data_monthly(mocker):
 
     fake_uuid = FakeUUID()
     mocker.patch("uuid.uuid4", side_effect=lambda: fake_uuid)
-    mocker.patch("openghg.store.base._datasource.uuid4", side_effect=lambda: fake_uuid)
+    mocker.patch("openghg.store.base._base.uuid4", side_effect=lambda: fake_uuid)
 
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 

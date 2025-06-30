@@ -24,7 +24,7 @@ def integrity_check(raise_error: bool = True) -> dict[str, dict[str, str]] | Non
         Nested dictionaries of failed datasource UUIDs, keyed by bucket and data type, if failures
         found, otherwise None.
     """
-    from openghg.store.base import Datasource
+    from openghg.objectstore import Datasource
 
     # For now loop over each of the object stores, can we somehow lock the object store?
     readable_buckets = get_readable_buckets()
@@ -41,7 +41,7 @@ def integrity_check(raise_error: bool = True) -> dict[str, dict[str, str]] | Non
                 failures = []
                 for uid in datasource_uuids:
                     try:
-                        Datasource(bucket=bucket, uuid=uid).integrity_check()
+                        Datasource.load(bucket=bucket, uuid=uid).integrity_check()
                     except ObjectStoreError:
                         failures.append(uid)
 

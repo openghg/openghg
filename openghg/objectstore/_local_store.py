@@ -462,7 +462,7 @@ def query_store() -> dict:
     """
     raise NotImplementedError
     from openghg.store import ObsSurface
-    from openghg.store.base import Datasource
+    from openghg.objectstore import Datasource
 
     obs = ObsSurface.load()
 

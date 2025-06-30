@@ -4,7 +4,7 @@ from helpers import get_column_datapath, clear_test_store, filt
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search_column
 from openghg.standardise import standardise_column
-from openghg.store.base import Datasource
+from openghg.objectstore import Datasource
 from pandas import Timestamp
 
 
@@ -41,7 +41,7 @@ def test_read_openghg_format():
 
     bucket = get_bucket()
 
-    d = Datasource(bucket=bucket, uuid=uuid)
+    d = Datasource.load(bucket=bucket, uuid=uuid)
 
     with d.get_data(version="latest") as ch4_data:
         assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
