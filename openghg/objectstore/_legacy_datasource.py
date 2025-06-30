@@ -156,7 +156,7 @@ class Datasource(AbstractDatasource):
         Returns:
             None
         """
-        self.add_metadata(metadata=metadata, skip_keys=skip_keys)
+        self.add_metadata(metadata=metadata, skip_keys=skip_keys, extend_keys=extend_keys)
 
         if "time" in data.coords:
             return self.add_timed_data(
