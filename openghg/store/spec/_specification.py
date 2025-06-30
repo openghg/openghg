@@ -8,6 +8,7 @@ from openghg.types import (
     FluxDatabases,
     BoundaryConditions,
     EulerianModelTypes,
+    MetTypes,
 )
 
 __all__ = [
@@ -31,6 +32,7 @@ def define_data_types() -> tuple[str, ...]:
         "boundary_conditions",
         "eulerian_model",
         "flux_timeseries",
+        "met",
     )
 
     return data_types
@@ -48,13 +50,14 @@ def define_data_type_classes() -> dict[str, Any]:
         ObsColumn,
         ObsSurface,
         FluxTimeseries,
+        Met,
     )
 
     data_type_classes = {
         "surface": ObsSurface,
         "column": ObsColumn,
         "flux": Flux,
-        # "met": ???
+        "met": Met,
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,
         "eulerian_model": EulerianModel,
@@ -78,7 +81,7 @@ def define_standardise_parsers() -> dict[str, Any]:
         "footprints": FootprintTypes,
         "eulerian_model": EulerianModelTypes,
         "boundary_conditions": BoundaryConditions,
-        # "met": ???,
+        "met": MetTypes,
     }
 
     return data_type_parsers

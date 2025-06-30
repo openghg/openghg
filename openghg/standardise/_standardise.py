@@ -808,3 +808,32 @@ def standardise_flux_timeseries(
         continuous=continuous,
         optional_metadata=optional_metadata,
     )
+
+
+def standardise_met(
+    filepath: str | Path,
+    site: str,
+    network: str,
+    met_source: str,
+    source_format="ecmwf",
+    if_exists: str = "auto",
+    save_current: str = "auto",
+    force: bool = False,
+    chunks: dict | None = None,
+    compressor: Any | None = None,
+):
+    """ """
+
+    return standardise(
+        data_type="met",
+        filepath=filepath,
+        site=site,
+        network=network,
+        met_source=met_source,
+        source_format=source_format,
+        if_exists=if_exists,
+        save_current=save_current,
+        force=force,
+        chunks=chunks,
+        compressor=compressor,
+    )

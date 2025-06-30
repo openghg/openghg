@@ -288,5 +288,25 @@
             }
         },
         "optional": {}
+    },
+    "met": {
+        "required": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "network": {
+                "type": [
+                    "str"
+                ]
+            },
+            "met_source": {
+                "type": [
+                    "str"
+                ]                
+            }
+        },
+        "optional": {}
     }
 }
