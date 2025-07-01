@@ -4,13 +4,14 @@ import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, synonyms
 from openghg.store import infer_date_range, update_zero_dim
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: str | Path,
+    filepath: pathType,
     species: str,
     bc_input: str,
     domain: str,

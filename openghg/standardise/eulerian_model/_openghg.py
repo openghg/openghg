@@ -1,16 +1,18 @@
 import logging
 from pathlib import Path
 import xarray as xr
+from pandas import Timestamp as pd_Timestamp
 
 from openghg.util import clean_string, timestamp_now, timestamp_tzaware
-from pandas import Timestamp as pd_Timestamp
+from openghg.types import pathType
+
 
 logger = logging.getLogger("openghg.standardise.eulerian_model")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: str | Path,
+    filepath: pathType,
     model: str,
     species: str,
     start_date: str | None = None,

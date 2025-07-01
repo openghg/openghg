@@ -83,6 +83,7 @@ def standardise_surface(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
+    open_files_grouped: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
@@ -193,7 +194,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path,
+    filepath: pathType,
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -291,7 +292,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path,
+    filepath: pathType,
     species: str,
     bc_input: str,
     domain: str,
@@ -376,7 +377,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: str | Path | list,
+    filepath: multiPathType,
     model: str,
     domain: str,
     site: str | None = None,
@@ -520,7 +521,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: str | Path,
+    filepath: pathType,
     species: str,
     source: str,
     domain: str,
@@ -622,7 +623,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path,
+    filepath: pathType,
     model: str,
     species: str,
     source_format: str = "openghg",
@@ -740,7 +741,7 @@ def standardise_from_binary_data(
 
 
 def standardise_flux_timeseries(
-    filepath: str | Path,
+    filepath: pathType,
     species: str,
     source: str,
     region: str = "UK",

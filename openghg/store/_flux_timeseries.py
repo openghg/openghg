@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
+from openghg.types import pathType
 
 __all__ = ["FluxTimeseries"]
 
@@ -51,7 +52,7 @@ class FluxTimeseries(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: pathType,
         species: str,
         source: str,
         region: str,

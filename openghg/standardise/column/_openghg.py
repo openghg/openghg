@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
-
 import xarray as xr
+
+from openghg.types import pathType
 
 
 def parse_openghg(
-    filepath: str | Path,
+    filepath: pathType,
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,
