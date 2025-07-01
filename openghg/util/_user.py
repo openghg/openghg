@@ -100,7 +100,7 @@ def create_config(silent: bool = False) -> None:
 
         logger.info(f"Current user object store path: {user_store_path}")
 
-        # Store the object store info
+        # Storing the object store info
         stores = {}
 
         update_input = input("Would you like to update the path? (y/n): ")
@@ -116,12 +116,12 @@ def create_config(silent: bool = False) -> None:
         else:
             stores["user"] = {"path": str(user_store_path), "permissions": "rw"}
 
-        # Copy in exisiting shared stores
+        # Copying in exisiting shared stores
         if recent:
             stores.update({k: v for k, v in config["object_store"].items() if k != "user"})
 
         # Now ask the user if they want to add new stores
-        new_shared_stores = _user_multstore_input()
+        new_shared_stores = _user_multstore_input(existing_stores=stores)
 
         if new_shared_stores:
             existing = [k for k in new_shared_stores if k in stores]
@@ -195,30 +195,72 @@ def create_config(silent: bool = False) -> None:
     user_config_path.write_text(toml.dumps(config))
 
 
-def _user_multstore_input() -> dict:
-    """Ask the user to input data about shared object stores
+def _user_multstore_input(existing_stores: dict | None = None) -> dict:
+    """Ask the user to input data about shared object stores.
+
+    Args:
+        existing_stores (dict, optional): Existing object stores to avoid duplicate paths/names.
 
     Returns:
-        dict: Dictionary of object store paths and permissions
+        dict: Dictionary of object store names mapped to path and permissions
     """
+    from pathlib import Path
+
     positive_responses = ("y", "yes")
     stores = {}
-    # 2. Ask the user to enter other object store paths
+    existing_stores = existing_stores or {}
+
+    existing_paths = {Path(store["path"]).resolve() for store in existing_stores.values()}
+
     while True:
         response = input("Would you like to add another object store? (y/n): ")
-        if response.lower() in positive_responses:
-            store_name = input("Enter the name of the store: ")
-            store_path = input("Enter the object store path: ")
-            print("\nYou will now be asked for read/write permissions for the store.")
-            print("For read only enter r, for read and write enter rw.")
-
-            store_permissions = ""
-            while store_permissions not in ("r", "rw"):
-                store_permissions = input("\nEnter object store permissions: ")
-
-            stores[store_name] = {"path": store_path, "permissions": store_permissions}
-        else:
+        if response.lower() not in positive_responses:
             break
+
+        raw_input = input("Enter a store name **or** full path: ").strip()
+
+        # Checking if input is a path
+        try:
+            input_path = Path(raw_input).expanduser().resolve()
+            is_path = input_path.exists() or "/" in raw_input or raw_input.startswith("~")
+        except Exception:
+            is_path = False
+
+        if is_path:
+            # Auto-generating name from path
+            store_path = str(input_path)
+            store_name = input("Enter a name to identify this store (default: folder name): ").strip()
+            if not store_name:
+                store_name = input_path.name
+        else:
+            # It's a name, ask separately for path
+            store_name = raw_input
+            store_path_input = input("Enter the object store path: ").strip()
+            try:
+                input_path = Path(store_path_input).expanduser().resolve()
+                store_path = str(input_path)
+            except Exception as e:
+                print(f"Invalid path: {e}")
+                continue
+
+        if store_name in stores or store_name in existing_stores:
+            print(f"A store with the name '{store_name}' already exists. Please choose a different name.")
+            continue
+
+        if Path(store_path).resolve() in existing_paths:
+            print("This path is already associated with another store. Please choose a different path.")
+            continue
+
+        # Ask for permissions
+        print("\nYou will now be asked for read/write permissions for the store.")
+        print("For read only enter 'r', for read and write enter 'rw'.")
+
+        store_permissions = ""
+        while store_permissions not in ("r", "rw"):
+            store_permissions = input("Enter object store permissions: ").strip().lower()
+
+        stores[store_name] = {"path": store_path, "permissions": store_permissions}
+        existing_paths.add(Path(store_path).resolve())
 
     return stores
 
