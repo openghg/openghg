@@ -1,4 +1,4 @@
-name: openghg_env
+name: openghg_env_dummy
 channels:
   - openghg
   - conda-forge
@@ -39,6 +39,6 @@ dependencies:
   - numcodecs
   - sympy
   - networkx
+  - openghg_calscales
   - pip:
     - icoscp<=0.1.17
-    - openghg-calscales
