@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Analyse &#8212; OpenGHG 0.14.0 documentation</title>
+    <title>Analyse &#8212; OpenGHG 0.15.0 documentation</title>
   
   
   
@@ -32,6 +32,8 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- So that users can add custom icons -->
@@ -40,14 +42,17 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=9e420a66"></script>
+    <script src="../_static/documentation_options.js?v=ef97403f"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/api_analyse';</script>
     <script src="../_static/custom.js"></script>
@@ -57,8 +62,8 @@
     <link rel="prev" title="User API" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.0" />
-    <meta name="docbuild:last-update" content="Apr 16, 2025"/>
+  <meta name="docsearch:version" content="0.15.0" />
+    <meta name="docbuild:last-update" content="Jul 02, 2025"/>
   </head>
   
   
@@ -124,8 +129,8 @@
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.14.0 documentation - Home"/>
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.14.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.15.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.15.0 documentation - Home"/>
   
   
 </a></div>
@@ -493,7 +498,7 @@ Can add flux datasets for multiple sources.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.analyse.ModelScenario.calc_modelled_baseline">
-<span class="sig-name descname"><span class="pre">calc_modelled_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.calc_modelled_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.calc_modelled_baseline" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">calc_modelled_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.calc_modelled_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.calc_modelled_baseline" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the modelled baseline points based on site footprint and boundary conditions.
 Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.</p>
 <p>The time points returned are dependent on the resample_to option chosen.
@@ -534,7 +539,7 @@ The associated scenario data will be cached as the ModelScenario.scenario attrib
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.analyse.ModelScenario.calc_modelled_obs">
-<span class="sig-name descname"><span class="pre">calc_modelled_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.calc_modelled_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.calc_modelled_obs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">calc_modelled_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_fp_x_flux</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_by_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.calc_modelled_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.calc_modelled_obs" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the modelled observation points based on site footprint and fluxes.</p>
 <p>The time points returned are dependent on the resample_to option chosen.
 If obs data is also linked to the ModelScenario instance, this will be used
@@ -556,10 +561,14 @@ to derive the time points where appropriate.</p>
 <li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
+<li><p><strong>output_fp_x_flux</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If true, include “fp x flux” data variable in output.</p></li>
+<li><p><strong>split_by_sectors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
+under the <em class="xref py py-obj">mf_mod_sectoral</em> and <em class="xref py py-obj">fp_x_flux_sectoral</em> data variables, and have a <em class="xref py py-obj">source</em> dimension for the
+different flux sources. The total mf_mod and fp_x_flux are available under their usual names.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>Modelled observation values along the time axis</p>
+<dd class="field-even"><p><p>Modelled observation values along the time axis, optionally with “fp x flux”.</p>
 <dl class="simple">
 <dt>If cache is True:</dt><dd><p>This data will also be cached as the ModelScenario.modelled_obs attribute.
 The associated scenario data will be cached as the ModelScenario.scenario attribute.</p>
@@ -568,7 +577,7 @@ The associated scenario data will be cached as the ModelScenario.scenario attrib
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>xarray.DataArray</p>
+<dd class="field-odd"><p>xarray.Dataset</p>
 </dd>
 </dl>
 </dd></dl>
@@ -639,7 +648,7 @@ from the metadata, then the openghg_defs site_info.json details for the site.</p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.analyse.ModelScenario.footprints_data_merge">
-<span class="sig-name descname"><span class="pre">footprints_data_merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_timeseries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_bc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.footprints_data_merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.footprints_data_merge" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">footprints_data_merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coarsest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_timeseries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_fp_x_flux</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_by_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_bc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario.footprints_data_merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario.footprints_data_merge" title="Link to this definition">#</a></dt>
 <dd><p>Produce combined object containing aligned footprint and observation data.
 Can also include modelled timeseries data derived from flux.</p>
 <dl class="field-list simple">
@@ -657,8 +666,11 @@ Can also include modelled timeseries data derived from flux.</p>
 </p></li>
 <li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample.</p></li>
 <li><p><strong>calc_timeseries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Calculate modelled timeseries based on flux sources.</p></li>
+<li><p><strong>calc_fp_x_flux</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Calculate “fp x flux” matrix</p></li>
 <li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux if calc_timseries is True.
 All will be used and stacked if not specified.</p></li>
+<li><p><strong>split_by_sectors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – if True, separate modelled obs (and footprint x flux) will be calculated
+for each flux source (“sector”).</p></li>
 <li><p><strong>calc_baseline</strong> – Calculate modelled baseline.</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
