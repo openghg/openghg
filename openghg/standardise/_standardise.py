@@ -83,7 +83,6 @@ def standardise_surface(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
-    open_files_grouped: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
