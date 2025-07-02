@@ -31,7 +31,7 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    check_function_open_nc,
+    footprint_open_nc_fn,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -46,6 +46,7 @@ from ._metadata_util import (
     check_not_set_value,
     get_overlap_keys,
     merge_dict,
+    merge_and_extend_dict,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
@@ -115,5 +116,8 @@ from ._util import (
     unanimous,
     verify_site,
     verify_site_with_satellite,
+    check_unique,
+    find_repeats,
+    collate_strings,
 )
 from ._versions import show_versions, check_if_need_new_version

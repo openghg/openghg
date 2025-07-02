@@ -5,7 +5,35 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.14.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
+
+## [0.15.0] - 2025-07-02
+
+### Added
+
+- Allow to provide a kwargs dict to `resampler` function via `drop_na` that will be used by `xarray.Dataset.dropna` [PR #1314](https://github.com/openghg/openghg/pull/1314)
+- Improved the check for nans in `surface_obs_resampler function`: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan [PR #1314](https://github.com/openghg/openghg/pull/1314). This removed the improvements of `surface_obs_resampler` from [PR #1298](https://github.com/openghg/openghg/pull/1298).
+- Fews fix for footprints standardisation : add `unify_chunks` in `openghg/store/storage/_localzarrstore.py` to prevent chunking errors while checking if chunks match; change name of function `check_function_open_nc` to `footprint_open_nc_fn` in `openghg/standardise/footprints/_acrg_org.py`; rewrite `footprint_open_nc_fn` to allow selection of the month (for badly formatted footprints) and footprints (same reason); and add a `"release_height"` variable to old format footprints (`format="acrg_org"`) for compatibility with new footprint format (`format="paris"`) [PR #1287](https://github.com/openghg/openghg/pull/1287)
+- Option to compute modelled obs (and "fp x flux") by flux sector/source in `ModelScenario.footprints_data_merge`. [PR #1330](https://github.com/openghg/openghg/pull/1330)
+- Option to return "fp x flux" from `ModelScenario.footprints_data_merge`. [PR #1328](https://github.com/openghg/openghg/pull/1328)
+- Function to compute baseline sensitivities for NESW. This is used in `calc_modelled_baseline` and will be useful for OpenGHG inversions. [PR #1326](https://github.com/openghg/openghg/pull/1326)
+- Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function.[PR #1361](https://github.com/openghg/openghg/pull/1361)
+- Method to update attributes of stored data. [PR #1375](https://github.com/openghg/openghg/pull/1375)
+- Added "tag" keyword as an option when standardising data. This allows a list of user-specified tags to be included. This allows users to search and connect data which includes the chosen tags. [PR #1354](https://github.com/openghg/openghg/pull/1354)
+
+### Updated
+
+- Updated `ModelScenario` to work with the new PARIS footprint format for time-resolved footprints. [PR #1324](https://github.com/openghg/openghg/pull/1324)
+- Updated the package release pyproject.toml and removed the setup.py to make sure PEP621 is followed. [PR #1345](https://github.com/openghg/openghg/pull/1345)
+- Updated '_scale_convert' to 'convert' function from openghg_calscales package. [PR #1349](https://github.com/openghg/openghg/pull/1349)
+- Renamed `optional_metadata` to `info_metadata` within `standardise_*` functions so this is more descriptive of how these keys are currently used [PR #1377](https://github.com/openghg/openghg/pull/1377)
+
+### Fixed
+
+- Added unit of `xch4` data var as units attribute to `mf` inside `get_obs_column`. [PR #1360](https://github.com/openghg/openghg/pull/1360)
+- Added missing reference to mf_mod while plotting in the tutorial.[PR #1365](https://github.com/openghg/openghg/pull/1365)
+- Made call to `.load` in `combine_datasets` optional. [PR #1371](https://github.com/openghg/openghg/pull/1371)
+- Fixed bug where `force` keyword was not being used correctly for `standardise_surface` and wasn't allowing the same data to be added again. [PR #1374](https://github.com/openghg/openghg/pull/1374)
 
 ## [0.14.0] - 2025-04-16
 

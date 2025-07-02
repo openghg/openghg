@@ -78,6 +78,12 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
     return float(obs_data_period_s)
 
 
+def time_of_day_offset(date_time: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
+    """Return an offset with the time past the start of the day."""
+    date_time = pd.to_datetime(date_time)
+    return date_time - pd.to_datetime(date_time.date())
+
+
 def time_overlap(
     times1: np.ndarray, times2: np.ndarray, freq1: pd.Timedelta, freq2: pd.Timedelta
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
@@ -216,7 +222,7 @@ def resample_obs_and_other(
         raise ValueError("Obs data and Footprint data don't overlap")
 
     # Offset for resampling
-    offset = start_date - pd.to_datetime(start_date.date())  # time past start of day
+    offset = time_of_day_offset(start_date)
 
     # If specific period has been passed, resample
     resample_keyword_choices = ("obs", "other", "coarsest")
@@ -286,6 +292,7 @@ def combine_datasets(
     dataset_B: xr.Dataset,
     method: ReindexMethod = "ffill",
     tolerance: float | None = None,
+    load: bool = False,
 ) -> xr.Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
@@ -299,15 +306,19 @@ def combine_datasets(
                 See xarray.DataArray.reindex_like for list of options and meaning.
                 Defaults to ffill (forward fill)
         tolerance: Maximum allowed tolerance between matches.
+        load: if True, load dataset_B before aligning. This avoids a performance issue
+            for datasets opened with the netcdf4 backend.
 
     Returns:
         xarray.Dataset: Combined dataset indexed to dataset_A
     """
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
-    else:
+    elif load:
         # load dataset_B to avoid performance issue (see xarray issue #8945)
         dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
+    else:
+        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 

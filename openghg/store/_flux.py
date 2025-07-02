@@ -69,6 +69,7 @@ class Flux(BaseStore):
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         chunks: dict | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
@@ -77,7 +78,7 @@ class Flux(BaseStore):
         force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Read flux / emissions file
 
@@ -97,6 +98,8 @@ class Flux(BaseStore):
                 - "yearly", "monthly"
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -119,7 +122,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -204,10 +207,10 @@ class Flux(BaseStore):
 
             Flux.validate_data(mdd.data)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         flux_data = self.update_metadata(flux_data, additional_input_parameters, additional_metadata)
@@ -236,7 +239,7 @@ class Flux(BaseStore):
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
         **kwargs: dict,
     ) -> list[dict]:
         """
@@ -313,8 +316,8 @@ class Flux(BaseStore):
 
         required_keys = ("species", "source", "domain")
 
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
 
             if common_keys:
                 raise ValueError(
@@ -322,7 +325,7 @@ class Flux(BaseStore):
                 )
             else:
                 for parsed_data in flux_data:
-                    parsed_data.metadata.update(optional_metadata)
+                    parsed_data.metadata.update(info_metadata)
 
         data_type = "flux"
         datasource_uuids = self.assign_data(

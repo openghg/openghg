@@ -227,6 +227,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
         "fp_high",
         "index_lons",
         "index_lats",
+        "release_height",
     ]
 
     del footprint_data.attrs["processed"]
@@ -738,7 +739,7 @@ def test_footprints_chunking_schema():
         )
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -763,11 +764,11 @@ def test_optional_metadata_raise_error():
             met_model=met_model,
             inlet=inlet,
             species=species,
-            optional_metadata={"species": species},
+            info_metadata={"species": species},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -790,7 +791,7 @@ def test_optional_metadata():
         inlet=inlet,
         species=species,
         domain=domain,
-        optional_metadata={"project": "test"},
+        info_metadata={"project": "test"},
     )
 
     # Get the footprints data
@@ -813,7 +814,8 @@ def mock_metakeys():
     # TODO - implement this in a different way
     default_keys = get_metakey_defaults()
 
-    default_keys["footprints"]["optional"] = ["project", "special_tag"]
+    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]},
+                                              "special_tag": {"type": ["str"]}}
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield
@@ -833,25 +835,25 @@ def test_standardise_footprints_different_datasources(mock_metakeys):
     model = "UKV"
     inlet = "100m"
 
-    optional_metadata = {"project": "zoo", "special_tag": "elephant"}
+    info_metadata = {"project": "zoo", "special_tag": "elephant"}
     res_1 = standardise_footprint(
         filepath=file1,
         site=site,
         domain=domain,
         model=model,
         inlet=inlet,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
         store="user",
     )
 
-    optional_metadata = {"project": "aquarium", "special_tag": "jellyfish"}
+    info_metadata = {"project": "aquarium", "special_tag": "jellyfish"}
     res_2 = standardise_footprint(
         filepath=file2,
         site=site,
         domain=domain,
         model=model,
         inlet=inlet,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
         store="user",
     )
 

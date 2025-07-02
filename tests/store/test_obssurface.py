@@ -1047,7 +1047,7 @@ def test_optional_parameters():
         )
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -1062,11 +1062,11 @@ def test_optional_metadata_raise_error():
             network="DECC",
             site="RGL",
             store="group",
-            optional_metadata={"species": "openghg_tests"},
+            info_metadata={"species": "openghg_tests"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -1079,7 +1079,7 @@ def test_optional_metadata():
         network="DECC",
         site="RGL",
         store="group",
-        optional_metadata={"project": "openghg_tests"},
+        info_metadata={"project": "openghg_tests"},
     )
 
     rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")
@@ -1168,3 +1168,59 @@ def test_co2_games():
         filepath=co2_games_data,
         store="user",
     )
+
+@pytest.mark.parametrize(
+    "tag1, tag2, combined_tag",
+    [
+        ("ceda_v1", "gemma_v1", ["ceda_v1", "gemma_v1"]),
+        ("ceda_v1", None, ["ceda_v1"]),
+        (None, "gemma_v1", ["gemma_v1"]),
+    ],
+)
+def test_add_tag(tag1, tag2, combined_tag):
+    """
+
+    """
+    clear_test_stores()
+
+    filepath_20230101 = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc", source_format="openghg"
+    )    
+
+    filepath_20230102 = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20230102_cut.nc", source_format="openghg"
+    )
+
+    site = "TAC"
+    network = "decc"
+    instrument = "crds"
+    sampling_period = "60s"
+    source_format = "openghg"
+    store="user"
+
+    standardise_surface(filepath=filepath_20230101,
+                        site=site,
+                        network=network,
+                        instrument=instrument,
+                        sampling_period=sampling_period,
+                        source_format=source_format,
+                        store=store,
+                        update_mismatch="metadata",
+                        tag=tag1,
+                        )
+    
+    standardise_surface(filepath=filepath_20230102,
+                        site=site,
+                        network=network,
+                        instrument=instrument,
+                        sampling_period=sampling_period,
+                        source_format=source_format,
+                        store=store,
+                        update_mismatch="metadata",
+                        tag=tag2,
+                        )
+    
+    data = search_surface(site=site).retrieve()
+    metadata = data.metadata
+    
+    assert metadata["tag"] == combined_tag

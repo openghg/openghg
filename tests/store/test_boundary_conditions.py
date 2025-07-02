@@ -267,7 +267,7 @@ def test_bc_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -286,11 +286,11 @@ def test_optional_metadata_raise_error():
             species=species,
             bc_input=bc_input,
             domain=domain,
-            optional_metadata={"purpose": "openghg_tests", "species": "co2"},
+            info_metadata={"purpose": "openghg_tests", "species": "co2"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -306,7 +306,7 @@ def test_optional_metadata():
         species=species,
         bc_input=bc_input,
         domain=domain,
-        optional_metadata={"project": "openghg_test", "tag": "tests"},
+        info_metadata={"project": "openghg_test", "tag": "tests"},
     )
 
     search_results = search(

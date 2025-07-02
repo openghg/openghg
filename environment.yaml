@@ -37,5 +37,8 @@ dependencies:
   - xesmf>=0.7
   - zarr==2.18.3
   - numcodecs
+  - sympy
+  - networkx
   - pip:
     - icoscp<=0.1.17
+    - openghg-calscales
