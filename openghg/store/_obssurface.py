@@ -646,19 +646,6 @@ class ObsSurface(BaseStore):
 
         return datasource_uuids
 
-    def store_hashes(self, hashes: dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function
-        Returns:
-            None
-        """
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
-
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID
 
