@@ -155,13 +155,13 @@ class AssignUnits:
         pint_xarray.accessors.default_registry = ureg
 
         # Assign BC pint unit (not for tracers)
-        for c in ["n", "e", "s", "w"]:
+        for cardinal_direction in ["n", "e", "s", "w"]:
             try:
-                bc_unit = self.data.data[f"vmr_{c}"].attrs["units"]
+                bc_unit = self.data.data[f"vmr_{cardinal_direction}"].attrs["units"]
             except KeyError:
                 print("No units provided. Assuming units of mol/mol")
                 bc_unit = "mol/mol"
-            self.data.data[f"vmr_{c}"] = self.data.data[f"vmr_{c}"].pint.quantify(ureg.parse_units(bc_unit))
+            self.data.data[f"vmr_{cardinal_direction}"] = self.data.data[f"vmr_{cardinal_direction}"].pint.quantify(ureg.parse_units(bc_unit))
 
         return self.data
 
