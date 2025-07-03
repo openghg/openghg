@@ -5,7 +5,7 @@ import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
-from openghg.types import pathType, multiPathType
+from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
 
@@ -69,7 +69,7 @@ def standardise_surface(
     platform: str | None = None,
     measurement_type: str | None = None,
     verify_site_code: bool = True,
-    site_filepath: pathType | None = None,
+    site_filepath: str | Path | None = None,
     tag: str | list | None = None,
     store: str | None = None,
     update_mismatch: str = "never",
@@ -193,7 +193,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: pathType,
+    filepath: str | Path,
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -291,7 +291,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: pathType,
+    filepath: str | Path,
     species: str,
     bc_input: str,
     domain: str,
@@ -520,7 +520,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: pathType,
+    filepath: str | Path,
     species: str,
     source: str,
     domain: str,
@@ -622,7 +622,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: pathType,
+    filepath: str | Path,
     model: str,
     species: str,
     source_format: str = "openghg",
@@ -740,7 +740,7 @@ def standardise_from_binary_data(
 
 
 def standardise_flux_timeseries(
-    filepath: pathType,
+    filepath: str | Path,
     species: str,
     source: str,
     region: str = "UK",
