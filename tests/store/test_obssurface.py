@@ -841,7 +841,7 @@ def test_check_obssurface_same_file_skips():
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
     )
 
-    assert not results
+    assert not results[0]
 
 
 def test_check_obssurface_multi_file_same_skip():
@@ -888,7 +888,7 @@ def test_check_obssurface_multi_file_same_skip():
         update_mismatch="metadata",
     )
 
-    assert not results
+    assert not results[0]
 
 
 def test_gcwerks_fp_not_a_tuple_raises():
