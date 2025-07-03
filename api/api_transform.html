@@ -394,7 +394,7 @@ Data must have dimensions (lat, lon) if 2D or (time, lat, lon) if 3D.</p></li>
 Only used if data is a numpy array and not a DataArray</p></li>
 <li><p><strong>lon_in</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – 1D array for input longitude grid.
 Only used if data is a numpy array and not a DataArray</p></li>
-<li><p><strong>latlon</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]</span>) – Names for latitude and longitude coordinates within data.
+<li><p><strong>latlon</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Names for latitude and longitude coordinates within data.
 Default = [“lat”, “lon”]</p></li>
 <li><p><strong>method</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Method to use for regridding. Mainly use:
 - “conservative”

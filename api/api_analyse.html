@@ -517,7 +517,7 @@ to derive the time points where appropriate.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
@@ -547,7 +547,7 @@ to derive the time points where appropriate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
 <li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
@@ -558,7 +558,7 @@ to derive the time points where appropriate.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 <li><p><strong>output_fp_x_flux</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If true, include “fp x flux” data variable in output.</p></li>
@@ -590,7 +590,7 @@ the time of the highest frequency flux source both for time range and frequency.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Names of sources to combine. Should already be attached to ModelScenario.</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Names of sources to combine. Should already be attached to ModelScenario.</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True</p></li>
 </ul>
 </dd>
@@ -626,7 +626,7 @@ axis. This will both slice and resample the data to align this axis.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide on resample and alignment steps.
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Observation platform used to decide on resample and alignment steps.
 If this is not supplied, function will attempt to extract this value from
 from the metadata, then the openghg_defs site_info.json details for the site.</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
@@ -664,10 +664,10 @@ Can also include modelled timeseries data derived from flux.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Observation platform used to decide whether to resample.</p></li>
 <li><p><strong>calc_timeseries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Calculate modelled timeseries based on flux sources.</p></li>
 <li><p><strong>calc_fp_x_flux</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Calculate “fp x flux” matrix</p></li>
-<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux if calc_timseries is True.
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Sources to use for flux if calc_timseries is True.
 All will be used and stacked if not specified.</p></li>
 <li><p><strong>split_by_sectors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – if True, separate modelled obs (and footprint x flux) will be calculated
 for each flux source (“sector”).</p></li>
@@ -696,7 +696,7 @@ for each flux source (“sector”).</p></li>
 - “boundary_conditions” - Uses added boundary conditions to calculate modelled baseline
 - “percentile” - Calculates the 1% value across the whole time period
 - None - don’t add a baseline and only plot the modelled observations</p></li>
-<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
 <li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
@@ -707,7 +707,7 @@ for each flux source (“sector”).</p></li>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Observation platform used to decide whether to resample e.g. “satellite”, “insitu”, “flask”</p></li>
 <li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 <li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
