@@ -6,7 +6,7 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import pathType
+from openghg.types import multiPathType
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
@@ -188,7 +188,7 @@ class Footprints(BaseStore):
         self,
         domain: str,
         model: str,
-        filepath: list | pathType,
+        filepath: multiPathType,
         site: str | None = None,
         satellite: str | None = None,
         obs_region: str | None = None,
