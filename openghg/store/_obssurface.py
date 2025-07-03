@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, MutableSequence, cast
+from typing import Any, MutableSequence
 from collections.abc import Sequence
 
 import numpy as np
@@ -220,7 +220,6 @@ class ObsSurface(BaseStore):
             format_platform,
             evaluate_sampling_period,
             check_and_set_null_variable,
-            hash_file,
             load_standardise_parser,
             verify_site,
             check_if_need_new_version,
