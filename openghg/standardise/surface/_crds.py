@@ -6,7 +6,7 @@ from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     network: str,
     inlet: str | None = None,

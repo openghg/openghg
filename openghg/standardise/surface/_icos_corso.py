@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_icos_corso(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     instrument: str,
     inlet: str | None = None,

@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 import copy
 import xarray as xr
 
@@ -14,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_co2_games(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     measurement_type: str,
     inlet: str | None = None,

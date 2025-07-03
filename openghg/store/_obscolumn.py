@@ -7,6 +7,7 @@ from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.types import pathType
 from xarray import DataArray
 
 ArrayType = Optional[ndarray | DataArray]
@@ -25,7 +26,7 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: pathType,
         species: str,
         platform: str = "satellite",
         obs_region: Optional[str] = None,

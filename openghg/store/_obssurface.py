@@ -331,7 +331,7 @@ class ObsSurface(BaseStore):
                 filepath = fp
 
             # Cast so it's clear we no longer expect a tuple
-            filepath = cast(str | Path, filepath)
+            filepath = cast(pathType, filepath)
             filepath = Path(filepath)
 
             fn_input_parameters["filepath"] = filepath

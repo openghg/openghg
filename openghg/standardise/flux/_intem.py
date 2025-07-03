@@ -1,9 +1,11 @@
 from pathlib import Path
 import warnings
 
+from openghg.types import pathType
+
 
 def parse_intem(
-    filepath: Path,
+    filepath: pathType,
     species: str,
     source: str,
     chunks: dict,
@@ -39,6 +41,8 @@ def parse_intem(
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
     from xarray import open_dataset
+
+    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
