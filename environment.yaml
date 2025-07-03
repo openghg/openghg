@@ -1,4 +1,4 @@
-name: openghg_env_dummy
+name: openghg_env
 channels:
   - openghg
   - conda-forge
