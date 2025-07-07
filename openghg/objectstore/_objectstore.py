@@ -94,11 +94,23 @@ class ObjectStore(Generic[DS]):
         datasource = self.datasource_factory.new(uuid)
 
         try:
+            # HACK to preserve current behaviour
+            if hasattr(datasource, "add_metadata"):
+                datasource.add_metadata(metadata=metadata, extend_keys=kwargs.get("extend_keys"))  # type: ignore
+            # END HACK
+
             datasource.add(data, **kwargs)
+
+            # HACK
+            if hasattr(datasource, "metadata"):
+                metadata = metadata.copy()
+                metadata.update(datasource.metadata())
+            # END HACK
         except Exception as e:
             raise e
         else:
             metadata["uuid"] = uuid
+
             self.metastore.insert(metadata)
             del metadata["uuid"]  # don't mutate the metadata
             datasource.save()
@@ -126,12 +138,27 @@ class ObjectStore(Generic[DS]):
             raise ObjectStoreError(f"Cannot update: UUID {uuid} not found.")
 
         if metadata:
+            # TODO: might need more sophisticated update method, e.g. for updating lists?
             self.metastore.update(where={"uuid": uuid}, to_update=metadata)
+
+            # HACK to preserve current behaviour
+            datasource = self.get_datasource(uuid)
+            if hasattr(datasource, "add_metadata"):
+                datasource.add_metadata(metadata=metadata, extend_keys=kwargs.get("extend_keys"))  # type: ignore
+            if hasattr(datasource, "metadata"):
+                self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
+            datasource.save()
+            # END HACK
 
         if data:
             datasource = self.get_datasource(uuid)
             datasource.add(data, **kwargs)
             datasource.save()
+
+            # HACK to preserve current behaviour
+            if hasattr(datasource, "metadata"):
+                self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
+            # END HACK
 
     def get_datasource(self, uuid: UUID) -> DS:
         """Get data stored at given uuid."""

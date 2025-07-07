@@ -196,6 +196,7 @@ class SafetyCachingMiddleware(Middleware):
         # then the cache should be empty, otherwise if the metastore instance is reused
         # it won't reflect the actual state of the metastore. (This is an edge case.)
         self.cache = None
+        self.writes_made = False
 
         # let underlying storage clean up
         self.storage.close()

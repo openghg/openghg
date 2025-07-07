@@ -690,7 +690,7 @@ class ObsSurface(BaseStore):
         delete_object(bucket=self._bucket, key=key)
 
         # Delete the UUID from the metastore
-        self._metastore.delete({"uuid": uuid})
+        self._objectstore.delete(uuid)
 
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes

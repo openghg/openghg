@@ -173,6 +173,7 @@ class DataManager:
             for u in uuid:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u)
+                print(d._metadata)
                 # Save a backup of the metadata for now
                 found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
