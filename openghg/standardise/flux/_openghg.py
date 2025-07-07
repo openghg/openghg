@@ -1,9 +1,11 @@
 from pathlib import Path
 import warnings
 
+from openghg.types import pathType
+
 
 def parse_openghg(
-    filepath: Path,
+    filepath: pathType,
     species: str,
     source: str,
     domain: str,
@@ -44,6 +46,8 @@ def parse_openghg(
     from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
     from xarray import open_dataset
+
+    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
