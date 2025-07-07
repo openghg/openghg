@@ -420,7 +420,8 @@ class BaseStore:
                     stored_uuid = objectstore.create(metadata=meta_copy, data=dataset, **cu_kwargs)
                 else:
                     stored_uuid = uuid
-                    objectstore.update(uuid=uuid, metadata=meta_copy, data=dataset, **cu_kwargs)
+                    # ignore mypy in next line due to bug: https://github.com/python/mypy/issues/8862
+                    objectstore.update(uuid=uuid, metadata=meta_copy, data=dataset, **cu_kwargs)  # type: ignore
 
                 required_info = {
                     k: v

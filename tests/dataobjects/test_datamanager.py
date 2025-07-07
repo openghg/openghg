@@ -332,7 +332,7 @@ def test_delete_and_modify_keys():
 
     assert "long_name" not in freshest_metadata
 
-    assert freshest_metadata["sampling_period"] == "12H"
+    assert freshest_metadata["sampling_period"] == "12h"  # values lowercased by Datasource.add_metadata
     assert freshest_metadata["tasty_dish"] == "pasta"
 
 

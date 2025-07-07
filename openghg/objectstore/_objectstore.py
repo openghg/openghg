@@ -27,6 +27,7 @@ from openghg.objectstore._legacy_datasource import Datasource, get_legacy_dataso
 from openghg.objectstore.metastore import MetaStore, open_metastore
 from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore, FileLock, LockingError
 from openghg.types import ObjectStoreError
+from openghg.util import split_function_inputs
 
 
 DS = TypeVar("DS", bound="AbstractDatasource")
@@ -58,13 +59,32 @@ class ObjectStore(Generic[DS]):
     def close(self) -> None:
         self.metastore.close()
 
-    def search(self, metadata: MetaData) -> QueryResults:
+    def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
         """Search the metastore.
+
+        TODO: fix the arguments: metastore search is now more complex...
 
         NOTE: currently this is a thin wrapper around MetaStore.search,
         but could be expanded to include information contained in datasources.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results (list of search results)
         """
-        return self.metastore.search(metadata)
+        metadata = metadata or {}
+
+        # get arguments for search function
+        params, remainder = split_function_inputs({**metadata, **kwargs}, self.metastore.search)
+
+        if "search_terms" in params:
+            params["search_terms"].update(**remainder)
+        else:
+            params["search_terms"] = remainder
+
+        return self.metastore.search(**params)
 
     def get_uuids(self, metadata: MetaData | None = None) -> list[UUID]:
         metadata = metadata or {}
@@ -118,7 +138,12 @@ class ObjectStore(Generic[DS]):
         return uuid
 
     def update(
-        self, uuid: UUID, metadata: MetaData | None = None, data: Data | None = None, **kwargs: Any
+        self,
+        uuid: UUID,
+        metadata: MetaData | None = None,
+        data: Data | None = None,
+        keys_to_delete: str | list[str] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Update metadata and/or data associated with a given UUID.
 
@@ -126,6 +151,7 @@ class ObjectStore(Generic[DS]):
             uuid: UUID of datasource to update
             metadata: metadata to add/overwrite metadata in metastore record associated with the given UUID.
             data: data to store in datasource with given UUID.
+            keys_to_delete: metadata keys to delete.
             kwargs: keyword args to pass to underlying Datasource storage method.
 
         Returns:
@@ -137,17 +163,30 @@ class ObjectStore(Generic[DS]):
         if not self.metastore.search({"uuid": uuid}):
             raise ObjectStoreError(f"Cannot update: UUID {uuid} not found.")
 
-        if metadata:
+        # Don't allow UUID to be deleted
+        if keys_to_delete is not None:
+            if isinstance(keys_to_delete, str):
+                keys_to_delete = [keys_to_delete]
+            if "uuid" in keys_to_delete:
+                raise ValueError("Cannot delete UUID.")
+
+        if metadata is not None and "uuid" in metadata:
+            raise ValueError("Cannot update UUID.")
+
+        if metadata or keys_to_delete:
             # TODO: might need more sophisticated update method, e.g. for updating lists?
-            self.metastore.update(where={"uuid": uuid}, to_update=metadata)
+            self.metastore.update(where={"uuid": uuid}, to_update=metadata, to_delete=keys_to_delete)
 
             # HACK to preserve current behaviour
             datasource = self.get_datasource(uuid)
-            if hasattr(datasource, "add_metadata"):
+            if hasattr(datasource, "add_metadata") and metadata is not None:
                 datasource.add_metadata(metadata=metadata, extend_keys=kwargs.get("extend_keys"))  # type: ignore
+            if hasattr(datasource, "_metadata") and keys_to_delete is not None:
+                for k in keys_to_delete:
+                    del datasource._metadata[k]  # type: ignore
+            datasource.save()
             if hasattr(datasource, "metadata"):
                 self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
-            datasource.save()
             # END HACK
 
         if data:
@@ -215,18 +254,26 @@ class LockingObjectStore(ObjectStore[DS]):
         return super().create(metadata, data, **kwargs)
 
     def update(
-        self, uuid: UUID, metadata: MetaData | None = None, data: Data | None = None, **kwargs: Any
+        self,
+        uuid: UUID,
+        metadata: MetaData | None = None,
+        data: Data | None = None,
+        keys_to_delete: str | list[str] | None = None,
+        **kwargs: Any,
     ) -> None:
         if not self.lock.is_locked:
             raise LockingError("Object store must be locked to update data.")
 
-        return super().update(uuid, metadata, data, **kwargs)
+        return super().update(uuid, metadata, data, keys_to_delete, **kwargs)
 
     def delete(self, uuid: UUID) -> None:
         if not self.lock.is_locked:
             raise LockingError("Object store must be locked to delete data.")
 
         return super().delete(uuid)
+
+
+LockingObjectStoreType = LockingObjectStore[Datasource]
 
 
 def locking_object_store(

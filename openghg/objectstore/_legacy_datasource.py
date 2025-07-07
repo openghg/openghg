@@ -9,6 +9,7 @@ from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 import numpy as np
 from openghg.objectstore import exists, get_object_from_json
+from openghg.objectstore._local_store import delete_object
 from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -118,6 +119,7 @@ class Datasource(AbstractDatasource):
 
     def delete(self) -> None:
         self.delete_all_data()
+        delete_object(bucket=self._bucket, key=self.key())
 
     def add_data(
         self,
