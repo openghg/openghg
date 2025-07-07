@@ -327,6 +327,36 @@ class BaseStore:
 
         return list_keys
 
+    def read_file(
+        self,
+        filepath: multiPathType,
+        update_mismatch: str = "never",
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        force: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        info_metadata: dict | None = None,
+        **kwargs,
+    ):
+        
+        # STEP 1: Check source format
+        # STEP 2?: Set versioning details
+        # DATA_TYPE STEP: Format metadata
+        # Specific details may need to be supplied:
+        #   - validate_data
+        #   - looping over filepath
+        #   - looping over other metadata keys
+        #   - "Type-specific settings?"
+        # STEP 3?: Check hashes
+        # STEP 4: Standardise data (looping style)
+        # STEP 5: Validate data
+        # STEP 6: Store data
+
+        pass
+
     def assign_data(
         self,
         data: MutableSequence[MetadataAndData],
