@@ -64,7 +64,7 @@ def get_writable_buckets() -> dict[str, str]:
     }
 
 
-def get_writable_bucket(name: str | None = None) -> str:
+def get_writable_bucket(name: str | None = None, store_path: str | None = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket available.
 
@@ -91,6 +91,18 @@ def get_writable_bucket(name: str | None = None) -> str:
                 f"Invalid object store name, stores you can write to are: {', '.join(writable_buckets)}"
             )
         return bucket_path
+    # If store_path is specified, try to match it to a writable store
+    elif store_path is not None:
+        for bucket_name, bucket_info in writable_buckets.items():
+            if bucket_info.get("permissions") == "rw" and bucket_info.get("path") == store_path:
+                return bucket_info["path"]
+        raise ObjectStoreError(f"No writable store matches the given path '{store_path}'.")
+
+    # If neither name nor store_path is provided
+    writable_only = {name: info for name, info in writable_buckets.items() if info.get("permissions") == "rw"}
+
+    if len(writable_only) == 1:
+        return next(iter(writable_only.values()))["path"]
     else:
         raise ObjectStoreError(
             f"More than one writable store, stores you can write to are: {', '.join(writable_buckets)}."
