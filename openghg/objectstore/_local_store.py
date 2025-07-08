@@ -94,8 +94,8 @@ def get_writable_bucket(name: str | None = None, store_path: str | None = None) 
     # If store_path is specified, try to match it to a writable store
     elif store_path is not None:
         for bucket_name, bucket_info in writable_buckets.items():
-            if bucket_info.get("permissions") == "rw" and bucket_info.get("path") == store_path:
-                return bucket_info["path"]
+            if bucket_info == store_path:
+                return bucket_info
         raise ObjectStoreError(
             f"No writable store matches the given path '{store_path}', stores you can write to are: {', '.join(writable_buckets)}"
         )
