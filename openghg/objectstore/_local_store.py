@@ -64,7 +64,9 @@ def get_writable_buckets() -> dict[str, str]:
     }
 
 
-def get_writable_bucket(name: str | None = None, store_path: str | None = None) -> str:
+def get_writable_bucket(
+    name: str | None = None, store_name: str | None = None, store_path: str | None = None
+) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket available.
 
@@ -77,6 +79,7 @@ def get_writable_bucket(name: str | None = None, store_path: str | None = None) 
         return str(get_tutorial_store_path())
 
     writable_buckets = get_writable_buckets()
+    name = store_name
 
     if not writable_buckets:
         raise ObjectStoreError("No writable object stores found. Check configuration file.")

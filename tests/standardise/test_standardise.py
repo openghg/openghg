@@ -291,7 +291,7 @@ def test_standardise_column():
         obs_region=obs_region,
         selection=selection,
         force=True,
-        store="/tmp/openghg_testing-STORE_123",
+        store_path="/tmp/openghg_testing-STORE_123",
     )
 
     assert "ch4" == results[0].get("species")
