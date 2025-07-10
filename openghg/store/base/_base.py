@@ -63,6 +63,10 @@ class BaseStore:
             raise ClassDefinitionError(
                 f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
             )
+        if cls._data_type in BaseStore._registry:
+            raise ClassDefinitionError(
+                f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
+            )
         BaseStore._registry[cls._data_type] = cls
 
     def __enter__(self) -> BaseStore:
