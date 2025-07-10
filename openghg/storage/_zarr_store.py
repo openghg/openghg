@@ -1,12 +1,15 @@
+from collections.abc import Callable, Hashable, Iterable
 import logging
 from pathlib import Path
-from typing import cast, Generic, Literal, TypeVar
+from typing import Any, cast, Generic, Literal, TypeVar
 
 import xarray as xr
 import zarr
+import zarr.convenience
 from zarr._storage.store import Store as AbstractZarrStore
 
 from openghg.types import DataOverlapError
+from openghg.util._versioning import SimpleVersioning
 from ._indexing import ConflictDeterminer
 from ._store import Store, UpdateError
 
@@ -28,6 +31,11 @@ class ZarrStore(Store, Generic[ZST]):
 
         Note: for commonly used types of ZarrStore, we can create convenience functions
         to create ZarrStore objects.
+
+        Args:
+            zarr_store: instantiated Zarr Store. (Optional to allow for versioning.)
+            append_dim: dimension to insert new data along.
+            index_options: options for index, such as `method = "nearest"`
         """
         super().__init__()
         self._store = zarr_store
@@ -36,6 +44,7 @@ class ZarrStore(Store, Generic[ZST]):
 
     @property
     def store(self) -> ZST:
+        """Zarr storage."""
         if self._store is None:
             raise AttributeError("Zarr store not set.")
         return self._store
@@ -140,3 +149,70 @@ def get_zarr_memory_store(
     """Factory function to create ZarrStore objects based on a zarr.MemoryStore."""
     store = zarr.MemoryStore()
     return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options)
+
+
+VT = TypeVar("VT", bound=Hashable)
+
+
+class VersionedZarrStore(SimpleVersioning[VT, ZST], ZarrStore[ZST]):
+    def __init__(
+        self,
+        factory: Callable[[VT], ZST],
+        versions: Iterable[VT] | None = None,
+        append_dim: str = "time",
+        index_options: dict | None = None,
+    ) -> None:
+        super().__init__(
+            factory=factory,
+            versions=versions,
+            super_init=True,
+            append_dim=append_dim,
+            index_options=index_options,
+        )
+
+    @property
+    def _store(self) -> ZST | None:
+        return self._current
+
+    @_store.setter
+    def _store(self, value: ZST | None) -> None:
+        if value is not None:
+            self._current = value
+
+    @staticmethod
+    def copy(source: Any, dest: Any) -> None:
+        """Copy method used in creating new versions."""
+        if not isinstance(source, AbstractZarrStore) or not isinstance(dest, AbstractZarrStore):
+            raise ValueError("Can only copy between Zarr stores.")
+        zarr.convenience.copy_store(source, dest)
+
+
+def get_versioned_zarr_directory_store(
+    path: Path,
+    versions: Iterable[str] | None = None,
+    append_dim: str = "time",
+    index_options: dict | None = None,
+) -> VersionedZarrStore[str, zarr.DirectoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore."""
+
+    def factory(v: str) -> zarr.DirectoryStore:
+        """Factory for versioning."""
+        return zarr.DirectoryStore(path / v)
+
+    return VersionedZarrStore[str, zarr.DirectoryStore](
+        factory=factory, versions=versions, append_dim=append_dim, index_options=index_options
+    )
+
+
+def get_versioned_zarr_memory_store(
+    versions: Iterable[str] | None = None, append_dim: str = "time", index_options: dict | None = None
+) -> VersionedZarrStore[str, zarr.MemoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore."""
+
+    def factory(_: str) -> zarr.MemoryStore:
+        """Factory for versioning."""
+        return zarr.MemoryStore()
+
+    return VersionedZarrStore[str, zarr.MemoryStore](
+        factory=factory, versions=versions, append_dim=append_dim, index_options=index_options
+    )
