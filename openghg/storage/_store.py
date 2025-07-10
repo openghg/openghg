@@ -158,7 +158,11 @@ class MemoryStore(Store):
                 # otherwise, select conflicts/overlapping values
                 data = self._conflict_determiner.select_conflicts(data, self.append_dim)
 
-            self.data.update(data)
+            # merge new data with existing data from other time points
+            # NOTE: this might not work properly if index options have been used to set
+            # a tolerance for defining conflicts
+            existing_data = self.data.drop_sel({self.append_dim: data.coords[self.append_dim]})
+            self.data = xr.merge([existing_data, data])
 
     def get(self) -> xr.Dataset:
         return self.data if self.data is not None else xr.Dataset()
