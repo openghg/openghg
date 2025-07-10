@@ -1,4 +1,12 @@
-from ._store import Store, MemoryStore
+"""Storage for Xarray Datasets."""
+
+from ._store import Store, MemoryStore, VersionedMemoryStore
 from ._zarr_store import get_zarr_directory_store, get_zarr_memory_store
 
-__all__ = ("MemoryStore", "Store", "get_zarr_directory_store", "get_zarr_memory_store")
+__all__ = (
+    "MemoryStore",
+    "Store",
+    "VersionedMemoryStore",
+    "get_zarr_directory_store",
+    "get_zarr_memory_store",
+)

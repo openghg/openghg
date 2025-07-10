@@ -123,6 +123,10 @@ class SimpleVersioning(Generic[VT, T]):
     def _current(self) -> T:
         return self._versions[self.current_version]
 
+    @_current.setter
+    def _current(self, value: T) -> None:
+        self._versions[self.current_version] = value
+
     def _get_version(self, v: Hashable) -> VT | None:
         # use loop to check equality in case version type VT
         # can be equal to other types (e.g. string)
