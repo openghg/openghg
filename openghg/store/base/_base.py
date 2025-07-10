@@ -28,6 +28,9 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+class ClassDefinitionError(Exception): ...
+
+
 class BaseStore:
     _registry: dict[str, type[BaseStore]] = {}
     _data_type = ""
@@ -56,6 +59,14 @@ class BaseStore:
         self._datasource_uuids = self._metastore.select("uuid")
 
     def __init_subclass__(cls) -> None:
+        if cls._data_type == "":
+            raise ClassDefinitionError(
+                f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
+            )
+        if cls._data_type in BaseStore._registry:
+            raise ClassDefinitionError(
+                f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
+            )
         BaseStore._registry[cls._data_type] = cls
 
     def __enter__(self) -> BaseStore:
