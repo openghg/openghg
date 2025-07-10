@@ -3,7 +3,14 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.storage import MemoryStore, VersionedMemoryStore, get_zarr_directory_store, get_zarr_memory_store
+from openghg.storage import (
+    MemoryStore,
+    VersionedMemoryStore,
+    get_zarr_directory_store,
+    get_zarr_memory_store,
+    get_versioned_zarr_directory_store,
+    get_versioned_zarr_memory_store,
+)
 from openghg.types import DataOverlapError
 from openghg.util._versioning import VersionError
 
@@ -56,8 +63,27 @@ def zarr_directory_store(tmp_path):
     return get_zarr_directory_store(path=tmp_path)
 
 
+@pytest.fixture()
+def versioned_zarr_memory_store():
+    """Test VersionedZarrStore with zarr.MemoryStore as underlying storage."""
+    return get_versioned_zarr_memory_store()
+
+
+@pytest.fixture()
+def versioned_zarr_directory_store(tmp_path):
+    """Test VersionedZarrStore with zarr.DirectoryStore as underlying storage."""
+    return get_versioned_zarr_directory_store(path=tmp_path)
+
+
 # names of fixtures to use in parametrize
-store_names = ["memory_store", "versioned_memory_store", "zarr_memory_store", "zarr_directory_store"]
+store_names = [
+    "memory_store",
+    "versioned_memory_store",
+    "zarr_memory_store",
+    "zarr_directory_store",
+    "versioned_zarr_memory_store",
+    "versioned_zarr_directory_store",
+]
 store_names_is_versioned = [(name, "versioned" in name) for name in store_names]
 
 
@@ -235,8 +261,18 @@ def test_contiguous_update(store_name, is_versioned, request):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
+# ZARR SPECIFIC TESTS
+# @pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
+# def test_zarr_thing(store_name, request):
+#     """Check that data can be added to a new version without affecting an old version."""
+#     store = request.getfixturevalue(store_name)
+
+
+
+
+
 # TESTS FOR VERSIONED STORES
-versioned_store_names = ["versioned_memory_store"]
+versioned_store_names = [name for name in store_names if "versioned" in name]
 
 
 @pytest.mark.parametrize("store_name", versioned_store_names)
