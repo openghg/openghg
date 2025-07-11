@@ -33,7 +33,7 @@ from ._file import (
     read_header,
     footprint_open_nc_fn,
 )
-from ._function_inputs import split_function_inputs
+from ._function_inputs import find_function_inputs, split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet, extract_height_name
 from ._metadata_util import (

@@ -7,7 +7,22 @@ logger = logging.getLogger("openghg.util.function_inputs")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-__all__ = ["split_function_inputs"]
+__all__ = ["find_function_inputs", "split_function_inputs"]
+
+
+def find_function_inputs(fn: Callable) -> list:
+    """
+    Find the inputs a function will accept.
+
+    Args:
+        fn: Any function
+    Returns:
+        list: Name of arguments accepted by the function
+    """
+    signature = inspect.signature(fn)
+    fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+
+    return fn_accepted_parameters
 
 
 def split_function_inputs(
@@ -24,8 +39,7 @@ def split_function_inputs(
         dict, dict: Dictionaries for parameters accepted and not accepted by the function
     """
     # Find parameters that fn accepts
-    signature = inspect.signature(fn)
-    fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+    fn_accepted_parameters = find_function_inputs(fn)
 
     fn_parameters = {}
     remaining_parameters = {}
