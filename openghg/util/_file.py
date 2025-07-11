@@ -251,7 +251,7 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
-def footprint_open_nc_fn(
+def open_nc_fn(
     filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
 ) -> tuple[Callable, multiPathType]:
     """
