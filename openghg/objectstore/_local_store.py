@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 import logging
 from openghg.types import ObjectStoreError
-from openghg.util import read_local_config
+from openghg.util import read_local_config, handle_direct_store_path
 
 
 rlock = threading.RLock()
@@ -66,12 +66,13 @@ def get_writable_buckets() -> dict[str, str]:
 
 def get_writable_bucket(name: str | None = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
-    more than one writable bucket available.
+    more than one writable bucket is available. If a direct path is passed
+    instead of a name, return it with a warning if it's not in the config.
 
     Args:
-        name: Name of writable bucket
+        name: Name of writable bucket, or a direct path.
     Returns:
-        str: Path to writable bucket
+        str: Path to writable bucket.
     """
     if os.getenv("OPENGHG_TUT_STORE") is not None:
         return str(get_tutorial_store_path())
@@ -81,20 +82,22 @@ def get_writable_bucket(name: str | None = None) -> str:
     if not writable_buckets:
         raise ObjectStoreError("No writable object stores found. Check configuration file.")
 
+    # If only one writable bucket and no name is provided
     if name is None and len(writable_buckets) == 1:
         return next(iter(writable_buckets.values()))
-    elif name is not None:
-        try:
-            bucket_path = writable_buckets[name]
-        except KeyError:
-            raise ObjectStoreError(
-                f"Invalid object store name, stores you can write to are: {', '.join(writable_buckets)}"
-            )
-        return bucket_path
-    else:
-        raise ObjectStoreError(
-            f"More than one writable store, stores you can write to are: {', '.join(writable_buckets)}."
-        )
+
+    if name is not None:
+        # Try interpreting name as a config key
+        if name in writable_buckets:
+            return writable_buckets[name]
+
+        # Util function treating possible name supplied as path incase it is not in the config file, asks user for adding the path to config path
+        return handle_direct_store_path(name)
+
+    # If name is None but multiple stores exist
+    raise ObjectStoreError(
+        f"More than one writable store found. Please specify one of: {', '.join(writable_buckets)}."
+    )
 
 
 def get_tutorial_store_path() -> Path:
