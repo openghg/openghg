@@ -5,7 +5,6 @@ from unittest.mock import patch
 from pathlib import Path
 
 import pytest
-from pytest_mock import session_mocker
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
 
 # Added for import of openghg from testing directory
@@ -28,8 +27,7 @@ def default_session_fixture() -> Iterator[None]:
         "config_version": "2",
     }
 
-    with patch("openghg.util.read_local_config", return_value=mock_config), \
-         patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
+    with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
         yield
 
 
