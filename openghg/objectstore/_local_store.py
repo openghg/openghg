@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 import logging
 from openghg.types import ObjectStoreError
-from openghg.util import read_local_config
+from openghg.util import read_local_config, handle_direct_store_path
 
 
 rlock = threading.RLock()
@@ -91,19 +91,8 @@ def get_writable_bucket(name: str | None = None) -> str:
         if name in writable_buckets:
             return writable_buckets[name]
 
-        # If it's not a known name, maybe it's a direct path
-        possible_path = Path(name)
-        if possible_path.exists() or possible_path.is_absolute():
-            logger.warn(
-                f"'{name}' is not a configured writable store name but looks like a path. "
-                "Using it directly."
-            )
-            return str(possible_path)
-
-        # If neither, raise an error
-        raise ObjectStoreError(
-            f"'{name}' is not a valid store name or path. Writable stores are: {', '.join(writable_buckets)}."
-        )
+        # Util function treating possible name supplied as path incase it is not in the config file, asks user for adding the path to config path
+        return handle_direct_store_path(name)
 
     # If name is None but multiple stores exist
     raise ObjectStoreError(
