@@ -321,7 +321,7 @@ def test_standardise_footprint():
         force=True,
         high_spatial_resolution=True,
         overwrite=True,
-        store="/tmp/openghg_testing-STORE_123",
+        store="user",
     )
 
     result = results[0]
