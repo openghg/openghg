@@ -411,13 +411,8 @@ def handle_direct_store_path(path: str, prompt_to_add: bool = True) -> str:
     )
 
     if prompt_to_add:
-        response = (
-            input(f"Would you like to add '{possible_path}' to your config as a new store? (y/n): ")
-            .strip()
-            .lower()
-        )
-        if response in {"y", "yes"}:
-            _add_path_to_config(possible_path)
+        name = possible_path.name  # e.g., 'my_store' from '/tmp/my_store'
+        _add_path_to_config(possible_path, name=name)
 
     return str(possible_path)
 
@@ -436,11 +431,9 @@ def _add_path_to_config(path: Path, name: str | None = None) -> None:
     config_path = get_user_config_path()
     if config_path.exists():
         config = toml.loads(config_path.read_text())
-    if not name:
-        name = input("Enter a name for this new store (e.g., 'custom'): ").strip()
 
     if name in config.get("object_store", {}):
-        raise ValueError(f"A store with the name '{name}' already exists in the config.")
+        raise ObjectStoreError(f"A store with the name '{name}' already exists in the config.")
 
     config["object_store"][name] = {"path": str(path), "permissions": "rw"}
 
