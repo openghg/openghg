@@ -5,7 +5,7 @@ from pathlib import Path
 import uuid
 import toml
 import shutil
-from openghg.types import ConfigFileError
+from openghg.types import ConfigFileError, ObjectStoreError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -387,3 +387,64 @@ def _check_valid_store(store_path: Path) -> bool:
     store_data_dir = store_dirs[0]
 
     return store_data_dir.joinpath("zarr").exists()
+
+
+def handle_direct_store_path(path: str, prompt_to_add: bool = True) -> str:
+    """
+    Try to interpret a given name as a direct object store path.
+    If valid and not in config, optionally prompt to add it to the config.
+
+    Args:
+        path: The potential path to an object store.
+        prompt_to_add: Whether to prompt user to add the path to config.
+
+    Returns:
+        str: Resolved path string.
+    """
+    possible_path = Path(path).expanduser().resolve()
+
+    if not (possible_path.exists() or possible_path.is_absolute()):
+        raise ObjectStoreError(f"'{path}' is not a valid path or store name.")
+
+    logger.warning(
+        f"'{path}' is not a configured writable store name but looks like a path. " "Using it directly."
+    )
+
+    if prompt_to_add:
+        response = (
+            input(f"Would you like to add '{possible_path}' to your config as a new store? (y/n): ")
+            .strip()
+            .lower()
+        )
+        if response in {"y", "yes"}:
+            _add_path_to_config(possible_path)
+
+    return str(possible_path)
+
+
+def _add_path_to_config(path: Path, name: str | None = None) -> None:
+    """
+    Add a new object store path to the user's config.
+
+    Args:
+        path: The path to add.
+        name: Optional name for the new store. If None, ask the user.
+
+    Returns:
+        None
+    """
+    config_path = get_user_config_path()
+    if config_path.exists():
+        config = toml.loads(config_path.read_text())
+    if not name:
+        name = input("Enter a name for this new store (e.g., 'custom'): ").strip()
+
+    if name in config.get("object_store", {}):
+        raise ValueError(f"A store with the name '{name}' already exists in the config.")
+
+    config["object_store"][name] = {"path": str(path), "permissions": "rw"}
+
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(toml.dumps(config))
+
+    logger.info(f"Added store '{name}' with path '{path}' to config.")
