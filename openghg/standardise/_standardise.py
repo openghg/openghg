@@ -291,7 +291,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path,
+    filepath: multiPathType,
     species: str,
     bc_input: str,
     domain: str,
@@ -351,7 +351,7 @@ def standardise_bc(
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="boundary_conditions",

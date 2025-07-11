@@ -1,17 +1,16 @@
 import logging
 from pathlib import Path
-import xarray as xr
 
-from openghg.util import clean_string, timestamp_now, synonyms
+from openghg.util import clean_string, timestamp_now, synonyms, open_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
-from openghg.types import pathType
+from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: pathType,
+    filepath: multiPathType,
     species: str,
     bc_input: str,
     domain: str,
@@ -40,9 +39,9 @@ def parse_openghg(
     bc_input = clean_string(bc_input)
     domain = clean_string(domain)
 
-    filepath = Path(filepath)
+    xr_open_fn, filepath = open_nc_fn(filepath, domain)
 
-    with xr.open_dataset(filepath).chunk(chunks) as bc_data:
+    with xr_open_fn(filepath).chunk(chunks) as bc_data:
         # Some attributes are numpy types we can't serialise to JSON so convert them
         # to their native types here
         attrs = {}
@@ -70,8 +69,16 @@ def parse_openghg(
 
         bc_time = bc_data["time"]
 
+        # If filepath is a single file, the naming scheme of this file can be used
+        # as one factor to try and determine the period.
+        # If multiple files, this input isn't needed.
+        if isinstance(filepath, (str, Path)):
+            input_filepath = filepath
+        else:
+            input_filepath = None
+
         start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
+            bc_time, filepath=input_filepath, period=period, continuous=continuous
         )
 
         metadata["start_date"] = str(start_date)
@@ -83,7 +90,6 @@ def parse_openghg(
         metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
         metadata["min_height"] = round(float(bc_data["height"].min()), 5)
         metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-        metadata["input_filename"] = filepath.name
 
         metadata["time_period"] = period_str
 
