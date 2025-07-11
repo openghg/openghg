@@ -98,7 +98,7 @@ def add_noaa_obspack(
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
                 processed = standardise_surface(
-                    store=store,
+                    store_name=store,
                     filepath=filepath,
                     site=site,
                     measurement_type=measurement_type,
