@@ -202,8 +202,6 @@ class Flux(BaseStore):
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
         for mdd in flux_data:
-            mdd.data = align_lat_lon(data=mdd.data, domain=domain)
-
             Flux.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through info_metadata dict
