@@ -251,7 +251,7 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
-def footprint_open_nc_fn(
+def open_nc_fn(
     filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
 ) -> tuple[Callable, multiPathType]:
     """
@@ -262,7 +262,7 @@ def footprint_open_nc_fn(
     Args:
         filepath: Path or list of filepaths
         realign_on_domain: When present, realign the data on the given domain. Option usable
-            when opening footprints or flux data but not observations and boundary conditions.
+            when opening footprints, flux or boundary conditions data but not observations or flux_timeseries.
         sel_month : when present keep only one month of data
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath

@@ -1,11 +1,14 @@
 from pathlib import Path
 import warnings
 
-from openghg.types import pathType
+from openghg.util import timestamp_now, open_nc_fn
+from openghg.store import infer_date_range, update_zero_dim
+from openghg.standardise.meta import assign_flux_attributes
+from openghg.types import multiPathType
 
 
 def parse_openghg(
-    filepath: pathType,
+    filepath: multiPathType,
     species: str,
     source: str,
     domain: str,
@@ -42,12 +45,6 @@ def parse_openghg(
     Returns:
         dict: Dictionary of data
     """
-    from openghg.standardise.meta import assign_flux_attributes
-    from openghg.store import infer_date_range, update_zero_dim
-    from openghg.util import timestamp_now
-    from xarray import open_dataset
-
-    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -56,7 +53,9 @@ def parse_openghg(
         )
         time_resolved = high_time_resolution
 
-    em_data = open_dataset(filepath).chunk(chunks)
+    xr_open_fn, filepath = open_nc_fn(filepath, domain)
+
+    em_data = xr_open_fn(filepath).chunk(chunks)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -99,8 +98,16 @@ def parse_openghg(
 
     em_time = em_data["time"]
 
+    # If filepath is a single file, the naming scheme of this file can be used
+    # as one factor to try and determine the period.
+    # If multiple files, this input isn't needed.
+    if isinstance(filepath, (str, Path)):
+        input_filepath = filepath
+    else:
+        input_filepath = None
+
     start_date, end_date, period_str = infer_date_range(
-        em_time, filepath=filepath, period=period, continuous=continuous
+        em_time, filepath=input_filepath, period=period, continuous=continuous
     )
 
     metadata["start_date"] = str(start_date)
