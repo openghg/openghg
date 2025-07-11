@@ -12,8 +12,8 @@ __all__ = (
     "MemoryStore",
     "Store",
     "VersionedMemoryStore",
-    "get_zarr_directory_store",
-    "get_zarr_memory_store",
     "get_versioned_zarr_directory_store",
     "get_versioned_zarr_memory_store",
+    "get_zarr_directory_store",
+    "get_zarr_memory_store",
 )
