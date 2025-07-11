@@ -44,7 +44,15 @@ class ZarrStore(Store, Generic[ZST]):
 
     @property
     def store(self) -> ZST:
-        """Zarr storage."""
+        """Underlying Zarr storage.
+
+        This property is necessary because `self._store` should not be None,
+        however, for versioning we need to allow the factory function in `SimpleVersioning`
+        to set the value of `self._store`.
+
+        Raises:
+            AttributeError if internal Zarr store is not set.
+        """
         if self._store is None:
             raise AttributeError("Zarr store not set.")
         return self._store
@@ -67,12 +75,12 @@ class ZarrStore(Store, Generic[ZST]):
             return 0
 
     def get(self) -> xr.Dataset:
-        if not self.__bool__():
+        if not bool(self):
             return xr.Dataset()
 
-        return xr.open_zarr(self.store, consolidated=True).sortby(
-            self.append_dim
-        )  # need to sort to be consistent with MemoryStore
+        # need to sort to be consistent with MemoryStore
+        result = xr.open_zarr(self.store, consolidated=True).sortby(self.append_dim)
+        return cast(xr.Dataset, result)
 
     def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
         if not self.store:
@@ -138,7 +146,18 @@ class ZarrStore(Store, Generic[ZST]):
 def get_zarr_directory_store(
     path: Path, append_dim: str = "time", index_options: dict | None = None
 ) -> ZarrStore[zarr.DirectoryStore]:
-    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore."""
+    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: path to Zarr store location.
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+        `method = "nearest"`.
+
+    Returns:
+        ZarrStore based on zarr.DirectoryStore.
+
+    """
     store = zarr.DirectoryStore(path)
     return ZarrStore[zarr.DirectoryStore](store, append_dim=append_dim, index_options=index_options)
 
@@ -146,12 +165,30 @@ def get_zarr_directory_store(
 def get_zarr_memory_store(
     append_dim: str = "time", index_options: dict | None = None
 ) -> ZarrStore[zarr.MemoryStore]:
-    """Factory function to create ZarrStore objects based on a zarr.MemoryStore."""
+    """Factory function to create ZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+        `method = "nearest"`.
+
+    Returns:
+        ZarrStore based on zarr.MemoryStore.
+
+    """
     store = zarr.MemoryStore()
     return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options)
 
 
 class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
+    """Zarr storage with versions.
+
+    This class uses the methods from `ZarrStore` but overrides the `._store` attribute
+    to point to the current version of the zarr store held by the `SimpleVersioning` class.
+
+    Overriding `._store`
+    """
+
     def __init__(
         self,
         factory: Callable[[str], ZST],
@@ -159,6 +196,22 @@ class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
         append_dim: str = "time",
         index_options: dict | None = None,
     ) -> None:
+        """Create VersionedZarrStore object.
+
+        The `factory` and `versions` arguments are used to set up the
+        versioning, and the remaining arguments are passed to `ZarrStore`.
+
+        Args:
+            factory: function that produces a zarr store, given a version. For
+              instance, "v1" might map to a zarr directory store with path
+              `root_path / "v1"`.
+            versions: Versions to instantiate; these are loaded using the
+            `factory` function.
+            append_dim: dimension to append new data along.
+            index_options: options for the index used to resolve conflicts when
+            adding data to the store.
+
+        """
         super().__init__(
             factory=factory,
             versions=versions,
@@ -173,6 +226,8 @@ class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
 
     @_store.setter
     def _store(self, value: ZST | None) -> None:
+        # ZarrStore.__init__ will try to set the value to None, but we don't want to set
+        # the current storage version to None.
         if value is not None:
             self._current = value
 
@@ -204,7 +259,20 @@ def get_versioned_zarr_directory_store(
     append_dim: str = "time",
     index_options: dict | None = None,
 ) -> VersionedZarrStore[zarr.DirectoryStore]:
-    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore."""
+    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: root path where zarr `DirectoryStore`s will be based.
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve conflicts when
+        adding data to the store.
+
+    Returns:
+        VersionedZarrStore object with zarr.DirectoryStore as the underlying
+        storage.
+
+    """
 
     def factory(v: str) -> zarr.DirectoryStore:
         """Factory for versioning."""
@@ -218,7 +286,19 @@ def get_versioned_zarr_directory_store(
 def get_versioned_zarr_memory_store(
     versions: Iterable[str] | None = None, append_dim: str = "time", index_options: dict | None = None
 ) -> VersionedZarrStore[zarr.MemoryStore]:
-    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore."""
+    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve conflicts when
+        adding data to the store.
+
+    Returns:
+        VersionedZarrStore object with zarr.MemoryStore as the underlying
+        storage.
+
+    """
 
     def factory(_: str) -> zarr.MemoryStore:
         """Factory for versioning."""

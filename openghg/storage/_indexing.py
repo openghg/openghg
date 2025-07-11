@@ -68,4 +68,6 @@ class ConflictDeterminer(ConflictsMixin):
 
     def conflicts(self, other: Iterable) -> npt.NDArray[np.bool_]:
         indexer = self.index.get_indexer(other, **self.index_options)
-        return indexer != -1
+        result: npt.NDArray[np.bool_] = indexer != -1
+
+        return result

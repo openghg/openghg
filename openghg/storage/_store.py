@@ -1,3 +1,16 @@
+"""Storage for a single Xarray Dataset.
+
+This module contains the interface (abstract base class) `Store`, as well
+as two concrete implementations:
+- `MemoryStore`
+- `VersionedMemoryStore`
+
+These concrete implementations are mainly used for testing.
+Their value is that they produce the same results as the Zarr implementations of
+the `Store` interface, using Xarray operations.
+
+"""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from contextlib import suppress
@@ -77,8 +90,9 @@ class Store(ABC):
     @abstractmethod
     def get(self) -> xr.Dataset:
         """Return the stored data."""
-        if not self.__bool__():
+        if not bool(self):
             return xr.Dataset()  # TODO: should this raise an error instead?
+        raise NotImplementedError
 
     @abstractmethod
     def clear(self) -> None:
@@ -133,7 +147,7 @@ class MemoryStore(Store):
 
     @property
     def _conflict_determiner(self) -> ConflictDeterminer:
-        index = self.data.get_index(self.append_dim) if self.data else pd.Index()
+        index = self.data.get_index(self.append_dim) if self.data else pd.Index([])
         return ConflictDeterminer(index=index, **self.index_options)
 
     def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:

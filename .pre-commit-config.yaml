@@ -24,6 +24,7 @@ repos:
         # Copied from setup.cfg
         exclude: "tests/"
         additional_dependencies: [
+            numpy,
             # Type stubs
             types-paramiko,
             types-PyYAML,
