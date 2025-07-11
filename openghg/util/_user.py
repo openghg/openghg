@@ -429,6 +429,7 @@ def _add_path_to_config(path: Path, name: str | None = None) -> None:
         None
     """
     config_path = get_user_config_path()
+    config = {}
     if config_path.exists():
         config = toml.loads(config_path.read_text())
 
