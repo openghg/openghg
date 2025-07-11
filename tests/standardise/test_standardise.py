@@ -1,5 +1,6 @@
 from pathlib import Path
 import pytest
+from unittest.mock import patch
 from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
@@ -21,6 +22,7 @@ from openghg.standardise import (
 from openghg.types import AttrMismatchError, ObjectStoreError
 from openghg.util import compress, find_domain
 import numpy as np
+
 
 
 def test_standardise_to_read_only_store():
@@ -310,19 +312,19 @@ def test_standardise_footprint():
     height = "10m"
     domain = "EUROPE"
     model = "test_model"
-
-    results = standardise_footprint(
-        filepath=datapath,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        force=True,
-        high_spatial_resolution=True,
-        overwrite=True,
-        store="/tmp/openghg_testing-STORE_123",
-    )
+    with patch("builtins.input", side_effect=["y", "mytempstore"]):
+        results = standardise_footprint(
+            filepath=datapath,
+            site=site,
+            model=model,
+            network=network,
+            height=height,
+            domain=domain,
+            force=True,
+            high_spatial_resolution=True,
+            overwrite=True,
+            store="/tmp/openghg_testing-STORE_123",
+        )
 
     result = results[0]
 
