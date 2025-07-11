@@ -198,8 +198,6 @@ class Flux(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        parser_input_parameters["data_type"] = self._data_type
-
         flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
