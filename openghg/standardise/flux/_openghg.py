@@ -9,7 +9,6 @@ def parse_openghg(
     species: str,
     source: str,
     domain: str,
-    data_type: str,
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
@@ -27,7 +26,6 @@ def parse_openghg(
         species: Name of species
         source: Source of the emissions data
         domain: Geographic domain
-        data_type: Type of data
         database: Name of the database
         database_version: Version of the database
         model: Model name if applicable.
@@ -83,9 +81,7 @@ def parse_openghg(
             metadata[key] = value
 
     metadata["author"] = author_name
-    metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "flux"
     metadata["source_format"] = "openghg"
 
     # As flux / emissions files handle things slightly differently we need to check the time values
