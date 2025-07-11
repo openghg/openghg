@@ -410,6 +410,7 @@ def standardise_footprint(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
+    open_files_grouped: bool = True,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -516,11 +517,12 @@ def standardise_footprint(
         sort=sort,
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
+        open_files_grouped=open_files_grouped,
     )
 
 
 def standardise_flux(
-    filepath: multiPathType,
+    filepath: str | Path,
     species: str,
     source: str,
     domain: str,
@@ -587,6 +589,7 @@ def standardise_flux(
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
+    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -594,11 +597,11 @@ def standardise_flux(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
-
     return standardise(
         data_type="flux",
         store=store,
         filepath=filepath,
+        source_format=source_format,
         species=species,
         source=source,
         domain=domain,

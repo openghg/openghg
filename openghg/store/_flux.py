@@ -8,7 +8,7 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import pathType
+from openghg.types import pathType, multiPathType
 from openghg.util import synonyms, align_lat_lon
 
 from xarray import DataArray, Dataset
@@ -59,7 +59,7 @@ class Flux(BaseStore):
 
     def read_file(
         self,
-        filepath: pathType,
+        filepath: multiPathType,
         species: str,
         source: str,
         domain: str,
@@ -166,8 +166,6 @@ class Flux(BaseStore):
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
 
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
