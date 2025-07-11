@@ -18,6 +18,7 @@ class METStore(BaseStore):
 
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
+    _data_type = "met"
 
     def save(self) -> None:
         """Save the object to the object store

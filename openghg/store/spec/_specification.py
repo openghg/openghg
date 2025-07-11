@@ -19,50 +19,16 @@ __all__ = [
 ]
 
 
-def define_data_types() -> tuple[str, ...]:
-    """
-    Define names of data types for objects within OpenGHG
-    """
-
-    data_types = (
-        "surface",
-        "column",
-        "flux",
-        "footprints",
-        "boundary_conditions",
-        "eulerian_model",
-        "flux_timeseries",
-    )
-
-    return data_types
-
-
 def define_data_type_classes() -> dict[str, Any]:
-    """
-    Define mapping between data types and associated input classes within OpenGHG
-    """
-    from openghg.store import (
-        BoundaryConditions,
-        Flux,
-        EulerianModel,
-        Footprints,
-        ObsColumn,
-        ObsSurface,
-        FluxTimeseries,
-    )
+    """Define mapping between data types and associated input classes within OpenGHG."""
+    from openghg.store.base import BaseStore
 
-    data_type_classes = {
-        "surface": ObsSurface,
-        "column": ObsColumn,
-        "flux": Flux,
-        # "met": ???
-        "footprints": Footprints,
-        "boundary_conditions": BoundaryConditions,
-        "eulerian_model": EulerianModel,
-        "flux_timeseries": FluxTimeseries,
-    }
+    return BaseStore._registry.copy()
 
-    return data_type_classes
+
+def define_data_types() -> tuple[str, ...]:
+    """Define names of data types for objects within OpenGHG."""
+    return tuple(define_data_type_classes().keys())
 
 
 def define_standardise_parsers() -> dict[str, Any]:
