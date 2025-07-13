@@ -163,9 +163,21 @@ def parse_icos_corso(
                         species + "_number_of_observations",
                         "flag",
                     ]
-                df = df[columns_to_keep]
+                else:
+                    columns_to_keep = [
+                        species,
+                        "sampling_start",
+                        "sampling_end",
+                        species + "_variability",
+                        species + "_repeatability",
+                        species + "_calibration_uncertainty",
+                        species + "_combined_uncertainty",
+                        "flag",
+                    ]
 
-                df = set_time_as_dataframe_index(dataframe=df)
+                    df = df[columns_to_keep]
+
+                    df = set_time_as_dataframe_index(dataframe=df)
 
             else:
                 site_fname = filepath.name.split("_")[-3]
