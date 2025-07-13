@@ -175,9 +175,9 @@ def parse_icos_corso(
                         "flag",
                     ]
 
-                    df = df[columns_to_keep]
+                df = df[columns_to_keep]
 
-                    df = set_time_as_dataframe_index(dataframe=df)
+                df = set_time_as_dataframe_index(dataframe=df)
 
             else:
                 site_fname = filepath.name.split("_")[-3]
