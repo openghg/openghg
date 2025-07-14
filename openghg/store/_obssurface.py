@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, MutableSequence, cast
+from typing import Any, MutableSequence
 from collections.abc import Sequence
 
 import numpy as np
@@ -123,6 +123,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: pathType | None = None,
+        tag: str | list | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -131,7 +132,7 @@ class ObsSurface(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         chunks: dict | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -171,6 +172,8 @@ class ObsSurface(BaseStore):
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             update_mismatch: This determines how mismatches between the internal data
                 "attributes" and the supplied / derived "metadata" are handled.
                 This includes the options:
@@ -198,7 +201,7 @@ class ObsSurface(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -217,7 +220,6 @@ class ObsSurface(BaseStore):
             format_platform,
             evaluate_sampling_period,
             check_and_set_null_variable,
-            hash_file,
             load_standardise_parser,
             verify_site,
             check_if_need_new_version,
@@ -308,49 +310,51 @@ class ObsSurface(BaseStore):
             chunks = {}
 
         if not isinstance(filepath, list):
-            filepaths = [filepath]
+            filepaths_to_check = [filepath]
         else:
-            filepaths = filepath
+            filepaths_to_check = filepath
+
+        filepaths: list[Path] = []
+        precision_filepaths: list[Path] = []
+        for fp in filepaths_to_check:
+            if isinstance(fp, tuple):
+                if source_format.lower() != "gcwerks":
+                    raise TypeError(
+                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
+                    )
+                filepaths.append(Path(fp[0]))
+                precision_filepaths.append(Path(fp[1]))
+            else:
+                if source_format.lower() == "gcwerks":
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+                filepaths.append(Path(fp))
+
+        # Check hashes of previous files (included after any filepath(s) formatting)
+        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
+
+        if not unseen_hashes:
+            return [{}]
+
+        filepaths = list(unseen_hashes.values())
+
+        if not filepaths:
+            return [{}]
 
         # Get current parameter values and filter to only include function inputs
         current_parameters = locals().copy()
         fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
 
         # Create a progress bar object using the filepaths, iterate over this below
-        for fp in filepaths:
-            if source_format == "GCWERKS":
-                if isinstance(fp, tuple):
-                    filepath = Path(fp[0])
-                    precision_filepath = Path(fp[1])
-                else:
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
-            else:
-                filepath = fp
-
-            # Cast so it's clear we no longer expect a tuple
-            filepath = cast(str | Path, filepath)
-            filepath = Path(filepath)
+        for i, filepath in enumerate(filepaths):
 
             fn_input_parameters["filepath"] = filepath
+            if precision_filepaths:
+                fn_input_parameters["precision_filepath"] = precision_filepaths[i]
 
             # Define parameters to pass to the parser function and remaining keys
             parser_input_parameters, additional_input_parameters = split_function_inputs(
                 fn_input_parameters, parser_fn
             )
-
-            # This hasn't been updated to use the new check_hashes function due to
-            # the added complication of the GCWERKS precision file handling,
-            # so we'll just use the old method for now.
-            file_hash = hash_file(filepath=filepath)
-            if file_hash in self._file_hashes and overwrite is False and force is False:
-                logger.warning(
-                    "This file has been uploaded previously with the filename : "
-                    f"{self._file_hashes[file_hash]} - skipping."
-                )
-                continue
-
-            if source_format == "GCWERKS":
-                parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
             data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
@@ -381,11 +385,11 @@ class ObsSurface(BaseStore):
 
             align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
-            # Check to ensure no required keys are being passed through optional_metadata dict
+            # Check to ensure no required keys are being passed through info_metadata dict
             # before adding details
-            self.check_info_keys(optional_metadata)
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
+            self.check_info_keys(info_metadata)
+            if info_metadata is not None:
+                additional_metadata.update(info_metadata)
 
             # Mop up and add additional keys to metadata which weren't passed to the parser
             data = self.update_metadata(data, additional_input_parameters, additional_metadata)
@@ -408,7 +412,7 @@ class ObsSurface(BaseStore):
 
             logger.info(f"Completed processing: {filepath.name}.")
 
-            self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return results
 
@@ -642,19 +646,6 @@ class ObsSurface(BaseStore):
                 datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
-
-    def store_hashes(self, hashes: dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function
-        Returns:
-            None
-        """
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

@@ -116,6 +116,7 @@ class Datasource:
         sort: bool = False,
         drop_duplicates: bool = False,
         skip_keys: list | None = None,
+        extend_keys: list | None = None,
         new_version: bool = True,
         if_exists: str = "auto",
         compressor: Any | None = None,
@@ -131,6 +132,7 @@ class Datasource:
             sort: Sort data in time dimension
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
+            extend_keys: Keys to add to to current keys (extend a list), if present.
             new_version: Create a new version of the data
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -149,7 +151,7 @@ class Datasource:
         if data_type not in expected_data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
-        self.add_metadata(metadata=metadata, skip_keys=skip_keys)
+        self.add_metadata(metadata=metadata, skip_keys=skip_keys, extend_keys=extend_keys)
 
         if "time" in data.coords:
             return self.add_timed_data(
@@ -400,16 +402,20 @@ class Datasource:
         del self._data_keys[version]
         del self._timestamps[version]
 
-    def add_metadata(self, metadata: dict, skip_keys: list | None = None) -> None:
-        """Add all metadata in the dictionary to this Datasource
+    def add_metadata(
+        self, metadata: dict, skip_keys: list | None = None, extend_keys: list | None = None
+    ) -> None:
+        """Add all metadata in the dictionary to this Datasource.
+        This will overwrite any previously stored values for keys of the same name.
 
         Args:
             metadata: Dictionary of metadata
             skip_keys: Keys to not standardise as lowercase
+            extend_keys: Keys to add in addition to current keys (extend a list) if present.
         Returns:
             None
         """
-        from openghg.util import to_lowercase, merge_dict
+        from openghg.util import to_lowercase, merge_dict, merge_and_extend_dict
 
         try:
             del metadata["object_store"]
@@ -418,9 +424,31 @@ class Datasource:
         else:
             logger.warning("object_store should not be added to the metadata, removing.")
 
+        if extend_keys is None:
+            extend_keys = []
+
         lowercased: dict = to_lowercase(metadata, skip_keys=skip_keys)
-        merged_metadata = merge_dict(self._metadata, lowercased, on_overlap="ignore", on_conflict="right")
-        self._metadata = merged_metadata
+        metadata_to_add = {key: value for key, value in lowercased.items() if key not in extend_keys}
+
+        # # Add keys - overwriting any existing values
+        # self._metadata.update(metadata_to_add)
+
+        merged_metadata = merge_dict(
+            self._metadata, metadata_to_add, on_overlap="ignore", on_conflict="right"
+        )
+
+        # Extend current keys with new values
+        metadata_extend = {}
+        for key in extend_keys:
+            if key in metadata:
+                value = metadata[key]
+                if isinstance(value, str):
+                    value = [value]
+                metadata_extend[key] = value
+
+        merged_and_extended_metadata = merge_and_extend_dict(merged_metadata, metadata_extend)
+
+        self._metadata = merged_and_extended_metadata
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame

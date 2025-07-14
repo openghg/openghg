@@ -1,11 +1,11 @@
 import os
+import numpy as np
 from pathlib import Path
 
 import pytest
-from openghg.types import InvalidSiteError
 from openghg.util import (
+    check_unique,
     read_header,
-    read_local_config,
     site_code_finder,
     synonyms,
     to_lowercase,
@@ -111,3 +111,20 @@ def test_sorting_with_str():
     sorted_file = sort_by_filenames(filepaths)
 
     assert isinstance(sorted_file, list)
+
+
+@pytest.mark.parametrize(
+    "input,expected_result",
+    [
+        ([1, 2, 3, 4, 5], True),  # no repeats
+        ([1, 2, 3, 4, 5, 5], False),  # repeats
+        ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
+        (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
+    ],
+)
+def test_check_unique(input, expected_result):
+    """
+    Test the check_unique function returns True/False as expected
+    """
+    result = check_unique(input)
+    assert result == expected_result
