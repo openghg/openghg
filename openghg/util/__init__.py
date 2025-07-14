@@ -116,4 +116,5 @@ from ._util import (
     verify_site,
     verify_site_with_satellite,
 )
+from ._units import assign_units
 from ._versions import show_versions, check_if_need_new_version

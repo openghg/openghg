@@ -14,7 +14,7 @@ from openghg.dataobjects import (
 from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
 
-from openghg.retrieve import _units
+from openghg.util import assign_units
 
 from pandas import Timestamp
 
@@ -249,7 +249,7 @@ def get_obs_surface(
     obs_data = ObsData(data=data, metadata=metadata)
 
     # Attribute pint units to observations
-    obs_data_u = _units.AssignUnits(obs_data).attribute()
+    obs_data_u = assign_units(obs_data)
 
     return obs_data_u
 
@@ -420,7 +420,7 @@ def get_flux(
     fluxdata = FluxData(data=em_data.data, metadata=em_data.metadata)
 
     # Attribute pint units to flux data
-    fluxdata_u = _units.AssignUnits(fluxdata).attribute()
+    fluxdata_u = assign_units(fluxdata)
 
     return fluxdata_u
 
@@ -459,7 +459,7 @@ def get_bc(
     bcdata = BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
     # Attribute pint units to BC data
-    bcdata_u = _units.AssignUnits(bcdata).attribute()
+    bcdata_u = assign_units(bcdata)
 
     return bcdata_u
 
@@ -530,7 +530,7 @@ def get_footprint(
     fpdata = FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # Attribute pint units to footprint data
-    fpdata_u = _units.AssignUnits(fpdata).attribute()
+    fpdata_u = assign_units(fpdata)
 
     return fpdata_u
 
