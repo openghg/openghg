@@ -12,7 +12,7 @@ from openghg.dataobjects import (
     ObsData,
 )
 from openghg.types import SearchError
-from openghg.util import combine_and_elevate_inlet
+from openghg.util import combine_and_elevate_inlet, assign_units
 
 from pandas import Timestamp
 
@@ -96,6 +96,7 @@ def get_obs_surface(
     rename_vars: bool = True,
     keep_missing: bool = False,
     keep_variables: list | None = None,
+    target_units: str | None = None,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -246,6 +247,7 @@ def get_obs_surface(
 
     obs_data = ObsData(data=data, metadata=metadata)
 
+    obs_data = assign_units(obs_data, target_units=target_units)
     return obs_data
 
 
@@ -262,6 +264,7 @@ def get_obs_column(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
+    target_units: str | None = None,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -360,6 +363,8 @@ def get_obs_column(
 
     obs_data.data = obs_data.data.sortby("time")
 
+    obs_data = assign_units(obs_data, target_units=target_units)
+
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
 
@@ -373,6 +378,7 @@ def get_flux(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     time_resolution: str | None = None,
+    target_units: str | None = None,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -412,6 +418,7 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
+    em_data = assign_units(data=em_data, target_units=target_units)
     return FluxData(data=em_data.data, metadata=em_data.metadata)
 
 
@@ -421,6 +428,7 @@ def get_bc(
     bc_input: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
+    target_units: str | None = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -446,6 +454,7 @@ def get_bc(
         **kwargs,
     )
 
+    bc_data = assign_units(data=bc_data, target_units=target_units)
     return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
 
@@ -460,6 +469,7 @@ def get_footprint(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     species: str | None = None,
+    target_units: str | None = None,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -512,6 +522,7 @@ def get_footprint(
         **kwargs,
     )
 
+    fp_data = assign_units(data=fp_data, target_units=target_units)
     return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?
