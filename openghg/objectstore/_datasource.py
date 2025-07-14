@@ -4,15 +4,14 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 from typing import Any
 
-DS = TypeVar("DS", bound="AbstractDatasource")
+DatasourceT = TypeVar("DatasourceT", bound="AbstractDatasource")
 
 
 UUID = str
-Data = Any
 Bucket = str
 
 
-class DatasourceFactory(Generic[DS]):
+class DatasourceFactory(Generic[DatasourceT]):
     """Class that allows Datasources to be created using only UUIDs.
 
     Any other arguments needed to initialise or load a Datasource are
@@ -23,7 +22,7 @@ class DatasourceFactory(Generic[DS]):
 
     def __init__(
         self,
-        datasource_class: type[DS],
+        datasource_class: type[DatasourceT],
         new_kwargs: dict[str, Any] | None = None,
         load_kwargs: dict[str, Any] | None = None,
     ) -> None:
@@ -40,16 +39,19 @@ class DatasourceFactory(Generic[DS]):
         self.new_kwargs = new_kwargs or {}
         self.load_kwargs = load_kwargs or {}
 
-    def new(self, uuid: UUID) -> DS:
+    def new(self, uuid: UUID) -> DatasourceT:
         """Initialise new `Datasource` via UUID."""
         return self.datasource_class(uuid=uuid, **self.new_kwargs)
 
-    def load(self, uuid: UUID) -> DS:
+    def load(self, uuid: UUID) -> DatasourceT:
         """Load existing `Datasource` via UUID."""
         return self.datasource_class.load(uuid=uuid, **self.load_kwargs)
 
 
-class AbstractDatasource(ABC):
+T = TypeVar("T")
+
+
+class AbstractDatasource(ABC, Generic[T]):
     """Interface for Datasource-like objects.
 
     The data stored in a Datasource is assumed to be related in some way.
@@ -67,11 +69,11 @@ class AbstractDatasource(ABC):
 
     @classmethod
     @abstractmethod
-    def load(cls: type[DS], uuid: UUID, *args: Any, **kwargs: Any) -> DS:
+    def load(cls: type[DatasourceT], uuid: UUID, *args: Any, **kwargs: Any) -> DatasourceT:
         pass
 
     @abstractmethod
-    def add(self, data: Data, *args, **kwargs: Any) -> None:
+    def add(self, data: T, *args, **kwargs: Any) -> None:
         """Add data to the datasource.
 
         TODO: add `overwrite` argument, with expected error type

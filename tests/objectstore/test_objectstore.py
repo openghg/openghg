@@ -1,4 +1,5 @@
 from typing import Any, TypeVar
+from typing_extensions import Self
 
 import pytest
 import tinydb
@@ -12,7 +13,7 @@ from openghg.types import ObjectStoreError
 MetaData = dict[str, Any]
 QueryResults = list[Any]
 UUID = str
-Data = Any
+Data = TypeVar("Data")
 
 
 @pytest.fixture
@@ -28,23 +29,20 @@ def metastore(tmp_path):
         yield metastore
 
 
-T = TypeVar("T", bound="InMemoryDatasource")
-
-
 class InMemoryDatasource(AbstractDatasource):
     """Minimal class implementing the Datasource interface."""
 
-    datasources: dict[UUID, list[Data]] = {}
+    datasources: dict[UUID, list[Any]] = {}
 
-    def __init__(self, uuid: UUID, data: list[Data] | None = None, **kwargs: Any) -> None:
+    def __init__(self, uuid: UUID, data: list[Any] | None = None, **kwargs: Any) -> None:
         super().__init__(uuid)
         if data:
-            self.data: list[Data] = data
+            self.data: list[Any] = data
         else:
-            self.data: list[Data] = []
+            self.data: list[Any] = []
 
     @classmethod
-    def load(cls: type[T], uuid: UUID) -> T:
+    def load(cls: type[Self], uuid: UUID) -> Self:
         try:
             data = cls.datasources[uuid]
         except KeyError:
@@ -52,7 +50,7 @@ class InMemoryDatasource(AbstractDatasource):
         else:
             return cls(uuid, data)
 
-    def add(self, data: Data) -> None:
+    def add(self, data: Any) -> None:
         self.data.append(data)
 
     def delete(self) -> None:
@@ -70,7 +68,7 @@ def objectstore(metastore):
     InMemoryDatasource is used for unit testing ObjectStore
     without needed to setup or mock a "real" Datasoure.
     """
-    yield ObjectStore[InMemoryDatasource](
+    yield ObjectStore[InMemoryDatasource, Any](
         metastore, DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
     )
 

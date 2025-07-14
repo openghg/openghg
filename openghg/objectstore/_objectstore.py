@@ -18,11 +18,13 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from types import TracebackType
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, TypeAlias, TypeVar
 from typing_extensions import Self
 from uuid import uuid4
 
-from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
+import xarray as xr
+
+from openghg.objectstore._datasource import DatasourceFactory, DatasourceT
 from openghg.objectstore._legacy_datasource import Datasource, get_legacy_datasource_factory
 from openghg.objectstore.metastore import MetaStore, open_metastore
 from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore, FileLock, LockingError
@@ -30,18 +32,15 @@ from openghg.types import ObjectStoreError
 from openghg.util import split_function_inputs
 
 
-DS = TypeVar("DS", bound="AbstractDatasource")
-
-
 MetaData = dict[str, Any]
 QueryResults = list[Any]
 UUID = str
-Data = Any
+T = TypeVar("T")
 Bucket = str
 
 
-class ObjectStore(Generic[DS]):
-    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory) -> None:
+class ObjectStore(Generic[DatasourceT, T]):
+    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory[DatasourceT]) -> None:
         self.metastore = metastore
         self.datasource_factory = datasource_factory
 
@@ -91,7 +90,7 @@ class ObjectStore(Generic[DS]):
         results = self.metastore.search(metadata)
         return [result["uuid"] for result in results]
 
-    def create(self, metadata: MetaData, data: Data, **kwargs: Any) -> UUID:
+    def create(self, metadata: MetaData, data: T, **kwargs: Any) -> UUID:
         """Create a new datasource and store its metadata and UUID in the metastore.
 
         Args:
@@ -141,7 +140,7 @@ class ObjectStore(Generic[DS]):
         self,
         uuid: UUID,
         metadata: MetaData | None = None,
-        data: Data | None = None,
+        data: T | None = None,
         keys_to_delete: str | list[str] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -199,7 +198,7 @@ class ObjectStore(Generic[DS]):
                 self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
             # END HACK
 
-    def get_datasource(self, uuid: UUID) -> DS:
+    def get_datasource(self, uuid: UUID) -> DatasourceT:
         """Get data stored at given uuid."""
         return self.datasource_factory.load(uuid)
 
@@ -214,15 +213,15 @@ class ObjectStore(Generic[DS]):
 @contextmanager
 def open_object_store(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
-) -> Generator[ObjectStore[Datasource], None, None]:
+) -> Generator[ObjectStore[Datasource, xr.Dataset], None, None]:
     with open_metastore(bucket=bucket, data_type=data_type, mode=mode) as ms:
         ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
-        object_store = ObjectStore[Datasource](metastore=ms, datasource_factory=ds_factory)
+        object_store = ObjectStore[Datasource, xr.Dataset](metastore=ms, datasource_factory=ds_factory)
         yield object_store
 
 
 # Object store with locks
-class LockingObjectStore(ObjectStore[DS]):
+class LockingObjectStore(ObjectStore[DatasourceT, T]):
     """ObjectStore with lock that can be acquired and released with a context manager.
 
     The context manager (`with` statement) must be used to create, update, and delete data.
@@ -248,7 +247,7 @@ class LockingObjectStore(ObjectStore[DS]):
         super().close()
         self.lock.release()
 
-    def create(self, metadata: MetaData, data: Data, **kwargs: Any) -> UUID:
+    def create(self, metadata: MetaData, data: T, **kwargs: Any) -> UUID:
         if not self.lock.is_locked:
             raise LockingError("Object store must be locked to add new data.")
         return super().create(metadata, data, **kwargs)
@@ -257,7 +256,7 @@ class LockingObjectStore(ObjectStore[DS]):
         self,
         uuid: UUID,
         metadata: MetaData | None = None,
-        data: Data | None = None,
+        data: T | None = None,
         keys_to_delete: str | list[str] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -273,14 +272,16 @@ class LockingObjectStore(ObjectStore[DS]):
         return super().delete(uuid)
 
 
-LockingObjectStoreType = LockingObjectStore[Datasource]
+LockingObjectStoreType: TypeAlias = LockingObjectStore[Datasource, xr.Dataset]
 
 
 def locking_object_store(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
-) -> LockingObjectStore[Datasource]:
+) -> LockingObjectStoreType:
     ms = DataClassMetaStore(bucket=bucket, data_type=data_type)
     ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
-    object_store = LockingObjectStore[Datasource](metastore=ms, datasource_factory=ds_factory, lock=ms.lock)
+    object_store = LockingObjectStore[Datasource, xr.Dataset](
+        metastore=ms, datasource_factory=ds_factory, lock=ms.lock
+    )
 
     return object_store

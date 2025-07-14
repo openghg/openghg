@@ -23,7 +23,7 @@ __all___ = ["Datasource"]
 T = TypeVar("T", bound="Datasource")
 
 
-class Datasource(AbstractDatasource):
+class Datasource(AbstractDatasource[xr.Dataset]):
     """A Datasource holds data relating to a single source, such as a specific species
     at a certain height on a specific instrument
     """
