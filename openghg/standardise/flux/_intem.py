@@ -3,11 +3,10 @@ import warnings
 
 from openghg.util import timestamp_now, open_nc_fn
 from openghg.store import infer_date_range
-from openghg.types import multiPathType
 
 
 def parse_intem(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     chunks: dict,

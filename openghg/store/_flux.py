@@ -8,7 +8,7 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import pathType, multiPathType
+from openghg.types import pathType
 from openghg.util import synonyms
 
 from xarray import DataArray, Dataset
@@ -59,7 +59,7 @@ class Flux(BaseStore):
 
     def read_file(
         self,
-        filepath: multiPathType,
+        filepath: str | Path | list[str | Path],
         species: str,
         source: str,
         domain: str,

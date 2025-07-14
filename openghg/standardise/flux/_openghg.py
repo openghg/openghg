@@ -4,11 +4,10 @@ import warnings
 from openghg.util import timestamp_now, open_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.standardise.meta import assign_flux_attributes
-from openghg.types import multiPathType
 
 
 def parse_openghg(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,

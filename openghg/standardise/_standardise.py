@@ -193,7 +193,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -291,7 +291,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     bc_input: str,
     domain: str,
@@ -376,7 +376,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     model: str,
     domain: str,
     site: str | None = None,
@@ -520,7 +520,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,
@@ -622,7 +622,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     model: str,
     species: str,
     source_format: str = "openghg",

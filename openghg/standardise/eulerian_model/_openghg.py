@@ -1,8 +1,8 @@
 import logging
+from pathlib import Path
 from pandas import Timestamp as pd_Timestamp
 
 from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_nc_fn
-from openghg.types import multiPathType
 
 
 logger = logging.getLogger("openghg.standardise.eulerian_model")
@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     model: str,
     species: str,
     start_date: str | None = None,

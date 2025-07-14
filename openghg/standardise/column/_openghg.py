@@ -1,12 +1,12 @@
+from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
 
-from openghg.types import multiPathType
 from openghg.util import open_nc_fn
 
 
 def parse_openghg(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,

@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 import xarray as xr
 
-from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
+from openghg.types import pathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
 
 __all__ = [
@@ -252,8 +252,8 @@ def get_logfile_path() -> Path:
 
 
 def open_nc_fn(
-    filepath: multiPathType, realign_on_domain: str | None = None, sel_month: bool = False
-) -> tuple[Callable, multiPathType]:
+    filepath: str | Path | list[str | Path], realign_on_domain: str | None = None, sel_month: bool = False
+) -> tuple[Callable, str | Path | list[str | Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset

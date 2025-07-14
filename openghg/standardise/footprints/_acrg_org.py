@@ -12,14 +12,14 @@ from openghg.util import (
     open_nc_fn,
 )
 from openghg.store import infer_date_range, update_zero_dim
-from openghg.types import multiPathType, ParseError
+from openghg.types import ParseError
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_acrg_org(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     domain: str,
     model: str,
     inlet: str,

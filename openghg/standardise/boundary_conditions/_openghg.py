@@ -3,14 +3,13 @@ from pathlib import Path
 
 from openghg.util import clean_string, timestamp_now, synonyms, open_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
-from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     species: str,
     bc_input: str,
     domain: str,
