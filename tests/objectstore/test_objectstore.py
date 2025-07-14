@@ -1,16 +1,16 @@
-from typing import Any, Dict, List
+from typing import Any, TypeVar
 
 import pytest
 import tinydb
 
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
-from openghg.objectstore._datasource import InMemoryDatasource, DatasourceFactory
+from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
 from openghg.objectstore._objectstore import ObjectStore
 from openghg.types import ObjectStoreError
 
 
-MetaData = Dict[str, Any]
-QueryResults = List[Any]
+MetaData = dict[str, Any]
+QueryResults = list[Any]
 UUID = str
 Data = Any
 
@@ -28,8 +28,48 @@ def metastore(tmp_path):
         yield metastore
 
 
+T = TypeVar("T", bound="InMemoryDatasource")
+
+
+class InMemoryDatasource(AbstractDatasource):
+    """Minimal class implementing the Datasource interface."""
+
+    datasources: dict[UUID, list[Data]] = {}
+
+    def __init__(self, uuid: UUID, data: list[Data] | None = None, **kwargs: Any) -> None:
+        super().__init__(uuid)
+        if data:
+            self.data: list[Data] = data
+        else:
+            self.data: list[Data] = []
+
+    @classmethod
+    def load(cls: type[T], uuid: UUID) -> T:
+        try:
+            data = cls.datasources[uuid]
+        except KeyError:
+            raise LookupError(f"No datasource with UUID {uuid} found.")
+        else:
+            return cls(uuid, data)
+
+    def add(self, data: Data) -> None:
+        self.data.append(data)
+
+    def delete(self) -> None:
+        self.data = []
+        del InMemoryDatasource.datasources[self.uuid]
+
+    def save(self) -> None:
+        InMemoryDatasource.datasources[self.uuid] = self.data
+
+
 @pytest.fixture
 def objectstore(metastore):
+    """Create ObjectStore with simple fake Datasource.
+
+    InMemoryDatasource is used for unit testing ObjectStore
+    without needed to setup or mock a "real" Datasoure.
+    """
     yield ObjectStore[InMemoryDatasource](
         metastore, DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
     )

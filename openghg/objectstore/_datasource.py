@@ -88,38 +88,3 @@ class AbstractDatasource(ABC):
     def save(self) -> None:
         """Save changes to datasource made by `add` method."""
         pass
-
-
-T = TypeVar("T", bound="InMemoryDatasource")
-
-
-class InMemoryDatasource(AbstractDatasource):
-    """Minimal class implementing the Datasource interface."""
-
-    datasources: dict[UUID, list[Data]] = {}
-
-    def __init__(self, uuid: UUID, data: list[Data] | None = None, **kwargs: Any) -> None:
-        super().__init__(uuid)
-        if data:
-            self.data: list[Data] = data
-        else:
-            self.data: list[Data] = []
-
-    @classmethod
-    def load(cls: type[T], uuid: UUID) -> T:
-        try:
-            data = cls.datasources[uuid]
-        except KeyError:
-            raise LookupError(f"No datasource with UUID {uuid} found.")
-        else:
-            return cls(uuid, data)
-
-    def add(self, data: Data) -> None:
-        self.data.append(data)
-
-    def delete(self) -> None:
-        self.data = []
-        del InMemoryDatasource.datasources[self.uuid]
-
-    def save(self) -> None:
-        InMemoryDatasource.datasources[self.uuid] = self.data
