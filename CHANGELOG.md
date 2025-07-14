@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
 
 ### Updated
-- Updated temporary path creation to have user specific folder.[PR #]()
+- Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
+
 ## [0.15.0] - 2025-07-02
 
 ### Added
