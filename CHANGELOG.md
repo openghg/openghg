@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
 
+### Fixed
+
+- Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
+
 ## [0.15.0] - 2025-07-02
 
 ### Added
@@ -34,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing reference to mf_mod while plotting in the tutorial.[PR #1365](https://github.com/openghg/openghg/pull/1365)
 - Made call to `.load` in `combine_datasets` optional. [PR #1371](https://github.com/openghg/openghg/pull/1371)
 - Fixed bug where `force` keyword was not being used correctly for `standardise_surface` and wasn't allowing the same data to be added again. [PR #1374](https://github.com/openghg/openghg/pull/1374)
-- Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
 
 ## [0.14.0] - 2025-04-16
 
