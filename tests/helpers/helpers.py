@@ -1,5 +1,5 @@
 """Some helper functions for things we do in tests frequently"""
-
+import getpass
 import shutil
 import tempfile
 from pathlib import Path
@@ -9,12 +9,15 @@ from typing import Dict, List, Union
 def temporary_store_paths() -> Dict[str, Path]:
     # Add some uppercasing and numbers here to enusure paths work
     # with other characters - see https://github.com/openghg/openghg/issues/701
-    return {
-        "user": Path(tempfile.gettempdir(), "openghg_testing-STORE_123"),
-        "group": Path(tempfile.gettempdir(), "openghg_testing_group_store"),
-        "shared": Path(tempfile.gettempdir(), "openghg_testing_shared_store"),
-    }
+    user = getpass.getuser()  # get current system user
 
+    base_tmp = Path(tempfile.gettempdir()) / f"openghg-testing-{user}"
+
+    return {
+        "user": base_tmp / f"openghg_testing-STORE_123",
+        "group": base_tmp / f"openghg_testing_group_store",
+        "shared": base_tmp / f"openghg_testing_shared_store",
+    }
 
 def clear_test_store(name: str) -> None:
     """Clear one of the testing object stores
