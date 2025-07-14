@@ -622,7 +622,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path,
+    filepath: multiPathType,
     model: str,
     species: str,
     source_format: str = "openghg",
