@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 from openghg.store.spec import define_standardise_parsers
-
+from openghg.types import pathType
 
 __all__ = ["BoundaryConditions"]
 
@@ -64,7 +64,7 @@ class BoundaryConditions(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: pathType,
         species: str,
         bc_input: str,
         domain: str,

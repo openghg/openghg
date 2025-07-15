@@ -15,7 +15,7 @@ from openghg.util import clean_string, format_inlet
 
 
 def parse_agage(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     network: str,
     inlet: str | None = None,

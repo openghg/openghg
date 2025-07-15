@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.types import pathType
 from openghg.util import synonyms, align_lat_lon
 
 from xarray import DataArray, Dataset
@@ -58,7 +59,7 @@ class Flux(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: pathType,
         species: str,
         source: str,
         domain: str,
@@ -197,8 +198,6 @@ class Flux(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        parser_input_parameters["data_type"] = self._data_type
-
         flux_data = parser_fn(**parser_input_parameters)
 
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
@@ -232,7 +231,7 @@ class Flux(BaseStore):
 
     def transform_data(
         self,
-        datapath: str | Path,
+        datapath: pathType,
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",

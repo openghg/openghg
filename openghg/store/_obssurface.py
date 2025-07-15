@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Any, MutableSequence, cast
+from typing import Any, MutableSequence
 from collections.abc import Sequence
 
 import numpy as np
@@ -220,7 +220,6 @@ class ObsSurface(BaseStore):
             format_platform,
             evaluate_sampling_period,
             check_and_set_null_variable,
-            hash_file,
             load_standardise_parser,
             verify_site,
             check_if_need_new_version,
@@ -311,49 +310,51 @@ class ObsSurface(BaseStore):
             chunks = {}
 
         if not isinstance(filepath, list):
-            filepaths = [filepath]
+            filepaths_to_check = [filepath]
         else:
-            filepaths = filepath
+            filepaths_to_check = filepath
+
+        filepaths: list[Path] = []
+        precision_filepaths: list[Path] = []
+        for fp in filepaths_to_check:
+            if isinstance(fp, tuple):
+                if source_format.lower() != "gcwerks":
+                    raise TypeError(
+                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
+                    )
+                filepaths.append(Path(fp[0]))
+                precision_filepaths.append(Path(fp[1]))
+            else:
+                if source_format.lower() == "gcwerks":
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+                filepaths.append(Path(fp))
+
+        # Check hashes of previous files (included after any filepath(s) formatting)
+        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
+
+        if not unseen_hashes:
+            return [{}]
+
+        filepaths = list(unseen_hashes.values())
+
+        if not filepaths:
+            return [{}]
 
         # Get current parameter values and filter to only include function inputs
         current_parameters = locals().copy()
         fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
 
         # Create a progress bar object using the filepaths, iterate over this below
-        for fp in filepaths:
-            if source_format == "GCWERKS":
-                if isinstance(fp, tuple):
-                    filepath = Path(fp[0])
-                    precision_filepath = Path(fp[1])
-                else:
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
-            else:
-                filepath = fp
-
-            # Cast so it's clear we no longer expect a tuple
-            filepath = cast(str | Path, filepath)
-            filepath = Path(filepath)
+        for i, filepath in enumerate(filepaths):
 
             fn_input_parameters["filepath"] = filepath
+            if precision_filepaths:
+                fn_input_parameters["precision_filepath"] = precision_filepaths[i]
 
             # Define parameters to pass to the parser function and remaining keys
             parser_input_parameters, additional_input_parameters = split_function_inputs(
                 fn_input_parameters, parser_fn
             )
-
-            # This hasn't been updated to use the new check_hashes function due to
-            # the added complication of the GCWERKS precision file handling,
-            # so we'll just use the old method for now.
-            file_hash = hash_file(filepath=filepath)
-            if file_hash in self._file_hashes and overwrite is False and force is False:
-                logger.warning(
-                    "This file has been uploaded previously with the filename : "
-                    f"{self._file_hashes[file_hash]} - skipping."
-                )
-                continue
-
-            if source_format == "GCWERKS":
-                parser_input_parameters["precision_filepath"] = precision_filepath
 
             # Call appropriate standardisation function with input parameters
             data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
@@ -411,7 +412,7 @@ class ObsSurface(BaseStore):
 
             logger.info(f"Completed processing: {filepath.name}.")
 
-            self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return results
 
@@ -645,19 +646,6 @@ class ObsSurface(BaseStore):
                 datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
-
-    def store_hashes(self, hashes: dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function
-        Returns:
-            None
-        """
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
 
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes
