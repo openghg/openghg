@@ -1,4 +1,5 @@
-from typing import Any, TypeVar
+"""Unit tests for the ObjectStore class."""
+from typing import Any, ClassVar, TypeVar
 from typing_extensions import Self
 
 import pytest
@@ -30,9 +31,18 @@ def metastore(tmp_path):
 
 
 class InMemoryDatasource(AbstractDatasource):
-    """Minimal class implementing the Datasource interface."""
+    """Minimal class implementing the Datasource interface.
 
-    datasources: dict[UUID, list[Any]] = {}
+    The data stored by each instance of `InMemoryDatasource` is just a list.
+
+    There is a class variable `datasources`, which is a dict mapping UUIDs to the list
+    of data for the datasource with that UUID. This allows us to simulate loading data.
+
+    When data is added to InMemoryDatasource, it is just appended to that
+    datasource's list.
+    """
+
+    datasources: ClassVar[dict[UUID, list[Any]]] = {}
 
     def __init__(self, uuid: UUID, data: list[Any] | None = None, **kwargs: Any) -> None:
         super().__init__(uuid)
@@ -125,11 +135,15 @@ def test_create_many(objectstore, fake_metadata, fake_data):
 
 
 def test_update(objectstore, fake_metadata, fake_data):
+    """Test that we can update an existing Datasource."""
+    # create a datasource
     objectstore.create(fake_metadata[0], fake_data[0])
 
+    # update the data by uuid
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
     objectstore.update(uuid, data=fake_data[1])
 
+    # check that the new data has been appended (which is what we expect from InMemoryDatasource)
     data = objectstore.get_datasource(uuid).get_data()
 
     assert len(data) == 2
@@ -142,6 +156,11 @@ def test_update_raises_error_if_uuid_not_found(objectstore):
 
 
 def test_update_metadata(objectstore, fake_metadata, fake_data):
+    """Test that we can modify the metadata stored in the metastore.
+
+    NOTE: eventually, object store might return Datasource (or something like it),
+    in which case we would need to change the assertions in this test.
+    """
     objectstore.create(fake_metadata[0], fake_data[0])
 
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
@@ -154,13 +173,20 @@ def test_update_metadata(objectstore, fake_metadata, fake_data):
 
 
 def test_delete(objectstore, fake_metadata, fake_data):
+    """Check that deleting an entry in the object store clears metadata and datasource.
+
+    Note that we need to check that the uuid is not in the metastore and that the datasource
+    has been deleted separately, since these two actions are independent.
+    """
     objectstore.create(fake_metadata[0], fake_data[0])
 
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
     objectstore.delete(uuid)
 
-    assert len(objectstore.get_uuids()) == 0
+    # check that uuid is not in the object store (which means that it is not in the metastore)
+    assert uuid not in objectstore.uuids
 
+    # check that we can't load the datasource
     with pytest.raises(LookupError):
         # LookupError from trying to load data from UUID not found in InMemoryDatasource
         objectstore.get_datasource(uuid)
