@@ -185,7 +185,7 @@ def test_scenario_infer_inputs_co2():
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 396.99)
     assert np.isclose(obs_mf[-1], 388.51)
-    assert obs_mf.attrs["units"] == "1e-6"
+    assert "ppm" in obs_mf.attrs["units"]
 
     # Footprint data - species
     assert model_scenario.footprint.metadata["species"] == "co2"

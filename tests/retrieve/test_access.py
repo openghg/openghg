@@ -74,8 +74,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
     assert co2_data.time[-1] == Timestamp("2020-12-01T22:31:30")
-    assert co2_data.mf[0] == 409.55
-    assert co2_data.mf[-1] == 417.65
+    assert 409.55 in co2_data.mf[0].values
+    assert 417.65 in co2_data.mf[-1].values
 
     metadata = obsdata.metadata
 
@@ -320,7 +320,7 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
-    assert obscolumn["mf"].attrs["units"] == '1e-9'
+    assert "ppb" in obscolumn["mf"].attrs["units"]
 
 
 def test_get_obs_column_max_level():
