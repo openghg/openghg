@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 from typing import Any
 import warnings
-from openghg.objectstore._objectstore import open_object_store
+from openghg.objectstore import open_object_store
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError

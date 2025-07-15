@@ -20,7 +20,7 @@ from openghg.objectstore import (
     get_writable_bucket,
     set_object_from_json,
 )
-from openghg.objectstore._objectstore import get_datasource, open_object_store
+from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface

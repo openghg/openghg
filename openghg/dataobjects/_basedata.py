@@ -2,7 +2,7 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from openghg.objectstore._objectstore import get_datasource
+from openghg.objectstore import get_datasource
 import xarray as xr
 from pandas import Timestamp, Timedelta
 import logging

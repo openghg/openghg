@@ -2,7 +2,7 @@ import pytest
 from openghg.objectstore import integrity_check
 from openghg.standardise import standardise_flux, standardise_footprint
 from openghg.objectstore import get_writable_bucket
-from openghg.objectstore._objectstore import open_object_store
+from openghg.objectstore import open_object_store
 from openghg.types import ObjectStoreError
 from helpers import get_footprint_datapath, get_flux_datapath, clear_test_stores
 

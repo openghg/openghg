@@ -4,7 +4,7 @@ from helpers import get_column_datapath, clear_test_store, filt
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search_column
 from openghg.standardise import standardise_column
-from openghg.objectstore._objectstore import get_datasource
+from openghg.objectstore import get_datasource
 from pandas import Timestamp
 
 

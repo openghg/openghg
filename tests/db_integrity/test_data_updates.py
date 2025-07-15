@@ -10,7 +10,7 @@ from helpers import (
     get_surface_datapath,
 )
 from openghg.objectstore import get_writable_bucket
-from openghg.objectstore._objectstore import get_datasource, open_object_store
+from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
 from openghg.types import DataOverlapError

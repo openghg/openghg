@@ -5,7 +5,6 @@ import logging
 
 from openghg.objectstore import get_readable_buckets
 from openghg.objectstore._objectstore import open_object_store
-from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
 
 
@@ -24,6 +23,8 @@ def integrity_check(raise_error: bool = True) -> dict[str, dict[str, str]] | Non
         Nested dictionaries of failed datasource UUIDs, keyed by bucket and data type, if failures
         found, otherwise None.
     """
+    from openghg.store.spec import define_data_types  # avoid circular import
+
     # For now loop over each of the object stores, can we somehow lock the object store?
     readable_buckets = get_readable_buckets()
     data_types = define_data_types()

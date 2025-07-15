@@ -8,7 +8,7 @@ from helpers import (
 )
 from openghg.dataobjects import DataManager, data_manager
 from openghg.objectstore import get_writable_bucket, exists
-from openghg.objectstore._objectstore import open_object_store
+from openghg.objectstore import open_object_store
 from openghg.retrieve import search_surface, get_footprint
 from openghg.standardise import standardise_footprint, standardise_surface
 from openghg.types import ObjectStoreError
