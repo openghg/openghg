@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
 - Updated workflow of pypi release to follow trusted publisher management from pypi.[PR #1402](https://github.com/openghg/openghg/pull/1401)
-- Updated temporary path creation to have user specific folder. [PR #1396](https://github.com/openghg/openghg/pull/1396)
 
 ### Fixed
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
