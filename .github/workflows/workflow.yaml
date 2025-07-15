@@ -89,8 +89,8 @@ jobs:
           branch: gh-pages
           folder: "doc/build/html"
           clean: true
-          
-  publish-to-testpypi:
+
+  release_testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
     - build
