@@ -1,3 +1,4 @@
+
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
@@ -451,6 +452,14 @@ def test_read_footprint_short_lived():
         (
             "mhd",
             "10m",
+            "NAME",
+            "ukv",
+            "2015-02-01 00:00:00+00:00",
+            "2015-02-01 00:59:59+00:00",
+            "MHD-10magl_NAME_UKV_TEST_co2_PARIS-format_201502.nc",
+        ),        (
+            "mhd",
+            "10m",
             "FLEXPART",
             "ecmwfhres",
             "2018-09-02 00:00:00+00:00",
@@ -471,10 +480,13 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
     source_format = "paris"
     domain = "test"
 
+    fp_species = "co2" if "co2" in filename else None
+
     standardise_footprint(
         store="user",
         filepath=datapath,
         site=site,
+        species=fp_species,
         model=model,
         met_model=met_model,
         inlet=inlet,
