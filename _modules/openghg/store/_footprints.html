@@ -60,7 +60,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 03, 2025"/>
+    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
   </head>
   
   
@@ -337,13 +337,13 @@
   <h1>Source code for openghg.store._footprints</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkingSchema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_species_lifetime</span><span class="p">,</span> <span class="n">check_species_time_resolved</span><span class="p">,</span> <span class="n">synonyms</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 
@@ -532,7 +532,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filepath</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -737,6 +737,7 @@
             <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
             <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
             <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
+            <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">chunks</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rechunking with chunks=</span><span class="si">{</span><span class="n">chunks</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -961,6 +962,7 @@
             <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
             <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
             <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
+            <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
@@ -973,6 +975,7 @@
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChunkingSchema</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get chunking schema for footprint data.</span>
@@ -1000,7 +1003,7 @@
             <span class="p">)</span>
             <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
         <span class="k">if</span> <span class="n">time_resolved</span><span class="p">:</span>
-            <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;fp_HiTRes&quot;</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;PARIS&quot;</span><span class="p">,</span> <span class="s2">&quot;FLEXPART&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;fp_time_resolved&quot;</span>
             <span class="n">time_chunk_size</span> <span class="o">=</span> <span class="mi">24</span>
             <span class="n">secondary_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;H_back&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>

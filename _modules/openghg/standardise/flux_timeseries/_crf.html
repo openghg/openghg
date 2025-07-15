@@ -60,7 +60,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 03, 2025"/>
+    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
   </head>
   
   
@@ -335,15 +335,17 @@
                 <article class="bd-article">
                   
   <h1>Source code for openghg.standardise.flux_timeseries._crf</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">infer_date_range</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">pathType</span>
 
 
 <div class="viewcode-block" id="parse_crf">
 <a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.flux_timeseries.parse_crf">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_crf</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;anthro&quot;</span><span class="p">,</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
@@ -379,6 +381,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">timestamp_now</span>
+
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="c1"># Dictionary of species corresponding to sheet names</span>
     <span class="n">sheet_selector</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ch4&quot;</span><span class="p">:</span> <span class="s2">&quot;Table10s3&quot;</span><span class="p">,</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span> <span class="s2">&quot;Table10s1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2o&quot;</span><span class="p">:</span> <span class="s2">&quot;Table10s4&quot;</span><span class="p">,</span> <span class="s2">&quot;hfc&quot;</span><span class="p">:</span> <span class="s2">&quot;Table10s5&quot;</span><span class="p">}</span>

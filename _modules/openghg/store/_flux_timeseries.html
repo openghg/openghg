@@ -60,7 +60,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 03, 2025"/>
+    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
   </head>
   
   
@@ -348,6 +348,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">pathType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FluxTimeseries&quot;</span><span class="p">]</span>
 
@@ -395,7 +396,7 @@
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.FluxTimeseries.read_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">region</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>

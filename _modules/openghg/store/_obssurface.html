@@ -60,7 +60,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 03, 2025"/>
+    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
   </head>
   
   
@@ -338,7 +338,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -564,7 +564,6 @@
             <span class="n">format_platform</span><span class="p">,</span>
             <span class="n">evaluate_sampling_period</span><span class="p">,</span>
             <span class="n">check_and_set_null_variable</span><span class="p">,</span>
-            <span class="n">hash_file</span><span class="p">,</span>
             <span class="n">load_standardise_parser</span><span class="p">,</span>
             <span class="n">verify_site</span><span class="p">,</span>
             <span class="n">check_if_need_new_version</span><span class="p">,</span>
@@ -655,49 +654,51 @@
             <span class="n">chunks</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
+            <span class="n">filepaths_to_check</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">filepaths</span> <span class="o">=</span> <span class="n">filepath</span>
+            <span class="n">filepaths_to_check</span> <span class="o">=</span> <span class="n">filepath</span>
+
+        <span class="n">filepaths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">precision_filepaths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepaths_to_check</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = </span><span class="si">{</span><span class="n">source_format</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">filepaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">precision_filepaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data we expect a tuple of (data file, precision file).&quot;</span><span class="p">)</span>
+                <span class="n">filepaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span>
+
+        <span class="c1"># Check hashes of previous files (included after any filepath(s) formatting)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">unseen_hashes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_hashes</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unseen_hashes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[{}]</span>
+
+        <span class="n">filepaths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filepaths</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[{}]</span>
 
         <span class="c1"># Get current parameter values and filter to only include function inputs</span>
         <span class="n">current_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">current_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fn_input_parameters</span><span class="p">}</span>
 
         <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
-        <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepaths</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data we expect a tuple of (data file, precision file).&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">filepath</span> <span class="o">=</span> <span class="n">fp</span>
-
-            <span class="c1"># Cast so it&#39;s clear we no longer expect a tuple</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filepaths</span><span class="p">):</span>
 
             <span class="n">fn_input_parameters</span><span class="p">[</span><span class="s2">&quot;filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span>
+            <span class="k">if</span> <span class="n">precision_filepaths</span><span class="p">:</span>
+                <span class="n">fn_input_parameters</span><span class="p">[</span><span class="s2">&quot;precision_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision_filepaths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
             <span class="c1"># Define parameters to pass to the parser function and remaining keys</span>
             <span class="n">parser_input_parameters</span><span class="p">,</span> <span class="n">additional_input_parameters</span> <span class="o">=</span> <span class="n">split_function_inputs</span><span class="p">(</span>
                 <span class="n">fn_input_parameters</span><span class="p">,</span> <span class="n">parser_fn</span>
             <span class="p">)</span>
-
-            <span class="c1"># This hasn&#39;t been updated to use the new check_hashes function due to</span>
-            <span class="c1"># the added complication of the GCWERKS precision file handling,</span>
-            <span class="c1"># so we&#39;ll just use the old method for now.</span>
-            <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">force</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
-                <span class="p">)</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
-                <span class="n">parser_input_parameters</span><span class="p">[</span><span class="s2">&quot;precision_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision_filepath</span>
 
             <span class="c1"># Call appropriate standardisation function with input parameters</span>
             <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetadataAndData</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
@@ -755,7 +756,7 @@
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
 
@@ -1001,22 +1002,6 @@
                 <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datasource_uuid</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
-
-
-<div class="viewcode-block" id="ObsSurface.store_hashes">
-<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
-<span class="sd">        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we&#39;ve</span>
-<span class="sd">        seen before and adds the new.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            hashes: Dictionary of hashes provided by the hash_retrieved_data function</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ObsSurface.delete">
