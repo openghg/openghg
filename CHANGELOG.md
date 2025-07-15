@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 - Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
+- Updated workflow of pypi release to follow trusted publisher management from pypi.[PR #1402](https://github.com/openghg/openghg/pull/1401)
 
 ## [0.15.0] - 2025-07-02
 
