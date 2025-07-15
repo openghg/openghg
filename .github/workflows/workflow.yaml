@@ -95,11 +95,10 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     environment:
       name: testpypi
       url: https://test.pypi.org/p/openghg
-
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
