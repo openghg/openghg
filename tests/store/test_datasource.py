@@ -1,7 +1,5 @@
 import datetime
-import os
 import uuid
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,7 +10,7 @@ from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
 from openghg.objectstore import Datasource
 from openghg.types import ObjectStoreError, ZarrStoreError
-from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
+from openghg.util import create_daterange_str, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
@@ -151,7 +149,7 @@ def test_add_data(data, datasource):
     assert d.metadata().items() >= expected_metadata.items()
 
 
-def test_versioning(capfd, bucket, datasource):
+def test_versioning(datasource):
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     detailed_tac_filepath = get_surface_datapath(
         filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
@@ -217,7 +215,6 @@ def test_replace_version(bucket):
     d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
     # Save initial data
-    bucket = get_bucket()
     d.save()
 
     detailed_data = parse_crds(filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
@@ -261,8 +258,7 @@ def test_get_dataframe_daterange(bucket):
     assert end == pd.Timestamp("1970-04-10 01:01:00+0000")
 
 
-def test_save(mock_uuid2, bucket):
-    bucket = get_bucket()
+def test_save(bucket):
 
     datasource = Datasource(uuid="abc123", bucket=bucket)
     datasource.add_metadata_key(key="data_type", value="surface")
@@ -278,9 +274,6 @@ def test_save_footprint(bucket, datasource):
 
     data = xr.open_dataset(filepath)
 
-    bucket = get_bucket()
-
-    #datasource = Datasource(uuid="abc123", bucket=bucket)
     datasource.add_data(
         data=data, metadata=metadata, sort=False, drop_duplicates=False, data_type="footprints"
     )
@@ -483,8 +476,8 @@ def test_data_version_deletion(data, bucket):
         d._store.keys(version="v1")
 
 
-def test_surface_data_stored_and_dated_correctly(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_surface_data_stored_and_dated_correctly(data, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -493,7 +486,6 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
 
     start, end = d.daterange()
 
-    stored_ds = d.get_data(version="v1")
     with d.get_data(version="v1") as stored_ds:
         assert stored_ds.equals(ch4_data)
 
@@ -516,7 +508,7 @@ def test_to_memory_store(data, datasource):
         assert ds.equals(ch4_data)
 
 
-def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps, datasource):
+def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
