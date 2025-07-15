@@ -32,6 +32,7 @@ from ._file import (
     load_transform_parser,
     read_header,
     open_nc_fn,
+    open_time_nc_fn,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string

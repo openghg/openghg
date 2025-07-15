@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 from collections.abc import Callable
-
+import numpy as np
 import xarray as xr
 
-from openghg.types import pathType, convert_to_list_of_metadata_and_data
+from openghg.types import pathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
 from openghg.util import align_lat_lon
 
 __all__ = [
@@ -24,6 +24,8 @@ __all__ = [
     "decompress_str",
     "compress_json",
     "decompress_json",
+    "open_nc_fn",
+    "open_time_nc_fn",
 ]
 
 
@@ -251,8 +253,40 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
+def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> XrDataLikeMatch:
+    """
+    Check coordinates are present and registering correctly as 1D dimensions within an xarray Dataset. This is to account for cases
+    where a single value is present for a coordinate but this has been squeezed to zero dimensions meaning this is not registering as a dimension.
+    Args:
+        data: xarray data to be checked
+        coords: Name of coordinates to check. This can be a str, list or None.
+    Returns:
+        xr.Dataset / xr.DataArray: data with coordinates registered correctly
+    """
+
+    if coords is None:
+        return data
+    elif isinstance(coords, str):
+        coords = [coords]
+
+    for c in coords:
+        if c in data.dims:
+            continue
+        elif c in data:
+            data = data.expand_dims(c)
+        else:
+            msg = f"Expected coordinate: '{c}' is not present in the input dataset"
+
+            raise ValueError(msg)
+
+    return data
+
+
 def open_nc_fn(
-    filepath: str | Path | list[str | Path], realign_on_domain: str | None = None, sel_month: bool = False
+    filepath: str | Path | list[str | Path],
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = None,
 ) -> tuple[Callable, str | Path | list[str | Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -264,24 +298,33 @@ def open_nc_fn(
         realign_on_domain: When present, realign the data on the given domain. Option usable
             when opening footprints, flux or boundary conditions data but not observations or flux_timeseries.
         sel_month : when present keep only one month of data
+        check_coords: Check whether expected coordinates are present and registered correctly as 1D dimensions in the netcdf files.
+            Default = None.
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
 
-    if sel_month:
-        import numpy as np
-
-        def select_time(x: xr.Dataset) -> xr.Dataset:
-            # WARNING : designed for a specific case where a day from another month was present
-            # in a monthly file (concerns file from an old NAME_processing version).
-            # Not designed for a general case.
-            month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
-            start_date = month.astype("datetime64[D]")
-            end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
-            return x.sel(time=slice(start_date, end_date))
-
     def process(x: xr.Dataset) -> xr.Dataset:
+        """
+        Apply appropriate process functions for the provided dataset.
+
+        Returns:
+            xarray.Dataset: updated Dataset with appropriate pre-processing applied.     
+        """
+        if sel_month:
+            def select_time(x: xr.Dataset) -> xr.Dataset:
+                # WARNING : designed for a specific case where a day from another month was present
+                # in a monthly file (concerns file from an old NAME_processing version).
+                # Not designed for a general case.
+                month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+                start_date = month.astype("datetime64[D]")
+                end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
+                return x.sel(time=slice(start_date, end_date))
+
+        if check_coords:
+            x = check_coords_nc(x, coords=check_coords)
+
         if realign_on_domain and sel_month:
             return align_lat_lon(select_time(x), realign_on_domain)
         elif realign_on_domain:
@@ -292,7 +335,6 @@ def open_nc_fn(
             return x
 
     if isinstance(filepath, list):
-
         if len(filepath) > 1:
             xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process)
             return xr_open_fn_1, filepath
@@ -304,3 +346,24 @@ def open_nc_fn(
         return process(xr.open_dataset(x))
 
     return xr_open_fn_2, filepath
+
+
+def open_time_nc_fn(
+    filepath: str | Path | list[str | Path],
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = "time",
+) -> tuple[Callable, str | Path | list[str | Path]]:
+    """
+    Check the filepath input to choose which xarray open function to use:
+     - Path or single item List - use open_dataset
+     - multiple item List - use open_mfdataset
+
+    This function is a wrapper for open_nc_fn() to include appropriate default checks for data which contains a time axis. See open_nc_fn() for full details.
+    """
+    return open_nc_fn(
+        filepath=filepath,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
+    )
