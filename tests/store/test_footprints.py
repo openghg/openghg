@@ -10,6 +10,8 @@ import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
 
+from tests.helpers.helpers import print_dict_diff
+
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
 def test_read_footprint_co2_from_data(mocker):
@@ -478,15 +480,17 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
     datapath = get_footprint_datapath(filename)
 
     source_format = "paris"
-    domain = "test"
+    domain = "europe" if "co2" in filename else "test"
 
     fp_species = "co2" if "co2" in filename else None
+    period = "1 hour" if "co2" in filename else None
 
     standardise_footprint(
         store="user",
         filepath=datapath,
         site=site,
         species=fp_species,
+        period=period,
         model=model,
         met_model=met_model,
         inlet=inlet,
@@ -495,7 +499,7 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
     )
 
     # Get the footprints data
-    footprint_results = search(site=site, domain=domain, model=model, data_type="footprints")
+    footprint_results = search(site=site, domain=domain, model=model, data_type="footprints", species=fp_species)
 
     footprint_obs = footprint_results.retrieve_all()
     footprint_data = footprint_obs.data
@@ -505,7 +509,11 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
     footprint_coords.sort()
-    assert footprint_coords == ["height", "lat", "lon", "time"]
+
+    if fp_species is None:
+        assert footprint_coords == ["height", "lat", "lon", "time"]
+    else:
+        assert footprint_coords == ["H_back", "height", "lat", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
 
@@ -530,6 +538,14 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
         "short_lifetime": "False",  # as above
         "time_period": "1 hour",
     }
+
+    if "co2" in filename:
+        expected_attrs["species"] = "co2"
+        expected_attrs["time_resolved"] = "True"
+        expected_attrs["max_longitude"] = 39.38
+        expected_attrs["min_longitude"] = -97.9
+        expected_attrs["max_latitude"] = 79.057
+        expected_attrs["min_latitude"] = 10.729
 
     assert footprint_data.attrs.items() >= expected_attrs.items()
 
