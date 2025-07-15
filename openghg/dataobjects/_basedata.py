@@ -2,7 +2,7 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from openghg.store.storage import LocalZarrStore
+from openghg.objectstore._objectstore import get_datasource
 import xarray as xr
 from pandas import Timestamp, Timedelta
 import logging
@@ -51,9 +51,10 @@ class _BaseData:
         self.metadata = metadata
         self._uuid = uuid
 
+        self._data_type = self.metadata.get("data_type")
+
         self._start_date = start_date
         self._end_date = end_date
-        self._zarrstore = None
 
         if elevate_inlet:
             raise NotImplementedError("elevate_inlet not implemented yet")
@@ -77,9 +78,11 @@ class _BaseData:
             self._version = version
             self._bucket = metadata["object_store"]
 
-            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+            datasource = get_datasource(bucket=self._bucket, uuid=uuid, data_type=self._data_type)
 
-            self.data = self._zarrstore.get(version=version)
+            version = version or "latest"  # can't pass version=None to Datasource.get_data
+            self.data = datasource.get_data(version=version)
+
             if slice_time:
                 # If slicing by time, this must be sorted along the time dimension
                 if sort is False:
