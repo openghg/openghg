@@ -90,6 +90,11 @@ class ObjectStore(Generic[DatasourceT, T]):
         results = self.metastore.search(metadata)
         return [result["uuid"] for result in results]
 
+    @property
+    def uuids(self) -> list[UUID]:
+        """UUIDs stored in ObjectStore."""
+        return self.get_uuids()
+
     def create(self, metadata: MetaData, data: T, **kwargs: Any) -> UUID:
         """Create a new datasource and store its metadata and UUID in the metastore.
 
@@ -218,6 +223,44 @@ def open_object_store(
         ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
         object_store = ObjectStore[Datasource, xr.Dataset](metastore=ms, datasource_factory=ds_factory)
         yield object_store
+
+
+def get_datasource(bucket: str, uuid: str, data_type: str | None = None) -> Datasource:
+    """Open Datasource with given bucket and uuid.
+
+    Passing the data type is slightly more efficient, but not necessary.
+
+    Args:
+        bucket: location of object store
+        uuid: uuid of Datasource
+        data_type: optional data type of Datasource
+
+    Returns:
+        specified Datasource
+
+    Raises:
+        ObjectStoreError: if no Datasource with the given UUID is found the
+        object store.
+
+    """
+    if data_type is not None:
+        with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
+            return objstore.get_datasource(uuid=uuid)
+    else:
+        # try iterating over all data types
+        from openghg.store.spec import define_data_types
+
+        for dtype in define_data_types():
+            try:
+                with open_object_store(bucket=bucket, data_type=dtype, mode="r") as objstore:
+                    result = objstore.get_datasource(uuid=uuid)
+            except ObjectStoreError:
+                continue
+            else:
+                return result
+
+    # search over all data types failed
+    raise ObjectStoreError(f"Datasource with uuid {uuid} not found in bucket {bucket}.")
 
 
 # Object store with locks

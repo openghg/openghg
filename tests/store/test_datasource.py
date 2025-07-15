@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from addict import Dict as aDict
 from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds

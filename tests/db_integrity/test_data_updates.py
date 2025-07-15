@@ -10,10 +10,9 @@ from helpers import (
     get_surface_datapath,
 )
 from openghg.objectstore import get_writable_bucket
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore._objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
-from openghg.objectstore import Datasource
 from openghg.types import DataOverlapError
 
 
@@ -381,8 +380,8 @@ def test_obs_data_read_data_diff():
 
     bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource.load(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource.load(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = get_datasource(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = get_datasource(uuid=uuid_n2o, bucket=bucket)
 
     assert d_sf6._latest_version == "v2"
     assert d_n2o._latest_version == "v2"
@@ -470,8 +469,8 @@ def test_obs_data_read_data_overwrite_version():
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
     bucket = get_writable_bucket(name="user")
-    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
+    d_sf6 = get_datasource(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = get_datasource(bucket=bucket, uuid=uuid_n2o)
 
     assert d_sf6._latest_version == "v1"
     assert d_n2o._latest_version == "v1"
@@ -604,8 +603,8 @@ def test_obs_data_read_two_frequencies():
 
     bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource.load(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource.load(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = get_datasource(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = get_datasource(uuid=uuid_co_minutely, bucket=bucket)
 
     assert d_co_hourly._latest_version == "v1"
     assert d_co_minutely._latest_version == "v1"
@@ -653,13 +652,13 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(if_exists="new")
 
-    with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = metastore.select("uuid")
+    with open_object_store(bucket=bucket, data_type="surface") as objstore:
+        uuids = objstore.uuids
 
-    datasources = []
-    for uuid in uuids:
-        datasource = Datasource(bucket=bucket, uuid=uuid)
-        datasources.append(datasource)
+        datasources = []
+        for uuid in uuids:
+            datasource = objstore.get_datasource(uuid=uuid)
+            datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]
     one_species_data = data[0]

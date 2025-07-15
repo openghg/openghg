@@ -1,12 +1,11 @@
 from collections import defaultdict
+from collections.abc import MutableMapping
 import copy
 import logging
-from typing import MutableMapping
 
 import zarr
 
-from openghg.objectstore import Datasource
-from openghg.objectstore._objectstore import locking_object_store, LockingObjectStoreType
+from openghg.objectstore._objectstore import get_datasource, locking_object_store, LockingObjectStoreType
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
 
@@ -280,9 +279,7 @@ class DataManager:
         for u, v in zip(uuid, version):
             updated = False
 
-            # TODO: make this go through object store
-            # need to be able to get object store without passing data type...
-            d = Datasource.load(bucket=self._bucket, uuid=u)
+            d = get_datasource(bucket=self._bucket, uuid=u)
 
             if v == "latest":
                 v = d._latest_version
