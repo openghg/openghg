@@ -53,6 +53,9 @@ class InMemoryDatasource(AbstractDatasource):
     def add(self, data: Any) -> None:
         self.data.append(data)
 
+    def get_data(self) -> Any:
+        return self.data
+
     def delete(self) -> None:
         self.data = []
         del InMemoryDatasource.datasources[self.uuid]
@@ -98,7 +101,7 @@ def test_create(objectstore, fake_metadata, fake_data):
 def test_create_and_retrieve(objectstore, fake_metadata, fake_data):
     objectstore.create(fake_metadata[0], fake_data[0])
     uuid = objectstore.get_uuids()[0]
-    data = objectstore.get_datasource(uuid).data
+    data = objectstore.get_datasource(uuid).get_data()
 
     assert data == [0]
 
@@ -127,7 +130,7 @@ def test_update(objectstore, fake_metadata, fake_data):
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
     objectstore.update(uuid, data=fake_data[1])
 
-    data = objectstore.get_datasource(uuid).data
+    data = objectstore.get_datasource(uuid).get_data()
 
     assert len(data) == 2
     assert data == fake_data[:2]

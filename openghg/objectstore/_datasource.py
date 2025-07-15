@@ -82,6 +82,15 @@ class AbstractDatasource(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    def get_data(self, *args, **kwargs: Any) -> T:
+        """Get data from the datasource.
+
+        TODO: add `overwrite` argument, with expected error type
+        if trying to overwrite data without saying so.
+        """
+        pass
+
+    @abstractmethod
     def delete(self) -> None:
         """Delete all of the data stored by this datasource."""
         pass
