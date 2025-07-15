@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 import logging
 from openghg.store.base import BaseStore
+from openghg.types import pathType
 from openghg.util import load_standardise_parser, split_function_inputs
 
 logger = logging.getLogger("openghg.store")
@@ -29,7 +30,7 @@ class EulerianModel(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: pathType,
         model: str,
         species: str,
         source_format: str = "openghg",

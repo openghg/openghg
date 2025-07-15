@@ -1,13 +1,14 @@
 from pathlib import Path
 import warnings
 
+from openghg.types import pathType
+
 
 def parse_intem(
-    filepath: Path,
+    filepath: pathType,
     species: str,
     source: str,
     chunks: dict,
-    data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",
     period: str | tuple | None = None,
@@ -26,7 +27,6 @@ def parse_intem(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
-        data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
@@ -39,6 +39,8 @@ def parse_intem(
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
     from xarray import open_dataset
+
+    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -74,7 +76,6 @@ def parse_intem(
 
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = data_type
     metadata["source_format"] = "openghg"
     metadata["time_resolution"] = "high" if time_resolved else "standard"
     dataset_time = emissions_dataset["time"]

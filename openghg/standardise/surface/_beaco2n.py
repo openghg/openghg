@@ -1,12 +1,14 @@
 from pathlib import Path
-
 from pandas import DataFrame
+
+from openghg.types import pathType
+
 
 __all__ = ["parse_beaco2n"]
 
 
 def parse_beaco2n(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     network: str,
     inlet: str,

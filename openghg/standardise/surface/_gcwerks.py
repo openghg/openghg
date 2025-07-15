@@ -5,7 +5,7 @@ from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
 
 
-def find_files(data_path: str | Path, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
+def find_files(data_path: pathType, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
     """A helper file to find GCWERKS data and precisions file in a given folder.
     It searches for .C files of the format macehead.19.C, looks for a precisions file
     named macehead.19.precions.C and if it exists creates a tuple for these files.
@@ -51,8 +51,8 @@ def find_files(data_path: str | Path, skip_str: str | list[str] = "sf6") -> list
 
 
 def parse_gcwerks(
-    filepath: str | Path,
-    precision_filepath: str | Path,
+    filepath: pathType,
+    precision_filepath: pathType,
     site: str,
     network: str,
     inlet: str | None = None,
