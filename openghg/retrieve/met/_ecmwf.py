@@ -5,6 +5,7 @@ import cdsapi  # type: ignore
 import numpy as np
 from typing import List, Tuple
 from openghg.util import get_site_info  # , timestamp_tzaware
+import pathlib
 
 import logging
 
@@ -21,10 +22,10 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-__all__ = ["retrieve_met", "test_cds_access"]
+__all__ = ["pull_met", "check_cds_access"]
 
 
-def test_cds_access() -> None:
+def check_cds_access() -> None:
     print(
         """To access data through the Copernicus API:
           (instructions: Follow the instructions here https://cds.climate.copernicus.eu/how-to-api)
@@ -39,18 +40,18 @@ def test_cds_access() -> None:
     except Exception as e:
         print("there was an error retrieving the client. check out the instructions")
         print(f"error: {e}")
+    else:
+        print("your client loaded successfully!")
 
-    print("your client loaded successfully!")
 
-
-def retrieve_met(
+def pull_met(
     site: str,
     network: str,
     years: str | list[str],
     variables: list[str] | None = None,
     save_path: str | None = None,
-) -> None:
-    """Retrieve METData data. Note that this function will only download a
+) -> List:
+    """Pull METData data and store on disc. Note that this function will only download a
     full year of data which may take some time.
 
     This function currently on retrieves data from the "reanalysis-era5-pressure-levels"
@@ -60,9 +61,9 @@ def retrieve_met(
         network: Network
         years: Year(s) of data required
         variables: List of variables to download
-        savepath: path to save the data to. If none, saves to openghg/metdata
+        save_path: path to save the data to. If none, saves to $HOME/metdata
     Returns:
-        None (data is downloaded to savepath)
+        list of paths of the downloaded files
     """
     # raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
     # from openghg.dataobjects import METData
@@ -108,11 +109,16 @@ def retrieve_met(
     else:
         years = sorted(years)
 
-    default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
-    save_path = default_save_path if save_path is None else save_path
-    assert os.path.isdir(
-        save_path
-    ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+    default_save_path = os.path.join(pathlib.Path.home(), "met_data")
+    if save_path is None:
+        save_path = default_save_path
+        os.makedirs(save_path, exist_ok=True)
+    else:
+        assert os.path.isdir(
+            save_path
+        ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+
+    dataset_savepaths = []
 
     # TODO - we might need to customise this further in the future to
     # request other types of weather data
@@ -142,11 +148,13 @@ def retrieve_met(
                 f"Met_{site}_{network}_{month}{year}.nc",
             )
 
+            dataset_savepaths.append(dataset_savepath)
+
             logger.info(f"Retrieving data for {site} and {month}/{year} to {dataset_savepath}")
 
             _ = cds_client.retrieve(name=dataset_name, request=request, target=dataset_savepath)
 
-    return None
+    return dataset_savepaths
 
     # We replace the date data with a start and end date here
     # start_date = str(timestamp_tzaware(f"{years[0]}-1-1"))
@@ -265,12 +273,10 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     Returns:
         list: List of desired pressures
     """
-    from openghg.util import load_json
+    from openghg.util import load_internal_json
 
-    path_to_json = os.path.join(
-        os.getcwd().split("openghg")[0], "openghg/openghg/data/ecmwf_dataset_info.json"
-    )
-    ecmwf_metadata = load_json(path_to_json)
+    ecwmf_info_file = "ecmwf_dataset_info.json"
+    ecmwf_metadata = load_internal_json(ecwmf_info_file)
     dataset_metadata = ecmwf_metadata["datasets"]
     valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
 
