@@ -878,8 +878,8 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
         time_point_difference = timestamps[1] - timestamps[0]
         total_seconds = time_point_difference.total_seconds()
 
-        hour = 3600.
-        day = hour * 24.
+        hour = 3600.0
+        day = hour * 24.0
 
         month_options = [28, 30, 31]
         min_month = min(month_options) * day
@@ -909,10 +909,10 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
                     inferred_period = f"YS"
                     break
             else:
-                inferred_period = f"{(total_seconds / day):.1f}D"            
+                inferred_period = f"{(total_seconds / day):.1f}D"
     else:
         inferred_period = pd.infer_freq(timestamps)
-    
+
     return inferred_period
 
 

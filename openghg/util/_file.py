@@ -310,9 +310,10 @@ def open_nc_fn(
         Apply appropriate process functions for the provided dataset.
 
         Returns:
-            xarray.Dataset: updated Dataset with appropriate pre-processing applied.     
+            xarray.Dataset: updated Dataset with appropriate pre-processing applied.
         """
         if sel_month:
+
             def select_time(x: xr.Dataset) -> xr.Dataset:
                 # WARNING : designed for a specific case where a day from another month was present
                 # in a monthly file (concerns file from an old NAME_processing version).
