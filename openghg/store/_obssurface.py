@@ -647,39 +647,6 @@ class ObsSurface(BaseStore):
 
         return datasource_uuids
 
-    def delete(self, uuid: str) -> None:
-        """Delete a Datasource with the given UUID
-
-        This function deletes both the record of the object store in he
-
-        Args:
-            uuid (str): UUID of Datasource
-        Returns:
-            None
-        """
-        from openghg.objectstore import delete_object
-        from openghg.store.base import Datasource
-
-        # Load the Datasource and get all its keys
-        # iterate over these keys and delete them
-        datasource = Datasource(bucket=self._bucket, uuid=uuid)
-
-        data_keys = datasource.raw_keys()
-
-        for version in data_keys:
-            key_data = data_keys[version]
-
-            for daterange in key_data:
-                key = key_data[daterange]
-                delete_object(bucket=self._bucket, key=key)
-
-        # Then delete the Datasource itself
-        key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        delete_object(bucket=self._bucket, key=key)
-
-        # Delete the UUID from the metastore
-        self._metastore.delete({"uuid": uuid})
-
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes
 
