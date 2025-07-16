@@ -271,6 +271,8 @@ def parse_icos_corso(
     if len(f_header) == 1:
         units = f_header[0].split(":")[1].lower().strip()
         metadata["units"] = units
+        if "per mil" in units:
+            metadata["units"] = "permil"
     else:
         raise ValueError("No unique MEASUREMENT UNIT in file header")
 
