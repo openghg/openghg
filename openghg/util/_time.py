@@ -897,7 +897,7 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
                 month_seconds = month * day
                 rounded_seconds = total_seconds / month_seconds
                 if np.isclose(rounded_seconds, 1):
-                    inferred_period = f"MS"
+                    inferred_period = "MS"
                     break
             else:
                 inferred_period = f"{(total_seconds / day):.1f}D"
@@ -906,7 +906,7 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
                 year_seconds = year * day
                 rounded_seconds = total_seconds / year_seconds
                 if np.isclose(rounded_seconds, 1):
-                    inferred_period = f"YS"
+                    inferred_period = "YS"
                     break
             else:
                 inferred_period = f"{(total_seconds / day):.1f}D"
