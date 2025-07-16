@@ -253,6 +253,16 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
+def _select_time(x: xr.Dataset) -> xr.Dataset:
+    # WARNING : designed for a specific case where a day from another month was present
+    # in a monthly file (concerns file from an old NAME_processing version).
+    # Not designed for a general case.
+    month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+    start_date = month.astype("datetime64[D]")
+    end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
+    return x.sel(time=slice(start_date, end_date))
+
+
 def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> XrDataLikeMatch:
     """
     Check coordinates are present and registering correctly as 1D dimensions within an xarray Dataset. This is to account for cases
@@ -312,26 +322,16 @@ def open_nc_fn(
         Returns:
             xarray.Dataset: updated Dataset with appropriate pre-processing applied.
         """
-        if sel_month:
-
-            def select_time(x: xr.Dataset) -> xr.Dataset:
-                # WARNING : designed for a specific case where a day from another month was present
-                # in a monthly file (concerns file from an old NAME_processing version).
-                # Not designed for a general case.
-                month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
-                start_date = month.astype("datetime64[D]")
-                end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
-                return x.sel(time=slice(start_date, end_date))
 
         if check_coords:
             x = check_coords_nc(x, coords=check_coords)
 
         if realign_on_domain and sel_month:
-            return align_lat_lon(select_time(x), realign_on_domain)
+            return align_lat_lon(_select_time(x), realign_on_domain)
         elif realign_on_domain:
             return align_lat_lon(x, realign_on_domain)
         elif sel_month:
-            return select_time(x)
+            return _select_time(x)
         else:
             return x
 
