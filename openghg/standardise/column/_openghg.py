@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
 
-from openghg.util import open_nc_fn
+from openghg.util import open_time_nc_fn
 
 
 def parse_openghg(
@@ -60,7 +60,7 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    xr_open_fn, filepath = open_nc_fn(filepath)
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
     data = xr_open_fn(filepath).chunk(chunks)
 

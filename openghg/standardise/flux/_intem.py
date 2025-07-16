@@ -1,7 +1,7 @@
 from pathlib import Path
 import warnings
 
-from openghg.util import timestamp_now, open_nc_fn
+from openghg.util import timestamp_now, open_time_nc_fn
 from openghg.store import infer_date_range
 
 
@@ -45,7 +45,7 @@ def parse_intem(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_nc_fn(filepath, domain)
+    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
 
     emissions_dataset = xr_open_fn(filepath).chunk(chunks)
 

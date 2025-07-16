@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from openghg.util import clean_string, timestamp_now, synonyms, open_nc_fn
+from openghg.util import clean_string, timestamp_now, synonyms, open_time_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
@@ -38,7 +38,7 @@ def parse_openghg(
     bc_input = clean_string(bc_input)
     domain = clean_string(domain)
 
-    xr_open_fn, filepath = open_nc_fn(filepath, domain)
+    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
 
     with xr_open_fn(filepath).chunk(chunks) as bc_data:
         # Some attributes are numpy types we can't serialise to JSON so convert them

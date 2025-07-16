@@ -9,7 +9,7 @@ from openghg.util import (
     check_species_time_resolved,
     check_species_lifetime,
     timestamp_now,
-    open_nc_fn,
+    open_nc_time_fn,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
@@ -69,7 +69,7 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_nc_fn(filepath, domain, sel_month=True)
+    xr_open_fn, filepath = open_nc_time_fn(filepath, domain, sel_month=True)
 
     fp_data = xr_open_fn(filepath)
 
