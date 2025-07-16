@@ -90,6 +90,7 @@ from ._time import (
     parse_period,
     dates_in_range,
     relative_time_offset,
+    infer_frequency,
     sanitise_daterange,
     split_daterange_str,
     split_encompassed_daterange,

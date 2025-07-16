@@ -1,7 +1,10 @@
 from datetime import date
 import logging
+import numpy as np
+import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
+
 import re
 
 from openghg.types import TimePeriod
@@ -842,6 +845,75 @@ def relative_time_offset(
         time_delta = time_offset(value, unit)
 
     return time_delta
+
+
+def infer_frequency(timestamps: DatetimeIndex) -> str | None:
+    """
+    For a series of timestamps, see if we can infer a consistent frequency. Must contain >= 2 time points.
+
+    For timestamps containing more than 2 values, this uses the pandas.infer_freq function.
+    For timestamps containing 2 values, the pandas.infer_freq function cannot be used and so this
+    is inferred manually as follows:
+        - If < 1 hour - returned as "{INT}s"
+        - If > 1 hour but < 1 day - returned as "{INT}h"
+        - If > 1 day but <~ 1 month - returned as "{1DP}D"
+        - If ~= 1 month in days (i.e. 28, 30 or 31 days) - returned as "MS"
+        - If ~= 1 year in days (i.e. 365, 366) - returned as "YS"
+        - Otherwise returns as "{1DP}D"
+
+    Args:
+        timestamps: DatetimeIndex of timestamp values
+    Returns:
+        str: A pandas frequency string for the inferred frequency
+        None: if no consistent frequency can be inferred a None will be returns
+    Raises:
+        ValueError: Less than 2 time points are present
+    """
+
+    timestamps = timestamps.sort_values()
+
+    if len(timestamps) < 2:
+        raise ValueError("Unable to infer frequency from <2 data points")
+    elif len(timestamps) == 2:
+        time_point_difference = timestamps[1] - timestamps[0]
+        total_seconds = time_point_difference.total_seconds()
+
+        hour = 3600.
+        day = hour * 24.
+
+        month_options = [28, 30, 31]
+        min_month = min(month_options) * day
+        year_options = [365, 366]
+        min_year = min(year_options) * day
+
+        if total_seconds < hour:
+            inferred_period: str | None = f"{int(total_seconds)}s"
+        elif total_seconds >= hour and total_seconds < day:
+            inferred_period = f"{int(total_seconds / hour)}h"
+        elif total_seconds >= day and total_seconds < min_month:
+            inferred_period = f"{(total_seconds / day):.1f}D"
+        elif total_seconds >= min_month and total_seconds <= min_year:
+            for month in month_options:
+                month_seconds = month * day
+                rounded_seconds = total_seconds / month_seconds
+                if np.isclose(rounded_seconds, 1):
+                    inferred_period = f"MS"
+                    break
+            else:
+                inferred_period = f"{(total_seconds / day):.1f}D"
+        elif total_seconds >= min_year:
+            for year in year_options:
+                year_seconds = year * day
+                rounded_seconds = total_seconds / year_seconds
+                if np.isclose(rounded_seconds, 1):
+                    inferred_period = f"YS"
+                    break
+            else:
+                inferred_period = f"{(total_seconds / day):.1f}D"            
+    else:
+        inferred_period = pd.infer_freq(timestamps)
+    
+    return inferred_period
 
 
 def in_daterange(
