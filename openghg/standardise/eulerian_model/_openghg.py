@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from pandas import Timestamp as pd_Timestamp
 
-from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_nc_time_fn
+from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_time_nc_fn
 
 
 logger = logging.getLogger("openghg.standardise.eulerian_model")
@@ -37,7 +37,7 @@ def parse_openghg(
          Dict : Dictionary of source_name : data, metadata, attr
     """
 
-    xr_open_fn, filepath = open_nc_time_fn(filepath)
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
     model = clean_string(model)
     species = clean_string(species)
