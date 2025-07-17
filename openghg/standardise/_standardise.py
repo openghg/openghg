@@ -13,7 +13,11 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store_name: str | None = None,
+    store_path: str | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -29,7 +33,12 @@ def standardise(
     from openghg.store import get_data_class
 
     dclass = get_data_class(data_type)
-    bucket = get_writable_bucket(name=store)
+    if store_name is not None:
+        bucket = get_writable_bucket(store_name=store_name)
+    elif store_path is not None:
+        bucket = get_writable_bucket(store_path=store_path)
+    else:
+        bucket = get_writable_bucket()
 
     compression = kwargs.get("compression", True)
     compressor = kwargs.get("compressor")
@@ -71,7 +80,8 @@ def standardise_surface(
     verify_site_code: bool = True,
     site_filepath: str | Path | None = None,
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -160,7 +170,8 @@ def standardise_surface(
             filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         data_type="surface",
         filepath=filepath,
         source_format=source_format,
@@ -205,7 +216,8 @@ def standardise_column(
     instrument: str | None = None,
     source_format: str = "openghg",
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -264,7 +276,8 @@ def standardise_column(
     """
     filepath = Path(filepath)
     return standardise(
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         data_type="column",
         filepath=filepath,
         species=species,
@@ -299,7 +312,8 @@ def standardise_bc(
     period: str | tuple | None = None,
     continuous: bool = True,
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -353,7 +367,8 @@ def standardise_bc(
     """
     filepath = Path(filepath)
     return standardise(
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         data_type="boundary_conditions",
         filepath=filepath,
         species=species,
@@ -394,7 +409,8 @@ def standardise_footprint(
     continuous: bool = True,
     retrieve_met: bool = False,
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -483,7 +499,8 @@ def standardise_footprint(
         filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         data_type="footprints",
         filepath=filepath,
         site=site,
@@ -534,7 +551,8 @@ def standardise_flux(
     chunks: dict | None = None,
     continuous: bool = True,
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -597,7 +615,8 @@ def standardise_flux(
         time_resolved = high_time_resolution
     return standardise(
         data_type="flux",
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         filepath=filepath,
         species=species,
         source=source,
@@ -633,7 +652,8 @@ def standardise_eulerian(
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     force: bool = False,
     compression: bool = True,
     compressor: Any | None = None,
@@ -682,7 +702,8 @@ def standardise_eulerian(
         dict: Dictionary of result data
     """
     return standardise(
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         data_type="eulerian_model",
         filepath=filepath,
         source_format=source_format,
@@ -705,11 +726,12 @@ def standardise_eulerian(
 
 
 def standardise_from_binary_data(
-    store: str,
     data_type: str,
     binary_data: bytes,
     metadata: dict,
     file_metadata: dict,
+    store_name: str | None = None,
+    store_path: str | None = None,
     **kwargs: Any,
 ) -> list[dict] | None:
     """Standardise binary data from serverless function.
@@ -730,7 +752,10 @@ def standardise_from_binary_data(
     from openghg.store import get_data_class
 
     dclass = get_data_class(data_type)
-    bucket = get_writable_bucket(name=store)
+    bucket = get_writable_bucket(
+        store_name=store_name,
+        store_path=store_path,
+    )
 
     with dclass(bucket) as dc:
         result = dc.read_data(
@@ -750,7 +775,8 @@ def standardise_flux_timeseries(
     database_version: str | None = None,
     model: str | None = None,
     tag: str | list | None = None,
-    store: str | None = None,
+    store_name: str | None = None,
+    store_path: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -815,7 +841,8 @@ def standardise_flux_timeseries(
         region = domain
     return standardise(
         data_type="flux_timeseries",
-        store=store,
+        store_name=store_name,
+        store_path=store_path,
         filepath=filepath,
         species=species,
         source=source,
