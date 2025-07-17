@@ -888,3 +888,28 @@ def test_icos_corso_clean_14_day():
     assert np.allclose(fetched_value, expected_value)
     assert "multiple" in metadata["sampling_period"]
     assert "integrated-naoh" in metadata["instrument"]
+
+
+def test_icos_corso_l2_deltao2():
+    """To test level 2 icos corso data for deltao2n2 species"""
+
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1667_FLASK.DELTAO2N2", source_format="icos_corso"
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="cbw",
+        instrument="flask",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "deltao2n2" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "2" in results[0]["data_level"]
+    assert "surface-flask" in results[0]["platform"]
