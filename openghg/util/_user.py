@@ -428,7 +428,7 @@ def _add_path_to_config(path: Path, name: str | None = None) -> None:
     Returns:
         None
     """
-        
+
     config_path = get_user_config_path()
     config = {}
 
