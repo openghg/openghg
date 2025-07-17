@@ -428,13 +428,19 @@ def _add_path_to_config(path: Path, name: str | None = None) -> None:
     Returns:
         None
     """
+        
     config_path = get_user_config_path()
     config = {}
+
     if config_path.exists():
         config = toml.loads(config_path.read_text())
 
     if name in config.get("object_store", {}):
         raise ObjectStoreError(f"A store with the name '{name}' already exists in the config.")
+
+    # Ensure "object_store" exists before inserting
+    if "object_store" not in config:
+        config["object_store"] = {}
 
     config["object_store"][name] = {"path": str(path), "permissions": "rw"}
 
