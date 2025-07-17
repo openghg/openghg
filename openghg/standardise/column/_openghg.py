@@ -330,8 +330,8 @@ def satellite_attribute_translation() -> TranslationDict:
         "instrument": "sensor",
         "satellite": "platform",
         "network": "platform",
-        "data_owner": "creator_name",
-        "data_owner_email": "creator_email",
+        "data_owner": ["creator_name","contact"],
+        "data_owner_email": ["creator_email","contact"],
     }
 
     return keywords

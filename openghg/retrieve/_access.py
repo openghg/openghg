@@ -258,10 +258,12 @@ def get_obs_column(
     site: str | None = None,
     network: str | None = None,
     instrument: str | None = None,
-    platform: str = "satellite",
+    platform: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
+    average: str = None,
+    keep_missing: bool = False,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -278,51 +280,80 @@ def get_obs_column(
     Returns:
         ObsColumnData: ObsColumnData object
     """
+    
+    column_keywords = {
+        "site": site,
+        "species": species,
+        "satellite": satellite,
+        "start_date": start_date,
+        "end_date": end_date,
+        "network": network,
+        "instrument": instrument,
+        "domain": domain,
+        "selection": selection,
+        "platform": platform,
+        "data_type": "column",
+    }
+    column_keywords.update(kwargs)
+
     obs_data = _get_generic(
-        species=species,
-        satellite=satellite,
-        domain=domain,
-        selection=selection,
-        site=site,
-        network=network,
-        instrument=instrument,
-        platform=platform,
-        start_date=start_date,
-        end_date=end_date,
-        data_type="column",
-        **kwargs,
+        **column_keywords
     )
 
-    if return_mf:
-        if max_level > max(obs_data.data.lev.values) + 1:
-            logger.warning(
-                f"passed max level is above max level in data ({max(obs_data.data.lev.values) + 1}). Defaulting to highest level"
+    data = obs_data.data
+
+    if average is not None: # copy-pasted from get_obs_surface. Maybe should put thi as an outside function
+        # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
+        # then it may be possible to avoid calling `.compute()`
+        # Currently, large gaps in the data could blow up the number of chunks when resampling
+        # which makes resampling extremely slow with Dask >= 2024.8.0
+        logger.info("Loading obs data into memory for resampling.")
+        data = data.compute()
+
+        var_to_delete = []
+        for var in data:
+            if data[var].isnull().all():
+                var_to_delete.append(var)
+        if var_to_delete:
+            logger.info(
+                f"{var_to_delete} contain only nan for obs. in {column_keywords}. They are thus deleted."
             )
-            max_level = max(obs_data.data.lev.values) + 1
+            data = data.drop_vars(var_to_delete)
+
+        data = surface_obs_resampler(
+            data, averaging_period=average, species=species, drop_na=(not keep_missing)
+        )
+
+    if return_mf:
+        if max_level > max(data.lev.values) + 1:
+            logger.warning(
+                f"passed max level is above max level in data ({max(data.lev.values) + 1}). Defaulting to highest level"
+            )
+            max_level = max(data.lev.values) + 1
 
         # processing taken from acrg/acrg/obs/read.py get_gosat()
         lower_levels = list(range(0, max_level))
 
         prior_factor = (
-            obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
-            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+            data.pressure_weights[dict(lev=list(lower_levels))]
+            * (1.0 - data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
+            * data.ch4_profile_apriori[dict(lev=list(lower_levels))]
         ).sum(dim="lev")
 
-        upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
+        upper_levels = list(range(max_level, len(data.lev.values)))
         prior_upper_level_factor = (
-            obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+            data.pressure_weights[dict(lev=list(upper_levels))]
+            * data.ch4_profile_apriori[dict(lev=list(upper_levels))]
         ).sum(dim="lev")
 
-        obs_data.data["mf_prior_factor"] = prior_factor
-        obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
-        obs_data.data["mf"] = (
-            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+        data["mf_prior_factor"] = prior_factor
+        data["mf_prior_upper_level_factor"] = prior_upper_level_factor
+        data["mf"] = (
+            data.xch4 - data.mf_prior_factor - data.mf_prior_upper_level_factor
         )
-        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+        data["mf_repeatability"] = data.xch4_uncertainty
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
+        data["mf"].attrs["units"] = data.xch4.attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             "xch4",
@@ -338,29 +369,33 @@ def get_obs_column(
         drop_coords = ["lev", "id"]
 
         for dv in drop_data_vars:
-            if dv in obs_data.data.data_vars:
-                obs_data.data = obs_data.data.drop_vars(dv)
+            if dv in data.data_vars:
+                data = data.drop_vars(dv)
         for coord in drop_coords:
-            if coord in obs_data.data.coords:
-                obs_data.data = obs_data.data.drop_vars(coord)
+            if coord in data.coords:
+                data = data.drop_vars(coord)
 
-        obs_data.data.attrs["max_level"] = max_level
+        data.attrs["max_level"] = max_level
         if species.upper() == "CH4":
             # obs_data.data.mf.attrs["units"] = "1e-9"
-            obs_data.data.attrs["species"] = "CH4"
+            data.attrs["species"] = "CH4"
         if species.upper() == "CO2":
             # obs_data.data.mf.attrs["units"] = "1e-6"
-            obs_data.data.attrs["species"] = "CO2"
+            data.attrs["species"] = "CO2"
 
+        if instrument.lower()=="tccon":
+            data.attrs["scale"] = "TCCON"
+        
         # obs_data.data.attrs["scale"] = "GOSAT"
 
         obs_data.metadata["transforms"] = (
             f"For creating mole fraction, used apriori data for levels above max_level={max_level}"
         )
+        obs_data.metadata["inlet"] = "column"
 
-    obs_data.data = obs_data.data.sortby("time")
+    data = data.sortby("time")
 
-    return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
+    return ObsColumnData(data=data, metadata=obs_data.metadata)
 
 
 def get_flux(
