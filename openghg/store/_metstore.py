@@ -51,7 +51,7 @@ class METStore(BaseStore):
             METData: METData object holding data and metadata
         """
         raise NotImplementedError("We are working to replace the MetStore.")
-        from openghg.retrieve.met import retrieve_met
+        from openghg.retrieve.met import pull_met
         from pandas import Timestamp
 
         if not isinstance(years, list):
@@ -69,7 +69,7 @@ class METStore(BaseStore):
 
         # Retrieve from the Copernicus store
         if result is None:
-            result = retrieve_met(site=site, network=network, years=years)
+            result = pull_met(site=site, network=network, years=years)
 
             store._store(met_data=result)
 

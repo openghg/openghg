@@ -29,3 +29,4 @@ zarr==2.18.3
 openghg-calscales
 sympy
 networkx
+cdsapi
