@@ -1,23 +1,21 @@
-import os
-import sys
-from typing import Iterator
+import getpass
+import tempfile
+import toml
+
 from unittest.mock import patch
 from pathlib import Path
 
 import pytest
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
 
-# Added for import of openghg from testing directory
-sys.path.insert(0, os.path.abspath("."))
 
 tmp_store_paths = temporary_store_paths()
 
 from openghg.store import get_metakey_defaults
 
-
 @pytest.fixture(scope="session", autouse=True)
-def default_session_fixture() -> Iterator[None]:
-    mock_config = {
+def mock_configuration_paths() -> dict:
+    return {
         "object_store": {
             "user": {"path": str(tmp_store_paths["user"]), "permissions": "rw"},
             "group": {"path": str(tmp_store_paths["group"]), "permissions": "rw"},
@@ -27,8 +25,25 @@ def default_session_fixture() -> Iterator[None]:
         "config_version": "2",
     }
 
-    with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_user_config(mock_configuration_paths):
+    user = getpass.getuser() 
+
+    temp_config = Path(tempfile.gettempdir())/ f"{user}" / "openghg.conf"
+    mock_test_config_path = temp_config
+
+    initial_config = mock_configuration_paths
+
+    mock_test_config_path.parent.mkdir(parents=True, exist_ok=True)
+    mock_test_config_path.write_text(toml.dumps(initial_config))
+
+    with patch("openghg.util._user.get_user_config_path", return_value=mock_test_config_path):
         yield
+
+    # Resets mock configuration file to empty and then to original
+    mock_test_config_path.write_text("")
+    mock_test_config_path.write_text(toml.dumps(initial_config))
 
 
 @pytest.fixture(scope="session", autouse=True)
