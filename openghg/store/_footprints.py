@@ -3,10 +3,11 @@ import logging
 from typing import Any, cast
 import warnings
 import numpy as np
+from pathlib import Path
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import multiPathType
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
@@ -188,7 +189,7 @@ class Footprints(BaseStore):
         self,
         domain: str,
         model: str,
-        filepath: multiPathType,
+        filepath: str | Path | list[str | Path],
         site: str | None = None,
         satellite: str | None = None,
         obs_region: str | None = None,
