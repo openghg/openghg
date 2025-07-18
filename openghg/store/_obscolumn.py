@@ -44,6 +44,7 @@ class ObsColumn(BaseStore):
         force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
+        pressure_weights_method: str | None = None,
         chunks: dict | None = None,
         info_metadata: dict | None = None,
     ) -> list[dict]:
@@ -115,7 +116,7 @@ class ObsColumn(BaseStore):
         platform = format_platform(platform)
         platform = clean_string(platform)
 
-        if site is None and satellite is None:
+        if site is None and satellite is None and source_format!="tccon":
             raise ValueError("Value for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")
@@ -126,6 +127,7 @@ class ObsColumn(BaseStore):
         obs_region = clean_string(obs_region)
         network = clean_string(network)
         instrument = clean_string(instrument)
+        pressure_weights_method = clean_string(pressure_weights_method)
 
         if domain is not None and obs_region is not None:
             err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"

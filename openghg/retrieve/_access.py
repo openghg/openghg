@@ -2,7 +2,7 @@ import logging
 from typing import Any, Union
 from openghg_calscales.functions import convert
 
-from openghg.data_processing import surface_obs_resampler
+from openghg.data_processing import surface_obs_resampler, column_obs_resampler
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -258,10 +258,11 @@ def get_obs_column(
     site: str | None = None,
     network: str | None = None,
     instrument: str | None = None,
-    platform: str = "satellite",
+    platform: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
+    average: str | None = None,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -305,32 +306,35 @@ def get_obs_column(
 
         prior_factor = (
             obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
-            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+            * (1.0 - obs_data.data[f"x{species}_averaging_kernel"][dict(lev=list(lower_levels))])
+            * obs_data.data[f"{species}_profile_apriori"][dict(lev=list(lower_levels))]
         ).sum(dim="lev")
 
         upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
         prior_upper_level_factor = (
             obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+            * obs_data.data[f"{species}_profile_apriori"][dict(lev=list(upper_levels))]
         ).sum(dim="lev")
 
         obs_data.data["mf_prior_factor"] = prior_factor
         obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
         obs_data.data["mf"] = (
-            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+            obs_data.data[f"x{species}"] - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
         )
-        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+        obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
+        obs_data.data["mf"].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
-            "xch4",
-            "xch4_uncertainty",
+            f"x{species}",
+            f"x{species}_uncertainty",
+            f"x{species}_error",
+            f"x{species}_apriori",
             "lon",
             "lat",
-            "ch4_profile_apriori",
-            "xch4_averaging_kernel",
+            "level",
+            f"{species}_profile_apriori",
+            f"x{species}_averaging_kernel",
             "pressure_levels",
             "pressure_weights",
             "exposure_id",
@@ -359,6 +363,11 @@ def get_obs_column(
         )
 
     obs_data.data = obs_data.data.sortby("time")
+
+    if average is not None:
+        obs_data.data = column_obs_resampler(
+            obs_data.data, averaging_period=average, species="mf"
+            )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 

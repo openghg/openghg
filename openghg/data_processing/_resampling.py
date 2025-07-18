@@ -415,10 +415,10 @@ def resampler(
     return result
 
 
-def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
+def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
     """Make dictionary mapping resampling functions to variables they will be applied to.
 
-    This is a helper function used by `surface_obs_resampler`.
+    This is a helper function used by `surface_obs_resampler` and `column_obs_resampler`.
 
     Args:
         ds: surface obs. data that resampler will be applied to
@@ -451,8 +451,9 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
     elif n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
-        if variability in data_vars:
-            weighted_vars.append(variability)
+        for var_name in [variability,f"{species}_prior_factor",f"{species}_prior_upper_level_factor"]:
+            if var_name in data_vars:
+                weighted_vars.append(var_name)
 
         func_dict["weighted"] = weighted_vars
 
@@ -466,6 +467,9 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
         # default, so set this explicitly
         if species not in func_dict.get("weighted", []):
             func_dict["mean"].append(species)
+            for var_name in [f"{species}_prior_factor",f"{species}_prior_upper_level_factor"]:
+                if var_name in data_vars:
+                    func_dict["mean"].append(var_name)
 
     return func_dict
 
@@ -475,6 +479,7 @@ def surface_obs_resampler(
     averaging_period: str,
     species: str,
     drop_na: bool = True,
+    **kwargs
 ) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
@@ -502,7 +507,7 @@ def surface_obs_resampler(
     Returns:
         xr.Dataset resampled according to default specification.
     """
-    resampler_dict = _surface_obs_resampler_dict(ds, species)
+    resampler_dict = _obs_resampler_dict(ds, species)
 
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
@@ -510,6 +515,44 @@ def surface_obs_resampler(
     else:
         drop_na_kwargs = False  # type: ignore
 
-    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs)
+    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs,**kwargs)
+
+    return result
+
+def column_obs_resampler(
+    ds: xr.Dataset,
+    averaging_period: str,
+    species: str,
+    **kwargs
+) -> xr.Dataset:
+    """Apply default resampling options for surface obs. data.
+
+    If the data contains the number of observations as a data variable, the
+    this data variable and the species mole fraction will be resampling using
+    a weighted average. Additionally, if "variability" is present, it will be
+    resampled using weights as well.
+
+    Otherwise, the species mole fraction is resampled to the mean.
+
+    If "repeatability" is present, it is resampled using the "uncorrelated_errors" method.
+
+    If "variability" is not present, it is added by taking the standard deviation of the obs.
+
+    Any remaining variables are mean resampled.
+
+    Keeps attributes from original dataset.
+
+    Args:
+        ds: surface obs. data that resampler will be applied to
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species of the obs. data
+        drop_na: if True, drop NaNs along "time" dimension if any of [species, "inlet"] has nan.
+
+    Returns:
+        xr.Dataset resampled according to default specification.
+    """
+    resampler_dict = _obs_resampler_dict(ds, species)
+
+    result = resampler(ds, averaging_period, resampler_dict, species=species, apply_func_kwargs={"remainder":"pass"},**kwargs)
 
     return result
