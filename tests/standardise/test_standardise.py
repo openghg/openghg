@@ -1,4 +1,5 @@
 from pathlib import Path
+import tempfile
 import pytest
 from helpers import (
     get_flux_datapath,
@@ -38,7 +39,7 @@ def test_standardise_to_read_only_store():
         )
 
 
-def test_standardise_obs_two_writable_stores():
+def test_standardise_obs_two_writable_stores(reset_mock_user_config):
 
     clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
@@ -115,7 +116,7 @@ def test_standardise_obs_openghg():
     assert "co2" == results[0].get("species")
 
 
-def test_standardise_obs_metadata_mismatch():
+def test_standardise_obs_metadata_mismatch(reset_mock_user_config):
     """
     Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
@@ -302,7 +303,7 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
-def test_standardise_footprint():
+def test_standardise_footprint(caplog):
     datapath = get_footprint_datapath("footprint_test.nc")
 
     site = "TMB"
@@ -321,15 +322,28 @@ def test_standardise_footprint():
         force=True,
         high_spatial_resolution=True,
         overwrite=True,
-        store="user",
+        store=Path(tempfile.gettempdir(), "openghg_testing-STORE_1234"),
     )
 
     result = results[0]
 
+    assert "/tmp/openghg_testing-STORE_1234' is not a configured writable store name" in caplog.text
     assert result["site"] == "tmb"
     assert result["domain"] == "europe"
     assert result["model"] == "test_model"
     assert result["inlet"] == "10m"
+
+
+def test_with_mocked_readable_buckets():
+    """This test looks at the pre-filled objectstore named as mockstore.
+    The path to this mockstore is not added in the temp conf earlier. It is expected to accept this path fetch the data and also add the details of the path to the temporary config"""
+    from unittest.mock import patch
+
+    mock_buckets = {"mockstore": "tests/data/xyza"}
+    with patch("openghg.objectstore.get_readable_buckets", return_value=mock_buckets["mockstore"]):
+        result = get_footprint(site="tmb", domain="europe", model="test_model", inlet="10m", height="10m", species="inert",store=mock_buckets["mockstore"])
+        assert result is not None
+
 
 
 @pytest.mark.parametrize("source_format", ["paris", "flexpart"])

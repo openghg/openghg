@@ -106,6 +106,7 @@ from ._user import (
     get_user_config_path,
     read_local_config,
     check_config,
+    handle_direct_store_path,
 )
 from ._util import (
     find_matching_site,
