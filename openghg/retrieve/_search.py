@@ -4,6 +4,7 @@ the object store.
 """
 
 import logging
+import os
 import pandas as pd
 from typing import Any
 import warnings
@@ -450,6 +451,7 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
+    from openghg.util import handle_direct_store_path
 
     # Select and format the search terms
     # - ignore any kwargs which are None
@@ -469,6 +471,8 @@ def search(**kwargs: Any) -> SearchResults:
         elif k.lower() in ["start_date", "end_date"]:
             if v is not None:
                 v = pd.Timestamp(v)
+        elif k.lower() == "store":
+            search_kwargs[k] = v
         else:
             v = clean_string(v)
 
@@ -510,10 +514,11 @@ def search(**kwargs: Any) -> SearchResults:
     # If we're given a store then we'll just read from that one
     store = search_kwargs.pop("store", None)
     if store:
-        try:
+        if store in readable_buckets:
             readable_buckets = {store: readable_buckets[store]}
-        except KeyError:
-            raise ObjectStoreError(f"Invalid store: {store}")
+        elif os.path.exists(store):
+            readable_buckets = {"direct_path": store}
+            handle_direct_store_path(path=store, prompt_to_add=True)
 
     # Keywords to apply a list search rather than exact match
     # At the moment this is primarily the "tag" keyword
