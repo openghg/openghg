@@ -621,7 +621,7 @@ def check_gcwerks_input(
         - filepath can contain tuples of (filepath, precision_filepath) pairs
             - This will be deprecated.
         - filepath and precision_filepath can be specified separately but must be the same length
-    
+
     Args:
         filepath: Filepath or filepath and precision_filepath pairs for the input files
         precision_filepath: Precision filepath details to link with filepath.

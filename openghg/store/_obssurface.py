@@ -321,7 +321,7 @@ class ObsSurface(BaseStore):
             if not isinstance(precision_filepath, list):
                 precision_filepath = [Path(precision_filepath)]
             else:
-                precision_filepath = [Path(pfp) for pfp in precision_filepath]            
+                precision_filepath = [Path(pfp) for pfp in precision_filepath]
 
         # Check hashes of previous files (included after any filepath(s) formatting)
         _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
