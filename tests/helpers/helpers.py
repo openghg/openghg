@@ -180,4 +180,9 @@ def print_dict_diff(dict1: dict, dict2: dict, skip_missing: bool = False) -> Non
             continue
 
         if val1 != val2:
-            print(f"{key:<20}{val1:<20}{val2:<20}")
+            try:
+                print_val1 = ", ".join(val1) if isinstance(val1, list) else val1
+                print_val2 = ", ".join(val2) if isinstance(val2, list) else val2
+                print(f"{key:<20}{print_val1:<20}{print_val2:<20}")
+            except TypeError:
+                print(key, val1, val2)
