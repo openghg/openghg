@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 - Updated temporary path creation to have user specific folder. [PR #1396](https://github.com/openghg/openghg/pull/1396)
+- Allow `precision_filepath` to be passed directly when specifying the "gcwerks" format for standardise_surface. Previous method of passing a tuple for filepath is still supported but will be deprecated. [PR #1405](https://github.com/openghg/openghg/pull/1405)
 
 ### Fixed
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
