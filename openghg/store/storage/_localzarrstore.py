@@ -92,19 +92,6 @@ class LocalZarrStore(Store):
         for store in self._stores.values():
             store.close()
 
-    def store_key(self, version: str) -> str:
-        """Return the key of this zarr Store
-
-        Args:
-            version: Data version
-        Returns:
-            str: Key of zarr store
-        """
-        if version.lower() not in self._stores:
-            raise KeyError(f"Invalid version - {version}")
-
-        return str(Path(self._root_store_key, version))
-
     def store_path(self, version: str) -> Path:
         """Return the path of this zarr Store
 
@@ -309,6 +296,7 @@ class LocalZarrStore(Store):
 
         return {}
 
+    # TODO: implement attribute matching for zarr store
     def match_attributes(self, version: str, dataset: xr.Dataset) -> dict:
         """Ensure the attributes of the stored and incoming data are matched,
         any attributes that differ will be added as a new key with a number appended.

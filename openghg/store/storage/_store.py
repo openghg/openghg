@@ -40,11 +40,6 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def store_key(self, version: str) -> str:
-        """Return the key of this zarr store"""
-        pass
-
-    @abstractmethod
     def version_exists(self, version: str) -> bool:
         """Check if a version exists in the current store"""
         pass
