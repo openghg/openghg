@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, MetadataAndData, DataOverlapError
+from openghg.types import pathType, MetadataAndData, DataOverlapError
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -97,7 +97,8 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = self.read_file(
-                    filepath=(filepath, precision_filepath),
+                    filepath=filepath,
+                    precision_filepath=[precision_filepath],
                     site_filepath=site_filepath,
                     **meta_kwargs,
                 )
@@ -107,7 +108,7 @@ class ObsSurface(BaseStore):
     # TODO: the return type of this method isn't the same as the parent class' method...
     def read_file(
         self,
-        filepath: multiPathType,
+        filepath: str | Path | list[str | Path],
         source_format: str,
         site: str,
         network: str,
@@ -123,6 +124,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         verify_site_code: bool = True,
         site_filepath: pathType | None = None,
+        precision_filepath: str | Path | list[str | Path] | None = None,
         tag: str | list | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
@@ -143,7 +145,6 @@ class ObsSurface(BaseStore):
             source_format: Data format, for example CRDS, GCWERKS
             site: Site code/name
             network: Network name
-
             inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
                 If retrieve multiple files pass None, OpenGHG will attempt to
                 extract this from the file.
@@ -172,6 +173,8 @@ class ObsSurface(BaseStore):
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
+            precision_filepath: Only needed for GCWERKS source format.
+                Accompanying precision_filepath is needed for each filepath.
             tag: Special tagged values to add to the Datasource. This will be added to any
                 current values if the tag key already exists in a list.
             update_mismatch: This determines how mismatches between the internal data
@@ -310,24 +313,15 @@ class ObsSurface(BaseStore):
             chunks = {}
 
         if not isinstance(filepath, list):
-            filepaths_to_check = [filepath]
+            filepaths = [Path(filepath)]
         else:
-            filepaths_to_check = filepath
+            filepaths = [Path(fp) for fp in filepath]
 
-        filepaths: list[Path] = []
-        precision_filepaths: list[Path] = []
-        for fp in filepaths_to_check:
-            if isinstance(fp, tuple):
-                if source_format.lower() != "gcwerks":
-                    raise TypeError(
-                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
-                    )
-                filepaths.append(Path(fp[0]))
-                precision_filepaths.append(Path(fp[1]))
+        if precision_filepath is not None:
+            if not isinstance(precision_filepath, list):
+                precision_filepath = [Path(precision_filepath)]
             else:
-                if source_format.lower() == "gcwerks":
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
-                filepaths.append(Path(fp))
+                precision_filepath = [Path(pfp) for pfp in precision_filepath]            
 
         # Check hashes of previous files (included after any filepath(s) formatting)
         _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
@@ -348,8 +342,8 @@ class ObsSurface(BaseStore):
         for i, filepath in enumerate(filepaths):
 
             fn_input_parameters["filepath"] = filepath
-            if precision_filepaths:
-                fn_input_parameters["precision_filepath"] = precision_filepaths[i]
+            if precision_filepath:
+                fn_input_parameters["precision_filepath"] = precision_filepath[i]
 
             # Define parameters to pass to the parser function and remaining keys
             parser_input_parameters, additional_input_parameters = split_function_inputs(

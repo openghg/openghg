@@ -1,3 +1,4 @@
+import logging
 import bz2
 from functools import partial, wraps
 import json
@@ -9,6 +10,8 @@ import xarray as xr
 
 from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data
 from openghg.util import align_lat_lon
+
+logger = logging.getLogger("openghg.util.file")
 
 __all__ = [
     "load_parser",
@@ -249,6 +252,34 @@ def get_logfile_path() -> Path:
         Path: Path to logfile
     """
     return Path("/tmp/openghg.log")
+
+
+def check_filepath(filepath: multiPathType, source_format: str) -> list[str | Path]:
+    """
+    Check that filepath is of the correct format - this assumes the filepath
+    should be a str, Path or list but not a tuple (this is only needed for gcwerks).
+
+    Args:
+        filepath: Input filepath details
+        source_format: Name of source format to use when standardising this data.
+    Returns:
+        list: List of filepaths
+    """
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    for fp in filepath:
+        if isinstance(fp, tuple):
+            if source_format.lower() == "gcwerks":
+                msg = f"The openghg.standardise.surface._check_gcwerks_input() function must be used to extract filepath and precision_filepath"
+                logger.exception(msg)
+                raise ValueError(msg)
+            else:
+                msg = f"Do not expect tuple for filepath for source_format={source_format}. Please provide a str/Path or list of Paths."
+                logger.exception(msg)
+                raise ValueError(msg)
+
+    return filepath
 
 
 def footprint_open_nc_fn(

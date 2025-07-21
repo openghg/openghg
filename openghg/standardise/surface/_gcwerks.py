@@ -1,8 +1,11 @@
+import logging
 from pathlib import Path
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import pathType
+from openghg.types import pathType, multiPathType
+
+logger = logging.getLogger("openghg.standardise")
 
 
 def find_files(data_path: pathType, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
@@ -607,3 +610,57 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: dict
         raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
     return attributes
+
+
+def check_gcwerks_input(
+    filepath: multiPathType, precision_filepath: str | Path | list[str | Path] | None
+) -> tuple[list[str | Path], list[str | Path]]:
+    """
+    Check that both filepath and precision_filepath are specified when using the gcwerks
+    source format. At the moment this can be specified as:
+        - filepath can contain tuples of (filepath, precision_filepath) pairs
+            - This will be deprecated.
+        - filepath and precision_filepath can be specified separately but must be the same length
+    
+    Args:
+        filepath: Filepath or filepath and precision_filepath pairs for the input files
+        precision_filepath: Precision filepath details to link with filepath.
+    Returns:
+        list, list: Filepath and precision filepath details as lists
+    """
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    if isinstance(precision_filepath, str | Path):
+        precision_filepath = [precision_filepath]
+
+    filepaths: list[str | Path] = []
+    precision_filepaths: list[str | Path] = []
+
+    for fp in filepath:
+        if isinstance(fp, tuple):
+            if not precision_filepath:
+                logger.warning(
+                    "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` input instead."
+                )
+            else:
+                msg = "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` only."
+                logger.exception(msg)
+                raise TypeError(msg)
+
+            filepaths.append(Path(fp[0]))
+            precision_filepaths.append(Path(fp[1]))
+        else:
+            if precision_filepath is None:
+                msg = "For GCWERKS format, filepath and precision_filepath must be specified."
+                logger.exception(msg)
+                raise TypeError(msg)
+            filepaths.append(Path(fp))
+
+    if len(filepaths) != len(precision_filepaths):
+        raise TypeError(
+            f"For GCWERKS data the same number of files should be supplied filepath and precision_filepath. Currently {len(filepaths)} and {len(precision_filepaths)}"
+        )
+
+    return filepaths, precision_filepaths
