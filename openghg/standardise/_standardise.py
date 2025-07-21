@@ -601,6 +601,7 @@ def standardise_flux(
         data_type="flux",
         store=store,
         filepath=filepath,
+        source_format=source_format,
         species=species,
         source=source,
         domain=domain,
