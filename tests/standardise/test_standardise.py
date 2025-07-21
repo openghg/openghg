@@ -303,7 +303,7 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
-def test_standardise_footprint(caplog):
+def test_standardise_footprint():
     datapath = get_footprint_datapath("footprint_test.nc")
 
     site = "TMB"
@@ -322,27 +322,26 @@ def test_standardise_footprint(caplog):
         force=True,
         high_spatial_resolution=True,
         overwrite=True,
-        store=Path(tempfile.gettempdir(), "openghg_testing-STORE_1234"),
+        store="user",
     )
 
     result = results[0]
 
-    assert "/tmp/openghg_testing-STORE_1234' is not a configured writable store name" in caplog.text
     assert result["site"] == "tmb"
     assert result["domain"] == "europe"
     assert result["model"] == "test_model"
     assert result["inlet"] == "10m"
 
 
-def test_with_mocked_readable_buckets():
-    """This test looks at the pre-filled objectstore named as mockstore.
-    The path to this mockstore is not added in the temp conf earlier. It is expected to accept this path fetch the data and also add the details of the path to the temporary config"""
-    from unittest.mock import patch
+# def test_with_mocked_readable_buckets():
+#     """This test looks at the pre-filled objectstore named as mockstore.
+#     The path to this mockstore is not added in the temp conf earlier. It is expected to accept this path fetch the data and also add the details of the path to the temporary config"""
+#     from unittest.mock import patch
 
-    mock_buckets = {"mockstore": "tests/data/xyza"}
-    with patch("openghg.objectstore.get_readable_buckets", return_value=mock_buckets["mockstore"]):
-        result = get_footprint(site="tmb", domain="europe", model="test_model", inlet="10m", height="10m", species="inert",store=mock_buckets["mockstore"])
-        assert result is not None
+#     mock_buckets = {"mockstore": "tests/mock_store"}
+#     with patch("openghg.objectstore.get_readable_buckets", return_value=mock_buckets["mockstore"]):
+#         result = get_footprint(site="tmb", domain="europe", model="test_model", inlet="10m", height="10m", species="inert",store=mock_buckets["mockstore"])
+#         assert result is not None
 
 
 

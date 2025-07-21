@@ -47,10 +47,8 @@ def test_get_writable_buckets():
     assert tmpdir in group_path
     assert "group" in group_path
 
-    direct_store_path = get_writable_bucket(name=Path(tempfile.gettempdir(), "openghg_testing-STORE_1234"), prompt_to_add=True)
-
     with pytest.raises(ObjectStoreError):
-        get_writable_bucket(name=direct_store_path, prompt_to_add=True)
+        get_writable_bucket(name="shared")
 
 
 def test_get_writable_buckets_no_writable(mocker):
