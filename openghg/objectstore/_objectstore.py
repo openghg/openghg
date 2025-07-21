@@ -15,7 +15,7 @@ both metadata and data.
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator, Iterable
 from contextlib import contextmanager
 from types import TracebackType
 from typing import Any, Generic, Literal, TypeAlias, TypeVar
@@ -40,9 +40,23 @@ Bucket = str
 
 
 class ObjectStore(Generic[DatasourceT, T]):
-    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory[DatasourceT]) -> None:
+    def __init__(
+        self,
+        metastore: MetaStore,
+        datasource_factory: DatasourceFactory[DatasourceT],
+        metadata_updater: (
+            Callable[[QueryResults, Iterable[DatasourceT]], tuple[QueryResults, Iterable[DatasourceT]]] | None
+        ) = None,
+    ) -> None:
         self.metastore = metastore
         self.datasource_factory = datasource_factory
+
+        def default_metadata_updater(
+            metadata: QueryResults, datasources: Iterable[DatasourceT]
+        ) -> tuple[QueryResults, Iterable[DatasourceT]]:
+            return metadata, datasources
+
+        self.metadata_updater = metadata_updater if metadata_updater is not None else default_metadata_updater
 
     def __enter__(self) -> Self:
         return self
@@ -58,13 +72,13 @@ class ObjectStore(Generic[DatasourceT, T]):
     def close(self) -> None:
         self.metastore.close()
 
-    def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
-        """Search the metastore.
+    def _search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
+        """Internal metastore search.
 
         TODO: fix the arguments: metastore search is now more complex...
 
-        NOTE: currently this is a thin wrapper around MetaStore.search,
-        but could be expanded to include information contained in datasources.
+        This only retrieves metadata from the metastore. The public `search` method adds
+        metadata from `Datasources` to this.
 
         Args:
             metadata: metadata to narrow search by
@@ -84,6 +98,66 @@ class ObjectStore(Generic[DatasourceT, T]):
             params["search_terms"] = remainder
 
         return self.metastore.search(**params)
+
+    def get_datasource(self, uuid: UUID) -> DatasourceT:
+        """Get data stored at given uuid."""
+        return self.datasource_factory.load(uuid)
+
+    def _retrieve(
+        self, metadata: MetaData | None = None, **kwargs: Any
+    ) -> tuple[QueryResults, Iterable[DatasourceT]]:
+        """Internal retrieve.
+
+        Searches the metastore then gets the Datasources corresponding to the search results.
+        The search results and datasources are updated by `self.metadata_updater`, before being
+        returned.
+
+        This allows adding metadata to the search results from the datasources, and adding metadata from
+        the metastore to the datasources.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results and corresponding Datasources, updated by `self.metadata_updater`
+        """
+        search_results = self._search(metadata, **kwargs)
+        datasources = (self.get_datasource(r["uuid"]) for r in search_results)
+        return self.metadata_updater(search_results, datasources)
+
+    def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
+        """Search the metastore.
+
+        TODO: fix the arguments: metastore search is now more complex...
+
+        NOTE: currently this is a thin wrapper around MetaStore.search,
+        but could be expanded to include information contained in datasources.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results (list of search results)
+        """
+        search_results, _ = self._retrieve(metadata, **kwargs)
+        return search_results
+
+    def retrieve(self, metadata: MetaData | None = None, **kwargs: Any) -> list[DatasourceT]:
+        """Retrieve Datasources from the ObjectStore.
+
+        Searching works the same as the `.search` method.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results (list of search results)
+        """
+        _, datasources = self._retrieve(metadata, **kwargs)
+        return list(datasources)
 
     def get_uuids(self, metadata: MetaData | None = None) -> list[UUID]:
         metadata = metadata or {}
@@ -202,10 +276,6 @@ class ObjectStore(Generic[DatasourceT, T]):
             if hasattr(datasource, "metadata"):
                 self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
             # END HACK
-
-    def get_datasource(self, uuid: UUID) -> DatasourceT:
-        """Get data stored at given uuid."""
-        return self.datasource_factory.load(uuid)
 
     def delete(self, uuid: UUID) -> None:
         """Delete data and metadata with given UUID."""
