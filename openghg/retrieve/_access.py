@@ -45,7 +45,7 @@ def _get_generic(
     """
     from openghg.retrieve import search
 
-    results = search(prompt_to_add,**kwargs)
+    results = search(prompt_to_add, **kwargs)
 
     keyword_string = _create_keyword_string(**kwargs)
     if not results:

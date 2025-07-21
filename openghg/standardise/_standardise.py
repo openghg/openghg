@@ -13,8 +13,11 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, 
-    prompt_to_add: bool | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store: str | None = None,
+    prompt_to_add: bool | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -84,7 +87,7 @@ def standardise_surface(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
@@ -191,7 +194,7 @@ def standardise_surface(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -218,7 +221,7 @@ def standardise_column(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Read column observation file
 
@@ -291,7 +294,7 @@ def standardise_column(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -314,7 +317,7 @@ def standardise_bc(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -378,7 +381,7 @@ def standardise_bc(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
-        prompt_to_add = prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -417,7 +420,7 @@ def standardise_footprint(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -524,7 +527,7 @@ def standardise_footprint(
         sort=sort,
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -552,7 +555,7 @@ def standardise_flux(
     compressor: Any | None = None,
     filters: Any | None = None,
     info_metadata: dict | None = None,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -628,7 +631,7 @@ def standardise_flux(
         compressor=compressor,
         filters=filters,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -651,7 +654,7 @@ def standardise_eulerian(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -713,7 +716,7 @@ def standardise_eulerian(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
 
 
@@ -774,7 +777,7 @@ def standardise_flux_timeseries(
     period: str | tuple | None = None,
     continuous: bool | None = None,
     info_metadata: dict | None = None,
-    prompt_to_add: bool = False
+    prompt_to_add: bool = False,
 ) -> list[dict]:
     """Process one dimension timeseries file
 
@@ -850,5 +853,5 @@ def standardise_flux_timeseries(
         period=period,
         continuous=continuous,
         info_metadata=info_metadata,
-        prompt_to_add=prompt_to_add
+        prompt_to_add=prompt_to_add,
     )
