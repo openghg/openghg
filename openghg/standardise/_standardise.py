@@ -410,6 +410,7 @@ def standardise_footprint(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
+    open_files_grouped: bool = True,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -516,6 +517,7 @@ def standardise_footprint(
         sort=sort,
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
+        open_files_grouped=open_files_grouped,
     )
 
 
