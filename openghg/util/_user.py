@@ -389,7 +389,7 @@ def _check_valid_store(store_path: Path) -> bool:
     return store_data_dir.joinpath("zarr").exists()
 
 
-def handle_direct_store_path(path: str, prompt_to_add: bool = True) -> str:
+def handle_direct_store_path(path: str, prompt_to_add: bool = False) -> str:
     """
     Try to interpret a given name as a direct object store path.
     If valid and not in config, optionally prompt to add it to the config.
@@ -401,7 +401,7 @@ def handle_direct_store_path(path: str, prompt_to_add: bool = True) -> str:
     Returns:
         str: Resolved path string.
     """
-    possible_path = Path(path).expanduser().resolve()
+    possible_path = Path(path).resolve()
 
     if not (possible_path.exists() or possible_path.is_absolute()):
         raise ObjectStoreError(f"'{path}' is not a valid path or store name.")

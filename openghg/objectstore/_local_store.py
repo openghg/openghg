@@ -64,7 +64,7 @@ def get_writable_buckets() -> dict[str, str]:
     }
 
 
-def get_writable_bucket(name: str | None = None) -> str:
+def get_writable_bucket(name: str | None = None, prompt_to_add: bool | None = None ) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket is available. If a direct path is passed
     instead of a name, return it with a warning if it's not in the config.
@@ -92,7 +92,7 @@ def get_writable_bucket(name: str | None = None) -> str:
             return writable_buckets[name]
 
         # Util function treating possible name supplied as path incase it is not in the config file, asks user for adding the path to config path
-        return handle_direct_store_path(name)
+        return handle_direct_store_path(name, prompt_to_add=prompt_to_add)
 
     # If name is None but multiple stores exist
     raise ObjectStoreError(

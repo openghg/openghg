@@ -409,7 +409,7 @@ def search_column(
     )
 
 
-def search(**kwargs: Any) -> SearchResults:
+def search(prompt_to_add: bool | None = None, **kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
@@ -516,9 +516,10 @@ def search(**kwargs: Any) -> SearchResults:
     if store:
         if store in readable_buckets:
             readable_buckets = {store: readable_buckets[store]}
-        elif os.path.exists(store):
-            readable_buckets = {"direct_path": store}
-            handle_direct_store_path(path=store, prompt_to_add=True)
+        else:
+            bucket_path: str = handle_direct_store_path(path=store, prompt_to_add=prompt_to_add)
+
+            readable_buckets = {store: bucket_path}
 
     # Keywords to apply a list search rather than exact match
     # At the moment this is primarily the "tag" keyword
