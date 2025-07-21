@@ -420,19 +420,6 @@ def test_surface_data_stored_and_dated_correctly(data, datasource):
     assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
 
 
-def test_to_memory_store(data, datasource):
-    d = datasource
-
-    metadata = data["ch4"]["metadata"]
-    ch4_data = data["ch4"]["data"]
-
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-
-    memory_store = d._copy_to_memorystore(version="latest")
-    with xr.open_zarr(store=memory_store) as ds:
-        assert ds.equals(ch4_data)
-
-
 def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()

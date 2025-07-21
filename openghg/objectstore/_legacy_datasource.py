@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections import defaultdict
-from typing import Any, cast, Literal, TypeVar
+from typing import Any, cast, Literal
 from typing_extensions import Self
 from types import TracebackType
 import logging
@@ -19,12 +19,12 @@ logger.setLevel(logging.DEBUG)
 
 __all___ = ["Datasource"]
 
-T = TypeVar("T", bound="Datasource")
-
 
 class Datasource(AbstractDatasource[xr.Dataset]):
-    """A Datasource holds data relating to a single source, such as a specific species
-    at a certain height on a specific instrument
+    """A Datasource holds data relating to a single source.
+
+    For instance, a specific species at a certain height on a specific
+    instrument could be a single "Datasource".
     """
 
     _datasource_root = "datasource"
@@ -256,7 +256,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             if new_version:
                 self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
             else:
-                self._store.overwrite(version=version_str, dataset=data, compressor=compressor, filters=filters)
+                self._store.overwrite(
+                    version=version_str, dataset=data, compressor=compressor, filters=filters
+                )
             # Only save the current daterange string for this version
             date_keys = [new_daterange_str]
         elif if_exists == "combine":

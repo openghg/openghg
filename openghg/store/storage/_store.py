@@ -55,11 +55,6 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def _pop(self, version: str) -> Dataset:
-        """Pop some data from the store. This removes the data at this version from the store
-        and returns it."""
-        pass
-
     def overwrite(self, version: str, dataset: Dataset, compressor: Any | None, filters: Any | None) -> None:
         """Overwrite the data at the given key"""
         pass
