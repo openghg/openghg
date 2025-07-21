@@ -4,7 +4,6 @@ the object store.
 """
 
 import logging
-import os
 import pandas as pd
 from typing import Any
 import warnings
@@ -409,7 +408,7 @@ def search_column(
     )
 
 
-def search(prompt_to_add: bool | None = None, **kwargs: Any) -> SearchResults:
+def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
@@ -513,6 +512,7 @@ def search(prompt_to_add: bool | None = None, **kwargs: Any) -> SearchResults:
 
     # If we're given a store then we'll just read from that one
     store = search_kwargs.pop("store", None)
+    prompt_to_add = search_kwargs.pop("prompt_to_add", False)
     if store:
         if store in readable_buckets:
             readable_buckets = {store: readable_buckets[store]}

@@ -28,7 +28,6 @@ multDataTypes = Union[
 def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: list | None = None,
-    prompt_to_add: bool | None = None,
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -45,7 +44,7 @@ def _get_generic(
     """
     from openghg.retrieve import search
 
-    results = search(prompt_to_add, **kwargs)
+    results = search(**kwargs)
 
     keyword_string = _create_keyword_string(**kwargs)
     if not results:
