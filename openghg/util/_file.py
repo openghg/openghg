@@ -254,9 +254,15 @@ def get_logfile_path() -> Path:
 
 
 def _select_time(x: xr.Dataset) -> xr.Dataset:
-    # WARNING : designed for a specific case where a day from another month was present
-    # in a monthly file (concerns file from an old NAME_processing version).
-    # Not designed for a general case.
+    """
+    WARNING : designed for a specific case where a day from another month was present
+    in a monthly file (concerns file from an old NAME_processing version).
+    This is not designed for a general case.
+    Args:
+        x: xarray data to be checked
+    Returns:
+        xarray.Dataset: Updated dataset
+    """
     month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
     start_date = month.astype("datetime64[D]")
     end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
