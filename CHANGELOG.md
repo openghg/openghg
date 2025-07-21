@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 - Updated temporary path creation to have user specific folder. [PR #1396](https://github.com/openghg/openghg/pull/1396)
+- Removed unused code from Datasource and LocalZarrStore and changed the name of LocalZarrStore's `update` method to `overwrite`. See the PR for full details of code removed.[PR #1404](https://github.com/openghg/openghg/pull/1404)
 
 ### Fixed
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
