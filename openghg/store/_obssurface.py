@@ -3,10 +3,10 @@ import logging
 from pathlib import Path
 from typing import Any, MutableSequence
 from collections.abc import Sequence
-
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
+
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -104,318 +104,6 @@ class ObsSurface(BaseStore):
 
         return result
 
-    # TODO: the return type of this method isn't the same as the parent class' method...
-    def read_file(
-        self,
-        filepath: multiPathType,
-        source_format: str,
-        site: str,
-        network: str,
-        inlet: str | None = None,
-        height: str | None = None,
-        instrument: str | None = None,
-        data_level: str | int | float | None = None,
-        data_sublevel: str | float | None = None,
-        dataset_source: str | None = None,
-        sampling_period: Timedelta | str | None = None,
-        calibration_scale: str | None = None,
-        platform: str | None = None,
-        measurement_type: str = "insitu",
-        verify_site_code: bool = True,
-        site_filepath: pathType | None = None,
-        tag: str | list | None = None,
-        update_mismatch: str = "never",
-        if_exists: str = "auto",
-        save_current: str = "auto",
-        overwrite: bool = False,
-        force: bool = False,
-        compressor: Any | None = None,
-        filters: Any | None = None,
-        chunks: dict | None = None,
-        info_metadata: dict | None = None,
-    ) -> list[dict]:
-        """Process files and store in the object store. This function
-            utilises the process functions of the other classes in this submodule
-            to handle each data type.
-
-        Args:
-            filepath: Filepath(s)
-            source_format: Data format, for example CRDS, GCWERKS
-            site: Site code/name
-            network: Network name
-
-            inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
-                If retrieve multiple files pass None, OpenGHG will attempt to
-                extract this from the file.
-            height: Alias for inlet.
-            read inlets from data.
-            instrument: Instrument name
-            data_level: The level of quality control which has been applied to the data.
-                This should follow the convention of:
-                    - "0": raw sensor output
-                    - "1": automated quality assurance (QA) performed
-                    - "2": final data set
-                    - "3": elaborated data products using the data
-            data_sublevel: Can be used to sub-categorise data (typically "L1") depending on different QA performed
-                before data is finalised.
-            dataset_source: Dataset source name, for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
-            platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
-            measurement_type: Type of measurement. For some source_formats this value is added
-                to the attributes. Platform should be used in preference.
-                If platform is specified and measurement_type is not, this will be
-                set to match the platform.
-            verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
-                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-                        update_mismatch: This determines whether mismatches between the internal data
-                attributes and the supplied / derived metadata can be updated or whether
-                this should raise an AttrMismatchError.
-                If True, currently updates metadata with attribute value.
-            tag: Special tagged values to add to the Datasource. This will be added to any
-                current values if the tag key already exists in a list.
-            update_mismatch: This determines how mismatches between the internal data
-                "attributes" and the supplied / derived "metadata" are handled.
-                This includes the options:
-                    - "never" - don't update mismatches and raise an AttrMismatchError
-                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-            if_exists: What to do if existing data is present.
-                - "auto" - checks new and current data for timeseries overlap
-                   - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
-                - "new" - just include new data and ignore previous
-                - "combine" - replace and insert new data into current timeseries
-            save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-                - "n" / "no" - Allow current data to updated / deleted
-            overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
-            compressor: A custom compressor to use. If None, this will default to
-                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
-            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
-            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
-        Returns:
-            dict: Dictionary of Datasource UUIDs
-
-        TODO: Should "measurement_type" be changed to "platform" to align
-        with ModelScenario and ObsColumn?
-        """
-        # Get initial values which exist within this function scope using locals
-        # MUST be at the top of the function
-        fn_input_parameters = locals().copy()
-
-        from openghg.store.spec import define_standardise_parsers
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            format_data_level,
-            format_platform,
-            evaluate_sampling_period,
-            check_and_set_null_variable,
-            load_standardise_parser,
-            verify_site,
-            check_if_need_new_version,
-            split_function_inputs,
-            synonyms,
-        )
-
-        standardise_parsers = define_standardise_parsers()[self._data_type]
-
-        try:
-            source_format = standardise_parsers[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Test that the passed values are valid
-        # Check validity of site, instrument, inlet etc in 'site_info.json'
-        # Clean the strings
-        if verify_site_code:
-            verified_site = verify_site(site=site)
-            if verified_site is None:
-                raise ValueError("Unable to validate site")
-            else:
-                site = verified_site
-        else:
-            site = clean_string(site)
-
-        network = clean_string(network)
-        instrument = clean_string(instrument)
-
-        sampling_period = evaluate_sampling_period(sampling_period)
-
-        platform = format_platform(platform, data_type=self._data_type)
-
-        if measurement_type is None and platform is not None:
-            measurement_type = platform
-
-        # Ensure we have a clear missing value for data_level, data_sublevel
-        data_level = format_data_level(data_level)
-        if data_sublevel is not None:
-            data_sublevel = str(data_sublevel)
-
-        platform = check_and_set_null_variable(platform)
-        data_level = check_and_set_null_variable(data_level)
-        data_sublevel = check_and_set_null_variable(data_sublevel)
-        dataset_source = check_and_set_null_variable(dataset_source)
-
-        platform = clean_string(platform)
-        data_level = clean_string(data_level)
-        data_sublevel = clean_string(data_sublevel)
-        dataset_source = clean_string(dataset_source)
-
-        # Check if alias `height` is included instead of `inlet`
-        if inlet is None and height is not None:
-            inlet = height
-
-        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
-        inlet = clean_string(inlet)
-        inlet = format_inlet(inlet)
-
-        # Would like to rename `data_source` to `retrieved_from` but
-        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
-        data_source = "internal"
-
-        # Define additional metadata which is not being passed to the parse functions
-        additional_metadata = {
-            "data_source": data_source,
-        }
-
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        # Load the data retrieve object
-        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
-
-        results: list[dict] = []
-
-        if chunks is None:
-            chunks = {}
-
-        if not isinstance(filepath, list):
-            filepaths_to_check = [filepath]
-        else:
-            filepaths_to_check = filepath
-
-        filepaths: list[Path] = []
-        precision_filepaths: list[Path] = []
-        for fp in filepaths_to_check:
-            if isinstance(fp, tuple):
-                if source_format.lower() != "gcwerks":
-                    raise TypeError(
-                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
-                    )
-                filepaths.append(Path(fp[0]))
-                precision_filepaths.append(Path(fp[1]))
-            else:
-                if source_format.lower() == "gcwerks":
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
-                filepaths.append(Path(fp))
-
-        # Check hashes of previous files (included after any filepath(s) formatting)
-        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
-
-        if not unseen_hashes:
-            return [{}]
-
-        filepaths = list(unseen_hashes.values())
-
-        if not filepaths:
-            return [{}]
-
-        # Get current parameter values and filter to only include function inputs
-        current_parameters = locals().copy()
-        fn_input_parameters = {key: current_parameters[key] for key in fn_input_parameters}
-
-        # Create a progress bar object using the filepaths, iterate over this below
-        for i, filepath in enumerate(filepaths):
-
-            fn_input_parameters["filepath"] = filepath
-            if precision_filepaths:
-                fn_input_parameters["precision_filepath"] = precision_filepaths[i]
-
-            # Define parameters to pass to the parser function and remaining keys
-            parser_input_parameters, additional_input_parameters = split_function_inputs(
-                fn_input_parameters, parser_fn
-            )
-
-            # Call appropriate standardisation function with input parameters
-            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
-
-            # Current workflow: if any species fails, whole filepath fails
-            for mdd in data:
-                species = mdd.metadata["species"]
-                species = synonyms(species)
-                try:
-                    ObsSurface.validate_data(mdd.data, species=species)
-                except ValueError:
-                    logger.error(
-                        f"Unable to validate and store data from file: {filepath.name}.",
-                        f" Problem with species: {species}\n",
-                    )
-                    validated = False
-                    break
-            else:
-                validated = True
-
-            if not validated:
-                continue
-
-            # Ensure the data is chunked
-            if chunks:
-                for mdd in data:
-                    mdd.data = mdd.data.chunk(chunks)
-
-            align_metadata_attributes(data=data, update_mismatch=update_mismatch)
-
-            # Check to ensure no required keys are being passed through info_metadata dict
-            # before adding details
-            self.check_info_keys(info_metadata)
-            if info_metadata is not None:
-                additional_metadata.update(info_metadata)
-
-            # Mop up and add additional keys to metadata which weren't passed to the parser
-            data = self.update_metadata(data, additional_input_parameters, additional_metadata)
-
-            # Create Datasources, save them to the object store and get their UUIDs
-            data_type = "surface"
-            datasource_uuids = self.assign_data(
-                data=data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                compressor=compressor,
-                filters=filters,
-            )
-
-            for x in datasource_uuids:
-                x.update({"file": filepath.name})
-
-            results.extend(datasource_uuids)
-
-            logger.info(f"Completed processing: {filepath.name}.")
-
-        self.store_hashes(unseen_hashes)
-
-        return results
-
     def read_multisite_aqmesh(
         self,
         filepath: pathType,
@@ -508,6 +196,136 @@ class ObsSurface(BaseStore):
 
         # return results
 
+    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
+        """ """
+        from openghg.util import (
+            verify_site,
+            clean_string,
+            evaluate_sampling_period,
+            format_platform,
+            format_data_level,
+            format_inlet,
+            check_and_set_null_variable,
+        )
+
+        # Apply clean_string first and then any specifics?
+        # How do we check the keys we're expecting for this? Rely on required keys?
+
+        params = kwargs.copy()
+
+        verify_site_code = params.get("verify_site_code")
+        if verify_site_code:
+            params.pop("verify_site_code")
+
+        # Test that the passed values are valid
+        # Check validity of site, instrument, inlet etc in 'site_info.json'
+        # Clean the strings
+        if verify_site_code:
+            verified_site = verify_site(site=params["site"])
+            if verified_site is None:
+                raise ValueError("Unable to validate site")
+            else:
+                params["site"] = verified_site
+        else:
+            params["site"] = clean_string(params["site"])
+
+        params["network"] = clean_string(params["network"])
+
+        if params.get("instrument") is not None:
+            params["instrument"] = clean_string(params["instrument"])
+        else:
+            params["instrument"] = None
+
+        if params.get("sampling_period") is not None:
+            params["sampling_period"] = evaluate_sampling_period(params["sampling_period"])
+        else:
+            params["sampling_period"] = None
+
+        platform = params.get("platform")
+        if platform is not None:
+            platform = format_platform(platform, data_type=self._data_type)
+
+        if params.get("measurement_type") is None and params.get("platform") is not None:
+            params["measurement_type"] = params["platform"]
+
+        # Ensure we have a clear missing value for data_level, data_sublevel
+        data_level = params.get("data_level")
+        data_level = format_data_level(data_level)
+
+        data_sublevel = params.get("data_sublevel")
+        if data_sublevel is not None:
+            data_sublevel = str(data_sublevel)
+
+        dataset_source = params.get("dataset_source")
+
+        platform = check_and_set_null_variable(platform)
+        data_level = check_and_set_null_variable(data_level)
+        data_sublevel = check_and_set_null_variable(data_sublevel)
+        dataset_source = check_and_set_null_variable(dataset_source)
+
+        params["platform"] = clean_string(platform)
+        params["data_level"] = clean_string(data_level)
+        params["data_sublevel"] = clean_string(data_sublevel)
+        params["dataset_source"] = clean_string(dataset_source)
+
+        # Make sure `inlet` OR the alias `height` is included
+        # Note: from this point only `inlet` variable should be used.
+        inlet = params.get("inlet")
+        if inlet is None and params.get("height") is not None:
+            inlet = params["height"]
+            params.pop("height")
+
+        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        inlet = clean_string(inlet)
+        params["inlet"] = format_inlet(inlet)
+
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
+
+        if not isinstance(params["filepath"], list):
+            filepaths_to_check = [params["filepath"]]
+        else:
+            filepaths_to_check = params["filepath"]
+
+        source_format = params["source_format"]
+        filepaths: list[Path] = []
+        precision_filepaths: list[Path] = []
+        for fp in filepaths_to_check:
+            if isinstance(fp, tuple):
+                if source_format.lower() != "gcwerks":
+                    raise TypeError(
+                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
+                    )
+                filepaths.append(Path(fp[0]))
+                precision_filepaths.append(Path(fp[1]))
+            else:
+                if source_format.lower() == "gcwerks":
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+                filepaths.append(Path(fp))
+                precision_filepaths.append(Path(""))
+
+        params["filepaths"] = filepaths
+        params["precision_filepaths"] = precision_filepaths
+
+        # Define additional metadata which is not being passed to the parse functions
+        additional_metadata = {
+            "data_source": data_source,
+        }
+
+        return params, additional_metadata
+
+    def align_metadata_attributes(self, data, update_mismatch):
+        """ """
+        return align_metadata_attributes(data, update_mismatch)
+
+    def define_loop_params(self):
+        """ """
+        loop_params = {  # "filepath": "filepaths",
+            "precision_filepath": "precision_filepaths",
+        }
+        return loop_params
+
     @staticmethod
     def schema(species: str) -> DataSchema:
         """
@@ -554,6 +372,10 @@ class ObsSurface(BaseStore):
         """
         data_schema = ObsSurface.schema(species)
         data_schema.validate_data(data)
+
+    def validate_data_internal(self, data: Dataset, species: str) -> None:
+        """ """
+        ObsSurface.validate_data(data=data, species=species)
 
     def store_data(
         self,
