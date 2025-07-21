@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 from typing import Any
 import warnings
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import open_object_store
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError
@@ -528,9 +528,9 @@ def search(**kwargs: Any) -> SearchResults:
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
         for data_type in types_to_search:
-            with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
+            with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
                 for v in expanded_search:
-                    res = metastore.search(**v)
+                    res = objstore.search(**v)
                     if res:
                         metastore_records.extend(res)
 
