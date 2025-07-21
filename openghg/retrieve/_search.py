@@ -512,13 +512,16 @@ def search(**kwargs: Any) -> SearchResults:
 
     # If we're given a store then we'll just read from that one
     store = search_kwargs.pop("store", None)
-    prompt_to_add = search_kwargs.pop("prompt_to_add", False)
+    add_new_store = search_kwargs.pop("add_new_store", False)
+    bucket_path = ""
     if store:
         if store in readable_buckets:
             readable_buckets = {store: readable_buckets[store]}
+        elif add_new_store:
+            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+            readable_buckets = {store: bucket_path}
         else:
-            bucket_path: str = handle_direct_store_path(path=store, prompt_to_add=prompt_to_add)
-
+            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
             readable_buckets = {store: bucket_path}
 
     # Keywords to apply a list search rather than exact match

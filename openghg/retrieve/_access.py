@@ -96,7 +96,6 @@ def get_obs_surface(
     rename_vars: bool = True,
     keep_missing: bool = False,
     keep_variables: list | None = None,
-    prompt_to_add: bool = False,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -165,7 +164,6 @@ def get_obs_surface(
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
-        prompt_to_add=prompt_to_add,
         **surface_keywords,  # type: ignore
     )
 
@@ -264,7 +262,6 @@ def get_obs_column(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
-    prompt_to_add: bool = False,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -293,7 +290,6 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
-        prompt_to_add=prompt_to_add,
         **kwargs,
     )
 
@@ -377,7 +373,6 @@ def get_flux(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     time_resolution: str | None = None,
-    prompt_to_add: bool = False,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -406,7 +401,6 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="flux",
-        prompt_to_add=prompt_to_add,
         **kwargs,
     )
 
@@ -427,7 +421,6 @@ def get_bc(
     bc_input: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
-    prompt_to_add: bool = False,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -450,7 +443,6 @@ def get_bc(
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
-        prompt_to_add=prompt_to_add,
         **kwargs,
     )
 
@@ -468,7 +460,6 @@ def get_footprint(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     species: str | None = None,
-    prompt_to_add: bool = False,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -518,7 +509,6 @@ def get_footprint(
         end_date=end_date,
         species=species,
         data_type="footprints",
-        prompt_to_add=prompt_to_add,
         **kwargs,
     )
 
