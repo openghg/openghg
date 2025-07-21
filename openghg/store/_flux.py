@@ -9,7 +9,7 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import pathType
-from openghg.util import synonyms, align_lat_lon
+from openghg.util import synonyms
 
 from xarray import DataArray, Dataset
 

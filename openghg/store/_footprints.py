@@ -3,10 +3,11 @@ import logging
 from typing import Any, cast
 import warnings
 import numpy as np
+from pathlib import Path
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import multiPathType
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
