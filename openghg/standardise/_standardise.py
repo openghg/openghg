@@ -193,7 +193,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -262,7 +262,7 @@ def standardise_column(
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="column",
@@ -291,7 +291,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     bc_input: str,
     domain: str,
@@ -351,7 +351,7 @@ def standardise_bc(
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="boundary_conditions",
@@ -376,7 +376,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     model: str,
     domain: str,
     site: str | None = None,
@@ -520,7 +520,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,
@@ -587,7 +587,6 @@ def standardise_flux(
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
-    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -595,6 +594,7 @@ def standardise_flux(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
     return standardise(
         data_type="flux",
         store=store,
@@ -622,7 +622,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     model: str,
     species: str,
     source_format: str = "openghg",
