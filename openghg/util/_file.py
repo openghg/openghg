@@ -271,7 +271,7 @@ def check_filepath(filepath: multiPathType, source_format: str) -> list[str | Pa
     for fp in filepath:
         if isinstance(fp, tuple):
             if source_format.lower() == "gcwerks":
-                msg = f"The openghg.standardise.surface._check_gcwerks_input() function must be used to extract filepath and precision_filepath"
+                msg = "The openghg.standardise.surface._check_gcwerks_input() function must be used to extract filepath and precision_filepath"
                 logger.exception(msg)
                 raise ValueError(msg)
             else:
