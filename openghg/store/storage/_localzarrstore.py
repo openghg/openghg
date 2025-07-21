@@ -269,7 +269,7 @@ class LocalZarrStore(Store):
         else:
             shutil.rmtree(self._stores_path, ignore_errors=True)
 
-    def update(
+    def overwrite(
         self,
         version: str,
         dataset: xr.Dataset,

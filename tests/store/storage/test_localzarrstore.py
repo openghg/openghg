@@ -25,7 +25,7 @@ def test_localzarrstore_not_writable():
         local_store.add(version="v1", dataset=xr.Dataset())
 
     with pytest.raises(PermissionError):
-        local_store.update(version="v1", dataset=xr.Dataset())
+        local_store.overwrite(version="v1", dataset=xr.Dataset())
 
     with pytest.raises(PermissionError):
         local_store.delete_version(version="v1")

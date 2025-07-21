@@ -60,9 +60,8 @@ class Store(ABC):
         and returns it."""
         pass
 
-    @abstractmethod
-    def update(self, version: str, dataset: Dataset, compressor: Any | None, filters: Any | None) -> None:
-        """Update the data at the given key"""
+    def overwrite(self, version: str, dataset: Dataset, compressor: Any | None, filters: Any | None) -> None:
+        """Overwrite the data at the given key"""
         pass
 
     @abstractmethod
