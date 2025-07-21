@@ -872,9 +872,6 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
 
     timestamps = timestamps.sort_values()
 
-    if len(timestamps) >= 3:
-        return pd.infer_freq(timestamps)
-
     if len(timestamps) < 2:
         raise ValueError("Unable to infer frequency from <2 data points")
     elif len(timestamps) == 2:
@@ -913,6 +910,8 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
                     break
             else:
                 inferred_period = f"{(total_seconds / day):.1f}D"
+    else:
+        inferred_period = pd.infer_freq(timestamps)
 
     return inferred_period
 
