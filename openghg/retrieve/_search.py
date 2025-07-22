@@ -515,18 +515,16 @@ def search(**kwargs: Any) -> SearchResults:
     store = search_kwargs.pop("store", None)
     add_new_store = search_kwargs.pop("add_new_store", False)
     bucket_path = ""
-    try:
-        if store:
-            if store in readable_buckets:
+
+    if store:
+        if store in readable_buckets:
+            try:
                 readable_buckets = {store: readable_buckets[store]}
-            elif add_new_store:
-                bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
-                readable_buckets = {store: bucket_path}
-            else:
-                bucket_path = handle_direct_store_path(path=store)
-                readable_buckets = {store: bucket_path}
-    except KeyError:
-        raise ValueError(f"Value for {store} cannot be processed")
+            except KeyError as e:
+                raise ValueError(f"Value for {store} cannot be processed") from e
+        else:
+            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+            readable_buckets = {store: bucket_path}
 
     # Keywords to apply a list search rather than exact match
     # At the moment this is primarily the "tag" keyword
