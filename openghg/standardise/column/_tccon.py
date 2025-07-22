@@ -13,7 +13,7 @@ logger = logging.getLogger("openghg.standardise.column._tccon")
 
 def filter_and_resample(ds,species,quality_filt):
     if quality_filt:
-        logger.info(f"Applying filter based on variable'extrapolation_flags_ak_x{species}'.")
+        logger.info(f"Applying filter based on variable 'extrapolation_flags_ak_x{species}'.")
         ds = ds.where(abs(ds[f'extrapolation_flags_ak_x{species}'])!=2)
     ds.dropna('time').sortby('time')
     tmp = ds.resample(time='h').mean(dim='time')
@@ -54,6 +54,48 @@ def define_var_attrs(ds,species,method):
         #                         'vmax':str(ds.wet_to_dry.values.max())}
 
     return ds
+
+def convert_prior_profile_to_dry(data, species):
+    logger.warning(f"According to the variables attributes, 'x{species}' is dry but the profile 'prior_h2o' and 'prior_{species}' are wet, so we dry the profile. Should check that with the TCCON team before starting to really use the data.")
+
+    if isinstance(species,str): species = [species,]
+
+    if data["prior_h2o"].attrs["standard_name"] == 'wet_atmosphere_mole_fraction_of_water':
+        h2o_attrs = data["prior_h2o"].attrs
+        data["prior_h2o"] = data["prior_h2o"]/(1-data["prior_h2o"])
+        data["prior_h2o"].attrs = {k:v.replace("wet","dry") for k,v in h2o_attrs.items() if k!="note"}
+    elif data["prior_h2o"].attrs["standard_name"] != 'dry_atmosphere_mole_fraction_of_water':
+        raise ValueError("'standard_name' of 'prior_h2o' is not what expected. Please check.")
+    
+    if "wet" in data["integration_operator"].attrs["description"]:
+        io_attrs = data["integration_operator"].attrs 
+        data["integration_operator"] = data["integration_operator"]/(1+data["prior_h2o"])
+        data["integration_operator"].attrs = {k:v.replace("wet","dry") for k,v in io_attrs.items()}
+    elif "dry" in data["integration_operator"].attrs["description"]:
+        logger.info(f"'integration_operator' already dried, skipping conversion from wet to dry.")
+    else:
+        raise ValueError(f"'description' of 'integration_operator' is not what expected. Please check.")
+
+    for sp in species:
+        if data[f"prior_{sp}"].attrs["standard_name"][:32] == 'wet_atmosphere_mole_fraction_of_':
+            sp_attrs = data[f"prior_{sp}"].attrs  
+            data[f"prior_{sp}"] = data[f"prior_{sp}"]*(1+data["prior_h2o"])
+            data[f"prior_{sp}"].attrs = {k:v.replace("wet","dry") for k,v in sp_attrs.items() if k!="note"}
+        elif data[f"prior_{sp}"].attrs["standard_name"][:32] == 'dry_atmosphere_mole_fraction_of_':
+            logger.info(f"Prior profile of {sp} already dried, skipping conversion from wet to dry.")
+        else:
+            raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
+        
+def reformat_units(data, species):
+    if isinstance(species,str): species = [species,]
+    for sp in species:
+        for var in [f"prior_{sp}",f"prior_x{sp}",f"x{sp}",f'x{sp}_uncertainty',f'x{sp}_error']:
+            if data[var].attrs["units"] == "ppm":
+                data[var].attrs["units"] = 1e-6
+            elif data[var].attrs["units"] == "ppb":
+                data[var].attrs["units"] = 1e-9
+            elif data[var].attrs["units"] == "ppt":
+                data[var].attrs["units"] = 1e-12
 
 def parse_tccon(
     filepath: pathType,
@@ -109,6 +151,8 @@ def parse_tccon(
     attributes["site"] = "T" + site_tccon_shortname.upper()
     attributes["network"] = "TCCON"
     attributes["platform"] = "site"
+    attributes["inlet"] = "column"
+    attributes["scale"] = "unknown"
 
     attributes["original_file_description"] = attributes["description"]
     attributes["description"] = f"TCCON data standardised from {filepath.name}, with the pressure weights estimated via '{pressure_weights_method}'."
@@ -134,15 +178,20 @@ def parse_tccon(
 
     # Align units
     if data[f'prior_{species}'].units == 'ppb' and data[f'prior_x{species}'].units == 'ppm' :
+        with xr.set_options(keep_attrs=True):
+            data[f'prior_{species}'] = data[f'prior_{species}']*1e-3
         data[f'prior_{species}'].attrs['units'] = 'ppm'
     if data[f'prior_{species}'].units != data[f'prior_x{species}'].units:
         raise ValueError(f"'prior_{species}' and 'prior_x{species}' have different units, please update this part of code to correct that.")
 
+    # Convert wet profile into dry
+    convert_prior_profile_to_dry(data, species = species)
+
+    # Define integartion_operator
     if pressure_weights_method == "integration_operator":
         if attributes["file_format_version"][:4] == "2020" and attributes["data_revision"] == "R0":
             raise ValueError(f"A bug is affecting the 'integration_operator' variable in version 2020.R0 (see https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator, last access:2025/07/17). Therefore the 'pressure weights should be used instead of 'integration_operator' while standardising {filepath}.")
-        # data['dry_to_wet'] = 1/(1+data['prior_h2o'])
-
+    
     elif pressure_weights_method == "pressure_weight":
         # Derive pressure thickness
         press = data.ak_pressure.values[:-1]- data.ak_pressure.values[1:]
@@ -151,32 +200,35 @@ def parse_tccon(
     
         # Derive pressure weight (hj), wet to dry conversion factor,
         # dry mole fraction of water (fdry_h2o) and prior dry xch4
+        if data["prior_h2o"].attrs["standard_name"] != 'dry_atmosphere_mole_fraction_of_water':
+            raise ValueError("Looks like the data haven't been dried..")
         M_dryH2O,M_dryAir = 18.0153,28.9647
-        data['wet_to_dry'] = 1/(1-data['prior_h2o'])
-        data['fdry_h2o'] = data['prior_h2o']*data['wet_to_dry']
         data['hj'] = data['dpj']/(data['prior_gravity']
                                     *M_dryAir
-                                    *(1+(data['fdry_h2o']
+                                    *(1+(data['prior_h2o']
                                          *M_dryH2O/M_dryAir)))
         
         data["integration_operator"] = data['hj']/data['hj'].sum(dim='prior_altitude')
 
-        data['prior_xch4'] = (data['integration_operator']*data['wet_to_dry']*data['prior_ch4']
-                              ).sum(dim='prior_altitude')                             
-        logger.warning("The rewriting of 'prior_xch4' by a 'dried' one seems odd to me. But I feel like I followed what is written in https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights")
-
-        data = data.drop_vars(['dpj','wet_to_dry','fdry_h2o','hj'])
+        # Clean dataset
+        data = data.drop_vars(['dpj','hj'])
 
     else:
         raise ValueError(f"pressure_weights_method = '{pressure_weights_method}' is not a valid option. Options available: 'pressure_weight' or 'integration_operator'.")
     
     data = data.drop_vars(["prior_gravity","prior_h2o","long","lat"])
 
-    logger.warning("The fuss about dry and wet mole fractions between the two methods should be checked again.")
-
+    # Test coherency between dry and wet stuff
+    max_diff = (abs(data['prior_xch4']-(data['prior_ch4']*data["integration_operator"]).sum(dim="prior_altitude"))/data['prior_xch4']).max().values
+    if max_diff > 1e-6:
+        logger.warning(f"Incoherencies between 'x{species}_prior' (supposed dry) and its recalculation from the derived integration operator and dried {species} profile (abs. rel. diff up to {100*max_diff:.1f}% of 'x{species}_prior'). Is 'x{species}_prior' in tccon file really dry? Or have I misunderstood something?")
+        
     # Filter the data and resample to hourly
     data = filter_and_resample(data,species,quality_filt)
     
+    # reformat units
+    reformat_units(data, species)
+
     # Rename variables
     data = data.rename({"integration_operator": "pressure_weights",
                           'ak_pressure':'pressure_levels',
@@ -208,9 +260,9 @@ def parse_tccon(
     
     else:
         raise ValueError("'ak_altitude' and ' prior_altitude' are different.")
-        
+    
     ### Define metadata
-    required_metadata = ["species","domain",
+    required_metadata = ["species","domain","inlet",
                          "site","network","platform",
                          "longitude","latitude",
                          "data_owner","data_owner_email",
