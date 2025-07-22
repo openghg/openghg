@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
 
+### Added
+- The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
+
 ### Updated
 - Updated temporary path creation to have user specific folder. [PR #1396](https://github.com/openghg/openghg/pull/1396)
 
 ### Fixed
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
+- Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
 
 ## [0.15.0] - 2025-07-02
 
@@ -26,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function.[PR #1361](https://github.com/openghg/openghg/pull/1361)
 - Method to update attributes of stored data. [PR #1375](https://github.com/openghg/openghg/pull/1375)
 - Added "tag" keyword as an option when standardising data. This allows a list of user-specified tags to be included. This allows users to search and connect data which includes the chosen tags. [PR #1354](https://github.com/openghg/openghg/pull/1354)
+- `ObjectStore` class, which manages access to the metastore and to datasources. [PR #1379](https://github.com/openghg/openghg/pull/1379)
 
 ### Updated
 

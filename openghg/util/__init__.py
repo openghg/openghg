@@ -31,7 +31,8 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    footprint_open_nc_fn,
+    open_nc_fn,
+    open_time_nc_fn,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -89,6 +90,7 @@ from ._time import (
     parse_period,
     dates_in_range,
     relative_time_offset,
+    infer_frequency,
     sanitise_daterange,
     split_daterange_str,
     split_encompassed_daterange,

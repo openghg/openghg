@@ -677,6 +677,7 @@ def test_search_for_float_inlet(tmp_path):
 
     bucket = str(tmp_path / "_metastore._data")
 
+    # Just use metastore here because we don't need to mock data.
     with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
         metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
 
