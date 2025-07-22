@@ -70,7 +70,7 @@ def get_writable_bucket(name: str | None = None) -> str:
     instead of a name, return it with a warning if it's not in the config.
 
     Args:
-        name: Name of writable bucket, or a direct path.
+        name: Name of writable bucket.
     Returns:
         str: Path to writable bucket.
     """
