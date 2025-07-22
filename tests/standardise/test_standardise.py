@@ -1,6 +1,5 @@
-from pathlib import Path
-import tempfile
 import pytest
+import socket
 from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
@@ -332,16 +331,19 @@ def test_standardise_footprint():
     assert result["model"] == "test_model"
     assert result["inlet"] == "10m"
 
+@pytest.mark.skipif(
+    "bp" not in socket.gethostname().lower(),
+    reason="Runs only on remote system."
+)
+def test_direct_path_to_get_function():
+    """This test looks at the pre-filled objectstore
+    The path to this objectstore is not added in the temp conf. It is expected to accept this path fetch the data"""
 
-# def test_with_mocked_readable_buckets():
-#     """This test looks at the pre-filled objectstore named as mockstore.
-#     The path to this mockstore is not added in the temp conf earlier. It is expected to accept this path fetch the data and also add the details of the path to the temporary config"""
-#     from unittest.mock import patch
+    mock_buckets = {"mockstore": "/group/chemistry/acrg/object_stores/obs_store"}
 
-#     mock_buckets = {"mockstore": "tests/mock_store"}
-#     with patch("openghg.objectstore.get_readable_buckets", return_value=mock_buckets["mockstore"]):
-#         result = get_footprint(site="tmb", domain="europe", model="test_model", inlet="10m", height="10m", species="inert",store=mock_buckets["mockstore"])
-#         assert result is not None
+    result = get_obs_surface(site="TAC", species="ch4", inlet= "100m", add_new_store=False, store=mock_buckets["mockstore"])
+
+    assert result is not None
 
 
 
