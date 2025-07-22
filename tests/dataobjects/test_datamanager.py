@@ -138,7 +138,9 @@ def test_delete_footprint_data(footprint_read):
     # Assert there are files in the zarr store
     assert ds._store
 
-    zarr_store_key = ds._store.store_key(version="v1")
+    zarr_store_path = ds._store.store_path("v1")
+
+    assert zarr_store_path.exists()
 
     with open_object_store(bucket=bucket, data_type="footprints") as objstore:
         assert objstore.search({"uuid": uuid})
@@ -150,7 +152,7 @@ def test_delete_footprint_data(footprint_read):
         with pytest.raises(ObjectStoreError):
             objstore.get_datasource(uuid=uuid)
 
-        assert not exists(bucket=bucket, key=zarr_store_key)
+        assert not zarr_store_path.exists()
         assert objstore.search({"uuid": uuid}) == []
 
 

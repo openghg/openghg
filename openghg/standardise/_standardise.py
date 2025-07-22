@@ -61,6 +61,7 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
+    precision_filepath: str | Path | list[str | Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
     instrument: str | None = None,
@@ -155,10 +156,16 @@ def standardise_surface(
     Returns:
         dict: Dictionary of result data
     """
-    if not isinstance(filepath, list):
-        filepath = [filepath]
+    from openghg.standardise.surface import check_gcwerks_input
+    from openghg.util import check_filepath
+
+    if source_format.lower() == "gcwerks":
+        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+    else:
+        filepath = check_filepath(filepath, source_format)
 
     if sort_files:
+        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
         if source_format.lower() != "gcwerks":
             filepath = sort_by_filenames(filepath=filepath)
 
@@ -166,6 +173,7 @@ def standardise_surface(
         store=store,
         data_type="surface",
         filepath=filepath,
+        precision_filepath=precision_filepath,
         source_format=source_format,
         network=network,
         site=site,
