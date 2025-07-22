@@ -379,6 +379,7 @@ class BaseStore:
                 dict mapping key based on required keys to Datasource UUIDs created or updated
         """
         from openghg.util import not_set_metadata_values
+        from openghg.util._metadata_util import get_period
 
         datasource_uuids = []
 
@@ -410,7 +411,7 @@ class BaseStore:
 
                 # Take a copy of the metadata so we can update it
                 meta_copy = metadata.copy()
-
+                period = get_period(meta_copy)
                 # kwargs for creating/updating
                 cu_kwargs = dict(
                     sort=sort,
@@ -421,11 +422,15 @@ class BaseStore:
                     if_exists=if_exists,
                     compressor=compressor,
                     filters=filters,
+                    period=period,
                 )
 
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
+
+                # add data type (this used to come from the Datasource)
+                meta_copy["data_type"] = self._data_type
 
                 if new_ds := uuid is None:  # use := so mypy knows uuid is not None in "else" clause
                     stored_uuid = objectstore.create(metadata=meta_copy, data=dataset, **cu_kwargs)

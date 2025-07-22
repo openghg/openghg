@@ -82,8 +82,10 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     with open_object_store(bucket=bucket, data_type="surface", mode="r") as objstore:
         for result in min_uuids:
             species = result["species"]
-            datasource = objstore.get_datasource(uuid=result["uuid"])
+            datasource = objstore.retrieve(uuid=result["uuid"])[0]
+
             assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
