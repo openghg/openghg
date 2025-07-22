@@ -66,9 +66,7 @@ def get_writable_buckets() -> dict[str, str]:
 
 def get_writable_bucket(name: str | None = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
-    more than one writable bucket is available. If a direct path is passed
-    instead of a name, return it with a warning if it's not in the config.
-
+    more than one writable bucket is available.
     Args:
         name: Name of writable bucket.
     Returns:
