@@ -18,6 +18,7 @@ from ._domain import (
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
+    check_filepath,
     compress,
     compress_json,
     compress_str,
