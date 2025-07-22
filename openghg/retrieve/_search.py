@@ -523,7 +523,7 @@ def search(**kwargs: Any) -> SearchResults:
                 bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
                 readable_buckets = {store: bucket_path}
             else:
-                bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+                bucket_path = handle_direct_store_path(path=store)
                 readable_buckets = {store: bucket_path}
     except KeyError:
         raise ValueError(f"Value for {store} cannot be processed")
