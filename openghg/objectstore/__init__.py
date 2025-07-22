@@ -26,3 +26,5 @@ from ._local_store import (
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes
 from ._integrity import integrity_check
+from ._legacy_datasource import Datasource
+from ._objectstore import get_datasource, locking_object_store, LockingObjectStoreType, open_object_store

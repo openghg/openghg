@@ -9,7 +9,6 @@ import pandas as pd
 import logging
 
 from openghg.util import clean_string
-from openghg.types import multiPathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -203,7 +202,7 @@ def multiple_inlets(site: str) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
+def sort_by_filenames(filepath: str | Path | list[str | Path]) -> list[str | Path]:
     """
     Sorting time on filename basis
 
@@ -216,15 +215,15 @@ def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
 
     # This code is to stop mypy complaints regarding file types
     if isinstance(filepath, str):
-        filepath = [Path(filepath)]
+        multi_filepath = [Path(filepath)]
     elif isinstance(filepath, Path):
-        filepath = [filepath]
+        multi_filepath = [filepath]
     elif isinstance(filepath, (tuple, list)):
-        filepath = [Path(f) for f in filepath]
+        multi_filepath = [Path(f) for f in filepath]
     else:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
-    return sorted(filepath)
+    return sorted(multi_filepath)
 
 
 def verify_site_with_satellite(

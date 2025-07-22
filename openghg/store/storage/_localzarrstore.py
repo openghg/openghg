@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
-from typing import Any, Literal, Union
-from collections.abc import Iterator, MutableMapping
+from typing import Any, Literal
+from collections.abc import Iterator
 import xarray as xr
 import zarr
 import os
@@ -15,8 +15,6 @@ from openghg.store.storage import Store
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
-
-StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
 
 class LocalZarrStore(Store):
@@ -46,8 +44,6 @@ class LocalZarrStore(Store):
                 if compiled_reg.match(str(f)):
                     full_path = Path(self._stores_path, f).expanduser().resolve()
                     self._stores[f] = zarr.storage.DirectoryStore(full_path)
-        # An in memory store used if data is popped from the store
-        self._memory_store: dict[str, bytes] = {}
 
     def __bool__(self) -> bool:
         return any(self._stores)
@@ -95,19 +91,6 @@ class LocalZarrStore(Store):
         """
         for store in self._stores.values():
             store.close()
-
-    def store_key(self, version: str) -> str:
-        """Return the key of this zarr Store
-
-        Args:
-            version: Data version
-        Returns:
-            str: Key of zarr store
-        """
-        if version.lower() not in self._stores:
-            raise KeyError(f"Invalid version - {version}")
-
-        return str(Path(self._root_store_key, version))
 
     def store_path(self, version: str) -> Path:
         """Return the path of this zarr Store
@@ -198,46 +181,6 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
         return ds
 
-    def _pop(self, version: str) -> xr.Dataset:
-        """Pop some data from the store. This copies the data in the version specified
-        to a memory store, deletes the version and returns an xarray Dataset loaded from the
-        memory store.
-
-        Note that this will delete the data from the store on the local filesystem.
-
-        Args:
-            version: Data version
-        Returns:
-            Dataset: Dataset popped from the store
-        """
-        raise NotImplementedError("This method will be updated to ensure data is backed up.")
-        self._check_writable()
-        version = self._check_version(version)
-
-        self._memory_store.clear()
-        store = self._stores[version]
-        # Let's copy the data we want to pop into a memory store and return it from there
-        zarr.convenience.copy_store(source=store, dest=self._memory_store)
-        self.delete_version(version=version)
-        ds: xr.Dataset = xr.open_zarr(store=self._memory_store)
-        return ds
-
-    def _copy_to_memorystore(self, version: str) -> dict:
-        """Copies the compressed data from the filesystem store to an in-memory store.
-        This preserves the compression and chunking of the data and the store
-        can be opened as a single dataset. This may be useful for testing
-
-        Args:
-            version: Data version
-        Returns:
-            dict: In-memory copy of compressed data
-        """
-        version = self._check_version(version)
-        store = self._stores[version]
-        mem_store: dict[str, bytes] = {}
-        zarr.copy_store(source=store, dest=mem_store)
-        return mem_store
-
     def delete_version(self, version: str) -> None:
         """Delete a version from the store
 
@@ -269,7 +212,7 @@ class LocalZarrStore(Store):
         else:
             shutil.rmtree(self._stores_path, ignore_errors=True)
 
-    def update(
+    def overwrite(
         self,
         version: str,
         dataset: xr.Dataset,
@@ -353,6 +296,7 @@ class LocalZarrStore(Store):
 
         return {}
 
+    # TODO: implement attribute matching for zarr store
     def match_attributes(self, version: str, dataset: xr.Dataset) -> dict:
         """Ensure the attributes of the stored and incoming data are matched,
         any attributes that differ will be added as a new key with a number appended.

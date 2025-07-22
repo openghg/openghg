@@ -11,7 +11,7 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
-def test_read_file():
+def test_parse_openghg():
     """
     Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
@@ -60,6 +60,41 @@ def test_read_file():
 
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
+
+
+def test_parse_openghg_column_multi_file():
+    """
+    Test the parser for column is able to accept multiple files and concatenate them.
+    """
+
+    data_path_1 = get_column_datapath(filename="gosat-fts_gosat_20160101_ch4-column.nc")
+    data_path_2 = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+
+    filepath = [data_path_1, data_path_2]
+
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
+    data = parse_openghg(
+        filepath,
+        satellite=satellite,
+        domain=domain,
+        species=species,
+    )
+
+    assert "ch4" in data
+
+    output_ch4 = data["ch4"]
+    data_ch4 = output_ch4["data"]
+
+    time = data_ch4["time"]
+    assert time[0] == Timestamp("2016-01-01T14:59:12.5")
+    assert time[-1] == Timestamp("2017-03-18T17:22:23")
+
+    xch4 = data_ch4["xch4"]
+    assert np.isclose(xch4[0], 1810.89001465)
+    assert np.isclose(xch4[-1], 1762.8855)    
 
 
 # def test_read_file_no_attr():
@@ -126,3 +161,5 @@ def test_read_file():
 # def test_openghg_cf_compliance(openghg_data):
 #     co2_data = openghg_data["co2"]["data"]
 #     assert check_cf_compliance(dataset=co2_data)
+
+

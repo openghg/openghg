@@ -139,6 +139,10 @@ class MetaStore(ABC):
         result = self.search(search_terms=metadata)
         return len(result) == 1
 
+    def close(self) -> None:
+        """Clean up any resources used by the Metastore."""
+        pass
+
 
 class TinyDBMetaStore(MetaStore):
     """MetaStore using a TinyDB database backend."""
@@ -338,3 +342,10 @@ class TinyDBMetaStore(MetaStore):
         super().delete(metadata, delete_one)  # Error handling
         _query = self._get_query(metadata)
         self._db.remove(_query)
+
+    def close(self) -> None:
+        """Clean up any resources used by the Metastore.
+
+        Closes the TinyDB store.
+        """
+        self._db.close()

@@ -1,13 +1,11 @@
 from __future__ import annotations
 import logging
-from pathlib import Path
 from typing import Any, Optional
-
+from pathlib import Path
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import pathType
 from xarray import DataArray
 
 ArrayType = Optional[ndarray | DataArray]
@@ -26,7 +24,7 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: pathType,
+        filepath: str | Path | list[str | Path],
         species: str,
         platform: str = "satellite",
         obs_region: Optional[str] = None,
@@ -153,8 +151,6 @@ class ObsColumn(BaseStore):
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
 
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
