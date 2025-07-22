@@ -470,6 +470,7 @@ def search(**kwargs: Any) -> SearchResults:
         elif k.lower() in ["start_date", "end_date"]:
             if v is not None:
                 v = pd.Timestamp(v)
+        # To avoid clean string function
         elif k.lower() in ["store", "add_new_store"]:
             search_kwargs[k] = v
         else:
@@ -514,15 +515,18 @@ def search(**kwargs: Any) -> SearchResults:
     store = search_kwargs.pop("store", None)
     add_new_store = search_kwargs.pop("add_new_store", False)
     bucket_path = ""
-    if store:
-        if store in readable_buckets:
-            readable_buckets = {store: readable_buckets[store]}
-        elif add_new_store:
-            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
-            readable_buckets = {store: bucket_path}
-        else:
-            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
-            readable_buckets = {store: bucket_path}
+    try:
+        if store:
+            if store in readable_buckets:
+                readable_buckets = {store: readable_buckets[store]}
+            elif add_new_store:
+                bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+                readable_buckets = {store: bucket_path}
+            else:
+                bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+                readable_buckets = {store: bucket_path}
+    except KeyError:
+        raise ValueError(f"Value for {store} cannot be processed")
 
     # Keywords to apply a list search rather than exact match
     # At the moment this is primarily the "tag" keyword
