@@ -470,7 +470,7 @@ def search(**kwargs: Any) -> SearchResults:
         elif k.lower() in ["start_date", "end_date"]:
             if v is not None:
                 v = pd.Timestamp(v)
-        elif k.lower() == "store":
+        elif k.lower() in ["store", "add_new_store"]:
             search_kwargs[k] = v
         else:
             v = clean_string(v)
