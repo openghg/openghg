@@ -2,7 +2,7 @@
 # from typing import Dict, Union
 
 # from openghg.store import ObsSurface
-# from openghg.store.base import Datasource
+# from openghg.objectstore import Datasource
 # from openghg.util import create_daterange_str, verify_site
 
 

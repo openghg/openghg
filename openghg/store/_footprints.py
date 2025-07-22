@@ -3,10 +3,11 @@ import logging
 from typing import Any, cast
 import warnings
 import numpy as np
+from pathlib import Path
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.types import multiPathType
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 from xarray import Dataset
 
@@ -188,7 +189,7 @@ class Footprints(BaseStore):
         self,
         domain: str,
         model: str,
-        filepath: multiPathType,
+        filepath: str | Path | list[str | Path],
         site: str | None = None,
         satellite: str | None = None,
         obs_region: str | None = None,
@@ -393,6 +394,7 @@ class Footprints(BaseStore):
             high_spatial_resolution=high_spatial_resolution,
             time_resolved=time_resolved,
             short_lifetime=short_lifetime,
+            source_format=source_format,
         )
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
@@ -611,6 +613,7 @@ class Footprints(BaseStore):
             high_spatial_resolution=high_spatial_resolution,
             time_resolved=time_resolved,
             short_lifetime=short_lifetime,
+            source_format=source_format,
         )
         data_schema.validate_data(data)
 
@@ -620,6 +623,7 @@ class Footprints(BaseStore):
         high_time_resolution: bool = False,
         high_spatial_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str = "",
     ) -> ChunkingSchema:
         """
         Get chunking schema for footprint data.
@@ -647,7 +651,7 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
         if time_resolved:
-            var = "fp_HiTRes"
+            var = "fp_HiTRes" if source_format.upper() not in ("PARIS", "FLEXPART") else "fp_time_resolved"
             time_chunk_size = 24
             secondary_vars = ["lat", "lon", "H_back"]
         else:

@@ -20,11 +20,10 @@ from openghg.objectstore import (
     get_writable_bucket,
     set_object_from_json,
 )
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.store.base import Datasource
 from openghg.types import MetadataAndData
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
@@ -79,28 +78,30 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     """
     bucket = get_writable_bucket(name="user")
     min_uuids = min_uuids_fixture
-    for result in min_uuids:
-        species = result["species"]
-        datasource = Datasource(bucket=bucket, uuid=result["uuid"])
-        assert metadata_checker_obssurface(datasource.metadata(), species=species)
 
-        with datasource.get_data(version="latest") as data:
-            assert attributes_checker_obssurface(data.attrs, species=species)
+    with open_object_store(bucket=bucket, data_type="surface", mode="r") as objstore:
+        for result in min_uuids:
+            species = result["species"]
+            datasource = objstore.get_datasource(uuid=result["uuid"])
+            assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
+            with datasource.get_data(version="latest") as data:
+                assert attributes_checker_obssurface(data.attrs, species=species)
 
 
+# TODO: review this test, it seems to be testing the objectstore (or metastore)
 def test_raising_error_doesnt_save_to_store(mocker, bucket):
     clear_test_stores()
     bucket = get_writable_bucket(name="user")
 
     key = ""
-    with pytest.raises(ValueError):
-        with open_metastore(data_type="surface", bucket=bucket) as obs:
-            key = "abc123"
-            assert not exists(bucket=bucket, key=key)
-            # Here we're testing to see what happens if a user does something
-            # with obs that results in an exception being raised that isn't internal
-            # to our processing functions
-            raise ValueError("Oops")
+    with pytest.raises(ValueError), open_object_store(data_type="surface", bucket=bucket):
+        key = "abc123"
+        assert not exists(bucket=bucket, key=key)
+        # Here we're testing to see what happens if a user does something
+        # with obs that results in an exception being raised that isn't internal
+        # to our processing functions
+        raise ValueError("Oops")
 
     assert not exists(bucket=bucket, key=key)
 
@@ -234,7 +235,7 @@ def test_read_CRDS(bucket, tmpdir):
     # Load up the assigned Datasources and check they contain the correct data
     uid = [res["uuid"] for res in results if res["species"] == "ch4"][0]
 
-    datasource = Datasource(bucket=bucket, uuid=uid)
+    datasource = get_datasource(bucket=bucket, data_type="surface", uuid=uid)
 
     assert datasource.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
@@ -254,9 +255,9 @@ def test_read_CRDS(bucket, tmpdir):
     )
 
     # Let's load the same Datasource again and check that the data has been updated
-    datasource = Datasource(bucket=bucket, uuid=uid)
+    datasource = get_datasource(bucket=bucket, data_type="surface", uuid=uid)
 
-    assert datasource.data_keys() == [
+    assert sorted(datasource.data_keys()) == [
         "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:21:29+00:00",
     ]
@@ -352,7 +353,7 @@ def test_read_GC(bucket):
     # Load in some data
     uuid = select(filt(results, species="hfc152a", inlet="70m"), "uuid")[0]["uuid"]
 
-    hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
+    hfc_datasource = get_datasource(bucket=bucket, data_type="surface", uuid=uuid)
 
     with hfc_datasource.get_data(version="latest") as ds:
         # hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
@@ -372,8 +373,8 @@ def test_read_GC(bucket):
         hfc152a_attrs = ds.attrs
 
     # Check we have the Datasource info saved
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuids = metastore.select("uuid")
+    with open_object_store(data_type="surface", bucket=bucket) as objstore:
+        uuids = objstore.get_uuids()
 
         attrs = hfc152a_attrs
 
@@ -382,7 +383,7 @@ def test_read_GC(bucket):
         # # Now test that if we add more data it adds it to the same Datasource
         uuid_one = uuids[0]  # metastore.search()[0]['uuid']
 
-    datasource = Datasource(bucket=bucket, uuid=uuid_one)
+        datasource = objstore.get_datasource(uuid=uuid_one)
 
     assert datasource.data_keys() == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
@@ -399,7 +400,7 @@ def test_read_GC(bucket):
         network="AGAGE",
     )
 
-    datasource = Datasource(bucket=bucket, uuid=uuid_one)
+    datasource = get_datasource(bucket=bucket, uuid=uuid_one, data_type="surface")
 
     assert datasource.data_keys() == [
         "2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00",
@@ -428,7 +429,7 @@ def test_read_openghg_format(bucket):
 
     uuid = filt(results, file="tac_co2_openghg.nc", species="co2")[0]["uuid"]
 
-    co2_data = Datasource(bucket=bucket, uuid=uuid)
+    co2_data = get_datasource(bucket=bucket, uuid=uuid, data_type="surface")
 
     with co2_data.get_data(version="latest") as co2_data:
         assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
@@ -455,7 +456,7 @@ def test_read_noaa_raw(bucket):
 
     uuid = filt(results, file="co_pocn25_surface-flask_1_ccgg_event.txt", species="co")[0]["uuid"]
 
-    co_datasource = Datasource(bucket=bucket, uuid=uuid)
+    co_datasource = get_datasource(bucket=bucket, uuid=uuid, data_type="surface")
 
     with co_datasource.get_data(version="latest") as co_data:
         assert co_data["co"][0] == pytest.approx(94.9)
@@ -487,7 +488,7 @@ def test_read_noaa_metastorepack(bucket):
 
     uuid = filt(results, file="ch4_esp_surface-flask_2_representative.nc", species="ch4")[0]["uuid"]
 
-    ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
+    ch4_datasource = get_datasource(bucket=bucket, uuid=uuid, data_type="surface")
 
     assert ch4_datasource.data_keys() == ["1993-06-17-00:12:30+00:00_2002-01-12-12:00:00+00:00"]
 
@@ -517,17 +518,17 @@ def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectS
         sort_files=True,
     )
 
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid = metastore.select("uuid")[0]
-        datasource = Datasource.load(bucket=bucket, uuid=uuid)
+    with open_object_store(data_type="surface", bucket=bucket) as objstore:
+        uuid = objstore.uuids[0]
+        datasource = objstore.get_datasource(uuid=uuid)
         data_keys = datasource.data_keys()
         key = data_keys[0]
 
         assert exists(bucket=bucket, key=key)
 
-        metastore.delete({"uuid": uuid})
+        objstore.delete(uuid)
 
-        assert uuid not in metastore.select("uuid")
+        assert uuid not in objstore.uuids
         assert not exists(bucket=bucket, key=key)
 
 
@@ -744,7 +745,7 @@ def test_read_multiside_aqmesh():
     # This crazy structure will be fixed when add_datsources is updated
     raith_uuid = result["raith"]["raith"]["uuid"]
 
-    d = Datasource.load(bucket=bucket, uuid=raith_uuid, shallow=False)
+    d = get_datasource(bucket=bucket, uuid=raith_uuid, data_type="surface")
 
     data = d.data()["2021-06-18-05:00:00+00:00_2021-06-21-13:00:00+00:00"]
 
@@ -791,8 +792,8 @@ def test_store_icos_carbonportal_data(bucket):
 
     data = [MetadataAndData(metadata=data["co2"]["metadata"], data=ds)]
 
-    with ObsSurface(bucket=bucket) as metastore:
-        result = metastore.store_data(data=data)
+    with ObsSurface(bucket=bucket) as obs:
+        result = obs.store_data(data=data)
 
     assert result is not None
     assert filt(result, species="co2")[0]["new"] is True
@@ -1148,7 +1149,7 @@ def test_sync_surface_metadata_store_level(
     standardised_data = filt(standardised_data, file=filepath.name)
 
     for res in standardised_data:
-        datasource = Datasource(bucket=bucket, uuid=res["uuid"])
+        datasource = get_datasource(bucket=bucket, uuid=res["uuid"], data_type="surface")
         assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
 
         with datasource.get_data(version="latest") as data:
@@ -1177,7 +1178,7 @@ def test_co2_games():
         (None, "gemma_v1", ["gemma_v1"]),
     ],
 )
-def test_add_tag(tag1, tag2, combined_tag):
+def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
     """
 
     """
@@ -1185,7 +1186,7 @@ def test_add_tag(tag1, tag2, combined_tag):
 
     filepath_20230101 = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc", source_format="openghg"
-    )    
+    )
 
     filepath_20230102 = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20230102_cut.nc", source_format="openghg"
@@ -1208,7 +1209,7 @@ def test_add_tag(tag1, tag2, combined_tag):
                         update_mismatch="metadata",
                         tag=tag1,
                         )
-    
+
     standardise_surface(filepath=filepath_20230102,
                         site=site,
                         network=network,
@@ -1219,8 +1220,8 @@ def test_add_tag(tag1, tag2, combined_tag):
                         update_mismatch="metadata",
                         tag=tag2,
                         )
-    
+
     data = search_surface(site=site).retrieve()
     metadata = data.metadata
-    
+
     assert metadata["tag"] == combined_tag

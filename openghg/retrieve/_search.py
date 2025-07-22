@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 from typing import Any
 import warnings
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import open_object_store
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError
@@ -450,6 +450,7 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
+    from openghg.util import handle_direct_store_path
 
     # Select and format the search terms
     # - ignore any kwargs which are None
@@ -469,6 +470,9 @@ def search(**kwargs: Any) -> SearchResults:
         elif k.lower() in ["start_date", "end_date"]:
             if v is not None:
                 v = pd.Timestamp(v)
+        # To avoid clean string function
+        elif k.lower() in ["store", "add_new_store"]:
+            search_kwargs[k] = v
         else:
             v = clean_string(v)
 
@@ -509,11 +513,18 @@ def search(**kwargs: Any) -> SearchResults:
 
     # If we're given a store then we'll just read from that one
     store = search_kwargs.pop("store", None)
+    add_new_store = search_kwargs.pop("add_new_store", False)
+    bucket_path = ""
+
     if store:
-        try:
-            readable_buckets = {store: readable_buckets[store]}
-        except KeyError:
-            raise ObjectStoreError(f"Invalid store: {store}")
+        if store in readable_buckets:
+            try:
+                readable_buckets = {store: readable_buckets[store]}
+            except KeyError as e:
+                raise ValueError(f"Value for {store} cannot be processed") from e
+        else:
+            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+            readable_buckets = {store: bucket_path}
 
     # Keywords to apply a list search rather than exact match
     # At the moment this is primarily the "tag" keyword
@@ -528,9 +539,9 @@ def search(**kwargs: Any) -> SearchResults:
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
         for data_type in types_to_search:
-            with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
+            with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
                 for v in expanded_search:
-                    res = metastore.search(**v)
+                    res = objstore.search(**v)
                     if res:
                         metastore_records.extend(res)
 
