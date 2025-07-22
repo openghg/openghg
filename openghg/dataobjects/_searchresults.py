@@ -60,7 +60,7 @@ class SearchResults:
         return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return f"SearchResults({self.uuids()})"
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
@@ -89,7 +89,11 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         if dataframe is not None:
-            uuids = dataframe["uuid"].to_list()
+            uuids = (
+                dataframe[["object_store_name", "data_type", "uuid"]]
+                .apply(lambda x: "__".join(x), axis=1)
+                .to_list()
+            )
             return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
         else:
             return self._retrieve_by_term(version=version, sort=sort, **kwargs)
@@ -180,7 +184,7 @@ class SearchResults:
 
             results.append(
                 ObsData(
-                    uuid=uuid,
+                    uuid=metadata["uuid"],
                     version=version,
                     metadata=metadata,
                     start_date=self._start_date,
