@@ -210,7 +210,7 @@ class EulerianModel(BaseStore):
 
         TODO: Decide on data_vars checks as we build up the use of this data_type
         """
-        data_vars = {}
+        data_vars: dict[str, tuple[str, ...]] = {}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64}
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
