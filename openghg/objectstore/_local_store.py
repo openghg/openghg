@@ -66,12 +66,11 @@ def get_writable_buckets() -> dict[str, str]:
 
 def get_writable_bucket(name: str | None = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
-    more than one writable bucket available.
-
+    more than one writable bucket is available.
     Args:
-        name: Name of writable bucket
+        name: Name of writable bucket.
     Returns:
-        str: Path to writable bucket
+        str: Path to writable bucket.
     """
     if os.getenv("OPENGHG_TUT_STORE") is not None:
         return str(get_tutorial_store_path())

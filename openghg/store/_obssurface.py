@@ -10,7 +10,7 @@ from xarray import Dataset
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, MetadataAndData, DataOverlapError
+from openghg.types import pathType, MetadataAndData, DataOverlapError
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -97,7 +97,8 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = self.read_file(
-                    filepath=(filepath, precision_filepath),
+                    filepath=filepath,
+                    precision_filepath=[precision_filepath],
                     site_filepath=site_filepath,
                     **meta_kwargs,
                 )
@@ -284,29 +285,15 @@ class ObsSurface(BaseStore):
         data_source = "internal"
 
         if not isinstance(params["filepath"], list):
-            filepaths_to_check = [params["filepath"]]
+            params["filepaths"] = [Path(params["filepath"])]
         else:
-            filepaths_to_check = params["filepath"]
+            params["filepaths"] = [Path(fp) for fp in params["filepath"]]
 
-        source_format = params["source_format"]
-        filepaths: list[Path] = []
-        precision_filepaths: list[Path] = []
-        for fp in filepaths_to_check:
-            if isinstance(fp, tuple):
-                if source_format.lower() != "gcwerks":
-                    raise TypeError(
-                        f"Only expect tuple of (data file, precision file) for GCWERKS input. This source_format = {source_format}"
-                    )
-                filepaths.append(Path(fp[0]))
-                precision_filepaths.append(Path(fp[1]))
+        if params.get("precision_filepath") is not None:
+            if not isinstance(params["precision_filepath"], list):
+                params["precision_filepath"] = [Path(params["precision_filepath"])]
             else:
-                if source_format.lower() == "gcwerks":
-                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
-                filepaths.append(Path(fp))
-                precision_filepaths.append(Path(""))
-
-        params["filepaths"] = filepaths
-        params["precision_filepaths"] = precision_filepaths
+                params["precision_filepath"] = [Path(pfp) for pfp in params["precision_filepath"]]
 
         # Define additional metadata which is not being passed to the parse functions
         additional_metadata = {
@@ -322,7 +309,7 @@ class ObsSurface(BaseStore):
     def define_loop_params(self):
         """ """
         loop_params = {  # "filepath": "filepaths",
-            "precision_filepath": "precision_filepaths",
+            "precision_filepath": "precision_filepath",
         }
         return loop_params
 

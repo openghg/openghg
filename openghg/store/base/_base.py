@@ -388,7 +388,8 @@ class BaseStore:
             fn_input_parameters["filepath"] = filepath
             if loop_params:
                 for key1, key2 in loop_params.items():
-                    fn_input_parameters[key1] = fn_input_parameters[key2][i]
+                    if fn_input_parameters.get(key2) is not None:
+                        fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
             datasource_uuids = self._standardise_from_file(
                 filepath=filepath,
