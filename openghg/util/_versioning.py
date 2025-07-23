@@ -6,19 +6,20 @@ from typing_extensions import Self
 
 
 @runtime_checkable
-class HasCopyTo(Protocol):
-    """Satisfied by classes with `copy_to` method.
+class HasCopy(Protocol):
+    """Satisfied by classes with `copy` static method."""
 
-    A `copy_to` method should copy the calling object to the "other" object
-    passed as an argument.
-    """
+    @staticmethod
+    def copy(source: Any, dest: Any) -> None: ...
 
-    def copy_to(self, other: Any) -> None: ...
+    """Copy source to destination.
 
-    """Copy self to other.
+    This method can be added to subclasses of SimpleVersioning to
+    modify how data is copied when creating new versions.
 
     Args:
-        other: object to copy self to.
+        source: object to copy from
+        dest: object to copy to
     """
 
 
@@ -123,6 +124,10 @@ class SimpleVersioning(Generic[VT, T]):
     def _current(self) -> T:
         return self._versions[self.current_version]
 
+    @_current.setter
+    def _current(self, value: T) -> None:
+        self._versions[self.current_version] = value
+
     def _get_version(self, v: Hashable) -> VT | None:
         # use loop to check equality in case version type VT
         # can be equal to other types (e.g. string)
@@ -141,7 +146,7 @@ class SimpleVersioning(Generic[VT, T]):
         if v in self.versions:
             raise ValueError(f"Cannot create version {v}; it already exists.")
 
-        # need to check copying behavior first, since if T does not have `copy_to` method, we will
+        # need to check copying behavior first, since if a `copy` static method is not available, we will
         # use `deepcopy`, in which case, we don't want to call the factory function, since it might
         # have side-effects (such as creating files/folders, etc.)
         if copy_current:
@@ -150,9 +155,9 @@ class SimpleVersioning(Generic[VT, T]):
             except VersionError as e:
                 raise ValueError("Cannot copy current: no version is currently selected.") from e
             else:
-                if isinstance(current, HasCopyTo):
+                if isinstance(self, HasCopy):
                     self._versions[v] = self.factory(v)
-                    current.copy_to(self._versions[v])
+                    self.copy(current, self._versions[v])
                 else:
                     self._versions[v] = deepcopy(self._current)
         else:
