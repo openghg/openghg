@@ -96,7 +96,7 @@ def get_obs_surface(
     rename_vars: bool = True,
     keep_missing: bool = False,
     keep_variables: list | None = None,
-    target_units: str | None = None,
+    target_units: dict | None = None,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -120,6 +120,12 @@ def get_obs_surface(
         rename_vars: Rename variables from species names to use "mf" explictly.
         keep_missing: Keep missing data points or drop them.
         keep_variables: List of variables to keep. If None, keeps everything.
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
         kwargs: Additional search terms
 
     Returns:
@@ -264,7 +270,7 @@ def get_obs_column(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
-    target_units: str | None = None,
+    target_units: dict | None = None,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -277,6 +283,12 @@ def get_obs_column(
         end_date: End date
         time_resolution: One of ["standard", "high"]
         return_mf: Return mole fraction rather than column data. Default=True
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -378,7 +390,7 @@ def get_flux(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     time_resolution: str | None = None,
-    target_units: str | None = None,
+    target_units: dict | None = None,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -392,6 +404,12 @@ def get_flux(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
         kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
@@ -428,7 +446,7 @@ def get_bc(
     bc_input: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
-    target_units: str | None = None,
+    target_units: dict | None = None,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -441,6 +459,12 @@ def get_bc(
         domain: Region for boundary conditions e.g. EUROPE
         start_date: Start date
         end_date: End date
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
@@ -469,7 +493,7 @@ def get_footprint(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     species: str | None = None,
-    target_units: str | None = None,
+    target_units: dict | None = None,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -492,6 +516,12 @@ def get_footprint(
                  if species needs a modified footprints from the typical 30-day
                  footprints appropriate for a long-lived species (like methane)
                  e.g. for high time resolution (co2) or is a short-lived species.
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
         kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
