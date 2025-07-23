@@ -207,7 +207,7 @@ class EulerianModel(BaseStore):
 
         Returns:
             DataSchema : Contains dummy schema for EulerianModel.
-        
+
         TODO: Decide on data_vars checks as we build up the use of this data_type
         """
         data_vars = {}
