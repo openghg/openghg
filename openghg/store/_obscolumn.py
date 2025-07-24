@@ -2,11 +2,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 from pathlib import Path
+import numpy as np
 from numpy import ndarray
 
-# from openghg.store import DataSchema
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray
+from xarray import DataArray, Dataset
 
 ArrayType = Optional[ndarray | DataArray]
 
@@ -305,47 +306,47 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
-    # TODO: Define and add schema methods for ObsColumn
-    # @staticmethod
-    # def schema(species: str, platform: str = "satellite") -> DataSchema:
-    #     """
-    #     Define schema for emissions Dataset.
+    # TODO: Check and update schema methods for ObsColumn to make sure this works for site-column
+    @staticmethod
+    def schema(species: str) -> DataSchema:
+        """
+        Define schema for emissions Dataset.
 
-    #     Includes column data for each time point:
-    #         - standardised species and column name (e.g. "xch4")
-    #         - expected dimensions: ("time")
+        Includes column data for each time point:
+            - standardised species and column name (e.g. "xch4")
+            - expected dimensions: ("time")
 
-    #     Expected data types for all variables and coordinates also included.
+        Expected data types for all variables and coordinates also included.
 
-    #     Returns:
-    #         DataSchema : Contains schema for Emissions.
-    #     """
-    #     data_vars: Dict[str, Tuple[str, ...]] \
-    #         = {"flux": ("time", "lat", "lon")}
-    #     dtypes = {"lat": np.floating,
-    #               "lon": np.floating,
-    #               "time": np.datetime64,
-    #               "flux": np.floating}
+        Returns:
+            DataSchema : Contains schema for Emissions.
+        """
+        from openghg.standardise.meta import define_species_label
 
-    #     data_format = DataSchema(data_vars=data_vars,
-    #                              dtypes=dtypes)
+        name = define_species_label(species)[0]
+        column_name = f"x{name}"
 
-    #     return data_format
+        data_vars: dict[str, tuple[str, ...]] = {column_name: ("time",)}
+        dtypes = {column_name: np.floating, "time": np.datetime64}
 
-    # @staticmethod
-    # def validate_data(data: Dataset) -> None:
-    #     """
-    #     Validate input data against Emissions schema - definition from
-    #     Emissions.schema() method.
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
-    #     Args:
-    #         data : xarray Dataset in expected format
+        return data_format
 
-    #     Returns:
-    #         None
+    @staticmethod
+    def validate_data(data: Dataset, species: str) -> None:
+        """
+        Validate input data against Emissions schema - definition from
+        Emissions.schema() method.
 
-    #         Raises a ValueError with details if the input data does not adhere
-    #         to the Emissions schema.
-    #     """
-    #     data_schema = Emissions.schema()
-    #     data_schema.validate_data(data)
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Emissions schema.
+        """
+        data_schema = ObsColumn.schema(species)
+        data_schema.validate_data(data)
