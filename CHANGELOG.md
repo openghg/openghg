@@ -10,16 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
 - Ability to pass the non configured path to the store argument directly for get_* functions. Also added the ability add the store to config using openghg --register-store command. [PR #1389](https://github.com/openghg/openghg/pull/1389)
+- Add basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
 
 ### Updated
-- Updated temporary path creation to have user specific folder. [PR #1396](https://github.com/openghg/openghg/pull/1396)
+
+- Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
 - Removed unused code from Datasource and LocalZarrStore and changed the name of LocalZarrStore's `update` method to `overwrite`. See the PR for full details of code removed.[PR #1404](https://github.com/openghg/openghg/pull/1404)
 - Allow `precision_filepath` to be passed directly when specifying the "gcwerks" format for standardise_surface. Previous method of passing a tuple for filepath is still supported but will be deprecated. [PR #1405](https://github.com/openghg/openghg/pull/1405)
-
+- Updated workflow of pypi release to follow trusted publisher management from pypi.[PR #1402](https://github.com/openghg/openghg/pull/1401)
 
 ### Fixed
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
 - Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
+
 
 ## [0.15.0] - 2025-07-02
 
