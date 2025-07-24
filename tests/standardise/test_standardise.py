@@ -773,7 +773,7 @@ def test_icos_corso_l1_flask_data():
     assert np.allclose(fetched_value, expected_value)
 
     assert data["mf_sampling_period"].isel(time=4).values == 3601
-    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert data["mf_sampling_period"].attrs["units"] == "second"
     assert "flask" in metadata["measurement_type"]
     assert "3600.0" in metadata["sampling_period"]
 
@@ -814,7 +814,7 @@ def test_icos_corso_l2_integrated_naoh():
     expected_value = -0.84
     assert np.allclose(fetched_value, expected_value)
     assert data["mf_sampling_period"].isel(time=0).values == 1209600.0
-    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert data["mf_sampling_period"].attrs["units"] == "second"
 
     assert "integrated-naoh" in metadata["measurement_type"]
     assert "multiple" in metadata["sampling_period"]
@@ -859,7 +859,7 @@ def test_icos_corso_l2_flask():
     assert np.allclose(fetched_value, expected_value)
 
     assert data["mf_sampling_period"].isel(time=5).values == 3600
-    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert data["mf_sampling_period"].attrs["units"] == "second"
     assert "flask" in metadata["measurement_type"]
     assert "3600.0" in metadata["sampling_period"]
 
@@ -897,7 +897,7 @@ def test_icos_corso_clean_14_day():
 
     fetched_value = data["mf"].isel(time=0)
     assert data["mf_sampling_period"].isel(time=0).values == 1036800.0
-    assert data["mf_sampling_period"].attrs["units"] == "s"
+    assert data["mf_sampling_period"].attrs["units"] == "second"
 
     expected_value = 189
     assert np.allclose(fetched_value, expected_value)

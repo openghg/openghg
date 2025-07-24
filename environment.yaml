@@ -21,6 +21,8 @@ dependencies:
   - openpyxl
   - pandas>=2.0
   - pip
+  - pint
+  - pint_xarray
   - plotly
   - pyvis
   - rapidfuzz

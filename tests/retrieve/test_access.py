@@ -74,8 +74,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
     assert co2_data.time[-1] == Timestamp("2020-12-01T22:31:30")
-    assert co2_data.mf[0] == 409.55
-    assert co2_data.mf[-1] == 417.65
+    assert 409.55 in co2_data.mf[0].values
+    assert 417.65 in co2_data.mf[-1].values
 
     metadata = obsdata.metadata
 
@@ -320,8 +320,16 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
-    assert obscolumn["mf"].attrs["units"] == '1e-9'
+    assert "1e-9" in obscolumn["mf"].attrs["units"]
 
+def test_unit_conversion_get_obs_column():
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10, target_units={"mf": "ppm", "mf_repeatability": "ppm"})
+
+    obs_column_data = column_data.data
+
+    assert "1e-6" in obs_column_data["mf"].attrs["units"]
+    assert "1e-6" in obs_column_data["mf_repeatability"].attrs["units"]
+    assert obs_column_data["mf"].values[0] == pytest.approx(1.2382743, rel=3e-8)
 
 def test_get_obs_column_max_level():
     # test max level defaults to highest available if out of range

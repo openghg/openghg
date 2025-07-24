@@ -124,4 +124,6 @@ from ._util import (
     find_repeats,
     collate_strings,
 )
+
+from ._units import assign_units
 from ._versions import show_versions, check_if_need_new_version
