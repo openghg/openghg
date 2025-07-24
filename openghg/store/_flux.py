@@ -220,25 +220,3 @@ class Flux(BaseStore):
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
-
-    @staticmethod
-    def validate_data(data: Dataset) -> None:
-        """
-        Validate input data against Flux schema - definition from
-        Flux.schema() method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Flux schema.
-        """
-        data_schema = Flux.schema()
-        data_schema.validate_data(data)
-
-    def validate_data_internal(self, data: Dataset) -> None:
-        """ """
-        Flux.validate_data(data=data)

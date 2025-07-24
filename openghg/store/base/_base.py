@@ -12,6 +12,7 @@ from collections.abc import MutableSequence, Sequence
 
 from pandas import Timestamp
 import xarray as xr
+from xarray import Dataset
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
@@ -197,7 +198,7 @@ class BaseStore:
             validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
 
             try:
-                self.validate_data_internal(datasource.data, **validate_kwargs)
+                self.validate_data(datasource.data, **validate_kwargs)
             except ValueError:
                 if isinstance(filepath, list):
                     logger.error(
@@ -449,15 +450,19 @@ class BaseStore:
 
         return kwargs
 
+    @classmethod
+    def validate_data(cls, data: Dataset, **kwargs) -> None:
+        data_schema = cls.schema(**kwargs)
+        data_schema.validate_data(data)
+
     def find_data_schema_inputs(self) -> list:
         """
-        Extract the expected inputs for the validate_data method.
+        Extract the expected inputs for the schema method.
         """
         from openghg.util import find_function_inputs
 
-        fn = self.validate_data
+        fn = self.schema
         inputs = find_function_inputs(fn)
-        inputs.remove("data")
 
         return inputs
 

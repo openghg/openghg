@@ -341,29 +341,6 @@ class ObsSurface(BaseStore):
 
         return source_format
 
-    @staticmethod
-    def validate_data(data: Dataset, species: str) -> None:
-        """
-        Validate input data against ObsSurface schema - definition from
-        ObsSurface.schema() method.
-
-        Args:
-            data : xarray Dataset in expected format
-            species: Species name
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the ObsSurface schema.
-        """
-        data_schema = ObsSurface.schema(species)
-        data_schema.validate_data(data)
-
-    def validate_data_internal(self, data: Dataset, species: str) -> None:
-        """ """
-        ObsSurface.validate_data(data=data, species=species)
-
     def store_data(
         self,
         data: MutableSequence[MetadataAndData],

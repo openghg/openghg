@@ -203,25 +203,3 @@ class ObsColumn(BaseStore):
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
-
-    @staticmethod
-    def validate_data(data: Dataset, species: str) -> None:
-        """
-        Validate input data against Emissions schema - definition from
-        Emissions.schema() method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Emissions schema.
-        """
-        data_schema = ObsColumn.schema(species)
-        data_schema.validate_data(data)
-
-    def validate_data_internal(self, data: Dataset, species: str) -> None:
-        """ """
-        ObsColumn.validate_data(data=data, species=species)

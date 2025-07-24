@@ -390,67 +390,6 @@ class Footprints(BaseStore):
 
         return data_format
 
-    @staticmethod
-    def validate_data(
-        data: Dataset,
-        particle_locations: bool = True,
-        high_spatial_resolution: bool = False,
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-        short_lifetime: bool = False,
-        source_format: str | None = None,
-    ) -> None:
-        """
-        Validate data against Footprint schema - definition from
-        Footprints.schema(...) method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-            See Footprints.schema() method for details on optional inputs.
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Footprints schema.
-        """
-        if high_time_resolution:
-            warnings.warn(
-                "This argument is deprecated and will be replaced in future versions with time_resolved.",
-                DeprecationWarning,
-            )
-            time_resolved = high_time_resolution
-        data_schema = Footprints.schema(
-            particle_locations=particle_locations,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            short_lifetime=short_lifetime,
-            source_format=source_format,
-        )
-        data_schema.validate_data(data)
-
-    def validate_data_internal(
-        self,
-        data: Dataset,
-        particle_locations: bool = True,
-        high_spatial_resolution: bool = False,
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-        short_lifetime: bool = False,
-        source_format: str | None = None,
-    ) -> None:
-        """ """
-        Footprints.validate_data(
-            data=data,
-            particle_locations=particle_locations,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            high_time_resolution=high_time_resolution,
-            short_lifetime=short_lifetime,
-            source_format=source_format,
-        )
-
     def chunking_schema(
         self,
         time_resolved: bool = False,
