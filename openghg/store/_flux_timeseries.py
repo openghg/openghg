@@ -4,14 +4,12 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
-from xarray import Dataset
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
-from openghg.types import pathType
 
 __all__ = ["FluxTimeseries"]
 
@@ -220,7 +218,7 @@ class FluxTimeseries(BaseStore):
         params["region"] = clean_string(params["region"])
         if params.get("domain"):
             params["domain"] = clean_string(params["domain"])
-        
+
         # Specify any additional metadata to be added
         additional_metadata = {}
 

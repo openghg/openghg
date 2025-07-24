@@ -1,15 +1,13 @@
 from __future__ import annotations
 import logging
-from typing import Any, cast
+from typing import cast
 import warnings
 import numpy as np
-from pathlib import Path
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
-from xarray import Dataset
 
 __all__ = ["Footprints"]
 

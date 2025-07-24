@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Any, MutableSequence
 from collections.abc import Sequence
 import numpy as np
-from pandas import Timedelta
-from xarray import Dataset
 
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema

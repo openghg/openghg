@@ -3,18 +3,14 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import numpy as np
-from xarray import Dataset
-
-from openghg.util import align_lat_lon, load_standardise_parser, split_function_inputs, synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
-from openghg.store.spec import define_standardise_parsers
 
 __all__ = ["BoundaryConditions"]
 
@@ -63,7 +59,7 @@ class BoundaryConditions(BaseStore):
 
     def format_inputs(self, **kwargs) -> tuple[dict, dict]:
         """ """
-        from openghg.util import clean_string
+        from openghg.util import clean_string, synonyms
 
         params = kwargs.copy()
 

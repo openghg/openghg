@@ -1,13 +1,12 @@
 from __future__ import annotations
 import logging
-from typing import Any, Optional
-from pathlib import Path
+from typing import Optional
 import numpy as np
 from numpy import ndarray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray, Dataset
+from xarray import DataArray
 
 ArrayType = Optional[ndarray | DataArray]
 

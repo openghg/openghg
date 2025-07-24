@@ -104,5 +104,5 @@ def check_parser(data_type: str, source_format: str, framework: str = "standardi
         source_format = parsers[source_format.upper()].value
     except KeyError:
         raise ValueError(f"Unknown data type {source_format} selected.")
-    
+
     return source_format

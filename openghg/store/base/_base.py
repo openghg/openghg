@@ -168,7 +168,7 @@ class BaseStore:
 
         from openghg.util import load_standardise_parser, split_function_inputs
 
-        chunking_params = self.find_chunking_schema_inputs()
+        # chunking_params = self.find_chunking_schema_inputs()
         validate_params = self.find_data_schema_inputs()
 
         if not parser_fn:

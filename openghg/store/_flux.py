@@ -6,12 +6,12 @@ from typing import Any, Optional
 import warnings
 import numpy as np
 from numpy import ndarray
+from xarray import DataArray
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import pathType
 from openghg.util import synonyms
-
-from xarray import DataArray, Dataset
 
 __all__ = ["Flux"]
 
@@ -34,7 +34,9 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict, source_format: str = "openghg") -> list[dict] | None:
+    def read_data(
+        self, binary_data: bytes, metadata: dict, file_metadata: dict, source_format: str = "openghg"
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:

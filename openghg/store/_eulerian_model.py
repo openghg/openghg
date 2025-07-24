@@ -1,13 +1,9 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Any
 import numpy as np
-from xarray import Dataset
 import logging
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.util import load_standardise_parser, split_function_inputs
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -41,7 +37,7 @@ class EulerianModel(BaseStore):
         params["species"] = synonyms(species)
 
         params["model"] = clean_string(params["model"])
-        
+
         params["start_date"] = clean_string(params["start_date"])
         params["end_date"] = clean_string(params["end_date"])
         params["setup"] = clean_string(params["setup"])
