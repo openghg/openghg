@@ -13,7 +13,10 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store: str | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -58,6 +61,7 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
+    precision_filepath: str | Path | list[str | Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
     instrument: str | None = None,
@@ -152,10 +156,16 @@ def standardise_surface(
     Returns:
         dict: Dictionary of result data
     """
-    if not isinstance(filepath, list):
-        filepath = [filepath]
+    from openghg.standardise.surface import check_gcwerks_input
+    from openghg.util import check_filepath
+
+    if source_format.lower() == "gcwerks":
+        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+    else:
+        filepath = check_filepath(filepath, source_format)
 
     if sort_files:
+        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
         if source_format.lower() != "gcwerks":
             filepath = sort_by_filenames(filepath=filepath)
 
@@ -163,6 +173,7 @@ def standardise_surface(
         store=store,
         data_type="surface",
         filepath=filepath,
+        precision_filepath=precision_filepath,
         source_format=source_format,
         network=network,
         site=site,
@@ -193,7 +204,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -263,7 +274,7 @@ def standardise_column(
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="column",
@@ -293,7 +304,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     bc_input: str,
     domain: str,
@@ -353,7 +364,7 @@ def standardise_bc(
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="boundary_conditions",
@@ -378,7 +389,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: multiPathType,
+    filepath: str | Path | list[str | Path],
     model: str,
     domain: str,
     site: str | None = None,
@@ -522,7 +533,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,
@@ -589,7 +600,6 @@ def standardise_flux(
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
-    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -597,6 +607,7 @@ def standardise_flux(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
     return standardise(
         data_type="flux",
         store=store,
@@ -624,7 +635,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     model: str,
     species: str,
     source_format: str = "openghg",
