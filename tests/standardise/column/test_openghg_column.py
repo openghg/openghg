@@ -61,7 +61,7 @@ def test_parse_openghg():
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
 
-def test_read_file_site():
+def test_parse_tccon():
     """
     Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
