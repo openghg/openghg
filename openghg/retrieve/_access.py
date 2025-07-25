@@ -81,8 +81,9 @@ def _get_generic(
 
     return result
 
-def update_scale(data, calibration_scale,species):
-    
+
+def update_scale(data, calibration_scale, species):
+
     data.attrs["scale"] = data.attrs.pop("calibration_scale")
     existing_calibration_scale = data.attrs["scale"]
 
@@ -243,7 +244,7 @@ def get_obs_surface(
     data.attrs["species"] = species
 
     if "calibration_scale" in data.attrs:
-        data = update_scale(data, calibration_scale,species)
+        data = update_scale(data, calibration_scale, species)
 
     metadata = retrieved_data.metadata
     metadata["calibration_scale"] = data.attrs["scale"]
@@ -326,7 +327,9 @@ def get_obs_column(
         obs_data.data["mf_prior_factor"] = prior_factor
         obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
         obs_data.data["mf"] = (
-            obs_data.data[f"x{species}"] - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+            obs_data.data[f"x{species}"]
+            - obs_data.data.mf_prior_factor
+            - obs_data.data.mf_prior_upper_level_factor
         )
         obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
@@ -372,10 +375,8 @@ def get_obs_column(
     obs_data.data = obs_data.data.sortby("time")
 
     if average is not None:
-        obs_data.data = column_obs_resampler(
-            obs_data.data, averaging_period=average, species="mf"
-            )
-    
+        obs_data.data = column_obs_resampler(obs_data.data, averaging_period=average, species="mf")
+
     if "calibration_scale" in obs_data.data.attrs:
         obs_data.data = update_scale(obs_data.data, calibration_scale, species)
         obs_data.metadata["scale"] = obs_data.data.attrs["scale"]

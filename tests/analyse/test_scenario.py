@@ -1009,7 +1009,6 @@ def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform
     np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
 
 
-
 # %% Test baseline calculation for short-lived species
 # Radon (Rn) - currently has one lifetime value defined
 # HFO-1234zee - currently has monthly lifetimes defined

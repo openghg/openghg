@@ -455,7 +455,7 @@ def test_relative_time_offset_with_vaies():
         ("2012-01-01T00:00:00", "2013-01-03T00:00:00", 2, "368.0D"),
     ],
 )
-def test_infer_frequency(start,end,periods,expected_freq):
+def test_infer_frequency(start, end, periods, expected_freq):
     """
     1. Checking frequency can be inferred for timestamps >2 points (should use pd.infer_freq)
     2-8. Check specific cases where only 2 timestamps are included

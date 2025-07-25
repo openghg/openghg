@@ -114,7 +114,7 @@ class ObsColumn(BaseStore):
         platform = format_platform(platform)
         platform = clean_string(platform)
 
-        if site is None and satellite is None and source_format!="tccon":
+        if site is None and satellite is None and source_format != "tccon":
             raise ValueError("Value for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")

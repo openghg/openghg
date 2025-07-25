@@ -61,6 +61,7 @@ def test_parse_openghg():
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
 
+
 def test_parse_tccon():
     """
     Test file in OpenGHG format (variables and attributes) can be
@@ -78,7 +79,7 @@ def test_parse_tccon():
         pressure_weights_method=pressure_weights_method,
         domain=domain,
         species=species,
-        max_level=max_level
+        max_level=max_level,
     )
 
     assert "ch4" in data
@@ -98,32 +99,33 @@ def test_parse_tccon():
     assert np.isclose(xch4[0], 1888.025)
     assert np.isclose(xch4[-1], 1889.0175)
 
-
-    expected_metadata = {'species': 'ch4',
-                        'domain': domain,
-                        'inlet': 'column',
-                        'site': 'THW',
-                        'network': 'TCCON',
-                        'platform': 'site',
-                        'longitude': '-1.320',
-                        'latitude': '51.570',
-                        'data_owner': 'Damien Weidmann',
-                        'data_owner_email': '<damien.weidmann@stfc.ac.uk>',
-                        'file_start_date': '2023-04-02',
-                        'file_end_date': '2023-04-02',
-                        'file_format_version': '2020.B',
-                        'data_revision': 'R0',
-                        'description': "TCCON data standardised from hw20230402_20230402.public.qc.nc, with the pressure weights estimated via 'pressure_weight'.",
-                        'calibration_scale': 'WMO CH4 X2004'}
+    expected_metadata = {
+        "species": "ch4",
+        "domain": domain,
+        "inlet": "column",
+        "site": "THW",
+        "network": "TCCON",
+        "platform": "site",
+        "longitude": "-1.320",
+        "latitude": "51.570",
+        "data_owner": "Damien Weidmann",
+        "data_owner_email": "<damien.weidmann@stfc.ac.uk>",
+        "file_start_date": "2023-04-02",
+        "file_end_date": "2023-04-02",
+        "file_format_version": "2020.B",
+        "data_revision": "R0",
+        "description": "TCCON data standardised from hw20230402_20230402.public.qc.nc, with the pressure weights estimated via 'pressure_weight'.",
+        "calibration_scale": "WMO CH4 X2004",
+    }
 
     metadata = output_ch4["metadata"]
     assert metadata.items() >= expected_metadata.items()
 
     expected_attributes = expected_metadata
-    expected_attributes.update({"longitude":"-1.320",
-                                "latitude":"51.570"})
+    expected_attributes.update({"longitude": "-1.320", "latitude": "51.570"})
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
+
 
 def test_parse_openghg_column_multi_file():
     """
@@ -157,7 +159,7 @@ def test_parse_openghg_column_multi_file():
 
     xch4 = data_ch4["xch4"]
     assert np.isclose(xch4[0], 1810.89001465)
-    assert np.isclose(xch4[-1], 1762.8855)    
+    assert np.isclose(xch4[-1], 1762.8855)
 
 
 # def test_read_file_no_attr():
@@ -224,5 +226,3 @@ def test_parse_openghg_column_multi_file():
 # def test_openghg_cf_compliance(openghg_data):
 #     co2_data = openghg_data["co2"]["data"]
 #     assert check_cf_compliance(dataset=co2_data)
-
-

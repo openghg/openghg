@@ -451,7 +451,7 @@ def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
     elif n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
-        for var_name in [variability,f"{species}_prior_factor",f"{species}_prior_upper_level_factor"]:
+        for var_name in [variability, f"{species}_prior_factor", f"{species}_prior_upper_level_factor"]:
             if var_name in data_vars:
                 weighted_vars.append(var_name)
 
@@ -467,7 +467,7 @@ def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
         # default, so set this explicitly
         if species not in func_dict.get("weighted", []):
             func_dict["mean"].append(species)
-            for var_name in [f"{species}_prior_factor",f"{species}_prior_upper_level_factor"]:
+            for var_name in [f"{species}_prior_factor", f"{species}_prior_upper_level_factor"]:
                 if var_name in data_vars:
                     func_dict["mean"].append(var_name)
 
@@ -475,11 +475,7 @@ def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
 
 
 def surface_obs_resampler(
-    ds: xr.Dataset,
-    averaging_period: str,
-    species: str,
-    drop_na: bool = True,
-    **kwargs
+    ds: xr.Dataset, averaging_period: str, species: str, drop_na: bool = True, **kwargs
 ) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
@@ -515,16 +511,14 @@ def surface_obs_resampler(
     else:
         drop_na_kwargs = False  # type: ignore
 
-    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs,**kwargs)
+    result = resampler(
+        ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs, **kwargs
+    )
 
     return result
 
-def column_obs_resampler(
-    ds: xr.Dataset,
-    averaging_period: str,
-    species: str,
-    **kwargs
-) -> xr.Dataset:
+
+def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **kwargs) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
     If the data contains the number of observations as a data variable, the
@@ -553,6 +547,13 @@ def column_obs_resampler(
     """
     resampler_dict = _obs_resampler_dict(ds, species)
 
-    result = resampler(ds, averaging_period, resampler_dict, species=species, apply_func_kwargs={"remainder":"pass"},**kwargs)
+    result = resampler(
+        ds,
+        averaging_period,
+        resampler_dict,
+        species=species,
+        apply_func_kwargs={"remainder": "pass"},
+        **kwargs,
+    )
 
     return result

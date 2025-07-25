@@ -303,7 +303,7 @@ def test_standardise_column():
 
 
 def test_standardise_footprint():
-    """ This is to test standardise_footprint method.
+    """This is to test standardise_footprint method.
     Additionally the get_footprint is also tested by supplying direct store path instead of name."""
 
     from openghg.objectstore import get_readable_buckets
@@ -338,11 +338,10 @@ def test_standardise_footprint():
     # testing direct path supplied to get function should fetch results.
     buckets = get_readable_buckets()
 
-    result = get_footprint(site=site, network=network,
-                           height=height,domain=domain,store=buckets["user"])
+    result = get_footprint(site=site, network=network, height=height, domain=domain, store=buckets["user"])
 
     assert result is not None
-    assert isinstance(result,FootprintData)
+    assert isinstance(result, FootprintData)
     assert result.metadata["site"] == "tmb"
     assert result.metadata["data_type"] == "footprints"
 
