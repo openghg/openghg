@@ -11,6 +11,8 @@ import logging
 
 logger = logging.getLogger("openghg.standardise.column._tccon")
 
+final_units = {"ch4": 1e-9}
+
 def filter_and_resample(ds,species,quality_filt):
     if quality_filt:
         logger.info(f"Applying filter based on variable 'extrapolation_flags_ak_x{species}'.")
@@ -26,37 +28,26 @@ def filter_and_resample(ds,species,quality_filt):
 def define_var_attrs(ds,species,method):
     ds[f'x{species}_uncertainty'].attrs={'long_name':f'uncertainty on the x{species} measurement',
                                'description':f'max of x{species}_error on resampling period',
-                               'unit':ds[f"x{species}"].units,
-                               'vmin':str(ds[f'x{species}_uncertainty'].values.min()),
-                               'vmax':str(ds[f'x{species}_uncertainty'].values.max())}
+                               'unit':ds[f"x{species}"].units}
 
-    if method=='integration_operator':
-        ds['obs'].attrs['description']='xch4-prior_xch4-sum(ak_footprint*prior_ch4,dim="ak_altitude")'
+    if method=='pressure_weights':
+        ds[f"pressure_weights"].attrs['long_name']='pressure_weights derived using pressure weight method'
+        ds[f"pressure_weights"].attrs['description']='see doc xxx'  
+        ds.attrs['derivation_method'] = 'pressure weight'
 
-        ds[f"x{species}_averaging_kernel"].attrs['long_name']='transformed ak using integration operator method'
-        ds[f"x{species}_averaging_kernel"].attrs['description']='ak_xch4*integration_operator'
-        ds.attrs['derivation_method'] = 'Integration operator'
-        # ds['dry_to_wet'].attrs={'long_name':'dry_to_wet',
-        #                         'description':'ratio to use to convert from dry to wet mole fraction. Derived as 1/(1+prior_h2o)',
-        #                         'units':1,
-        #                         'vmin':str(ds.dry_to_wet.values.min()),
-        #                         'vmax':str(ds.dry_to_wet.values.max())}
+    elif method=='integration_operator':
+        ds[f"pressure_weights"].attrs['long_name']='pressure_weights derived using integration_operator'
+        ds[f"pressure_weights"].attrs['description']='see doc xxx'  
+        ds.attrs['derivation_method'] = 'integration operator'
 
-    elif method=='pressure_weights':
-        ds[f"x{species}_averaging_kernel"].attrs['long_name']='ak derived using pressure weight method'
-        ds[f"x{species}_averaging_kernel"].attrs['description']='see doc xxx'  
-        ds.attrs['derivation_method'] = 'Pressure weight' 
-        
-        # ds['wet_to_dry'].attrs={'long_name':'wet_to_dry',
-        #                         'description':'ratio to use to convert from wet to wet dry fraction. Derived as 1/(1-prior_h2o)',
-        #                         'units':1,
-        #                         'vmin':str(ds.wet_to_dry.values.min()),
-        #                         'vmax':str(ds.wet_to_dry.values.max())}
+    for var in ds.data_vars:
+        ds[var].attrs["vmin"] = f"{ds[var].values.min():.1f}"
+        ds[var].attrs["vmax"] = f"{ds[var].values.max():.1f}"
 
     return ds
 
 def convert_prior_profile_to_dry(data, species):
-    logger.warning(f"According to the variables attributes, 'x{species}' is dry but the profile 'prior_h2o' and 'prior_{species}' are wet, so we dry the profile. Should check that with the TCCON team before starting to really use the data.")
+    logger.warning(f"According to the variables attributes, 'x{species}' is dry but the profiles 'prior_h2o' and 'prior_{species}' are wet, so we dry the profiles. Should check that with the TCCON team before starting to really use the data.")
 
     if isinstance(species,str): species = [species,]
 
@@ -86,16 +77,17 @@ def convert_prior_profile_to_dry(data, species):
         else:
             raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
         
-def reformat_units(data, species):
+def reformat_convert_units(data, species):
     if isinstance(species,str): species = [species,]
+    
+    unit_converter = {"ppm":1e-6, "ppb": 1e-9, "ppt": 1e-12}
+
     for sp in species:
         for var in [f"prior_{sp}",f"prior_x{sp}",f"x{sp}",f'x{sp}_uncertainty',f'x{sp}_error']:
-            if data[var].attrs["units"] == "ppm":
-                data[var].attrs["units"] = 1e-6
-            elif data[var].attrs["units"] == "ppb":
-                data[var].attrs["units"] = 1e-9
-            elif data[var].attrs["units"] == "ppt":
-                data[var].attrs["units"] = 1e-12
+            with xr.set_options(keep_attrs=True):
+                data[var] = data[var] * unit_converter[data[var].attrs["units"]] / final_units[sp]
+            data[var].attrs["units"] = final_units[sp]
+    return data
 
 def parse_tccon(
     filepath: pathType,
@@ -152,10 +144,11 @@ def parse_tccon(
     attributes["network"] = "TCCON"
     attributes["platform"] = "site"
     attributes["inlet"] = "column"
-    attributes["scale"] = "unknown"
 
     attributes["original_file_description"] = attributes["description"]
     attributes["description"] = f"TCCON data standardised from {filepath.name}, with the pressure weights estimated via '{pressure_weights_method}'."
+
+    attributes["calibration_scale"] = data[f"x{species}"].attrs.get("wmo_or_analogous_scale", "unknown")
 
     contact = attributes["contact"].split(' ')
     if "@" in contact[-1]:
@@ -227,7 +220,7 @@ def parse_tccon(
     data = filter_and_resample(data,species,quality_filt)
     
     # reformat units
-    reformat_units(data, species)
+    data = reformat_convert_units(data, species)
 
     # Rename variables
     data = data.rename({"integration_operator": "pressure_weights",
@@ -268,7 +261,7 @@ def parse_tccon(
                          "data_owner","data_owner_email",
                          "file_start_date","file_end_date",
                          "file_format_version","data_revision",
-                         "description"
+                         "description","calibration_scale"
                          ]
     metadata = {k:attributes[k] for k in required_metadata}
 
