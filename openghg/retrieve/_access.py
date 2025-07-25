@@ -81,6 +81,32 @@ def _get_generic(
 
     return result
 
+def update_scale(data, calibration_scale,species):
+    
+    data.attrs["scale"] = data.attrs.pop("calibration_scale")
+    existing_calibration_scale = data.attrs["scale"]
+
+    if calibration_scale is not None:
+        target_scale = calibration_scale
+        original_scale = existing_calibration_scale
+
+        if original_scale and target_scale and original_scale != target_scale:
+            logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
+            for var_name in (
+                v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
+            ):
+                # Convert function from openghg_calscales
+                data[var_name] = convert(
+                    c=data[var_name],
+                    species=species,
+                    scale_original=original_scale,
+                    scale_new=target_scale,
+                )
+                data[var_name].attrs["calibration_scale"] = target_scale
+
+        data.attrs["scale"] = target_scale
+    return data
+
 
 def get_obs_surface(
     site: str,
@@ -217,28 +243,7 @@ def get_obs_surface(
     data.attrs["species"] = species
 
     if "calibration_scale" in data.attrs:
-        data.attrs["scale"] = data.attrs.pop("calibration_scale")
-        existing_calibration_scale = data.attrs["scale"]
-
-        if calibration_scale is not None:
-            target_scale = calibration_scale
-            original_scale = existing_calibration_scale
-
-            if original_scale and target_scale and original_scale != target_scale:
-                logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
-                for var_name in (
-                    v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
-                ):
-                    # Convert function from openghg_calscales
-                    data[var_name] = convert(
-                        c=data[var_name],
-                        species=species,
-                        scale_original=original_scale,
-                        scale_new=target_scale,
-                    )
-                    data[var_name].attrs["calibration_scale"] = target_scale
-
-            data.attrs["scale"] = target_scale
+        data = update_scale(data, calibration_scale,species)
 
     metadata = retrieved_data.metadata
     metadata["calibration_scale"] = data.attrs["scale"]
@@ -258,6 +263,7 @@ def get_obs_column(
     site: str | None = None,
     network: str | None = None,
     instrument: str | None = None,
+    calibration_scale: str | None = None,
     platform: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
@@ -274,6 +280,7 @@ def get_obs_column(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        calibration_scale: Convert to this calibration scale
         return_mf: Return mole fraction rather than column data. Default=True
         kwargs: Additional search terms
     Returns:
@@ -368,6 +375,10 @@ def get_obs_column(
         obs_data.data = column_obs_resampler(
             obs_data.data, averaging_period=average, species="mf"
             )
+    
+    if "calibration_scale" in obs_data.data.attrs:
+        obs_data.data = update_scale(obs_data.data, calibration_scale, species)
+        obs_data.metadata["scale"] = obs_data.data.attrs["scale"]
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
