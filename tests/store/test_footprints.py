@@ -1,4 +1,3 @@
-
 import pytest
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
@@ -459,7 +458,8 @@ def test_read_footprint_short_lived():
             "2015-02-01 00:00:00+00:00",
             "2015-02-01 00:59:59+00:00",
             "MHD-10magl_NAME_UKV_TEST_co2_PARIS-format_201502.nc",
-        ),        (
+        ),
+        (
             "mhd",
             "10m",
             "FLEXPART",
@@ -499,7 +499,9 @@ def test_read_paris_footprint(site, inlet, model, met_model, start, end, filenam
     )
 
     # Get the footprints data
-    footprint_results = search(site=site, domain=domain, model=model, data_type="footprints", species=fp_species)
+    footprint_results = search(
+        site=site, domain=domain, model=model, data_type="footprints", species=fp_species
+    )
 
     footprint_obs = footprint_results.retrieve_all()
     footprint_data = footprint_obs.data
@@ -842,8 +844,7 @@ def mock_metakeys():
     # TODO - implement this in a different way
     default_keys = get_metakey_defaults()
 
-    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]},
-                                              "special_tag": {"type": ["str"]}}
+    default_keys["footprints"]["optional"] = {"project": {"type": ["str"]}, "special_tag": {"type": ["str"]}}
 
     with patch("openghg.store.base._base.get_metakeys", return_value=default_keys):
         yield

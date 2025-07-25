@@ -295,11 +295,7 @@ def test_merge_null_values_ignore():
         ({"tag": "decc"}, {"tag": "gemma"}, {"tag": ["decc", "gemma"]}),
         ({"tag": ["decc"]}, {"tag": "gemma"}, {"tag": ["decc", "gemma"]}),
         ({"tag": "decc"}, {"tag": ["gemma"]}, {"tag": ["decc", "gemma"]}),
-        (
-            {"tag": ["decc"]},
-            {"tag": ["gemma", "gemma_v2"]},
-            {"tag": ["decc", "gemma", "gemma_v2"]}
-        ),
+        ({"tag": ["decc"]}, {"tag": ["gemma", "gemma_v2"]}, {"tag": ["decc", "gemma", "gemma_v2"]}),
         (
             {"site": "bsd", "inlet": "10m", "tag": "decc"},
             {"tag": "gemma"},
@@ -309,7 +305,7 @@ def test_merge_null_values_ignore():
             {"site": "bsd", "inlet": "10m", "tag": ["decc"]},
             {"tag": ["decc", "decc", "decc"]},
             {"site": "bsd", "inlet": "10m", "tag": ["decc"]},
-        ),        
+        ),
     ],
 )
 def test_merge_and_extend_dict(left, right, expected_output):

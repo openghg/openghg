@@ -4,7 +4,7 @@ import pytest
 import xarray as xr
 
 from openghg.data_processing._resampling import (
-    _surface_obs_resampler_dict,
+    _obs_resampler_dict,
     mean_resample,
     weighted_resample,
     uncorrelated_errors_resample,
@@ -140,8 +140,8 @@ def test_weighted_resample_with_nans(tac_ds):
 
 
 def test_make_surface_obs_resampler_dict(mhd_ds, tac_ds):
-    resampler_dict1 = _surface_obs_resampler_dict(mhd_ds, species="ch4")
-    resampler_dict2 = _surface_obs_resampler_dict(tac_ds, species="ch4")
+    resampler_dict1 = _obs_resampler_dict(mhd_ds, species="ch4")
+    resampler_dict2 = _obs_resampler_dict(tac_ds, species="ch4")
 
     assert resampler_dict1 == {
         "uncorrelated_errors": ["ch4_repeatability"],

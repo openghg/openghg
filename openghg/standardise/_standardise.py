@@ -224,6 +224,7 @@ def standardise_column(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
+    pressure_weights_method: str | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
 ) -> list[dict]:
@@ -296,6 +297,7 @@ def standardise_column(
         compression=compression,
         compressor=compressor,
         filters=filters,
+        pressure_weights_method=pressure_weights_method,
         chunks=chunks,
         info_metadata=info_metadata,
     )

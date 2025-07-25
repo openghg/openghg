@@ -24,15 +24,15 @@ def stored_data_1():
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(0, len(time), 1)
 
-    data = xr.Dataset({"mf": ("time", values)},
-                       coords={"time": time}
-    )
-    metadata = {"site": "WAO",
-                "species": "ch4",
-                "inlet": "10m",
-                "data_level": 1,
-                "data_source": "icos",
-                "latest_version": "v1"}
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time})
+    metadata = {
+        "site": "WAO",
+        "species": "ch4",
+        "inlet": "10m",
+        "data_level": 1,
+        "data_source": "icos",
+        "latest_version": "v1",
+    }
 
     obs_data = ObsData(data=data, metadata=metadata)
 
@@ -49,16 +49,16 @@ def stored_data_2():
     time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
     values = np.arange(10, len(time) + 10, 1)
 
-    data = xr.Dataset({"mf": ("time", values)},
-                       coords={"time": time}
-    )
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time})
 
-    metadata = {"site": "WAO",
-                "species": "ch4",
-                "inlet": "10m",
-                "data_level": 2,
-                "data_source": "internal",
-                "latest_version": "v1"}
+    metadata = {
+        "site": "WAO",
+        "species": "ch4",
+        "inlet": "10m",
+        "data_level": 2,
+        "data_source": "internal",
+        "latest_version": "v1",
+    }
 
     obs_data = ObsData(data=data, metadata=metadata)
 

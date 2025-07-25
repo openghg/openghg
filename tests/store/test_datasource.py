@@ -54,6 +54,7 @@ class UUID:
 
     They have the form "uuid1", "uuid2", etc.
     """
+
     uuid_int = 0
 
     def __init__(self) -> None:
@@ -161,7 +162,7 @@ def test_versioning(datasource):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = datasource # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
+    d = datasource  # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
 
     min_ch4_data = min_data["ch4"]["data"]
 
