@@ -83,10 +83,11 @@ def _get_generic(
     return result
 
 
-def update_scale(data: Dataset,
-                 species: str,
-                 calibration_scale: str | None = None,
-                 ) -> Dataset:
+def update_scale(
+    data: Dataset,
+    species: str,
+    calibration_scale: str | None = None,
+) -> Dataset:
     """
     Rename calibration_scale into scale in data attributes.
     If calibration_scale is not None, update it using openghg_calscales.functions.convert.
@@ -293,12 +294,12 @@ def get_obs_column(
         max_level: Max level to use to recalculate the mole fraction (must be corresponding to the max height of the footprint model if used in ModelScenario)
         satellite: Satellite name (needed for satellite data)
         domain: Domain e.g. EUROPE
-        selection: 
+        selection:
         site: Site name (needed for site column data)
         network: Network for the site/instrument e.g. TCCON
         instrument: Instrument name
         calibration_scale: Convert to this calibration scale
-        platform: 
+        platform:
         start_date: Start date
         end_date: End date
         return_mf: Return mole fraction rather than column data. Default=True

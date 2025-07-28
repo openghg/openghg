@@ -14,16 +14,12 @@ logger = logging.getLogger("openghg.standardise.column._tccon")
 final_units = {"ch4": 1e-9}
 
 
-def filter_and_resample(ds: xr.Dataset,
-                        species: str,
-                        quality_filt: bool,
-                        resample: bool
-) -> xr.Dataset:
+def filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
     Filter (if quality_filt = True) the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
     Then resample the data on an hourly scale.
     Args:
-        ds: dataset with column concentrations 
+        ds: dataset with column concentrations
         species: species name e.g. "ch4"
         quality_filt: if True, filters the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
         resample: if True resamples the data at hourly scale.
@@ -37,29 +33,28 @@ def filter_and_resample(ds: xr.Dataset,
 
     if not resample:
         return ds
-    
+
     output = ds.resample(time="h").mean(dim="time")
     output[f"x{species}_uncertainty"] = ds[f"x{species}_error"].resample(time="h").max(dim="time")
-    logger.warning("Not sure that we should resample at this stage (and also resample the uncertainty like that).")
+    logger.warning(
+        "Not sure that we should resample at this stage (and also resample the uncertainty like that)."
+    )
     del output[f"extrapolation_flags_ak_x{species}"]
     output = output.dropna("time")
 
     return output
 
 
-def define_var_attrs(ds: xr.Dataset,
-                     species: str, 
-                     method: str
-) -> xr.Dataset:
+def define_var_attrs(ds: xr.Dataset, species: str, method: str) -> xr.Dataset:
     """
     Add attributes to "x{species}_uncertainty" and "pressure_weights" variables, add global attribute "derivation_method" that keeps track of the method used to derive the pressure weights.
     Estimate the min and max values of each variables and store them in the attributes.
     Args:
-        ds: dataset with column concentrations 
+        ds: dataset with column concentrations
         species: species name e.g. "ch4"
-        method: method used to calculate the integration_operator. 
-            Options possible : "pressure_weight" and "integration_operator". method use to calculate the integration_operator. 
-            Options possible : "pressure_weight" and "integration_operator". 
+        method: method used to calculate the integration_operator.
+            Options possible : "pressure_weight" and "integration_operator". method use to calculate the integration_operator.
+            Options possible : "pressure_weight" and "integration_operator".
             See https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Calculating_comparison_quantities for description.
     Returns:
         dataset with updated attributes.
@@ -72,12 +67,16 @@ def define_var_attrs(ds: xr.Dataset,
 
     if method == "pressure_weights":
         ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using pressure weight method"
-        ds["pressure_weights"].attrs["description"] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights"
+        ds["pressure_weights"].attrs[
+            "description"
+        ] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights"
         ds.attrs["derivation_method"] = "pressure weight"
 
     elif method == "integration_operator":
         ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using integration_operator"
-        ds["pressure_weights"].attrs["description"] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator"
+        ds["pressure_weights"].attrs[
+            "description"
+        ] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator"
         ds.attrs["derivation_method"] = "integration operator"
 
     for var in ds.data_vars:
@@ -87,13 +86,11 @@ def define_var_attrs(ds: xr.Dataset,
     return ds
 
 
-def convert_prior_profile_to_dry(ds: xr.Dataset, 
-                                 species: list | str
-                                 ) -> None:
+def convert_prior_profile_to_dry(ds: xr.Dataset, species: list | str) -> None:
     """
     Calculate (inplace) the dry "prior_h2o", "integration_operator" and "prior_{sp}" and ovewrite the ones that are wet.
     Args:
-        ds: dataset with column concentrations 
+        ds: dataset with column concentrations
         species: species name(s) e.g. "ch4"
     """
     logger.warning(
@@ -125,23 +122,20 @@ def convert_prior_profile_to_dry(ds: xr.Dataset,
         if ds[f"prior_{sp}"].attrs["standard_name"][:32] == "wet_atmosphere_mole_fraction_of_":
             sp_attrs = ds[f"prior_{sp}"].attrs
             ds[f"prior_{sp}"] = ds[f"prior_{sp}"] * (1 + ds["prior_h2o"])
-            ds[f"prior_{sp}"].attrs = {
-                k: v.replace("wet", "dry") for k, v in sp_attrs.items() if k != "note"
-            }
+            ds[f"prior_{sp}"].attrs = {k: v.replace("wet", "dry") for k, v in sp_attrs.items() if k != "note"}
         elif ds[f"prior_{sp}"].attrs["standard_name"][:32] == "dry_atmosphere_mole_fraction_of_":
             logger.info(f"Prior profile of {sp} already dried, skipping conversion from wet to dry.")
         else:
             raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
 
 
-def reformat_convert_units(ds: xr.Dataset,
-                           species: list | str,
-                           final_units: dict | float = {"ch4": 1e-9}
-                           ) -> xr.Dataset:
+def reformat_convert_units(
+    ds: xr.Dataset, species: list | str, final_units: dict | float = {"ch4": 1e-9}
+) -> xr.Dataset:
     """
     Convert f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error" units to the one specified in final_units
     Args:
-        ds: dataset with column concentrations 
+        ds: dataset with column concentrations
         species: species name(s) e.g. "ch4"
         final_units: dict with species as keys containing the targeted unit (e.g. 1e-9) for each species as values. If float, unit is applied to all.
     Returns:
@@ -176,12 +170,12 @@ def parse_tccon(
     """
     Parse and extract data from netcdf downloaded from tccon archive (https://tccondata.org/).
 
-    Args:        
+    Args:
         filepath: Path of observation file
-        domain: 
+        domain:
         species: Species name or synonym e.g. "ch4"
-        pressure_weights_method: method use to calculate the integration_operator. 
-            Options possible : "pressure_weight" and "integration_operator". 
+        pressure_weights_method: method use to calculate the integration_operator.
+            Options possible : "pressure_weight" and "integration_operator".
             See https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Calculating_comparison_quantities for description.
         quality_filt: If True, filters data keeping data with extrapolation_flags_ak_x{species} equal to 2.
         resample: If True, resample data at hourly scale.
