@@ -234,6 +234,7 @@ def parse_tccon(
     attributes["network"] = "TCCON"
     attributes["platform"] = "site"
     attributes["inlet"] = "column"
+    attributes["pressure_weights_method"] = pressure_weights_method
 
     attributes["original_file_description"] = attributes["description"]
     attributes["description"] = (
@@ -384,6 +385,7 @@ def parse_tccon(
         "data_revision",
         "description",
         "calibration_scale",
+        "pressure_weights_method",
     ]
     metadata = {k: attributes[k] for k in required_metadata}
 

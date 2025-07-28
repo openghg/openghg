@@ -302,6 +302,37 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
+def test_standardise_tccon_obs():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
+    filepath = get_column_datapath(filename="hw20230402_20230402.public.qc.nc")
+
+    domain = "EUROPE"
+    species = "ch4"
+    pressure_weights_method = "pressure_weight"
+
+    results = standardise_column(
+        filepath=filepath,
+        domain=domain,
+        species=species,
+        pressure_weights_method=pressure_weights_method,
+        source_format="tccon",
+        force=True,
+        store="user",
+    )
+
+    assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species="ch4", site="THW", max_level=3, network="TCCON", store="user")
+
+    assert "file_format_version" in data.metadata
+    assert "data_revision" in data.metadata
+
+    assert data.metadata["pressure_weights_method"] == pressure_weights_method
+
+
 def test_standardise_footprint():
     """This is to test standardise_footprint method.
     Additionally the get_footprint is also tested by supplying direct store path instead of name."""
