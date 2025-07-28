@@ -1,9 +1,16 @@
 import logging
+import xarray as xr
 import pint
 import pint_xarray
-import xarray as xr
+import cf_xarray.units  # noqa: F401  # Needed to register units
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import ObsData, ObsColumnData, FootprintData, FluxData
+    from openghg.dataobjects._basedata import _BaseData
+
 from openghg.util._file import load_internal_json
-from openghg.dataobjects._basedata import _BaseData
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -54,7 +61,9 @@ def _read_attributes_json() -> dict:
     return load_internal_json("attributes.json")
 
 
-def assign_units(data: _BaseData, target_units: dict | None = None) -> xr.Dataset:
+def assign_units(
+    data: ObsData | ObsColumnData | FootprintData | FluxData | _BaseData, target_units: dict | None = None
+) -> xr.Dataset:
     """This function is used to assign units as well as convert the units of the dataset if target_units are supplied to the function. The final supplied values are dequantified to ensure the ModelScenario usecases are not broken.
 
     Args:
