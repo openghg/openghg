@@ -62,7 +62,7 @@ def _read_attributes_json() -> dict:
 
 
 def assign_units(
-    data: ObsData | ObsColumnData | FootprintData | FluxData | _BaseData, target_units: dict | None = None
+    data: "ObsData | ObsColumnData | FootprintData | FluxData | _BaseData", target_units: dict | None = None
 ) -> xr.Dataset:
     """This function is used to assign units as well as convert the units of the dataset if target_units are supplied to the function. The final supplied values are dequantified to ensure the ModelScenario usecases are not broken.
 
