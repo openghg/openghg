@@ -1,4 +1,5 @@
 addict
+cf-xarray
 dask
 filelock
 h5netcdf

@@ -8,6 +8,7 @@ dependencies:
   - python>=3.9
   - conda-build
   - addict
+  - cf_xarray
   - dask
   - h5netcdf
   - filelock
@@ -40,6 +41,8 @@ dependencies:
   - numcodecs
   - git
   - flake8
+  - pint
+  - pint-xarray
   - pre-commit
   - pytest
   - pytest-cov
