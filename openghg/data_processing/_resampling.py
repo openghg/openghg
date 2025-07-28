@@ -475,7 +475,7 @@ def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
 
 
 def surface_obs_resampler(
-    ds: xr.Dataset, averaging_period: str, species: str, drop_na: bool = True, **kwargs
+    ds: xr.Dataset, averaging_period: str, species: str, drop_na: bool = True, **kwargs: Any
 ) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
@@ -518,7 +518,7 @@ def surface_obs_resampler(
     return result
 
 
-def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **kwargs) -> xr.Dataset:
+def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **kwargs: Any) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
     If the data contains the number of observations as a data variable, the

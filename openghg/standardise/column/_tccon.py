@@ -160,8 +160,8 @@ def reformat_convert_units(
 
 def parse_tccon(
     filepath: pathType,
+    species: str,
     domain: str | None = None,
-    species: str | None = None,
     pressure_weights_method: str = "integration_operator",
     quality_filt: bool = True,
     resample: bool = True,
@@ -172,8 +172,8 @@ def parse_tccon(
 
     Args:
         filepath: Path of observation file
-        domain:
         species: Species name or synonym e.g. "ch4"
+        domain:
         pressure_weights_method: method use to calculate the integration_operator.
             Options possible : "pressure_weight" and "integration_operator".
             See https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Calculating_comparison_quantities for description.
