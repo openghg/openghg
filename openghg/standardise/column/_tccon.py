@@ -14,20 +14,56 @@ logger = logging.getLogger("openghg.standardise.column._tccon")
 final_units = {"ch4": 1e-9}
 
 
-def filter_and_resample(ds, species, quality_filt):
+def filter_and_resample(ds: xr.Dataset,
+                        species: str,
+                        quality_filt: bool,
+                        resample: bool
+) -> xr.Dataset:
+    """
+    Filter (if quality_filt = True) the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
+    Then resample the data on an hourly scale.
+    Args:
+        ds: dataset with column concentrations 
+        species: species name e.g. "ch4"
+        quality_filt: if True, filters the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
+        resample: if True resamples the data at hourly scale.
+    Returns:
+        dataset resampled and filtered (if asked)
+    """
     if quality_filt:
         logger.info(f"Applying filter based on variable 'extrapolation_flags_ak_x{species}'.")
         ds = ds.where(abs(ds[f"extrapolation_flags_ak_x{species}"]) != 2)
     ds.dropna("time").sortby("time")
-    tmp = ds.resample(time="h").mean(dim="time")
-    tmp[f"x{species}_uncertainty"] = ds[f"x{species}_error"].resample(time="h").max(dim="time")
-    del tmp[f"extrapolation_flags_ak_x{species}"]
-    tmp = tmp.dropna("time")
 
-    return tmp
+    if not resample:
+        return ds
+    
+    output = ds.resample(time="h").mean(dim="time")
+    output[f"x{species}_uncertainty"] = ds[f"x{species}_error"].resample(time="h").max(dim="time")
+    logger.warning("Not sure that we should resample at this stage (and also resample the uncertainty like that).")
+    del output[f"extrapolation_flags_ak_x{species}"]
+    output = output.dropna("time")
+
+    return output
 
 
-def define_var_attrs(ds, species, method):
+def define_var_attrs(ds: xr.Dataset,
+                     species: str, 
+                     method: str
+) -> xr.Dataset:
+    """
+    Add attributes to "x{species}_uncertainty" and "pressure_weights" variables, add global attribute "derivation_method" that keeps track of the method used to derive the pressure weights.
+    Estimate the min and max values of each variables and store them in the attributes.
+    Args:
+        ds: dataset with column concentrations 
+        species: species name e.g. "ch4"
+        method: method used to calculate the integration_operator. 
+            Options possible : "pressure_weight" and "integration_operator". method use to calculate the integration_operator. 
+            Options possible : "pressure_weight" and "integration_operator". 
+            See https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Calculating_comparison_quantities for description.
+    Returns:
+        dataset with updated attributes.
+    """
     ds[f"x{species}_uncertainty"].attrs = {
         "long_name": f"uncertainty on the x{species} measurement",
         "description": f"max of x{species}_error on resampling period",
@@ -35,13 +71,13 @@ def define_var_attrs(ds, species, method):
     }
 
     if method == "pressure_weights":
-        ds[f"pressure_weights"].attrs["long_name"] = "pressure_weights derived using pressure weight method"
-        ds[f"pressure_weights"].attrs["description"] = "see doc xxx"
+        ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using pressure weight method"
+        ds["pressure_weights"].attrs["description"] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights"
         ds.attrs["derivation_method"] = "pressure weight"
 
     elif method == "integration_operator":
-        ds[f"pressure_weights"].attrs["long_name"] = "pressure_weights derived using integration_operator"
-        ds[f"pressure_weights"].attrs["description"] = "see doc xxx"
+        ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using integration_operator"
+        ds["pressure_weights"].attrs["description"] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator"
         ds.attrs["derivation_method"] = "integration operator"
 
     for var in ds.data_vars:
@@ -51,7 +87,15 @@ def define_var_attrs(ds, species, method):
     return ds
 
 
-def convert_prior_profile_to_dry(data, species):
+def convert_prior_profile_to_dry(ds: xr.Dataset, 
+                                 species: list | str
+                                 ) -> None:
+    """
+    Calculate (inplace) the dry "prior_h2o", "integration_operator" and "prior_{sp}" and ovewrite the ones that are wet.
+    Args:
+        ds: dataset with column concentrations 
+        species: species name(s) e.g. "ch4"
+    """
     logger.warning(
         f"According to the variables attributes, 'x{species}' is dry but the profiles 'prior_h2o' and 'prior_{species}' are wet, so we dry the profiles. Should check that with the TCCON team before starting to really use the data."
     )
@@ -61,49 +105,63 @@ def convert_prior_profile_to_dry(data, species):
             species,
         ]
 
-    if data["prior_h2o"].attrs["standard_name"] == "wet_atmosphere_mole_fraction_of_water":
-        h2o_attrs = data["prior_h2o"].attrs
-        data["prior_h2o"] = data["prior_h2o"] / (1 - data["prior_h2o"])
-        data["prior_h2o"].attrs = {k: v.replace("wet", "dry") for k, v in h2o_attrs.items() if k != "note"}
-    elif data["prior_h2o"].attrs["standard_name"] != "dry_atmosphere_mole_fraction_of_water":
+    if ds["prior_h2o"].attrs["standard_name"] == "wet_atmosphere_mole_fraction_of_water":
+        h2o_attrs = ds["prior_h2o"].attrs
+        ds["prior_h2o"] = ds["prior_h2o"] / (1 - ds["prior_h2o"])
+        ds["prior_h2o"].attrs = {k: v.replace("wet", "dry") for k, v in h2o_attrs.items() if k != "note"}
+    elif ds["prior_h2o"].attrs["standard_name"] != "dry_atmosphere_mole_fraction_of_water":
         raise ValueError("'standard_name' of 'prior_h2o' is not what expected. Please check.")
 
-    if "wet" in data["integration_operator"].attrs["description"]:
-        io_attrs = data["integration_operator"].attrs
-        data["integration_operator"] = data["integration_operator"] / (1 + data["prior_h2o"])
-        data["integration_operator"].attrs = {k: v.replace("wet", "dry") for k, v in io_attrs.items()}
-    elif "dry" in data["integration_operator"].attrs["description"]:
-        logger.info(f"'integration_operator' already dried, skipping conversion from wet to dry.")
+    if "wet" in ds["integration_operator"].attrs["description"]:
+        io_attrs = ds["integration_operator"].attrs
+        ds["integration_operator"] = ds["integration_operator"] / (1 + ds["prior_h2o"])
+        ds["integration_operator"].attrs = {k: v.replace("wet", "dry") for k, v in io_attrs.items()}
+    elif "dry" in ds["integration_operator"].attrs["description"]:
+        logger.info("'integration_operator' already dried, skipping conversion from wet to dry.")
     else:
-        raise ValueError(f"'description' of 'integration_operator' is not what expected. Please check.")
+        raise ValueError("'description' of 'integration_operator' is not what expected. Please check.")
 
     for sp in species:
-        if data[f"prior_{sp}"].attrs["standard_name"][:32] == "wet_atmosphere_mole_fraction_of_":
-            sp_attrs = data[f"prior_{sp}"].attrs
-            data[f"prior_{sp}"] = data[f"prior_{sp}"] * (1 + data["prior_h2o"])
-            data[f"prior_{sp}"].attrs = {
+        if ds[f"prior_{sp}"].attrs["standard_name"][:32] == "wet_atmosphere_mole_fraction_of_":
+            sp_attrs = ds[f"prior_{sp}"].attrs
+            ds[f"prior_{sp}"] = ds[f"prior_{sp}"] * (1 + ds["prior_h2o"])
+            ds[f"prior_{sp}"].attrs = {
                 k: v.replace("wet", "dry") for k, v in sp_attrs.items() if k != "note"
             }
-        elif data[f"prior_{sp}"].attrs["standard_name"][:32] == "dry_atmosphere_mole_fraction_of_":
+        elif ds[f"prior_{sp}"].attrs["standard_name"][:32] == "dry_atmosphere_mole_fraction_of_":
             logger.info(f"Prior profile of {sp} already dried, skipping conversion from wet to dry.")
         else:
             raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
 
 
-def reformat_convert_units(data, species):
+def reformat_convert_units(ds: xr.Dataset,
+                           species: list | str,
+                           final_units: dict | float = {"ch4": 1e-9}
+                           ) -> xr.Dataset:
+    """
+    Convert f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error" units to the one specified in final_units
+    Args:
+        ds: dataset with column concentrations 
+        species: species name(s) e.g. "ch4"
+        final_units: dict with species as keys containing the targeted unit (e.g. 1e-9) for each species as values. If float, unit is applied to all.
+    Returns:
+        dataset with variables converted to desired units.
+    """
     if isinstance(species, str):
         species = [
             species,
         ]
+    if not isinstance(final_units, dict):
+        final_units = {sp: final_units for sp in species}
 
     unit_converter = {"ppm": 1e-6, "ppb": 1e-9, "ppt": 1e-12}
 
     for sp in species:
         for var in [f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error"]:
             with xr.set_options(keep_attrs=True):
-                data[var] = data[var] * unit_converter[data[var].attrs["units"]] / final_units[sp]
-            data[var].attrs["units"] = final_units[sp]
-    return data
+                ds[var] = ds[var] * unit_converter[ds[var].attrs["units"]] / final_units[sp]
+            ds[var].attrs["units"] = final_units[sp]
+    return ds
 
 
 def parse_tccon(
@@ -111,17 +169,30 @@ def parse_tccon(
     domain: str | None = None,
     species: str | None = None,
     pressure_weights_method: str = "integration_operator",
-    max_level: int = 24,
     quality_filt: bool = True,
+    resample: bool = True,
     chunks: dict | None = None,
 ) -> dict:
     """
     Parse and extract data from netcdf downloaded from tccon archive (https://tccondata.org/).
-    """
-    from openghg.standardise.meta import define_species_label
-    from openghg.util import clean_string
 
-    # from openghg.standardise.meta import attributes_default_keys, assign_attributes
+    Args:        
+        filepath: Path of observation file
+        domain: 
+        species: Species name or synonym e.g. "ch4"
+        pressure_weights_method: method use to calculate the integration_operator. 
+            Options possible : "pressure_weight" and "integration_operator". 
+            See https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Calculating_comparison_quantities for description.
+        quality_filt: If True, filters data keeping data with extrapolation_flags_ak_x{species} equal to 2.
+        resample: If True, resample data at hourly scale.
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
+    Returns:
+        Dict : Dictionary of source_name : data, metadata, attributes
+
+    """
 
     filepath = Path(filepath)
 
@@ -151,7 +222,7 @@ def parse_tccon(
 
     data = xr.open_dataset(filepath)[var_to_read].chunk(chunks)
 
-    ### Create metadata ###
+    # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
 
     attributes["file_start_date"] = datetime.strptime(splitted_filename[0][2:10], "%Y%m%d").strftime(
@@ -194,14 +265,7 @@ def parse_tccon(
     attributes["latitude"] = f"{data.lat.values.mean():.3f}"
     logger.warning("Add a check here that the site is really in the domain")
 
-    ### Prepare data ###
-    # Select the levels
-    if max_level > data.ak_altitude.size:
-        raise ValueError(
-            f"max_level ({max_level}) is greater than actual number of levels ({data.ak_altitude.size})."
-        )
-    data = data.isel(ak_altitude=slice(0, max_level)).isel(prior_altitude=slice(0, max_level))
-
+    # Prepare data #
     # Align units
     if data[f"prior_{species}"].units == "ppb" and data[f"prior_x{species}"].units == "ppm":
         with xr.set_options(keep_attrs=True):
@@ -267,7 +331,7 @@ def parse_tccon(
         )
 
     # Filter the data and resample to hourly
-    data = filter_and_resample(data, species, quality_filt)
+    data = filter_and_resample(data, species, quality_filt, resample)
 
     # reformat units
     data = reformat_convert_units(data, species)
@@ -308,7 +372,7 @@ def parse_tccon(
     else:
         raise ValueError("'ak_altitude' and ' prior_altitude' are different.")
 
-    ### Define metadata
+    # Define metadata
     required_metadata = [
         "species",
         "domain",
@@ -329,7 +393,7 @@ def parse_tccon(
     ]
     metadata = {k: attributes[k] for k in required_metadata}
 
-    ### Prepare dict to return
+    # Prepare dict to return
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     return gas_data

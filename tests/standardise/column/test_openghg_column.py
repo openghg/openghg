@@ -64,7 +64,7 @@ def test_parse_openghg():
 
 def test_parse_tccon():
     """
-    Test file in OpenGHG format (variables and attributes) can be
+    Test file in TCCON format (variables and attributes) can be
     correctly parsed.
     """
     filepath = get_column_datapath(filename="hw20230402_20230402.public.qc.nc")
@@ -72,14 +72,12 @@ def test_parse_tccon():
     domain = "EUROPE"
     species = "ch4"
     pressure_weights_method = "pressure_weight"
-    max_level = 24
 
     data = parse_tccon(
         filepath,
         pressure_weights_method=pressure_weights_method,
         domain=domain,
         species=species,
-        max_level=max_level,
     )
 
     assert "ch4" in data

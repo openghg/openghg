@@ -264,7 +264,8 @@ def standardise_column(
         compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
         filters: Filters to apply during data storage. Defaults to no filtering.
-        https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        pressure_weights_method: method to use to derive TCCON pressure_weights.
         chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking

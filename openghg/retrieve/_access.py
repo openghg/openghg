@@ -15,6 +15,7 @@ from openghg.types import SearchError
 from openghg.util import combine_and_elevate_inlet
 
 from pandas import Timestamp
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -82,7 +83,20 @@ def _get_generic(
     return result
 
 
-def update_scale(data, calibration_scale, species):
+def update_scale(data: Dataset,
+                 species: str,
+                 calibration_scale: str | None = None,
+                 ) -> Dataset:
+    """
+    Rename calibration_scale into scale in data attributes.
+    If calibration_scale is not None, update it using openghg_calscales.functions.convert.
+    Args:
+        data: data containing species concentrations. Should have a global attribute "calibration_scale" with the current calibration scale.
+        species: Species identifier e.g. ch4 for methane.
+        calibration_scale: Convert to this calibration scale
+    Returns:
+        dataset with converted scale and updated attr name.
+    """
 
     data.attrs["scale"] = data.attrs.pop("calibration_scale")
     existing_calibration_scale = data.attrs["scale"]
@@ -244,7 +258,7 @@ def get_obs_surface(
     data.attrs["species"] = species
 
     if "calibration_scale" in data.attrs:
-        data = update_scale(data, calibration_scale, species)
+        data = update_scale(data, species, calibration_scale)
 
     metadata = retrieved_data.metadata
     metadata["calibration_scale"] = data.attrs["scale"]
@@ -276,13 +290,20 @@ def get_obs_column(
 
     Args:
         species: Species name
-        source: Source name
+        max_level: Max level to use to recalculate the mole fraction (must be corresponding to the max height of the footprint model if used in ModelScenario)
+        satellite: Satellite name (needed for satellite data)
         domain: Domain e.g. EUROPE
+        selection: 
+        site: Site name (needed for site column data)
+        network: Network for the site/instrument e.g. TCCON
+        instrument: Instrument name
+        calibration_scale: Convert to this calibration scale
+        platform: 
         start_date: Start date
         end_date: End date
-        time_resolution: One of ["standard", "high"]
-        calibration_scale: Convert to this calibration scale
         return_mf: Return mole fraction rather than column data. Default=True
+        average: Averaging period for dataset. Value should be a string of
+            the form e.g. "2H", "30min" (should match pandas offset aliases format)
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -378,7 +399,7 @@ def get_obs_column(
         obs_data.data = column_obs_resampler(obs_data.data, averaging_period=average, species="mf")
 
     if "calibration_scale" in obs_data.data.attrs:
-        obs_data.data = update_scale(obs_data.data, calibration_scale, species)
+        obs_data.data = update_scale(obs_data.data, species, calibration_scale)
         obs_data.metadata["scale"] = obs_data.data.attrs["scale"]
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
