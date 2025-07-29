@@ -1,8 +1,8 @@
 import logging
-import xarray as xr
-import pint
-import pint_xarray
 import cf_xarray.units  # noqa: F401  # Needed to register units
+import pint_xarray
+import pint
+import xarray as xr
 
 from typing import TYPE_CHECKING
 
