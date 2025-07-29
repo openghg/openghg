@@ -32,6 +32,7 @@ def filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resamp
     ds.dropna("time").sortby("time")
 
     if not resample:
+        ds[f"x{species}_uncertainty"] = ds[f"x{species}_error"]
         return ds
 
     output = ds.resample(time="h").mean(dim="time")
