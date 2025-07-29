@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
 
 ### Added
+- Add the possibility to use TCCON data. Write dedicated parser, adapt standardise footprint, get_obs_column and small bits in workflow. Rename _surface_obs_resampler_dict to _obs_resampler_dict in openghg/data_processing/_resampling.py. [PR #1407] (https://github.com/openghg/openghg/pull/1407)
 - The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
 - Ability to pass the non configured path to the store argument directly for get_* functions. Also added the ability add the store to config using openghg --register-store command. [PR #1389](https://github.com/openghg/openghg/pull/1389)
 - Add basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
