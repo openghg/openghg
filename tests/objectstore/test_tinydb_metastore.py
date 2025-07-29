@@ -255,10 +255,10 @@ def test_search_list(metastore, search_list_keys, expected_names):
     4. Check multiple search terms can be included and matching values in any order found (1)
     5. Check multiple search terms can be included and matching values in any order found (2)
     """
-    metastore.insert({'name': 'user1', 'groups': ['user']})
-    metastore.insert({'name': 'user2', 'groups': ['admin', 'user']})
-    metastore.insert({'name': 'user3', 'groups': ['sudo', 'user']})
-    metastore.insert({'name': 'user4', 'groups': ['user', 'another-user', 'sudo']})
+    metastore.insert({"name": "user1", "groups": ["user"]})
+    metastore.insert({"name": "user2", "groups": ["admin", "user"]})
+    metastore.insert({"name": "user3", "groups": ["sudo", "user"]})
+    metastore.insert({"name": "user4", "groups": ["user", "another-user", "sudo"]})
 
     results = metastore.search(search_list_keys=search_list_keys)
 
