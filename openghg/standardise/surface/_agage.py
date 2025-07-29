@@ -245,9 +245,11 @@ def _format_species(
 
         # change the column names to {species} and {species} repeatability, which is what the get_obs_surface function expects
         species_data = species_data.rename(
-            columns={"mf": f"{comp_species}", 
-                     "mf_repeatability": f"{comp_species} repeatability",
-                     "mf_variability": f"{comp_species} variability"}
+            columns={
+                "mf": f"{comp_species}",
+                "mf_repeatability": f"{comp_species} repeatability",
+                "mf_variability": f"{comp_species} variability",
+            }
         )
 
         # We want an xarray Dataset
