@@ -97,6 +97,7 @@ def get_obs_surface(
     keep_missing: bool = False,
     keep_variables: list | None = None,
     target_units: dict | None = None,
+    is_dequantified: bool = True,
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -126,6 +127,7 @@ def get_obs_surface(
             "mf": "ppm",
             "mf_variability": "ppm"
         }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
         kwargs: Additional search terms
 
     Returns:
@@ -253,7 +255,7 @@ def get_obs_surface(
 
     obs_data = ObsData(data=data, metadata=metadata)
 
-    obs_data = assign_units(obs_data, target_units=target_units)
+    obs_data = assign_units(obs_data, target_units=target_units, is_dequantified=is_dequantified)
     return obs_data
 
 
@@ -271,6 +273,7 @@ def get_obs_column(
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
     target_units: dict | None = None,
+    is_dequantified: bool = True,
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -289,6 +292,7 @@ def get_obs_column(
             "mf": "ppm",
             "mf_variability": "ppm"
         }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -375,7 +379,7 @@ def get_obs_column(
 
     obs_data.data = obs_data.data.sortby("time")
 
-    obs_data = assign_units(obs_data, target_units=target_units)
+    obs_data = assign_units(obs_data, target_units=target_units, is_dequantified=is_dequantified)
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
@@ -391,6 +395,7 @@ def get_flux(
     end_date: str | Timestamp | None = None,
     time_resolution: str | None = None,
     target_units: dict | None = None,
+    is_dequantified: bool = True,
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -410,6 +415,7 @@ def get_flux(
             "mf": "ppm",
             "mf_variability": "ppm"
         }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
         kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
@@ -436,7 +442,7 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    em_data = assign_units(data=em_data, target_units=target_units)
+    em_data = assign_units(data=em_data, target_units=target_units, is_dequantified=is_dequantified)
     return FluxData(data=em_data.data, metadata=em_data.metadata)
 
 
@@ -447,6 +453,7 @@ def get_bc(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     target_units: dict | None = None,
+    is_dequantified: bool = True,
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -465,6 +472,7 @@ def get_bc(
             "mf": "ppm",
             "mf_variability": "ppm"
         }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
@@ -478,7 +486,7 @@ def get_bc(
         **kwargs,
     )
 
-    bc_data = assign_units(data=bc_data, target_units=target_units)
+    bc_data = assign_units(data=bc_data, target_units=target_units, is_dequantified=is_dequantified)
     return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
 
@@ -494,6 +502,7 @@ def get_footprint(
     end_date: str | Timestamp | None = None,
     species: str | None = None,
     target_units: dict | None = None,
+    is_dequantified: bool = True,
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -522,6 +531,7 @@ def get_footprint(
             "mf": "ppm",
             "mf_variability": "ppm"
         }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
         kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
@@ -552,7 +562,7 @@ def get_footprint(
         **kwargs,
     )
 
-    fp_data = assign_units(data=fp_data, target_units=target_units)
+    fp_data = assign_units(data=fp_data, target_units=target_units, is_dequantified=is_dequantified)
     return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?

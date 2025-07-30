@@ -62,7 +62,9 @@ def _read_attributes_json() -> dict:
 
 
 def assign_units(
-    data: "ObsData | ObsColumnData | FootprintData | FluxData | _BaseData", target_units: dict | None = None
+    data: "ObsData | ObsColumnData | FootprintData | FluxData | _BaseData",
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
 ) -> xr.Dataset:
     """This function is used to assign units as well as convert the units of the dataset if target_units are supplied to the function. The final supplied values are dequantified to ensure the ModelScenario usecases are not broken.
 
@@ -117,8 +119,8 @@ def assign_units(
             # Map back to original preferred unit string if available
             preferred_unit = inverse_unit_mapping.get(pint_final_unit, pint_final_unit)
             # Store this back in attrs (user-facing)
-
-            data.data[key] = data.data[key].pint.dequantify()
+            if is_dequantified:
+                data.data[key] = data.data[key].pint.dequantify()
             data.data[key].attrs["units"] = preferred_unit
         except pint.errors.UndefinedUnitError:
             logger.warning(f"The unit '{i_unit}' for key '{key}' is not recognised by mappings or Pint.")
