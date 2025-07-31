@@ -121,9 +121,24 @@ def assign_units(
 
             # Map back to original preferred unit string if available
             preferred_unit = inverse_unit_mapping.get(pint_final_unit, pint_final_unit)
-            # Store this back in attrs (user-facing)
             if is_dequantified:
-                data.data[key] = data.data[key].pint.dequantify()
+                # Dequantify the data variable if it's quantified
+                if hasattr(data.data[key], "pint"):
+                    try:
+                        data.data[key] = data.data[key].pint.dequantify()
+                    except Exception:
+                        pass
+
+                # Dequantify any quantified coordinates of that variable
+                for coord_name in data.data[key].coords:
+                    coord = data.data.coords[coord_name]
+                    if hasattr(coord, "pint"):
+                        try:
+                            data.data.coords[coord_name] = coord.pint.dequantify()
+                        except Exception:
+                            pass
+
+            # Set original unit
             data.data[key].attrs["units"] = preferred_unit
         except pint.errors.UndefinedUnitError:
             logger.warning(f"The unit '{i_unit}' for key '{key}' is not recognised by mappings or Pint.")

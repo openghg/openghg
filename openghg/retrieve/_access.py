@@ -255,7 +255,7 @@ def get_obs_surface(
 
     obs_data = ObsData(data=data, metadata=metadata)
 
-    obs_data = assign_units(obs_data, target_units=target_units, is_dequantified=is_dequantified)
+    obs_data = assign_units(data=obs_data, target_units=target_units, is_dequantified=is_dequantified)
     return obs_data
 
 
