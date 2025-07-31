@@ -116,6 +116,11 @@ def assign_units(
                 quantified_data = quantified_data.pint.to(target_units[key])
                 quantified_data.attrs["converted_pint_units"] = str(quantified_data.pint.units)
 
+            # Dequantify coordinate indexes on quantified_data to match unquantified dataset indexes
+            for coord in quantified_data.coords:
+                if hasattr(quantified_data.coords[coord], "pint"):
+                    quantified_data.coords[coord] = quantified_data.coords[coord].pint.dequantify()
+
             data.data[key] = quantified_data
 
             pint_final_unit = str(quantified_data.pint.units)
