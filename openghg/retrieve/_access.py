@@ -253,9 +253,10 @@ def get_obs_surface(
     metadata["calibration_scale"] = data.attrs["scale"]
     metadata.update(data.attrs)
 
+    data = assign_units(data=data, target_units=target_units, is_dequantified=is_dequantified)
+
     obs_data = ObsData(data=data, metadata=metadata)
 
-    obs_data = assign_units(data=obs_data, target_units=target_units, is_dequantified=is_dequantified)
     return obs_data
 
 
@@ -379,7 +380,9 @@ def get_obs_column(
 
     obs_data.data = obs_data.data.sortby("time")
 
-    obs_data = assign_units(obs_data, target_units=target_units, is_dequantified=is_dequantified)
+    obs_data.data = assign_units(
+        data=obs_data.data, target_units=target_units, is_dequantified=is_dequantified
+    )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
@@ -442,7 +445,8 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    em_data = assign_units(data=em_data, target_units=target_units, is_dequantified=is_dequantified)
+    em_data.data = assign_units(data=em_data.data, target_units=target_units, is_dequantified=is_dequantified)
+
     return FluxData(data=em_data.data, metadata=em_data.metadata)
 
 
@@ -486,7 +490,7 @@ def get_bc(
         **kwargs,
     )
 
-    bc_data = assign_units(data=bc_data, target_units=target_units, is_dequantified=is_dequantified)
+    bc_data.data = assign_units(data=bc_data.data, target_units=target_units, is_dequantified=is_dequantified)
     return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
 
@@ -562,7 +566,7 @@ def get_footprint(
         **kwargs,
     )
 
-    fp_data = assign_units(data=fp_data, target_units=target_units, is_dequantified=is_dequantified)
+    fp_data.data = assign_units(data=fp_data.data, target_units=target_units, is_dequantified=is_dequantified)
     return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?

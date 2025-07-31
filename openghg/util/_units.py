@@ -4,13 +4,6 @@ import pint_xarray
 import pint
 import xarray as xr
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # from openghg.dataobjects import ObsData, ObsColumnData, FootprintData, FluxData
-
-    from openghg.dataobjects._basedata import _BaseData
-
 from openghg.util._file import load_internal_json
 
 logger = logging.getLogger("openghg.util")
@@ -68,7 +61,7 @@ def _read_attributes_json() -> dict:
 
 
 def assign_units(
-    data: "_BaseData",
+    data: xr.Dataset,
     target_units: dict | None = None,
     is_dequantified: bool = True,
 ) -> xr.Dataset:
@@ -96,13 +89,13 @@ def assign_units(
     inverse_unit_mapping = {v: k for k, v in unit_mapping.items()}
 
     for key in data.data.data_vars:
-        if "units" not in data.data[key].attrs:
+        if "units" not in data[key].attrs:
             continue
 
         if key in ["lat", "latitude", "lon", "longitude, release_lat, release_lon"]:
             continue
 
-        i_unit = _normalize_unit(data.data[key].attrs["units"].lower())
+        i_unit = _normalize_unit(data[key].attrs["units"].lower())
 
         try:
             # Resolve input unit → canonical Pint unit
@@ -114,7 +107,7 @@ def assign_units(
                 pint_unit_str = i_unit
 
             # Quantify the data with the unit
-            quantified_data = data.data[key].pint.quantify(ureg.parse_units(pint_unit_str))
+            quantified_data = data[key].pint.quantify(ureg.parse_units(pint_unit_str))
 
             # Convert to target units if requested
             if target_units and key in target_units:
@@ -126,7 +119,7 @@ def assign_units(
                 if hasattr(quantified_data.coords[coord], "pint"):
                     quantified_data.coords[coord] = quantified_data.coords[coord].pint.dequantify()
 
-            data.data[key] = quantified_data
+            data[key] = quantified_data
 
             pint_final_unit = str(quantified_data.pint.units)
 
@@ -134,14 +127,14 @@ def assign_units(
             preferred_unit = inverse_unit_mapping.get(pint_final_unit, pint_final_unit)
             if is_dequantified:
                 # Dequantify the data variable if it's quantified
-                if hasattr(data.data[key], "pint"):
+                if hasattr(data[key], "pint"):
                     try:
-                        data.data[key] = data.data[key].pint.dequantify()
+                        data[key] = data[key].pint.dequantify()
                     except Exception:
                         pass
 
             # Set original unit
-            data.data[key].attrs["units"] = preferred_unit
+            data[key].attrs["units"] = preferred_unit
         except pint.errors.UndefinedUnitError:
             logger.warning(f"The unit '{i_unit}' for key '{key}' is not recognised by mappings or Pint.")
 
