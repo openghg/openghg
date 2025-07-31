@@ -93,7 +93,7 @@ def assign_units(
         if "units" not in data.data[key].attrs:
             continue
 
-        if key in ["lat", "latitude", "lon", "longitude"]:
+        if key in ["lat", "latitude", "lon", "longitude, release_lat, release_lon"]:
             continue
 
         i_unit = _normalize_unit(data.data[key].attrs["units"].lower())
