@@ -88,7 +88,7 @@ def assign_units(
     # Invert the unit_mapping to go from canonical pint units back to original strings
     inverse_unit_mapping = {v: k for k, v in unit_mapping.items()}
 
-    for key in data.data.data_vars:
+    for key in data.data_vars:
         if "units" not in data[key].attrs:
             continue
 
