@@ -32,6 +32,11 @@ def _openghg_unit_registry() -> pint.UnitRegistry:
     ureg.define("Degrees_east = degree")
     ureg.define("Degrees_west = degree")
     ureg.define("Degrees_south = degree")
+    ureg.define("degree_north = degree")
+    ureg.define("degree_east = degree")
+    ureg.define("degree_west = degree")
+    ureg.define("degree_south = degree")
+
     return ureg
 
 
@@ -134,15 +139,6 @@ def assign_units(
                         data.data[key] = data.data[key].pint.dequantify()
                     except Exception:
                         pass
-
-                # Dequantify any quantified coordinates of that variable
-                for coord_name in data.data[key].coords:
-                    coord = data.data.coords[coord_name]
-                    if hasattr(coord, "pint"):
-                        try:
-                            data.data.coords[coord_name] = coord.pint.dequantify()
-                        except Exception:
-                            pass
 
             # Set original unit
             data.data[key].attrs["units"] = preferred_unit
