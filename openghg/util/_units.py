@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData, ObsColumnData, FootprintData, FluxData
-    from openghg.dataobjects._basedata import _BaseData
+
+    # from openghg.dataobjects._basedata import _BaseData
 
 from openghg.util._file import load_internal_json
 
@@ -62,7 +63,7 @@ def _read_attributes_json() -> dict:
 
 
 def assign_units(
-    data: "ObsData | ObsColumnData | FootprintData | FluxData | _BaseData",
+    data: "ObsData | ObsColumnData | FootprintData | FluxData" | xr.Dataset,
     target_units: dict | None = None,
     is_dequantified: bool = True,
 ) -> xr.Dataset:
