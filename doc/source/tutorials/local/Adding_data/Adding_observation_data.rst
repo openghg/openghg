@@ -164,12 +164,8 @@ First we retrieve example data from the  Cape Grim station in Australia (site co
 
 .. code:: python
 
-    import posixpath
-
-    files = [
-    posixpath.join("~", "openghg_store", "tutorial_store", "extracted_files", "capegrim.18.C"),
-    posixpath.join("~", "openghg_store", "tutorial_store", "extracted_files", "capegrim.18.precisions.C"),
-    ]
+    from pathlib import Path
+    files = [Path("~/openghg_store/tutorial_store/extracted_files/capegrim.18.C"), Path("~/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C")]
 
 We put the data file and precisions file into a tuple:
 
