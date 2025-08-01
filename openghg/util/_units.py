@@ -16,6 +16,7 @@ cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
 cf_ureg.preprocessors.append(lambda x: x.replace("per m", "per_m"))
 
+cf_ureg.define("@alias ppm = parts_per_million")  # this works for converting, but not formatting
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
 cf_ureg.define("ppt = 1e-12 mol/mol = parts_per_trillion")
 cf_ureg.define("ppq = 1e-15 mol/mol = parts_per_quadrillion")
