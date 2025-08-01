@@ -261,7 +261,7 @@ def test_convert_units_get_obs():
 
     sliced_co2_data = timeslice_data.data
     assert "1e-9" in sliced_co2_data["mf"].attrs["units"]
-    assert "ppb" in sliced_co2_data["mf"].attrs["converted_pint_units"]
+    assert "parts_per_billion" in sliced_co2_data["mf"].attrs["units_definition"]
     np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-6)
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
@@ -360,7 +360,7 @@ def test_get_flux():
 
     flux = flux_data.data
 
-    assert "mole / m2 / second" in flux["flux"].attrs["units"]
+    assert "mol m-2 s-1" in flux["flux"].attrs["units"]
     assert float(flux.lat.max()) == pytest.approx(79.057)
     assert float(flux.lat.min()) == pytest.approx(10.729)
     assert float(flux.lon.max()) == pytest.approx(39.38)
@@ -380,7 +380,7 @@ def test_conver_units_get_flux():
 
     flux = flux_data.data
 
-    assert "millimole / m2 / second" in flux["flux"].attrs["units"]
+    assert "mmol m-2 s-1" in flux["flux"].attrs["units"]
 
     assert float(flux.lat.max()) == pytest.approx(79.057)
     assert float(flux.lat.min()) == pytest.approx(10.729)
