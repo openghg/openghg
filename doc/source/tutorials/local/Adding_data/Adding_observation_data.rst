@@ -165,7 +165,13 @@ First we retrieve example data from the  Cape Grim station in Australia (site co
 .. code:: python
 
     from pathlib import Path
-    files = [Path("~/openghg_store/tutorial_store/extracted_files/capegrim.18.C"), Path("~/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C")]
+
+    base_path = Path.home() / "openghg_store" / "tutorial_store" / "extracted_files"
+    files = [
+        base_path / "capegrim.18.C",
+        base_path / "capegrim.18.precisions.C"
+    ]
+
 
 We put the data file and precisions file into a tuple:
 
@@ -475,7 +481,7 @@ By default, the returned data is dequantified, so you can confirm the unit conve
 
 .. jupyter-execute::
     co2_ppb.data["mf"].attrs["units"]
-    co2_ppb.data["mf"].attrs["converted_pint_units"]
+    co2_ppb.data["mf"].attrs["units_definition"]
 
 This confirms that the mole fraction (``mf``) was converted to **parts per billion (ppb)** instead of the default **parts per million (ppm)**. The original units attribute is preserved in scalar format comaptible with the further workflow. However more standard string value of the units can be observed with `converted_pint_units`.
 
