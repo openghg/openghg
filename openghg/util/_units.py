@@ -5,56 +5,60 @@ import pint_xarray  # noqa: F401  # Needed to activate xarray pint accessor
 import pint
 import xarray as xr
 
-from openghg.util._file import load_internal_json
-
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+# convert scientific notation to volume ratios
+unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq"}
+cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
+
+# remove spaces from some non-standard units ("per mil", "per meg", etc.)
+cf_ureg.preprocessors.append(lambda x: x.replace("per m", "per_m"))
+
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
 cf_ureg.define("ppt = 1e-12 mol/mol= parts_per_trillion")
-cf_ureg.define("permeg = 0.001 permille")
+cf_ureg.define("ppq = 1e-15 mol/mol= parts_per_quadrillion")
+cf_ureg.define("@alias permille = permil = per_mil = per_mille")
+cf_ureg.define("permeg = 0.001 permille = per_meg")
 cf_ureg.define("m2 = m*m = metres_squared")
-cf_ureg.define("hpa = hectopascal")
-cf_ureg.define("degrees_north = degree")
-cf_ureg.define("degrees_east = degree")
-cf_ureg.define("degrees_west = degree")
-cf_ureg.define("degrees_south = degree")
-cf_ureg.define("Degrees_north = degree")
-cf_ureg.define("Degrees_east = degree")
-cf_ureg.define("Degrees_west = degree")
-cf_ureg.define("Degrees_south = degree")
-cf_ureg.define("degree_north = degree")
-cf_ureg.define("degree_east = degree")
-cf_ureg.define("degree_west = degree")
-cf_ureg.define("degree_south = degree")
+cf_ureg.define("hpa = 100.0 Pa = hectopascal = hPa")
+
+cf_ureg.define(
+    "degrees_west = degree = degrees_west = degress_W = degreesW = degree_west = degree_W = degreeW"
+)
+cf_ureg.define(
+    "degrees_south = degree = degrees_south = degress_S = degreesS = degree_south = degree_S = degreeS"
+)
 
 
-def _normalize_unit(unit_str: str) -> str:
-    """
-    Convert a unit string to a normalized or preferred format for display or comparison.
-
-    This function maps specific unit strings (e.g., from a dataset or user input)
-    to a standardized or more readable format using predefined substitutions.
-    If the input unit is not found in the substitutions, it is returned unchanged.
-
-    Args:
-        unit_str: The input unit string (e.g., "m s-1", "kg m-2 s-1").
-
-    Returns:
-        str: The normalized or unchanged unit string.
-    """
-    substitutions = {
-        "m s-1": "m/s",
-        "m2 s-1": "m²/s",
-        "kg m-2 s-1": "kg/(m²·s)",
-        "μmol m-2 s-1": "umol/(m²·s)",  # if applicable
-    }
-    return substitutions.get(unit_str, unit_str)
+# Invert the unit_mapping to go from cf_xarray pint units back to original strings
+# note that `getattr(cf_ureg, v)` will get the unit corresponding to the string v,
+# and `f"{...:cf}"` will print in cf format
+inverse_unit_mapping = {f"{getattr(cf_ureg, v):cf}": k for k, v in unit_mapping.items()}
 
 
-def _read_attributes_json() -> dict:
-    return load_internal_json("attributes.json")
+# create custom units registry that does cf formatting, then converts parts_per_billion to 1e-9, etc
+@pint.register_unit_format("openghg")
+def openghg_format(unit, registry, **options):  # type: ignore
+    cf_fmt = registry.formatter._formatters.get("cf")
+    out = cf_fmt.format_unit(unit) if cf_fmt is not None else str(unit)
+    return inverse_unit_mapping.get(out, out)
+
+
+cf_ureg.formatter.default_format = "openghg"
+
+
+def convert_units(ds: xr.Dataset, target_units: dict) -> None:
+    for dv, target_unit in target_units.items():
+        if dv in ds.ds_vars:
+            try:
+                ds[dv] = ds[dv].pint.to(target_unit)
+            except ValueError as e:
+                raise ValueError(
+                    "Cannot convert unquantified Dataset. Use `ds.pint.quantify()` first."
+                ) from e
+            ds[dv].attrs["converted_pint_units"] = str(ds[dv].pint.units)
 
 
 def assign_units(
@@ -62,79 +66,26 @@ def assign_units(
     target_units: dict | None = None,
     is_dequantified: bool = True,
 ) -> xr.Dataset:
-    """This function is used to assign units as well as convert the units of the dataset if target_units are supplied to the function. The final supplied values are dequantified to ensure the ModelScenario usecases are not broken.
+    """This function is used to assign units as well as convert the units of the dataset if target_units are supplied to the function.
+
+    The final supplied values are dequantified to ensure the ModelScenario usecases are not broken.
 
     Args:
         data: xarray dataset
-        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
-    Example:
-        {
-            "mf": "ppm",
-            "mf_variability": "ppm"
-        }
+        target_units: Dictionary specifying the desired units for each variable in the dataset.
+            Keys are variable names, and values are the units to which the data should be converted.
+            For example: {"mf": "ppm", "mf_variability": "ppm"}.
+
     Returns:
         xr.Dataset
     """
-    # ureg = _openghg_unit_registry()
-    # pint_xarray.accessors.default_registry = ureg
 
-    ureg = cf_ureg
+    data = data.pint.quantify()
 
-    attrs = _read_attributes_json()
-    unit_mapping = attrs["unit_pint"]
-    non_standard = attrs["unit_non_standard_interpret"]
+    if target_units is not None:
+        convert_units(data, target_units)
 
-    # Invert the unit_mapping to go from canonical pint units back to original strings
-    inverse_unit_mapping = {v: k for k, v in unit_mapping.items()}
-
-    for key in data.data_vars:
-        if "units" not in data[key].attrs:
-            continue
-
-        if key in ["lat", "latitude", "lon", "longitude, release_lat, release_lon"]:
-            continue
-
-        i_unit = _normalize_unit(data[key].attrs["units"].lower())
-
-        try:
-            # Resolve input unit → canonical Pint unit
-            if i_unit in unit_mapping:
-                pint_unit_str = unit_mapping[i_unit]
-            elif i_unit in non_standard:
-                pint_unit_str = non_standard[i_unit]
-            else:
-                pint_unit_str = i_unit
-
-            # Quantify the data with the unit
-            quantified_data = data[key].pint.quantify(ureg.parse_units(pint_unit_str))
-
-            # Convert to target units if requested
-            if target_units and key in target_units:
-                quantified_data = quantified_data.pint.to(target_units[key])
-                quantified_data.attrs["converted_pint_units"] = str(quantified_data.pint.units)
-
-            # Dequantify coordinate indexes on quantified_data to match unquantified dataset indexes
-            for coord in list(quantified_data.coords):
-                if hasattr(quantified_data.coords[coord], "pint"):
-                    quantified_data.coords[coord] = quantified_data.coords[coord].pint.dequantify()
-
-            data[key] = quantified_data
-
-            pint_final_unit = str(quantified_data.pint.units)
-
-            # Map back to original preferred unit string if available
-            preferred_unit = inverse_unit_mapping.get(pint_final_unit, pint_final_unit)
-            if is_dequantified:
-                # Dequantify the data variable if it's quantified
-                if hasattr(data[key], "pint"):
-                    try:
-                        data[key] = data[key].pint.dequantify()
-                    except Exception:
-                        pass
-
-            # Set original unit
-            data[key].attrs["units"] = preferred_unit
-        except pint.errors.UndefinedUnitError:
-            logger.warning(f"The unit '{i_unit}' for key '{key}' is not recognised by mappings or Pint.")
+    if is_dequantified:
+        data = data.pint.dequantify()
 
     return data
