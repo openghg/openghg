@@ -125,5 +125,5 @@ from ._util import (
     collate_strings,
 )
 
-from ._units import assign_units
+from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version
