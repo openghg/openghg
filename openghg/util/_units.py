@@ -1,6 +1,7 @@
 import logging
 import cf_xarray.units  # noqa: F401  # Needed to register units
-import pint_xarray
+from cf_xarray.units import units as cf_ureg
+import pint_xarray  # noqa: F401  # Needed to activate xarray pint accessor
 import pint
 import xarray as xr
 
@@ -10,27 +11,23 @@ logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def _openghg_unit_registry() -> pint.UnitRegistry:
-    ureg = pint.UnitRegistry(force_ndarray_like=True)
-    ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
-    ureg.define("ppt = 1e-12 mol/mol= parts_per_trillion")
-    ureg.define("permeg = 0.001 permille")
-    ureg.define("m2 = m*m = metres_squared")
-    ureg.define("hpa = hectopascal")
-    ureg.define("degrees_north = degree")
-    ureg.define("degrees_east = degree")
-    ureg.define("degrees_west = degree")
-    ureg.define("degrees_south = degree")
-    ureg.define("Degrees_north = degree")
-    ureg.define("Degrees_east = degree")
-    ureg.define("Degrees_west = degree")
-    ureg.define("Degrees_south = degree")
-    ureg.define("degree_north = degree")
-    ureg.define("degree_east = degree")
-    ureg.define("degree_west = degree")
-    ureg.define("degree_south = degree")
-
-    return ureg
+cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
+cf_ureg.define("ppt = 1e-12 mol/mol= parts_per_trillion")
+cf_ureg.define("permeg = 0.001 permille")
+cf_ureg.define("m2 = m*m = metres_squared")
+cf_ureg.define("hpa = hectopascal")
+cf_ureg.define("degrees_north = degree")
+cf_ureg.define("degrees_east = degree")
+cf_ureg.define("degrees_west = degree")
+cf_ureg.define("degrees_south = degree")
+cf_ureg.define("Degrees_north = degree")
+cf_ureg.define("Degrees_east = degree")
+cf_ureg.define("Degrees_west = degree")
+cf_ureg.define("Degrees_south = degree")
+cf_ureg.define("degree_north = degree")
+cf_ureg.define("degree_east = degree")
+cf_ureg.define("degree_west = degree")
+cf_ureg.define("degree_south = degree")
 
 
 def _normalize_unit(unit_str: str) -> str:
@@ -78,8 +75,10 @@ def assign_units(
     Returns:
         xr.Dataset
     """
-    ureg = _openghg_unit_registry()
-    pint_xarray.accessors.default_registry = ureg
+    # ureg = _openghg_unit_registry()
+    # pint_xarray.accessors.default_registry = ureg
+
+    ureg = cf_ureg
 
     attrs = _read_attributes_json()
     unit_mapping = attrs["unit_pint"]
