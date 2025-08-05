@@ -79,6 +79,13 @@ def _get_generic(
     else:
         result = retrieved_data
 
+    # TODO: make sure lat and lon have units when stadardising
+    # make sure lat and lon units are set
+    if "lat" in result.data.dims and result.data.lat.attrs.get("units") is None:
+        result.data.lat.attrs["units"] = "degrees_north"
+    if "lon" in result.data.dims and result.data.lon.attrs.get("units") is None:
+        result.data.lon.attrs["units"] = "degrees_east"
+
     return result
 
 

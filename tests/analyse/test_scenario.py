@@ -557,9 +557,18 @@ def test_footprints_data_merge(model_scenario_1):
     assert "fp" in combined_dataset
     assert "mf" in combined_dataset
     assert "mf_mod" in combined_dataset
+    assert "bc_mod" in combined_dataset
 
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
+
+    for dv in ("mf_mod", "bc_mod"):
+        assert combined_dataset[dv].attrs["units"] == "1e-9"
+
+    error_in_mod_obs = np.mean(np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)).values
+    error_threshold = 0.1 * np.mean(combined_dataset.mf).values  # somewhat arbitrary, but fails if bc mod units wrong
+
+    assert error_in_mod_obs < error_threshold
 
 
 def test_combine_obs_sampling_period_infer():
@@ -629,6 +638,7 @@ def obs_ch4_dummy():
     }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+    data.mf.attrs["units"] = "1e-9"
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -690,6 +700,13 @@ def footprint_dummy():
 
     data = xr.Dataset(data_vars, coords=coords)
 
+    # set units for testing with pint
+    data.fp.attrs["units"] = "m2 s mol-1"
+    for d in "nesw":
+        data[f"particle_locations_{d}"].attrs["units"] = "1"  # dimensionless
+    data.lat.attrs["units"] = "degrees_north"
+    data.lon.attrs["units"] = "degrees_east"
+
     # Potential metadata:
     # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
@@ -725,6 +742,11 @@ def flux_ch4_dummy():
     flux = xr.Dataset(
         {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
     )
+
+    # add units for testing with pint
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
@@ -781,6 +803,12 @@ def bc_ch4_dummy():
 
     bc = xr.Dataset(data_vars, coords=coords)
 
+    # add units for testing with pint
+    for d in "nesw":
+        bc[f"vmr_{d}"].attrs["units"] = "1"  # dimensionless
+    bc.lat.attrs["units"] = "degrees_north"
+    bc.lon.attrs["units"] = "degrees_east"
+
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
@@ -800,6 +828,11 @@ def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_
     )
 
     return model_scenario
+
+
+def test_model_scenario_units(model_scenario_ch4_dummy):
+    """Check that units are picked up from obs data."""
+    assert model_scenario_ch4_dummy.units == "1e-9"
 
 
 def test_model_resample_ch4(model_scenario_ch4_dummy):
@@ -825,7 +858,7 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
 
 
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
-    """Test expected modelled observations within footprints_data_merge method with known dummy data"""
+    """Test expected modelled observations within footprints_data_merge method with known dummy data."""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -845,6 +878,7 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     input_fp_values = footprint["fp"]
 
     expected_modelled_mf = (input_fp_values * input_flux_values).sum(dim=("lat", "lon")).values
+    expected_modelled_mf *= 1e9  # fp x flux in mol/mol but output converted to obs units of ppb
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
@@ -1088,6 +1122,13 @@ def footprint_radon_dummy(footprint_dummy):
         data_vars[dv] = (dims, values)
 
     footprint_ds = footprint_ds.assign(data_vars)
+
+    # set units for testing with pint
+    footprint_ds.fp.attrs["units"] = "m2 s mol-1"
+    for d in "nesw":
+        footprint_ds[f"particle_locations_{d}"].attrs["units"] = "1"  # dimensionless
+    footprint_ds.lat.attrs["units"] = "degrees_north"
+    footprint_ds.lon.attrs["units"] = "degrees_east"
 
     footprintdata = FootprintData(data=footprint_ds, metadata=footprint_metadata)
 

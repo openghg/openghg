@@ -55,6 +55,7 @@ def openghg_format(unit, registry):  # type: ignore
 
 
 cf_ureg.formatter.default_format = "openghg"
+cf_ureg.case_sensitive = False
 
 
 def convert_units(ds: xr.Dataset, target_units: dict) -> None:
