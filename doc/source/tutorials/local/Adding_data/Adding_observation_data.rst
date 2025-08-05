@@ -164,8 +164,14 @@ First we retrieve example data from the  Cape Grim station in Australia (site co
 
 .. code:: python
 
-    [PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.C'),
-    PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C')]
+    from pathlib import Path
+
+    base_path = Path.home() / "openghg_store" / "tutorial_store" / "extracted_files"
+    files = [
+        base_path / "capegrim.18.C",
+        base_path / "capegrim.18.precisions.C"
+    ]
+
 
 We put the data file and precisions file into a tuple:
 
@@ -193,7 +199,7 @@ Datasource UUIDs shown due to the large number of gases in each data
 file
 
 However, recently the AGAGE network has begun to also produce netCDF files, which are processed by Matt
-Rigby's `agage-archive <https://github.com/mrghg/agage-archive>`_ repository. These files are split by site, 
+Rigby's `agage-archive <https://github.com/mrghg/agage-archive>`_ repository. These files are split by site,
 species and instrument and do not need an accompanying precisions file. These can also be read in by the
 ``openghg.standardise.standardise_surface`` function, with the arguments:
 
@@ -203,8 +209,8 @@ species and instrument and do not need an accompanying precisions file. These ca
 * ``network``: ``"AGAGE"``
 * ``instrument``: ``"medusa"``
 
-The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly. 
-Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible. 
+The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly.
+Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
 
 .. _note-on-datasources:
 
@@ -227,7 +233,7 @@ stored for easy future comparison.
 Other keywords
 ~~~~~~~~~~~~~~
 
-When adding data in this way there are other keywords which can be used to 
+When adding data in this way there are other keywords which can be used to
 distinguish between different data sets as required including:
 
 * ``instrument``: Name of the instrument
@@ -265,7 +271,7 @@ added using the same `tag`. For example below we show how to add the same data a
                                        network="DECC",
                                        tag="project1",
                                        force=True)
-    
+
     agage_results = standardise_surface(filepath=capegrim_tuple,
                                         source_format="GCWERKS",
                                         site="CGO",
@@ -274,8 +280,8 @@ added using the same `tag`. For example below we show how to add the same data a
                                         tag=["project1", "project2"],
                                         force=True)
 
-    
-*Note: here we included the force=True keyword as we are adding the same data which has been added in 
+
+*Note: here we included the force=True keyword as we are adding the same data which has been added in
 a previous step of the tutorial - see "Updating existing data" tutorial for more details of this.*
 
 As will be covered in the :ref:`2. Searching for data` section, these keywords can then used when searching the
@@ -451,6 +457,48 @@ the ``ObsData`` object.
 
 You can also pass any of ``title``, ``xlabel``, ``ylabel`` and ``units``
 to the ``plot_timeseries`` function to modify the labels.
+
+Unit conversion
+^^^^^^^^^^^^^^^^
+
+You can request the mole fraction data in a different unit by specifying
+the `target_units` argument when calling ``get_obs_surface``.
+
+For example, to convert the mole fraction from the default unit
+(usually ppm for CO₂) to ppb:
+
+.. jupyter-execute::
+
+    co2_ppb = get_obs_surface(
+        site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}
+    )
+
+.. jupyter-execute::
+
+    co2_ppb.data
+
+By default, the returned data is dequantified, so you can confirm the unit conversion using:
+
+.. jupyter-execute::
+    co2_ppb.data["mf"].attrs["units"]
+    co2_ppb.data["mf"].attrs["units_definition"]
+
+This confirms that the mole fraction (``mf``) was converted to **parts per billion (ppb)** instead of the default **parts per million (ppm)**. The original units attribute is preserved in scalar format comaptible with the further workflow. However more standard string value of the units can be observed with `converted_pint_units`.
+
+If you prefer to keep the data **quantified** (i.e., retaining the Pint unit objects), set the ``is_dequantified`` argument to ``False`` when calling ``get_obs_surface``.
+
+.. jupyter-execute::
+
+    co2_ppb_quantified = get_obs_surface(site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, is_dequantified=False)
+
+You can then access the Pint units directly:
+
+.. jupyter-execute::
+
+    co2_ppb_quantified.data["mf"].pint.units
+
+.. note::
+    Above mentioned unit conversion can be applied on ``get_obs_column``, ``get_flux``, ``get_footprint``, and ``get_bc`` too.
 
 4. Cleanup
 ----------
