@@ -1251,7 +1251,8 @@ class ModelScenario:
         output_units: float = 1.0,
         cache: bool = True,
         recalculate: bool = False,
-    ) -> DataArray:
+        output_sensitivity: bool = False,
+    ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
 
@@ -1285,7 +1286,7 @@ class ModelScenario:
 
         if not param_calculate:
             modelled_baseline = cast(DataArray, self.modelled_baseline)
-            return modelled_baseline
+            return xr.Dataset({"bc_mod": modelled_baseline})
 
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
@@ -1294,13 +1295,16 @@ class ModelScenario:
             bc=bc_data, fp=scenario, species=self.species, output_units=output_units
         )
 
+        result = sensitivities if output_sensitivity else xr.Dataset()
+
         modelled_baseline = (
             sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
 
         modelled_baseline.attrs["resample_to"] = str(resample_to)
         modelled_baseline.attrs["units"] = output_units
-        modelled_baseline = modelled_baseline.rename("bc_mod")
+
+        result["bc_mod"] = modelled_baseline
 
         # Cache output from calculations
         if cache:
@@ -1311,7 +1315,7 @@ class ModelScenario:
             self.modelled_baseline = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
 
-        return modelled_baseline
+        return result
 
     # def _calc_modelled_baseline_long_lived():
     #     pass
@@ -1328,6 +1332,7 @@ class ModelScenario:
         sources: str | list | None = None,
         split_by_sectors: bool = False,
         calc_bc: bool = True,
+        calc_bc_sensitivity: bool = False,
         cache: bool = True,
         recalculate: bool = False,
         output_obs_units: str | float | None = None,
@@ -1379,9 +1384,10 @@ class ModelScenario:
                     platform=platform,
                     cache=cache,
                     recalculate=recalculate,
+                    output_sensitivity=calc_bc_sensitivity,
                 )
-                name = modelled_baseline.name
-                combined_dataset = combined_dataset.assign({name: modelled_baseline})
+
+                combined_dataset = combined_dataset.merge(modelled_baseline)
             else:
                 logger.warning(
                     "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
@@ -1394,7 +1400,7 @@ class ModelScenario:
         to_convert = []
         for dv in combined_dataset.data_vars:
             if (
-                any(x in str(dv) for x in ("mf", "bc_mod", "fp_x_flux"))
+                any(x in str(dv) for x in ("mf", "bc_mod", "fp_x_flux", "bc_sensitivity"))
                 and combined_dataset[dv].attrs.get("units") is not None
             ):
                 to_convert.append(dv)
