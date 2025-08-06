@@ -106,21 +106,21 @@ def test_footprint_data_variable_attribute_modification(footprint_read):
 
     # modify attributes
     uuid = next(iter(search_res.metadata))
-    to_update = {"units": "bananas"}
+    to_update = {"units": "hectopascal"}  # hectopascals... why not?
 
     search_res.update_attributes(uuid=uuid, to_update=to_update, data_vars="fp", update_global=False)
 
     # check new attributes
-    fp_data = get_footprint(
-        site="TMB",
-        network="LGHG",
-        height="10m",
-        domain="EUROPE",
-        model="test_model",
-        store="user",
-    )
-    assert fp_data.data.fp.units == "bananas"
-    assert fp_data.data.attrs.get("units") != "bananas"
+
+    fp_data = get_footprint(site = "TMB",
+                        network = "LGHG",
+                        height = "10m",
+                        domain = "EUROPE",
+                        model = "test_model",
+                        store="user",
+                        )
+    assert fp_data.data.fp.units == "hectopascal"
+    assert fp_data.data.attrs.get("units") != "hectopascal"
 
 
 def test_delete_footprint_data(footprint_read):
