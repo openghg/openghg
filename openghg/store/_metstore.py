@@ -18,6 +18,7 @@ class METStore(BaseStore):
 
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
+    _data_type = "met"
 
     def save(self) -> None:
         """Save the object to the object store
@@ -50,7 +51,7 @@ class METStore(BaseStore):
             METData: METData object holding data and metadata
         """
         raise NotImplementedError("We are working to replace the MetStore.")
-        from openghg.retrieve.met import retrieve_met
+        from openghg.retrieve.met import pull_met
         from pandas import Timestamp
 
         if not isinstance(years, list):
@@ -68,7 +69,7 @@ class METStore(BaseStore):
 
         # Retrieve from the Copernicus store
         if result is None:
-            result = retrieve_met(site=site, network=network, years=years)
+            result = pull_met(site=site, network=network, years=years)
 
             store._store(met_data=result)
 
@@ -94,7 +95,7 @@ class METStore(BaseStore):
         """
         raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.dataobjects import METData
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
 
         datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
 
@@ -120,7 +121,7 @@ class METStore(BaseStore):
             None
         """
         raise NotImplementedError("We are working to replace the MetStore.")
-        from openghg.store.base import Datasource
+        from openghg.objectstore import Datasource
 
         metadata = met_data.metadata
 

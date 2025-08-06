@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
 
-import xarray as xr
+from openghg.util import open_time_nc_fn
 
 
 def parse_openghg(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,
@@ -60,14 +60,9 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    # from openghg.standardise.meta import attributes_default_keys, assign_attributes
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
-    filepath = Path(filepath)
-
-    if filepath.suffix.lower() != ".nc":
-        raise ValueError("Input file must be a .nc (netcdf) file.")
-
-    data = xr.open_dataset(filepath).chunk(chunks)
+    data = xr_open_fn(filepath).chunk(chunks)
 
     # TODO: Remove this once ragged arrays from xarray is handled
     if "exposure_id" in data:

@@ -292,6 +292,7 @@ def combine_datasets(
     dataset_B: xr.Dataset,
     method: ReindexMethod = "ffill",
     tolerance: float | None = None,
+    load: bool = False,
 ) -> xr.Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
@@ -305,15 +306,19 @@ def combine_datasets(
                 See xarray.DataArray.reindex_like for list of options and meaning.
                 Defaults to ffill (forward fill)
         tolerance: Maximum allowed tolerance between matches.
+        load: if True, load dataset_B before aligning. This avoids a performance issue
+            for datasets opened with the netcdf4 backend.
 
     Returns:
         xarray.Dataset: Combined dataset indexed to dataset_A
     """
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
-    else:
+    elif load:
         # load dataset_B to avoid performance issue (see xarray issue #8945)
         dataset_B_temp = dataset_B.load().reindex_like(dataset_A, method=method, tolerance=tolerance)
+    else:
+        dataset_B_temp = dataset_B.reindex_like(dataset_A, method=method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 

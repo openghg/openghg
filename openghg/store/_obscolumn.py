@@ -1,8 +1,7 @@
 from __future__ import annotations
 import logging
-from pathlib import Path
 from typing import Any, Optional
-
+from pathlib import Path
 from numpy import ndarray
 
 # from openghg.store import DataSchema
@@ -25,7 +24,7 @@ class ObsColumn(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: str | Path | list[str | Path],
         species: str,
         platform: str = "satellite",
         obs_region: Optional[str] = None,
@@ -35,6 +34,7 @@ class ObsColumn(BaseStore):
         site: str | None = None,
         network: str | None = None,
         instrument: str | None = None,
+        tag: str | list | None = None,
         source_format: str = "openghg",
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -43,7 +43,7 @@ class ObsColumn(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         chunks: dict | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Read column observation file
 
@@ -64,6 +64,8 @@ class ObsColumn(BaseStore):
             site : Site code/name (if relevant). Should include satellite OR site.
             instrument: Instrument name e.g. "TANSO-FTS"
             network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             source_format : Type of data being input e.g. openghg (internal format)
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
@@ -86,7 +88,7 @@ class ObsColumn(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -150,8 +152,6 @@ class ObsColumn(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        filepath = Path(filepath)
-
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
         try:
@@ -193,10 +193,10 @@ class ObsColumn(BaseStore):
         # this could be "site" or "satellite" keys.
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)

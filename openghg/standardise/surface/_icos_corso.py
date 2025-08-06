@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_icos_corso(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     instrument: str,
     inlet: str | None = None,
@@ -163,6 +163,18 @@ def parse_icos_corso(
                         species + "_number_of_observations",
                         "flag",
                     ]
+                else:
+                    columns_to_keep = [
+                        species,
+                        "sampling_start",
+                        "sampling_end",
+                        species + "_variability",
+                        species + "_repeatability",
+                        species + "_calibration_uncertainty",
+                        species + "_combined_uncertainty",
+                        "flag",
+                    ]
+
                 df = df[columns_to_keep]
 
                 df = set_time_as_dataframe_index(dataframe=df)
@@ -258,7 +270,11 @@ def parse_icos_corso(
     f_header = [s for s in header if "MEASUREMENT UNIT" in s]
     if len(f_header) == 1:
         units = f_header[0].split(":")[1].lower().strip()
+        if "per mil" in units:
+            units = "permil"
         metadata["units"] = units
+        if "per mil" in units:
+            metadata["units"] = "permil"
     else:
         raise ValueError("No unique MEASUREMENT UNIT in file header")
 

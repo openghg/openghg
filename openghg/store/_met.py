@@ -42,7 +42,7 @@ class Met(BaseStore):
         force: bool = False,
         chunks: dict | None = None,
         compressor: Any | None = None,
-    ):
+    ) -> list[dict]:
         # Get initial values which exist within this function scope using locals
         # MUST be at the top of the function
         fn_input_parameters = locals().copy()
@@ -104,7 +104,7 @@ class Met(BaseStore):
         # self.check_info_keys(optional_metadata)
         # if optional_metadata is not None:
         #     additional_metadata.update(optional_metadata)
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         data = self.update_metadata(data, additional_input_parameters, additional_metadata)
@@ -135,7 +135,7 @@ class Met(BaseStore):
     def schema() -> DataSchema:
         """ """
         # TODO: Add details of expected format for internal data
-        data_vars = {}
+        data_vars: dict = {}
         dtypes = {
             "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
             "lon": np.floating,

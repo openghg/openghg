@@ -1,9 +1,11 @@
 from collections import defaultdict
+from collections.abc import MutableMapping
 import copy
 import logging
 
-from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
+import zarr
+
+from openghg.objectstore import get_datasource, locking_object_store, LockingObjectStoreType
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
 
@@ -26,6 +28,9 @@ class DataManager:
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
+
+    def objectstore(self, data_type: str) -> LockingObjectStoreType:
+        return locking_object_store(bucket=self._bucket, data_type=data_type)
 
     def _clean_metadata(self, metadata: dict) -> dict:
         """Ensures the metadata we give to the user is the metadata
@@ -111,16 +116,17 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-        with open_metastore(data_type=dtype, bucket=self._bucket) as metastore:
-            backup = self._backup[uuid][version]
-            self.metadata[uuid] = backup
+        with self.objectstore(data_type=dtype) as objstore:
+            # update DataManager's copy of metadata
+            backup = self._backup[uuid][version].copy()
+            self.metadata[uuid] = backup.copy()
+            del backup["uuid"]
 
-            metastore.delete({"uuid": uuid})
-            metastore.insert(backup)
+            current_metadata = objstore.search(uuid=uuid)[0]
+            do_not_delete = ("uuid", "object_store", "data_type")
+            to_delete = [k for k in current_metadata if k not in backup and k.lower() not in do_not_delete]
 
-            d = Datasource(bucket=self._bucket, uuid=uuid)
-            d._metadata = backup
-            d.save()
+            objstore.update(uuid=uuid, metadata=backup, keys_to_delete=to_delete)
 
     def view_backup(self, uuid: str | None = None, version: str | None = None) -> dict:
         """View backed-up metadata for all Datasources
@@ -146,8 +152,10 @@ class DataManager:
         to_update: dict | None = None,
         to_delete: str | list | None = None,
     ) -> None:
-        """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
+        """Update the metadata associated with data.
+
+        This takes UUIDs of Datasources and updates the associated metadata.
+        To update metadata pass in a dictionary of key/value pairs to update.
         To delete metadata pass in a list of keys to delete.
 
         Args:
@@ -166,59 +174,141 @@ class DataManager:
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
+        with self.objectstore(data_type=dtype) as objstore:
             for u in uuid:
-                updated = False
-                d = Datasource(bucket=self._bucket, uuid=u)
-                # Save a backup of the metadata for now
-                found_record = metastore.search({"uuid": u})
-                current_metadata = found_record[0]
+                # get current metadata for backup
+                current_metadata = objstore.search(uuid=u)[0]
 
+                # update object store
+                objstore.update(uuid=u, metadata=to_update, keys_to_delete=to_delete)
+
+                # back up metadata
                 version = str(len(self._backup[u].keys()) + 1)
                 self._latest = version
                 self._backup[u][version] = copy.deepcopy(dict(current_metadata))
-                # To update this object's records
-                internal_copy = copy.deepcopy(dict(current_metadata))
-                n_records = len(self._backup[u][version])
 
-                # Do a quick check to make sure we're not being asked to delete all the metadata
+                # update DataManager's current of metadata
+                internal_copy = copy.deepcopy(dict(current_metadata))
+
                 if to_delete is not None and to_delete:
                     if not isinstance(to_delete, list):
                         to_delete = [to_delete]
-
-                    if "uuid" in to_delete:
-                        raise ValueError("Cannot delete the UUID key.")
-
-                    if len(to_delete) == n_records:
-                        raise ValueError("We can't remove all the metadata associated with this Datasource.")
                     for k in to_delete:
-                        d._metadata.pop(k)
-                        internal_copy.pop(k)
-
-                    try:
-                        metastore.update(where={"uuid": u}, to_delete=to_delete)
-                    except KeyError:
-                        raise ValueError(
-                            "Unable to remove keys from metadata store, please ensure they exist."
-                        )
-
-                    updated = True
+                        del internal_copy[k]
 
                 if to_update is not None and to_update:
-                    if "uuid" in to_update:
-                        raise ValueError("Cannot update the UUID.")
-
-                    d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    metastore.update(where={"uuid": u}, to_update=to_update)
 
-                    updated = True
+                self.metadata[u] = internal_copy
+                logger.info(f"Modified metadata for {u}.")
 
-                if updated:
-                    d.save()
-                    # Update the metadata stored internally so we're up to date
-                    self.metadata[u] = internal_copy
-                    logger.info(f"Modified metadata for {u}.")
+    def update_attributes(
+        self,
+        uuid: list | str,
+        version: str | list[str] = "latest",
+        data_vars: str | list[str] | None = None,
+        update_global: bool = True,
+        to_update: dict | None = None,
+        to_delete: str | list | None = None,
+    ) -> None:
+        """Update the attributes of the stored Dataset.
+
+        This takes UUIDs of Datasources (and optionally a version tag) and updates
+        the associated attributes:
+        - to update attributes pass in a dictionary of key/value pairs to update.
+        - to delete attributes pass in a list of keys to delete.
+
+        Args:
+            uuid: UUID(s) of Datasources to be updated.
+            version: optional version string
+            data_vars: optional list of data vars to update; if None, then only global attributes
+                will be updated.
+            update_global: if True, update global attributes.
+            to_update: Dictionary of metadata to add/update. New key/value pairs will be added.
+            If the key already exists in the metadata the value will be updated.
+            to_delete: Key(s) to delete from the metadata
+        Returns:
+            None
+        """
+        if to_update is None and to_delete is None:
+            return None
+
+        if update_global is False and data_vars is None:
+            return None
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        if not isinstance(version, list):
+            version = [version] * len(uuid)
+
+        if len(uuid) != len(version):
+            raise ValueError("List passed for 'version' must have same length as 'uuid'.")
+
+        def updater(
+            attrs: MutableMapping, to_update: dict | None = None, to_delete: str | list | None = None
+        ) -> bool:
+            """Update/delete attributes.
+
+            Can be used on either global attributes or the attributes of a data variable.
+
+            Args:
+                attrs: dict (or MutableMapping) of attributes to update.
+                to_update: dict of attributes to update.
+                to_delete: key or list of keys of attributes to delete.
+
+            Returns:
+                True if attributes either updated or deleted, False otherwise.
+            """
+            updated = False
+            if to_delete is not None and to_delete:
+                if not isinstance(to_delete, list):
+                    to_delete = [to_delete]
+
+                for k in to_delete:
+                    attrs.pop(k)
+
+                updated = True
+
+            if to_update is not None and to_update:
+                attrs.update(to_update)
+                updated = True
+
+            return updated
+
+        for u, v in zip(uuid, version):
+            updated = False
+
+            d = get_datasource(bucket=self._bucket, uuid=u)
+
+            if v == "latest":
+                v = d._latest_version
+
+            zs = d._store._stores[v]  # zarr store for specified version
+            group = zarr.open_group(zs)
+
+            # update global
+            if update_global:
+                global_updated = updater(group.attrs, to_update, to_delete)
+                updated = updated or global_updated
+            # update data vars
+            if data_vars is not None:
+                if not isinstance(data_vars, list):
+                    data_vars = [data_vars]
+
+                for dv in data_vars:
+                    try:
+                        arr = group[dv]
+                    except KeyError:
+                        logger.warning(f"Data variable {dv} not present in zarr store. Skipping.")
+                        continue
+                    else:
+                        data_var_updated = updater(arr.attrs, to_update, to_delete)
+                        updated = updated or data_var_updated
+
+            if updated:
+                zarr.consolidate_metadata(zs)
+                logger.info(f"Modified attributes for {u}.")
 
     def delete_datasource(self, uuid: list | str) -> None:
         """Delete Datasource(s) in the object store.
@@ -231,27 +321,14 @@ class DataManager:
         Returns:
             None
         """
-        from openghg.objectstore import delete_object
-
-        # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
+        with self.objectstore(data_type=dtype) as objstore:
             for uid in uuid:
-                # First remove the data from the metadata store
-                metastore.delete({"uuid": uid})
-
-                # Delete all the data associated with a Datasource and the
-                # data in its zarr store.
-                d = Datasource(bucket=self._bucket, uuid=uid)
-                d.delete_all_data()
-
-                # Then delete the Datasource itself
-                delete_object(bucket=self._bucket, key=d.key())
-
+                objstore.delete(uid)
                 logger.info(f"Deleted Datasource with UUID {uid}.")
 
 

@@ -1,7 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any
+import numpy as np
+from xarray import Dataset
 import logging
+
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.util import load_standardise_parser, split_function_inputs
 
@@ -29,13 +33,14 @@ class EulerianModel(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: str | Path | list[str | Path],
         model: str,
         species: str,
         source_format: str = "openghg",
         start_date: str | None = None,
         end_date: str | None = None,
         setup: str | None = None,
+        tag: str | list | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -43,7 +48,7 @@ class EulerianModel(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         chunks: dict | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Read Eulerian model output
 
@@ -55,6 +60,8 @@ class EulerianModel(BaseStore):
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
@@ -76,7 +83,7 @@ class EulerianModel(BaseStore):
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -112,8 +119,6 @@ class EulerianModel(BaseStore):
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
 
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
@@ -155,10 +160,10 @@ class EulerianModel(BaseStore):
         #     em_data = split_data["data"]
         #     EulerianModel.validate_data(em_data)
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         model_data = self.update_metadata(
@@ -191,3 +196,41 @@ class EulerianModel(BaseStore):
         self.store_hashes(unseen_hashes)
 
         return datasource_uuids
+
+    @staticmethod
+    def schema() -> DataSchema:
+        """
+        Define schema for Eulerian model Dataset.
+
+        At present, this doesn't check the variables but does check that
+        "lat", "lon", "time" are included as appropriate types.
+
+        Returns:
+            DataSchema : Contains dummy schema for EulerianModel.
+
+        TODO: Decide on data_vars checks as we build up the use of this data_type
+        """
+        data_vars: dict[str, tuple[str, ...]] = {}
+        dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64}
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against EulerianModel schema - definition from
+        EulerianModel.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the EulerianModel schema.
+        """
+        data_schema = EulerianModel.schema()
+        data_schema.validate_data(data)

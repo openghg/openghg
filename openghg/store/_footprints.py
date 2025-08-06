@@ -1,9 +1,10 @@
 from __future__ import annotations
 import logging
-from pathlib import Path
 from typing import Any, cast
 import warnings
 import numpy as np
+from pathlib import Path
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
@@ -188,7 +189,7 @@ class Footprints(BaseStore):
         self,
         domain: str,
         model: str,
-        filepath: list | str | Path,
+        filepath: str | Path | list[str | Path],
         site: str | None = None,
         satellite: str | None = None,
         obs_region: str | None = None,
@@ -199,6 +200,7 @@ class Footprints(BaseStore):
         species: str | None = None,
         network: str | None = None,
         period: str | tuple | None = None,
+        tag: str | list | None = None,
         continuous: bool = True,
         chunks: dict | None = None,
         source_format: str = "acrg_org",
@@ -215,7 +217,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
-        optional_metadata: dict | None = None,
+        info_metadata: dict | None = None,
     ) -> list[dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -233,6 +235,8 @@ class Footprints(BaseStore):
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
             period: Period of measurements. Only needed if this can not be inferred from the time coords
+            tag: Special tagged values to add to the Datasource. This will be added to any
+                current values if the tag key already exists in a list.
             continuous: Whether time stamps have to be continuous.
             chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
@@ -263,7 +267,7 @@ class Footprints(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -390,6 +394,7 @@ class Footprints(BaseStore):
             high_spatial_resolution=high_spatial_resolution,
             time_resolved=time_resolved,
             short_lifetime=short_lifetime,
+            source_format=source_format,
         )
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
@@ -413,10 +418,10 @@ class Footprints(BaseStore):
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
-        # Check to ensure no required keys are being passed through optional_metadata dict
-        self.check_info_keys(optional_metadata)
-        if optional_metadata is not None:
-            additional_metadata.update(optional_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
+        if info_metadata is not None:
+            additional_metadata.update(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         footprint_data = self.update_metadata(
@@ -608,6 +613,7 @@ class Footprints(BaseStore):
             high_spatial_resolution=high_spatial_resolution,
             time_resolved=time_resolved,
             short_lifetime=short_lifetime,
+            source_format=source_format,
         )
         data_schema.validate_data(data)
 
@@ -617,6 +623,7 @@ class Footprints(BaseStore):
         high_time_resolution: bool = False,
         high_spatial_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str = "",
     ) -> ChunkingSchema:
         """
         Get chunking schema for footprint data.
@@ -644,7 +651,7 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
         if time_resolved:
-            var = "fp_HiTRes"
+            var = "fp_HiTRes" if source_format.upper() not in ("PARIS", "FLEXPART") else "fp_time_resolved"
             time_chunk_size = 24
             secondary_vars = ["lat", "lon", "H_back"]
         else:

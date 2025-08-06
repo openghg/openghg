@@ -10,10 +10,9 @@ from helpers import (
     get_surface_datapath,
 )
 from openghg.objectstore import get_writable_bucket
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux, search
+from openghg.objectstore import get_datasource, open_object_store
+from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
-from openghg.store.base import Datasource
 from openghg.types import DataOverlapError
 
 
@@ -109,7 +108,7 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd():
+def bsd_data_read_gcmd(force=False):
     """
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
@@ -129,6 +128,7 @@ def bsd_data_read_gcmd():
         site=site,
         network=network,
         instrument=instrument,
+        force=force,
     )
 
 
@@ -380,8 +380,8 @@ def test_obs_data_read_data_diff():
 
     bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = get_datasource(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = get_datasource(uuid=uuid_n2o, bucket=bucket)
 
     assert d_sf6._latest_version == "v2"
     assert d_n2o._latest_version == "v2"
@@ -469,8 +469,8 @@ def test_obs_data_read_data_overwrite_version():
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
     bucket = get_writable_bucket(name="user")
-    d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
+    d_sf6 = get_datasource(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = get_datasource(bucket=bucket, uuid=uuid_n2o)
 
     assert d_sf6._latest_version == "v1"
     assert d_n2o._latest_version == "v1"
@@ -488,8 +488,24 @@ def test_obs_data_read_data_overwrite_version():
     metadata_sf6 = obs_data_sf6.metadata
     assert metadata_sf6["latest_version"] == "v1"
 
-
 # TODO: Add test for different time values as well.
+
+def test_obs_data_force_update():
+    """
+    Loading same obs surface data twice and checking if using the force=True
+    keyword allows the same data to be added again and a new version created.
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    bsd_data_read_gcmd(force=True)
+
+    # Search for an expected species
+    # GCMD data
+    data_sf6 = get_obs_surface(site="bsd", species="sf6", inlet="108m")
+
+    assert data_sf6 is not None
+    assert data_sf6.metadata["latest_version"] == "v2"
 
 
 #  Look at different data frequencies for the same data
@@ -587,8 +603,8 @@ def test_obs_data_read_two_frequencies():
 
     bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = get_datasource(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = get_datasource(uuid=uuid_co_minutely, bucket=bucket)
 
     assert d_co_hourly._latest_version == "v1"
     assert d_co_minutely._latest_version == "v1"
@@ -636,13 +652,13 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(if_exists="new")
 
-    with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = metastore.select("uuid")
+    with open_object_store(bucket=bucket, data_type="surface") as objstore:
+        uuids = objstore.uuids
 
-    datasources = []
-    for uuid in uuids:
-        datasource = Datasource(bucket=bucket, uuid=uuid)
-        datasources.append(datasource)
+        datasources = []
+        for uuid in uuids:
+            datasource = objstore.get_datasource(uuid=uuid)
+            datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]
     one_species_data = data[0]

@@ -5,7 +5,7 @@ import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
-from openghg.types import pathType, multiPathType
+from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
 
@@ -13,7 +13,10 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store: str | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -58,6 +61,7 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
+    precision_filepath: str | Path | list[str | Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
     instrument: str | None = None,
@@ -69,7 +73,8 @@ def standardise_surface(
     platform: str | None = None,
     measurement_type: str | None = None,
     verify_site_code: bool = True,
-    site_filepath: pathType | None = None,
+    site_filepath: str | Path | None = None,
+    tag: str | list | None = None,
     store: str | None = None,
     update_mismatch: str = "never",
     if_exists: str = "auto",
@@ -80,7 +85,7 @@ def standardise_surface(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
@@ -114,6 +119,8 @@ def standardise_surface(
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of object store to write to, required if user has access to more than one
             writable store
         update_mismatch: This determines how mismatches between the internal data
@@ -144,15 +151,21 @@ def standardise_surface(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sorts multiple files date-wise.
     Returns:
         dict: Dictionary of result data
     """
-    if not isinstance(filepath, list):
-        filepath = [filepath]
+    from openghg.standardise.surface import check_gcwerks_input
+    from openghg.util import check_filepath
+
+    if source_format.lower() == "gcwerks":
+        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+    else:
+        filepath = check_filepath(filepath, source_format)
 
     if sort_files:
+        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
         if source_format.lower() != "gcwerks":
             filepath = sort_by_filenames(filepath=filepath)
 
@@ -160,6 +173,7 @@ def standardise_surface(
         store=store,
         data_type="surface",
         filepath=filepath,
+        precision_filepath=precision_filepath,
         source_format=source_format,
         network=network,
         site=site,
@@ -176,6 +190,7 @@ def standardise_surface(
         overwrite=overwrite,
         verify_site_code=verify_site_code,
         site_filepath=site_filepath,
+        tag=tag,
         update_mismatch=update_mismatch,
         if_exists=if_exists,
         save_current=save_current,
@@ -184,12 +199,12 @@ def standardise_surface(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
 def standardise_column(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -200,6 +215,7 @@ def standardise_column(
     network: str | None = None,
     instrument: str | None = None,
     source_format: str = "openghg",
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -209,7 +225,7 @@ def standardise_column(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Read column observation file
 
@@ -229,6 +245,8 @@ def standardise_column(
         network: Name of the satellite or in-situ measurement network (e.g., "TCCON").
         instrument: Instrument name used to collect data (e.g., "TANSO-FTS").
         source_format: Format of the input data (default is "openghg").
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: The name of the store to write the processed data to.
         if_exists: Determines behavior if data already exists in the store.
             Can be one of:
@@ -250,12 +268,12 @@ def standardise_column(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Additional metadata to tag the data (e.g., `{"project": "paris"}`).
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
 
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="column",
@@ -270,6 +288,7 @@ def standardise_column(
         network=network,
         instrument=instrument,
         source_format=source_format,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -278,18 +297,19 @@ def standardise_column(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
 def standardise_bc(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     bc_input: str,
     domain: str,
     source_format: str = "openghg",
     period: str | tuple | None = None,
     continuous: bool = True,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -299,7 +319,7 @@ def standardise_bc(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -313,6 +333,8 @@ def standardise_bc(
         source_format : Type of data being input e.g. openghg (internal format).
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -336,11 +358,11 @@ def standardise_bc(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
-    filepath = Path(filepath)
+
     return standardise(
         store=store,
         data_type="boundary_conditions",
@@ -351,6 +373,7 @@ def standardise_bc(
         source_format=source_format,
         period=period,
         continuous=continuous,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -359,12 +382,12 @@ def standardise_bc(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
 def standardise_footprint(
-    filepath: str | Path | list,
+    filepath: str | Path | list[str | Path],
     model: str,
     domain: str,
     site: str | None = None,
@@ -381,6 +404,7 @@ def standardise_footprint(
     chunks: dict | None = None,
     continuous: bool = True,
     retrieve_met: bool = False,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -395,7 +419,7 @@ def standardise_footprint(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
     sort_files: bool = False,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
@@ -428,6 +452,8 @@ def standardise_footprint(
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -448,7 +474,7 @@ def standardise_footprint(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sort multiple files datewise
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
@@ -490,6 +516,7 @@ def standardise_footprint(
         high_spatial_resolution=high_spatial_resolution,
         time_resolved=time_resolved,
         short_lifetime=short_lifetime,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -499,12 +526,12 @@ def standardise_footprint(
         filters=filters,
         sort=sort,
         drop_duplicates=drop_duplicates,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
 def standardise_flux(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,
@@ -517,6 +544,7 @@ def standardise_flux(
     period: str | tuple | None = None,
     chunks: dict | None = None,
     continuous: bool = True,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -525,7 +553,7 @@ def standardise_flux(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -545,6 +573,8 @@ def standardise_flux(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
@@ -564,11 +594,10 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
-    filepath = Path(filepath)
 
     if high_time_resolution:
         warnings.warn(
@@ -576,6 +605,7 @@ def standardise_flux(
             DeprecationWarning,
         )
         time_resolved = high_time_resolution
+
     return standardise(
         data_type="flux",
         store=store,
@@ -590,6 +620,7 @@ def standardise_flux(
         period=period,
         continuous=continuous,
         chunks=chunks,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -597,18 +628,19 @@ def standardise_flux(
         compression=compression,
         compressor=compressor,
         filters=filters,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
 def standardise_eulerian(
-    filepath: str | Path,
+    filepath: str | Path | list[str | Path],
     model: str,
     species: str,
     source_format: str = "openghg",
     start_date: str | None = None,
     end_date: str | None = None,
     setup: str | None = None,
+    tag: str | list | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
     overwrite: bool = False,
@@ -618,7 +650,7 @@ def standardise_eulerian(
     compressor: Any | None = None,
     filters: Any | None = None,
     chunks: dict | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -630,6 +662,8 @@ def standardise_eulerian(
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         if_exists: What to do if existing data is present.
             - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -654,7 +688,7 @@ def standardise_eulerian(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     Returns:
         dict: Dictionary of result data
     """
@@ -668,6 +702,7 @@ def standardise_eulerian(
         start_date=start_date,
         end_date=end_date,
         setup=setup,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         force=force,
@@ -676,7 +711,7 @@ def standardise_eulerian(
         compressor=compressor,
         filters=filters,
         chunks=chunks,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -725,6 +760,7 @@ def standardise_flux_timeseries(
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
+    tag: str | list | None = None,
     store: str | None = None,
     if_exists: str = "auto",
     save_current: str = "auto",
@@ -734,7 +770,7 @@ def standardise_flux_timeseries(
     filters: Any | None = None,
     period: str | tuple | None = None,
     continuous: bool | None = None,
-    optional_metadata: dict | None = None,
+    info_metadata: dict | None = None,
 ) -> list[dict]:
     """Process one dimension timeseries file
 
@@ -753,6 +789,8 @@ def standardise_flux_timeseries(
             - "yearly", "monthly"
             - suitable pandas Offset Alias
             - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        tag: Special tagged values to add to the Datasource. This will be added to any
+            current values if the tag key already exists in a list.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -775,7 +813,7 @@ def standardise_flux_timeseries(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-        optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+        info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
@@ -798,6 +836,7 @@ def standardise_flux_timeseries(
         database=database,
         database_version=database_version,
         model=model,
+        tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
@@ -806,7 +845,7 @@ def standardise_flux_timeseries(
         filters=filters,
         period=period,
         continuous=continuous,
-        optional_metadata=optional_metadata,
+        info_metadata=info_metadata,
     )
 
 
@@ -815,13 +854,13 @@ def standardise_met(
     site: str,
     network: str,
     met_source: str,
-    source_format="ecmwf",
+    source_format: str = "ecmwf",
     if_exists: str = "auto",
     save_current: str = "auto",
     force: bool = False,
     chunks: dict | None = None,
     compressor: Any | None = None,
-):
+) -> list[dict]:
     """ """
 
     return standardise(

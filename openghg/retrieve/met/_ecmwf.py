@@ -5,6 +5,7 @@ import cdsapi  # type: ignore
 import numpy as np
 from typing import List, Tuple
 from openghg.util import get_site_info  # , timestamp_tzaware
+import pathlib
 
 import logging
 
@@ -21,10 +22,10 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-__all__ = ["retrieve_met", "test_cds_access"]
+__all__ = ["pull_met", "check_cds_access"]
 
 
-def test_cds_access() -> None:
+def check_cds_access() -> None:
     print(
         """To access data through the Copernicus API:
           (instructions: Follow the instructions here https://cds.climate.copernicus.eu/how-to-api)
@@ -39,8 +40,8 @@ def test_cds_access() -> None:
     except Exception as e:
         print("there was an error retrieving the client. check out the instructions")
         print(f"error: {e}")
-
-    print("your client loaded successfully!")
+    else:
+        print("your client loaded successfully!")
 
 
 def retrieve_met(
@@ -49,7 +50,7 @@ def retrieve_met(
     years: str | list[str],
     variables: list[str] | None = None,
     local_save_path: str | None = None,
-):
+) -> None:
     """
     Retrieve and store Met data from Copernicus Climate Data Store.
 
@@ -86,9 +87,9 @@ def pull_met(
         network: Network
         years: Year(s) of data required
         variables: List of variables to download
-        savepath: path to save the data to. If none, saves to openghg/metdata
+        save_path: path to save the data to. If none, saves to $HOME/metdata
     Returns:
-        None (data is downloaded to savepath)
+        list of paths of the downloaded files
     """
     # raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
     # from openghg.dataobjects import METData
@@ -139,6 +140,16 @@ def pull_met(
     assert os.path.isdir(
         save_path
     ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+
+    dataset_savepaths: list[str] = []
+    default_save_path = os.path.join(pathlib.Path.home(), "met_data")
+    if save_path is None:
+        save_path = default_save_path
+        os.makedirs(save_path, exist_ok=True)
+    else:
+        assert os.path.isdir(
+            save_path
+        ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
 
     dataset_savepaths = []
 
@@ -294,12 +305,10 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     Returns:
         list: List of desired pressures
     """
-    from openghg.util import load_json
+    from openghg.util import load_internal_json
 
-    path_to_json = os.path.join(
-        os.getcwd().split("openghg")[0], "openghg/openghg/data/ecmwf_dataset_info.json"
-    )
-    ecmwf_metadata = load_json(path_to_json)
+    ecwmf_info_file = "ecmwf_dataset_info.json"
+    ecmwf_metadata = load_internal_json(ecwmf_info_file)
     dataset_metadata = ecmwf_metadata["datasets"]
     valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
 

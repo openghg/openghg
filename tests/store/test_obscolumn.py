@@ -4,7 +4,7 @@ from helpers import get_column_datapath, clear_test_store, filt
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search_column
 from openghg.standardise import standardise_column
-from openghg.store.base import Datasource
+from openghg.objectstore import get_datasource
 from pandas import Timestamp
 
 
@@ -41,14 +41,14 @@ def test_read_openghg_format():
 
     bucket = get_bucket()
 
-    d = Datasource(bucket=bucket, uuid=uuid)
+    d = get_datasource(bucket=bucket, uuid=uuid)
 
     with d.get_data(version="latest") as ch4_data:
         assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
         assert np.isclose(ch4_data["xch4"][0], 1844.2019)
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -69,11 +69,11 @@ def test_optional_metadata_raise_error():
             satellite=satellite,
             domain=domain,
             species=species,
-            optional_metadata={"species": "ch4"},
+            info_metadata={"species": "ch4"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify required keys present in optional metadata supplied as dictionary is
     added to metadata
@@ -92,7 +92,7 @@ def test_optional_metadata():
         satellite=satellite,
         domain=domain,
         species=species,
-        optional_metadata={"project": "openghg_test"},
+        info_metadata={"project": "openghg_test"},
     )
     col_data = search_column(species="ch4").retrieve_all()
     metadata = col_data.metadata
