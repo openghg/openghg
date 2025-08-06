@@ -144,10 +144,8 @@ def parse_cams(
             fp_lon = fp["lon"].values
             fp_height = fp["height"].values
         else:
-            from openghg_defs import domain_info_file
-
             raise ValueError(
-                "For now get_footprint_kwargs is not optionnal (but there is a beginning of implementation, don't hesitate to finish it)."
+                "For now get_footprint_kwargs is not optionnal. Might do something with openghg_defs.domain_info_file"
             )
 
         # Select the gridcells closest to the edges of the  domain and make sure outside of fp
