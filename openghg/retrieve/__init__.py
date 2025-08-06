@@ -13,5 +13,6 @@ from ._search import (
     search_flux,
     search_eulerian,
     search_footprints,
+    search_met,
     search_surface,
 )

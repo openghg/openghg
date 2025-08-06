@@ -847,3 +847,34 @@ def standardise_flux_timeseries(
         continuous=continuous,
         info_metadata=info_metadata,
     )
+
+
+def standardise_met(
+    filepath: str | Path,
+    site: str,
+    network: str,
+    met_source: str,
+    source_format: str = "ecmwf",
+    if_exists: str = "auto",
+    save_current: str = "auto",
+    store: str | None = None,
+    force: bool = False,
+    chunks: dict | None = None,
+    compressor: Any | None = None,
+) -> list[dict]:
+    """ """
+
+    return standardise(
+        data_type="met",
+        filepath=filepath,
+        site=site,
+        network=network,
+        met_source=met_source,
+        source_format=source_format,
+        if_exists=if_exists,
+        store=store,
+        save_current=save_current,
+        force=force,
+        chunks=chunks,
+        compressor=compressor,
+    )

@@ -52,7 +52,7 @@ from ._metadata_util import (
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
-from ._site import get_site_info, sites_in_network
+from ._site import get_site_info, sites_in_network, _get_site_data
 from ._species import (
     get_species_info,
     synonyms,

@@ -8,6 +8,7 @@ from openghg.types import (
     FluxDatabases,
     BoundaryConditions,
     EulerianModelTypes,
+    MetTypes,
 )
 
 __all__ = [
@@ -18,16 +19,52 @@ __all__ = [
 ]
 
 
-def define_data_type_classes() -> dict[str, Any]:
-    """Define mapping between data types and associated input classes within OpenGHG."""
-    from openghg.store.base import BaseStore
-
-    return BaseStore._registry.copy()
-
-
 def define_data_types() -> tuple[str, ...]:
-    """Define names of data types for objects within OpenGHG."""
-    return tuple(define_data_type_classes().keys())
+    """
+    Define names of data types for objects within OpenGHG
+    """
+
+    data_types = (
+        "surface",
+        "column",
+        "flux",
+        "footprints",
+        "boundary_conditions",
+        "eulerian_model",
+        "flux_timeseries",
+        "met",
+    )
+
+    return data_types
+
+
+def define_data_type_classes() -> dict[str, Any]:
+    """
+    Define mapping between data types and associated input classes within OpenGHG
+    """
+    from openghg.store import (
+        BoundaryConditions,
+        Flux,
+        EulerianModel,
+        Footprints,
+        ObsColumn,
+        ObsSurface,
+        FluxTimeseries,
+        Met,
+    )
+
+    data_type_classes = {
+        "surface": ObsSurface,
+        "column": ObsColumn,
+        "flux": Flux,
+        "met": Met,
+        "footprints": Footprints,
+        "boundary_conditions": BoundaryConditions,
+        "eulerian_model": EulerianModel,
+        "flux_timeseries": FluxTimeseries,
+    }
+
+    return data_type_classes
 
 
 def validate_data_type(data_type: str) -> None:
@@ -53,7 +90,7 @@ def define_standardise_parsers() -> dict[str, Any]:
         "footprints": FootprintTypes,
         "eulerian_model": EulerianModelTypes,
         "boundary_conditions": BoundaryConditions,
-        # "met": ???,
+        "met": MetTypes,
     }
 
     return data_type_parsers

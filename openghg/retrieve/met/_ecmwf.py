@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 import os
 import cdsapi  # type: ignore
 import numpy as np
-from typing import List, Tuple
-from openghg.util import get_site_info  # , timestamp_tzaware
+from openghg.util import _get_site_data  # , timestamp_tzaware
 import pathlib
 
 import logging
@@ -44,13 +41,53 @@ def check_cds_access() -> None:
         print("your client loaded successfully!")
 
 
+def retrieve_met(
+    site: str,
+    network: str,
+    years: str | list[str],
+    months: str | list[str] | None = None,
+    variables: list[str] | None = None,
+    local_save_path: str | None = None,
+    store: str | None = None,
+) -> None:
+    """
+    Retrieve and store Met data from Copernicus Climate Data Store.
+
+    See `pull_met` function for more details on the data.
+
+    ...
+    """
+    from openghg.standardise import standardise_met
+
+    all_months = [str(x).zfill(2) for x in range(1, 13)]
+    if months is not None:
+        if isinstance(months, str):
+            months = [months]
+
+        # check that all months are valid
+        assert np.all(
+            [month in all_months for month in months]
+        ), "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+
+    filepaths = pull_met(
+        site=site, network=network, years=years, months=months, variables=variables, save_path=local_save_path
+    )
+
+    met_source = "ecmwf"
+
+    for filepath in filepaths:
+        standardise_met(filepath, site=site, network=network, met_source=met_source, store=store)
+        os.remove(filepath)  # remove the file after standardisation
+
+
 def pull_met(
     site: str,
     network: str,
     years: str | list[str],
+    months: str | list[str] | None = None,
     variables: list[str] | None = None,
     save_path: str | None = None,
-) -> List:
+) -> list:
     """Pull METData data and store on disc. Note that this function will only download a
     full year of data which may take some time.
 
@@ -65,7 +102,9 @@ def pull_met(
     Returns:
         list of paths of the downloaded files
     """
-    # raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
+    # add option to pass site height!
+    # Note: passing month could lead to issues if downloading and standardising non-sequential months?
+
     # from openghg.dataobjects import METData
 
     if variables is None:
@@ -100,6 +139,8 @@ def pull_met(
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitute)
     # Calculate the pressure at measurement height(s)
+
+    # Note: need to test that this works fine for sites with multiple inlets!
     measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
     # Calculate the ERA5 pressure levels required
     ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
@@ -109,6 +150,13 @@ def pull_met(
     else:
         years = sorted(years)
 
+    default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
+    save_path = default_save_path if save_path is None else save_path
+    assert os.path.isdir(
+        save_path
+    ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+
+    dataset_savepaths: list[str] = []
     default_save_path = os.path.join(pathlib.Path.home(), "met_data")
     if save_path is None:
         save_path = default_save_path
@@ -122,9 +170,20 @@ def pull_met(
 
     # TODO - we might need to customise this further in the future to
     # request other types of weather data
+    all_months = [str(x).zfill(2) for x in range(1, 13)]
+    if months is None:
+        months = all_months
+    else:
+        if isinstance(months, str):
+            months = [months]
+
+        # check that all months are valid
+        assert np.all(
+            [month in all_months for month in months]
+        ), "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+
     for year in years:
-        for month_int in range(1, 13):
-            month = str(month_int).zfill(2)
+        for month in months:
             request = {
                 "product_type": "reanalysis",
                 "format": "netcdf",
@@ -147,7 +206,6 @@ def pull_met(
                 save_path,
                 f"Met_{site}_{network}_{month}{year}.nc",
             )
-
             dataset_savepaths.append(dataset_savepath)
 
             logger.info(f"Retrieving data for {site} and {month}/{year} to {dataset_savepath}")
@@ -187,33 +245,7 @@ def _two_closest_values(diff: np.ndarray) -> np.ndarray:
     return closest_values
 
 
-def _get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
-    """Extract site location data from site attributes file.
-
-    Args:
-        site: Site code
-    Returns:
-        dict: Dictionary of site data
-    """
-
-    network = network.upper()
-    site = site.upper()
-
-    site_info = get_site_info()
-
-    try:
-        site_data = site_info[site][network]
-        latitude = float(site_data["latitude"])
-        longitute = float(site_data["longitude"])
-        site_height = float(site_data["height_station_masl"])
-        inlet_heights = site_data["height_name"]
-    except KeyError as e:
-        raise KeyError(f"Incorrect site or network : {e}")
-
-    return latitude, longitute, site_height, inlet_heights
-
-
-def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
+def _get_ecmwf_area(site_lat: float, site_long: float) -> list:
     """Find out the area required from ERA5.
 
     Args:
@@ -236,7 +268,7 @@ def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
     ]
 
 
-def _get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
+def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
     """Calculate the pressure levels required
 
     Args:
@@ -265,7 +297,7 @@ def _get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
     return measured_pressure
 
 
-def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
+def _altitude_to_ecmwf_pressure(measure_pressure: list[float]) -> list[str]:
     """Find out what pressure levels are required from ERA5.
 
     Args:
@@ -291,6 +323,6 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
 
     desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
 
-    pressure_levels: List = desired_era5_pressure.astype(str).tolist()
+    pressure_levels: list = desired_era5_pressure.astype(str).tolist()
 
     return pressure_levels
