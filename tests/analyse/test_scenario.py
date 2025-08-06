@@ -29,7 +29,13 @@ def test_scenario_direct_objects():
     bc_input = "MOZART"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network, target_units={"mf_variability": "ppm"}
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        target_units={"mf_variability": "ppm"},
     )
 
     footprint = get_footprint(

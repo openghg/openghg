@@ -422,7 +422,7 @@ def get_obs_column(
     if "calibration_scale" in obs_data.data.attrs:
         obs_data.data = update_scale(obs_data.data, species, calibration_scale)
         obs_data.metadata["scale"] = obs_data.data.attrs["scale"]
-        
+
     obs_data.data = assign_units(
         data=obs_data.data, target_units=target_units, is_dequantified=is_dequantified
     )

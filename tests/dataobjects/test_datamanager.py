@@ -112,13 +112,14 @@ def test_footprint_data_variable_attribute_modification(footprint_read):
 
     # check new attributes
 
-    fp_data = get_footprint(site = "TMB",
-                        network = "LGHG",
-                        height = "10m",
-                        domain = "EUROPE",
-                        model = "test_model",
-                        store="user",
-                        )
+    fp_data = get_footprint(
+        site="TMB",
+        network="LGHG",
+        height="10m",
+        domain="EUROPE",
+        model="test_model",
+        store="user",
+    )
     assert fp_data.data.fp.units == "hectopascal"
     assert fp_data.data.attrs.get("units") != "hectopascal"
 
