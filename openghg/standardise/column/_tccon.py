@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 import xarray as xr
 
+from openghg.util import load_internal_json
 from openghg.types import pathType
 
 import logging
@@ -14,7 +15,7 @@ logger = logging.getLogger("openghg.standardise.column._tccon")
 final_units = {"ch4": 1e-9}
 
 
-def filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
+def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
     Filter (if quality_filt = True) the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
     Then resample the data on an hourly scale.
@@ -46,7 +47,7 @@ def filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resamp
     return output
 
 
-def define_var_attrs(ds: xr.Dataset, species: str, method: str) -> xr.Dataset:
+def _define_var_attrs(ds: xr.Dataset, species: str, method: str) -> xr.Dataset:
     """
     Add attributes to "x{species}_uncertainty" and "pressure_weights" variables, add global attribute "derivation_method" that keeps track of the method used to derive the pressure weights.
     Estimate the min and max values of each variables and store them in the attributes.
@@ -87,7 +88,7 @@ def define_var_attrs(ds: xr.Dataset, species: str, method: str) -> xr.Dataset:
     return ds
 
 
-def convert_prior_profile_to_dry(ds: xr.Dataset, species: list | str) -> None:
+def _convert_prior_profile_to_dry(ds: xr.Dataset, species: list | str) -> None:
     """
     Calculate (inplace) the dry "prior_h2o", "integration_operator" and "prior_{sp}" and ovewrite the ones that are wet.
     Args:
@@ -130,7 +131,7 @@ def convert_prior_profile_to_dry(ds: xr.Dataset, species: list | str) -> None:
             raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
 
 
-def reformat_convert_units(
+def _reformat_convert_units(
     ds: xr.Dataset, species: list | str, final_units: dict | float = {"ch4": 1e-9}
 ) -> xr.Dataset:
     """
@@ -149,7 +150,7 @@ def reformat_convert_units(
     if not isinstance(final_units, dict):
         final_units = {sp: final_units for sp in species}
 
-    unit_converter = {"ppm": 1e-6, "ppb": 1e-9, "ppt": 1e-12}
+    unit_converter = load_internal_json(filename="attributes.json")["unit_interpret"]
 
     for sp in species:
         for var in [f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error"]:
@@ -273,7 +274,7 @@ def parse_tccon(
         )
 
     # Convert wet profile into dry
-    convert_prior_profile_to_dry(data, species=species)
+    _convert_prior_profile_to_dry(data, species=species)
 
     # Define integartion_operator
     if pressure_weights_method == "integration_operator":
@@ -327,10 +328,10 @@ def parse_tccon(
         )
 
     # Filter the data and resample to hourly
-    data = filter_and_resample(data, species, quality_filt, resample)
+    data = _filter_and_resample(data, species, quality_filt, resample)
 
     # reformat units
-    data = reformat_convert_units(data, species)
+    data = _reformat_convert_units(data, species)
 
     # Rename variables
     data = data.rename(
@@ -344,7 +345,7 @@ def parse_tccon(
     )
 
     # Define attributes
-    data = define_var_attrs(data, species, pressure_weights_method)
+    data = _define_var_attrs(data, species, pressure_weights_method)
 
     # Align dimensions
     if all(data["ak_altitude"].values == data["prior_altitude"].values):
