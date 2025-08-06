@@ -70,6 +70,11 @@ class BoundaryConditions(BaseStore):
         source_format: str,
         tag: str | list | None = None,
         period: str | tuple | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        cams_version: str | None = None,
+        input_observations: str | None = None,
+        get_footprint_kwargs: str | None = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -166,7 +171,7 @@ class BoundaryConditions(BaseStore):
         if not unseen_hashes:
             return [{}]
 
-        filepath = next(iter(unseen_hashes.values()))
+        filepath = list(unseen_hashes.values())
 
         if chunks is None:
             chunks = {}
@@ -209,7 +214,10 @@ class BoundaryConditions(BaseStore):
             filters=filters,
         )
 
-        logger.info(f"Completed processing: {filepath.name}.")
+        if isinstance(filepath, list):
+            logger.info(f"Completed processing: {[Path(file).name for file in filepath]}.")
+        else:
+            logger.info(f"Completed processing: {Path(filepath).name}.")
 
         # Record the file hash in case we see this file again
         self.store_hashes(unseen_hashes)
