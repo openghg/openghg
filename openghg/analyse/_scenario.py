@@ -1248,7 +1248,6 @@ class ModelScenario:
         self,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
-        output_units: float = 1.0,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1290,16 +1289,14 @@ class ModelScenario:
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        sensitivities = baseline_sensitivities(
-            bc=bc_data, fp=scenario, species=self.species, output_units=output_units
-        )
+        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=self.species)
 
         modelled_baseline = (
             sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
 
         modelled_baseline.attrs["resample_to"] = str(resample_to)
-        modelled_baseline.attrs["units"] = output_units
+        modelled_baseline.attrs["units"] = sensitivities.bc_n.attrs["units"]
         modelled_baseline = modelled_baseline.rename("bc_mod")
 
         # Cache output from calculations
@@ -1389,7 +1386,7 @@ class ModelScenario:
 
         # align units
         if output_obs_units is None:
-            output_obs_units = self.units or "1"  # use 1 (dimensionless) if obs units are not available
+            output_obs_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
 
         to_convert = []
         for dv in combined_dataset.data_vars:

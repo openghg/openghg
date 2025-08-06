@@ -6,11 +6,7 @@ import xarray as xr
 from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
 
 
-# TODO: remove output_units, since the user can scale using pint now (and we convert units in
-# footprints_data_merge)
-def baseline_sensitivities(
-    bc: xr.Dataset, fp: xr.Dataset, species: str | None = None, output_units: float | str = "1"
-) -> xr.Dataset:
+def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None = None) -> xr.Dataset:
     """Compute contributions from NESW boundary curtains.
 
     Computes "mean_particle_age" * "vmr" for the NESW boundary curtains,
@@ -20,8 +16,6 @@ def baseline_sensitivities(
         bc: boundary conditions dataset
         fp: footprints (or scenario) dataset
         species: optional species, used to check for short-lifetime
-        output_units: units conversion to apply; e.g. `1e-9` will scale the
-          outputs by `1e9`, converting mol/mol to ppb.
 
     Returns:
         Dataset with data variables `bc_n`, `bc_e`, `bc_s`, `bc_w` for baseline contributions.
@@ -107,6 +101,4 @@ def baseline_sensitivities(
 
     # convert units then dequantify so output has correct units, but is not quantified, which
     # might cause issues with dask in subsequent computations
-    result = xr.Dataset(sensitivities)
-    result = result.pint.to(str(output_units))
-    return cast(xr.Dataset, result.pint.dequantify())
+    return cast(xr.Dataset, xr.Dataset(sensitivities).pint.dequantify())
