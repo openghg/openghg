@@ -26,6 +26,10 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
     flux = flux.reindex_like(footprint, method="ffill")
 
+    # align chunks
+    fp_time_chunk = footprint.fp.chunksizes["time"][0]
+    flux = flux.chunk({"time": fp_time_chunk})
+
     result = footprint.fp.pint.quantify() * flux.flux.pint.quantify()
     return cast(xr.DataArray, result.pint.dequantify())
 

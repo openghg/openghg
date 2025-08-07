@@ -1327,7 +1327,7 @@ class ModelScenario:
         calc_bc: bool = True,
         cache: bool = True,
         recalculate: bool = False,
-        output_obs_units: str | float | None = None,
+        output_units: str | float | None = None,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1348,6 +1348,7 @@ class ModelScenario:
             calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
@@ -1385,8 +1386,8 @@ class ModelScenario:
                 )
 
         # align units
-        if output_obs_units is None:
-            output_obs_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+        if output_units is None:
+            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
 
         to_convert = []
         for dv in combined_dataset.data_vars:
@@ -1396,7 +1397,7 @@ class ModelScenario:
             ):
                 to_convert.append(dv)
 
-        target_units = {dv: output_obs_units for dv in to_convert}
+        target_units = {dv: output_units for dv in to_convert}
 
         combined_dataset = combined_dataset.pint.quantify().pint.to(target_units).pint.dequantify()
 
@@ -1483,20 +1484,19 @@ class ModelScenario:
 
         if baseline == "boundary_conditions":
             if self.bc is not None:
-                modelled_baseline = self.calc_modelled_baseline(
+                y_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
                 )
-                y_baseline = modelled_baseline.data
                 y_data = (
                     y_data.pint.quantify() + y_baseline.pint.quantify()
                 )  # quantify to do unit aware calculation
-                y_data = y_data.pint.to(obs.data.mf.pint.units)  # convert to same units as obs
+                y_data = y_data.pint.to(self.units)  # convert to same units as obs
             else:
                 logger.warning("Unable to calculate baseline from boundary conditions")
         elif baseline == "percentile":
             mf = obs.data["mf"]
-            y_baseline = mf.quantile(1.0, dim="time").values
-            y_data = y_data + y_baseline
+            y_baseline = mf.quantile(1.0, dim="time")
+            y_data = y_data.pint.quantify() + y_baseline.pint.quantify()
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 

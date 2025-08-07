@@ -29,6 +29,11 @@ def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None =
 
     bc = bc.pint.reindex_like(fp, "ffill")
 
+    # align chunks for time after filling
+    fp_time_chunk = fp.particle_locations_n.chunksizes["time"][0]
+    bc = bc.chunk({"time": fp_time_chunk})
+
+    # check if loss term is needed
     lifetime_value = species_lifetime(species)
     check_monthly = check_lifetime_monthly(lifetime_value)
 
@@ -101,4 +106,9 @@ def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None =
 
     # convert units then dequantify so output has correct units, but is not quantified, which
     # might cause issues with dask in subsequent computations
-    return cast(xr.Dataset, xr.Dataset(sensitivities).pint.dequantify())
+    result = cast(xr.Dataset, xr.Dataset(sensitivities).pint.dequantify())
+
+    # keep float32
+    result = result.astype({f"bc_{d}": "float32" for d in "nesw"})
+
+    return result

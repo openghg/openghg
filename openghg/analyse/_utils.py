@@ -265,6 +265,35 @@ def _calc_average_gap(data_array: xr.DataArray) -> Any:
         raise e  # else, re-raise
 
 
+def concat_dataset_dict(dataset_dict: dict[str, xr.Dataset], new_dim: str) -> xr.Dataset:
+    """Concat dictionary of datasets along new dimension.
+
+    The keys of the dictionary are used as coordinate values for the new dimension.
+
+    An outer join is used for the dimensions not concatenated over, so alignment should be
+    done before calling this function, if necessary.
+
+    Args:
+        dataset_dict: dictionary of datasets keyed by valued for new coordinate
+        new_dim: name of new dimension to add and concatenate along
+
+    Returns:
+        xr.Dataset obtained by concatenating dict of datasets along new dim.
+    """
+    if not dataset_dict:
+        return xr.Dataset()
+
+    datasets_dim_added = [v.expand_dims({new_dim: [k]}).pint.quantify() for k, v in dataset_dict.items()]
+    result = xr.concat(datasets_dim_added, dim=new_dim, join="outer")
+
+    # pint might change the dtype https://github.com/hgrecco/pint/issues/1210
+    # so we'll cast to the original type (in particular, we do not want to upcast
+    # from float32 to float64!)
+    result = result.astype(next(iter(dataset_dict.values())).dtypes)
+
+    return cast(xr.Dataset, result.pint.dequantify())
+
+
 def stack_datasets(
     datasets: Sequence[xr.Dataset], dim: str = "time", method: ReindexMethod = "ffill"
 ) -> xr.Dataset:
@@ -302,5 +331,10 @@ def stack_datasets(
 
     # quantify and sum
     result = cast(xr.Dataset, sum(ds.pint.quantify() for ds in datasets))
+
+    # pint might change the dtype https://github.com/hgrecco/pint/issues/1210
+    # so we'll cast to the original type (in particular, we do not want to upcast
+    # from float32 to float64!)
+    result = result.astype(datasets[0].dtypes)
 
     return cast(xr.Dataset, result.pint.dequantify())
