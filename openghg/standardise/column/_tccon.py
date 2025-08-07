@@ -155,7 +155,7 @@ def _reformat_convert_units(
     for sp in species:
         for var in [f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error"]:
             with xr.set_options(keep_attrs=True):
-                ds[var] = ds[var] * unit_converter[ds[var].attrs["units"]] / final_units[sp]
+                ds[var] = ds[var] * float(unit_converter[ds[var].attrs["units"]]) / final_units[sp]
             ds[var].attrs["units"] = final_units[sp]
     return ds
 
