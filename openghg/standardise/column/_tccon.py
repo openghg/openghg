@@ -14,6 +14,7 @@ logger = logging.getLogger("openghg.standardise.column._tccon")
 
 final_units = {"ch4": "ppb"}
 
+
 def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
     Filter (if quality_filt = True) the data keeping those for which "extrapolation_flags_ak_x{species}" is equal to 2.
@@ -130,9 +131,7 @@ def _convert_prior_profile_to_dry(ds: xr.Dataset, species: list | str) -> None:
             raise ValueError(f"'standard_name' of 'prior_{sp}' is not what expected. Please check.")
 
 
-def _reformat_convert_units(
-    ds: xr.Dataset, species: list | str, final_unit: float
-) -> xr.Dataset:
+def _reformat_convert_units(ds: xr.Dataset, species: list | str, final_unit: float) -> xr.Dataset:
     """
     Convert f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error" units to the one specified in final_units
     Args:
@@ -152,7 +151,11 @@ def _reformat_convert_units(
     for sp in species:
         for var in [f"prior_{sp}", f"prior_x{sp}", f"x{sp}", f"x{sp}_uncertainty", f"x{sp}_error"]:
             with xr.set_options(keep_attrs=True):
-                ds[var] = ds[var] * float(unit_converter[ds[var].attrs["units"]]) / float(unit_converter[final_unit])
+                ds[var] = (
+                    ds[var]
+                    * float(unit_converter[ds[var].attrs["units"]])
+                    / float(unit_converter[final_unit])
+                )
             ds[var].attrs["units"] = final_units[sp]
     return ds
 
@@ -328,7 +331,7 @@ def parse_tccon(
     data = _filter_and_resample(data, species, quality_filt, resample)
 
     # reformat units
-    data = _reformat_convert_units(data, species, final_unit = final_units[species])
+    data = _reformat_convert_units(data, species, final_unit=final_units[species])
 
     # Rename variables
     data = data.rename(
