@@ -30,8 +30,10 @@ def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None =
     bc = bc.pint.reindex_like(fp, "ffill")
 
     # align chunks for time after filling
-    fp_time_chunk = fp.particle_locations_n.chunksizes["time"][0]
-    bc = bc.chunk({"time": fp_time_chunk})
+    fp_time_chunks = fp.particle_locations_n.chunksizes.get("time")
+    if fp_time_chunks is not None:
+        fp_time_chunk = fp_time_chunks[0]
+        bc = bc.chunk({"time": fp_time_chunk})
 
     # check if loss term is needed
     lifetime_value = species_lifetime(species)
