@@ -67,7 +67,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         ds = cls(bucket, uuid, mode, data_type)
         ds.__dict__.update(stored_data)
         ds._data_keys = defaultdict(list, ds._data_keys)
-        print("Classmethod data keys", ds._data_keys)
+
         return ds
 
     def __enter__(self) -> Datasource:
@@ -114,6 +114,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         self._metadata[key.lower()] = value.lower()
 
     def add(self, data: xr.Dataset, **kwargs) -> None:
+        if (period := kwargs.pop("period", None)) is not None:
+            self._metadata["period"] = period
+
         self.add_data(metadata={}, data=data, data_type=self._data_type, **kwargs)
 
     def delete(self) -> None:
@@ -448,36 +451,12 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         """
         # Extract period associated with data from metadata
         # This will be the "sampling_period" for obs and "time_period" for other
-        metadata = self._metadata
+        from openghg.util._metadata_util import get_period as _get_period
 
-        time_period_attrs = ["sampling_period", "time_period"]
-        for attr in time_period_attrs:
-            # These will always be strings
-            value = cast(str, metadata.get(attr))
-            if value is not None:
-                # For sampling period data, expect this to be in seconds
-                if attr == "sampling_period":
-                    if value.endswith("s"):  # Check if str includes "s"
-                        period: str | None = value
-                    else:
-                        try:
-                            value_num: int | None = int(value)
-                        except ValueError:
-                            try:
-                                value_num = int(float(value))
-                            except ValueError:
-                                value_num = None
-                                continue
-                        period = f"{value_num}s"
-                else:
-                    # Expect period data to include value and time unit
-                    period = value
+        if "period" not in self._metadata:
+            self._metadata["period"] = _get_period(self._metadata)
 
-                break
-        else:
-            period = None
-
-        return period
+        return cast(str | None, self._metadata["period"])
 
     def save(self) -> None:
         """Save this Datasource object as JSON to the object store
