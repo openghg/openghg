@@ -364,7 +364,7 @@ class BaseStore:
         # Check if the files are opened grouped (e.g. for netcdf files)
         if open_files_grouped:
             results = self._standardise_from_file(
-                filepath=filepath,
+                filepath=filepaths,
                 fn_input_parameters=fn_input_parameters,
                 source_format=source_format,
                 update_mismatch=update_mismatch,
