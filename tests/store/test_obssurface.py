@@ -1003,7 +1003,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_1
+        **data_labels_1,
     )
 
     standardise_surface(
@@ -1013,7 +1013,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_2
+        **data_labels_2,
     )
 
     tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
@@ -1172,6 +1172,7 @@ def test_co2_games():
         store="user",
     )
 
+
 @pytest.mark.parametrize(
     "tag1, tag2, combined_tag",
     [
@@ -1181,9 +1182,7 @@ def test_co2_games():
     ],
 )
 def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
-    """
-
-    """
+    """ """
     clear_test_stores()
 
     filepath_20230101 = get_surface_datapath(
@@ -1199,29 +1198,31 @@ def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
     instrument = "crds"
     sampling_period = "60s"
     source_format = "openghg"
-    store="user"
+    store = "user"
 
-    standardise_surface(filepath=filepath_20230101,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag1,
-                        )
+    standardise_surface(
+        filepath=filepath_20230101,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag1,
+    )
 
-    standardise_surface(filepath=filepath_20230102,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag2,
-                        )
+    standardise_surface(
+        filepath=filepath_20230102,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag2,
+    )
 
     data = search_surface(site=site).retrieve()
     metadata = data.metadata

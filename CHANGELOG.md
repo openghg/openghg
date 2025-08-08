@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
 
 ### Added
+- Support for TCCON data: implemented a dedicated parser and integrated with standardise_footprint, get_obs_column, and related workflow steps. Renamed _surface_obs_resampler_dict to _obs_resampler_dict in openghg/data_processing/_resampling.py for generalisation beyond surface data. [PR #1407] (https://github.com/openghg/openghg/pull/1407)
 - The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
 - `retrieve` method to `ObjectStore` and related methods that allow metadata from the metastore and datasources to be combined on retrieval. [PR #1408](https://github.com/openghg/openghg/pull/1408)
 - Ability to pass the non configured path to the store argument directly for get_* functions. Also added the ability add the store to config using openghg --register-store command. [PR #1389](https://github.com/openghg/openghg/pull/1389)

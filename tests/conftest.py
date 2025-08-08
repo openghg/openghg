@@ -14,6 +14,7 @@ tmp_store_paths = temporary_store_paths()
 
 from openghg.store import get_metakey_defaults
 
+
 @pytest.fixture(scope="session", autouse=True)
 def mock_configuration_paths() -> dict:
     return {
@@ -26,16 +27,18 @@ def mock_configuration_paths() -> dict:
         "config_version": "2",
     }
 
+
 @pytest.fixture(scope="session", autouse=True)
-def default_session_fixture(mock_configuration_paths)-> Iterator[None]:
+def default_session_fixture(mock_configuration_paths) -> Iterator[None]:
     with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_configuration_paths):
         yield
-        
+
+
 @pytest.fixture(scope="session", autouse=True)
 def mock_user_config(mock_configuration_paths):
-    user = getpass.getuser() 
+    user = getpass.getuser()
 
-    temp_config = Path(tempfile.gettempdir())/ f"{user}" / "openghg.conf"
+    temp_config = Path(tempfile.gettempdir()) / f"{user}" / "openghg.conf"
     mock_test_config_path = temp_config
 
     initial_config = mock_configuration_paths
@@ -46,12 +49,13 @@ def mock_user_config(mock_configuration_paths):
     with patch("openghg.util._user.get_user_config_path", return_value=mock_test_config_path):
         yield
 
+
 @pytest.fixture(scope="function")
 def reset_mock_user_config(mock_configuration_paths):
-    user = getpass.getuser() 
+    user = getpass.getuser()
     initial_config = mock_configuration_paths
 
-    temp_config = Path(tempfile.gettempdir())/ f"{user}" / "openghg.conf"
+    temp_config = Path(tempfile.gettempdir()) / f"{user}" / "openghg.conf"
     mock_test_config_path = temp_config
     mock_test_config_path.write_text("")
     mock_test_config_path.write_text(toml.dumps(initial_config))
