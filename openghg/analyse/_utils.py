@@ -3,6 +3,7 @@ from typing import Any, cast
 
 import numpy as np
 import xarray as xr
+from xarray import AlignmentError
 
 from openghg.types import ReindexMethod, XrDataLikeMatch
 
@@ -111,7 +112,18 @@ def reindex_on_dims(
 
     indexers = {dim: reindex_like[dim] for dim in dims}
 
-    return to_reindex.reindex(indexers, method=method, tolerance=tolerance)
+    try:
+        result = to_reindex.reindex(indexers, method=method, tolerance=tolerance)
+    except AlignmentError as e1:
+        try:
+            result = to_reindex.pint.reindex(indexers, method=method, tolerance=tolerance)
+        except ValueError as e2:
+            raise ValueError(
+                f"Could not reindex on dims due to error with xr.Dataset.reindex:\n{e1}\nand error with pint.reindex:\n{e2}."
+            ) from e2
+
+    # pint.reindex doesn't have correct type hints?
+    return result  # type: ignore
 
 
 def match_dataset_dims(
@@ -280,34 +292,15 @@ def stack_datasets(
 
     data_frequency = [calc_dim_resolution(ds, dim) for ds in datasets]
     index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
-    data_highest_freq = datasets[index_highest_freq]
-    coords_to_match = data_highest_freq[dim]
 
-    for i, data in enumerate(datasets):
-        data_match = data.reindex({dim: coords_to_match}, method=method)
-        if i == 0:
-            data_stacked = data_match
-            data_stacked.attrs = {}
-        else:
-            data_stacked += data_match
+    # align to highest frequency dataset
+    datasets = list(datasets)
+    data_highest_freq = datasets.pop(index_highest_freq)
+    coord_to_match = data_highest_freq[dim]
+    datasets = [ds.reindex({dim: coord_to_match}, method=method) for ds in datasets]
+    datasets.append(data_highest_freq)
 
-    return data_stacked
+    # quantify and sum
+    result = cast(xr.Dataset, sum(ds.pint.quantify() for ds in datasets))
 
-
-def check_units(data_var: xr.DataArray, default: float) -> float:
-    """Check "units" attribute within a DataArray. Expect this to be a float
-    or possible to convert to a float.
-    If not present, use default value.
-    """
-    attrs = data_var.attrs
-    if "units" in attrs:
-        units_from_attrs = attrs["units"]
-        if not isinstance(units_from_attrs, float):
-            try:
-                units = float(units_from_attrs)
-            except ValueError:
-                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
-    else:
-        units = default
-
-    return units
+    return cast(xr.Dataset, result.pint.dequantify())

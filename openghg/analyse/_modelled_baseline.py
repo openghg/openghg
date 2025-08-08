@@ -4,11 +4,12 @@ import numpy as np
 import xarray as xr
 
 from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
-from ._utils import check_units
 
 
+# TODO: remove output_units, since the user can scale using pint now (and we convert units in
+# footprints_data_merge)
 def baseline_sensitivities(
-    bc: xr.Dataset, fp: xr.Dataset, species: str | None = None, output_units: float = 1.0
+    bc: xr.Dataset, fp: xr.Dataset, species: str | None = None, output_units: float | str = "1"
 ) -> xr.Dataset:
     """Compute contributions from NESW boundary curtains.
 
@@ -29,7 +30,10 @@ def baseline_sensitivities(
         ValueError: if wrong footprints used for short-lifetime species.
 
     """
-    bc = bc.reindex_like(fp, "ffill")
+    fp = fp.pint.quantify()
+    bc = bc.pint.quantify()
+
+    bc = bc.pint.reindex_like(fp, "ffill")
 
     lifetime_value = species_lifetime(species)
     check_monthly = check_lifetime_monthly(lifetime_value)
@@ -94,18 +98,15 @@ def baseline_sensitivities(
         loss_s = 1.0
         loss_w = 1.0
 
-    # Check and extract units as float, if present.
-    units_default = 1.0
-    units_n = check_units(bc["vmr_n"], default=units_default)
-    units_e = check_units(bc["vmr_e"], default=units_default)
-    units_s = check_units(bc["vmr_s"], default=units_default)
-    units_w = check_units(bc["vmr_w"], default=units_default)
-
     sensitivities = {
-        "bc_n": fp["particle_locations_n"] * bc["vmr_n"] * loss_n * units_n,
-        "bc_e": fp["particle_locations_e"] * bc["vmr_e"] * loss_e * units_e,
-        "bc_s": fp["particle_locations_s"] * bc["vmr_s"] * loss_s * units_s,
-        "bc_w": fp["particle_locations_w"] * bc["vmr_w"] * loss_w * units_w,
+        "bc_n": fp["particle_locations_n"] * bc["vmr_n"] * loss_n,
+        "bc_e": fp["particle_locations_e"] * bc["vmr_e"] * loss_e,
+        "bc_s": fp["particle_locations_s"] * bc["vmr_s"] * loss_s,
+        "bc_w": fp["particle_locations_w"] * bc["vmr_w"] * loss_w,
     }
 
-    return xr.Dataset(sensitivities) / output_units
+    # convert units then dequantify so output has correct units, but is not quantified, which
+    # might cause issues with dask in subsequent computations
+    result = xr.Dataset(sensitivities)
+    result = result.pint.to(str(output_units))
+    return cast(xr.Dataset, result.pint.dequantify())
