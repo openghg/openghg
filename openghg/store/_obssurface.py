@@ -196,7 +196,18 @@ class ObsSurface(BaseStore):
         # return results
 
     def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+        """
+        Apply appropriate formatting for expected inputs for ObsSurface.
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+        
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
         from openghg.util import (
             verify_site,
             clean_string,
@@ -300,12 +311,37 @@ class ObsSurface(BaseStore):
 
         return params, additional_metadata
 
-    def align_metadata_attributes(self, data, update_mismatch):
-        """ """
+    def align_metadata_attributes(self, data, update_mismatch) -> None:
+        """
+        Check values within metadata and attributes are consistent and update (in place).
+        This is a wrapper for separate openghg.util.align_metadata_attributes() function.
+
+        Args:
+            data: sequence of MetadataAndData objects
+            update_mismatch: This determines how mismatches between the internal data
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+        Returns:
+            None
+
+        TODO: At the moment the align_metadata_attributes() function is only applicable
+            to surface data but this should be generalised to all data types.
+        """
         return align_metadata_attributes(data, update_mismatch)
 
     def define_loop_params(self):
-        """ """
+        """
+        If filepath is supplied as a list, depending on the data type this will be
+        looped over to extract each file. If there are additional parameters which need to
+        be looped over as well (when defined) these are defined here.
+
+        Returns:
+            dict: Dictionary of name of loop parameters within inputs and to pass
+                to the relevant parse functions.
+        """
         loop_params = {  # "filepath": "filepaths",
             "precision_filepath": "precision_filepath",
         }
