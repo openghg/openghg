@@ -109,6 +109,7 @@ from ._user import (
     get_user_config_path,
     read_local_config,
     check_config,
+    handle_direct_store_path,
 )
 from ._util import (
     find_matching_site,
@@ -123,4 +124,6 @@ from ._util import (
     find_repeats,
     collate_strings,
 )
+
+from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version

@@ -1180,7 +1180,7 @@ def test_co2_games():
         (None, "gemma_v1", ["gemma_v1"]),
     ],
 )
-def test_add_tag(tag1, tag2, combined_tag):
+def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
     """
 
     """

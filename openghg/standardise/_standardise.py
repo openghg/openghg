@@ -13,7 +13,10 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store: str | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
