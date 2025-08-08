@@ -1290,7 +1290,12 @@ class ModelScenario:
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=self.species)
+        try:
+            species = self.species
+        except AttributeError:
+            species = None
+
+        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=species)
 
         result = sensitivities if output_sensitivity else xr.Dataset()
 
