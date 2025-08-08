@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
 - Unit tracking with pint to ModelScenario. [PR #1417](https://github.com/openghg/openghg/pull/1417)
 
-
 ### Updated
 
 - Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
