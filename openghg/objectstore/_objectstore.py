@@ -34,13 +34,20 @@ from openghg.util import split_function_inputs
 
 
 MetaData = dict[str, Any]
-QueryResults = list[Any]
+QueryResults = list[MetaData]
 UUID = str
 T = TypeVar("T")
 Bucket = str
 
 MetadataUpdaterT = Callable[[QueryResults, Iterable[DatasourceT]], tuple[QueryResults, Iterable[DatasourceT]]]
 """Type for function that transforms query results and a list of datasources."""
+
+
+def _default_metadata_updater(
+    metadata: QueryResults, datasources: Iterable[DatasourceT]
+) -> tuple[QueryResults, Iterable[DatasourceT]]:
+    """Default metadata updater for ObjectStore."""
+    return metadata, datasources
 
 
 class ObjectStore(Generic[DatasourceT, T]):
@@ -53,12 +60,8 @@ class ObjectStore(Generic[DatasourceT, T]):
         self.metastore = metastore
         self.datasource_factory = datasource_factory
 
-        def default_metadata_updater(
-            metadata: QueryResults, datasources: Iterable[DatasourceT]
-        ) -> tuple[QueryResults, Iterable[DatasourceT]]:
-            return metadata, datasources
-
-        self.metadata_updater = metadata_updater if metadata_updater is not None else default_metadata_updater
+        # use default metadata updater if None is passed
+        self.metadata_updater = metadata_updater or _default_metadata_updater
 
     def __enter__(self) -> Self:
         return self
@@ -268,7 +271,29 @@ class ObjectStore(Generic[DatasourceT, T]):
 
 
 # Helper functions for creating object stores
-def make_metadata_updater(skip_keys: list | None = None, extend_keys: list | None = None) -> MetadataUpdaterT:
+def _update_one(
+    r: MetaData, d: DatasourceT, skip_keys: list | None = None, extend_keys: list | None = None
+) -> tuple[Any, DatasourceT]:
+    """Helper function for make_metadata_updater_fn.
+
+    Updates one pair of metadata and datasource.
+
+    Note that this only changes the input if the datasource has metadata and an `add_metadata`
+    method, like the standard datasource we use for storing data in zarr stores.
+    """
+    if hasattr(d, "add_metadata") and hasattr(d, "metadata"):
+        # update datasource by adding missing metadata
+        d_keys = list(d.metadata().keys())  # type: ignore
+        to_add = {k: v for k, v in r.items() if k not in d_keys}
+        d.add_metadata(metadata=to_add, skip_keys=skip_keys, extend_keys=extend_keys)  # type: ignore
+
+        r.update(d.metadata())  # type: ignore
+    return r, d
+
+
+def make_metadata_updater_fn(
+    skip_keys: list | None = None, extend_keys: list | None = None
+) -> MetadataUpdaterT:
     """Create metadata updater function using given `skip_keys` and `extend_keys`.
 
     Since `extend_keys` depends on the context (e.g. data type), this function
@@ -307,17 +332,9 @@ def make_metadata_updater(skip_keys: list | None = None, extend_keys: list | Non
         if not search_results:
             return search_results, datasources
 
-        def update_one(r: Any, d: DatasourceT) -> tuple[Any, DatasourceT]:
-            if hasattr(d, "add_metadata") and hasattr(d, "metadata"):
-                # update datasource by adding missing metadata
-                d_keys = list(d.metadata().keys())  # type: ignore
-                to_add = {k: v for k, v in r.items() if k not in d_keys}
-                d.add_metadata(metadata=to_add, skip_keys=skip_keys, extend_keys=extend_keys)  # type: ignore
-
-                r.update(d.metadata())  # type: ignore
-            return r, d
-
-        zipped_result = (update_one(r, d) for r, d in zip(search_results, datasources))
+        zipped_result = (
+            _update_one(r, d, skip_keys, extend_keys) for r, d in zip(search_results, datasources)
+        )
         search_iter, datasources_iter = list(
             zip(*zipped_result)
         )  # turn iterator of tuples into list of two lists
@@ -341,7 +358,7 @@ def open_object_store(
             list_keys = dc(bucket=bucket).get_list_metakeys()
         except (ObjectStoreError, ValueError):
             list_keys = None
-        metadata_updater = make_metadata_updater(extend_keys=list_keys)
+        metadata_updater = make_metadata_updater_fn(extend_keys=list_keys)
 
         object_store = ObjectStore[Datasource, xr.Dataset](
             metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater
@@ -460,7 +477,7 @@ def locking_object_store(
 ) -> LockingObjectStoreType:
     ms = DataClassMetaStore(bucket=bucket, data_type=data_type)
     ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
-    metadata_updater = make_metadata_updater(skip_keys=skip_keys, extend_keys=extend_keys)
+    metadata_updater = make_metadata_updater_fn(skip_keys=skip_keys, extend_keys=extend_keys)
     object_store = LockingObjectStore[Datasource, xr.Dataset](
         metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater, lock=ms.lock
     )

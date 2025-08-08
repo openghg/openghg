@@ -454,7 +454,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         from openghg.util._metadata_util import get_period as _get_period
 
         if "period" not in self._metadata:
-            self._metadata["period"] = _get_period(self._metadata)  # type: ignore
+            self._metadata["period"] = _get_period(self._metadata)
 
         return cast(str | None, self._metadata["period"])
 
