@@ -6,14 +6,14 @@ import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
-from openghg.util import check_and_set_null_variable, not_set_metadata_values
+from openghg.util import check_and_set_null_variable, not_set_metadata_values, open_nc_fn
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
-    filepath: pathType,
+    filepath: str | Path | list[str | Path],
     site: str,
     measurement_type: str | None,
     inlet: str | None = None,
@@ -59,9 +59,20 @@ def parse_noaa(
     elif measurement_type not in valid_types:
         raise ValueError(f"measurement_type is '{measurement_type}' but must be one of {valid_types}")
 
-    file_extension = Path(filepath).suffix
+    if isinstance(filepath, list):
+        file_extensions = [Path(fp).suffix for fp in filepath]
+        if all([ext == ".nc" for ext in file_extensions]):
+            input_is_nc = True
+        else:
+            raise ValueError("For multiple input files must all be '.nc' files. Currently: {filepath}")
+    else:
+        file_extension = Path(filepath).suffix
+        if file_extension == ".nc":
+            input_is_nc = True
+        else:
+            input_is_nc = False
 
-    if file_extension == ".nc":
+    if input_is_nc:
         return _read_obspack(
             filepath=filepath,
             site=site,
@@ -73,8 +84,9 @@ def parse_noaa(
             site_filepath=site_filepath,
         )
     else:
+        single_filepath = cast(str | Path, filepath)
         return _read_raw_file(
-            filepath=filepath,
+            filepath=single_filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -280,7 +292,7 @@ def _split_inlets(obspack_ds: xr.Dataset, attributes: dict, metadata: dict, inle
 
 
 def _read_obspack(
-    filepath: pathType,
+    filepath: str | Path | list[str | Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
@@ -312,7 +324,9 @@ def _read_obspack(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
 
-    with xr.open_dataset(filepath) as temp:
+    xr_open_fn, filepath = open_nc_fn(filepath)
+
+    with xr_open_fn(filepath) as temp:
         obspack_ds = temp
         orig_attrs = temp.attrs
 

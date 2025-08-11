@@ -1,16 +1,16 @@
+import logging
 from pathlib import Path
 from typing import cast
-import logging
-import xarray as xr
 
 from openghg.types import pathType
+from openghg.util import open_time_nc_fn
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: pathType,
+    filepath: str | Path | list[str | Path],
     site: str | None = None,
     species: str | None = None,
     network: str | None = None,
@@ -69,12 +69,9 @@ def parse_openghg(
         dataset_formatter,
     )
 
-    filepath = Path(filepath)
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
-    try:
-        data = xr.open_dataset(filepath)  # Change this to with statement?
-    except ValueError as e:
-        raise ValueError(f"Input file {filepath.name} could not be opened by xarray.") from e
+    data = xr_open_fn(filepath)
 
     # Extract current attributes from input data
     attributes = data.attrs

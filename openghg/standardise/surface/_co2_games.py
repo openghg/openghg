@@ -1,8 +1,9 @@
 import logging
+from pathlib import Path
 import copy
-import xarray as xr
 
 from openghg.types import pathType
+from openghg.util import open_time_nc_fn
 from openghg.standardise.meta import (
     assign_attributes,
     dataset_formatter,
@@ -13,7 +14,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_co2_games(
-    filepath: pathType,
+    filepath: str | Path | list[str | Path],
     site: str,
     measurement_type: str,
     inlet: str | None = None,
@@ -52,7 +53,9 @@ def parse_co2_games(
 
     gas_data: dict = {}
 
-    with xr.open_dataset(filepath) as dataset:
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
+
+    with xr_open_fn(filepath) as dataset:
         # Use dictionary comprehension to split data variables into individual datasets
         attributes = dataset.attrs
         metadata = {
