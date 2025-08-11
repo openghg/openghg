@@ -87,6 +87,7 @@ def standardise_surface(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Standardise surface measurements and store the data in the object store.
 
@@ -153,6 +154,10 @@ def standardise_surface(
             To disable chunking pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sorts multiple files date-wise.
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     Returns:
         dict: Dictionary of result data
     """
@@ -200,6 +205,7 @@ def standardise_surface(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -226,6 +232,7 @@ def standardise_column(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Read column observation file
 
@@ -269,7 +276,10 @@ def standardise_column(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
-
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -298,6 +308,7 @@ def standardise_column(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -320,6 +331,7 @@ def standardise_bc(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -359,7 +371,11 @@ def standardise_bc(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
             To disable chunking pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
-    returns:
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
+    Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
 
@@ -383,6 +399,7 @@ def standardise_bc(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -421,7 +438,7 @@ def standardise_footprint(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     sort_files: bool = False,
-    open_files_grouped: bool = True,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -477,6 +494,10 @@ def standardise_footprint(
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sort multiple files datewise
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -528,7 +549,7 @@ def standardise_footprint(
         sort=sort,
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
-        open_files_grouped=open_files_grouped,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -556,6 +577,7 @@ def standardise_flux(
     compressor: Any | None = None,
     filters: Any | None = None,
     info_metadata: dict | None = None,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -597,6 +619,10 @@ def standardise_flux(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -632,6 +658,7 @@ def standardise_flux(
         compressor=compressor,
         filters=filters,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -654,6 +681,7 @@ def standardise_eulerian(
     filters: Any | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -692,6 +720,10 @@ def standardise_eulerian(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     Returns:
         dict: Dictionary of result data
     """
@@ -715,6 +747,7 @@ def standardise_eulerian(
         filters=filters,
         chunks=chunks,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )
 
 
@@ -774,6 +807,7 @@ def standardise_flux_timeseries(
     period: str | tuple | None = None,
     continuous: bool | None = None,
     info_metadata: dict | None = None,
+    concat_nc_files: bool | None = None,
 ) -> list[dict]:
     """Process one dimension timeseries file
 
@@ -817,6 +851,10 @@ def standardise_flux_timeseries(
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
+        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+            - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+            - True - attempt to open concatenated if all files are recognised as netcdf files.
+            - False - open and standardise each file individually.
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
@@ -849,4 +887,5 @@ def standardise_flux_timeseries(
         period=period,
         continuous=continuous,
         info_metadata=info_metadata,
+        concat_nc_files=concat_nc_files,
     )

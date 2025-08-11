@@ -18,7 +18,7 @@ from openghg.standardise import (
     standardise_flux_timeseries,
 )
 from openghg.dataobjects import FootprintData
-from openghg.types import AttrMismatchError, ObjectStoreError
+from openghg.types import AttrMismatchError, ObjectStoreError, StandardiseError
 from openghg.util import compress, find_domain
 import numpy as np
 
@@ -524,7 +524,7 @@ def test_standardise_incomplete_flux():
     # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
     # we get an error
 
-    with pytest.raises(ValueError):
+    with pytest.raises(StandardiseError):
         standardise_flux(
             filepath=test_datapath,
             species="co2",
@@ -581,7 +581,7 @@ def test_incompatible_species_for_flux_timeseries():
     """This function tests if incompatible species values is supplied to standardise"""
 
     data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
-    with pytest.raises(ValueError):
+    with pytest.raises(StandardiseError):
         standardise_flux_timeseries(
             filepath=data_path, species="hfc123", source="crf", period="years", continuous=False, store="user"
         )

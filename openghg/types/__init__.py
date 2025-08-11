@@ -32,6 +32,7 @@ from ._errors import (
     ZarrStoreError,
     KeyExistsError,
     MetadataMissingError,
+    StandardiseError,
     construct_xesmf_import_error,
 )
 from ._types import (

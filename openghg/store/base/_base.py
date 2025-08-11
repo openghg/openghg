@@ -17,7 +17,7 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store.storage import ChunkingSchema
-from openghg.types import DatasourceLookupError, multiPathType, MetadataAndData
+from openghg.types import DatasourceLookupError, StandardiseError, multiPathType, MetadataAndData
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
 from .._metakeys_config import get_metakeys
@@ -181,7 +181,12 @@ class BaseStore:
         )
 
         # Call appropriate standardisation function with input parameters
-        data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+        try:
+            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+        except (TypeError, ValueError) as err:
+            msg = f"Error during standardisation of file(s): {filepath}. Error: {err}"
+            logger.exception(msg)
+            raise StandardiseError(msg)
 
         # # TODO: Add in use of self.check_chunks() - used for Footprint only at the moment
         # chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, data[0])
@@ -259,7 +264,7 @@ class BaseStore:
 
     def read_file(
         self,
-        filepath: multiPathType,
+        filepath: str | Path | list[str | Path],
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -269,7 +274,7 @@ class BaseStore:
         filters: Any | None = None,
         chunks: dict | None = None,
         update_mismatch: str = "never",
-        open_files_grouped: bool = False,
+        concat_nc_files: bool | None = None,
         info_metadata: dict | None = None,
         **kwargs,
     ) -> list[dict]:
@@ -309,7 +314,10 @@ class BaseStore:
                     - "never" - don't update mismatches and raise an AttrMismatchError
                     - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
                     - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-            open_files_grouped: bool = False,
+            concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+                - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+                - True - attempt to open concatenated if all files are recognised as netcdf files.
+                - False - open and standardise each file individually.
             info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
             **kwargs: Specific keywords associated with the data type. See
                 the openghg.standardise.standardise_* functions for details
@@ -364,23 +372,38 @@ class BaseStore:
         if chunks is None:
             chunks = {}
 
-        # Check if the files are opened grouped (e.g. for netcdf files)
-        if open_files_grouped:
-            results = self._standardise_from_file(
-                filepath=filepaths,
-                fn_input_parameters=fn_input_parameters,
-                source_format=source_format,
-                update_mismatch=update_mismatch,
-                if_exists=if_exists,
-                new_version=new_version,
-                compressor=compressor,
-                filters=filters,
-                chunks=chunks,
-                info_metadata=info_metadata,
-                additional_metadata=additional_metadata,
-            )
+        # Check if filepaths are all netcdf files
+        file_extensions = [Path(fp).suffix for fp in filepaths]
+        nc_extensions = [".nc", ".nc4"]
+        if all([ext in nc_extensions for ext in file_extensions]):
+            if concat_nc_files is None:
+                concat_nc_files = True
+        else:
+            if concat_nc_files is True:
+                logger.warning(f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated.")
+            concat_nc_files = False
 
-            return results
+        # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
+        if concat_nc_files:
+            try:
+                results = self._standardise_from_file(
+                    filepath=filepaths,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                    additional_metadata=additional_metadata,
+                )
+            except StandardiseError:
+                logger.warning("Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually.")
+            else:
+                self.store_hashes(unseen_hashes)
+                return results
 
         # If not, loop over multiple filepaths when present
         loop_params = self.define_loop_params()
