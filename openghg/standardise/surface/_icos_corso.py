@@ -422,7 +422,7 @@ def initial_checks_and_setup(
 
     if inlet_height_fname is not None:
         if input_inlet is not None and inlet_height_fname.lower() != input_inlet:
-            raise ValueError("Mismatch between inlet height passed and in filename.")
+            raise ValueError(f"Mismatch between inlet height passed ({input_inlet}) and in filename ({inlet_height_fname}).")
 
     inlet_height_magl = format_inlet(inlet_height_fname, key_name="inlet_height_magl")
 
