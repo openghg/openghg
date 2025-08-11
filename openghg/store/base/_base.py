@@ -244,6 +244,9 @@ class BaseStore:
         )
 
         for x in datasource_uuids:
+            if isinstance(filepath, list) and len(filepath) == 1:
+                filepath = filepath[0]
+
             if isinstance(filepath, str | Path):
                 x.update({"file": filepath.name})
                 logger.info(f"Completed processing: {filepath.name}.")
