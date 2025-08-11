@@ -1105,7 +1105,7 @@ class ModelScenario:
                     )
                 else:
                     mod_obs = self._calc_modelled_obs_integrated(
-                        sources=sources,
+                        sources=source,
                         output_TS=True,
                         ts_name="mf_mod_sectoral",
                         output_fpXflux=output_fp_x_flux,
