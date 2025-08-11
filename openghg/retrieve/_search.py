@@ -408,6 +408,21 @@ def search_column(
     )
 
 
+def search_met(
+    site: str | None = None,
+    network: str | None = None,
+    met_source: str | None = None,
+    **kwargs: Any,
+) -> SearchResults:
+    return search(
+        site=site,
+        network=network,
+        met_source=met_source,
+        data_type="met",
+        **kwargs,
+    )
+
+
 def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
