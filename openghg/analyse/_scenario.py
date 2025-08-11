@@ -1077,7 +1077,8 @@ class ModelScenario:
             return modelled_obs
 
         # Check species and use high time resolution steps if this is carbon dioxide
-        if self.species == "co2":
+        if self.species in ["co2", "o2", "deltao2n2"]:
+        # if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
                 sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
             )
@@ -1092,9 +1093,11 @@ class ModelScenario:
             sectoral_datasets = []
 
             for source in sources:
-                if self.species == "co2":
+                # if self.species == "co2":
+                if self.species in ["co2", "o2", "deltao2n2"]:
                     mod_obs = self._calc_modelled_obs_HiTRes(
-                        sources=sources,
+                        # sources=sources,
+                        sources=source,
                         output_TS=True,
                         ts_name="mf_mod_high_res_sectoral",
                         output_fpXflux=output_fp_x_flux,
