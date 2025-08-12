@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-from typing import cast
+from typing import cast, Any
 import warnings
 import numpy as np
 
@@ -183,8 +183,22 @@ class Footprints(BaseStore):
 
     #     """
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs for Footprints. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_footprint()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
         from openghg.util import (
             clean_string,
             format_inlet,
@@ -195,7 +209,7 @@ class Footprints(BaseStore):
         # How do we check the keys we're expecting for this? Rely on required keys?
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         params = kwargs.copy()
 
@@ -264,7 +278,7 @@ class Footprints(BaseStore):
         return params, additional_metadata
 
     @staticmethod
-    def schema(
+    def schema(  # type: ignore[override]
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
         time_resolved: bool = False,

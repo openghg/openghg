@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 from types import TracebackType
 from typing import Any, TypeVar
-from collections.abc import MutableSequence, Sequence
+from collections.abc import MutableSequence, Sequence, Callable
 
 from pandas import Timestamp
 import xarray as xr
@@ -16,8 +16,14 @@ from xarray import Dataset
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
+from openghg.store._data_schema import DataSchema
 from openghg.store.storage import ChunkingSchema
-from openghg.types import DatasourceLookupError, StandardiseError, multiPathType, MetadataAndData
+from openghg.types import (
+    DatasourceLookupError,
+    StandardiseError,
+    ValidationError,
+    MetadataAndData,
+)
 from openghg.util import timestamp_now, to_lowercase, hash_file
 
 from .._metakeys_config import get_metakeys
@@ -115,7 +121,7 @@ class BaseStore:
         filepath: str | Path | list[str | Path],
         fn_input_parameters: dict,
         source_format: str | None = None,
-        parser_fn: callable | None = None,
+        parser_fn: Callable | None = None,
         update_mismatch: str = "never",
         if_exists: str = "auto",
         new_version: bool = True,
@@ -171,9 +177,15 @@ class BaseStore:
         # chunking_params = self.find_chunking_schema_inputs()
         validate_params = self.find_data_schema_inputs()
 
-        if not parser_fn:
+        if not parser_fn and source_format is not None:
             # Load the data retrieve object
             parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+        else:
+            msg = "Either 'source_format' must be specified so an appropriate parse function can be found or a parser_fn must be specified directly."
+            logger.exception(msg)
+            raise ValueError(msg)
+
+        fn_input_parameters["filepath"] = filepath
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
@@ -204,22 +216,13 @@ class BaseStore:
 
             try:
                 self.validate_data(datasource.data, **validate_kwargs)
-            except ValueError:
+            except ValidationError as err:
                 if isinstance(filepath, list):
-                    logger.error(
-                        f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}."
-                    )
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([Path(fp).name for fp in filepath])}. Error: {err}"
                 else:
-                    logger.error(
-                        f"Unable to validate and store data from file: {filepath.name}.",
-                    )
-                validated = False
-                break
-        else:
-            validated = True
-
-        if not validated:
-            return None
+                    msg = f"Unable to validate and store data from file: {Path(filepath).name}. Error: {err}"
+                logger.error(msg)
+                raise ValidationError(msg)
 
         # Ensure the data is chunked
         if chunks:
@@ -227,6 +230,9 @@ class BaseStore:
                 datasource.data = datasource.data.chunk(chunks)
 
         self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+
+        if additional_metadata is None:
+            additional_metadata = {}
 
         # Check to ensure no required keys are being passed through info_metadata dict
         # before adding details
@@ -253,10 +259,10 @@ class BaseStore:
                 filepath = filepath[0]
 
             if isinstance(filepath, str | Path):
-                x.update({"file": filepath.name})
-                logger.info(f"Completed processing: {filepath.name}.")
+                x.update({"file": Path(filepath).name})
+                logger.info(f"Completed processing: {Path(filepath).name}.")
             elif isinstance(filepath, list):
-                filepath_str = ", ".join([fp.name for fp in filepath])
+                filepath_str = ", ".join([Path(fp).name for fp in filepath])
                 x.update({"files": filepath_str})
                 logger.info(f"Completed processing files: {filepath_str}.")
 
@@ -276,7 +282,7 @@ class BaseStore:
         update_mismatch: str = "never",
         concat_nc_files: bool | None = None,
         info_metadata: dict | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[dict]:
         """
         Process files, standardise and store in the object store.
@@ -380,7 +386,9 @@ class BaseStore:
                 concat_nc_files = True
         else:
             if concat_nc_files is True:
-                logger.warning(f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated.")
+                logger.warning(
+                    f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
+                )
             concat_nc_files = False
 
         # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
@@ -400,7 +408,9 @@ class BaseStore:
                     additional_metadata=additional_metadata,
                 )
             except StandardiseError:
-                logger.warning("Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually.")
+                logger.warning(
+                    "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
+                )
             else:
                 self.store_hashes(unseen_hashes)
                 return results
@@ -408,29 +418,40 @@ class BaseStore:
         # If not, loop over multiple filepaths when present
         loop_params = self.define_loop_params()
 
-        results: list[dict] = []
+        results = []
 
-        for i, filepath in enumerate(filepaths):
+        for i, fp in enumerate(filepaths):
 
-            fn_input_parameters["filepath"] = filepath
+            # fn_input_parameters["filepath"] = fp
             if loop_params:
                 for key1, key2 in loop_params.items():
                     if fn_input_parameters.get(key2) is not None:
                         fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
-            datasource_uuids = self._standardise_from_file(
-                filepath=filepath,
-                fn_input_parameters=fn_input_parameters,
-                source_format=source_format,
-                update_mismatch=update_mismatch,
-                if_exists=if_exists,
-                new_version=new_version,
-                compressor=compressor,
-                filters=filters,
-                chunks=chunks,
-                info_metadata=info_metadata,
-                additional_metadata=additional_metadata,
-            )
+            try:
+                datasource_uuids = self._standardise_from_file(
+                    filepath=fp,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                    additional_metadata=additional_metadata,
+                )
+            except ValidationError as err:
+                msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
+                logger.error(msg)
+                validated = False
+                break
+            else:
+                validated = True
+
+            if not validated:
+                continue
 
             results.extend(datasource_uuids)
 
@@ -438,7 +459,9 @@ class BaseStore:
 
         return results
 
-    def create_schema_kwargs(self, schema_params, fn_input_parameters, datasource) -> dict:
+    def create_schema_kwargs(
+        self, schema_params: list, fn_input_parameters: dict, datasource: MetadataAndData
+    ) -> dict:
         """
         Create the keyword arguments needed when creating a data type schema.
 
@@ -476,9 +499,37 @@ class BaseStore:
 
         return kwargs
 
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs.
+        Note: This is a placeholder as we expect this to be implemented for all subclasses.
+        """
+        raise NotImplementedError("The format_inputs() method should be created for each subclass")
+
+    @staticmethod
+    def schema(**kwargs: Any) -> DataSchema:
+        """
+        Defined schema for an internal Dataset. This is a placeholder and will
+        return an empty DataSchema object
+        """
+        return DataSchema(None, None, None)
+
     @classmethod
-    def validate_data(cls, data: Dataset, **kwargs) -> None:
-        data_schema = cls.schema(**kwargs)
+    def validate_data(cls, data: Dataset, **kwargs: Any) -> None:
+        """
+        Class method for validation of a dataset against the defined schema.
+        Args:
+            data: xarray Dataset in expected format
+            kwargs:
+        Returns:
+            None
+        Raises
+            ValidationError: if input data does not pass the schema checks.
+        """
+        if kwargs:
+            data_schema = cls.schema(**kwargs)
+        else:
+            data_schema = cls.schema()
         data_schema.validate_data(data)
 
     def find_data_schema_inputs(self) -> list:
@@ -523,7 +574,9 @@ class BaseStore:
         name_only = {k: v.name for k, v in hashes.items()}
         self._file_hashes.update(name_only)
 
-    def check_hashes(self, filepaths: multiPathType, force: bool) -> tuple[dict[str, Path], dict[str, Path]]:
+    def check_hashes(
+        self, filepaths: str | Path | list[str | Path], force: bool
+    ) -> tuple[dict[str, Path], dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
         uploaded files. Two dictionaries are returned, one containing the hashes
         of files we've seen before and one containing the hashes of files we haven't.
@@ -730,7 +783,7 @@ class BaseStore:
 
         return list_keys
 
-    def align_metadata_attributes(self, data, update_mismatch) -> None:
+    def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
         """Default to returning None for cases where this method isn't
         defined yet within the child data_type class.
         """

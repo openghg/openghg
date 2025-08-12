@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -206,8 +206,22 @@ class FluxTimeseries(BaseStore):
 
     #     return datasource_uuids
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs for FluxTimeseries. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_flux_timeseries()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
         from openghg.util import clean_string, synonyms
 
         params = kwargs.copy()
@@ -220,12 +234,12 @@ class FluxTimeseries(BaseStore):
             params["domain"] = clean_string(params["domain"])
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         return params, additional_metadata
 
     @staticmethod
-    def schema() -> DataSchema:
+    def schema() -> DataSchema:  # type: ignore[override]
         """
         Define schema for one dimensional timeseries(FluxTimeseries) Dataset.
 

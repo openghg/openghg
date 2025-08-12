@@ -30,7 +30,7 @@ class ObsSurface(BaseStore):
         file_metadata: dict,
         precision_data: bytes | None = None,
         site_filepath: pathType | None = None,
-    ) -> list[dict]:
+    ) -> list[dict] | None:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -195,16 +195,19 @@ class ObsSurface(BaseStore):
 
         # return results
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
         """
-        Apply appropriate formatting for expected inputs for ObsSurface.
+        Apply appropriate formatting for expected inputs for ObsColumn. Expected
+        inputs will typically be defined within the openghg.standardse.standardise_surface()
+        function.
+
         Args:
             kwargs: Set of keyword arguments. Selected keywords will be
                 appropriately formatted.
         Returns:
             (dict, dict): Formatted parameters and any additional parameters
                 for this data type.
-        
+
         TODO: Decide if we can phase out additional_metadata or if this could be
             added to params.
         """
@@ -305,13 +308,13 @@ class ObsSurface(BaseStore):
                 params["precision_filepath"] = [Path(pfp) for pfp in params["precision_filepath"]]
 
         # Define additional metadata which is not being passed to the parse functions
-        additional_metadata = {
+        additional_metadata: dict = {
             "data_source": data_source,
         }
 
         return params, additional_metadata
 
-    def align_metadata_attributes(self, data, update_mismatch) -> None:
+    def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
         """
         Check values within metadata and attributes are consistent and update (in place).
         This is a wrapper for separate openghg.util.align_metadata_attributes() function.
@@ -332,7 +335,7 @@ class ObsSurface(BaseStore):
         """
         return align_metadata_attributes(data, update_mismatch)
 
-    def define_loop_params(self):
+    def define_loop_params(self) -> dict:
         """
         If filepath is supplied as a list, depending on the data type this will be
         looped over to extract each file. If there are additional parameters which need to
@@ -348,7 +351,7 @@ class ObsSurface(BaseStore):
         return loop_params
 
     @staticmethod
-    def schema(species: str) -> DataSchema:
+    def schema(species: str) -> DataSchema:  # type: ignore[override]
         """
         Define schema for surface observations Dataset.
 

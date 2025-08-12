@@ -3,6 +3,8 @@ import logging
 import numpy as np
 from xarray import Dataset
 
+from openghg.types import ValidationError
+
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -61,7 +63,7 @@ class DataSchema:
                             f"Missing dimension for data variable: {edv}, {edim}. Current dims: {dims}"
                         )
             else:
-                raise ValueError(f"Expected data variable: {edv} not present in standardised data")
+                raise ValidationError(f"Expected data variable: {edv} not present in standardised data")
 
     def _check_dims(self, data: Dataset) -> None:
         """
@@ -84,7 +86,7 @@ class DataSchema:
 
         for edim in expected_dims:
             if edim not in dims:
-                raise ValueError(f"Expected dimension: {edim} not present in standardised data")
+                raise ValidationError(f"Expected dimension: {edim} not present in standardised data")
 
     def _check_dtypes(self, data: Dataset) -> None:
         """
@@ -107,7 +109,7 @@ class DataSchema:
             if variable in data:
                 dtype = data[variable].dtype
                 if not np.issubdtype(dtype, edata_type):
-                    raise ValueError(
+                    raise ValidationError(
                         f"Expected data type of variable {variable} to be: {edata_type}. Current {dtype}"
                     )
 
@@ -128,7 +130,7 @@ class DataSchema:
         Returns:
             None
 
-            Raises a ValueError with details if the input data does not adhere
+            Raises a ValidationError with details if the input data does not adhere
             to the defined DataSchema.
         """
 

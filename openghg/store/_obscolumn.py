@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Optional, Any
 import numpy as np
 from numpy import ndarray
 
@@ -103,8 +103,22 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs for ObsColumn. Expected
+        inputs will typically be defined within the openghg.standardse.standardise_column()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
 
         from openghg.util import (
             clean_string,
@@ -172,13 +186,13 @@ class ObsColumn(BaseStore):
         params["obs_region"] = obs_region
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         return params, additional_metadata
 
     # TODO: Check and update schema methods for ObsColumn to make sure this works for site-column
     @staticmethod
-    def schema(species: str) -> DataSchema:
+    def schema(species: str) -> DataSchema:  # type: ignore[override]
         """
         Define schema for emissions Dataset.
 

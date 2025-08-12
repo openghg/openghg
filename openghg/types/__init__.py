@@ -33,6 +33,7 @@ from ._errors import (
     KeyExistsError,
     MetadataMissingError,
     StandardiseError,
+    ValidationError,
     construct_xesmf_import_error,
 )
 from ._types import (

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -57,8 +57,22 @@ class BoundaryConditions(BaseStore):
 
             return self.read_file(filepath=filepath, source_format=source_format, **metadata)
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs for BoundaryConditions. Expected
+        inputs will typically be defined within the openghg.standardse.standardise_bc()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
         from openghg.util import clean_string, synonyms
 
         params = kwargs.copy()
@@ -69,12 +83,12 @@ class BoundaryConditions(BaseStore):
         params["domain"] = clean_string(params["domain"])
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         return params, additional_metadata
 
     @staticmethod
-    def schema() -> DataSchema:
+    def schema() -> DataSchema:  # type: ignore[override]
         """
         Define schema for boundary conditions Dataset.
 

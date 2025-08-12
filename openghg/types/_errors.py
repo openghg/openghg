@@ -82,6 +82,10 @@ class StandardiseError(OpenGHGError):
     """Raised if there is a problem during standardisation within the parse function"""
 
 
+class ValidationError(OpenGHGError):
+    """Raised if the data produced by the parse function cannot be validated as a valid internal format"""
+
+
 def construct_xesmf_import_error(exception: ImportError | None = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."

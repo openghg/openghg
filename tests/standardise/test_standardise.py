@@ -621,6 +621,7 @@ def test_standardise_sorting_true():
         update_mismatch="attributes",
         if_exists="new",
         sort_files=True,
+        concat_nc_files=False,
     )
 
     assert "20220928.nc" in results[0]["file"]

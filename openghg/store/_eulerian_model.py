@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
 import logging
+from typing import Any
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -27,8 +28,22 @@ class EulerianModel(BaseStore):
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def format_inputs(self, **kwargs) -> tuple[dict, dict]:
-        """ """
+    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+        """
+        Apply appropriate formatting for expected inputs for EulerianModel. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_eulerian()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
         from openghg.util import clean_string, synonyms
 
         params = kwargs.copy()
@@ -43,12 +58,12 @@ class EulerianModel(BaseStore):
         params["setup"] = clean_string(params["setup"])
 
         # Specify any additional metadata to be added
-        additional_metadata = {}
+        additional_metadata: dict = {}
 
         return params, additional_metadata
 
     @staticmethod
-    def schema() -> DataSchema:
+    def schema() -> DataSchema:  # type:ignore[override]
         """
         Define schema for Eulerian model Dataset.
 
