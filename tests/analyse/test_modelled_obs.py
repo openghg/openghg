@@ -237,7 +237,9 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         print(t)
         # Extract flux data to match H_back and residual time period
         release_time = aligned_time[t].values
-        expected_modelled_mf_hr = expected_modelled_mf_at_time(release_time, aligned_time[0], flux, footprint, max_hours_back)
+        expected_modelled_mf_hr = expected_modelled_mf_at_time(
+            release_time, aligned_time[0], flux, footprint, max_hours_back
+        )
         modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
 
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
@@ -267,12 +269,16 @@ def test_get_fp_time_resolved_and_residual(footprint_co2_dummy, footprint_paris_
 @pytest.fixture
 def model_scenario_paris_co2_dummy(obs_co2_dummy, footprint_paris_co2_dummy, flux_co2_dummy):
     """Create ModelScenario with input dummy data for co2, using PARIS style footprints."""
-    model_scenario = ModelScenario(obs=obs_co2_dummy, footprint=footprint_paris_co2_dummy, flux=flux_co2_dummy)
+    model_scenario = ModelScenario(
+        obs=obs_co2_dummy, footprint=footprint_paris_co2_dummy, flux=flux_co2_dummy
+    )
 
     return model_scenario
 
 
-def test_model_modelled_obs_paris_co2(model_scenario_paris_co2_dummy, footprint_paris_co2_dummy, flux_co2_dummy):
+def test_model_modelled_obs_paris_co2(
+    model_scenario_paris_co2_dummy, footprint_paris_co2_dummy, flux_co2_dummy
+):
     """Test expected modelled observations within footprints_dat_merge() method with known dummy data for co2.
 
     This test uses the newer "PARIS" footprint format, with `fp_time_resolved` and `fp_residual` data variables.
@@ -288,14 +294,18 @@ def test_model_modelled_obs_paris_co2(model_scenario_paris_co2_dummy, footprint_
     flux = flux_co2_dummy.data
 
     # Find maximum number of hours of the back run from footprint data
-    max_hours_back = _max_h_back(footprint)  # use function that compensates for max H_back = 23 in PARIS format footprints
+    max_hours_back = _max_h_back(
+        footprint
+    )  # use function that compensates for max H_back = 23 in PARIS format footprints
 
     # Loop over each time point so we can calculate expected value and compare
     for t in range(len(aligned_time)):
         print(t)
         # Extract flux data to match H_back and residual time period
         release_time = aligned_time[t].values
-        expected_modelled_mf_hr = expected_modelled_mf_at_time(release_time, aligned_time[0], flux, footprint, max_hours_back)
+        expected_modelled_mf_hr = expected_modelled_mf_at_time(
+            release_time, aligned_time[0], flux, footprint, max_hours_back
+        )
         modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
 
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
@@ -313,9 +323,14 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
 def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_dummy):
     """Test footprints_data_merge with multisector return options"""
     model_scenario_co2_dummy.add_flux(species="co2", flux={"TESTSOURCE2": flux_co2_dummy})
-    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(calc_fp_x_flux=True, split_by_sectors=True)
+    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(
+        calc_fp_x_flux=True, split_by_sectors=True
+    )
     print(combined_dataset)
     print(combined_dataset.data_vars)
-    assert all(dv in combined_dataset for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"])
+    assert all(
+        dv in combined_dataset
+        for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"]
+    )
 
     assert all(combined_dataset.source.values == ["TESTSOURCE", "TESTSOURCE2"])

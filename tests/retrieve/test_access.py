@@ -256,7 +256,12 @@ def test_timeslice_slices_correctly():
 def test_convert_units_get_obs():
 
     timeslice_data = get_obs_surface(
-        site="bsd", species="co2", inlet="248m", start_date="2017-01-01", end_date="2018-03-03", target_units={"mf":"ppb"}
+        site="bsd",
+        species="co2",
+        inlet="248m",
+        start_date="2017-01-01",
+        end_date="2018-03-03",
+        target_units={"mf": "ppb"},
     )
 
     sliced_co2_data = timeslice_data.data
@@ -340,13 +345,16 @@ def test_get_obs_column():
 
 def test_unit_conversion_get_obs_column():
     """To test unit conversion applied on the data"""
-    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10, target_units={"mf": "ppm", "mf_repeatability": "ppm"})
+    column_data = get_obs_column(
+        species="ch4", satellite="gosat", max_level=10, target_units={"mf": "ppm", "mf_repeatability": "ppm"}
+    )
 
     obs_column_data = column_data.data
 
     assert "1e-6" in obs_column_data["mf"].attrs["units"]
     assert "1e-6" in obs_column_data["mf_repeatability"].attrs["units"]
     assert obs_column_data["mf"].values[0] == pytest.approx(1.2382743, rel=3e-8)
+
 
 def test_get_obs_column_max_level():
     # test max level defaults to highest available if out of range
@@ -376,7 +384,9 @@ def test_get_flux():
 def test_conver_units_get_flux():
     """To test unit conversion applied on the data"""
 
-    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe", target_units={"flux":"millimol / m2 / second"})
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", target_units={"flux": "millimol / m2 / second"}
+    )
 
     flux = flux_data.data
 
@@ -485,13 +495,14 @@ def test_get_obs_surface_elevate_inlets():
     assert "inlet" in result.data.data_vars
     assert "WMO-X2004A" in result.metadata["calibration_scale"]
 
+
 def test_get_obs_convert_calibration_scale():
-    """ To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
+    """To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
 
     result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4", calibration_scale="CSIRO-94")
 
-    assert "CSIRO-94" == result.data['mf'].attrs["calibration_scale"]
-    assert "CSIRO-94" == result.data['mf_number_of_observations'].attrs["calibration_scale"]
-    assert "CSIRO-94" == result.data['mf_variability'].attrs["calibration_scale"]
-    assert "calibration_scale" not in result.data['inlet'].attrs
+    assert "CSIRO-94" == result.data["mf"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_number_of_observations"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_variability"].attrs["calibration_scale"]
+    assert "calibration_scale" not in result.data["inlet"].attrs
     assert "CSIRO-94" in result.metadata["calibration_scale"]

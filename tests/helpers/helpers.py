@@ -1,4 +1,5 @@
 """Some helper functions for things we do in tests frequently"""
+
 import getpass
 import shutil
 import tempfile
@@ -18,6 +19,7 @@ def temporary_store_paths() -> Dict[str, Path]:
         "group": base_tmp / f"openghg_testing_group_store",
         "shared": base_tmp / f"openghg_testing_shared_store",
     }
+
 
 def clear_test_store(name: str) -> None:
     """Clear one of the testing object stores
