@@ -74,8 +74,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
     assert co2_data.time[-1] == Timestamp("2020-12-01T22:31:30")
-    assert co2_data.mf[0] == 409.55
-    assert co2_data.mf[-1] == 417.65
+    assert 409.55 in co2_data.mf[0].values
+    assert 417.65 in co2_data.mf[-1].values
 
     metadata = obsdata.metadata
 
@@ -248,6 +248,26 @@ def test_timeslice_slices_correctly():
     )
 
     sliced_co2_data = timeslice_data.data
+    assert 409.93 == sliced_co2_data["mf"].values[-1]
+    assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
+    assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
+
+
+def test_convert_units_get_obs():
+
+    timeslice_data = get_obs_surface(
+        site="bsd",
+        species="co2",
+        inlet="248m",
+        start_date="2017-01-01",
+        end_date="2018-03-03",
+        target_units={"mf": "ppb"},
+    )
+
+    sliced_co2_data = timeslice_data.data
+    assert "1e-9" in sliced_co2_data["mf"].attrs["units"]
+    assert "parts_per_billion" in sliced_co2_data["mf"].attrs["units_definition"]
+    np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-6)
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
 
@@ -320,7 +340,20 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
-    assert obscolumn["mf"].attrs["units"] == '1e-9'
+    assert "1e-9" in obscolumn["mf"].attrs["units"]
+
+
+def test_unit_conversion_get_obs_column():
+    """To test unit conversion applied on the data"""
+    column_data = get_obs_column(
+        species="ch4", satellite="gosat", max_level=10, target_units={"mf": "ppm", "mf_repeatability": "ppm"}
+    )
+
+    obs_column_data = column_data.data
+
+    assert "1e-6" in obs_column_data["mf"].attrs["units"]
+    assert "1e-6" in obs_column_data["mf_repeatability"].attrs["units"]
+    assert obs_column_data["mf"].values[0] == pytest.approx(1.2382743, rel=3e-8)
 
 
 def test_get_obs_column_max_level():
@@ -334,6 +367,30 @@ def test_get_flux():
     flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe")
 
     flux = flux_data.data
+
+    assert "mol m-2 s-1" in flux["flux"].attrs["units"]
+    assert float(flux.lat.max()) == pytest.approx(79.057)
+    assert float(flux.lat.min()) == pytest.approx(10.729)
+    assert float(flux.lon.max()) == pytest.approx(39.38)
+    assert float(flux.lon.min()) == pytest.approx(-97.9)
+    assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
+
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_conver_units_get_flux():
+    """To test unit conversion applied on the data"""
+
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", target_units={"flux": "millimol / m2 / second"}
+    )
+
+    flux = flux_data.data
+
+    assert "mmol m-2 s-1" in flux["flux"].attrs["units"]
 
     assert float(flux.lat.max()) == pytest.approx(79.057)
     assert float(flux.lat.min()) == pytest.approx(10.729)
@@ -438,13 +495,14 @@ def test_get_obs_surface_elevate_inlets():
     assert "inlet" in result.data.data_vars
     assert "WMO-X2004A" in result.metadata["calibration_scale"]
 
+
 def test_get_obs_convert_calibration_scale():
-    """ To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
+    """To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
 
     result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4", calibration_scale="CSIRO-94")
 
-    assert "CSIRO-94" == result.data['mf'].attrs["calibration_scale"]
-    assert "CSIRO-94" == result.data['mf_number_of_observations'].attrs["calibration_scale"]
-    assert "CSIRO-94" == result.data['mf_variability'].attrs["calibration_scale"]
-    assert "calibration_scale" not in result.data['inlet'].attrs
+    assert "CSIRO-94" == result.data["mf"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_number_of_observations"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_variability"].attrs["calibration_scale"]
+    assert "calibration_scale" not in result.data["inlet"].attrs
     assert "CSIRO-94" in result.metadata["calibration_scale"]

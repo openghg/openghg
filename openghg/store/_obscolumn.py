@@ -185,6 +185,8 @@ class ObsColumn(BaseStore):
         params["domain"] = domain
         params["obs_region"] = obs_region
 
+        params["pressure_weights_method"] = clean_string(params["pressure_weights_method"])
+
         # Specify any additional metadata to be added
         additional_metadata: dict = {}
 
