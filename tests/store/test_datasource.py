@@ -54,6 +54,7 @@ class UUID:
 
     They have the form "uuid1", "uuid2", etc.
     """
+
     uuid_int = 0
 
     def __init__(self) -> None:
@@ -161,7 +162,7 @@ def test_versioning(datasource):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = datasource # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
+    d = datasource  # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
 
     min_ch4_data = min_data["ch4"]["data"]
 
@@ -239,23 +240,6 @@ def test_replace_version(bucket):
     assert detailed_keys["v2"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
-
-
-def test_get_dataframe_daterange(bucket):
-    n_days = 100
-    epoch = datetime.datetime(1970, 1, 1, 1, 1)
-    random_data = pd.DataFrame(
-        data=np.random.randint(0, 100, size=(100, 4)),
-        index=pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
-        columns=list("ABCD"),
-    )
-
-    d = Datasource(uuid="abc123", bucket=bucket)
-
-    start, end = d.get_dataframe_daterange(random_data)
-
-    assert start == pd.Timestamp("1970-01-01 01:01:00+0000")
-    assert end == pd.Timestamp("1970-04-10 01:01:00+0000")
 
 
 def test_save(bucket):
@@ -367,64 +351,6 @@ def test_update_daterange_replacement(data, bucket):
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
 
 
-def test_load_dataset(bucket):
-    with pytest.raises(NotImplementedError):
-        Datasource.load_dataset(bucket=bucket, key="key")
-
-
-def test_in_daterange(data, bucket):
-    metadata = data["ch4"]["metadata"]
-    data = data["ch4"]["data"]
-
-    d = Datasource(uuid="test-id-123", bucket=bucket)
-    d.add_data(metadata=metadata, data=data, data_type="surface")
-
-    assert d.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
-
-    start = pd.Timestamp("2014-1-1")
-    end = pd.Timestamp("2014-2-1")
-    daterange = create_daterange_str(start=start, end=end)
-
-    dated_keys = d.keys_in_daterange_str(daterange=daterange)
-
-    assert dated_keys == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
-
-
-def test_key_date_compare(bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
-
-    keys = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
-    ]
-
-    start = timestamp_tzaware("2014-01-01")
-    end = timestamp_tzaware("2018-01-01")
-
-    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
-
-    expected = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
-    ]
-
-    assert in_date == expected
-
-    start = timestamp_tzaware("2026-01-01")
-    end = timestamp_tzaware("2029-01-01")
-
-    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
-
-    assert not in_date
-
-
 def test_integrity_check(data, bucket):
     d = Datasource(uuid="abc123", bucket=bucket)
 
@@ -495,19 +421,6 @@ def test_surface_data_stored_and_dated_correctly(data, datasource):
     assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
 
 
-def test_to_memory_store(data, datasource):
-    d = datasource
-
-    metadata = data["ch4"]["metadata"]
-    ch4_data = data["ch4"]["data"]
-
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-
-    memory_store = d._copy_to_memorystore(version="latest")
-    with xr.open_zarr(store=memory_store) as ds:
-        assert ds.equals(ch4_data)
-
-
 def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
@@ -561,26 +474,6 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
         assert ds.time.size == n_days_expected
         combined = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time")
         assert ds.equals(combined)
-
-
-@pytest.mark.xfail(reason="Combining datasets is not currently supported")
-def test_add_data_combine_datasets(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
-
-    metadata = data["ch4"]["metadata"]
-    ch4_data = data["ch4"]["data"]
-
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-
-    ch4_data_clipped = ch4_data.isel(time=slice(10, ch4_data.time.size - 10))
-
-    d.add_data(metadata=metadata, data=ch4_data_clipped, data_type="surface", if_exists="combine")
-
-    assert d._store.version_exists(version="v1")
-
-    ds_data = d._copy_to_memorystore(version="v1")
-    combined_ds = xr.open_zarr(store=ds_data, consolidated=True)
-    assert combined_ds.equals(ch4_data)
 
 
 @pytest.mark.xfail(reason="Combining datasets with overlap is not yet supported")

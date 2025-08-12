@@ -20,11 +20,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Any
-from collections.abc import Callable
+from collections.abc import Callable, MutableMapping
 
 import tinydb
 from tinydb.operations import delete as tinydb_delete
 
+from openghg.util import merge_and_extend_dict
 from openghg.types import MetastoreError
 
 MetaData = dict[str, Any]
@@ -96,6 +97,7 @@ class MetaStore(ABC):
         where: MetaData,
         to_update: MetaData | None = None,
         to_delete: str | list[str] | None = None,
+        to_extend: dict | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
@@ -104,6 +106,10 @@ class MetaStore(ABC):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
+            to_extend: dict of values to extend metadata by, meaning that if the key is already
+                present, then the value there is (possibly converted to a list and) extended by the
+                input value. This allows updating values stored as lists by extending them, rather
+                than replacing the values.
 
         Returns:
             None
@@ -292,6 +298,7 @@ class TinyDBMetaStore(MetaStore):
         where: MetaData,
         to_update: MetaData | None = None,
         to_delete: str | list[str] | None = None,
+        to_extend: dict | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
@@ -300,6 +307,10 @@ class TinyDBMetaStore(MetaStore):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
+            to_extend: dict of values to extend metadata by, meaning that if the key is already
+                present, then the value there is (possibly converted to a list and) extended by the
+                input value. This allows updating values stored as lists by extending them, rather
+                than replacing the values.
 
         Returns:
             None
@@ -316,6 +327,15 @@ class TinyDBMetaStore(MetaStore):
                 to_delete = [to_delete]
             for key in to_delete:
                 self._db.update(tinydb_delete(key), _query)
+        if to_extend:
+
+            def extender(doc: MutableMapping) -> None:
+                # NOTE: type hints for TinyDB.Table.update are incorrect, so we have to
+                # suppress Mypy below
+                result = merge_and_extend_dict(dict(doc), to_extend)
+                doc.update(result)
+
+            self._db.update(extender, _query)  # type: ignore
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.

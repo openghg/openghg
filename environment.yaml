@@ -7,6 +7,7 @@ channels:
 dependencies:
   - python>=3.10
   - addict
+  - cf_xarray
   - dask
   - h5netcdf
   - filelock
@@ -21,6 +22,8 @@ dependencies:
   - openpyxl
   - pandas>=2.0
   - pip
+  - pint
+  - pint-xarray
   - plotly
   - pyvis
   - rapidfuzz

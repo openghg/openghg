@@ -29,7 +29,13 @@ def test_scenario_direct_objects():
     bc_input = "MOZART"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        target_units={"mf_variability": "ppm"},
     )
 
     footprint = get_footprint(
@@ -185,7 +191,7 @@ def test_scenario_infer_inputs_co2():
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 396.99)
     assert np.isclose(obs_mf[-1], 388.51)
-    assert obs_mf.attrs["units"] == "1e-6"
+    assert "1e-6" in obs_mf.attrs["units"]
 
     # Footprint data - species
     assert model_scenario.footprint.metadata["species"] == "co2"
@@ -1007,7 +1013,6 @@ def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform
 
     np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
     np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
-
 
 
 # %% Test baseline calculation for short-lived species

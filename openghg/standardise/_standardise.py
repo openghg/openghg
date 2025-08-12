@@ -13,7 +13,10 @@ logger = logging.getLogger("openghg.standardise")
 
 
 def standardise(
-    data_type: str, filepath: multiPathType, store: str | None = None, **kwargs: Any
+    data_type: str,
+    filepath: multiPathType,
+    store: str | None = None,
+    **kwargs: Any,
 ) -> list[dict]:
     """Generic standardise function, used by data-type specific versions.
 
@@ -58,6 +61,7 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
+    precision_filepath: str | Path | list[str | Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
     instrument: str | None = None,
@@ -152,10 +156,16 @@ def standardise_surface(
     Returns:
         dict: Dictionary of result data
     """
-    if not isinstance(filepath, list):
-        filepath = [filepath]
+    from openghg.standardise.surface import check_gcwerks_input
+    from openghg.util import check_filepath
+
+    if source_format.lower() == "gcwerks":
+        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+    else:
+        filepath = check_filepath(filepath, source_format)
 
     if sort_files:
+        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
         if source_format.lower() != "gcwerks":
             filepath = sort_by_filenames(filepath=filepath)
 
@@ -163,6 +173,7 @@ def standardise_surface(
         store=store,
         data_type="surface",
         filepath=filepath,
+        precision_filepath=precision_filepath,
         source_format=source_format,
         network=network,
         site=site,
@@ -213,6 +224,7 @@ def standardise_column(
     compression: bool = True,
     compressor: Any | None = None,
     filters: Any | None = None,
+    pressure_weights_method: str | None = None,
     chunks: dict | None = None,
     info_metadata: dict | None = None,
 ) -> list[dict]:
@@ -252,7 +264,8 @@ def standardise_column(
         compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
         filters: Filters to apply during data storage. Defaults to no filtering.
-        https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        pressure_weights_method: method to use to derive TCCON pressure_weights.
         chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
@@ -285,6 +298,7 @@ def standardise_column(
         compression=compression,
         compressor=compressor,
         filters=filters,
+        pressure_weights_method=pressure_weights_method,
         chunks=chunks,
         info_metadata=info_metadata,
     )

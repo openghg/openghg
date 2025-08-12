@@ -18,6 +18,7 @@ from ._domain import (
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
+    check_filepath,
     compress,
     compress_json,
     compress_str,
@@ -51,6 +52,7 @@ from ._metadata_util import (
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import AutoRegistry, Registry
+from ._scale import update_scale
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,
@@ -108,6 +110,7 @@ from ._user import (
     get_user_config_path,
     read_local_config,
     check_config,
+    handle_direct_store_path,
 )
 from ._util import (
     find_matching_site,
@@ -122,4 +125,6 @@ from ._util import (
     find_repeats,
     collate_strings,
 )
+
+from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version

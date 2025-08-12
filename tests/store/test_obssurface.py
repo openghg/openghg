@@ -82,8 +82,10 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     with open_object_store(bucket=bucket, data_type="surface", mode="r") as objstore:
         for result in min_uuids:
             species = result["species"]
-            datasource = objstore.get_datasource(uuid=result["uuid"])
+            datasource = objstore.retrieve(uuid=result["uuid"])[0]
+
             assert metadata_checker_obssurface(datasource.metadata(), species=species)
+
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
@@ -1001,7 +1003,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_1
+        **data_labels_1,
     )
 
     standardise_surface(
@@ -1011,7 +1013,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_2
+        **data_labels_2,
     )
 
     tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
@@ -1170,6 +1172,7 @@ def test_co2_games():
         store="user",
     )
 
+
 @pytest.mark.parametrize(
     "tag1, tag2, combined_tag",
     [
@@ -1178,10 +1181,8 @@ def test_co2_games():
         (None, "gemma_v1", ["gemma_v1"]),
     ],
 )
-def test_add_tag(tag1, tag2, combined_tag):
-    """
-
-    """
+def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
+    """ """
     clear_test_stores()
 
     filepath_20230101 = get_surface_datapath(
@@ -1197,29 +1198,31 @@ def test_add_tag(tag1, tag2, combined_tag):
     instrument = "crds"
     sampling_period = "60s"
     source_format = "openghg"
-    store="user"
+    store = "user"
 
-    standardise_surface(filepath=filepath_20230101,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag1,
-                        )
+    standardise_surface(
+        filepath=filepath_20230101,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag1,
+    )
 
-    standardise_surface(filepath=filepath_20230102,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag2,
-                        )
+    standardise_surface(
+        filepath=filepath_20230102,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag2,
+    )
 
     data = search_surface(site=site).retrieve()
     metadata = data.metadata

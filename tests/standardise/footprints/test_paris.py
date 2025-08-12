@@ -34,6 +34,15 @@ from openghg.types import ParseError
             "inert",
             "MHD-10magl_FLEXPART_ECMWFHRES_TEST_inert_201809.nc",
         ),
+        (
+            "thw",
+            "column",
+            "NAME",
+            None,
+            "test",
+            "inert",
+            "THW-column_NAME_UMG_EUROPE_TEST_inert_202304.nc",
+        ),
     ],
 )
 def test_paris_footprint(site, inlet, model, met_model, domain, species, filename):
