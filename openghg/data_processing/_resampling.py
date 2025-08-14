@@ -252,7 +252,7 @@ def uncorrelated_errors_resample(
 
 @register
 @add_averaging_attrs
-def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = True) -> xr.Dataset:
+def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = False) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods.
 
     Args:
@@ -271,7 +271,7 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     if fill_zero:
         # we can't filter by a dask array, so we need to call compute
         result = result.compute()
-        result = result.where(result == 0.0, result.median(dim="time"))
+        result = result.where(result != 0.0, result.median(dim="time"))
 
     result = update_attrs(result, (lambda x: x + "_variability", ["long_name"]))
 
