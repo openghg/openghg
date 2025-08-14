@@ -187,11 +187,10 @@ class ObsColumn(BaseStore):
 
         obs_data = parser_fn(**parser_input_parameters)
 
-        # TODO: Add in schema and checks for ObsColumn
-        # # Checking against expected format for ObsColumn
-        # for split_data in obs_data.values():
-        #     col_data = split_data["data"]
-        #     ObsColumn.validate_data(col_data)
+        # Checking against expected format for ObsColumn
+        for datasource in obs_data:
+            col_data = datasource.data
+            ObsColumn.validate_data(col_data, species=species)
 
         # TODO: Do we need to do include a split here of some kind, since
         # this could be "site" or "satellite" keys.
@@ -309,28 +308,52 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
-    # TODO: Check and update schema methods for ObsColumn to make sure this works for site-column
     @staticmethod
-    def schema(species: str) -> DataSchema:
+    def schema(species: str, vertical_name: str = "lev") -> DataSchema:
         """
-        Define schema for emissions Dataset.
+        Define schema for a column Dataset.
 
         Includes column data for each time point:
-            - standardised species and column name (e.g. "xch4")
-            - expected dimensions: ("time")
+            - standardised species and column name as "x{species}" (e.g. "xch4")
+            - averaging kernel variable as "x{species_name}_averaging_kernel"
+            - profile apriori variable as "{species_name}_profile_apriori"
+            - expected "time" dimension
+            - expected vertical dimension (defined by input)
 
         Expected data types for all variables and coordinates also included.
 
+        Args:
+            species: Species name which will be used to construct appropriate
+                variable names e.g. "ch4" will create "xch4"
+            vertical_name: Name of the vertical dimension for averaging kernel
+                and apriori.
+                Default = "lev"
         Returns:
-            DataSchema : Contains schema for Emissions.
+            DataSchema : Contains schema for ObsColumn.
+
+        TODO: Expand valid list of vertical names as needed (e.g. "lev", "height") and
+            check vertical_name inputs against valid list of options.
         """
         from openghg.standardise.meta import define_species_label
 
-        name = define_species_label(species)[0]
-        column_name = f"x{name}"
+        data_vars: dict[str, tuple[str, ...]] = {}
+        dtypes: dict[str, Any] = {"time": np.datetime64}
 
-        data_vars: dict[str, tuple[str, ...]] = {column_name: ("time",)}
-        dtypes = {column_name: np.floating, "time": np.datetime64}
+        species_name = define_species_label(species)[0]
+
+        column_name = f"x{species_name}"
+        averaging_kernal_name = f"x{species_name}_averaging_kernel"
+        profile_apriori_name = f"{species_name}_profile_apriori"
+
+        data_vars[column_name] = ("time",)
+        data_vars[averaging_kernal_name] = ("time", vertical_name)
+        data_vars[profile_apriori_name] = ("time", vertical_name)
+
+        dtypes = {
+            column_name: np.floating,
+            averaging_kernal_name: np.floating,
+            profile_apriori_name: np.floating,
+        }
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
