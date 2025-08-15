@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
 - `retrieve` method to `ObjectStore` and related methods that allow metadata from the metastore and datasources to be combined on retrieval. [PR #1408](https://github.com/openghg/openghg/pull/1408)
 - Ability to pass the non configured path to the store argument directly for get_* functions. Also added the ability add the store to config using openghg --register-store command. [PR #1389](https://github.com/openghg/openghg/pull/1389)
-- Add basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
-
+- Schema for ObsColumn data type. This currently checks appropriate data variables (time, column, averaging kernel and apriori values) are included of appropriate types. At the moment, this also expects a vertical dimension of "lev". [PR #1409](https://github.com/openghg/openghg/pull/1409)
+- Basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
 
 ### Updated
 
