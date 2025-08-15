@@ -104,17 +104,10 @@ def parse_cams(
         gridsize = f"{lat_grid} x {lon_grid}"
 
         # Resample to target resolution
-        ds = ds.resample(
-            time=(
-                "3h"
-                if period == "3h"
-                else (
-                    "D"
-                    if period == "daily"
-                    else "MS" if period == "monthly" else "YS" if period == "yearly" else None
-                )
-            )
-        ).mean()
+        alias_period = {"daily": "D", "monthly": "MS", "yearly": "YS"}
+        closed = "right" if species =="n2o" else "left"
+        ds = ds.resample(time=alias_period.get(period,period),
+                         closed = closed).mean()
 
         # Convert altitude coordinates from hlevel to level
         if species.lower() == "co2":
