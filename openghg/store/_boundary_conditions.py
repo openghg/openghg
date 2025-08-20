@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, TYPE_CHECKING
+from openghg.types import pathType
 
 import numpy as np
 from xarray import Dataset
@@ -280,3 +281,89 @@ class BoundaryConditions(BaseStore):
         """
         data_schema = BoundaryConditions.schema()
         data_schema.validate_data(data)
+
+    def transform_data(
+        self,
+        datapath: pathType,
+        database: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        info_metadata: dict | None = None,
+        **kwargs: dict,
+    ) -> list[dict]:
+        """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
+        The underlying parser functions will be of the form:
+            - openghg.transform.boundary_conditions.parse_{database.lower()}
+                - e.g. openghg.transform.boundary_conditions.parse_cams()"""
+
+        import inspect
+        from openghg.store.spec import define_transform_parsers
+        from openghg.util import load_transform_parser, check_if_need_new_version
+
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        datapath = Path(datapath)
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+
+        try:
+            data_type = transform_parsers[database.upper()].value
+        except KeyError:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
+
+        # Find all parameters that can be accepted by parse function
+        all_param = list(inspect.signature(parser_fn).parameters.keys())
+
+        # Define parameters to pass to the parser function from kwargs
+        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
+        param["datapath"] = datapath  # Add datapath explicitly (for now)
+
+        bc_data = parser_fn(**param)
+
+        # Checking against expected format for Flux
+        for mdd in bc_data:
+            BoundaryConditions.validate_data(mdd.data)
+
+        required_keys = ("species", "source", "domain")
+
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for parsed_data in bc_data:
+                    parsed_data.metadata.update(info_metadata)
+
+        data_type = "flux"
+        datasource_uuids = self.assign_data(
+            data=bc_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
+        )
+
+        # "date" used to be part of the "keys" in the old datasource_uuids format
+        if "date" in param:
+            for du in datasource_uuids:
+                du["date"] = param["date"]
+
+        return datasource_uuids
