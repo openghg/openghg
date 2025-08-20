@@ -50,7 +50,7 @@ from collections.abc import Sequence
 import pandas as pd
 import xarray as xr
 from pandas import Timestamp
-from xarray import DataArray, Dataset
+from xarray import Dataset
 
 from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
@@ -283,7 +283,7 @@ class ModelScenario:
         # Initialise attributes used for caching
         self.scenario: Dataset | None = None
         self.modelled_obs: Dataset | None = None
-        self.modelled_baseline: DataArray | None = None
+        self.modelled_baseline: Dataset | None = None
         self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
@@ -1270,7 +1270,8 @@ class ModelScenario:
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
         Returns:
-            xarray.DataArray: Modelled baselined values along the time axis
+            xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
+                for the NESW boundary regions.
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
@@ -1284,8 +1285,7 @@ class ModelScenario:
         )
 
         if not param_calculate:
-            modelled_baseline = cast(Dataset, self.modelled_baseline)
-            return modelled_baseline
+            return cast(Dataset, self.modelled_baseline)
 
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
@@ -1311,8 +1311,7 @@ class ModelScenario:
         # Cache output from calculations
         if cache:
             logger.info("Caching calculated data")
-            self.modelled_baseline = modelled_baseline
-            # self.scenario[name] = modelled_obs
+            self.modelled_baseline = result
         else:
             self.modelled_baseline = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
@@ -1403,7 +1402,7 @@ class ModelScenario:
         to_convert = []
         for dv in combined_dataset.data_vars:
             if (
-                any(x in str(dv) for x in ("mf", "bc_mod", "fp_x_flux", "bc_sensitivity"))
+                any(x in str(dv) for x in ("mf", "bc_", "fp_x_flux"))
                 and combined_dataset[dv].attrs.get("units") is not None
             ):
                 to_convert.append(dv)
@@ -1479,7 +1478,8 @@ class ModelScenario:
         y_data = modelled_obs["mf_mod"]
 
         species = self.species
-        if sources is None:
+
+        if sources is None and hasattr(self, "flux_sources"):
             sources = self.flux_sources
         elif isinstance(sources, str):
             sources = [sources]
@@ -1497,7 +1497,7 @@ class ModelScenario:
             if self.bc is not None:
                 y_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
-                )
+                ).bc_mod
                 y_data = (
                     y_data.pint.quantify() + y_baseline.pint.quantify()
                 )  # quantify to do unit aware calculation
