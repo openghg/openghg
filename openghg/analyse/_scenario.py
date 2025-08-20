@@ -44,8 +44,8 @@ on which data types are missing.
 """
 
 import logging
-from typing import Any, Union, cast
-from collections.abc import Sequence
+from typing import Any, Iterable, Union, cast
+from collections.abc import Hashable, Sequence
 
 import pandas as pd
 import xarray as xr
@@ -679,6 +679,40 @@ class ModelScenario:
             return None
         return str(result)
 
+    def convert_units(
+        self,
+        ds: Dataset,
+        output_units: float | str | None = None,
+        data_vars: Iterable[Hashable] | None = None,
+    ) -> Dataset:
+        """Align units in dataset with obs units.
+
+        Units will only be updated for data variables that: 1) already have units, 2) have a "time" dimension.
+
+        Args:
+            ds: dataset to align units on
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
+            data_vars: data variables to convert; if None, all data variables satisfying the
+              conditions 1) and 2) will be converted.
+
+        Returns:
+            input dataset with aligned units
+
+        """
+        if output_units is None:
+            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+
+        to_convert = []
+        data_vars = data_vars or ds.data_vars
+        for dv in data_vars:
+            if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
+                to_convert.append(dv)
+
+        target_units = {dv: output_units for dv in to_convert}
+
+        return ds.pint.quantify().pint.to(target_units).pint.dequantify()
+
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -1114,6 +1148,8 @@ class ModelScenario:
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
 
+        modelled_obs = self.convert_units(modelled_obs)
+
         # Cache output from calculations
         if cache:
             logger.info("Caching calculated data")
@@ -1308,6 +1344,8 @@ class ModelScenario:
 
         result["bc_mod"] = modelled_baseline
 
+        result = self.convert_units(result)
+
         # Cache output from calculations
         if cache:
             logger.info("Caching calculated data")
@@ -1396,20 +1434,12 @@ class ModelScenario:
                 )
 
         # align units
-        if output_units is None:
-            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
-
-        to_convert = []
-        for dv in combined_dataset.data_vars:
-            if (
-                any(x in str(dv) for x in ("mf", "bc_", "fp_x_flux"))
-                and combined_dataset[dv].attrs.get("units") is not None
-            ):
-                to_convert.append(dv)
-
-        target_units = {dv: output_units for dv in to_convert}
-
-        combined_dataset = combined_dataset.pint.quantify().pint.to(target_units).pint.dequantify()
+        dv_to_convert = [
+            dv for dv in combined_dataset.data_vars if any(x in str(dv) for x in ("mf", "bc_", "fp_x_flux"))
+        ]
+        combined_dataset = self.convert_units(
+            combined_dataset, output_units=output_units, data_vars=dv_to_convert
+        )
 
         if cache:
             self.scenario = combined_dataset
