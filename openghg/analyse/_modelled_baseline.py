@@ -24,10 +24,14 @@ def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None =
         ValueError: if wrong footprints used for short-lifetime species.
 
     """
-    bc = bc.reindex_like(fp, "ffill")
+    # explicitly copy units for coordinates if they're missing; implicitly we're assuming units are aligned
+    for dim in bc.dims:
+        if dim in fp.dims and "units" not in bc[dim].attrs:
+            bc[dim].attrs["units"] = fp[dim].attrs.get("units")
 
     fp = fp.pint.quantify()
     bc = bc.pint.quantify()
+    bc = bc.pint.reindex_like(fp, "ffill")
 
     # align chunks for time after filling
     fp_time_chunks = fp.particle_locations_n.chunksizes.get("time")
