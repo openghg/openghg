@@ -44,13 +44,13 @@ on which data types are missing.
 """
 
 import logging
-from typing import Any, Union, cast
-from collections.abc import Sequence
+from typing import Any, Iterable, Union, cast
+from collections.abc import Hashable, Sequence
 
 import pandas as pd
 import xarray as xr
 from pandas import Timestamp
-from xarray import DataArray, Dataset
+from xarray import Dataset
 
 from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
@@ -283,7 +283,7 @@ class ModelScenario:
         # Initialise attributes used for caching
         self.scenario: Dataset | None = None
         self.modelled_obs: Dataset | None = None
-        self.modelled_baseline: DataArray | None = None
+        self.modelled_baseline: Dataset | None = None
         self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
@@ -350,7 +350,6 @@ class ModelScenario:
         store: str | None = None,
     ) -> None:
         """Add observation data based on keywords or direct ObsData object."""
-
         # Search for obs data based on keywords
         if site is not None and obs is None:
             site = clean_string(site)
@@ -396,7 +395,6 @@ class ModelScenario:
         store: str | None = None,
     ) -> None:
         """Add column data based on keywords or direct ObsColumnData object."""
-
         # Search for obs data based on keywords
         if site is not None and obs_column is None and satellite is None:
             site = clean_string(site)
@@ -662,6 +660,60 @@ class ModelScenario:
 
         self.bc = bc
 
+    @property
+    def units(self) -> str | None:
+        """Units used by this scenario's obs. data."""
+        if self.obs is None:
+            return None
+
+        mf = self.obs.data.mf
+
+        # try getting pint units
+        if mf.pint.units is not None:
+            return str(mf.pint.units)
+
+        # otherwise get units from attributes
+        result = mf.attrs.get("units")
+
+        if result is None:
+            return None
+        return str(result)
+
+    def convert_units(
+        self,
+        ds: Dataset,
+        output_units: float | str | None = None,
+        data_vars: Iterable[Hashable] | None = None,
+    ) -> Dataset:
+        """Align units in dataset with obs units.
+
+        Units will only be updated for data variables that: 1) already have units, 2) have a "time" dimension.
+
+        Args:
+            ds: dataset to align units on
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
+            data_vars: data variables to convert; if None, all data variables satisfying the
+              conditions 1) and 2) will be converted.
+
+        Returns:
+            input dataset with aligned units
+
+        """
+        if output_units is None:
+            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+
+        to_convert = []
+        data_vars = data_vars or ds.data_vars
+        for dv in data_vars:
+            if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
+                to_convert.append(dv)
+
+        target_units = {dv: output_units for dv in to_convert}
+
+        result = ds.pint.quantify().pint.to(target_units).pint.dequantify()
+        return cast(xr.Dataset, result)
+
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -834,33 +886,13 @@ class ModelScenario:
 
         # Resample, align and merge the observation and footprint Datasets
         resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
+
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
         )
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
         combined_dataset = combined_dataset.transpose(..., "time")
-
-        # Save the observation data units
-        try:
-            mf = obs.data["mf"]
-            units: float | None = float(mf.attrs["units"])
-        except (ValueError, KeyError):
-            units = None
-        except AttributeError:
-            raise AttributeError("Unable to read mf attribute from observation data.")
-
-        if units is not None:
-            combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset["fp"].data / units))})
-            if self.species == "co2":
-                combined_dataset.update(
-                    {
-                        "fp_HiTRes": (
-                            combined_dataset.fp_HiTRes.dims,
-                            (combined_dataset.fp_HiTRes.data / units),
-                        )
-                    }
-                )
 
         attributes = {}
         attributes_obs = obs.data.attrs
@@ -878,8 +910,9 @@ class ModelScenario:
         return combined_dataset
 
     def _clean_sources_input(self, sources: str | list | None = None) -> list:
-        """Check sources input and make sure this is a list. If None, this will extract
-        all sources from self.fluxes.
+        """Check sources input and make sure this is a list.
+
+        If None, this will extract all sources from self.fluxes.
         """
         self._check_data_is_present(need=["fluxes"])
         flux_dict = cast(dict[str, FluxData], self.fluxes)
@@ -1037,6 +1070,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_fp_x_flux: bool = False,
         split_by_sectors: bool = False,
+        output_units: float | str | None = None,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1058,6 +1092,8 @@ class ModelScenario:
             split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
               under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
               different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1116,6 +1152,8 @@ class ModelScenario:
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
 
+        modelled_obs = self.convert_units(modelled_obs, output_units=output_units)
+
         # Cache output from calculations
         if cache:
             logger.info("Caching calculated data")
@@ -1159,14 +1197,14 @@ class ModelScenario:
             raise ValueError("Combined data must have been defined before calling this function.")
 
         scenario = self.scenario
+
         flux = self.combine_flux_sources(sources)
         flux_modelled = fp_x_flux_integrated(scenario, flux)
 
         data = {}
 
         if output_TS:
-            data[ts_name] = flux_modelled.sum(["lat", "lon"])
-
+            data[ts_name] = flux_modelled.pint.quantify().sum(["lat", "lon"]).pint.dequantify()
         if output_fpXflux:
             data[fp_x_flux_name] = flux_modelled
 
@@ -1221,7 +1259,6 @@ class ModelScenario:
         not be what we want and may want to add extra code to remove any NaNs, if
         they are introduced or to find a way to remove this requirement.
         """
-
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
 
@@ -1251,10 +1288,11 @@ class ModelScenario:
         self,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
-        output_units: float = 1,
         cache: bool = True,
         recalculate: bool = False,
-    ) -> DataArray:
+        output_sensitivity: bool = False,
+        output_units: float | str | None = None,
+    ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
 
@@ -1271,9 +1309,12 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
 
         Returns:
-            xarray.DataArray: Modelled baselined values along the time axis
+            xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
+                for the NESW boundary regions.
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
@@ -1287,34 +1328,40 @@ class ModelScenario:
         )
 
         if not param_calculate:
-            modelled_baseline = cast(DataArray, self.modelled_baseline)
-            return modelled_baseline
+            return cast(Dataset, self.modelled_baseline)
 
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
 
-        sensitivities = baseline_sensitivities(
-            bc=bc_data, fp=scenario, species=self.species, output_units=output_units
-        )
+        try:
+            species = self.species
+        except AttributeError:
+            species = None
+
+        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=species)
+
+        result = sensitivities if output_sensitivity else xr.Dataset()
 
         modelled_baseline = (
             sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
 
         modelled_baseline.attrs["resample_to"] = str(resample_to)
-        modelled_baseline.attrs["units"] = output_units
-        modelled_baseline = modelled_baseline.rename("bc_mod")
+        modelled_baseline.attrs["units"] = sensitivities.bc_n.attrs["units"]
+
+        result["bc_mod"] = modelled_baseline
+
+        result = self.convert_units(result, output_units=output_units)
 
         # Cache output from calculations
         if cache:
             logger.info("Caching calculated data")
-            self.modelled_baseline = modelled_baseline
-            # self.scenario[name] = modelled_obs
+            self.modelled_baseline = result
         else:
             self.modelled_baseline = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
 
-        return modelled_baseline
+        return result
 
     # def _calc_modelled_baseline_long_lived():
     #     pass
@@ -1331,8 +1378,10 @@ class ModelScenario:
         sources: str | list | None = None,
         split_by_sectors: bool = False,
         calc_bc: bool = True,
+        calc_bc_sensitivity: bool = False,
         cache: bool = True,
         recalculate: bool = False,
+        output_units: str | float | None = None,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1353,6 +1402,7 @@ class ModelScenario:
             calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
@@ -1381,13 +1431,22 @@ class ModelScenario:
                     platform=platform,
                     cache=cache,
                     recalculate=recalculate,
+                    output_sensitivity=calc_bc_sensitivity,
                 )
-                name = modelled_baseline.name
-                combined_dataset = combined_dataset.assign({name: modelled_baseline})
+
+                combined_dataset = combined_dataset.merge(modelled_baseline)
             else:
                 logger.warning(
                     "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
                 )
+
+        # align units
+        dv_to_convert = [
+            dv for dv in combined_dataset.data_vars if any(x in str(dv) for x in ("mf", "bc_", "fp_x_flux"))
+        ]
+        combined_dataset = self.convert_units(
+            combined_dataset, output_units=output_units, data_vars=dv_to_convert
+        )
 
         if cache:
             self.scenario = combined_dataset
@@ -1456,7 +1515,8 @@ class ModelScenario:
         y_data = modelled_obs["mf_mod"]
 
         species = self.species
-        if sources is None:
+
+        if sources is None and hasattr(self, "flux_sources"):
             sources = self.flux_sources
         elif isinstance(sources, str):
             sources = [sources]
@@ -1472,17 +1532,19 @@ class ModelScenario:
 
         if baseline == "boundary_conditions":
             if self.bc is not None:
-                modelled_baseline = self.calc_modelled_baseline(
+                y_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
-                )
-                y_baseline = modelled_baseline.data
-                y_data = y_data + y_baseline
+                ).bc_mod
+                y_data = (
+                    y_data.pint.quantify() + y_baseline.pint.quantify()
+                )  # quantify to do unit aware calculation
+                y_data = y_data.pint.to(self.units)  # convert to same units as obs
             else:
                 logger.warning("Unable to calculate baseline from boundary conditions")
         elif baseline == "percentile":
             mf = obs.data["mf"]
-            y_baseline = mf.quantile(1.0, dim="time").values
-            y_data = y_data + y_baseline
+            y_baseline = mf.quantile(1.0, dim="time")
+            y_data = y_data.pint.quantify() + y_baseline.pint.quantify()
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
