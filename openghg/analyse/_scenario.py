@@ -235,7 +235,7 @@ class ModelScenario:
                 satellite = obs_metadata["satellite"]
             else:
                 site = obs_metadata["site"]
-                inlet = obs_metadata["inlet"]
+                inlet = obs_metadata.get("inlet", "column")
             species = obs_metadata["species"]
             logger.info("Updating any inputs based on observation data")
             logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
@@ -378,7 +378,7 @@ class ModelScenario:
         if self.obs is not None:
             self.site = self.obs.metadata["site"]
             self.species = self.obs.metadata["species"]
-            self.inlet = self.obs.metadata["inlet"]
+            self.inlet = self.obs.metadata.get("inlet", "column")
 
     def add_obs_column(
         self,

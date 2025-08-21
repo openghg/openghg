@@ -29,7 +29,13 @@ def test_scenario_direct_objects():
     bc_input = "MOZART"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network, target_units={"mf_variability": "ppm"}
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        target_units={"mf_variability": "ppm"},
     )
 
     footprint = get_footprint(
@@ -920,7 +926,7 @@ def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dum
         model_scenario.combine_obs_footprint()
 
 
-def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
+def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None, obs_units: float = 1.0):
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
@@ -952,7 +958,7 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
         else:
             expected_modelled_baseline += baseline_component
 
-    return expected_modelled_baseline
+    return expected_modelled_baseline / obs_units
 
 
 def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
@@ -972,7 +978,7 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     footprint = footprint_dummy.data.sel(time=time_slice)
     bc = bc_ch4_dummy.data.sel(time=time_slice)
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
@@ -1048,7 +1054,6 @@ def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform
 
     np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
     np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
-
 
 
 # %% Test baseline calculation for short-lived species
@@ -1184,7 +1189,7 @@ def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dum
     lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
     lifetime_rn_hrs = lifetime_rn_days * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
@@ -1259,7 +1264,7 @@ def test_modelled_baseline_short_life(
     lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
     lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 

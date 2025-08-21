@@ -2,11 +2,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 from pathlib import Path
+import numpy as np
 from numpy import ndarray
 
-# from openghg.store import DataSchema
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray
+from xarray import DataArray, Dataset
 
 ArrayType = Optional[ndarray | DataArray]
 
@@ -42,6 +43,7 @@ class ObsColumn(BaseStore):
         force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
+        pressure_weights_method: str | None = None,
         chunks: dict | None = None,
         info_metadata: dict | None = None,
     ) -> list[dict]:
@@ -84,6 +86,7 @@ class ObsColumn(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            pressure_weights_method: method to use to derive TCCON pressure_weights.
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
@@ -113,7 +116,7 @@ class ObsColumn(BaseStore):
         platform = format_platform(platform)
         platform = clean_string(platform)
 
-        if site is None and satellite is None:
+        if site is None and satellite is None and source_format != "tccon":
             raise ValueError("Value for 'site' or 'satellite' must be specified")
         elif site is not None and satellite is not None:
             raise ValueError("Only one of 'site' or 'satellite' should be specified")
@@ -124,6 +127,7 @@ class ObsColumn(BaseStore):
         obs_region = clean_string(obs_region)
         network = clean_string(network)
         instrument = clean_string(instrument)
+        pressure_weights_method = clean_string(pressure_weights_method)
 
         if domain is not None and obs_region is not None:
             err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
@@ -183,11 +187,10 @@ class ObsColumn(BaseStore):
 
         obs_data = parser_fn(**parser_input_parameters)
 
-        # TODO: Add in schema and checks for ObsColumn
-        # # Checking against expected format for ObsColumn
-        # for split_data in obs_data.values():
-        #     col_data = split_data["data"]
-        #     ObsColumn.validate_data(col_data)
+        # Checking against expected format for ObsColumn
+        for datasource in obs_data:
+            col_data = datasource.data
+            ObsColumn.validate_data(col_data, species=species)
 
         # TODO: Do we need to do include a split here of some kind, since
         # this could be "site" or "satellite" keys.
@@ -305,47 +308,71 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
-    # TODO: Define and add schema methods for ObsColumn
-    # @staticmethod
-    # def schema(species: str, platform: str = "satellite") -> DataSchema:
-    #     """
-    #     Define schema for emissions Dataset.
+    @staticmethod
+    def schema(species: str, vertical_name: str = "lev") -> DataSchema:
+        """
+        Define schema for a column Dataset.
 
-    #     Includes column data for each time point:
-    #         - standardised species and column name (e.g. "xch4")
-    #         - expected dimensions: ("time")
+        Includes column data for each time point:
+            - standardised species and column name as "x{species}" (e.g. "xch4")
+            - averaging kernel variable as "x{species_name}_averaging_kernel"
+            - profile apriori variable as "{species_name}_profile_apriori"
+            - expected "time" dimension
+            - expected vertical dimension (defined by input)
 
-    #     Expected data types for all variables and coordinates also included.
+        Expected data types for all variables and coordinates also included.
 
-    #     Returns:
-    #         DataSchema : Contains schema for Emissions.
-    #     """
-    #     data_vars: Dict[str, Tuple[str, ...]] \
-    #         = {"flux": ("time", "lat", "lon")}
-    #     dtypes = {"lat": np.floating,
-    #               "lon": np.floating,
-    #               "time": np.datetime64,
-    #               "flux": np.floating}
+        Args:
+            species: Species name which will be used to construct appropriate
+                variable names e.g. "ch4" will create "xch4"
+            vertical_name: Name of the vertical dimension for averaging kernel
+                and apriori.
+                Default = "lev"
+        Returns:
+            DataSchema : Contains schema for ObsColumn.
 
-    #     data_format = DataSchema(data_vars=data_vars,
-    #                              dtypes=dtypes)
+        TODO: Expand valid list of vertical names as needed (e.g. "lev", "height") and
+            check vertical_name inputs against valid list of options.
+        """
+        from openghg.standardise.meta import define_species_label
 
-    #     return data_format
+        data_vars: dict[str, tuple[str, ...]] = {}
+        dtypes: dict[str, Any] = {"time": np.datetime64}
 
-    # @staticmethod
-    # def validate_data(data: Dataset) -> None:
-    #     """
-    #     Validate input data against Emissions schema - definition from
-    #     Emissions.schema() method.
+        species_name = define_species_label(species)[0]
 
-    #     Args:
-    #         data : xarray Dataset in expected format
+        column_name = f"x{species_name}"
+        averaging_kernal_name = f"x{species_name}_averaging_kernel"
+        profile_apriori_name = f"{species_name}_profile_apriori"
 
-    #     Returns:
-    #         None
+        data_vars[column_name] = ("time",)
+        data_vars[averaging_kernal_name] = ("time", vertical_name)
+        data_vars[profile_apriori_name] = ("time", vertical_name)
 
-    #         Raises a ValueError with details if the input data does not adhere
-    #         to the Emissions schema.
-    #     """
-    #     data_schema = Emissions.schema()
-    #     data_schema.validate_data(data)
+        dtypes = {
+            column_name: np.floating,
+            averaging_kernal_name: np.floating,
+            profile_apriori_name: np.floating,
+        }
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset, species: str) -> None:
+        """
+        Validate input data against Emissions schema - definition from
+        Emissions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Emissions schema.
+        """
+        data_schema = ObsColumn.schema(species)
+        data_schema.validate_data(data)
