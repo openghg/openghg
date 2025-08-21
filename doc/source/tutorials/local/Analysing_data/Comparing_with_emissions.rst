@@ -215,7 +215,7 @@ This could then be plotted directly using the xarray plotting methods:
 
 .. jupyter-execute::
 
-    modelled_observations["mf_mod"].plot()  # Can plot using xarray plotting methods
+    modelled_observations.mf_mod.plot()  # Can plot using xarray plotting methods
 
 The modelled baseline, based on the linked boundary conditions, can also
 be calculated in a similar way:
@@ -223,7 +223,7 @@ be calculated in a similar way:
 .. jupyter-execute::
 
     modelled_baseline = scenario.calc_modelled_baseline()
-    modelled_baseline.plot()  # Can plot using xarray plotting methods
+    modelled_baseline.bc_mod.plot()  # Can plot using xarray plotting methods
 
 To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
@@ -316,23 +316,24 @@ To get a matrix suitable for typical inversion frameworks, we can flatten the la
 (Normally you would apply basis functions to reduce the size of the matrix.)
 
 
-The corresponding calculation for baseline sensitivities from boundary conditions is currently not available in the same way, but it can be accessed as follows:
+The corresponding calculation for baseline sensitivities from boundary conditions is:
 
 .. jupyter-execute::
 
    from openghg.analyse._modelled_baseline import baseline_sensitivities
 
-   bc_sensitivity = baseline_sensitivities(bc=scenario.bc.data, fp=scenario.footprint.data, species=scenario.species)
+   bc_sensitivity = scenario.calc_modelled_baseline(output_sensitivity=True)
    bc_sensitivity
-
-In the future, these baseline sensitivities will be available directly from ``ModelScenario``.
 
 All of this data (except the baseline sensitivities) can be produced at once using ``footprints_data_merge``:
 
 .. jupyter-execute::
 
-   combined_data = scenario.footprints_data_merge(calc_fp_x_flux=True, recalculate=True)
-   combined_data[["mf", "mf_mod", "bc_mod", "fp_x_flux"]]
+   combined_data = scenario.footprints_data_merge(calc_fp_x_flux=True,
+                                                  calc_bc_sensitivity=True,
+                                                  recalculate=True)
+   data_vars = ["mf", "mf_mod", "bc_mod", "fp_x_flux"] + [f"bc_{d}" for d in "nesw"]
+   combined_data[data_vars]
 
 Notice that the units of all these data variables are compatible. We will say more about this in the next section.
 
@@ -343,11 +344,16 @@ You can specify the units you prefer in ``footprints_data_merge`` (look at the a
 
 .. jupyter-execute::
 
-   combined_data = scenario.footprints_data_merge(calc_fp_x_flux=True, recalculate=True, output_units="mol/mol")
-   combined_data[["mf", "mf_mod", "bc_mod", "fp_x_flux"]]
+   combined_data = scenario.footprints_data_merge(calc_fp_x_flux=True,
+                                                  calc_bc_sensitivity=True,
+                                                  recalculate=True,
+                                                  output_units="mol/mol")
+   data_vars = ["mf", "mf_mod", "bc_mod", "fp_x_flux"] + [f"bc_{d}" for d in "nesw"]
+   combined_data[data_vars]
 
 By default, the native units of the obs data are used, but here have used ``"mol/mol"``, which is equivalent to using ``"1"``.
 Other options could be floats like ``1e-9``, or ``"1e-9 mol/mol"``, or abbreviations like ``"ppm"``, ``"ppb"``, and ``"ppt"``.
+To see the units of the obs data, use ``scenario.units``. If this returns ``None``, then ``mol/mol`` will be used for conversions.
 
 These outputs have aligned units, but they are not `units aware`. To do computations while preserving the units, you can `quantify` the data:
 
@@ -364,6 +370,8 @@ These outputs have aligned units, but they are not `units aware`. To do computat
 
 Note that alignment and reindexing quantified data can be tempermental, so it is safest to align data while it is unquantified, then quantify it to do calculations, then dequantify when you are done.
 
+Also note that the units in ``calc_modelled_obs`` and ``calc_modelled_baseline`` have the same units conversion options as ``footprints_data_merge``.
+Further, you can use ``scenario.convert_units(ds)`` to convert the units of a dataset ``ds`` to the units stored in ``scenario.units``.
 
 6. Multi-sector scenarios
 -------------------------

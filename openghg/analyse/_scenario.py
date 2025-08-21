@@ -1069,6 +1069,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_fp_x_flux: bool = False,
         split_by_sectors: bool = False,
+        output_units: float | str | None = None,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1090,6 +1091,8 @@ class ModelScenario:
             split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
               under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
               different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1148,7 +1151,7 @@ class ModelScenario:
 
         modelled_obs.attrs["resample_to"] = str(resample_to)
 
-        modelled_obs = self.convert_units(modelled_obs)
+        modelled_obs = self.convert_units(modelled_obs, output_units=output_units)
 
         # Cache output from calculations
         if cache:
@@ -1287,6 +1290,7 @@ class ModelScenario:
         cache: bool = True,
         recalculate: bool = False,
         output_sensitivity: bool = False,
+        output_units: float | str | None = None,
     ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
@@ -1304,6 +1308,8 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_units: target units; if None, then obs. units will be used,
+              or "mol/mol" if these are not present.
 
         Returns:
             xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
@@ -1344,7 +1350,7 @@ class ModelScenario:
 
         result["bc_mod"] = modelled_baseline
 
-        result = self.convert_units(result)
+        result = self.convert_units(result, output_units=output_units)
 
         # Cache output from calculations
         if cache:
