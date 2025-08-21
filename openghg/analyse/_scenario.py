@@ -711,7 +711,8 @@ class ModelScenario:
 
         target_units = {dv: output_units for dv in to_convert}
 
-        return ds.pint.quantify().pint.to(target_units).pint.dequantify()
+        result = ds.pint.quantify().pint.to(target_units).pint.dequantify()
+        return cast(xr.Dataset, result)
 
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """Check whether correct data types have been included. This should
