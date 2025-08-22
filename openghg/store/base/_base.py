@@ -118,7 +118,7 @@ class BaseStore:
 
     def _standardise_from_file(
         self,
-        filepath: str | Path | list[str | Path],
+        filepath: Path | list[Path],
         fn_input_parameters: dict,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
@@ -218,9 +218,9 @@ class BaseStore:
                 self.validate_data(datasource.data, **validate_kwargs)
             except ValidationError as err:
                 if isinstance(filepath, list):
-                    msg = f"Unable to validate and store data from grouped files: {', '.join([Path(fp).name for fp in filepath])}. Error: {err}"
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
                 else:
-                    msg = f"Unable to validate and store data from file: {Path(filepath).name}. Error: {err}"
+                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
                 logger.error(msg)
                 raise ValidationError(msg)
 
@@ -258,11 +258,11 @@ class BaseStore:
             if isinstance(filepath, list) and len(filepath) == 1:
                 filepath = filepath[0]
 
-            if isinstance(filepath, str | Path):
-                x.update({"file": Path(filepath).name})
-                logger.info(f"Completed processing: {Path(filepath).name}.")
+            if isinstance(filepath, Path):
+                x.update({"file": filepath.name})
+                logger.info(f"Completed processing: {filepath.name}.")
             elif isinstance(filepath, list):
-                filepath_str = ", ".join([Path(fp).name for fp in filepath])
+                filepath_str = ", ".join([fp.name for fp in filepath])
                 x.update({"files": filepath_str})
                 logger.info(f"Completed processing files: {filepath_str}.")
 
@@ -270,7 +270,7 @@ class BaseStore:
 
     def read_file(
         self,
-        filepath: str | Path | list[str | Path],
+        filepath: str | Path | list[str] | list[Path],
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -360,9 +360,13 @@ class BaseStore:
         fn_input_parameters, additional_metadata = self.format_inputs(**kwargs)
 
         # TODO: Do we pass filepath to format_inputs or treat separately?
-        filepaths = fn_input_parameters.get("filepaths")
-        if filepaths is None:
-            filepaths = fn_input_parameters["filepath"]
+        filepath = fn_input_parameters.get("filepath")
+        if isinstance(filepath, str):
+            filepaths = [Path(filepath)]
+        elif isinstance(filepath, Path):
+            filepaths = [filepath]
+        elif isinstance(filepath, list):
+            filepaths = [Path(fp) for fp in filepath]
 
         # Check hashes of previous files (included after any filepath(s) formatting)
         _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
@@ -379,7 +383,7 @@ class BaseStore:
             chunks = {}
 
         # Check if filepaths are all netcdf files
-        file_extensions = [Path(fp).suffix for fp in filepaths]
+        file_extensions = [fp.suffix for fp in filepaths]
         nc_extensions = [".nc", ".nc4"]
         if all([ext in nc_extensions for ext in file_extensions]):
             if concat_nc_files is None:
@@ -575,7 +579,7 @@ class BaseStore:
         self._file_hashes.update(name_only)
 
     def check_hashes(
-        self, filepaths: str | Path | list[str | Path], force: bool
+        self, filepaths: str | Path | list[str] | list[Path], force: bool
     ) -> tuple[dict[str, Path], dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
         uploaded files. Two dictionaries are returned, one containing the hashes
@@ -590,10 +594,12 @@ class BaseStore:
         Returns:
             tuple: seen files, unseen files
         """
-        if not isinstance(filepaths, list):
+        if isinstance(filepaths, str):
+            filepaths = [Path(filepaths)]
+        elif isinstance(filepaths, Path):
             filepaths = [filepaths]
-
-        filepaths = [Path(filepath) for filepath in filepaths]
+        elif isinstance(filepaths, list):
+            filepaths = [Path(filepath) for filepath in filepaths]
 
         unseen: dict[str, Path] = {}
         seen: dict[str, Path] = {}

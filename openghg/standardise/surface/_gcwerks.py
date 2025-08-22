@@ -613,8 +613,8 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: dict
 
 
 def check_gcwerks_input(
-    filepath: multiPathType, precision_filepath: str | Path | list[str | Path] | None
-) -> tuple[list[str | Path], list[str | Path]]:
+    filepath: multiPathType, precision_filepath: str | Path | list[str] | list[Path] | None
+) -> tuple[list[Path], list[Path]]:
     """
     Check that both filepath and precision_filepath are specified when using the gcwerks
     source format. At the moment this can be specified as:
@@ -632,15 +632,17 @@ def check_gcwerks_input(
     if not isinstance(filepath, list):
         filepath = [filepath]
 
-    if isinstance(precision_filepath, str | Path):
+    if isinstance(precision_filepath, str):
+        precision_filepath = [Path(precision_filepath)]
+    elif isinstance(precision_filepath, Path):
         precision_filepath = [precision_filepath]
 
-    filepaths: list[str | Path] = []
-    precision_filepaths: list[str | Path] = []
+    filepaths: list[Path] = []
+    precision_filepaths: list[Path] = []
 
     for fp in filepath:
         if isinstance(fp, tuple):
-            if not precision_filepath:
+            if precision_filepath is None:
                 logger.warning(
                     "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` input instead."
                 )

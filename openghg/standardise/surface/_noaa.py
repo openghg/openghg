@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_noaa(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     site: str,
     measurement_type: str | None,
     inlet: str | None = None,
@@ -292,7 +292,7 @@ def _split_inlets(obspack_ds: xr.Dataset, attributes: dict, metadata: dict, inle
 
 
 def _read_obspack(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     site: str,
     sampling_period: str,
     measurement_type: str,

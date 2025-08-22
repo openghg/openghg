@@ -14,7 +14,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_co2_games(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     site: str,
     measurement_type: str,
     inlet: str | None = None,

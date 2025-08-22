@@ -14,7 +14,7 @@ logger = logging.getLogger("openghg.standardise")
 
 def standardise(
     data_type: str,
-    filepath: multiPathType,
+    filepath: str | Path | list[str] | list[Path],
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -62,7 +62,7 @@ def standardise_surface(
     network: str,
     site: str,
     filepath: multiPathType,
-    precision_filepath: str | Path | list[str | Path] | None = None,
+    precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
     instrument: str | None = None,
@@ -211,7 +211,7 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     platform: str = "satellite",
     obs_region: str | None = None,
@@ -317,7 +317,7 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     bc_input: str,
     domain: str,
@@ -408,7 +408,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     model: str,
     domain: str,
     site: str | None = None,
@@ -513,7 +513,9 @@ def standardise_footprint(
         )
         time_resolved = high_time_resolution
 
-    if not isinstance(filepath, list):
+    if isinstance(filepath, str):
+        filepath = [Path(filepath)]
+    elif isinstance(filepath, Path):
         filepath = [filepath]
 
     if sort_files:
@@ -558,7 +560,7 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     source: str,
     domain: str,
@@ -667,7 +669,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     model: str,
     species: str,
     source_format: str = "openghg",
@@ -791,7 +793,7 @@ def standardise_from_binary_data(
 
 
 def standardise_flux_timeseries(
-    filepath: str | Path,
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     source: str,
     region: str = "UK",
