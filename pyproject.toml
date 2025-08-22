@@ -26,6 +26,7 @@ maintainers = [
 
 dependencies = [
 "addict",
+"cf_xarray",
 "dask",
 "filelock",
 "h5netcdf",
@@ -42,6 +43,8 @@ dependencies = [
 "openghg_defs",
 "openpyxl",
 "pandas >= 2.0",
+"pint",
+"pint_xarray",
 "plotly",
 "pyvis",
 "rapidfuzz",
