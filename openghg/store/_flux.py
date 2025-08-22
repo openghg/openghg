@@ -59,7 +59,7 @@ class Flux(BaseStore):
 
             return self.read_file(filepath=filepath, source_format=source_format, **metadata)
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs for Flux. Expected
         inputs will typically be defined within the openghg.standardise.standardise_flux()
@@ -69,11 +69,7 @@ class Flux(BaseStore):
             kwargs: Set of keyword arguments. Selected keywords will be
                 appropriately formatted.
         Returns:
-            (dict, dict): Formatted parameters and any additional parameters
-                for this data type.
-
-        TODO: Decide if we can phase out additional_metadata or if this could be
-            added to params.
+            dict: Formatted parameters for this data type.
         """
         from openghg.util import (
             clean_string,
@@ -101,10 +97,7 @@ class Flux(BaseStore):
         if species is not None:
             params["species"] = synonyms(species)
 
-        # Specify any additional metadata to be added
-        additional_metadata: dict = {}
-
-        return params, additional_metadata
+        return params
 
     def transform_data(
         self,

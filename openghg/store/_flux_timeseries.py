@@ -206,7 +206,7 @@ class FluxTimeseries(BaseStore):
 
     #     return datasource_uuids
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs for FluxTimeseries. Expected
         inputs will typically be defined within the openghg.standardise.standardise_flux_timeseries()
@@ -216,11 +216,7 @@ class FluxTimeseries(BaseStore):
             kwargs: Set of keyword arguments. Selected keywords will be
                 appropriately formatted.
         Returns:
-            (dict, dict): Formatted parameters and any additional parameters
-                for this data type.
-
-        TODO: Decide if we can phase out additional_metadata or if this could be
-            added to params.
+            dict: Formatted parameters for this data type.
         """
         from openghg.util import clean_string, synonyms
 
@@ -238,10 +234,7 @@ class FluxTimeseries(BaseStore):
         if species is not None:
             params["species"] = synonyms(species)
 
-        # Specify any additional metadata to be added
-        additional_metadata: dict = {}
-
-        return params, additional_metadata
+        return params
 
     @staticmethod
     def schema() -> DataSchema:  # type: ignore[override]

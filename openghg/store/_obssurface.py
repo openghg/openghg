@@ -195,7 +195,7 @@ class ObsSurface(BaseStore):
 
         # return results
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs for ObsColumn. Expected
         inputs will typically be defined within the openghg.standardse.standardise_surface()
@@ -205,8 +205,7 @@ class ObsSurface(BaseStore):
             kwargs: Set of keyword arguments. Selected keywords will be
                 appropriately formatted.
         Returns:
-            (dict, dict): Formatted parameters and any additional parameters
-                for this data type.
+            dict: Formatted parameters for this data type.
 
         TODO: Decide if we can phase out additional_metadata or if this could be
             added to params.
@@ -292,23 +291,19 @@ class ObsSurface(BaseStore):
         params["platform"] = check_and_set_null_variable(params.get("platform"))
         params["dataset_source"] = check_and_set_null_variable(params.get("dataset_source"))
 
-        # Include additional, internally-defined keywords
-        # Would like to rename `data_source` to `retrieved_from` but
-        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
-        data_source = "internal"
-
         if params.get("precision_filepath") is not None:
             if not isinstance(params["precision_filepath"], list):
                 params["precision_filepath"] = [Path(params["precision_filepath"])]
             else:
                 params["precision_filepath"] = [Path(pfp) for pfp in params["precision_filepath"]]
 
-        # Define additional metadata which is not being passed to the parse functions
-        additional_metadata: dict = {
-            "data_source": data_source,
-        }
+        # Include additional, internally-defined keywords
+        # Would like to rename `data_source` to `retrieved_from` but
+        # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
+        data_source = "internal"
+        params["data_source"] = data_source
 
-        return params, additional_metadata
+        return params
 
     def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
         """

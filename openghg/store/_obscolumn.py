@@ -103,7 +103,7 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs for ObsColumn. Expected
         inputs will typically be defined within the openghg.standardse.standardise_column()
@@ -176,10 +176,7 @@ class ObsColumn(BaseStore):
         # Ensure we have a clear missing value (not_set) where needed (required keys)
         params["domain"] = check_and_set_null_variable(params.get("domain"))
 
-        # Specify any additional metadata to be added
-        additional_metadata: dict = {}
-
-        return params, additional_metadata
+        return params
 
     @staticmethod
     def schema(species: str, vertical_name: str = "lev") -> DataSchema:  # type: ignore[override]

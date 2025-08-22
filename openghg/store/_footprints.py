@@ -183,7 +183,7 @@ class Footprints(BaseStore):
 
     #     """
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs for Footprints. Expected
         inputs will typically be defined within the openghg.standardise.standardise_footprint()
@@ -193,8 +193,7 @@ class Footprints(BaseStore):
             kwargs: Set of keyword arguments. Selected keywords will be
                 appropriately formatted.
         Returns:
-            (dict, dict): Formatted parameters and any additional parameters
-                for this data type.
+            dict: Formatted parameters for this data type.
 
         TODO: Decide if we can phase out additional_metadata or if this could be
             added to params.
@@ -273,10 +272,7 @@ class Footprints(BaseStore):
         # Ensure we have a clear missing value (not_set) where needed (required keys)
         params["met_model"] = check_and_set_null_variable(params.get("met_model"))
 
-        # Specify any additional metadata to be added
-        additional_metadata: dict = {}
-
-        return params, additional_metadata
+        return params
 
     @staticmethod
     def schema(  # type: ignore[override]

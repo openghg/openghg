@@ -129,7 +129,6 @@ class BaseStore:
         filters: Any | None = None,
         chunks: dict | None = None,
         info_metadata: dict | None = None,
-        additional_metadata: dict | None = None,
     ) -> list[dict]:
         """
         Standardise input data from a filepath or set of filepaths. This will also
@@ -162,7 +161,6 @@ class BaseStore:
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
             info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
-            additional_metadata: Additional metadata to include for the datasource.
         Returns:
             list[dict]: List of datasources and their uuids
 
@@ -231,17 +229,14 @@ class BaseStore:
 
         self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
 
-        if additional_metadata is None:
-            additional_metadata = {}
-
         # Check to ensure no required keys are being passed through info_metadata dict
         # before adding details
         self.check_info_keys(info_metadata)
-        if info_metadata is not None:
-            additional_metadata.update(info_metadata)
+        if info_metadata is None:
+            info_metadata = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        data = self.update_metadata(data, additional_input_parameters, additional_metadata)
+        data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
 
         # Create Datasources, save them to the object store and get their UUIDs
         data_type = self._data_type
@@ -355,11 +350,11 @@ class BaseStore:
         new_version = check_if_need_new_version(if_exists, save_current)
 
         # Format input parameters (specific to data_type)
-        fn_input_parameters, additional_metadata = self.format_inputs(**kwargs)
+        fn_input_parameters = self.format_inputs(**kwargs)
 
         fn_input_parameters["source_format"] = source_format
 
-        # TODO: Do we pass filepath to format_inputs or treat separately?
+        # Make sure filepaths contains Path objects
         if isinstance(filepath, str):
             filepaths = [Path(filepath)]
         elif isinstance(filepath, Path):
@@ -408,7 +403,6 @@ class BaseStore:
                     filters=filters,
                     chunks=chunks,
                     info_metadata=info_metadata,
-                    additional_metadata=additional_metadata,
                 )
             except StandardiseError:
                 logger.warning(
@@ -443,7 +437,6 @@ class BaseStore:
                     filters=filters,
                     chunks=chunks,
                     info_metadata=info_metadata,
-                    additional_metadata=additional_metadata,
                 )
             except ValidationError as err:
                 msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
@@ -502,7 +495,7 @@ class BaseStore:
 
         return kwargs
 
-    def format_inputs(self, **kwargs: Any) -> tuple[dict, dict]:
+    def format_inputs(self, **kwargs: Any) -> dict:
         """
         Apply appropriate formatting for expected inputs.
         Note: This is a placeholder as we expect this to be implemented for all subclasses.
@@ -668,7 +661,9 @@ class BaseStore:
 
     MST = TypeVar("MST", bound=MutableSequence[MetadataAndData])
 
-    def update_metadata(self, data: MST, input_parameters: dict, additional_metadata: dict) -> MST:
+    def update_metadata(
+        self, data: MST, input_parameters: dict, additional_metadata: dict | None = None
+    ) -> MST:
         """This adds additional metadata keys to the metadata within the data dictionary.
 
         Args:
@@ -688,6 +683,9 @@ class BaseStore:
 
         # Informational keys add useful detail but are not used for categorisation
         informational = self.get_informational_dict_keys()
+
+        if additional_metadata is None:
+            additional_metadata = {}
 
         for parsed_data in data:
             metadata = parsed_data.metadata
