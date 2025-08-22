@@ -355,12 +355,11 @@ class BaseStore:
         new_version = check_if_need_new_version(if_exists, save_current)
 
         # Format input parameters (specific to data_type)
-        kwargs["filepath"] = filepath
-        kwargs["source_format"] = source_format
         fn_input_parameters, additional_metadata = self.format_inputs(**kwargs)
 
+        fn_input_parameters["source_format"] = source_format
+
         # TODO: Do we pass filepath to format_inputs or treat separately?
-        filepath = fn_input_parameters.get("filepath")
         if isinstance(filepath, str):
             filepaths = [Path(filepath)]
         elif isinstance(filepath, Path):

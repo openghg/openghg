@@ -297,11 +297,6 @@ class ObsSurface(BaseStore):
         # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
         data_source = "internal"
 
-        if not isinstance(params.get("filepath"), list):
-            params["filepaths"] = [Path(params["filepath"])]
-        else:
-            params["filepaths"] = [Path(fp) for fp in params["filepath"]]
-
         if params.get("precision_filepath") is not None:
             if not isinstance(params["precision_filepath"], list):
                 params["precision_filepath"] = [Path(params["precision_filepath"])]
