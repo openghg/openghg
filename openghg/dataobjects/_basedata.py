@@ -137,7 +137,34 @@ class _BaseData:
     def __repr__(self) -> str:
         cls = self.__class__.__name__
         meta = self.metadata.copy()
-        del meta["data_type"]
+        to_skip = [
+            "conditions_of_use",
+            "max_latitude",
+            "variables",
+            "title",
+            "processed on",
+            "time_resolution",
+            "author",
+            "ukghg sectors",
+            "min_latitude",
+            "versions",
+            "processed by",
+            "time_resolved",
+            "max_longitude",
+            "data_type",
+            "processed",
+            "min_longitude",
+            "latest_version",
+            "period",
+            "time_period",
+            "height",
+            "conventions",
+            "timestamp",
+            "uuid",
+        ]
+        for key in to_skip:
+            if key in meta:
+                del meta[key]
         meta_str = truncated_dict_repr(meta)
         return f"{cls}(metadata={meta_str}, uuid={self._uuid or self.metadata.get('uuid')})"
 
