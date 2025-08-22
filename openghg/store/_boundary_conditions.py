@@ -77,10 +77,16 @@ class BoundaryConditions(BaseStore):
 
         params = kwargs.copy()
 
-        species = clean_string(params["species"])
-        params["species"] = synonyms(species)
-        params["bc_input"] = clean_string(params["bc_input"])
-        params["domain"] = clean_string(params["domain"])
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["bc_input"] = clean_string(params.get("bc_input"))
+        params["domain"] = clean_string(params.get("domain"))
+
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
         # Specify any additional metadata to be added
         additional_metadata: dict = {}

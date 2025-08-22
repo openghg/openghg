@@ -48,14 +48,18 @@ class EulerianModel(BaseStore):
 
         params = kwargs.copy()
 
-        species = clean_string(params["species"])
-        params["species"] = synonyms(species)
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["model"] = clean_string(params.get("model"))
+        params["start_date"] = clean_string(params.get("start_date"))
+        params["end_date"] = clean_string(params.get("end_date"))
+        params["setup"] = clean_string(params.get("setup"))
 
-        params["model"] = clean_string(params["model"])
-
-        params["start_date"] = clean_string(params["start_date"])
-        params["end_date"] = clean_string(params["end_date"])
-        params["setup"] = clean_string(params["setup"])
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
         # Specify any additional metadata to be added
         additional_metadata: dict = {}

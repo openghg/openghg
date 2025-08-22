@@ -226,12 +226,17 @@ class FluxTimeseries(BaseStore):
 
         params = kwargs.copy()
 
-        species = clean_string(params["species"])
-        params["species"] = synonyms(species)
-        params["source"] = clean_string(params["source"])
-        params["region"] = clean_string(params["region"])
-        if params.get("domain"):
-            params["domain"] = clean_string(params["domain"])
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["source"] = clean_string(params.get("source"))
+        params["region"] = clean_string(params.get("region"))
+        params["domain"] = clean_string(params.get("domain"))
+
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
         # Specify any additional metadata to be added
         additional_metadata: dict = {}

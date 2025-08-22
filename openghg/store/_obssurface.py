@@ -221,82 +221,83 @@ class ObsSurface(BaseStore):
             check_and_set_null_variable,
         )
 
-        # Apply clean_string first and then any specifics?
-        # How do we check the keys we're expecting for this? Rely on required keys?
-
         params = kwargs.copy()
 
+        # Apply pre-checks and formatting
+        # - check and verify site code based on flag
         verify_site_code = params.get("verify_site_code")
         if verify_site_code:
             params.pop("verify_site_code")
+        site_filepath = params.get("site_filepath")
+        site_filepath_str = "default" if site_filepath is None else site_filepath
 
-        # Test that the passed values are valid
-        # Check validity of site, instrument, inlet etc in 'site_info.json'
-        # Clean the strings
-        if verify_site_code:
-            verified_site = verify_site(site=params["site"])
-            if verified_site is None:
-                raise ValueError("Unable to validate site")
+        if verify_site_code is True:
+            site = params.get("site")
+            if site is not None:
+                verified_site = verify_site(site, site_filepath=site_filepath)
+                if verified_site is not None:
+                    params["site"] = verified_site
+                else:
+                    msg = (
+                        f"Unable to verify site from site code: {site}. (Site filepath: {site_filepath_str})"
+                    )
+                    logger.exception(msg)
+                    raise ValueError(msg)
             else:
-                params["site"] = verified_site
+                msg = "Unable to verify site: site details not specified"
+                logger.exception(msg)
+                raise ValueError(msg)
         else:
             params["site"] = clean_string(params["site"])
 
-        params["network"] = clean_string(params["network"])
+        # - make sure `inlet` OR the alias `height` is included
+        #    - note: from this point only `inlet` variable should be used.        params["inlet"] = params.get("inlet")
+        if params.get("inlet") is None and params.get("height") is not None:
+            params["inlet"] = params["height"]
+            params.pop("height")
 
-        if params.get("instrument") is not None:
-            params["instrument"] = clean_string(params["instrument"])
-        else:
-            params["instrument"] = None
+        # - make sure data_sublevel is cast as a string
+        params["data_sublevel"] = params.get("data_sublevel")
+        if params["data_sublevel"] is not None:
+            params["data_sublevel"] = str(params["data_sublevel"])
 
-        if params.get("sampling_period") is not None:
-            params["sampling_period"] = evaluate_sampling_period(params["sampling_period"])
-        else:
-            params["sampling_period"] = None
+        # Apply clean string formatting
+        params["inlet"] = clean_string(params.get("inlet"))
+        params["network"] = clean_string(params.get("network"))
+        params["instrument"] = clean_string(params.get("instrument"))
+        params["data_level"] = clean_string(params.get("data_level"))
+        params["data_sublevel"] = clean_string(params.get("data_sublevel"))
+        params["platform"] = clean_string(params.get("platform"))
+        params["dataset_source"] = clean_string(params.get("dataset_source"))
 
-        platform = params.get("platform")
-        if platform is not None:
-            platform = format_platform(platform, data_type=self._data_type)
+        # Apply individual formatting as appropriate
 
+        # - check and evaluate sampling_period is in correct format
+        params["sampling_period"] = evaluate_sampling_period(params.get("sampling_period"))
+
+        # - format platform and populate measurement_type
+        params["platform"] = format_platform(params.get("platform"), data_type=self._data_type)
         if params.get("measurement_type") is None and params.get("platform") is not None:
             params["measurement_type"] = params["platform"]
 
-        # Ensure we have a clear missing value for data_level, data_sublevel
-        data_level = params.get("data_level")
-        data_level = format_data_level(data_level)
+        # - try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        params["inlet"] = format_inlet(params.get("inlet"))
 
-        data_sublevel = params.get("data_sublevel")
-        if data_sublevel is not None:
-            data_sublevel = str(data_sublevel)
+        # - check data level
+        params["data_level"] = format_data_level(params.get("data_level"))
 
-        dataset_source = params.get("dataset_source")
+        # Ensure we have a clear missing value (not_set) where needed (required keys)
+        params["data_level"] = check_and_set_null_variable(params.get("data_level"))
+        params["data_sublevel"] = check_and_set_null_variable(params.get("data_sublevel"))
+        params["platform"] = check_and_set_null_variable(params.get("platform"))
+        params["dataset_source"] = check_and_set_null_variable(params.get("dataset_source"))
 
-        platform = check_and_set_null_variable(platform)
-        data_level = check_and_set_null_variable(data_level)
-        data_sublevel = check_and_set_null_variable(data_sublevel)
-        dataset_source = check_and_set_null_variable(dataset_source)
-
-        params["platform"] = clean_string(platform)
-        params["data_level"] = clean_string(data_level)
-        params["data_sublevel"] = clean_string(data_sublevel)
-        params["dataset_source"] = clean_string(dataset_source)
-
-        # Make sure `inlet` OR the alias `height` is included
-        # Note: from this point only `inlet` variable should be used.
-        inlet = params.get("inlet")
-        if inlet is None and params.get("height") is not None:
-            inlet = params["height"]
-            params.pop("height")
-
-        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
-        inlet = clean_string(inlet)
-        params["inlet"] = format_inlet(inlet)
-
+        # Include additional, internally-defined keywords
         # Would like to rename `data_source` to `retrieved_from` but
         # currently trying to match with keys added from retrieve_atmospheric (ICOS) - Issue #654
         data_source = "internal"
 
-        if not isinstance(params["filepath"], list):
+        if not isinstance(params.get("filepath"), list):
             params["filepaths"] = [Path(params["filepath"])]
         else:
             params["filepaths"] = [Path(fp) for fp in params["filepath"]]

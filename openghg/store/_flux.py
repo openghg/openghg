@@ -79,22 +79,27 @@ class Flux(BaseStore):
             clean_string,
         )
 
-        # Apply clean_string first and then any specifics?
-        # How do we check the keys we're expecting for this? Rely on required keys?
-
         params = kwargs.copy()
 
-        species = clean_string(params["species"])
-        params["species"] = synonyms(species)
-        params["source"] = clean_string(params["source"])
-        params["domain"] = clean_string(params["domain"])
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["source"] = clean_string(params.get("source"))
+        params["domain"] = clean_string(params.get("domain"))
 
+        # Checking inputs
+        # - check time_resolved details are set in preference to high_time_resolution
         if params.get("high_time_resolution"):
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
             )
             params["time_resolved"] = params["high_time_resolution"]
+
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
         # Specify any additional metadata to be added
         additional_metadata: dict = {}

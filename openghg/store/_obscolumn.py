@@ -124,68 +124,57 @@ class ObsColumn(BaseStore):
             clean_string,
             format_platform,
             synonyms,
-            not_set_metadata_values,
+            check_and_set_null_variable,
         )
-
-        #     Args:
-        #         filepath: Path of observation file
-        #         species: Species name or synonym e.g. "ch4"
-        #         platform: Type of platform. Should be one of:
-        #             - "satellite"
-        #             - "site"
-        #         satellite: Name of satellite (if relevant). Should include satellite OR site.
-        #         domain: For satellite only. If data has been selected on an area include the
-        #             identifier name for domain covered. This can map to previously defined domains
-        #             (see openghg_defs "domain_info.json" file) or a newly defined domain.
-        #         selection: For satellite only, identifier for any data selection which has been
-        #             performed on satellite data. This can be based on any form of filtering, binning etc.
-        #             but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
-        #             If not specified, domain will be used.
-        #         site : Site code/name (if relevant). Should include satellite OR site.
-        #         instrument: Instrument name e.g. "TANSO-FTS"
-        #         network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
 
         params = kwargs.copy()
 
-        # TODO: Evaluate which inputs need cleaning (if any)
-        species = clean_string(params["species"])
-        params["species"] = synonyms(species)
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["platform"] = clean_string(params.get("platform"))
+        params["site"] = clean_string(params.get("site"))
+        params["satellite"] = clean_string(params.get("satellite"))
+        params["network"] = clean_string(params.get("network"))
+        params["instrument"] = clean_string(params.get("instrument"))
+        params["domain"] = clean_string(params.get("domain"))
+        params["obs_region"] = clean_string(params.get("obs_region"))
+        params["pressure_weights_method"] = clean_string(params.get("pressure_weights_method"))
 
-        platform = format_platform(params["platform"])
-        params["platform"] = clean_string(platform)
-
+        # Checks input combinations are correct
         site = params.get("site")
         satellite = params.get("satellite")
 
         if site is None and satellite is None:
-            raise ValueError("Value for 'site' or 'satellite' must be specified")
+            msg = "Value for 'site' or 'satellite' must be specified"
+            logger.exception(msg)
+            raise ValueError(msg)
         elif site is not None and satellite is not None:
-            raise ValueError("Only one of 'site' or 'satellite' should be specified")
+            msg = "Only one of 'site' or 'satellite' should be specified"
+            logger.exception(msg)
+            raise ValueError(msg)
 
-        params["site"] = clean_string(site)
-        params["satellite"] = clean_string(satellite)
-        params["network"] = clean_string(params.get("network"))
-        params["instrument"] = clean_string(params.get("instrument"))
-
-        domain = clean_string(params.get("domain"))
-        obs_region = clean_string(params.get("obs_region"))
+        domain = params.get("domain")
+        obs_region = params.get("obs_region")
 
         if domain is not None and obs_region is not None:
             err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
             logger.exception(err_msg)
             raise ValueError(err_msg)
         elif domain is not None and obs_region is None:
-            obs_region = domain
+            params["obs_region"] = domain
             logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
-        elif obs_region is not None and domain is None:
-            not_set_value = not_set_metadata_values()[0]
-            domain = not_set_value  # Do we want this to be "NOT_SET" or just not included?
-            logging.info(f"Updated value of 'domain': {domain}")
 
-        params["domain"] = domain
-        params["obs_region"] = obs_region
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
-        params["pressure_weights_method"] = clean_string(params["pressure_weights_method"])
+        # - format platform
+        params["platform"] = format_platform(params.get("platform"))
+
+        # Ensure we have a clear missing value (not_set) where needed (required keys)
+        params["domain"] = check_and_set_null_variable(params.get("domain"))
 
         # Specify any additional metadata to be added
         additional_metadata: dict = {}

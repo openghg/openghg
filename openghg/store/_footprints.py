@@ -205,14 +205,21 @@ class Footprints(BaseStore):
             check_and_set_null_variable,
         )
 
-        # Apply clean_string first and then any specifics?
-        # How do we check the keys we're expecting for this? Rely on required keys?
-
-        # Specify any additional metadata to be added
-        additional_metadata: dict = {}
-
         params = kwargs.copy()
 
+        # Apply clean string formatting
+        params["site"] = clean_string(params.get("site"))
+        params["satellite"] = clean_string(params.get("satellite"))
+        params["obs_region"] = clean_string(params.get("obs_region"))
+        params["network"] = clean_string(params.get("network"))
+        params["domain"] = clean_string(params.get("domain"))
+        params["inlet"] = clean_string(params.get("inlet"))
+        params["height"] = clean_string(params.get("height"))
+        params["species"] = clean_string(params.get("species"))
+        params["met_model"] = clean_string(params.get("met_model"))
+
+        # Checking inputs
+        # - check time_resolved details are set in preference to high_time_resolution
         if params.get("high_time_resolution") is not None:
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
@@ -221,59 +228,53 @@ class Footprints(BaseStore):
             params["time_resolved"] = params["high_time_resolution"]
             params.pop("high_time_resolution")
 
-        if params.get("site") is not None:
-            params["site"] = clean_string(params["site"])
-        elif params.get("satellite") is not None and params.get("obs_region") is not None:
-            params["satellite"] = clean_string(params["satellite"])
-            params["obs_region"] = clean_string(params["obs_region"])
+        # - check either site or (satellite and obs_region) are included
+        if params.get("satellite") is not None and params.get("obs_region") is not None:
             params["continuous"] = False
             logger.info("For satellite data, 'continuous' is set to `False`")
-        else:
-            raise ValueError("Please pass either site or satellite and obs_region values")
+        elif params.get("site") is None:
+            msg = "Please pass either site or satellite and obs_region values"
+            logger.exception(msg)
+            raise ValueError(msg)
 
-        params["network"] = clean_string(params["network"])
-        params["domain"] = clean_string(params["domain"])
-
-        # Make sure `inlet` OR the alias `height` is included
-        # Note: from this point only `inlet` variable should be used.
+        # - make sure `inlet` OR the alias `height` is included
+        #    - note: from this point only `inlet` variable should be used.
         inlet = params.get("inlet")
         if inlet is None and params.get("height") is None:
             raise ValueError("One of inlet (or height) must be specified as an input")
         elif inlet is None:
-            inlet = params["height"]
+            params["inlet"] = params["height"]
             params.pop("height")
 
-        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
-        inlet = clean_string(inlet)
-        params["inlet"] = format_inlet(inlet)
+        # Apply individual formatting as appropriate
+
+        # - try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        params["inlet"] = format_inlet(params.get("inlet"))
         params["inlet"] = cast(str, params["inlet"])
 
-        # Ensure we have a value for species
-        if params.get("species") is None:
-            species = "inert"
+        # - ensure we have a value for species
+        species = params.get("species")
+        if species is None:
+            params["species"] = "inert"
         else:
-            species = clean_string(params["species"])
-            species = synonyms(species)
-        params["species"] = species
+            params["species"] = synonyms(species)
 
-        # Ensure we have a clear missing value for met_model
-        met_model = params.get("met_model")
-        params["met_model"] = check_and_set_null_variable(met_model)
-        params["met_model"] = clean_string(params["met_model"])
-
-        if params.get("network") is not None:
-            params["network"] = clean_string(params["network"])
-
-        # Do some housekeeping on the inputs
+        # - check time_resolved and short_lifetime values are appropriate for species
         time_resolved = params.get("time_resolved", False)
         short_lifetime = params.get("short_lifetime", False)
-        params["time_resolved"] = check_species_time_resolved(species, time_resolved)
-        params["short_lifetime"] = check_species_lifetime(species, short_lifetime)
+        params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
 
-        if params["time_resolved"] and params.get("sort") is True:
+        if params.get("time_resolved") and params.get("sort") is True:
             logger.info(
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
+
+        # Ensure we have a clear missing value (not_set) where needed (required keys)
+        params["met_model"] = check_and_set_null_variable(params.get("met_model"))
+
+        # Specify any additional metadata to be added
+        additional_metadata: dict = {}
 
         return params, additional_metadata
 
