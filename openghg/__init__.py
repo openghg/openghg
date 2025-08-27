@@ -68,19 +68,3 @@ consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
 
 del logfile_path
-
-from . import _version
-
-__version__ = _version.get_versions()["version"]
-
-from . import _version
-
-__version__ = _version.get_versions()["version"]
-
-from . import _version
-
-__version__ = _version.get_versions()["version"]
-
-from . import _version
-
-__version__ = _version.get_versions()["version"]
