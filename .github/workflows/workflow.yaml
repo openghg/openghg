@@ -8,7 +8,6 @@ on:
 jobs:
   release_testpypi:
     # Only run for your test branch or manual trigger
-    if: github.event.pull_request.head.ref == 'your-test-branch' || github.event_name == 'workflow_dispatch'
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     runs-on: ubuntu-latest
     environment:
