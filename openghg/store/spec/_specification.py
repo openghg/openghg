@@ -67,6 +67,7 @@ def define_transform_parsers() -> dict[str, Any]:
     # TODO: May want to move away from representing these parser details as classes
     data_type_parsers = {
         "flux": FluxDatabases,
+        "boundary_conditions": BoundaryConditions,
     }
 
     return data_type_parsers
