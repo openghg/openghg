@@ -163,7 +163,7 @@ class Flux(BaseStore):
         transform_parsers = define_transform_parsers()[self._data_type]
 
         try:
-            data_type = transform_parsers[database.upper()].value
+            transform_parsers[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
