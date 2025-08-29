@@ -4,12 +4,9 @@ import numpy as np
 import xarray as xr
 
 from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
-from ._utils import check_units
 
 
-def baseline_sensitivities(
-    bc: xr.Dataset, fp: xr.Dataset, species: str | None = None, output_units: float = 1.0
-) -> xr.Dataset:
+def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None = None) -> xr.Dataset:
     """Compute contributions from NESW boundary curtains.
 
     Computes "mean_particle_age" * "vmr" for the NESW boundary curtains,
@@ -19,8 +16,6 @@ def baseline_sensitivities(
         bc: boundary conditions dataset
         fp: footprints (or scenario) dataset
         species: optional species, used to check for short-lifetime
-        output_units: units conversion to apply; e.g. `1e-9` will scale the
-          outputs by `1e9`, converting mol/mol to ppb.
 
     Returns:
         Dataset with data variables `bc_n`, `bc_e`, `bc_s`, `bc_w` for baseline contributions.
@@ -29,8 +24,22 @@ def baseline_sensitivities(
         ValueError: if wrong footprints used for short-lifetime species.
 
     """
-    bc = bc.reindex_like(fp, "ffill")
+    # explicitly copy units for coordinates if they're missing; implicitly we're assuming units are aligned
+    for dim in bc.dims:
+        if dim in fp.dims and "units" not in bc[dim].attrs:
+            bc[dim].attrs["units"] = fp[dim].attrs.get("units")
 
+    fp = fp.pint.quantify()
+    bc = bc.pint.quantify()
+    bc = bc.pint.reindex_like(fp, "ffill")
+
+    # align chunks for time after filling
+    fp_time_chunks = fp.particle_locations_n.chunksizes.get("time")
+    if fp_time_chunks is not None:
+        fp_time_chunk = fp_time_chunks[0]
+        bc = bc.chunk({"time": fp_time_chunk})
+
+    # check if loss term is needed
     lifetime_value = species_lifetime(species)
     check_monthly = check_lifetime_monthly(lifetime_value)
 
@@ -94,18 +103,18 @@ def baseline_sensitivities(
         loss_s = 1.0
         loss_w = 1.0
 
-    # Check and extract units as float, if present.
-    units_default = 1.0
-    units_n = check_units(bc["vmr_n"], default=units_default)
-    units_e = check_units(bc["vmr_e"], default=units_default)
-    units_s = check_units(bc["vmr_s"], default=units_default)
-    units_w = check_units(bc["vmr_w"], default=units_default)
-
     sensitivities = {
-        "bc_n": fp["particle_locations_n"] * bc["vmr_n"] * loss_n * units_n,
-        "bc_e": fp["particle_locations_e"] * bc["vmr_e"] * loss_e * units_e,
-        "bc_s": fp["particle_locations_s"] * bc["vmr_s"] * loss_s * units_s,
-        "bc_w": fp["particle_locations_w"] * bc["vmr_w"] * loss_w * units_w,
+        "bc_n": fp["particle_locations_n"] * bc["vmr_n"] * loss_n,
+        "bc_e": fp["particle_locations_e"] * bc["vmr_e"] * loss_e,
+        "bc_s": fp["particle_locations_s"] * bc["vmr_s"] * loss_s,
+        "bc_w": fp["particle_locations_w"] * bc["vmr_w"] * loss_w,
     }
 
-    return xr.Dataset(sensitivities) / output_units
+    # convert units then dequantify so output has correct units, but is not quantified, which
+    # might cause issues with dask in subsequent computations
+    result = cast(xr.Dataset, xr.Dataset(sensitivities).pint.dequantify())
+
+    # keep float32
+    result = result.astype({f"bc_{d}": "float32" for d in "nesw"})
+
+    return result

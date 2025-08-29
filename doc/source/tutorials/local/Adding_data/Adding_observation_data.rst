@@ -480,10 +480,22 @@ For example, to convert the mole fraction from the default unit
 By default, the returned data is dequantified, so you can confirm the unit conversion using:
 
 .. jupyter-execute::
-    co2_ppb.data["mf"].attrs["units"]
-    co2_ppb.data["mf"].attrs["units_definition"]
 
-This confirms that the mole fraction (``mf``) was converted to **parts per billion (ppb)** instead of the default **parts per million (ppm)**. The original units attribute is preserved in scalar format comaptible with the further workflow. However more standard string value of the units can be observed with `converted_pint_units`.
+    co2_ppb.data["mf"].attrs["units"]
+
+This confirms that the mole fraction (``mf``) was converted to **parts per billion (ppb)** instead of the default **parts per million (ppm)**. The original units attribute is preserved in scalar format compatible with the further workflow.
+We can display units in other formats:
+
+.. jupyter-execute::
+
+   # quantify, then get pint units
+   pint_units = co2_ppb.data.mf.pint.quantify().pint.units
+
+   # print in cf format
+   print(f"{pint_units:cf}")
+
+   # print in default format
+   print(f"{pint_units:D}")
 
 If you prefer to keep the data **quantified** (i.e., retaining the Pint unit objects), set the ``is_dequantified`` argument to ``False`` when calling ``get_obs_surface``.
 

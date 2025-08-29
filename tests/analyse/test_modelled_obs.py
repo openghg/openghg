@@ -103,6 +103,13 @@ def footprint_co2_dummy():
         coords={"lat": lat, "lon": lon, "time": time, "H_back": H_back},
     )
 
+    # set units for testing with pint
+    data.fp.attrs["units"] = "m2 s mol-1"
+    data.fp_HiTRes.attrs["units"] = "m2 s mol-1"
+    data.lat.attrs["units"] = "degrees_north"
+    data.lon.attrs["units"] = "degrees_east"
+    data.H_back.attrs["units"] = "Hours"
+
     # Potential metadata:
     # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - species (if applicable)
@@ -148,6 +155,11 @@ def flux_co2_dummy():
     flux = xr.Dataset(
         {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
     )
+
+    # add units for testing with pint
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
@@ -323,14 +335,8 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
 def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_dummy):
     """Test footprints_data_merge with multisector return options"""
     model_scenario_co2_dummy.add_flux(species="co2", flux={"TESTSOURCE2": flux_co2_dummy})
-    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(
-        calc_fp_x_flux=True, split_by_sectors=True
-    )
-    print(combined_dataset)
-    print(combined_dataset.data_vars)
-    assert all(
-        dv in combined_dataset
-        for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"]
-    )
+    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(calc_fp_x_flux=True, split_by_sectors=True)
+
+    assert all(dv in combined_dataset for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"])
 
     assert all(combined_dataset.source.values == ["TESTSOURCE", "TESTSOURCE2"])

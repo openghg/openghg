@@ -4,6 +4,7 @@ Utility functions for OpenGHG
 
 from ._cli import cli
 from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
+from ._data import openghg_data_path
 from ._data_level import format_data_level
 from ._domain import (
     get_domain_info,
