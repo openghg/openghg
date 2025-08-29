@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
+
+## [0.16.0] - 2025-08-29
 
 ### Added
 - Support for TCCON data: implemented a dedicated parser and integrated with standardise_footprint, get_obs_column, and related workflow steps. Renamed _surface_obs_resampler_dict to _obs_resampler_dict in openghg/data_processing/_resampling.py for generalisation beyond surface data. [PR #1407] (https://github.com/openghg/openghg/pull/1407)
