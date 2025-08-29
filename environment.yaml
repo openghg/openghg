@@ -11,6 +11,7 @@ dependencies:
   - dask
   - h5netcdf
   - filelock
+  - flox
   - matplotlib
   - msgpack-python
   - netcdf4

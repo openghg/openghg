@@ -29,6 +29,7 @@ dependencies = [
 "cf_xarray",
 "dask",
 "filelock",
+"flox",
 "h5netcdf",
 "icoscp <= 0.1.17",
 "ipywidgets",
