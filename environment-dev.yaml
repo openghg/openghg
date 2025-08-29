@@ -12,7 +12,6 @@ dependencies:
   - dask
   - h5netcdf
   - filelock
-  - flox
   - matplotlib
   - msgpack-python
   - netcdf4<=1.6.5
@@ -35,6 +34,7 @@ dependencies:
   - rich
   - ipywidgets
   - xarray>=2025.04.0
+  - flox
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
