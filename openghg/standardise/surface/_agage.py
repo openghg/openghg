@@ -229,7 +229,7 @@ def _format_species(
         if "instrument" in attributes.keys():
             attributes["instrument_name"] = attributes.pop("instrument")
 
-        attribute_keys = attributes_default_keys()
+        attribute_keys = attributes_default_keys(data_type="surface")
 
         # JP hack to stop instrument getting overwritten for multi-instrument files
         # instrument = metadata["instrument"]

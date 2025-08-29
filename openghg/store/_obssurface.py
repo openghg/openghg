@@ -377,7 +377,7 @@ class ObsSurface(BaseStore):
                 for mdd in data:
                     mdd.data = mdd.data.chunk(chunks)
 
-            align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+            align_metadata_attributes(data=data, update_mismatch=update_mismatch, data_type=self._data_type)
 
             # Check to ensure no required keys are being passed through info_metadata dict
             # before adding details
