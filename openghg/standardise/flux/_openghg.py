@@ -1,13 +1,16 @@
 from pathlib import Path
 import warnings
 
+from openghg.util import timestamp_now, open_time_nc_fn
+from openghg.store import infer_date_range, update_zero_dim
+from openghg.standardise.meta import assign_flux_attributes
+
 
 def parse_openghg(
-    filepath: Path,
+    filepath: str | Path | list[str | Path],
     species: str,
     source: str,
     domain: str,
-    data_type: str,
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
@@ -25,7 +28,6 @@ def parse_openghg(
         species: Name of species
         source: Source of the emissions data
         domain: Geographic domain
-        data_type: Type of data
         database: Name of the database
         database_version: Version of the database
         model: Model name if applicable.
@@ -40,10 +42,6 @@ def parse_openghg(
     Returns:
         dict: Dictionary of data
     """
-    from openghg.standardise.meta import assign_flux_attributes
-    from openghg.store import infer_date_range, update_zero_dim
-    from openghg.util import timestamp_now
-    from xarray import open_dataset
 
     if high_time_resolution:
         warnings.warn(
@@ -52,7 +50,9 @@ def parse_openghg(
         )
         time_resolved = high_time_resolution
 
-    em_data = open_dataset(filepath).chunk(chunks)
+    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+
+    em_data = xr_open_fn(filepath).chunk(chunks)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -79,9 +79,7 @@ def parse_openghg(
             metadata[key] = value
 
     metadata["author"] = author_name
-    metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "flux"
     metadata["source_format"] = "openghg"
 
     # As flux / emissions files handle things slightly differently we need to check the time values
@@ -95,8 +93,16 @@ def parse_openghg(
 
     em_time = em_data["time"]
 
+    # If filepath is a single file, the naming scheme of this file can be used
+    # as one factor to try and determine the period.
+    # If multiple files, this input isn't needed.
+    if isinstance(filepath, (str, Path)):
+        input_filepath = filepath
+    else:
+        input_filepath = None
+
     start_date, end_date, period_str = infer_date_range(
-        em_time, filepath=filepath, period=period, continuous=continuous
+        em_time, filepath=input_filepath, period=period, continuous=continuous
     )
 
     metadata["start_date"] = str(start_date)

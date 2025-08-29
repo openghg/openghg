@@ -26,8 +26,10 @@ maintainers = [
 
 dependencies = [
 "addict",
+"cf_xarray",
 "dask",
 "filelock",
+"flox",
 "h5netcdf",
 "icoscp <= 0.1.17",
 "ipywidgets",
@@ -42,6 +44,8 @@ dependencies = [
 "openghg_defs",
 "openpyxl",
 "pandas >= 2.0",
+"pint",
+"pint_xarray",
 "plotly",
 "pyvis",
 "rapidfuzz",
@@ -51,7 +55,7 @@ dependencies = [
 "tinydb",
 "toml",
 "urllib3 >= 1.26.3",
-"xarray",
+"xarray >= 2025.04.0",
 "zarr==2.18.3",
 "openghg-calscales"
 ]

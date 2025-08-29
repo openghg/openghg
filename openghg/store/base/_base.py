@@ -14,7 +14,7 @@ from pandas import Timestamp
 import xarray as xr
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.objectstore import locking_object_store
 from openghg.store.storage import ChunkingSchema
 from openghg.types import DatasourceLookupError, multiPathType, MetadataAndData
 from openghg.util import timestamp_now, to_lowercase, hash_file
@@ -26,6 +26,9 @@ T = TypeVar("T", bound="BaseStore")
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+class ClassDefinitionError(Exception): ...
 
 
 class BaseStore:
@@ -51,11 +54,20 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
+        # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
+        self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
-        self._datasource_uuids = self._metastore.select("uuid")
+        self._datasource_uuids = self._objectstore.get_uuids()
 
     def __init_subclass__(cls) -> None:
+        if cls._data_type == "":
+            raise ClassDefinitionError(
+                f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
+            )
+        if cls._data_type in BaseStore._registry:
+            raise ClassDefinitionError(
+                f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
+            )
         BaseStore._registry[cls._data_type] = cls
 
     def __enter__(self) -> BaseStore:
@@ -83,13 +95,13 @@ class BaseStore:
     def save(self) -> None:
         # from openghg.objectstore import set_object_from_json
 
-        self._metastore.close()
+        self._objectstore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
+        DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     def read_data(
@@ -366,8 +378,8 @@ class BaseStore:
             Returns:
                 dict mapping key based on required keys to Datasource UUIDs created or updated
         """
-        from openghg.store.base import Datasource
         from openghg.util import not_set_metadata_values
+        from openghg.util._metadata_util import get_period
 
         datasource_uuids = []
 
@@ -379,7 +391,7 @@ class BaseStore:
         if not extend_keys:
             extend_keys = self.get_list_metakeys()
 
-        with self._metastore as metastore:
+        with self._objectstore as objectstore:
             lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
             # TODO - remove this when the lowercasing of metadata gets removed
             # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
@@ -399,53 +411,40 @@ class BaseStore:
 
                 # Take a copy of the metadata so we can update it
                 meta_copy = metadata.copy()
-                new_ds = uuid is None
-
-                if new_ds:
-                    datasource = Datasource(bucket=self._bucket)
-                    uid = datasource.uuid()
-                    meta_copy["uuid"] = uid
-                    # Make sure all the metadata is lowercase for easier searching later
-                    # TODO - do we want to do this or should be just perform lowercase comparisons?
-                    meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
-                else:
-                    datasource = Datasource(bucket=self._bucket, uuid=uuid)
-
-                # Add the dataframe to the datasource
-                datasource.add_data(
-                    metadata=meta_copy,
-                    data=dataset,
+                period = get_period(meta_copy)
+                # kwargs for creating/updating
+                cu_kwargs = dict(
                     sort=sort,
                     drop_duplicates=drop_duplicates,
                     skip_keys=skip_keys,
                     extend_keys=extend_keys,
                     new_version=new_version,
                     if_exists=if_exists,
-                    data_type=data_type,
                     compressor=compressor,
                     filters=filters,
+                    period=period,
                 )
 
-                # Save Datasource to object store
-                datasource.save()
+                # Make sure all the metadata is lowercase for easier searching later
+                # TODO - do we want to do this or should be just perform lowercase comparisons?
+                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
 
-                # Add the metadata to the metastore and make sure it's up to date with the metadata stored
-                # in the Datasource
-                datasource_metadata = datasource.metadata()
+                # add data type (this used to come from the Datasource)
+                meta_copy["data_type"] = self._data_type
 
-                if new_ds:
-                    metastore.insert(datasource_metadata)
-                    logger.info("Created new datasource with UUID %s", datasource.uuid())
+                if new_ds := uuid is None:  # use := so mypy knows uuid is not None in "else" clause
+                    stored_uuid = objectstore.create(metadata=meta_copy, data=dataset, **cu_kwargs)
                 else:
-                    metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
-                    logger.info("Added data to existing datasource with UUID %s", datasource.uuid())
+                    stored_uuid = uuid
+                    # ignore mypy in next line due to bug: https://github.com/python/mypy/issues/8862
+                    objectstore.update(uuid=uuid, metadata=meta_copy, data=dataset, **cu_kwargs)  # type: ignore
 
                 required_info = {
                     k: v
                     for k, v in metadata.items()
                     if k in required_keys and v is not None and v not in not_set_metadata_values()
                 }
-                datasource_uuids.append({"uuid": datasource.uuid(), "new": new_ds, **required_info})
+                datasource_uuids.append({"uuid": stored_uuid, "new": new_ds, **required_info})
 
         return datasource_uuids
 
@@ -490,7 +489,7 @@ class BaseStore:
                     + f"Missing keys: {missing_keys}"
                 )
 
-            required_result = self._metastore.search(required_metadata)
+            required_result = self._objectstore.search(required_metadata)
 
             if not required_result:
                 results.append(None)

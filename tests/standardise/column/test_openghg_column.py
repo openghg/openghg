@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import pytest
 from helpers import get_column_datapath  # , parsed_surface_metachecker, check_cf_compliance
-from openghg.standardise.column import parse_openghg
+from openghg.standardise.column import parse_openghg, parse_tccon
 from openghg.standardise.meta import attributes_default_keys
 from pandas import Timestamp
 
@@ -11,7 +11,7 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
-def test_read_file():
+def test_parse_openghg():
     """
     Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
@@ -60,6 +60,104 @@ def test_read_file():
 
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
+
+
+def test_parse_tccon():
+    """
+    Test file in TCCON format (variables and attributes) can be
+    correctly parsed.
+    """
+    filepath = get_column_datapath(filename="hw20230402_20230402.public.qc.nc")
+
+    domain = "EUROPE"
+    species = "ch4"
+    pressure_weights_method = "pressure_weight"
+
+    data = parse_tccon(
+        filepath,
+        pressure_weights_method=pressure_weights_method,
+        domain=domain,
+        species=species,
+    )
+
+    assert "ch4" in data
+
+    assert "integration_operator" not in data
+    assert "ak_altitude" not in data
+    assert "prior_altitude" not in data
+
+    output_ch4 = data["ch4"]
+    data_ch4 = output_ch4["data"]
+
+    time = data_ch4["time"]
+    assert time[0] == Timestamp("2023-04-02T15:00:00")
+    assert time[1] == Timestamp("2023-04-02T16:00:00")
+
+    xch4 = data_ch4["xch4"].values
+    assert np.isclose(xch4[0], 1888.025)
+    assert np.isclose(xch4[-1], 1889.0175)
+
+    expected_metadata = {
+        "species": "ch4",
+        "domain": domain,
+        "inlet": "column",
+        "site": "THW",
+        "network": "TCCON",
+        "platform": "site",
+        "longitude": "-1.320",
+        "latitude": "51.570",
+        "data_owner": "Damien Weidmann",
+        "data_owner_email": "<damien.weidmann@stfc.ac.uk>",
+        "file_start_date": "2023-04-02",
+        "file_end_date": "2023-04-02",
+        "file_format_version": "2020.B",
+        "data_revision": "R0",
+        "description": "TCCON data standardised from hw20230402_20230402.public.qc.nc, with the pressure weights estimated via 'pressure_weight'.",
+        "calibration_scale": "WMO CH4 X2004",
+    }
+
+    metadata = output_ch4["metadata"]
+    assert metadata.items() >= expected_metadata.items()
+
+    expected_attributes = expected_metadata
+    expected_attributes.update({"longitude": "-1.320", "latitude": "51.570"})
+    attributes = data_ch4.attrs
+    assert attributes.items() >= expected_metadata.items()
+
+
+def test_parse_openghg_column_multi_file():
+    """
+    Test the parser for column is able to accept multiple files and concatenate them.
+    """
+
+    data_path_1 = get_column_datapath(filename="gosat-fts_gosat_20160101_ch4-column.nc")
+    data_path_2 = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+
+    filepath = [data_path_1, data_path_2]
+
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
+    data = parse_openghg(
+        filepath,
+        satellite=satellite,
+        domain=domain,
+        species=species,
+    )
+
+    assert "ch4" in data
+
+    output_ch4 = data["ch4"]
+    data_ch4 = output_ch4["data"]
+
+    time = data_ch4["time"]
+    assert time[0] == Timestamp("2016-01-01T14:59:12.5")
+    assert time[-1] == Timestamp("2017-03-18T17:22:23")
+
+    xch4 = data_ch4["xch4"]
+    assert np.isclose(xch4[0], 1810.89001465)
+    assert np.isclose(xch4[-1], 1762.8855)
 
 
 # def test_read_file_no_attr():

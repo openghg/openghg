@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 from openghg.store.base import BaseStore
 from openghg.store.spec import define_standardise_parsers
 
-
 __all__ = ["BoundaryConditions"]
 
 logger = logging.getLogger("openghg.store")
@@ -64,7 +63,7 @@ class BoundaryConditions(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: str | Path | list[str | Path],
         species: str,
         bc_input: str,
         domain: str,
@@ -151,8 +150,6 @@ class BoundaryConditions(BaseStore):
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
 
         standardise_parsers = define_standardise_parsers()[self._data_type]
 

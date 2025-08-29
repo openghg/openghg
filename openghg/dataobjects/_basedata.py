@@ -2,13 +2,30 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from openghg.store.storage import LocalZarrStore
-import xarray as xr
-from pandas import Timestamp, Timedelta
+from itertools import islice
 import logging
+
+from pandas import Timestamp, Timedelta
+import xarray as xr
+
+from openghg.objectstore import get_datasource
+
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def truncated_dict_repr(d: dict, length: int = 4) -> str:
+    if len(d) <= length:
+        return repr(d)
+
+    trun_d = dict(islice(d.items(), length))
+    result = repr(trun_d)
+
+    # add "..." to indicate truncation
+    result = result[:-1] + ", ...}"
+
+    return result
 
 
 class _BaseData:
@@ -51,9 +68,10 @@ class _BaseData:
         self.metadata = metadata
         self._uuid = uuid
 
+        self._data_type = self.metadata.get("data_type")
+
         self._start_date = start_date
         self._end_date = end_date
-        self._zarrstore = None
 
         if elevate_inlet:
             raise NotImplementedError("elevate_inlet not implemented yet")
@@ -77,9 +95,11 @@ class _BaseData:
             self._version = version
             self._bucket = metadata["object_store"]
 
-            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+            datasource = get_datasource(bucket=self._bucket, uuid=uuid, data_type=self._data_type)
 
-            self.data = self._zarrstore.get(version=version)
+            version = version or "latest"  # can't pass version=None to Datasource.get_data
+            self.data = datasource.get_data(version=version)
+
             if slice_time:
                 # If slicing by time, this must be sorted along the time dimension
                 if sort is False:
@@ -114,5 +134,39 @@ class _BaseData:
     def __bool__(self) -> bool:
         return bool(self.data)
 
+    def __repr__(self) -> str:
+        cls = self.__class__.__name__
+        meta = self.metadata.copy()
+        to_skip = [
+            "conditions_of_use",
+            "max_latitude",
+            "variables",
+            "title",
+            "processed on",
+            "time_resolution",
+            "author",
+            "ukghg sectors",
+            "min_latitude",
+            "versions",
+            "processed by",
+            "time_resolved",
+            "max_longitude",
+            "data_type",
+            "processed",
+            "min_longitude",
+            "latest_version",
+            "period",
+            "time_period",
+            "height",
+            "conventions",
+            "timestamp",
+            "uuid",
+        ]
+        for key in to_skip:
+            if key in meta:
+                del meta[key]
+        meta_str = truncated_dict_repr(meta)
+        return f"{cls}(metadata={meta_str}, uuid={self._uuid or self.metadata.get('uuid')})"
+
     def __str__(self) -> str:
-        return f"Data: {self.data}\nMetadata: {self.metadata}"
+        return f"Data:\n{self.data}\nMetadata:\n{self.metadata}"

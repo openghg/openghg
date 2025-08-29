@@ -5,7 +5,33 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.15.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
+
+## [0.16.0] - 2025-08-29
+
+### Added
+- Support for TCCON data: implemented a dedicated parser and integrated with standardise_footprint, get_obs_column, and related workflow steps. Renamed _surface_obs_resampler_dict to _obs_resampler_dict in openghg/data_processing/_resampling.py for generalisation beyond surface data. [PR #1407] (https://github.com/openghg/openghg/pull/1407)
+- The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
+- `retrieve` method to `ObjectStore` and related methods that allow metadata from the metastore and datasources to be combined on retrieval. [PR #1408](https://github.com/openghg/openghg/pull/1408)
+- Ability to pass the non configured path to the store argument directly for get_* functions. Also added the ability add the store to config using openghg --register-store command. [PR #1389](https://github.com/openghg/openghg/pull/1389)
+- Add basic schema for EulerianModel data type. This currently checks appropriate coordinates and types are included. [PR #1414](https://github.com/openghg/openghg/pull/1414)
+- Unit tracking with pint to ModelScenario. [PR #1417](https://github.com/openghg/openghg/pull/1417)
+- Schema for ObsColumn data type. This currently checks appropriate data variables (time, column, averaging kernel and apriori values) are included of appropriate types. At the moment, this also expects a vertical dimension of "lev". [PR #1409](https://github.com/openghg/openghg/pull/1409)
+
+### Updated
+
+- Updated temporary path creation to have user specific folder.[PR #1396](https://github.com/openghg/openghg/pull/1396)
+- Removed unused code from Datasource and LocalZarrStore and changed the name of LocalZarrStore's `update` method to `overwrite`. See the PR for full details of code removed.[PR #1404](https://github.com/openghg/openghg/pull/1404)
+- Allow `precision_filepath` to be passed directly when specifying the "gcwerks" format for standardise_surface. Previous method of passing a tuple for filepath is still supported but will be deprecated. [PR #1405](https://github.com/openghg/openghg/pull/1405)
+- Updated workflow of pypi release to follow trusted publisher management from pypi.[PR #1402](https://github.com/openghg/openghg/pull/1401)
+- Allowed `mf_variability` to be read in from AGAGE-style obs files. [PR #1416](https://github.com/openghg/openghg/pull/1416)
+
+### Fixed
+- Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
+- Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
+- Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
+- Issue with importlib.resources.files and editable installs. [PR #1429](https://github.com/opengh/openghg/pull/1429)
+- Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package) and `flox` dependency. [PR #1440](https://github.com/openghg/openghg/pull/1440)
 
 ## [0.15.0] - 2025-07-02
 
@@ -20,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for converting `calibration_scale` before plotting in the `plot_timeseries` function.[PR #1361](https://github.com/openghg/openghg/pull/1361)
 - Method to update attributes of stored data. [PR #1375](https://github.com/openghg/openghg/pull/1375)
 - Added "tag" keyword as an option when standardising data. This allows a list of user-specified tags to be included. This allows users to search and connect data which includes the chosen tags. [PR #1354](https://github.com/openghg/openghg/pull/1354)
+- `ObjectStore` class, which manages access to the metastore and to datasources. [PR #1379](https://github.com/openghg/openghg/pull/1379)
 
 ### Updated
 

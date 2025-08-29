@@ -1,4 +1,3 @@
-from pathlib import Path
 import pytest
 from helpers import (
     get_flux_datapath,
@@ -18,6 +17,7 @@ from openghg.standardise import (
     standardise_surface,
     standardise_flux_timeseries,
 )
+from openghg.dataobjects import FootprintData
 from openghg.types import AttrMismatchError, ObjectStoreError
 from openghg.util import compress, find_domain
 import numpy as np
@@ -38,7 +38,7 @@ def test_standardise_to_read_only_store():
         )
 
 
-def test_standardise_obs_two_writable_stores():
+def test_standardise_obs_two_writable_stores(reset_mock_user_config):
 
     clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
@@ -115,7 +115,7 @@ def test_standardise_obs_openghg():
     assert "co2" == results[0].get("species")
 
 
-def test_standardise_obs_metadata_mismatch():
+def test_standardise_obs_metadata_mismatch(reset_mock_user_config):
     """
     Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
@@ -302,7 +302,43 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
+def test_standardise_tccon_obs():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
+    filepath = get_column_datapath(filename="hw20230402_20230402.public.qc.nc")
+
+    domain = "EUROPE"
+    species = "ch4"
+    pressure_weights_method = "pressure_weight"
+
+    results = standardise_column(
+        filepath=filepath,
+        domain=domain,
+        species=species,
+        pressure_weights_method=pressure_weights_method,
+        source_format="tccon",
+        force=True,
+        store="user",
+    )
+
+    assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species="ch4", site="THW", max_level=3, network="TCCON", store="user")
+
+    assert "file_format_version" in data.metadata
+    assert "data_revision" in data.metadata
+
+    assert data.metadata["pressure_weights_method"] == pressure_weights_method
+
+
 def test_standardise_footprint():
+    """This is to test standardise_footprint method.
+    Additionally the get_footprint is also tested by supplying direct store path instead of name."""
+
+    from openghg.objectstore import get_readable_buckets
+
     datapath = get_footprint_datapath("footprint_test.nc")
 
     site = "TMB"
@@ -325,11 +361,20 @@ def test_standardise_footprint():
     )
 
     result = results[0]
-
     assert result["site"] == "tmb"
     assert result["domain"] == "europe"
     assert result["model"] == "test_model"
     assert result["inlet"] == "10m"
+
+    # testing direct path supplied to get function should fetch results.
+    buckets = get_readable_buckets()
+
+    result = get_footprint(site=site, network=network, height=height, domain=domain, store=buckets["user"])
+
+    assert result is not None
+    assert isinstance(result, FootprintData)
+    assert result.metadata["site"] == "tmb"
+    assert result.metadata["data_type"] == "footprints"
 
 
 @pytest.mark.parametrize("source_format", ["paris", "flexpart"])
@@ -888,3 +933,28 @@ def test_icos_corso_clean_14_day():
     assert np.allclose(fetched_value, expected_value)
     assert "multiple" in metadata["sampling_period"]
     assert "integrated-naoh" in metadata["instrument"]
+
+
+def test_icos_corso_l2_deltao2():
+    """To test level 2 icos corso data for deltao2n2 species"""
+
+    filepath = get_surface_datapath(
+        filename="ICOS_ATC_L2_L2-2024.1_CBW_207.0_1667_FLASK.DELTAO2N2", source_format="icos_corso"
+    )
+
+    results = standardise_surface(
+        filepath=filepath,
+        source_format="icos_corso",
+        network="icos",
+        site="cbw",
+        instrument="flask",
+        data_level=2,
+        platform="surface-flask",
+        store="user",
+    )
+
+    assert "deltao2n2" in results[0]["species"]
+    assert "cbw" in results[0]["site"]
+    assert "ICOS_CORSO" in results[0]["source_format"]
+    assert "2" in results[0]["data_level"]
+    assert "surface-flask" in results[0]["platform"]

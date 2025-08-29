@@ -9,7 +9,7 @@ import pandas as pd
 import logging
 
 from openghg.util import clean_string
-from openghg.types import multiPathType
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -51,11 +51,12 @@ def pairwise(iterable: Iterable) -> Iterator[tuple[Any, Any]]:
     return zip(a, b)
 
 
-def site_code_finder(site_name: str) -> str | None:
+def site_code_finder(site_name: str, site_filepath: pathType | None = None) -> str | None:
     """Find the site code for a given site name.
 
     Args:
         site_name: Site long name
+        site_filepath: Alternative site info file. Defaults to openghg_defs input.
     Returns:
         str or None: Three letter site code if found
     """
@@ -64,7 +65,7 @@ def site_code_finder(site_name: str) -> str | None:
 
     site_name = remove_punctuation(site_name)
 
-    inverted = _create_site_lookup_dict()
+    inverted = _create_site_lookup_dict(site_filepath=site_filepath)
 
     # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
     matches = process.extract(query=site_name, choices=inverted.keys())  # type:ignore
@@ -121,16 +122,17 @@ def find_matching_site(site_name: str, possible_sites: dict) -> str:
         return f"Unknown site: {site_name}"
 
 
-def _create_site_lookup_dict() -> dict:
+def _create_site_lookup_dict(site_filepath: pathType | None = None) -> dict:
     """Create a dictionary of site name: three letter site code values
 
+    Args:
+        site_filepath: Alternative site info file. Defaults to openghg_defs input.
     Returns:
         dict: Dictionary of site_name: site_code values
     """
-    from openghg_defs import site_info_file
-    from openghg.util import load_json, remove_punctuation
+    from openghg.util import get_site_info, remove_punctuation
 
-    site_info = load_json(path=site_info_file)
+    site_info = get_site_info(site_filepath=site_filepath)
 
     inverted = {}
     for site, site_data in site_info.items():
@@ -153,22 +155,22 @@ def _create_site_lookup_dict() -> dict:
     return inverted
 
 
-def verify_site(site: str) -> str | None:
+def verify_site(site: str, site_filepath: pathType | None = None) -> str | None:
     """Check if the passed site is a valid one and returns the three
     letter site code if found. Otherwise we use fuzzy text matching to suggest
     sites with similar names.
 
     Args:
         site: Three letter site code or site name
+        site_filepath: Alternative site info file. Defaults to openghg_defs input.
     Returns:
         str: Verified three letter site code if valid site
     """
-    from openghg.util import load_json
-    from openghg_defs import site_info_file
+    from openghg.util import get_site_info
 
-    site_data = load_json(path=site_info_file)
+    site_info = get_site_info(site_filepath=site_filepath)
 
-    if site.upper() in site_data:
+    if site.upper() in site_info:
         return site.lower()
     else:
         site_code = site_code_finder(site_name=site)
@@ -177,33 +179,34 @@ def verify_site(site: str) -> str | None:
         return site_code
 
 
-def multiple_inlets(site: str) -> bool:
+def multiple_inlets(site: str, site_filepath: pathType | None = None) -> bool:
     """Check if the passed site has more than one inlet
 
     Args:
         site: Three letter site code
+        site_filepath: Alternative site info file. Defaults to openghg_defs input.
     Returns:
         bool: True if multiple inlets
     """
     from openghg.util import get_site_info
 
-    site_data = get_site_info()
+    site_info = get_site_info(site_filepath=site_filepath)
 
     site = site.upper()
-    network = next(iter(site_data[site]))
+    network = next(iter(site_info[site]))
 
     try:
-        heights = set(site_data[network]["height"])
+        heights = set(site_info[network]["height"])
     except KeyError:
         try:
-            heights = set(site_data[network]["height_name"])
+            heights = set(site_info[network]["height_name"])
         except KeyError:
             return True
 
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
+def sort_by_filenames(filepath: str | Path | list[str | Path]) -> list[str | Path]:
     """
     Sorting time on filename basis
 
@@ -216,15 +219,15 @@ def sort_by_filenames(filepath: multiPathType | Any) -> list[Path]:
 
     # This code is to stop mypy complaints regarding file types
     if isinstance(filepath, str):
-        filepath = [Path(filepath)]
+        multi_filepath = [Path(filepath)]
     elif isinstance(filepath, Path):
-        filepath = [filepath]
+        multi_filepath = [filepath]
     elif isinstance(filepath, (tuple, list)):
-        filepath = [Path(f) for f in filepath]
+        multi_filepath = [Path(f) for f in filepath]
     else:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
-    return sorted(filepath)
+    return sorted(multi_filepath)
 
 
 def verify_site_with_satellite(

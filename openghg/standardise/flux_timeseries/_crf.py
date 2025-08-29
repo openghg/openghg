@@ -1,10 +1,12 @@
-import numpy as np
 from pathlib import Path
+import numpy as np
 from openghg.store import infer_date_range
+
+from openghg.types import pathType
 
 
 def parse_crf(
-    filepath: Path,
+    filepath: pathType,
     species: str,
     source: str = "anthro",
     region: str = "UK",
@@ -40,6 +42,8 @@ def parse_crf(
     """
     import pandas as pd
     from openghg.util import timestamp_now
+
+    filepath = Path(filepath)
 
     # Dictionary of species corresponding to sheet names
     sheet_selector = {"ch4": "Table10s3", "co2": "Table10s1", "n2o": "Table10s4", "hfc": "Table10s5"}

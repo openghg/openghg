@@ -8,10 +8,9 @@ from helpers import (
 )
 from openghg.dataobjects import DataManager, data_manager
 from openghg.objectstore import get_writable_bucket, exists
-from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import open_object_store
 from openghg.retrieve import search_surface, get_footprint
 from openghg.standardise import standardise_footprint, standardise_surface
-from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 
 
@@ -85,15 +84,15 @@ def test_footprint_attribute_modification(footprint_read):
     search_res.update_attributes(uuid=uuid, to_update=to_update, to_delete=to_delete)
 
     # check new attributes
-    fp_data = get_footprint(site = "TMB",
-                        network = "LGHG",
-                        height = "10m",
-                        domain = "EUROPE",
-                        model = "test_model",
-                        store="user",
-                        )
+    fp_data = get_footprint(
+        site="TMB",
+        network="LGHG",
+        height="10m",
+        domain="EUROPE",
+        model="test_model",
+        store="user",
+    )
     new_attrs = fp_data.data.attrs
-
 
     assert new_attrs["domain"] == "antarctica"
     assert new_attrs["model"] == "peugeot"
@@ -107,30 +106,32 @@ def test_footprint_data_variable_attribute_modification(footprint_read):
 
     # modify attributes
     uuid = next(iter(search_res.metadata))
-    to_update = {"units": "bananas"}
+    to_update = {"units": "hectopascal"}  # hectopascals... why not?
 
     search_res.update_attributes(uuid=uuid, to_update=to_update, data_vars="fp", update_global=False)
 
     # check new attributes
-    fp_data = get_footprint(site = "TMB",
-                        network = "LGHG",
-                        height = "10m",
-                        domain = "EUROPE",
-                        model = "test_model",
-                        store="user",
-                        )
-    assert fp_data.data.fp.units == "bananas"
-    assert fp_data.data.attrs.get("units") != "bananas"
+
+    fp_data = get_footprint(
+        site="TMB",
+        network="LGHG",
+        height="10m",
+        domain="EUROPE",
+        model="test_model",
+        store="user",
+    )
+    assert fp_data.data.fp.units == "hectopascal"
+    assert fp_data.data.attrs.get("units") != "hectopascal"
 
 
 def test_delete_footprint_data(footprint_read):
     res = data_manager(data_type="footprints", site="tmb", store="user")
 
     bucket = get_writable_bucket(name="user")
-    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uuid = metastore.select("uuid")[0]
+    with open_object_store(bucket=bucket, data_type="footprints") as objstore:
+        uuid = objstore.uuids[0]
+        ds = objstore.get_datasource(uuid=uuid)
 
-    ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
 
@@ -139,21 +140,22 @@ def test_delete_footprint_data(footprint_read):
     # Assert there are files in the zarr store
     assert ds._store
 
-    zarr_store_key = ds._store.store_key(version="v1")
+    zarr_store_path = ds._store.store_path("v1")
 
-    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({"uuid": uuid})
+    assert zarr_store_path.exists()
+
+    with open_object_store(bucket=bucket, data_type="footprints") as objstore:
+        assert objstore.search({"uuid": uuid})
 
     res.delete_datasource(uuid=uuid)
 
     # Let's open the Datasource again and make sure we get a new empty object
-    with pytest.raises(ObjectStoreError):
-        Datasource(bucket=bucket, uuid=uuid)
+    with open_object_store(bucket=bucket, data_type="footprints") as objstore:
+        with pytest.raises(ObjectStoreError):
+            objstore.get_datasource(uuid=uuid)
 
-    assert not exists(bucket=bucket, key=zarr_store_key)
-
-    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({"uuid": uuid}) == []
+        assert not zarr_store_path.exists()
+        assert objstore.search({"uuid": uuid}) == []
 
 
 def test_object_store_not_in_metadata():
@@ -332,7 +334,7 @@ def test_delete_and_modify_keys():
 
     assert "long_name" not in freshest_metadata
 
-    assert freshest_metadata["sampling_period"] == "12H"
+    assert freshest_metadata["sampling_period"] == "12h"  # values lowercased by Datasource.add_metadata
     assert freshest_metadata["tasty_dish"] == "pasta"
 
 
@@ -355,11 +357,13 @@ def test_delete_data():
     uid = next(iter(res.metadata))
 
     bucket = get_writable_bucket(name="user")
-    d = Datasource(bucket=bucket, uuid=uid)
-    key = d.key()
 
-    with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({"uuid": uid})
+    with open_object_store(bucket=bucket, data_type="surface") as objstore:
+        assert uid in objstore.uuids
+
+        d = objstore.get_datasource(uuid=uid)
+
+    key = d.key()
 
     assert d._data_keys
     assert d._store
@@ -371,8 +375,8 @@ def test_delete_data():
     assert not zarr_store_path.exists()
     assert not exists(bucket=bucket, key=key)
 
-    with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({"uuid": uid}) == []
+    with open_object_store(bucket=bucket, data_type="surface") as objstore:
+        assert uid not in objstore.uuids
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

@@ -1,6 +1,8 @@
 addict
+cf-xarray
 dask
 filelock
+flox
 h5netcdf
 icoscp <= 0.1.17
 ipywidgets
@@ -15,6 +17,8 @@ numpy
 openghg_defs
 openpyxl
 pandas >= 2.0
+pint
+pint-xarray
 plotly
 pyvis
 rapidfuzz
@@ -24,8 +28,9 @@ scipy
 tinydb
 toml
 urllib3 >= 1.26.3
-xarray
+xarray >= 2025.04.0
 zarr==2.18.3
 openghg-calscales
 sympy
 networkx
+cdsapi

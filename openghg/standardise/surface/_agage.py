@@ -15,7 +15,7 @@ from openghg.util import clean_string, format_inlet
 
 
 def parse_agage(
-    filepath: str | Path,
+    filepath: pathType,
     site: str,
     network: str,
     inlet: str | None = None,
@@ -141,6 +141,8 @@ def parse_agage(
         # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
         data["mf_repeatability"] = data["mf_repeatability"].astype(float)
+        if "mf_variability" in data.columns:
+            data["mf_variability"] = data["mf_variability"].astype(float)
 
         gas_data = _format_species(
             data=data,
@@ -212,7 +214,10 @@ def _format_species(
         # want to select the data corresponding to each inlet
 
         inlet_data = data.loc[data["inlet_height"] == inlet]
-        species_data = inlet_data[["mf", "mf_repeatability"]]
+        if "mf_variability" in inlet_data.columns:
+            species_data = inlet_data[["mf", "mf_repeatability", "mf_variability"]]
+        else:
+            species_data = inlet_data[["mf", "mf_repeatability"]]
         species_data = species_data.dropna(axis="index", how="any")
 
         # Check that the Dataframe has something in it
@@ -240,7 +245,11 @@ def _format_species(
 
         # change the column names to {species} and {species} repeatability, which is what the get_obs_surface function expects
         species_data = species_data.rename(
-            columns={"mf": f"{comp_species}", "mf_repeatability": f"{comp_species} repeatability"}
+            columns={
+                "mf": f"{comp_species}",
+                "mf_repeatability": f"{comp_species} repeatability",
+                "mf_variability": f"{comp_species} variability",
+            }
         )
 
         # We want an xarray Dataset

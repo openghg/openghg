@@ -1,10 +1,11 @@
 import builtins
 from pathlib import Path
+import tempfile
 import pytest
 import toml
 from unittest.mock import patch
-from openghg.types import ConfigFileError
-from openghg.util import check_config, create_config, read_local_config
+from openghg.types import ConfigFileError, ObjectStoreError
+from openghg.util import check_config, create_config, read_local_config, handle_direct_store_path
 
 
 @pytest.fixture
@@ -168,3 +169,26 @@ def test_create_config_duplicates(monkeypatch, mocker, tmp_path, capsys):
     assert "Some names match those of existing stores: ['user'], please update manually" in str(captured)
     assert "user" in str(exception)
     assert config["object_store"]["user"]["path"] in str(exception)
+
+
+def test_handle_direct_store_path(caplog, reset_mock_user_config):
+    """Test the function to directly add the path to config, as well as looks for the ObjectStore error if the store details already exist in the config."""
+    path = Path(tempfile.gettempdir()) / "openghg-testing-direct-store"
+    name = "direct_store"
+    handle_direct_store_path(path=path, name=name, add_new_store=True)
+
+    assert (
+        f"'{path}' is not a configured writable store name but looks like a path. "
+        "Using it directly." in caplog.text
+    )
+    assert f"Added store '{name}' with path '{path}' to config." in caplog.text
+
+    handle_direct_store_path(path=path, add_new_store=True)
+    assert (
+        f"'{path}' is not a configured writable store name but looks like a path. "
+        "Using it directly." in caplog.text
+    )
+    assert "openghg-testing-direct-store" in caplog.text
+
+    with pytest.raises(ObjectStoreError):
+        handle_direct_store_path(path=path, add_new_store=True)

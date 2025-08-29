@@ -19,6 +19,7 @@ from openghg.util import (
     in_daterange,
     parse_period,
     relative_time_offset,
+    infer_frequency,
     split_daterange_str,
     split_encompassed_daterange,
     time_offset,
@@ -439,6 +440,42 @@ def test_relative_time_offset(kwargs, expected):
 
 def test_relative_time_offset_with_vaies():
     print(relative_time_offset)
+
+
+@pytest.mark.parametrize(
+    "start,end,periods,expected_freq",
+    [
+        ("2012-01-01T00:00:00", "2012-01-01T00:01:00", 61, "s"),
+        ("2012-01-01T00:00:00", "2012-01-01T00:01:00", 2, "60s"),
+        ("2012-01-01T00:00:00", "2012-01-01T01:00:00", 2, "1h"),
+        ("2012-01-01T00:00:00", "2012-01-02T00:00:00", 2, "1.0D"),
+        ("2012-01-01T00:00:00", "2012-02-01T00:00:00", 2, "MS"),
+        ("2012-01-01T00:00:00", "2012-02-02T00:00:00", 2, "32.0D"),
+        ("2012-01-01T00:00:00", "2013-01-01T00:00:00", 2, "YS"),
+        ("2012-01-01T00:00:00", "2013-01-03T00:00:00", 2, "368.0D"),
+    ],
+)
+def test_infer_frequency(start, end, periods, expected_freq):
+    """
+    1. Checking frequency can be inferred for timestamps >2 points (should use pd.infer_freq)
+    2-8. Check specific cases where only 2 timestamps are included
+       2. Check < 1 hour include seconds as an integer
+       3. Check < 1 day includes hours as an integer
+       4. Check <~ 1 month includes days as a 1DP float
+       5. Check ~= month (28, 30, 31 days) but <~ year (365, 366) is set to "MS"
+         - We don't check this is the start of the month (so a little dodgy)
+           but this is an approximation to align with pandas freq strings
+       6. Check other time in this range is given in days as a 1DP float
+       7. Check ~= year (365, 366) is set to "YS"
+         - Again, we don't check this is the start of the year, and this is
+           another approximation to align with pandas frequency strings
+       8. Check any other time is given in days as a 1DP float
+
+    """
+    timestamps = pd.date_range(start, end, periods=periods)
+    freq = infer_frequency(timestamps)
+
+    assert freq == expected_freq
 
 
 def test_in_daterange():

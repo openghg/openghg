@@ -1,7 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any
+import numpy as np
+from xarray import Dataset
 import logging
+
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.util import load_standardise_parser, split_function_inputs
 
@@ -29,7 +33,7 @@ class EulerianModel(BaseStore):
 
     def read_file(
         self,
-        filepath: str | Path,
+        filepath: str | Path | list[str | Path],
         model: str,
         species: str,
         source_format: str = "openghg",
@@ -116,8 +120,6 @@ class EulerianModel(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        filepath = Path(filepath)
-
         standardise_parsers = define_standardise_parsers()[self._data_type]
 
         try:
@@ -194,3 +196,41 @@ class EulerianModel(BaseStore):
         self.store_hashes(unseen_hashes)
 
         return datasource_uuids
+
+    @staticmethod
+    def schema() -> DataSchema:
+        """
+        Define schema for Eulerian model Dataset.
+
+        At present, this doesn't check the variables but does check that
+        "lat", "lon", "time" are included as appropriate types.
+
+        Returns:
+            DataSchema : Contains dummy schema for EulerianModel.
+
+        TODO: Decide on data_vars checks as we build up the use of this data_type
+        """
+        data_vars: dict[str, tuple[str, ...]] = {}
+        dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64}
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against EulerianModel schema - definition from
+        EulerianModel.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the EulerianModel schema.
+        """
+        data_schema = EulerianModel.schema()
+        data_schema.validate_data(data)

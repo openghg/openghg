@@ -57,41 +57,41 @@ def test_construct_name_fails_missing_key():
 
 
 @pytest.mark.parametrize(
-        "metadata, obs_type, out_filename",
-        [
-            (
-                {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-insitu", "ch4_WAO_10m_surface-insitu.nc"
-            ),
-            (
-                {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-insitu", "ch4_WAO_10m_surface-insitu.nc"
-            ),
-            (
-                {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"},
-                "surface-insitu", "ch4_WAO_10m_surface-insitu_v1.nc"
-            ),
-            (
-                {"site": "WAO", "species": "ch4", "inlet": "10m"},
-                "surface-flask", "ch4_WAO_10m_surface-flask.nc"
-            ),
-            (
-                {"platform": "site", "species": "ch4", "site": "WAO"},
-                "column", "ch4_WAO_site_column.nc"
-            ),
-            (
-                {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
-                "column", "ch4_GOSAT-BRAZIL_satellite_column.nc"
-            ),
-            (
-                {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
-                "column", "ch4_GOSAT-BRAZIL_satellite_column.nc"
-            ),
-            (
-                {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
-                "column", "ch4_GOSAT-SOUTHAMERICA_satellite_column.nc"
-            ),
-        ]
+    "metadata, obs_type, out_filename",
+    [
+        (
+            {"site": "WAO", "species": "ch4", "inlet": "10m"},
+            "surface-insitu",
+            "ch4_WAO_10m_surface-insitu.nc",
+        ),
+        (
+            {"site": "WAO", "species": "ch4", "inlet": "10m"},
+            "surface-insitu",
+            "ch4_WAO_10m_surface-insitu.nc",
+        ),
+        (
+            {"site": "WAO", "species": "ch4", "inlet": "10m", "latest_version": "v1"},
+            "surface-insitu",
+            "ch4_WAO_10m_surface-insitu_v1.nc",
+        ),
+        ({"site": "WAO", "species": "ch4", "inlet": "10m"}, "surface-flask", "ch4_WAO_10m_surface-flask.nc"),
+        ({"platform": "site", "species": "ch4", "site": "WAO"}, "column", "ch4_WAO_site_column.nc"),
+        (
+            {"platform": "satellite", "species": "ch4", "site": "GOSAT-BRAZIL"},
+            "column",
+            "ch4_GOSAT-BRAZIL_satellite_column.nc",
+        ),
+        (
+            {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "selection": "BRAZIL"},
+            "column",
+            "ch4_GOSAT-BRAZIL_satellite_column.nc",
+        ),
+        (
+            {"platform": "satellite", "species": "ch4", "satellite": "GOSAT", "domain": "SOUTHAMERICA"},
+            "column",
+            "ch4_GOSAT-SOUTHAMERICA_satellite_column.nc",
+        ),
+    ],
 )
 def test_define_stored_data_filename(metadata, obs_type, out_filename):
     """
@@ -110,15 +110,16 @@ def test_define_stored_data_filename(metadata, obs_type, out_filename):
 
     assert filename == out_filename
 
+
 @pytest.mark.parametrize(
-        "latest_version, data_version, include_version, out_filename",
-        [
-            ("v52", None, True, "ch4_WAO_10m_surface-insitu_v52.nc"),
-            (None, "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
-            ("v52", "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
-            (None, None, True, "ch4_WAO_10m_surface-insitu.nc"),
-            ("v52", "v34", False, "ch4_WAO_10m_surface-insitu.nc"),
-        ]
+    "latest_version, data_version, include_version, out_filename",
+    [
+        ("v52", None, True, "ch4_WAO_10m_surface-insitu_v52.nc"),
+        (None, "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
+        ("v52", "v34", True, "ch4_WAO_10m_surface-insitu_v34.nc"),
+        (None, None, True, "ch4_WAO_10m_surface-insitu.nc"),
+        ("v52", "v34", False, "ch4_WAO_10m_surface-insitu.nc"),
+    ],
 )
 def test_define_stored_data_filename_version(latest_version, data_version, include_version, out_filename):
     """
@@ -135,21 +136,20 @@ def test_define_stored_data_filename_version(latest_version, data_version, inclu
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_stored_data_filename(metadata,
-                                       obs_type=obs_type,
-                                       include_version=include_version,
-                                       data_version=data_version)
+    filename = define_stored_data_filename(
+        metadata, obs_type=obs_type, include_version=include_version, data_version=data_version
+    )
 
     assert filename == out_filename
 
 
 @pytest.mark.parametrize(
-        "name_components, out_filename",
-        [
-            (["species", "site", "inlet"], "ch4_WAO_10m_surface-insitu_v1.nc"),
-            (["site", "inlet", "species"], "WAO_10m_ch4_surface-insitu_v1.nc"),
-            (["site", "data_source", "data_level"], "WAO_icos_1_surface-insitu_v1.nc"),
-        ]
+    "name_components, out_filename",
+    [
+        (["species", "site", "inlet"], "ch4_WAO_10m_surface-insitu_v1.nc"),
+        (["site", "inlet", "species"], "WAO_10m_ch4_surface-insitu_v1.nc"),
+        (["site", "data_source", "data_level"], "WAO_icos_1_surface-insitu_v1.nc"),
+    ],
 )
 def test_define_stored_data_filename_name_components(name_components, out_filename):
     """
@@ -169,20 +169,18 @@ def test_define_stored_data_filename_name_components(name_components, out_filena
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_stored_data_filename(metadata,
-                                       obs_type=obs_type,
-                                       name_components=name_components)
+    filename = define_stored_data_filename(metadata, obs_type=obs_type, name_components=name_components)
 
     assert filename == out_filename
 
 
 @pytest.mark.parametrize(
-        "name_suffixes, out_filename",
-        [
-            ({"obs_type": "surface-insitu", "data_version": "v1"}, "ch4_WAO_10m_surface-insitu_v1.nc"),
-            ({"latest_version": "v51"}, "ch4_WAO_10m_v51.nc"),
-            ({"project": "gemma", "source": "noaa"}, "ch4_WAO_10m_gemma_noaa.nc"),
-        ]
+    "name_suffixes, out_filename",
+    [
+        ({"obs_type": "surface-insitu", "data_version": "v1"}, "ch4_WAO_10m_surface-insitu_v1.nc"),
+        ({"latest_version": "v51"}, "ch4_WAO_10m_v51.nc"),
+        ({"project": "gemma", "source": "noaa"}, "ch4_WAO_10m_gemma_noaa.nc"),
+    ],
 )
 def test_define_stored_data_filename_name_suffixes(name_suffixes, out_filename):
     """
@@ -195,21 +193,20 @@ def test_define_stored_data_filename_name_suffixes(name_suffixes, out_filename):
 
     obs_type = "surface-insitu"
     out_filename = Path(out_filename)
-    filename = define_stored_data_filename(metadata,
-                                       obs_type=obs_type,
-                                       name_suffixes=name_suffixes)
+    filename = define_stored_data_filename(metadata, obs_type=obs_type, name_suffixes=name_suffixes)
 
     assert filename == out_filename
 
+
 @pytest.mark.parametrize(
-        "output_folder, subfolder",
-        [
-            (None, None),
-            ("", ""),
-            ("path/to/folder", None),
-            (None, "site-insitu"),
-            ("path/to/folder", "site-insitu"),
-        ]
+    "output_folder, subfolder",
+    [
+        (None, None),
+        ("", ""),
+        ("path/to/folder", None),
+        (None, "site-insitu"),
+        ("path/to/folder", "site-insitu"),
+    ],
 )
 def test_define_full_obspack_filename(output_folder, subfolder):
     """
@@ -220,10 +217,9 @@ def test_define_full_obspack_filename(output_folder, subfolder):
     filename = "ch4_WAO_10m_surface-insitu_v1.nc"
     obspack_name = "gemma_obspack_v2"
 
-    full_filename = define_full_obspack_filename(filename,
-                                                 obspack_name=obspack_name,
-                                                 output_folder=output_folder,
-                                                 subfolder=subfolder)
+    full_filename = define_full_obspack_filename(
+        filename, obspack_name=obspack_name, output_folder=output_folder, subfolder=subfolder
+    )
 
     if subfolder is None:
         subfolder = ""
@@ -233,7 +229,7 @@ def test_define_full_obspack_filename(output_folder, subfolder):
     expected_full_filename = Path(output_folder) / obspack_name / Path(subfolder) / filename
 
     assert full_filename == expected_full_filename
-    
+
 
 def test_find_additional_metakeys_insitu():
     """
@@ -258,24 +254,25 @@ def test_find_additional_metakeys_insitu():
     assert one_expected_metakey in metakeys
 
 
-#%% Test creation of obspack_name
-    
+# %% Test creation of obspack_name
+
+
 @pytest.mark.parametrize(
-"version,current_obspacks,expected_output",
-[
-    ("v1", [], "gemma_obspack_v1"),
-    (
-        None,
-        ["gemma_obspack"],
-        "gemma_obspack_v2",
-    ),  # If no version is found, assume v1 and use next version
-    (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
-    (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-    (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
-    (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
-    (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
-    (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
-],
+    "version,current_obspacks,expected_output",
+    [
+        ("v1", [], "gemma_obspack_v1"),
+        (
+            None,
+            ["gemma_obspack"],
+            "gemma_obspack_v2",
+        ),  # If no version is found, assume v1 and use next version
+        (None, ["gemma_obspack_v1"], "gemma_obspack_v2"),
+        (None, ["gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (None, ["gemma_obspack_v0.23"], "gemma_obspack_v0.24"),
+        (None, ["gemma_obspack_v1.1", "gemma_obspack_v2"], "gemma_obspack_v3"),
+        (None, ["gemma_obspack_v0.23", "gemma_obspack_v1.1"], "gemma_obspack_v1.2"),
+        (None, ["gemma_obspack_v2.0", "gemma_obspack_v1.1"], "gemma_obspack_v2.1"),
+    ],
 )
 def test_define_obspack_name(version, current_obspacks, expected_output):
     obspack_stub = "gemma_obspack"

@@ -6,6 +6,7 @@ from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
 
 from openghg.types import TimePeriod, pathType
+from openghg.util import infer_frequency
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -146,9 +147,9 @@ def infer_date_range(
         # Here we trim the timestamps to millisecond precision to reduce the likelihood of
         # floating point errors result in ns differences in period
         timestamps = pd.to_datetime(time.values.astype("datetime64[ms]"), utc=True)
-        timestamps = timestamps.sort_values()
 
-        inferred_period = pd.infer_freq(timestamps)
+        inferred_period = infer_frequency(timestamps)
+
         if inferred_period is None:
             if continuous:
                 raise ValueError(

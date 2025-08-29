@@ -1,5 +1,6 @@
 """Some helper functions for things we do in tests frequently"""
 
+import getpass
 import shutil
 import tempfile
 from pathlib import Path
@@ -9,10 +10,14 @@ from typing import Dict, List, Union
 def temporary_store_paths() -> Dict[str, Path]:
     # Add some uppercasing and numbers here to enusure paths work
     # with other characters - see https://github.com/openghg/openghg/issues/701
+    user = getpass.getuser()  # get current system user
+
+    base_tmp = Path(tempfile.gettempdir()) / f"openghg-testing-{user}"
+
     return {
-        "user": Path(tempfile.gettempdir(), "openghg_testing-STORE_123"),
-        "group": Path(tempfile.gettempdir(), "openghg_testing_group_store"),
-        "shared": Path(tempfile.gettempdir(), "openghg_testing_shared_store"),
+        "user": base_tmp / f"openghg_testing-STORE_123",
+        "group": base_tmp / f"openghg_testing_group_store",
+        "shared": base_tmp / f"openghg_testing_shared_store",
     }
 
 
@@ -177,4 +182,9 @@ def print_dict_diff(dict1: dict, dict2: dict, skip_missing: bool = False) -> Non
             continue
 
         if val1 != val2:
-            print(f"{key:<20}{val1:<20}{val2:<20}")
+            try:
+                print_val1 = ", ".join(val1) if isinstance(val1, list) else val1
+                print_val2 = ", ".join(val2) if isinstance(val2, list) else val2
+                print(f"{key:<20}{print_val1:<20}{print_val2:<20}")
+            except TypeError:
+                print(key, val1, val2)

@@ -2,12 +2,12 @@ name: openghg_dev_env
 channels:
   - openghg
   - conda-forge
-  - defaults
   - anaconda
 dependencies:
   - python>=3.9
   - conda-build
   - addict
+  - cf_xarray
   - dask
   - h5netcdf
   - filelock
@@ -32,7 +32,8 @@ dependencies:
   - toml
   - rich
   - ipywidgets
-  - xarray
+  - xarray>=2025.04.0
+  - flox
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
@@ -40,6 +41,8 @@ dependencies:
   - numcodecs
   - git
   - flake8
+  - pint
+  - pint-xarray
   - pre-commit
   - pytest
   - pytest-cov
@@ -53,6 +56,7 @@ dependencies:
   - types-toml
   - types-urllib3
   - openghg_calscales
+  - cdsapi
   - pip:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types
