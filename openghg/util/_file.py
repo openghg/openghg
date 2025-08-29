@@ -256,7 +256,7 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
-def check_filepath(filepath: multiPathType, source_format: str) -> list[str | Path]:
+def check_filepath(filepath: multiPathType, source_format: str) -> list[str] | list[Path]:
     """
     Check that filepath is of the correct format - this assumes the filepath
     should be a str, Path or list but not a tuple (this is only needed for gcwerks).
@@ -330,11 +330,11 @@ def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> 
 
 
 def open_nc_fn(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = None,
-) -> tuple[Callable, str | Path | list[str | Path]]:
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -387,11 +387,11 @@ def open_nc_fn(
 
 
 def open_time_nc_fn(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = "time",
-) -> tuple[Callable, str | Path | list[str | Path]]:
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset

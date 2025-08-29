@@ -206,7 +206,7 @@ def multiple_inlets(site: str, site_filepath: pathType | None = None) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: str | Path | list[str | Path]) -> list[str | Path]:
+def sort_by_filenames(filepath: str | Path | list[str] | list[Path]) -> list[Path]:
     """
     Sorting time on filename basis
 

@@ -24,7 +24,7 @@ from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.types import MetadataAndData
+from openghg.types import MetadataAndData, StandardiseError
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -1030,13 +1030,13 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
 
 
 def test_optional_parameters():
-    """Test if ValueError is raised for invalid input value to calibration_scale."""
+    """Test if StandardiseError is raised for invalid input value to calibration_scale."""
 
     clear_test_stores()
     data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     with pytest.raises(
-        ValueError,
+        StandardiseError,
         match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007",
     ):
         standardise_surface(

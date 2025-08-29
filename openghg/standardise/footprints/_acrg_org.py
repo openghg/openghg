@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     domain: str,
     model: str,
     inlet: str,
