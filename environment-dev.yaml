@@ -2,7 +2,6 @@ name: openghg_dev_env
 channels:
   - openghg
   - conda-forge
-  - defaults
   - anaconda
 dependencies:
   - python>=3.9
@@ -33,7 +32,8 @@ dependencies:
   - toml
   - rich
   - ipywidgets
-  - xarray
+  - xarray>=2025.04.0
+  - flox
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
