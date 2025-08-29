@@ -172,8 +172,8 @@ class BaseStore:
 
         from openghg.util import load_standardise_parser, split_function_inputs
 
-        # chunking_params = self.find_chunking_schema_inputs()
         validate_params = self.find_data_schema_inputs()
+        chunking_params = self.find_chunking_schema_inputs()
 
         if not parser_fn and source_format is not None:
             # Load the data retrieve object
@@ -198,15 +198,13 @@ class BaseStore:
             logger.exception(msg)
             raise StandardiseError(msg)
 
-        # # TODO: Add in use of self.check_chunks() - used for Footprint only at the moment
-        # chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, data[0])
-        # chunks = self.check_chunks(
-        #     ds=data[0].data,
-        #     chunks=chunks,
-        #     **chunking_kwargs
-        #     )
-        # if chunks:
-        #     logger.info(f"Rechunking with chunks={chunks}")
+        # Check any specified chunks / default chunks for the data_type are not too large
+        chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, data[0])
+        chunks = self.check_chunks(
+            ds=data[0].data,
+            chunks=chunks,
+            **chunking_kwargs
+            )
 
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
@@ -224,6 +222,7 @@ class BaseStore:
 
         # Ensure the data is chunked
         if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
             for datasource in data:
                 datasource.data = datasource.data.chunk(chunks)
 
@@ -370,9 +369,6 @@ class BaseStore:
 
         if not filepaths:
             return [{}]
-
-        if chunks is None:
-            chunks = {}
 
         # Check if filepaths are all netcdf files
         file_extensions = [fp.suffix for fp in filepaths]
