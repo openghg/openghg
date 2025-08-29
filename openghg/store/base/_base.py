@@ -200,11 +200,7 @@ class BaseStore:
 
         # Check any specified chunks / default chunks for the data_type are not too large
         chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, data[0])
-        chunks = self.check_chunks(
-            ds=data[0].data,
-            chunks=chunks,
-            **chunking_kwargs
-            )
+        chunks = self.check_chunks(ds=data[0].data, chunks=chunks, **chunking_kwargs)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
