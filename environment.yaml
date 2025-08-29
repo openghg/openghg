@@ -2,7 +2,6 @@ name: openghg_env
 channels:
   - openghg
   - conda-forge
-  - defaults
   - anaconda
 dependencies:
   - python>=3.10
