@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obscolumn &#8212; OpenGHG 0.15.0 documentation</title>
+    <title>openghg.store._obscolumn &#8212; OpenGHG 0.16.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
+  <meta name="docsearch:version" content="0.16.0" />
+    <meta name="docbuild:last-update" content="Aug 29, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.15.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.15.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
   
   
 </a></div>
@@ -337,15 +337,14 @@
   <h1>Source code for openghg.store._obscolumn</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="c1"># from openghg.store import DataSchema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">pathType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 
 <span class="n">ArrayType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">DataArray</span><span class="p">]</span>
 
@@ -367,7 +366,7 @@
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsColumn.read_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
         <span class="n">obs_region</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -385,6 +384,7 @@
         <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pressure_weights_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
@@ -427,6 +427,7 @@
 <span class="sd">                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
 <span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
 <span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
+<span class="sd">            pressure_weights_method: method to use to derive TCCON pressure_weights.</span>
 <span class="sd">            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">                for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
@@ -456,7 +457,7 @@
         <span class="n">platform</span> <span class="o">=</span> <span class="n">format_platform</span><span class="p">(</span><span class="n">platform</span><span class="p">)</span>
         <span class="n">platform</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">platform</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">source_format</span> <span class="o">!=</span> <span class="s2">&quot;tccon&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value for &#39;site&#39; or &#39;satellite&#39; must be specified&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one of &#39;site&#39; or &#39;satellite&#39; should be specified&quot;</span><span class="p">)</span>
@@ -467,6 +468,7 @@
         <span class="n">obs_region</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obs_region</span><span class="p">)</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
         <span class="n">instrument</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+        <span class="n">pressure_weights_method</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">pressure_weights_method</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs_region</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Only one of &#39;domain&#39; : </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> or &#39;obs_region&#39;: </span><span class="si">{</span><span class="n">obs_region</span><span class="si">}</span><span class="s2"> should be specified&quot;</span>
@@ -494,8 +496,6 @@
             <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
 
         <span class="n">new_version</span> <span class="o">=</span> <span class="n">check_if_need_new_version</span><span class="p">(</span><span class="n">if_exists</span><span class="p">,</span> <span class="n">save_current</span><span class="p">)</span>
-
-        <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
         <span class="n">standardise_parsers</span> <span class="o">=</span> <span class="n">define_standardise_parsers</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">]</span>
 
@@ -528,11 +528,10 @@
 
         <span class="n">obs_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
 
-        <span class="c1"># TODO: Add in schema and checks for ObsColumn</span>
-        <span class="c1"># # Checking against expected format for ObsColumn</span>
-        <span class="c1"># for split_data in obs_data.values():</span>
-        <span class="c1">#     col_data = split_data[&quot;data&quot;]</span>
-        <span class="c1">#     ObsColumn.validate_data(col_data)</span>
+        <span class="c1"># Checking against expected format for ObsColumn</span>
+        <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">obs_data</span><span class="p">:</span>
+            <span class="n">col_data</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">ObsColumn</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">col_data</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
 
         <span class="c1"># TODO: Do we need to do include a split here of some kind, since</span>
         <span class="c1"># this could be &quot;site&quot; or &quot;satellite&quot; keys.</span>
@@ -568,7 +567,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
-</div>
 
 
     <span class="c1"># TODO: Add in transform method for gosat and tropomi raw data files</span>
@@ -652,50 +650,81 @@
 
     <span class="c1">#     return datasource_uuids</span>
 
-    <span class="c1"># TODO: Define and add schema methods for ObsColumn</span>
-    <span class="c1"># @staticmethod</span>
-    <span class="c1"># def schema(species: str, platform: str = &quot;satellite&quot;) -&gt; DataSchema:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Define schema for emissions Dataset.</span>
+<div class="viewcode-block" id="ObsColumn.schema">
+<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsColumn.schema">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vertical_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lev&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define schema for a column Dataset.</span>
 
-    <span class="c1">#     Includes column data for each time point:</span>
-    <span class="c1">#         - standardised species and column name (e.g. &quot;xch4&quot;)</span>
-    <span class="c1">#         - expected dimensions: (&quot;time&quot;)</span>
+<span class="sd">        Includes column data for each time point:</span>
+<span class="sd">            - standardised species and column name as &quot;x{species}&quot; (e.g. &quot;xch4&quot;)</span>
+<span class="sd">            - averaging kernel variable as &quot;x{species_name}_averaging_kernel&quot;</span>
+<span class="sd">            - profile apriori variable as &quot;{species_name}_profile_apriori&quot;</span>
+<span class="sd">            - expected &quot;time&quot; dimension</span>
+<span class="sd">            - expected vertical dimension (defined by input)</span>
 
-    <span class="c1">#     Expected data types for all variables and coordinates also included.</span>
+<span class="sd">        Expected data types for all variables and coordinates also included.</span>
 
-    <span class="c1">#     Returns:</span>
-    <span class="c1">#         DataSchema : Contains schema for Emissions.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     data_vars: Dict[str, Tuple[str, ...]] \</span>
-    <span class="c1">#         = {&quot;flux&quot;: (&quot;time&quot;, &quot;lat&quot;, &quot;lon&quot;)}</span>
-    <span class="c1">#     dtypes = {&quot;lat&quot;: np.floating,</span>
-    <span class="c1">#               &quot;lon&quot;: np.floating,</span>
-    <span class="c1">#               &quot;time&quot;: np.datetime64,</span>
-    <span class="c1">#               &quot;flux&quot;: np.floating}</span>
+<span class="sd">        Args:</span>
+<span class="sd">            species: Species name which will be used to construct appropriate</span>
+<span class="sd">                variable names e.g. &quot;ch4&quot; will create &quot;xch4&quot;</span>
+<span class="sd">            vertical_name: Name of the vertical dimension for averaging kernel</span>
+<span class="sd">                and apriori.</span>
+<span class="sd">                Default = &quot;lev&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            DataSchema : Contains schema for ObsColumn.</span>
 
-    <span class="c1">#     data_format = DataSchema(data_vars=data_vars,</span>
-    <span class="c1">#                              dtypes=dtypes)</span>
+<span class="sd">        TODO: Expand valid list of vertical names as needed (e.g. &quot;lev&quot;, &quot;height&quot;) and</span>
+<span class="sd">            check vertical_name inputs against valid list of options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_species_label</span>
 
-    <span class="c1">#     return data_format</span>
+        <span class="n">data_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dtypes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">}</span>
 
-    <span class="c1"># @staticmethod</span>
-    <span class="c1"># def validate_data(data: Dataset) -&gt; None:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Validate input data against Emissions schema - definition from</span>
-    <span class="c1">#     Emissions.schema() method.</span>
+        <span class="n">species_name</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="c1">#     Args:</span>
-    <span class="c1">#         data : xarray Dataset in expected format</span>
+        <span class="n">column_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">averaging_kernal_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species_name</span><span class="si">}</span><span class="s2">_averaging_kernel&quot;</span>
+        <span class="n">profile_apriori_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_name</span><span class="si">}</span><span class="s2">_profile_apriori&quot;</span>
 
-    <span class="c1">#     Returns:</span>
-    <span class="c1">#         None</span>
+        <span class="n">data_vars</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,)</span>
+        <span class="n">data_vars</span><span class="p">[</span><span class="n">averaging_kernal_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">vertical_name</span><span class="p">)</span>
+        <span class="n">data_vars</span><span class="p">[</span><span class="n">profile_apriori_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">vertical_name</span><span class="p">)</span>
 
-    <span class="c1">#         Raises a ValueError with details if the input data does not adhere</span>
-    <span class="c1">#         to the Emissions schema.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     data_schema = Emissions.schema()</span>
-    <span class="c1">#     data_schema.validate_data(data)</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">column_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
+            <span class="n">averaging_kernal_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
+            <span class="n">profile_apriori_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_format</span></div>
+
+
+<div class="viewcode-block" id="ObsColumn.validate_data">
+<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsColumn.validate_data">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate input data against Emissions schema - definition from</span>
+<span class="sd">        Emissions.schema() method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data : xarray Dataset in expected format</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">            Raises a ValueError with details if the input data does not adhere</span>
+<span class="sd">            to the Emissions schema.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">ObsColumn</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
                 </article>

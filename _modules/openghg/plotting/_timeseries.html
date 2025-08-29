@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.plotting._timeseries &#8212; OpenGHG 0.15.0 documentation</title>
+    <title>openghg.plotting._timeseries &#8212; OpenGHG 0.16.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
+  <meta name="docsearch:version" content="0.16.0" />
+    <meta name="docbuild:last-update" content="Aug 29, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.15.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.15.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
   
   
 </a></div>
@@ -342,7 +342,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_species_info</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">get_datapath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_species_info</span><span class="p">,</span> <span class="n">load_internal_json</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">get_datapath</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg_calscales.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -450,6 +450,95 @@
     <span class="k">return</span> <span class="n">logo_dict</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_plot_single_timeseries</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">:</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span>
+    <span class="n">to_plot</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="n">ObsColumnData</span><span class="p">,</span>
+    <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">yvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">attributes_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="c1"># Get species info and attributes data, if not passed</span>
+    <span class="n">species_info</span> <span class="o">=</span> <span class="n">species_info</span> <span class="ow">or</span> <span class="n">get_species_info</span><span class="p">()</span>
+    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">attributes_data</span> <span class="ow">or</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">metadata</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="n">existing_calibration_scale</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">calibration_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">target_scale</span> <span class="o">=</span> <span class="n">calibration_scale</span>
+        <span class="n">original_scale</span> <span class="o">=</span> <span class="n">existing_calibration_scale</span>
+
+        <span class="k">if</span> <span class="n">original_scale</span> <span class="ow">and</span> <span class="n">target_scale</span> <span class="ow">and</span> <span class="n">original_scale</span> <span class="o">!=</span> <span class="n">target_scale</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converting from calibration scale &#39;</span><span class="si">{</span><span class="n">original_scale</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">target_scale</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="n">v</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data_vars</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">))</span>
+            <span class="p">):</span>
+                <span class="n">dataset</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span>
+                    <span class="n">c</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span>
+                    <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                    <span class="n">scale_original</span><span class="o">=</span><span class="n">original_scale</span><span class="p">,</span>
+                    <span class="n">scale_new</span><span class="o">=</span><span class="n">target_scale</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_scale</span>
+
+    <span class="n">species_string</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">species_info</span><span class="p">[</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">)][</span><span class="s2">&quot;print_string&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="n">satellite</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span>
+        <span class="n">legend_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_string</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">satellite</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;calibration_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+        <span class="n">legend_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_string</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;calibration_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">x_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">xvar</span><span class="p">]</span> <span class="k">if</span> <span class="n">xvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dataset</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="k">if</span> <span class="n">yvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">yvar</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
+
+    <span class="n">y_data</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">quantify</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_data</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+
+    <span class="n">unit_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y_data</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">units</span><span class="si">:</span><span class="s2">cf</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Add NaNs where there are large data gaps</span>
+    <span class="n">x_data_plot</span><span class="p">,</span> <span class="n">y_data_plot</span> <span class="o">=</span> <span class="n">_plot_remove_gaps</span><span class="p">(</span><span class="n">x_data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Convert unit string to html</span>
+    <span class="n">unit_string_html</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">unit_string</span><span class="p">)</span>
+
+    <span class="c1"># Create plot</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">legend_text</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">x_data_plot</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y_data_plot</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">&quot;%{x|%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M}&lt;br&gt; %</span><span class="si">{y:.1f}</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="n">unit_string_html</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">unit_string_html</span><span class="p">,</span> <span class="n">species_string</span>
+
+
 <div class="viewcode-block" id="plot_timeseries">
 <a class="viewcode-back" href="../../../api/api_plotting.html#openghg.plotting.plot_timeseries">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plot_timeseries</span><span class="p">(</span>
@@ -478,8 +567,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        go.Figure: Plotly Graph Object Figure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_internal_json</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No data to plot, returning&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -511,109 +598,43 @@
     <span class="n">species_strings</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">unit_strings</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1"># get ascending/descending + set-up for possibly finding units</span>
+    <span class="n">data0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">data0</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">data0</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">yvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">yvar</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Determine whether data is ascending or descending (positioning of legend)</span>
+    <span class="n">y_data_diff</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">ascending</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y_data_diff</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span>  <span class="c1"># float conversion for mypy</span>
+
+    <span class="c1"># get units if plotting multiple timeseries</span>
+    <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pint_units</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">quantify</span><span class="p">()</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">units</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pint_units</span><span class="si">:</span><span class="s2">cf</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">plot_args</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;xvar&quot;</span><span class="p">:</span> <span class="n">xvar</span><span class="p">,</span>
+        <span class="s2">&quot;yvar&quot;</span><span class="p">:</span> <span class="n">yvar</span><span class="p">,</span>
+        <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="n">units</span><span class="p">,</span>
+        <span class="s2">&quot;calibration_scale&quot;</span><span class="p">:</span> <span class="n">calibration_scale</span><span class="p">,</span>
+        <span class="s2">&quot;species_info&quot;</span><span class="p">:</span> <span class="n">species_info</span><span class="p">,</span>
+        <span class="s2">&quot;attributes_data&quot;</span><span class="p">:</span> <span class="n">attributes_data</span><span class="p">,</span>
+    <span class="p">}</span>
+
     <span class="c1"># Loop through inlets/species</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">metadata</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">data</span>
-
-        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-        <span class="n">existing_calibration_scale</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">calibration_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">target_scale</span> <span class="o">=</span> <span class="n">calibration_scale</span>
-            <span class="n">original_scale</span> <span class="o">=</span> <span class="n">existing_calibration_scale</span>
-
-            <span class="k">if</span> <span class="n">original_scale</span> <span class="ow">and</span> <span class="n">target_scale</span> <span class="ow">and</span> <span class="n">original_scale</span> <span class="o">!=</span> <span class="n">target_scale</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converting from calibration scale &#39;</span><span class="si">{</span><span class="n">original_scale</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">target_scale</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="n">v</span>
-                    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data_vars</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">))</span>
-                <span class="p">):</span>
-                    <span class="n">dataset</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span>
-                        <span class="n">c</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span>
-                        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                        <span class="n">scale_original</span><span class="o">=</span><span class="n">original_scale</span><span class="p">,</span>
-                        <span class="n">scale_new</span><span class="o">=</span><span class="n">target_scale</span><span class="p">,</span>
-                    <span class="p">)</span>
-
-                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_scale</span>
-
-        <span class="n">species_string</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">species_info</span><span class="p">[</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">)][</span><span class="s2">&quot;print_string&quot;</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
-            <span class="n">satellite</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span>
-            <span class="n">legend_text</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_string</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">satellite</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;calibration_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="n">legend_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_string</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;calibration_scale&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-
-        <span class="k">if</span> <span class="n">xvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">xvar</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">time</span>
-
-        <span class="k">if</span> <span class="n">yvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">yvar</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">data_attrs</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">attrs</span>
-            <span class="n">data_units</span> <span class="o">=</span> <span class="n">data_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
-                    <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
-                    <span class="n">unit_value</span> <span class="o">=</span> <span class="n">unit_interpret</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">unit_value</span> <span class="o">=</span> <span class="n">data_units</span>
-
-            <span class="n">unit_conversion</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_units</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">unit_value</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">unit_conversion</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="c1"># TODO: Not sure what is expected for unit_value here</span>
-            <span class="n">unit_value</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
-
-        <span class="n">y_data</span> <span class="o">*=</span> <span class="n">unit_conversion</span>
-
-        <span class="n">unit_string</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_print&quot;</span><span class="p">][</span><span class="n">unit_value</span><span class="p">]</span>
-
-        <span class="c1"># Add NaNs where there are large data gaps</span>
-        <span class="n">x_data_plot</span><span class="p">,</span> <span class="n">y_data_plot</span> <span class="o">=</span> <span class="n">_plot_remove_gaps</span><span class="p">(</span><span class="n">x_data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-
-        <span class="c1"># Convert unit string to html</span>
-        <span class="n">unit_string_html</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">unit_string</span><span class="p">)</span>
-
-        <span class="c1"># Create plot</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
-            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">legend_text</span><span class="p">,</span>
-                <span class="n">x</span><span class="o">=</span><span class="n">x_data_plot</span><span class="p">,</span>
-                <span class="n">y</span><span class="o">=</span><span class="n">y_data_plot</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
-                <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">&quot;%{x|%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M}&lt;br&gt; %</span><span class="si">{y:.1f}</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="n">unit_string_html</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">unit_string_html</span><span class="p">,</span> <span class="n">species_string</span> <span class="o">=</span> <span class="n">_plot_single_timeseries</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">to_plot</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_args</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
         <span class="c1"># Save units and species names for axis labels</span>
         <span class="n">unit_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unit_string_html</span><span class="p">)</span>
         <span class="n">species_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species_string</span><span class="p">)</span>
-
-    <span class="c1"># Determine whether data is ascending or descending (positioning of legend)</span>
-    <span class="n">y_data_diff</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">y_data_diff</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">ascending</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ascending</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">unit_strings</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t plot two different units yet&quot;</span><span class="p">)</span>

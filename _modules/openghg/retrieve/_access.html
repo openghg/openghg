@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0.15.0 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0.16.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
+  <meta name="docsearch:version" content="0.16.0" />
+    <meta name="docbuild:last-update" content="Aug 29, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.15.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.15.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
   
   
 </a></div>
@@ -337,9 +337,8 @@
   <h1>Source code for openghg.retrieve._access</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg_calscales.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.data_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">surface_obs_resampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.data_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">surface_obs_resampler</span><span class="p">,</span> <span class="n">column_obs_resampler</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects._basedata</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseData</span>  <span class="c1"># TODO: expose this type?</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BoundaryConditionsData</span><span class="p">,</span>
@@ -349,7 +348,7 @@
     <span class="n">ObsData</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchError</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_and_elevate_inlet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_and_elevate_inlet</span><span class="p">,</span> <span class="n">assign_units</span><span class="p">,</span> <span class="n">update_scale</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
 
@@ -416,6 +415,13 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">retrieved_data</span>
 
+    <span class="c1"># TODO: make sure lat and lon have units when stadardising</span>
+    <span class="c1"># make sure lat and lon units are set</span>
+    <span class="k">if</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_north&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degrees_east&quot;</span>
+
     <span class="k">return</span> <span class="n">result</span>
 
 
@@ -435,6 +441,8 @@
     <span class="n">rename_vars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">keep_variables</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_dequantified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
@@ -458,6 +466,13 @@
 <span class="sd">        rename_vars: Rename variables from species names to use &quot;mf&quot; explictly.</span>
 <span class="sd">        keep_missing: Keep missing data points or drop them.</span>
 <span class="sd">        keep_variables: List of variables to keep. If None, keeps everything.</span>
+<span class="sd">        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.</span>
+<span class="sd">        Example:</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;mf&quot;: &quot;ppm&quot;,</span>
+<span class="sd">            &quot;mf_variability&quot;: &quot;ppm&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 
 <span class="sd">    Returns:</span>
@@ -556,32 +571,13 @@
     <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
 
     <span class="k">if</span> <span class="s2">&quot;calibration_scale&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">)</span>
-        <span class="n">existing_calibration_scale</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">calibration_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">target_scale</span> <span class="o">=</span> <span class="n">calibration_scale</span>
-            <span class="n">original_scale</span> <span class="o">=</span> <span class="n">existing_calibration_scale</span>
-
-            <span class="k">if</span> <span class="n">original_scale</span> <span class="ow">and</span> <span class="n">target_scale</span> <span class="ow">and</span> <span class="n">original_scale</span> <span class="o">!=</span> <span class="n">target_scale</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converting from calibration scale &#39;</span><span class="si">{</span><span class="n">original_scale</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">target_scale</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="s2">&quot;mf&quot;</span> <span class="ow">or</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;mf_&quot;</span><span class="p">))</span>
-                <span class="p">):</span>
-                    <span class="c1"># Convert function from openghg_calscales</span>
-                    <span class="n">data</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span>
-                        <span class="n">c</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span>
-                        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                        <span class="n">scale_original</span><span class="o">=</span><span class="n">original_scale</span><span class="p">,</span>
-                        <span class="n">scale_new</span><span class="o">=</span><span class="n">target_scale</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">data</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_scale</span>
-
-            <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_scale</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">update_scale</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">calibration_scale</span><span class="p">)</span>
 
     <span class="n">metadata</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">metadata</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
     <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">assign_units</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span> <span class="n">is_dequantified</span><span class="o">=</span><span class="n">is_dequantified</span><span class="p">)</span>
 
     <span class="n">obs_data</span> <span class="o">=</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
@@ -598,22 +594,41 @@
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+    <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_mf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">average</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_dequantified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsColumnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract available column data from the object store using keywords.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        species: Species name</span>
-<span class="sd">        source: Source name</span>
+<span class="sd">        max_level: Max level to use to recalculate the mole fraction (must be corresponding to the max height of the footprint model if used in ModelScenario)</span>
+<span class="sd">        satellite: Satellite name (needed for satellite data)</span>
 <span class="sd">        domain: Domain e.g. EUROPE</span>
+<span class="sd">        selection:</span>
+<span class="sd">        site: Site name (needed for site column data)</span>
+<span class="sd">        network: Network for the site/instrument e.g. TCCON</span>
+<span class="sd">        instrument: Instrument name</span>
+<span class="sd">        calibration_scale: Convert to this calibration scale</span>
+<span class="sd">        platform:</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
-<span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
 <span class="sd">        return_mf: Return mole fraction rather than column data. Default=True</span>
+<span class="sd">        average: Averaging period for dataset. Value should be a string of</span>
+<span class="sd">            the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format)</span>
+<span class="sd">        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.</span>
+<span class="sd">        Example:</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;mf&quot;: &quot;ppm&quot;,</span>
+<span class="sd">            &quot;mf_variability&quot;: &quot;ppm&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsColumnData: ObsColumnData object</span>
@@ -645,32 +660,37 @@
 
         <span class="n">prior_factor</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pressure_weights</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">lower_levels</span><span class="p">))]</span>
-            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xch4_averaging_kernel</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">lower_levels</span><span class="p">))])</span>
-            <span class="o">*</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ch4_profile_apriori</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">lower_levels</span><span class="p">))]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_averaging_kernel&quot;</span><span class="p">][</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">lower_levels</span><span class="p">))])</span>
+            <span class="o">*</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_profile_apriori&quot;</span><span class="p">][</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">lower_levels</span><span class="p">))]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;lev&quot;</span><span class="p">)</span>
 
         <span class="n">upper_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">max_level</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">lev</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
         <span class="n">prior_upper_level_factor</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pressure_weights</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">upper_levels</span><span class="p">))]</span>
-            <span class="o">*</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ch4_profile_apriori</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">upper_levels</span><span class="p">))]</span>
+            <span class="o">*</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_profile_apriori&quot;</span><span class="p">][</span><span class="nb">dict</span><span class="p">(</span><span class="n">lev</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">upper_levels</span><span class="p">))]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;lev&quot;</span><span class="p">)</span>
 
         <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf_prior_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prior_factor</span>
         <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf_prior_upper_level_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prior_upper_level_factor</span>
         <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xch4</span> <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mf_prior_factor</span> <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mf_prior_upper_level_factor</span>
+            <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mf_prior_factor</span>
+            <span class="o">-</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mf_prior_upper_level_factor</span>
         <span class="p">)</span>
-        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf_repeatability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xch4_uncertainty</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf_repeatability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_uncertainty&quot;</span><span class="p">]</span>
 
-        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xch4</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
         <span class="c1"># rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function</span>
         <span class="n">drop_data_vars</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;xch4&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;xch4_uncertainty&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_uncertainty&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_error&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_apriori&quot;</span><span class="p">,</span>
             <span class="s2">&quot;lon&quot;</span><span class="p">,</span>
             <span class="s2">&quot;lat&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ch4_profile_apriori&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;xch4_averaging_kernel&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_profile_apriori&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_averaging_kernel&quot;</span><span class="p">,</span>
             <span class="s2">&quot;pressure_levels&quot;</span><span class="p">,</span>
             <span class="s2">&quot;pressure_weights&quot;</span><span class="p">,</span>
             <span class="s2">&quot;exposure_id&quot;</span><span class="p">,</span>
@@ -700,6 +720,17 @@
 
     <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">column_obs_resampler</span><span class="p">(</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">averaging_period</span><span class="o">=</span><span class="n">average</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;mf&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;calibration_scale&quot;</span> <span class="ow">in</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">update_scale</span><span class="p">(</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">calibration_scale</span><span class="p">)</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+
+    <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">assign_units</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span> <span class="n">is_dequantified</span><span class="o">=</span><span class="n">is_dequantified</span>
+    <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">ObsColumnData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
 
 
@@ -715,6 +746,8 @@
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_resolution</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_dequantified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The flux function reads in all flux files for the domain and species as an xarray Dataset.</span>
@@ -728,6 +761,13 @@
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
+<span class="sd">        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.</span>
+<span class="sd">        Example:</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;mf&quot;: &quot;ppm&quot;,</span>
+<span class="sd">            &quot;mf_variability&quot;: &quot;ppm&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        FluxData: FluxData object</span>
@@ -754,6 +794,8 @@
 
         <span class="n">em_ds</span> <span class="o">=</span> <span class="n">em_ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;lev&quot;</span><span class="p">)</span>
 
+    <span class="n">em_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">assign_units</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span> <span class="n">is_dequantified</span><span class="o">=</span><span class="n">is_dequantified</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
@@ -766,6 +808,8 @@
     <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_dequantified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryConditionsData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get boundary conditions for a given species, domain and bc_input name.</span>
@@ -778,6 +822,13 @@
 <span class="sd">        domain: Region for boundary conditions e.g. EUROPE</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
+<span class="sd">        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.</span>
+<span class="sd">        Example:</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;mf&quot;: &quot;ppm&quot;,</span>
+<span class="sd">            &quot;mf_variability&quot;: &quot;ppm&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        BoundaryConditionsData: BoundaryConditionsData object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -791,6 +842,7 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="n">bc_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">assign_units</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span> <span class="n">is_dequantified</span><span class="o">=</span><span class="n">is_dequantified</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
@@ -808,6 +860,8 @@
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Timestamp</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_dequantified</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FootprintData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get footprints from one site.</span>
@@ -830,6 +884,13 @@
 <span class="sd">                 if species needs a modified footprints from the typical 30-day</span>
 <span class="sd">                 footprints appropriate for a long-lived species (like methane)</span>
 <span class="sd">                 e.g. for high time resolution (co2) or is a short-lived species.</span>
+<span class="sd">        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.</span>
+<span class="sd">        Example:</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;mf&quot;: &quot;ppm&quot;,</span>
+<span class="sd">            &quot;mf_variability&quot;: &quot;ppm&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.</span>
 <span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        FootprintData: FootprintData dataclass</span>
@@ -860,6 +921,7 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="n">fp_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">assign_units</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fp_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">target_units</span><span class="o">=</span><span class="n">target_units</span><span class="p">,</span> <span class="n">is_dequantified</span><span class="o">=</span><span class="n">is_dequantified</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fp_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">fp_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 

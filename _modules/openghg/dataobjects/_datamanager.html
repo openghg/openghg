@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.15.0 documentation</title>
+    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.16.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
-    <meta name="docbuild:last-update" content="Jul 15, 2025"/>
+  <meta name="docsearch:version" content="0.16.0" />
+    <meta name="docbuild:last-update" content="Aug 29, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.15.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.15.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
   
   
 </a></div>
@@ -336,14 +336,13 @@
                   
   <h1>Source code for openghg.dataobjects._datamanager</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableMapping</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableMapping</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">zarr</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datasource</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore.metastore</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_metastore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_datasource</span><span class="p">,</span> <span class="n">locking_object_store</span><span class="p">,</span> <span class="n">LockingObjectStoreType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_writable_bucket</span><span class="p">,</span> <span class="n">get_writable_buckets</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObjectStoreError</span>
 
@@ -374,6 +373,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">objectstore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LockingObjectStoreType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">locking_object_store</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clean_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensures the metadata we give to the user is the metadata</span>
@@ -464,16 +466,17 @@
         <span class="n">version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
 
         <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_datatypes</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">open_metastore</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">metastore</span><span class="p">:</span>
-            <span class="n">backup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">version</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">backup</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectstore</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">objstore</span><span class="p">:</span>
+            <span class="c1"># update DataManager&#39;s copy of metadata</span>
+            <span class="n">backup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">version</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">backup</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">backup</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
 
-            <span class="n">metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="p">})</span>
-            <span class="n">metastore</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">backup</span><span class="p">)</span>
+            <span class="n">current_metadata</span> <span class="o">=</span> <span class="n">objstore</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">do_not_delete</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;uuid&quot;</span><span class="p">,</span> <span class="s2">&quot;object_store&quot;</span><span class="p">,</span> <span class="s2">&quot;data_type&quot;</span><span class="p">)</span>
+            <span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">current_metadata</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backup</span> <span class="ow">and</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">do_not_delete</span><span class="p">]</span>
 
-            <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-            <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span>
-            <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+            <span class="n">objstore</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">backup</span><span class="p">,</span> <span class="n">keys_to_delete</span><span class="o">=</span><span class="n">to_delete</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataManager.view_backup">
@@ -505,8 +508,10 @@
         <span class="n">to_update</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">to_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the metadata associated with data. This takes UUIDs of Datasources and updates</span>
-<span class="sd">        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the metadata associated with data.</span>
+
+<span class="sd">        This takes UUIDs of Datasources and updates the associated metadata.</span>
+<span class="sd">        To update metadata pass in a dictionary of key/value pairs to update.</span>
 <span class="sd">        To delete metadata pass in a list of keys to delete.</span>
 
 <span class="sd">        Args:</span>
@@ -525,59 +530,33 @@
 
         <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_datatypes</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">open_metastore</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">metastore</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectstore</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">objstore</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">uuid</span><span class="p">:</span>
-                <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
-                <span class="c1"># Save a backup of the metadata for now</span>
-                <span class="n">found_record</span> <span class="o">=</span> <span class="n">metastore</span><span class="o">.</span><span class="n">search</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">})</span>
-                <span class="n">current_metadata</span> <span class="o">=</span> <span class="n">found_record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># get current metadata for backup</span>
+                <span class="n">current_metadata</span> <span class="o">=</span> <span class="n">objstore</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
+                <span class="c1"># update object store</span>
+                <span class="n">objstore</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">to_update</span><span class="p">,</span> <span class="n">keys_to_delete</span><span class="o">=</span><span class="n">to_delete</span><span class="p">)</span>
+
+                <span class="c1"># back up metadata</span>
                 <span class="n">version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_latest</span> <span class="o">=</span> <span class="n">version</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">current_metadata</span><span class="p">))</span>
-                <span class="c1"># To update this object&#39;s records</span>
-                <span class="n">internal_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">current_metadata</span><span class="p">))</span>
-                <span class="n">n_records</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">version</span><span class="p">])</span>
 
-                <span class="c1"># Do a quick check to make sure we&#39;re not being asked to delete all the metadata</span>
+                <span class="c1"># update DataManager&#39;s current of metadata</span>
+                <span class="n">internal_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">current_metadata</span><span class="p">))</span>
+
                 <span class="k">if</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">to_delete</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                         <span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="n">to_delete</span><span class="p">]</span>
-
-                    <span class="k">if</span> <span class="s2">&quot;uuid&quot;</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot delete the UUID key.&quot;</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_records</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We can&#39;t remove all the metadata associated with this Datasource.&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
-                        <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                        <span class="n">internal_copy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">metastore</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">},</span> <span class="n">to_delete</span><span class="o">=</span><span class="n">to_delete</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;Unable to remove keys from metadata store, please ensure they exist.&quot;</span>
-                        <span class="p">)</span>
-
-                    <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">del</span> <span class="n">internal_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">to_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">to_update</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s2">&quot;uuid&quot;</span> <span class="ow">in</span> <span class="n">to_update</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot update the UUID.&quot;</span><span class="p">)</span>
-
-                    <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_update</span><span class="p">)</span>
                     <span class="n">internal_copy</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_update</span><span class="p">)</span>
-                    <span class="n">metastore</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">},</span> <span class="n">to_update</span><span class="o">=</span><span class="n">to_update</span><span class="p">)</span>
 
-                    <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="k">if</span> <span class="n">updated</span><span class="p">:</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                    <span class="c1"># Update the metadata stored internally so we&#39;re up to date</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataManager.update_attributes">
@@ -659,7 +638,7 @@
         <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
             <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">get_datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s2">&quot;latest&quot;</span><span class="p">:</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">_latest_version</span>
@@ -704,27 +683,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">delete_object</span>
-
-        <span class="c1"># Add in ability to delete metadata keys</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">uuid</span> <span class="o">=</span> <span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
 
         <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_datatypes</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">open_metastore</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">metastore</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectstore</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">as</span> <span class="n">objstore</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">uuid</span><span class="p">:</span>
-                <span class="c1"># First remove the data from the metadata store</span>
-                <span class="n">metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">})</span>
-
-                <span class="c1"># Delete all the data associated with a Datasource and the</span>
-                <span class="c1"># data in its zarr store.</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
-                <span class="n">d</span><span class="o">.</span><span class="n">delete_all_data</span><span class="p">()</span>
-
-                <span class="c1"># Then delete the Datasource itself</span>
-                <span class="n">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">key</span><span class="p">())</span>
-
+                <span class="n">objstore</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted Datasource with UUID </span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 </div>
 
