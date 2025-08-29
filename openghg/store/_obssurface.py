@@ -433,7 +433,6 @@ class ObsSurface(BaseStore):
             )
 
         # Create Datasources, save them to the object store and get their UUIDs
-        data_type = "surface"
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
 
@@ -447,7 +446,6 @@ class ObsSurface(BaseStore):
                 datasource_uuid = self.assign_data(
                     data=[mdd],
                     if_exists=if_exists,
-                    data_type=data_type,
                     required_keys=required_metakeys,
                     min_keys=5,
                     compressor=compressor,

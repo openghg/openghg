@@ -239,12 +239,10 @@ class BaseStore:
         data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
 
         # Create Datasources, save them to the object store and get their UUIDs
-        data_type = self._data_type
         datasource_uuids = self.assign_data(
             data=data,
             if_exists=if_exists,
             new_version=new_version,
-            data_type=data_type,
             compressor=compressor,
             filters=filters,
         )
@@ -800,7 +798,6 @@ class BaseStore:
     def assign_data(
         self,
         data: MutableSequence[MetadataAndData],
-        data_type: str,
         required_keys: Sequence[str] | None = None,
         sort: bool = True,
         drop_duplicates: bool = True,
@@ -817,7 +814,6 @@ class BaseStore:
             Args:
                 data: Dictionary containing data and metadata for species
                 overwrite: If True overwrite current data stored
-                data_type: Type of data, timeseries etc
                 required_keys: Required minimum keys to lookup unique Datasource
                 sort: Sort data in time dimension
                 drop_duplicates: Drop duplicate timestamps, keeping the first value

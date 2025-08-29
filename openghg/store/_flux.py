@@ -196,12 +196,10 @@ class Flux(BaseStore):
                 for parsed_data in flux_data:
                     parsed_data.metadata.update(info_metadata)
 
-        data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
-            data_type=data_type,
             required_keys=required_keys,
             compressor=compressor,
             filters=filters,
