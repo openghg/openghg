@@ -6,8 +6,10 @@ from typing import Any, Optional
 import warnings
 import numpy as np
 from numpy import ndarray
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.store.storage import ChunkingSchema
 from openghg.types import pathType
 from openghg.util import synonyms
 
@@ -198,8 +200,19 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**parser_input_parameters)
 
+        chunks = self.check_chunks(
+            ds=flux_data[0].data,
+            chunks=None,
+            time_resolved=time_resolved,
+            auto_scale_to_fit_max_chunk_size=True,
+        )
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
+
         # Checking against expected format for Flux, and align to expected lat/lons if necessary.
         for mdd in flux_data:
+            if chunks:
+                mdd.data = mdd.data.chunk(chunks)
             Flux.validate_data(mdd.data)
 
         # Check to ensure no required keys are being passed through info_metadata dict
@@ -305,8 +318,23 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**param)
 
+        time_resolved = flux_data[0].metadata.get("time_resolved", False) or flux_data[0].metadata.get(
+            "high_time_resolution", False
+        )
+
+        chunks = self.check_chunks(
+            ds=flux_data[0].data,
+            chunks=None,
+            time_resolved=time_resolved,
+            auto_scale_to_fit_max_chunk_size=True,
+        )
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
+
         # Checking against expected format for Flux
         for mdd in flux_data:
+            if chunks:
+                mdd.data = mdd.data.chunk(chunks)
             Flux.validate_data(mdd.data)
 
         required_keys = ("species", "source", "domain")
@@ -378,3 +406,38 @@ class Flux(BaseStore):
         """
         data_schema = Flux.schema()
         data_schema.validate_data(data)
+
+    def chunking_schema(
+        self,
+        time_resolved: bool = False,
+        high_time_resolution: bool = False,
+    ) -> ChunkingSchema:
+        """
+        Get chunking schema for footprint data.
+
+        Args:
+            time_resolved : Set footprint variable to be high time resolution.
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
+
+        Returns:
+            dict: Chunking schema for footprint data.
+        """
+
+        if high_time_resolution:
+            warnings.warn(
+                "This argument is deprecated and will be replaced in future versions with time_resolved.",
+                DeprecationWarning,
+            )
+            time_resolved = high_time_resolution
+
+        var = "flux"
+
+        if time_resolved:
+            # TODO: check performance of this chunk size
+            time_chunk_size = 336  # 336 = 14 * 24 so high res. fp chunks fit evenly
+            secondary_vars = ["lat", "lon"]
+        else:
+            time_chunk_size = 336  # fits evenly into fp chunk size and works for global edgar...
+            secondary_vars = ["lat", "lon"]
+
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)

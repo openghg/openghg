@@ -1,4 +1,13 @@
 from dataclasses import dataclass
+import math
+
+
+def chunk_size_in_megabytes(dtype_bytes: int, chunks: dict[str, int]) -> int:
+    """Compute size of chunks (in MB) given number of bytes in scalar value and chunks dict."""
+    MB_to_bytes = 1024**2
+    bytes_to_MB = 1 / MB_to_bytes
+    chunk_bytes = dtype_bytes * math.prod(chunks.values())
+    return int(chunk_bytes * bytes_to_MB)
 
 
 @dataclass(frozen=True)
