@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
 - Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
 - Issue with importlib.resources.files and editable installs. [PR #1429](https://github.com/opengh/openghg/pull/1429)
-- Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package). [PR #1440](https://github.com/openghg/openghg/pull/1440)
+- Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package) and `flox` dependency. [PR #1440](https://github.com/openghg/openghg/pull/1440)
 
 ## [0.15.0] - 2025-07-02
 
