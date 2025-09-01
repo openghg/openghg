@@ -117,6 +117,9 @@ jobs:
 
       - name: Publish to Test PyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+        repository-url: https://test.pypi.org/legacy/
+
 
   release_pypi:
     name: Build and publish Python distributions 📦 to PyPI (PEP 621, Trusted Publishing)
