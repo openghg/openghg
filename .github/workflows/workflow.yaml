@@ -12,23 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/openghg
+      url: https://test.pypi.org/legacy/
     permissions:
-      id-token: write
-
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # already a full clone
-
-      - name: Fetch tags
-        run: git fetch --tags
-
-      - name: Show version for debugging
-        run: |
-          python3 -m pip install versioneer
-          python3 -c "import versioneer; print('Version:', versioneer.get_version())"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -43,5 +32,3 @@ jobs:
 
       - name: Publish to Test PyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
