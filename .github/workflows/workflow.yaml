@@ -10,9 +10,6 @@ jobs:
     # Only run for your test branch or manual trigger
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/legacy/
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
@@ -30,5 +27,7 @@ jobs:
       - name: Build distributions
         run: python3 -m build
 
-      - name: Publish to Test PyPI (via Trusted Publishing)
+      - name: Publish package distributions to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
