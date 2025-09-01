@@ -24,16 +24,17 @@ jobs:
       max-parallel: 3
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.10"]
-        # python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v3
-      - uses: mamba-org/setup-micromamba@8752438cc2755ab7d0de2a8d70b694f5586baae8
+      - uses: mamba-org/setup-micromamba@v2
         with:
           environment-file: environment-dev.yaml
           cache-environment: true
           post-cleanup: "all"
           init-shell: bash
+          create-args: >-
+            python=${{ matrix.python-version }}
       - name: Install OpenGHG
         run: conda develop .
         shell: micromamba-shell {0}
