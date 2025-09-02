@@ -21,11 +21,36 @@ object store.
 1. ICOS
 -------
 
-It's easy to retrieve atmospheric gas measurements from the `ICOS Carbon
+Atmospheric gas measurements can be retrieved from the `ICOS Carbon
 Portal`_  using OpenGHG. To do so we'll use the ``retrieve_atmospheric``
 function from ``openghg.retrieve.icos``.
 
 .. _`ICOS Carbon Portal`: https://www.icos-cp.eu/observations/carbon-portal
+
+Authentication
+~~~~~~~~~~~~~~
+
+To access the ICOS Carbon Portal we use the `icoscp` module which requires
+an account to have been set up and some authentication steps to be followed: 
+https://icos-carbon-portal.github.io/pylib/icoscp/authentication/.
+
+As of 02/09/2025 (icoscp v0.2.2), this can be set up once by creating a personal account
+(not an institutional account) which has a username and password and running the
+following:
+
+.. ipython::
+   :verbatim:
+
+   from icoscp_core.icos import auth
+   auth.init_config_file()
+
+This should prompt the user to supply their username and password and should only need to be run once.
+Note that the credentials (API key) to access your ICOS account will be refreshed
+every 27 hours but running the above lines of code should allow this to be automatically resfreshed.
+
+*If after running these lines of code, an `AuthenticationError` is received when
+accessing the functions in the `openghg.retrieve.icos` module please check the latest
+Authentication details from icoscp and follow any instructions provided.*
 
 Checking available data
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,8 +116,8 @@ Let's say we want to look at the ICOS dataset, we can select that first dataset
 
     In [9]: sac_data_icos = sac_data[0]
 
-    In [11]: sac_data_icos
-    Out[11]:
+    In [10]: sac_data_icos
+    Out[10]:
     ObsData(data=<xarray.Dataset>
     Dimensions:                     (time: 40510)
     Coordinates:
@@ -130,11 +155,11 @@ in the ``instrument_data`` section of the metadata
 .. ipython::
     :verbatim:
 
-    In [14]: metadata = sac_data_icos.metadata
+    In [11]: metadata = sac_data_icos.metadata
 
-    In [15]: metadata["instrument_data"]
+    In [12]: metadata["instrument_data"]
 
-    In [16]: metadata["citation_string"]
+    In [13]: metadata["citation_string"]
 
 Here we get the instrument name and a link to the instrument data on the
 ICOS Carbon Portal.
@@ -151,7 +176,7 @@ As with any ``ObsData`` object we can quickly plot it to have a look.
 .. ipython::
     :verbatim:
 
-    In [17]:  sac_data_icos.plot_timeseries()
+    In [14]:  sac_data_icos.plot_timeseries()
 
 Data levels
 ~~~~~~~~~~~
@@ -176,11 +201,11 @@ Below we'll retrieve some more recent data from **SAC**.
 .. ipython::
     :verbatim:
 
-    In [2]: sac_data_level1 = retrieve_atmospheric(site="SAC", species="CH4", sampling_height="100m", data_level=1, dataset_source="icos")
+    In [15]: sac_data_level1 = retrieve_atmospheric(site="SAC", species="CH4", sampling_height="100m", data_level=1, dataset_source="icos")
 
-    In [4]: sac_data_level1.data.time[0]
+    In [16]: sac_data_level1.data.time[0]
 
-    In [7]: sac_data_level1.data.time[-1]
+    In [17]: sac_data_level1.data.time[-1]
 
 You can see that we've now got quite recent data, usually up until a day or so before these docs were built. The
 ability to retrieve different level data has been added for convenience, choose the best option for your workflow.
@@ -188,7 +213,7 @@ ability to retrieve different level data has been added for convenience, choose 
 .. ipython::
     :verbatim:
 
-    In [10]: sac_data_level1.plot_timeseries(title="SAC - Level 1 data")
+    In [18]: sac_data_level1.plot_timeseries(title="SAC - Level 1 data")
 
 Forcing retrieval
 ~~~~~~~~~~~~~~~~~
@@ -203,7 +228,7 @@ portal) you can force a retrieval using ``force_retrieval``.
 .. ipython::
     :verbatim:
 
-    In [11]: new_data = retrieve_atmospheric(site="SAC", species="CH4", data_level=1, force_retrieval=True)
+    In [19]: new_data = retrieve_atmospheric(site="SAC", species="CH4", data_level=1, force_retrieval=True)
 
 Here we get a message telling us there is no new data to
 process, this will depend on the rate at which datasets are updated on the ICOS Carbon Portal.
