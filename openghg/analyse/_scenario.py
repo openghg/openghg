@@ -465,7 +465,7 @@ class ModelScenario:
             if satellite is not None and fp_inlet is None:
                 fp_inlet = "column"
 
-            if site is not None and fp_inlet is None:
+            if site is not None and inlet is None and fp_inlet is None:
                 # use obs network if we're trying to infer the height from site info
                 if self.obs is not None:
                     network = network or self.obs.metadata.get("network")
