@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
+### Fixed 
+
+- Bug in ModelScenario where `add_footprint` method uses the default inlet for a site rather than the input `inlet` value. [PR #1449](https://github.com/openghg/openghg/pull/1449)
+
 ## [0.16.0] - 2025-08-29
 
 ### Added
