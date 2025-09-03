@@ -48,7 +48,8 @@ def test_read_binary_data(mocker, clear_stores):
     assert filt(results, species="co2", source="gpp-cardamom", domain="europe")[0]["new"] is True
 
 
-def test_read_file():
+def test_read_file(caplog):
+    clear_test_stores()
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
@@ -62,6 +63,9 @@ def test_read_file():
     )
 
     assert len(proc_results) == 1
+
+    assert "Rechunking with chunks" in caplog.text
+    assert "'time': 336" in caplog.text
 
     expected_info = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
     assert expected_info.items() <= proc_results[0].items()
