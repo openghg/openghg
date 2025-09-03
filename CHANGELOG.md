@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
+## Updated
+
+- Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+
 ## [0.16.0] - 2025-08-29
 
 ### Added
