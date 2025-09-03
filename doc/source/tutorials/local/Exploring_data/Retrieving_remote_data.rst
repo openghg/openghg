@@ -41,16 +41,15 @@ following:
 .. ipython::
    :verbatim:
 
-   from icoscp_core.icos import auth
-   auth.init_config_file()
+   In [1]: from icoscp_core.icos import auth
+   Out [1]: auth.init_config_file()
 
 This should prompt the user to supply their username and password and should only need to be run once.
 Note that the credentials (API key) to access your ICOS account will be refreshed
-every 27 hours but running the above lines of code should allow this to be automatically resfreshed.
+every 27 hours but running the above lines of code should allow this to be automatically refreshed.
 
 *If after running these lines of code, an `AuthenticationError` is received when
-accessing the functions in the `openghg.retrieve.icos` module please check the latest
-Authentication details from icoscp and follow any instructions provided.*
+accessing the functions in the `openghg.retrieve.icos` module please check the latest Authentication details from icoscp and follow any instructions provided.*
 
 Checking available data
 ~~~~~~~~~~~~~~~~~~~~~~~
