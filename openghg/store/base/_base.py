@@ -197,7 +197,7 @@ class BaseStore:
 
         # Check any specified chunks / default chunks for the data_type are not too large
         # - currently checking the first MetadataAndData object returned only
-        chunks = self._check_chunks_wrapper(data[0], fn_input_parameters, chunks=chunks)
+        chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
         self._validate_datasources(data, fn_input_parameters, filepath=filepath)
@@ -566,7 +566,7 @@ class BaseStore:
     def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
 
-    def _check_chunks_wrapper(
+    def _check_chunks_datasource(
         self,
         datasource: MetadataAndData,
         fn_input_parameters: dict,
