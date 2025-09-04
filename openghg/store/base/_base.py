@@ -439,6 +439,19 @@ class BaseStore:
 
         return results
 
+    def store_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> list[dict]:
+        raise NotImplementedError
+
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs.
+        Note: This is a placeholder as we expect this to be implemented for all subclasses.
+        """
+        raise NotImplementedError("The format_inputs() method should be created for each subclass")
+
     def create_schema_kwargs(
         self, schema_params: list, fn_input_parameters: dict, datasource: MetadataAndData
     ) -> dict:
@@ -478,13 +491,6 @@ class BaseStore:
                     break
 
         return kwargs
-
-    def format_inputs(self, **kwargs: Any) -> dict:
-        """
-        Apply appropriate formatting for expected inputs.
-        Note: This is a placeholder as we expect this to be implemented for all subclasses.
-        """
-        raise NotImplementedError("The format_inputs() method should be created for each subclass")
 
     @staticmethod
     def schema(**kwargs: Any) -> DataSchema:
@@ -533,12 +539,6 @@ class BaseStore:
         inputs = get_parameters(fn)
 
         return inputs
-
-    def store_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
-        raise NotImplementedError
-
-    def transform_data(self, *args: Any, **kwargs: Any) -> list[dict]:
-        raise NotImplementedError
 
     def chunking_schema(self) -> ChunkingSchema:
         raise NotImplementedError
