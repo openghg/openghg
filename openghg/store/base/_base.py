@@ -522,10 +522,10 @@ class BaseStore:
         """
         Extract the expected inputs for the schema method.
         """
-        from openghg.util import find_function_inputs
+        from openghg.util import get_parameters
 
         fn = self.schema
-        inputs = find_function_inputs(fn)
+        inputs = get_parameters(fn)
 
         return inputs
 
@@ -533,10 +533,10 @@ class BaseStore:
         """
         Extract the expected inputs for the chunking_schema method.
         """
-        from openghg.util import find_function_inputs
+        from openghg.util import get_parameters
 
         fn = self.chunking_schema
-        inputs = find_function_inputs(fn)
+        inputs = get_parameters(fn)
 
         return inputs
 

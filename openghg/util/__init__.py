@@ -36,7 +36,7 @@ from ._file import (
     open_nc_fn,
     open_time_nc_fn,
 )
-from ._function_inputs import find_function_inputs, split_function_inputs
+from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet, extract_height_name
 from ._metadata_util import (
@@ -52,7 +52,7 @@ from ._metadata_util import (
     merge_and_extend_dict,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
-from ._registry import AutoRegistry, Registry
+from ._registry import get_parameters, AutoRegistry, Registry
 from ._scale import update_scale
 from ._site import get_site_info, sites_in_network
 from ._species import (
