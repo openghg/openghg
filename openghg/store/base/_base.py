@@ -1266,4 +1266,3 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
-
