@@ -24,7 +24,7 @@ from openghg.types import (
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file
+from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
 
 from .._metakeys_config import get_metakeys
 
@@ -348,12 +348,7 @@ class BaseStore:
         fn_input_parameters["source_format"] = source_format
 
         # Make sure filepaths contains Path objects
-        if isinstance(filepath, str):
-            filepaths = [Path(filepath)]
-        elif isinstance(filepath, Path):
-            filepaths = [filepath]
-        elif isinstance(filepath, list):
-            filepaths = [Path(fp) for fp in filepath]
+        filepaths = normalise_to_filepath_list(filepath)
 
         # Check hashes of previous files (included after any filepath(s) formatting)
         _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)

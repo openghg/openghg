@@ -115,6 +115,7 @@ from ._user import (
 )
 from ._util import (
     find_matching_site,
+    normalise_to_filepath_list,
     multiple_inlets,
     pairwise,
     site_code_finder,
