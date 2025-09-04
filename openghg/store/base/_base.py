@@ -462,20 +462,16 @@ class BaseStore:
         Returns:
             dict: Keyword arguments for the data type to create the schema
         """
+        from collections import ChainMap
 
         kwargs = {}
 
-        sources = [fn_input_parameters, datasource.metadata]
-
+        # ChainMap links a number of dictionaries so they can be treated as a single unit.
+        # - if keys overlap should use the earlier value
+        sources = ChainMap(fn_input_parameters, datasource.metadata)
         for key in schema_params:
-            for source in sources:
-                try:
-                    value = source[key]
-                except KeyError:
-                    continue
-                else:
-                    kwargs[key] = value
-                    break
+            if key in sources:
+                kwargs[key] = sources[key]
 
         return kwargs
 
