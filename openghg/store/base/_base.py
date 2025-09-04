@@ -523,11 +523,11 @@ class BaseStore:
                 raise ValidationError(msg)
 
     @classmethod
-    def validate_data(cls, data: Dataset, **kwargs: Any) -> None:
+    def validate_data(cls, ds: Dataset, **kwargs: Any) -> None:
         """
         Class method for validation of a dataset against the defined schema.
         Args:
-            data: xarray Dataset in expected format
+            ds: xarray Dataset in expected format
             kwargs: Keywords argument for defining the schema. See the .schema() method
                 for the underlying data_type class for details.
         Returns:
@@ -539,7 +539,7 @@ class BaseStore:
             data_schema = cls.schema(**kwargs)
         else:
             data_schema = cls.schema()
-        data_schema.validate_data(data)
+        data_schema.validate_data(ds)
 
     def find_data_schema_inputs(self) -> list:
         """
