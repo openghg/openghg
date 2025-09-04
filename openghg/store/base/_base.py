@@ -173,7 +173,6 @@ class BaseStore:
         from openghg.util import load_standardise_parser, split_function_inputs
 
         validate_params = self.find_data_schema_inputs()
-        chunking_params = self.find_chunking_schema_inputs()
 
         if not parser_fn and source_format is not None:
             # Load the data retrieve object
@@ -199,8 +198,8 @@ class BaseStore:
             raise StandardiseError(msg)
 
         # Check any specified chunks / default chunks for the data_type are not too large
-        chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, data[0])
-        chunks = self.check_chunks(ds=data[0].data, chunks=chunks, **chunking_kwargs)
+        # - currently checking the first MetadataAndData object returned only
+        chunks = self._check_chunks_wrapper(data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
@@ -1165,6 +1164,37 @@ class BaseStore:
         self._datasource_uuids.clear()
         self._file_hashes.clear()
 
+    def _check_chunks_wrapper(
+        self,
+        datasource: MetadataAndData,
+        fn_input_parameters: dict,
+        chunks: dict[str, int] | None = None,
+        max_chunk_size: int = 300,
+    ) -> dict[str, int]:
+        """
+        Check chunks for a datasource.
+
+        Args:
+            datasource: Produced datasource which contains data and metadata.
+            fn_input_parameters: Input parameters which have been provided by the user / defaults.
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+        Returns:
+            dict:  Dictionary of chunk sizes
+        """
+        chunking_params = self.find_chunking_schema_inputs()
+
+        # Check any specified chunks / default chunks for the data_type are not too large
+        chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, datasource)
+        chunks = self.check_chunks(
+            ds=datasource.data, chunks=chunks, max_chunk_size=max_chunk_size, **chunking_kwargs
+        )
+
+        return chunks
+
+    # TODO: Decide if it would be useful to make this into a @classmethod - use cls rather than self
     def check_chunks(
         self,
         ds: xr.Dataset,
@@ -1176,9 +1206,9 @@ class BaseStore:
 
         Args:
             ds: dataset to check
-            variable: Name of the variable that we want to check for max chunksize
-            chunk_dimension: Dimension to chunk over
-            secondary_dimensions: List of secondary dimensions to chunk over
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
         Returns:
             Dict: Dictionary of chunk sizes
