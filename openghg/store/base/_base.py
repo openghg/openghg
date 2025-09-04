@@ -197,7 +197,9 @@ class BaseStore:
 
         # Check any specified chunks / default chunks for the data_type are not too large
         # - currently checking the first MetadataAndData object returned only
-        chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+        # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
+        if chunks == {}:
+            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
         self._validate_datasources(data, fn_input_parameters, filepath=filepath)
