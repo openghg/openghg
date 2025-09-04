@@ -202,18 +202,7 @@ class BaseStore:
         chunks = self._check_chunks_wrapper(data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
-        for datasource in data:
-            validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
-
-            try:
-                self.validate_data(datasource.data, **validate_kwargs)
-            except ValidationError as err:
-                if isinstance(filepath, list):
-                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
-                else:
-                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
-                logger.error(msg)
-                raise ValidationError(msg)
+        self._validate_datasources(data, fn_input_parameters, filepath=filepath)
 
         # Ensure the data is chunked
         if chunks:
@@ -500,13 +489,47 @@ class BaseStore:
         """
         return DataSchema(None, None, None)
 
+    def _validate_datasources(self,
+                              data: list[MetadataAndData],
+                              fn_input_parameters: dict,
+                              filepath: Path | list[Path] | None = None) -> None:
+        """
+        Validate the standardise datasources against the data_type schema.
+        Args:
+            data: xarray Dataset in expected format
+            fn_input_parameters: Input parameters which have been provided by the user / defaults.
+            filepath: Filepath or list of filepaths to the data, if present.
+        Returns:
+            None
+        Raises
+            ValidationError: if input data does not pass the schema checks.
+        """
+        validate_params = self.find_data_schema_inputs()
+
+        # Current workflow: if any datasource fails validation, whole filepath fails
+        for datasource in data:
+            validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
+
+            try:
+                self.validate_data(datasource.data, **validate_kwargs)
+            except ValidationError as err:
+                if isinstance(filepath, list):
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
+                elif isinstance(filepath, Path):
+                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
+                else:
+                    msg = f"Unable to validate and store supplied data. Error: {err}"
+                logger.error(msg)
+                raise ValidationError(msg)
+
     @classmethod
     def validate_data(cls, data: Dataset, **kwargs: Any) -> None:
         """
         Class method for validation of a dataset against the defined schema.
         Args:
             data: xarray Dataset in expected format
-            kwargs:
+            kwargs: Keywords argument for defining the schema. See the .schema() method
+                for the underlying data_type class for details.
         Returns:
             None
         Raises
