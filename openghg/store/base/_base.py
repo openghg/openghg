@@ -172,8 +172,6 @@ class BaseStore:
 
         from openghg.util import load_standardise_parser, split_function_inputs
 
-        validate_params = self.find_data_schema_inputs()
-
         if not parser_fn and source_format is not None:
             # Load the data retrieve object
             parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
@@ -489,10 +487,12 @@ class BaseStore:
         """
         return DataSchema(None, None, None)
 
-    def _validate_datasources(self,
-                              data: list[MetadataAndData],
-                              fn_input_parameters: dict,
-                              filepath: Path | list[Path] | None = None) -> None:
+    def _validate_datasources(
+        self,
+        data: list[MetadataAndData],
+        fn_input_parameters: dict,
+        filepath: Path | list[Path] | None = None,
+    ) -> None:
         """
         Validate the standardise datasources against the data_type schema.
         Args:
