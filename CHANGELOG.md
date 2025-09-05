@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Updated
 
+- Refactored individual `read_file` methods on data_type classes in `openghg.store` to use a central `read_file` method on `BaseStore` parent class (`openghg.store.base`). This centralises the `read_file` functionality and ensures the steps for each subclass are consistent. Each data_type class now requires a `format_inputs` method to apply the formatting steps to the input kwargs when standardising. [PR #1415](https://github.com/openghg/openghg/pull/1415)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 
 ## [0.16.0] - 2025-08-29
 
 ### Added
+
 - Support for TCCON data: implemented a dedicated parser and integrated with standardise_footprint, get_obs_column, and related workflow steps. Renamed _surface_obs_resampler_dict to _obs_resampler_dict in openghg/data_processing/_resampling.py for generalisation beyond surface data. [PR #1407] (https://github.com/openghg/openghg/pull/1407)
 - The `standardise_flux`, `standardise_bc`, `standardise_eulerian` and `standardise_column` can now all accept a list of input netcdf files for filepath (rather than just a single file). This pre-processes the data and concatenates the files when opening them. [PR #1393](https://github.com/openghg/openghg/pull/1393)
 - `retrieve` method to `ObjectStore` and related methods that allow metadata from the metastore and datasources to be combined on retrieval. [PR #1408](https://github.com/openghg/openghg/pull/1408)
@@ -31,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allowed `mf_variability` to be read in from AGAGE-style obs files. [PR #1416](https://github.com/openghg/openghg/pull/1416)
 
 ### Fixed
+
 - Bug with chunking when standardising PARIS and FLEXPART CO2 footprints. [PR #1399](https://github.com/openghg/openghg/pull/1399)
 - Fixed bug to process deltao2n2 flask level 2 corso data. [PR #1394](https://github.com/openghg/openghg/pull/1394)
 - Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
@@ -69,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.14.0] - 2025-04-16
 
 ### Added
+
 - Added new tutorial for satellite ModelScenario processing.[PR #1304](https://github.com/openghg/openghg/pull/1304)
 - Improved the check for nans in surface_obs_resampler function: drop data for times where any of `f"{species}"` or `"inlet"` variables are nan, or when both `f"{species}_variability"` and `f"{species}_repeatability"` are nans.[PR #1298](https://github.com/openghg/openghg/pull/1298)
 - Added a `"keep_variables"` parameter in `get_obs_surface` to choose which variables we want to keep when retrieving data. This can be use to prevent resampling functions to try to resample unused variables filled with nans or string [PR #1283](https://github.com/openghg/openghg/pull/1283)
