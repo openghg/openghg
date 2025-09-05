@@ -77,6 +77,19 @@ class SimpleVersioning(Generic[T]):
         super_init: bool = False,
         **kwargs: Any,
     ) -> None:
+        """Create SimpleVersioning object.
+
+        Args:
+            factory: factory function to create the versioned objects given a
+            version string.
+            versions: initial list of versions.
+            super_init: if True, pass kwargs to `super().__init__`, which might
+              be helpful, since this class is intended to be used with multiple
+              inheritence.
+            **kwargs: arguments to pass via `super().__init__`; these are ignored if
+              if `super_init` is False.
+
+        """
         self.factory = factory
 
         if versions is None:
@@ -92,11 +105,12 @@ class SimpleVersioning(Generic[T]):
 
     @property
     def versions(self) -> list[str]:
-        # TODO: should this return Iterable so e.g. we could return a tree?
+        """List of stored versions."""
         return list(self._versions.keys())
 
     @property
     def current_version(self) -> str:
+        """Current version."""
         if self._current_version is None:
             raise VersionError("No version is selected. Use `checkout_version` to select a version.")
         return self._current_version
@@ -106,6 +120,15 @@ class SimpleVersioning(Generic[T]):
         return self._versions[self.current_version]
 
     def checkout_version(self, v: str) -> None:
+        """Checkout specified version.
+
+        Args:
+            v: version to check out.
+
+        Raises:
+            ValueError: if specified version not found.
+
+        """
         if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
         self._current_version = v
@@ -125,15 +148,30 @@ class SimpleVersioning(Generic[T]):
 
         Raises:
             VersionError if no version is currently checked out.
+
         """
         self._versions[v] = deepcopy(self._current)
 
     def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None:
+        """Create new version.
+
+        Args:
+            v: version to create.
+            checkout: if True, checkout the newly created version.
+            copy_current: if True, copy current version to new version.
+
+        Raises:
+            ValueError: if new version `v` already exists; if `copy_current` is
+            True and no version is currently checked out.
+
+        """
         if v in self.versions:
             raise ValueError(f"Cannot create version {v}; it already exists.")
 
         if copy_current:
             if self._current_version is None:
+                # This check isn't necessary with default `copy_to_version`, but it's here for
+                # safety if a subclass overrides `copy_to_version`.
                 raise ValueError("Cannot copy current: no version is currently selected.")
             self.copy_to_version(v)
         else:
@@ -143,6 +181,19 @@ class SimpleVersioning(Generic[T]):
             self._current_version = v
 
     def delete_version(self, v: str) -> None:
+        """Delete version.
+
+        In addition to deleting the version from list of versions, if the type
+        of a data stored in that version has a `delete` method, then that method
+        is called on the data.
+
+        Args:
+            v: version to delete.
+
+        Raises:
+            ValueError: if specified version not found.
+
+        """
         if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
 
