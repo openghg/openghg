@@ -1,5 +1,5 @@
 from collections import UserDict, UserList
-from collections.abc import Callable, Iterable, Hashable
+from collections.abc import Callable, Iterable
 from copy import deepcopy
 from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
 from collections.abc import Mapping
@@ -34,11 +34,10 @@ class HasDelete(Protocol):
 class VersionError(Exception): ...
 
 
-VT = TypeVar("VT", bound=Hashable)  # version type
 T = TypeVar("T")  # underlying class type
 
 
-class SimpleVersioning(Generic[VT, T]):
+class SimpleVersioning(Generic[T]):
     """Work with versions of an object.
 
     This can be used to create a "versioned" subclass of the class T in some circumstances, by
@@ -51,7 +50,7 @@ class SimpleVersioning(Generic[VT, T]):
     In this example, we set a default version, so that the user does not have to create a version before using the
     versioned list. Also, we use strings for the "version type". The factory function maps versions to empty lists.
 
-    >>> class VersionedList(SimpleVersioning[str, list], UserList):
+    >>> class VersionedList(SimpleVersioning[list], UserList):
     >>>     def __init__(self, iterable=None):
     >>>         super().__init__(factory=lambda x: [], versions=["v1"])  # we don't use UserList's __init__
     >>>         if iterable:
@@ -90,8 +89,8 @@ class SimpleVersioning(Generic[VT, T]):
 
     def __init__(
         self,
-        factory: Callable[[VT], T],
-        versions: Iterable[VT] | None = None,
+        factory: Callable[[str], T],
+        versions: Iterable[str] | None = None,
         super_init: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -99,7 +98,7 @@ class SimpleVersioning(Generic[VT, T]):
 
         if versions is None:
             self._versions = {}
-            self._current_version: VT | None = None
+            self._current_version: str | None = None
         else:
             self._versions = {v: factory(v) for v in versions}
             self._current_version = self.versions[-1]  # version added last
@@ -109,12 +108,12 @@ class SimpleVersioning(Generic[VT, T]):
             super().__init__(**kwargs)
 
     @property
-    def versions(self) -> list[VT]:
+    def versions(self) -> list[str]:
         # TODO: should this return Iterable so e.g. we could return a tree?
         return list(self._versions.keys())
 
     @property
-    def current_version(self) -> VT:
+    def current_version(self) -> str:
         if self._current_version is None:
             raise VersionError("No version is selected. Use `checkout_version` to select a version.")
         return self._current_version
@@ -123,21 +122,12 @@ class SimpleVersioning(Generic[VT, T]):
     def _current(self) -> T:
         return self._versions[self.current_version]
 
-    def _get_version(self, v: Hashable) -> VT | None:
-        # use loop to check equality in case version type VT
-        # can be equal to other types (e.g. string)
-        for version in self.versions:
-            if v == version:
-                return version
-        return None
-
-    def checkout_version(self, v: Hashable) -> None:
-        version = self._get_version(v)
-        if version is None:
+    def checkout_version(self, v: str) -> None:
+        if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
-        self._current_version = version
+        self._current_version = v
 
-    def create_version(self, v: VT, checkout: bool = False, copy_current: bool = False) -> None:
+    def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None:
         if v in self.versions:
             raise ValueError(f"Cannot create version {v}; it already exists.")
 
@@ -161,19 +151,18 @@ class SimpleVersioning(Generic[VT, T]):
         if checkout:
             self._current_version = v
 
-    def delete_version(self, v: Hashable) -> None:
-        version = self._get_version(v)
-        if version is None:
+    def delete_version(self, v: str) -> None:
+        if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
 
-        data = self._versions[version]
+        data = self._versions[v]
 
         if isinstance(data, HasDelete):
             data.delete()
 
-        del self._versions[version]
+        del self._versions[v]
 
-        if version == self._current_version:
+        if v == self._current_version:
             self._current_version = None
 
 
@@ -198,7 +187,7 @@ def prev_version(v: str, min_version: int = 1) -> str:
     return f"v{n + 1}"
 
 
-class VersionedList(SimpleVersioning[str, list], UserList):
+class VersionedList(SimpleVersioning[list], UserList):
     """List with verisons.
 
     This works by subclassing SimpleVersioning and UserList, and overriding the
@@ -216,7 +205,7 @@ class VersionedList(SimpleVersioning[str, list], UserList):
         return self._current
 
 
-class VersionedDict(SimpleVersioning[str, dict], UserDict):
+class VersionedDict(SimpleVersioning[dict], UserDict):
     """Dict with verisons.
 
     This works by subclassing SimpleVersioning and UserDict, and overriding the
