@@ -1,13 +1,12 @@
 from __future__ import annotations
 import logging
-from typing import Any, Optional
-from pathlib import Path
+from typing import Optional, Any
 import numpy as np
 from numpy import ndarray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray, Dataset
+from xarray import DataArray
 
 ArrayType = Optional[ndarray | DataArray]
 
@@ -22,210 +21,6 @@ class ObsColumn(BaseStore):
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def read_file(
-        self,
-        filepath: str | Path | list[str | Path],
-        species: str,
-        platform: str = "satellite",
-        obs_region: Optional[str] = None,
-        satellite: str | None = None,
-        domain: str | None = None,
-        selection: str | None = None,
-        site: str | None = None,
-        network: str | None = None,
-        instrument: str | None = None,
-        tag: str | list | None = None,
-        source_format: str = "openghg",
-        if_exists: str = "auto",
-        save_current: str = "auto",
-        overwrite: bool = False,
-        force: bool = False,
-        compressor: Any | None = None,
-        filters: Any | None = None,
-        pressure_weights_method: str | None = None,
-        chunks: dict | None = None,
-        info_metadata: dict | None = None,
-    ) -> list[dict]:
-        """Read column observation file
-
-        Args:
-            filepath: Path of observation file
-            species: Species name or synonym e.g. "ch4"
-            platform: Type of platform. Should be one of:
-                - "satellite"
-                - "site"
-            satellite: Name of satellite (if relevant). Should include satellite OR site.
-            domain: For satellite only. If data has been selected on an area include the
-                identifier name for domain covered. This can map to previously defined domains
-                (see openghg_defs "domain_info.json" file) or a newly defined domain.
-            selection: For satellite only, identifier for any data selection which has been
-                performed on satellite data. This can be based on any form of filtering, binning etc.
-                but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
-                If not specified, domain will be used.
-            site : Site code/name (if relevant). Should include satellite OR site.
-            instrument: Instrument name e.g. "TANSO-FTS"
-            network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-            tag: Special tagged values to add to the Datasource. This will be added to any
-                current values if the tag key already exists in a list.
-            source_format : Type of data being input e.g. openghg (internal format)
-            if_exists: What to do if existing data is present.
-                - "auto" - checks new and current data for timeseries overlap
-                   - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
-                - "new" - just include new data and ignore previous
-                - "combine" - replace and insert new data into current timeseries
-            save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-                - "n" / "no" - Allow current data to updated / deleted
-            overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
-            compressor: A custom compressor to use. If None, this will default to
-                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            pressure_weights_method: method to use to derive TCCON pressure_weights.
-            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
-            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
-        Returns:
-            dict: Dictionary of datasource UUIDs data assigned to
-        """
-        # Get initial values which exist within this function scope using locals
-        # MUST be at the top of the function
-        fn_input_parameters = locals().copy()
-
-        from openghg.store.spec import define_standardise_parsers
-        from openghg.util import (
-            clean_string,
-            format_platform,
-            load_standardise_parser,
-            split_function_inputs,
-            check_if_need_new_version,
-            synonyms,
-        )
-
-        # TODO: Evaluate which inputs need cleaning (if any)
-        species = clean_string(species)
-        species = synonyms(species)
-
-        platform = format_platform(platform)
-        platform = clean_string(platform)
-
-        if site is None and satellite is None and source_format != "tccon":
-            raise ValueError("Value for 'site' or 'satellite' must be specified")
-        elif site is not None and satellite is not None:
-            raise ValueError("Only one of 'site' or 'satellite' should be specified")
-
-        site = clean_string(site)
-        satellite = clean_string(satellite)
-        domain = clean_string(domain)
-        obs_region = clean_string(obs_region)
-        network = clean_string(network)
-        instrument = clean_string(instrument)
-        pressure_weights_method = clean_string(pressure_weights_method)
-
-        if domain is not None and obs_region is not None:
-            err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
-            logger.exception(err_msg)
-            raise ValueError(err_msg)
-        elif domain is not None and obs_region is None:
-            obs_region = domain
-            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
-        elif obs_region is not None and domain is None:
-            domain = "NOT_SET"
-            logging.info(f"Updated value of 'domain': {domain}")
-
-        # Specify any additional metadata to be added
-        additional_metadata = {}
-
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        standardise_parsers = define_standardise_parsers()[self._data_type]
-
-        try:
-            source_format = standardise_parsers[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Load the data retrieve object
-        parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
-
-        # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return [{}]
-
-        filepath = next(iter(unseen_hashes.values()))
-
-        if chunks is None:
-            chunks = {}
-
-        # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
-        )
-
-        obs_data = parser_fn(**parser_input_parameters)
-
-        # Checking against expected format for ObsColumn
-        for datasource in obs_data:
-            col_data = datasource.data
-            ObsColumn.validate_data(col_data, species=species)
-
-        # TODO: Do we need to do include a split here of some kind, since
-        # this could be "site" or "satellite" keys.
-        # platform = list(obs_data.keys())[0]["metadata"]["platform"]
-
-        # Check to ensure no required keys are being passed through info_metadata dict
-        self.check_info_keys(info_metadata)
-        if info_metadata is not None:
-            additional_metadata.update(info_metadata)
-
-        # Mop up and add additional keys to metadata which weren't passed to the parser
-        obs_data = self.update_metadata(obs_data, additional_input_parameters, additional_metadata)
-
-        data_type = "column"
-        datasource_uuids = self.assign_data(
-            data=obs_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            compressor=compressor,
-            filters=filters,
-        )
-
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
-
-        # obs_store.add_datasources(
-        #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
-        # )
-
-        # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
-
-        return datasource_uuids
 
     # TODO: Add in transform method for gosat and tropomi raw data files
     #  - Included emissions version as starting point to be updated.
@@ -308,8 +103,83 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs for ObsColumn. Expected
+        inputs will typically be defined within the openghg.standardse.standardise_column()
+        function.
+
+        Args:
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
+        Returns:
+            (dict, dict): Formatted parameters and any additional parameters
+                for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
+        """
+
+        from openghg.util import (
+            clean_string,
+            format_platform,
+            synonyms,
+            check_and_set_null_variable,
+        )
+
+        params = kwargs.copy()
+
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["platform"] = clean_string(params.get("platform"))
+        params["site"] = clean_string(params.get("site"))
+        params["satellite"] = clean_string(params.get("satellite"))
+        params["network"] = clean_string(params.get("network"))
+        params["instrument"] = clean_string(params.get("instrument"))
+        params["domain"] = clean_string(params.get("domain"))
+        params["obs_region"] = clean_string(params.get("obs_region"))
+        params["pressure_weights_method"] = clean_string(params.get("pressure_weights_method"))
+
+        # Checks input combinations are correct
+        site = params.get("site")
+        satellite = params.get("satellite")
+
+        if site is None and satellite is None:
+            msg = "Value for 'site' or 'satellite' must be specified"
+            logger.exception(msg)
+            raise ValueError(msg)
+        elif site is not None and satellite is not None:
+            msg = "Only one of 'site' or 'satellite' should be specified"
+            logger.exception(msg)
+            raise ValueError(msg)
+
+        domain = params.get("domain")
+        obs_region = params.get("obs_region")
+
+        if domain is not None and obs_region is not None:
+            err_msg = f"Only one of 'domain' : {domain} or 'obs_region': {obs_region} should be specified"
+            logger.exception(err_msg)
+            raise ValueError(err_msg)
+        elif domain is not None and obs_region is None:
+            params["obs_region"] = domain
+            logger.info(f"Updated 'obs_region' to match 'domain': {domain}")
+
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
+
+        # - format platform
+        params["platform"] = format_platform(params.get("platform"))
+
+        # Ensure we have a clear missing value (not_set) where needed (required keys)
+        params["domain"] = check_and_set_null_variable(params.get("domain"))
+
+        return params
+
     @staticmethod
-    def schema(species: str, vertical_name: str = "lev") -> DataSchema:
+    def schema(species: str, vertical_name: str = "lev") -> DataSchema:  # type: ignore[override]
         """
         Define schema for a column Dataset.
 
@@ -358,21 +228,3 @@ class ObsColumn(BaseStore):
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
-
-    @staticmethod
-    def validate_data(data: Dataset, species: str) -> None:
-        """
-        Validate input data against Emissions schema - definition from
-        Emissions.schema() method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Emissions schema.
-        """
-        data_schema = ObsColumn.schema(species)
-        data_schema.validate_data(data)
