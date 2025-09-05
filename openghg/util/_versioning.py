@@ -1,8 +1,8 @@
 from collections import UserDict, UserList
 from collections.abc import Callable, Iterable, Hashable
 from copy import deepcopy
-from typing import Any, Generic, Mapping, Protocol, runtime_checkable, TypeVar
-from typing_extensions import Self
+from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
+from collections.abc import Mapping
 
 
 @runtime_checkable
@@ -177,79 +177,28 @@ class SimpleVersioning(Generic[VT, T]):
             self._current_version = None
 
 
-class LinearVersion:
-    """Versions numbers of the form `v1`, `v2`, etc.
+def next_version(v: str) -> str:
+    """Get next version of v[number].
 
-    LinearVersion objects can be compared with strings:
-
-    >>> LinearVersion("v1") == "v1"
-    True
-
-    The next version number can be accessed via `.next`:
-
-    >>> LinearVersion("v1").next == "v2"
-    True
-
-    Thus LinearVersion objects can be used like the strings "v1", "v2", ..., but
-    you don't need to extract the version number to increment the version.
-
-    Also, LinearVersion includes some validation for the version format.
+    For instance, if v = "v10", then return "v11".
     """
-
-    def __init__(self, version: int | str) -> None:
-        if isinstance(version, int):
-            self.number = version
-            self.version = f"v{version}"
-        else:
-            err_msg = f"version string {version} is not of the form 'v{{integer}}'."
-            if not version.startswith("v"):
-                raise ValueError(err_msg)
-            try:
-                self.number = int(version[1:])
-            except ValueError as e:
-                raise ValueError(err_msg) from e
-            else:
-                self.version = version
-
-    def __str__(self) -> str:
-        return self.version
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    def __hash__(self) -> int:
-        return hash(str(self))
-
-    def __eq__(self, other: Any, /) -> bool:
-        if isinstance(other, str):
-            return str(self) == other
-        if isinstance(other, int):
-            return self.number == other
-        if isinstance(other, LinearVersion):
-            return self.number == other.number
-        raise ValueError(f"Cannot compare LinearVersion with type {type(other)}.")
-
-    def __lt__(self, other: Any, /) -> bool:
-        if isinstance(other, str):
-            return str(self) < other
-        if isinstance(other, int):
-            return self.number < other
-        if isinstance(other, LinearVersion):
-            return self.number < other.number
-        raise ValueError(f"Cannot compare LinearVersion with type {type(other)}.")
-
-    @property
-    def next(self) -> Self:
-        """Next (child) version label."""
-        return type(self)(self.number + 1)
-
-    @property
-    def prev(self) -> Self:
-        """Previous (parent) version label."""
-        return type(self)(self.number - 1)
+    n = int(v[1:])
+    return f"v{n + 1}"
 
 
-class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
+def prev_version(v: str, min_version: int = 1) -> str:
+    """Get previous version of v[number].
+
+    For instance, if v = "v10", then return "v9".
+    Raise an error if v is the mininum version.
+    """
+    n = int(v[1:])
+    if n == min_version:
+        raise ValueError(f"Can't get previous version for minimum version v{n}.")
+    return f"v{n + 1}"
+
+
+class VersionedList(SimpleVersioning[str, list], UserList):
     """List with verisons.
 
     This works by subclassing SimpleVersioning and UserList, and overriding the
@@ -257,7 +206,7 @@ class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
     """
 
     def __init__(self, iterable: Iterable | None = None):
-        super().__init__(factory=lambda _: [], versions=[LinearVersion("v1")])
+        super().__init__(factory=lambda _: [], versions=["v1"])
 
         if iterable:
             self.extend(iterable)
@@ -267,7 +216,7 @@ class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
         return self._current
 
 
-class VersionedDict(SimpleVersioning[LinearVersion, dict], UserDict):
+class VersionedDict(SimpleVersioning[str, dict], UserDict):
     """Dict with verisons.
 
     This works by subclassing SimpleVersioning and UserDict, and overriding the
@@ -275,7 +224,7 @@ class VersionedDict(SimpleVersioning[LinearVersion, dict], UserDict):
     """
 
     def __init__(self, iterable: Mapping | None = None):
-        super().__init__(factory=lambda _: {}, versions=[LinearVersion("v1")])
+        super().__init__(factory=lambda _: {}, versions=["v1"])
 
         if iterable:
             self.update(iterable)

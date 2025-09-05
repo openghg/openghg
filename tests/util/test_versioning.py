@@ -1,6 +1,6 @@
 import pytest
 
-from openghg.util._versioning import VersionedList
+from openghg.util._versioning import next_version, VersionedList
 
 
 def test_versioned_list_list_operations():
@@ -30,7 +30,8 @@ def test_versioned_list_two_versions():
 
     assert vlist == ["a"]
 
-    vlist.create_version(vlist.current_version.next, checkout=True, copy_current=True)
+    new_version = next_version(vlist.current_version)
+    vlist.create_version(new_version, checkout=True, copy_current=True)
 
     assert vlist == ["a"]
 
