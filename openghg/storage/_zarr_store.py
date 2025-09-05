@@ -1,0 +1,310 @@
+from collections.abc import Callable, Hashable, Iterable
+import logging
+from pathlib import Path
+from typing import Any, cast, Generic, Literal, TypeVar
+
+import xarray as xr
+import zarr
+import zarr.convenience
+from zarr._storage.store import Store as AbstractZarrStore
+
+from openghg.types import DataOverlapError
+from openghg.util._versioning import SimpleVersioning
+from ._indexing import ConflictDeterminer
+from ._store import Store, UpdateError
+
+
+logger = logging.getLogger("openghg.storage")
+logger.setLevel(logging.DEBUG)
+
+
+ZST = TypeVar("ZST", bound=AbstractZarrStore)
+
+
+class ZarrStore(Store, Generic[ZST]):
+    """Zarr store for storing a single dataset."""
+
+    def __init__(
+        self, zarr_store: ZST | None = None, append_dim: str = "time", index_options: dict | None = None
+    ) -> None:
+        """Pass an instantiated Zarr Store.
+
+        Note: for commonly used types of ZarrStore, we can create convenience functions
+        to create ZarrStore objects.
+
+        Args:
+            zarr_store: instantiated Zarr Store. (Optional to allow for versioning.)
+            append_dim: dimension to insert new data along.
+            index_options: options for index, such as `method = "nearest"`
+        """
+        super().__init__()
+        self._store = zarr_store
+        self.append_dim = append_dim
+        self.index_options = index_options or {}
+
+    @property
+    def store(self) -> ZST:
+        """Underlying Zarr storage.
+
+        This property is necessary because `self._store` should not be None,
+        however, for versioning we need to allow the factory function in `SimpleVersioning`
+        to set the value of `self._store`.
+
+        Raises:
+            AttributeError if internal Zarr store is not set.
+        """
+        if self._store is None:
+            raise AttributeError("Zarr store not set.")
+        return self._store
+
+    @property
+    def _conflict_determiner(self) -> ConflictDeterminer:
+        index = self.get().get_index(self.append_dim)
+        return ConflictDeterminer(index=index, **self.index_options)
+
+    def __bool__(self) -> bool:
+        return bool(self.store)
+
+    def clear(self) -> None:
+        self.store.rmdir()
+
+    def bytes_stored(self) -> int:
+        try:
+            return cast(int, self.store.getsize())
+        except AttributeError:
+            return 0
+
+    def get(self) -> xr.Dataset:
+        if not bool(self):
+            return xr.Dataset()
+
+        # need to sort to be consistent with MemoryStore
+        result = xr.open_zarr(self.store, consolidated=True).sortby(self.append_dim)
+        return cast(xr.Dataset, result)
+
+    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+        if not self.store:
+            data.to_zarr(
+                store=self.store,
+                mode="w",
+                consolidated=True,
+                compute=True,
+                synchronizer=zarr.ThreadSynchronizer(),
+            )
+        else:
+            if self._conflict_determiner.has_conflicts(data.get_index(self.append_dim)):
+                if on_conflict == "error":
+                    raise DataOverlapError("Cannot insert data with conflicts if `on_conflict` == 'error'")
+
+                # otherwise, select non-conflicts
+                data = self._conflict_determiner.select_nonconflicts(data, self.append_dim)
+
+            data.to_zarr(
+                store=self.store,
+                mode="a",
+                append_dim=self.append_dim,
+                consolidated=True,
+                compute=True,
+                synchronizer=zarr.ThreadSynchronizer(),
+                safe_chunks=False,
+            )
+
+    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+        if not self.store:
+            raise UpdateError("Cannot update empty Store.")
+        else:
+            if self._conflict_determiner.has_nonconflicts(data.get_index(self.append_dim)):
+                if on_nonconflict == "error":
+                    raise UpdateError("Cannot add new values with `update`.")
+
+                # otherwise, select conflicts/overlapping values
+                data = self._conflict_determiner.select_conflicts(data, self.append_dim)
+
+            # nothing to update
+            if not bool(data):
+                logger.warning("No data to update with")
+                return None
+
+            try:
+                data.to_zarr(
+                    store=self.store,
+                    mode="r+",
+                    region="auto",
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+            except (ValueError, IndexError) as e:
+                # possible issue with non-contiguous data
+                raise NotImplementedError(
+                    "Cannot update Zarr store, possibly due to non-contiguous data."
+                    "Updating with non-contiguous data is currently not supported."
+                ) from e
+
+
+def get_zarr_directory_store(
+    path: Path, append_dim: str = "time", index_options: dict | None = None
+) -> ZarrStore[zarr.DirectoryStore]:
+    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: path to Zarr store location.
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+        `method = "nearest"`.
+
+    Returns:
+        ZarrStore based on zarr.DirectoryStore.
+
+    """
+    store = zarr.DirectoryStore(path)
+    return ZarrStore[zarr.DirectoryStore](store, append_dim=append_dim, index_options=index_options)
+
+
+def get_zarr_memory_store(
+    append_dim: str = "time", index_options: dict | None = None
+) -> ZarrStore[zarr.MemoryStore]:
+    """Factory function to create ZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+        `method = "nearest"`.
+
+    Returns:
+        ZarrStore based on zarr.MemoryStore.
+
+    """
+    store = zarr.MemoryStore()
+    return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options)
+
+
+VT = TypeVar("VT", bound=Hashable)
+
+
+class VersionedZarrStore(SimpleVersioning[VT, ZST], ZarrStore[ZST]):
+    """Zarr storage with versions.
+
+    This class uses the methods from `ZarrStore` but overrides the `._store` attribute
+    to point to the current version of the zarr store held by the `SimpleVersioning` class.
+
+    Overriding `._store`
+    """
+
+    def __init__(
+        self,
+        factory: Callable[[VT], ZST],
+        versions: Iterable[VT] | None = None,
+        append_dim: str = "time",
+        index_options: dict | None = None,
+    ) -> None:
+        """Create VersionedZarrStore object.
+
+        The `factory` and `versions` arguments are used to set up the
+        versioning, and the remaining arguments are passed to `ZarrStore`.
+
+        Args:
+            factory: function that produces a zarr store, given a version. For
+              instance, "v1" might map to a zarr directory store with path
+              `root_path / "v1"`.
+            versions: Versions to instantiate; these are loaded using the
+            `factory` function.
+            append_dim: dimension to append new data along.
+            index_options: options for the index used to resolve conflicts when
+            adding data to the store.
+
+        """
+        super().__init__(
+            factory=factory,
+            versions=versions,
+            super_init=True,
+            append_dim=append_dim,
+            index_options=index_options,
+        )
+
+    @property
+    def _store(self) -> ZST | None:
+        return self._current
+
+    @_store.setter
+    def _store(self, value: ZST | None) -> None:
+        # ZarrStore.__init__ will try to set the value to None, but we don't want to set
+        # the current storage version to None.
+        if value is not None:
+            self._current = value
+
+    @staticmethod
+    def copy(source: Any, dest: Any) -> None:
+        """Copy method used in creating new versions.
+
+        This is used by `SimpleVersioning` when copying data from the current version to a new version.
+
+        Args:
+            source: zarr store to copy from.
+            dest: zarr to to copy to.
+
+        Raises:
+            ValueError: if either `source` or `dest` is not a zarr store (i.e.
+            subclass of the zarr `Store` ABC).
+
+        """
+        if not isinstance(source, AbstractZarrStore) or not isinstance(dest, AbstractZarrStore):
+            raise ValueError("Can only copy between Zarr stores.")
+        zarr.convenience.copy_store(source, dest)
+
+
+def get_versioned_zarr_directory_store(
+    path: Path,
+    versions: Iterable[str] | None = None,
+    append_dim: str = "time",
+    index_options: dict | None = None,
+) -> VersionedZarrStore[str, zarr.DirectoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: root path where zarr `DirectoryStore`s will be based.
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve conflicts when
+        adding data to the store.
+
+    Returns:
+        VersionedZarrStore object with zarr.DirectoryStore as the underlying
+        storage.
+
+    """
+
+    def factory(v: str) -> zarr.DirectoryStore:
+        """Factory for versioning."""
+        return zarr.DirectoryStore(path / v)
+
+    return VersionedZarrStore[str, zarr.DirectoryStore](
+        factory=factory, versions=versions, append_dim=append_dim, index_options=index_options
+    )
+
+
+def get_versioned_zarr_memory_store(
+    versions: Iterable[str] | None = None, append_dim: str = "time", index_options: dict | None = None
+) -> VersionedZarrStore[str, zarr.MemoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve conflicts when
+        adding data to the store.
+
+    Returns:
+        VersionedZarrStore object with zarr.MemoryStore as the underlying
+        storage.
+
+    """
+
+    def factory(_: str) -> zarr.MemoryStore:
+        """Factory for versioning."""
+        return zarr.MemoryStore()
+
+    return VersionedZarrStore[str, zarr.MemoryStore](
+        factory=factory, versions=versions, append_dim=append_dim, index_options=index_options
+    )
