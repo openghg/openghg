@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
-### Updated
+## Updated
 
+- Refactored individual `read_file` methods on data_type classes in `openghg.store` to use a central `read_file` method on `BaseStore` parent class (`openghg.store.base`). This centralises the `read_file` functionality and ensures the steps for each subclass are consistent. Each data_type class now requires a `format_inputs` method to apply the formatting steps to the input kwargs when standardising. [PR #1415](https://github.com/openghg/openghg/pull/1415)
  - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 
 ## [0.16.0] - 2025-08-29

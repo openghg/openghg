@@ -4,4 +4,5 @@ from ._specification import (
     validate_data_type,
     define_standardise_parsers,
     define_transform_parsers,
+    check_parser,
 )
