@@ -183,9 +183,8 @@ class SimpleVersioning(Generic[T]):
     def delete_version(self, v: str) -> None:
         """Delete version.
 
-        In addition to deleting the version from list of versions, if the type
-        of a data stored in that version has a `delete` method, then that method
-        is called on the data.
+        In addition to deleting the version from list of versions, if a `.delete` method
+        has been added to the versioned class (by subclassing), then that method is called.
 
         Args:
             v: version to delete.
@@ -197,10 +196,13 @@ class SimpleVersioning(Generic[T]):
         if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
 
-        data = self._versions[v]
+        if isinstance(self, HasDelete):
+            temp = self._current_version
+            self.checkout_version(v)
+            self.delete()
 
-        if isinstance(data, HasDelete):
-            data.delete()
+            if temp is not None:
+                self.checkout_version(temp)
 
         del self._versions[v]
 
