@@ -6,23 +6,6 @@ from collections.abc import Mapping
 
 
 @runtime_checkable
-class HasCopyTo(Protocol):
-    """Satisfied by classes with `copy_to` method.
-
-    A `copy_to` method should copy the calling object to the "other" object
-    passed as an argument.
-    """
-
-    def copy_to(self, other: Any) -> None: ...
-
-    """Copy self to other.
-
-    Args:
-        other: object to copy self to.
-    """
-
-
-@runtime_checkable
 class HasDelete(Protocol):
     """Satisfied by classes with `delete` method."""
 
@@ -127,24 +110,32 @@ class SimpleVersioning(Generic[T]):
             raise ValueError(f"Version {v} does not exist.")
         self._current_version = v
 
+    def copy_to_version(self, v: str) -> None:
+        """Copy current version to specified version.
+
+        The version "v" is created if it doesn't exist, and is overwritten otherwise.
+
+        This method can be customised in subclasses if more sophisticated
+        copying methods are available. (This is the primary reason for making this
+        method separate from `create_version`.) Care should be taken to clean up if a
+        new version is created but the copy fails.
+
+        Args:
+            v: version to copy to
+
+        Raises:
+            VersionError if no version is currently checked out.
+        """
+        self._versions[v] = deepcopy(self._current)
+
     def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None:
         if v in self.versions:
             raise ValueError(f"Cannot create version {v}; it already exists.")
 
-        # need to check copying behavior first, since if T does not have `copy_to` method, we will
-        # use `deepcopy`, in which case, we don't want to call the factory function, since it might
-        # have side-effects (such as creating files/folders, etc.)
         if copy_current:
-            try:
-                current = self._current
-            except VersionError as e:
-                raise ValueError("Cannot copy current: no version is currently selected.") from e
-            else:
-                if isinstance(current, HasCopyTo):
-                    self._versions[v] = self.factory(v)
-                    current.copy_to(self._versions[v])
-                else:
-                    self._versions[v] = deepcopy(self._current)
+            if self._current_version is None:
+                raise ValueError("Cannot copy current: no version is currently selected.")
+            self.copy_to_version(v)
         else:
             self._versions[v] = self.factory(v)
 
