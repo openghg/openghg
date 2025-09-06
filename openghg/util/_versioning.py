@@ -1,25 +1,8 @@
 from collections import UserDict, UserList
-from collections.abc import Callable, Iterable, Hashable
+from collections.abc import Callable, Iterable
 from copy import deepcopy
-from typing import Any, Generic, Mapping, Protocol, runtime_checkable, TypeVar
-from typing_extensions import Self
-
-
-@runtime_checkable
-class HasCopyTo(Protocol):
-    """Satisfied by classes with `copy_to` method.
-
-    A `copy_to` method should copy the calling object to the "other" object
-    passed as an argument.
-    """
-
-    def copy_to(self, other: Any) -> None: ...
-
-    """Copy self to other.
-
-    Args:
-        other: object to copy self to.
-    """
+from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
+from collections.abc import Mapping
 
 
 @runtime_checkable
@@ -34,11 +17,10 @@ class HasDelete(Protocol):
 class VersionError(Exception): ...
 
 
-VT = TypeVar("VT", bound=Hashable)  # version type
 T = TypeVar("T")  # underlying class type
 
 
-class SimpleVersioning(Generic[VT, T]):
+class SimpleVersioning(Generic[T]):
     """Work with versions of an object.
 
     This can be used to create a "versioned" subclass of the class T in some circumstances, by
@@ -51,7 +33,7 @@ class SimpleVersioning(Generic[VT, T]):
     In this example, we set a default version, so that the user does not have to create a version before using the
     versioned list. Also, we use strings for the "version type". The factory function maps versions to empty lists.
 
-    >>> class VersionedList(SimpleVersioning[str, list], UserList):
+    >>> class VersionedList(SimpleVersioning[list], UserList):
     >>>     def __init__(self, iterable=None):
     >>>         super().__init__(factory=lambda x: [], versions=["v1"])  # we don't use UserList's __init__
     >>>         if iterable:
@@ -90,16 +72,29 @@ class SimpleVersioning(Generic[VT, T]):
 
     def __init__(
         self,
-        factory: Callable[[VT], T],
-        versions: Iterable[VT] | None = None,
+        factory: Callable[[str], T],
+        versions: Iterable[str] | None = None,
         super_init: bool = False,
         **kwargs: Any,
     ) -> None:
+        """Create SimpleVersioning object.
+
+        Args:
+            factory: factory function to create the versioned objects given a
+            version string.
+            versions: initial list of versions.
+            super_init: if True, pass kwargs to `super().__init__`, which might
+              be helpful, since this class is intended to be used with multiple
+              inheritence.
+            **kwargs: arguments to pass via `super().__init__`; these are ignored if
+              if `super_init` is False.
+
+        """
         self.factory = factory
 
         if versions is None:
             self._versions = {}
-            self._current_version: VT | None = None
+            self._current_version: str | None = None
         else:
             self._versions = {v: factory(v) for v in versions}
             self._current_version = self.versions[-1]  # version added last
@@ -109,12 +104,13 @@ class SimpleVersioning(Generic[VT, T]):
             super().__init__(**kwargs)
 
     @property
-    def versions(self) -> list[VT]:
-        # TODO: should this return Iterable so e.g. we could return a tree?
+    def versions(self) -> list[str]:
+        """List of stored versions."""
         return list(self._versions.keys())
 
     @property
-    def current_version(self) -> VT:
+    def current_version(self) -> str:
+        """Current version."""
         if self._current_version is None:
             raise VersionError("No version is selected. Use `checkout_version` to select a version.")
         return self._current_version
@@ -123,133 +119,119 @@ class SimpleVersioning(Generic[VT, T]):
     def _current(self) -> T:
         return self._versions[self.current_version]
 
-    def _get_version(self, v: Hashable) -> VT | None:
-        # use loop to check equality in case version type VT
-        # can be equal to other types (e.g. string)
-        for version in self.versions:
-            if v == version:
-                return version
-        return None
+    def checkout_version(self, v: str) -> None:
+        """Checkout specified version.
 
-    def checkout_version(self, v: Hashable) -> None:
-        version = self._get_version(v)
-        if version is None:
+        Args:
+            v: version to check out.
+
+        Raises:
+            ValueError: if specified version not found.
+
+        """
+        if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
-        self._current_version = version
+        self._current_version = v
 
-    def create_version(self, v: VT, checkout: bool = False, copy_current: bool = False) -> None:
+    def copy_to_version(self, v: str) -> None:
+        """Copy current version to specified version.
+
+        The version "v" is created if it doesn't exist, and is overwritten otherwise.
+
+        This method can be customised in subclasses if more sophisticated
+        copying methods are available. (This is the primary reason for making this
+        method separate from `create_version`.) Care should be taken to clean up if a
+        new version is created but the copy fails.
+
+        Args:
+            v: version to copy to
+
+        Raises:
+            VersionError if no version is currently checked out.
+
+        """
+        self._versions[v] = deepcopy(self._current)
+
+    def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None:
+        """Create new version.
+
+        Args:
+            v: version to create.
+            checkout: if True, checkout the newly created version.
+            copy_current: if True, copy current version to new version.
+
+        Raises:
+            ValueError: if new version `v` already exists; if `copy_current` is
+            True and no version is currently checked out.
+
+        """
         if v in self.versions:
             raise ValueError(f"Cannot create version {v}; it already exists.")
 
-        # need to check copying behavior first, since if T does not have `copy_to` method, we will
-        # use `deepcopy`, in which case, we don't want to call the factory function, since it might
-        # have side-effects (such as creating files/folders, etc.)
         if copy_current:
-            try:
-                current = self._current
-            except VersionError as e:
-                raise ValueError("Cannot copy current: no version is currently selected.") from e
-            else:
-                if isinstance(current, HasCopyTo):
-                    self._versions[v] = self.factory(v)
-                    current.copy_to(self._versions[v])
-                else:
-                    self._versions[v] = deepcopy(self._current)
+            if self._current_version is None:
+                # This check isn't necessary with default `copy_to_version`, but it's here for
+                # safety if a subclass overrides `copy_to_version`.
+                raise ValueError("Cannot copy current: no version is currently selected.")
+            self.copy_to_version(v)
         else:
             self._versions[v] = self.factory(v)
 
         if checkout:
             self._current_version = v
 
-    def delete_version(self, v: Hashable) -> None:
-        version = self._get_version(v)
-        if version is None:
+    def delete_version(self, v: str) -> None:
+        """Delete version.
+
+        In addition to deleting the version from list of versions, if a `.delete` method
+        has been added to the versioned class (by subclassing), then that method is called.
+
+        Args:
+            v: version to delete.
+
+        Raises:
+            ValueError: if specified version not found.
+
+        """
+        if v not in self.versions:
             raise ValueError(f"Version {v} does not exist.")
 
-        data = self._versions[version]
+        if isinstance(self, HasDelete):
+            temp = self._current_version
+            self.checkout_version(v)
+            self.delete()
 
-        if isinstance(data, HasDelete):
-            data.delete()
+            if temp is not None:
+                self.checkout_version(temp)
 
-        del self._versions[version]
+        del self._versions[v]
 
-        if version == self._current_version:
+        if v == self._current_version:
             self._current_version = None
 
 
-class LinearVersion:
-    """Versions numbers of the form `v1`, `v2`, etc.
+def next_version(v: str) -> str:
+    """Get next version of v[number].
 
-    LinearVersion objects can be compared with strings:
-
-    >>> LinearVersion("v1") == "v1"
-    True
-
-    The next version number can be accessed via `.next`:
-
-    >>> LinearVersion("v1").next == "v2"
-    True
-
-    Thus LinearVersion objects can be used like the strings "v1", "v2", ..., but
-    you don't need to extract the version number to increment the version.
-
-    Also, LinearVersion includes some validation for the version format.
+    For instance, if v = "v10", then return "v11".
     """
-
-    def __init__(self, version: int | str) -> None:
-        if isinstance(version, int):
-            self.number = version
-            self.version = f"v{version}"
-        else:
-            err_msg = f"version string {version} is not of the form 'v{{integer}}'."
-            if not version.startswith("v"):
-                raise ValueError(err_msg)
-            try:
-                self.number = int(version[1:])
-            except ValueError as e:
-                raise ValueError(err_msg) from e
-            else:
-                self.version = version
-
-    def __str__(self) -> str:
-        return self.version
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    def __hash__(self) -> int:
-        return hash(str(self))
-
-    def __eq__(self, other: Any, /) -> bool:
-        if isinstance(other, str):
-            return str(self) == other
-        if isinstance(other, int):
-            return self.number == other
-        if isinstance(other, LinearVersion):
-            return self.number == other.number
-        raise ValueError(f"Cannot compare LinearVersion with type {type(other)}.")
-
-    def __lt__(self, other: Any, /) -> bool:
-        if isinstance(other, str):
-            return str(self) < other
-        if isinstance(other, int):
-            return self.number < other
-        if isinstance(other, LinearVersion):
-            return self.number < other.number
-        raise ValueError(f"Cannot compare LinearVersion with type {type(other)}.")
-
-    @property
-    def next(self) -> Self:
-        """Next (child) version label."""
-        return type(self)(self.number + 1)
-
-    @property
-    def prev(self) -> Self:
-        """Previous (parent) version label."""
-        return type(self)(self.number - 1)
+    n = int(v[1:])
+    return f"v{n + 1}"
 
 
-class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
+def prev_version(v: str, min_version: int = 1) -> str:
+    """Get previous version of v[number].
+
+    For instance, if v = "v10", then return "v9".
+    Raise an error if v is the mininum version.
+    """
+    n = int(v[1:])
+    if n == min_version:
+        raise ValueError(f"Can't get previous version for minimum version v{n}.")
+    return f"v{n + 1}"
+
+
+class VersionedList(SimpleVersioning[list], UserList):
     """List with verisons.
 
     This works by subclassing SimpleVersioning and UserList, and overriding the
@@ -257,7 +239,7 @@ class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
     """
 
     def __init__(self, iterable: Iterable | None = None):
-        super().__init__(factory=lambda _: [], versions=[LinearVersion("v1")])
+        super().__init__(factory=lambda _: [], versions=["v1"])
 
         if iterable:
             self.extend(iterable)
@@ -267,7 +249,7 @@ class VersionedList(SimpleVersioning[LinearVersion, list], UserList):
         return self._current
 
 
-class VersionedDict(SimpleVersioning[LinearVersion, dict], UserDict):
+class VersionedDict(SimpleVersioning[dict], UserDict):
     """Dict with verisons.
 
     This works by subclassing SimpleVersioning and UserDict, and overriding the
@@ -275,7 +257,7 @@ class VersionedDict(SimpleVersioning[LinearVersion, dict], UserDict):
     """
 
     def __init__(self, iterable: Mapping | None = None):
-        super().__init__(factory=lambda _: {}, versions=[LinearVersion("v1")])
+        super().__init__(factory=lambda _: {}, versions=["v1"])
 
         if iterable:
             self.update(iterable)
