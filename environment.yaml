@@ -44,4 +44,4 @@ dependencies:
   - networkx
   - openghg_calscales
   - pip:
-    - icoscp<=0.1.17
+    - icoscp
