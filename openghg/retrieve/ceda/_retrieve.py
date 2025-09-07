@@ -51,6 +51,53 @@ def retrieve_surface(
         force_retrieval=force_retrieval,
         additional_metadata=additional_metadata,
         store=store,
+        data_type="surface",
+    )
+
+
+def retrieve_column(
+    site: Optional[str] = None,
+    species: Optional[str] = None,
+    inlet: Optional[str] = None,
+    url: Optional[str] = None,
+    force_retrieval: bool = False,
+    additional_metadata: Optional[Dict] = None,
+    store: Optional[str] = None,
+) -> Union[List[ObsData], ObsData, None]:
+    """Retrieve column measurements from the CEDA archive. This function will route the call
+    to either local or cloud functions based on the environment.
+
+    Args:
+        site: Site name
+        species: Species name
+        inlet: Inlet height
+        url: URL of data in CEDA archive
+        force_retrieval: Force the retrieval of data from a URL
+        additional_metadata: Additional metadata to pass if the returned data
+        doesn't contain everythging we need. At the moment we try and find site and inlet
+        keys if they aren't found in the dataset's attributes.
+        For example:
+            {"site": "AAA", "inlet": "10m"}
+        store: Name of object store to use
+    Returns:
+        ObsData or None: ObsData if data found / retrieved successfully.
+
+    Example:
+        To retrieve new data from the CEDA archive using a URL
+        >>> retrieve_column(url=https://dap.ceda.ac.uk/neodc/...)
+        To retrieve already cached data from the object store
+        >>> retrieve_column(site="BSD", species="ch4)
+
+    """
+    return retrieve(
+        site=site,
+        species=species,
+        inlet=inlet,
+        url=url,
+        force_retrieval=force_retrieval,
+        additional_metadata=additional_metadata,
+        store=store,
+        data_type="column",
     )
 
 
@@ -66,7 +113,7 @@ def retrieve(
 ) -> list[ObsData] | ObsData | None:
     """Retrieve surface observations data from the CEDA archive. You can pass
     search terms and the object store will be searched. To retrieve data from the
-    CEDA Archive please browse the website (https://data.ceda.ac.uk/badc) to find
+    CEDA Archive please browse the website for surface (https://data.ceda.ac.uk/badc) and website for column (https://data.ceda.ac.uk/neodc)  to find
     the URL of the dataset to retrieve.
 
     Args:
@@ -93,14 +140,22 @@ def retrieve(
     import io
 
     import xarray as xr
+    
     from openghg.retrieve import search_surface
-    from openghg.store import ObsSurface
+    from openghg.store import ObsSurface, ObsColumn
     from openghg.util import download_data, parse_url_filename, site_code_finder
 
     if additional_metadata is None:
         additional_metadata = {}
 
-    results = search_surface(site=site, species=species, inlet=inlet, data_source="ceda_archive", store=store)
+    results = search(
+        site=site,
+        species=species,
+        inlet=inlet,
+        data_source="ceda_archive",
+        data_type=kwargs["data_type"],
+        store=store,
+    )
 
     if results and not force_retrieval or url is None:
         return results.retrieve_all()
@@ -129,7 +184,7 @@ def retrieve(
     # We'll take the attributes as metadata
     metadata = dataset.attrs.copy()
 
-    metadata["data_type"] = "surface"
+    metadata["data_type"] = kwargs["data_type"]
     metadata["data_source"] = "ceda_archive"
     # TODO - how should we find these? Need to change how we're retrieving Datasources
     # using metadata
@@ -138,6 +193,7 @@ def retrieve(
 
     # If we're going to be using site, species and inlet here we should check that that
     # information is in the metadata
+
     if not {"site", "inlet"} <= metadata.keys():
         site_name = metadata["station_long_name"]
         site_code = site_code_finder(site_name=site_name)
@@ -167,7 +223,14 @@ def retrieve(
     to_store = [MetadataAndData(metadata=metadata, data=dataset)]
 
     bucket = get_writable_bucket(name=store)
-    with ObsSurface(bucket=bucket) as obs:
-        obs.store_data(data=to_store)
 
-    return ObsData(data=dataset, metadata=metadata)
+    if kwargs["data_type"] == "column":
+        with ObsColumn(bucket=bucket) as obs:
+            obs.store_data(data=to_store)
+
+        return ObsData(data=dataset, metadata=metadata)
+    else:
+        with ObsSurface(bucket=bucket) as obs:
+            obs.store_data(data=to_store)
+
+        return ObsData(data=dataset, metadata=metadata)
