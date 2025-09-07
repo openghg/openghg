@@ -324,7 +324,7 @@ class ObsSurface(BaseStore):
         TODO: At the moment the align_metadata_attributes() function is only applicable
             to surface data but this should be generalised to all data types.
         """
-        return align_metadata_attributes(data, update_mismatch)
+        return align_metadata_attributes(data, update_mismatch, data_type=self._data_type)
 
     def define_loop_params(self) -> dict:
         """

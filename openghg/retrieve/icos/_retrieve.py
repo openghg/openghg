@@ -488,7 +488,9 @@ def _retrieve_remote(
     standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
     standardised_data_list = convert_to_list_of_metadata_and_data(standardised_data)
-    align_metadata_attributes(data=standardised_data_list, update_mismatch=update_mismatch)
+    align_metadata_attributes(
+        data=standardised_data_list, update_mismatch=update_mismatch, data_type="surface"
+    )
 
     return standardised_data_list
 

@@ -45,7 +45,7 @@ def test_read_file_no_attr():
     assert attributes["site"] == param["site"]
     assert attributes["species"] == param["species"]
 
-    attribute_keys = attributes_default_keys()
+    attribute_keys = attributes_default_keys(data_type="surface")
     expected_metadata = {param: value for param, value in attributes.items() if param in attribute_keys}
 
     metadata = output_co2["metadata"]
