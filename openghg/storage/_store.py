@@ -13,14 +13,13 @@ the `Store` interface, using Xarray operations.
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from contextlib import suppress
-from typing import Any, Literal
+from typing import Literal
 
 import pandas as pd
 import xarray as xr
 
 from openghg.types import DataOverlapError
-from openghg.util._versioning import SimpleVersioning, VersionError
+from openghg.util._versioning import SimpleVersioning
 from ._indexing import ConflictDeterminer
 
 
@@ -196,7 +195,6 @@ class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
         append_dim: str = "time",
         index_options: dict | None = None,
         default_version: str = "v1",
-        **kwargs: Any,
     ) -> None:
         # if data is not None, we need to create an initial version
         versions = [default_version] if data is not None else None
@@ -204,26 +202,15 @@ class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
         super().__init__(
             factory=lambda _: None,  # empty MemoryStore initialised with data = None
             versions=versions,
-            super_init=True,  # pass remaining arguments on to MemoryStore init
-            data=data,
-            append_dim=append_dim,
-            index_options=index_options,
-            **kwargs,
         )
+        self.append_dim = append_dim
+        self.index_options = index_options or {}
 
+    # make .data an alias for ._current
     @property
     def data(self) -> xr.Dataset | None:
         return self._current
 
     @data.setter
     def data(self, value: xr.Dataset | None) -> None:
-        if value is not None:
-            self._current = value
-        else:
-            # If value is None, ignore version errors:
-            # this prevents an error when initialising an empty store.
-            #
-            # This also has the effect of ignoring `.clear()`
-            # when a version is not checked out.
-            with suppress(VersionError):
-                self._current = value
+        self._current = value

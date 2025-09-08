@@ -24,16 +24,14 @@ ZST = TypeVar("ZST", bound=AbstractZarrStore)
 class ZarrStore(Store, Generic[ZST]):
     """Zarr store for storing a single dataset."""
 
-    def __init__(
-        self, zarr_store: ZST | None = None, append_dim: str = "time", index_options: dict | None = None
-    ) -> None:
+    def __init__(self, zarr_store: ZST, append_dim: str = "time", index_options: dict | None = None) -> None:
         """Pass an instantiated Zarr Store.
 
         Note: for commonly used types of ZarrStore, we can create convenience functions
         to create ZarrStore objects.
 
         Args:
-            zarr_store: instantiated Zarr Store. (Optional to allow for versioning.)
+            zarr_store: instantiated Zarr Store.
             append_dim: dimension to insert new data along.
             index_options: options for index, such as `method = "nearest"`
         """
@@ -44,17 +42,7 @@ class ZarrStore(Store, Generic[ZST]):
 
     @property
     def store(self) -> ZST:
-        """Underlying Zarr storage.
-
-        This property is necessary because `self._store` should not be None,
-        however, for versioning we need to allow the factory function in `SimpleVersioning`
-        to set the value of `self._store`.
-
-        Raises:
-            AttributeError if internal Zarr store is not set.
-        """
-        if self._store is None:
-            raise AttributeError("Zarr store not set.")
+        """Underlying Zarr storage."""
         return self._store
 
     @property
@@ -215,21 +203,18 @@ class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
         super().__init__(
             factory=factory,
             versions=versions,
-            super_init=True,
-            append_dim=append_dim,
-            index_options=index_options,
         )
+        self.append_dim = append_dim
+        self.index_options = index_options or {}
 
+    # make ._store an alias for ._current
     @property
-    def _store(self) -> ZST | None:
+    def _store(self) -> ZST:
         return self._current
 
     @_store.setter
-    def _store(self, value: ZST | None) -> None:
-        # ZarrStore.__init__ will try to set the value to None, but we don't want to set
-        # the current storage version to None.
-        if value is not None:
-            self._current = value
+    def _store(self, value: ZST) -> None:
+        self._current = value
 
     def copy_to_version(self, v: str) -> None:
         """Copy current version to specified version.

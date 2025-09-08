@@ -1,7 +1,7 @@
 from collections import UserDict, UserList
 from collections.abc import Callable, Iterable
 from copy import deepcopy
-from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
+from typing import Generic, Protocol, runtime_checkable, TypeVar
 from collections.abc import Mapping
 
 
@@ -74,8 +74,6 @@ class SimpleVersioning(Generic[T]):
         self,
         factory: Callable[[str], T],
         versions: Iterable[str] | None = None,
-        super_init: bool = False,
-        **kwargs: Any,
     ) -> None:
         """Create SimpleVersioning object.
 
@@ -98,10 +96,6 @@ class SimpleVersioning(Generic[T]):
         else:
             self._versions = {v: factory(v) for v in versions}
             self._current_version = self.versions[-1]  # version added last
-
-        # we might want to pass arguments to
-        if super_init:
-            super().__init__(**kwargs)
 
     @property
     def versions(self) -> list[str]:
