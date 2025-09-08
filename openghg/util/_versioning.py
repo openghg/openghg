@@ -119,6 +119,10 @@ class SimpleVersioning(Generic[T]):
     def _current(self) -> T:
         return self._versions[self.current_version]
 
+    @_current.setter
+    def _current(self, value: T) -> None:
+        self._versions[self.current_version] = value
+
     def checkout_version(self, v: str) -> None:
         """Checkout specified version.
 

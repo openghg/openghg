@@ -3,9 +3,9 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.storage import MemoryStore
-from openghg.storage._zarr_store import get_zarr_directory_store, get_zarr_memory_store
+from openghg.storage import MemoryStore, VersionedMemoryStore, get_zarr_directory_store, get_zarr_memory_store
 from openghg.types import DataOverlapError
+from openghg.util._versioning import VersionError
 
 
 def dummy_dataset(index, data=None) -> xr.Dataset:
@@ -39,6 +39,12 @@ def memory_store():
 
 
 @pytest.fixture()
+def versioned_memory_store():
+    """Test MemoryStore."""
+    return VersionedMemoryStore()
+
+
+@pytest.fixture()
 def zarr_memory_store():
     """Test ZarrStore with zarr.MemoryStore as underlying storage."""
     return get_zarr_memory_store()
@@ -51,14 +57,18 @@ def zarr_directory_store(tmp_path):
 
 
 # names of fixtures to use in parametrize
-store_names = ["memory_store", "zarr_memory_store", "zarr_directory_store"]
+store_names = ["memory_store", "versioned_memory_store", "zarr_memory_store", "zarr_directory_store"]
+store_names_is_versioned = [(name, "versioned" in name) for name in store_names]
 
 
 # To use fixtures in parametrize, use the "request" fixture, as detailed here:
 # https://stackoverflow.com/questions/42014484/pytest-using-fixtures-as-arguments-in-parametrize
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_creates(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_insert_creates(store_name, is_versioned, request):
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     assert not store
 
@@ -69,9 +79,12 @@ def test_insert_creates(store_name, request):
     xr.testing.assert_equal(store.get(), ds1)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_clear(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_clear(store_name, is_versioned, request):
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     assert not store
 
@@ -85,9 +98,12 @@ def test_clear(store_name, request):
     xr.testing.assert_identical(store.get(), xr.Dataset())
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_twice(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_insert_twice(store_name, is_versioned, request):
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
     store.insert(ds5)
@@ -97,10 +113,13 @@ def test_insert_twice(store_name, request):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_error_on_insert_conflict(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_error_on_insert_conflict(store_name, is_versioned, request):
     """Test an error is raised on conflict."""
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -108,10 +127,13 @@ def test_error_on_insert_conflict(store_name, request):
         store.insert(ds1)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_ignore_conflict(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_insert_ignore_conflict(store_name, is_versioned, request):
     """Test that insert with `on_conflict = 'ignore'` inserts non-conflicting values."""
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -127,9 +149,12 @@ def test_insert_ignore_conflict(store_name, request):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_update(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_update(store_name, is_versioned, request):
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -141,10 +166,13 @@ def test_update(store_name, request):
     xr.testing.assert_equal(store.get(), twice_ds1)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_update_ignore_nonconflicts(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_update_ignore_nonconflicts(store_name, is_versioned, request):
     """Test `update` with non-conflicts ignored."""
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -157,14 +185,19 @@ def test_update_ignore_nonconflicts(store_name, request):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name, is_zarr", [(name, "zarr" in name) for name in store_names])
-def test_non_contiguous_update(store_name, is_zarr, request):
+@pytest.mark.parametrize(
+    "store_name, is_versioned, is_zarr", [(name, "versioned" in name, "zarr" in name) for name in store_names]
+)
+def test_non_contiguous_update(store_name, is_versioned, is_zarr, request):
     """Test `update` when only some of the values are updated.
 
     This raises an error with Zarr stores because the region to update is non-contiguous.
     We will fix this later.
     """
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -182,10 +215,13 @@ def test_non_contiguous_update(store_name, is_zarr, request):
             store.update(twice_ds2)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_contiguous_update(store_name, request):
+@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+def test_contiguous_update(store_name, is_versioned, request):
     """Test `update` on contiguous region of times."""
     store = request.getfixturevalue(store_name)
+
+    if is_versioned:
+        store.create_version("v1", checkout=True)
 
     store.insert(ds1)
 
@@ -197,3 +233,77 @@ def test_contiguous_update(store_name, request):
 
     expected = np.hstack([twice_ds1.x.values, ds5.x.values])
     np.testing.assert_equal(store.get().x.values, expected)
+
+
+# TESTS FOR VERSIONED STORES
+versioned_store_names = ["versioned_memory_store"]
+
+
+@pytest.mark.parametrize("store_name", versioned_store_names)
+def test_add_data_to_new_version(store_name, request):
+    """Check that data can be added to a new version without affecting an old version."""
+    store = request.getfixturevalue(store_name)
+
+    # create a version and add some data
+    store.create_version("v1", checkout=True)
+    store.insert(ds1)
+
+    # create a new version, copying v1, then add some more data
+    store.create_version("v2", checkout=True, copy_current=True)
+    store.insert(ds5)
+
+    # version 2 is still checked out, and should have the combined values added
+    expected2 = np.hstack([ds1.x.values, ds5.x.values])
+    np.testing.assert_equal(store.get().x.values, expected2)
+
+    # checkout version 1 and test that it is unmodified
+    store.checkout_version("v1")
+    expected1 = ds1.x.values
+    np.testing.assert_equal(store.get().x.values, expected1)
+
+
+@pytest.mark.parametrize("store_name", versioned_store_names)
+def test_clear_data_from_old_version(store_name, request):
+    """Check that data can be cleared from an old version without affecting a new version."""
+    store = request.getfixturevalue(store_name)
+
+    # create a version and add some data
+    store.create_version("v1", checkout=True)
+    store.insert(ds1)
+
+    # create a new version, copying version 1
+    store.create_version("v2", checkout=True, copy_current=True)
+
+    # checkout v1 and clear it
+    store.checkout_version("v1")
+    store.clear()
+    assert not store
+
+    # check out v2 and test that it is not empty
+    store.checkout_version("v2")
+    assert store
+
+
+@pytest.mark.parametrize("store_name", versioned_store_names)
+def test_delete_data_from_old_version(store_name, request):
+    """Check that an old version can be deleted without affecting a new version."""
+    store = request.getfixturevalue(store_name)
+
+    # create a version and add some data
+    store.create_version("v1", checkout=True)
+    store.insert(ds1)
+
+    # create a new version, copying version 1
+    store.create_version("v2", checkout=True, copy_current=True)
+
+    # checkout v1 and clear it
+    store.checkout_version("v1")
+    store.delete_version("v1")
+
+    # now there is no version checked out
+    with pytest.raises(VersionError):
+        store.current_version
+
+    # check out v2 and test that it is not empty
+    store.checkout_version("v2")
+    assert store
