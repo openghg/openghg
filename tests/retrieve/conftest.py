@@ -114,7 +114,6 @@ def data_read():
         update_mismatch="metadata",
     )
 
-
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 

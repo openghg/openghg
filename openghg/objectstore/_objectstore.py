@@ -15,10 +15,11 @@ both metadata and data.
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator, Iterable
 from contextlib import contextmanager
 from types import TracebackType
 from typing import Any, Generic, Literal, TypeAlias, TypeVar
+import warnings
 from typing_extensions import Self
 from uuid import uuid4
 
@@ -33,16 +34,34 @@ from openghg.util import split_function_inputs
 
 
 MetaData = dict[str, Any]
-QueryResults = list[Any]
+QueryResults = list[MetaData]
 UUID = str
 T = TypeVar("T")
 Bucket = str
 
+MetadataUpdaterT = Callable[[QueryResults, Iterable[DatasourceT]], tuple[QueryResults, Iterable[DatasourceT]]]
+"""Type for function that transforms query results and a list of datasources."""
+
+
+def _default_metadata_updater(
+    metadata: QueryResults, datasources: Iterable[DatasourceT]
+) -> tuple[QueryResults, Iterable[DatasourceT]]:
+    """Default metadata updater for ObjectStore."""
+    return metadata, datasources
+
 
 class ObjectStore(Generic[DatasourceT, T]):
-    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory[DatasourceT]) -> None:
+    def __init__(
+        self,
+        metastore: MetaStore,
+        datasource_factory: DatasourceFactory[DatasourceT],
+        metadata_updater: MetadataUpdaterT | None = None,
+    ) -> None:
         self.metastore = metastore
         self.datasource_factory = datasource_factory
+
+        # use default metadata updater if None is passed
+        self.metadata_updater = metadata_updater or _default_metadata_updater
 
     def __enter__(self) -> Self:
         return self
@@ -58,13 +77,13 @@ class ObjectStore(Generic[DatasourceT, T]):
     def close(self) -> None:
         self.metastore.close()
 
-    def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
-        """Search the metastore.
+    def _search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
+        """Internal metastore search.
 
         TODO: fix the arguments: metastore search is now more complex...
 
-        NOTE: currently this is a thin wrapper around MetaStore.search,
-        but could be expanded to include information contained in datasources.
+        This only retrieves metadata from the metastore. The public `search` method adds
+        metadata from `Datasources` to this.
 
         Args:
             metadata: metadata to narrow search by
@@ -84,6 +103,70 @@ class ObjectStore(Generic[DatasourceT, T]):
             params["search_terms"] = remainder
 
         return self.metastore.search(**params)
+
+    def get_datasource(self, uuid: UUID) -> DatasourceT:
+        """Get data stored at given uuid."""
+        return self.datasource_factory.load(uuid)
+
+    def _retrieve(
+        self, metadata: MetaData | None = None, **kwargs: Any
+    ) -> tuple[QueryResults, Iterable[DatasourceT]]:
+        """Internal retrieve.
+
+        Searches the metastore then gets the Datasources corresponding to the search results.
+        The search results and datasources are updated by `self.metadata_updater`, before being
+        returned.
+
+        This allows adding metadata to the search results from the datasources, and adding metadata from
+        the metastore to the datasources.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results and corresponding Datasources, updated by `self.metadata_updater`
+        """
+        search_results = self._search(metadata, **kwargs)
+        datasources = (self.get_datasource(r["uuid"]) for r in search_results)
+        return self.metadata_updater(search_results, datasources)
+
+    def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
+        """Search the metastore.
+
+        Adds metadata from Datasources via `self.metadata_updater`, if Datasource
+        metadata is available.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            Query results (list of search results)
+        """
+        try:
+            search_results, _ = self._retrieve(metadata, **kwargs)
+        except ObjectStoreError as e:
+            # Datasource not found? just warn...
+            warnings.warn(f"Metadata found without corresponding Datasource {e}.")
+            search_results = self._search(metadata, **kwargs)
+
+        return list(search_results)
+
+    def retrieve(self, metadata: MetaData | None = None, **kwargs: Any) -> list[DatasourceT]:
+        """Retrieve Datasources from the ObjectStore.
+
+        Searching works the same as the `.search` method.
+
+        Args:
+            metadata: metadata to narrow search by
+            **kwargs: keyword arg version of search metadata
+
+        Returns:
+            list of Datasources corresponding to query.
+        """
+        _, datasources = self._retrieve(metadata, **kwargs)
+        return list(datasources)
 
     def get_uuids(self, metadata: MetaData | None = None) -> list[UUID]:
         metadata = metadata or {}
@@ -117,27 +200,12 @@ class ObjectStore(Generic[DatasourceT, T]):
         uuid: UUID = str(uuid4())
         datasource = self.datasource_factory.new(uuid)
 
-        try:
-            # HACK to preserve current behaviour
-            if hasattr(datasource, "add_metadata"):
-                datasource.add_metadata(metadata=metadata, extend_keys=kwargs.get("extend_keys"))  # type: ignore
-            # END HACK
+        datasource.add(data, **kwargs)
+        metadata["uuid"] = uuid
 
-            datasource.add(data, **kwargs)
-
-            # HACK
-            if hasattr(datasource, "metadata"):
-                metadata = metadata.copy()
-                metadata.update(datasource.metadata())
-            # END HACK
-        except Exception as e:
-            raise e
-        else:
-            metadata["uuid"] = uuid
-
-            self.metastore.insert(metadata)
-            del metadata["uuid"]  # don't mutate the metadata
-            datasource.save()
+        self.metastore.insert(metadata)
+        del metadata["uuid"]  # don't mutate the metadata
+        datasource.save()
 
         return uuid
 
@@ -147,6 +215,7 @@ class ObjectStore(Generic[DatasourceT, T]):
         metadata: MetaData | None = None,
         data: T | None = None,
         keys_to_delete: str | list[str] | None = None,
+        extend_keys: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         """Update metadata and/or data associated with a given UUID.
@@ -178,34 +247,21 @@ class ObjectStore(Generic[DatasourceT, T]):
             raise ValueError("Cannot update UUID.")
 
         if metadata or keys_to_delete:
-            # TODO: might need more sophisticated update method, e.g. for updating lists?
-            self.metastore.update(where={"uuid": uuid}, to_update=metadata, to_delete=keys_to_delete)
+            to_extend = None
+            if extend_keys and metadata is not None:
+                to_extend = {}
+                for key in extend_keys:
+                    if key in metadata:
+                        to_extend[key] = metadata.pop(key)
 
-            # HACK to preserve current behaviour
-            datasource = self.get_datasource(uuid)
-            if hasattr(datasource, "add_metadata") and metadata is not None:
-                datasource.add_metadata(metadata=metadata, extend_keys=kwargs.get("extend_keys"))  # type: ignore
-            if hasattr(datasource, "_metadata") and keys_to_delete is not None:
-                for k in keys_to_delete:
-                    del datasource._metadata[k]  # type: ignore
-            datasource.save()
-            if hasattr(datasource, "metadata"):
-                self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
-            # END HACK
+            self.metastore.update(
+                where={"uuid": uuid}, to_update=metadata, to_delete=keys_to_delete, to_extend=to_extend
+            )
 
         if data:
             datasource = self.get_datasource(uuid)
             datasource.add(data, **kwargs)
             datasource.save()
-
-            # HACK to preserve current behaviour
-            if hasattr(datasource, "metadata"):
-                self.metastore.update(where={"uuid": uuid}, to_update=datasource.metadata())  # type: ignore
-            # END HACK
-
-    def get_datasource(self, uuid: UUID) -> DatasourceT:
-        """Get data stored at given uuid."""
-        return self.datasource_factory.load(uuid)
 
     def delete(self, uuid: UUID) -> None:
         """Delete data and metadata with given UUID."""
@@ -215,13 +271,98 @@ class ObjectStore(Generic[DatasourceT, T]):
 
 
 # Helper functions for creating object stores
+def _update_one(
+    r: MetaData, d: DatasourceT, skip_keys: list | None = None, extend_keys: list | None = None
+) -> tuple[Any, DatasourceT]:
+    """Helper function for make_metadata_updater_fn.
+
+    Updates one pair of metadata and datasource.
+
+    Note that this only changes the input if the datasource has metadata and an `add_metadata`
+    method, like the standard datasource we use for storing data in zarr stores.
+    """
+    if hasattr(d, "add_metadata") and hasattr(d, "metadata"):
+        # update datasource by adding missing metadata
+        d_keys = list(d.metadata().keys())  # type: ignore
+        to_add = {k: v for k, v in r.items() if k not in d_keys}
+        d.add_metadata(metadata=to_add, skip_keys=skip_keys, extend_keys=extend_keys)  # type: ignore
+
+        r.update(d.metadata())  # type: ignore
+    return r, d
+
+
+def make_metadata_updater_fn(
+    skip_keys: list | None = None, extend_keys: list | None = None
+) -> MetadataUpdaterT:
+    """Create metadata updater function using given `skip_keys` and `extend_keys`.
+
+    Since `extend_keys` depends on the context (e.g. data type), this function
+    helps create metadata updaters to suit different contexts.
+
+    Args:
+        skip_keys: keys whose values should not be lowercased when added to
+        Datasource metadata.
+        extend_keys: keys whose values are lists, and should be extended rather
+        than overwritten.
+
+    Returns:
+        metadata updater function.
+
+    """
+
+    def metadata_updater(
+        search_results: QueryResults, datasources: Iterable[DatasourceT]
+    ) -> tuple[QueryResults, Iterable[DatasourceT]]:
+        """Update metastore and datasource metadata by combining their metadata.
+
+        The returned metastore results and datasources will have the same
+        metadata, which is a combination of the unique metadata from each
+        source.
+
+        Args:
+            search_results: results of metastore search
+            datasources: iterable of datasources corresponding to metastore
+            search results.
+
+        Returns:
+            updated search results and datasources with updated metadata.
+
+        """
+        # handle empty search
+        if not search_results:
+            return search_results, datasources
+
+        zipped_result = (
+            _update_one(r, d, skip_keys, extend_keys) for r, d in zip(search_results, datasources)
+        )
+        search_iter, datasources_iter = list(
+            zip(*zipped_result)
+        )  # turn iterator of tuples into list of two lists
+        return list(search_iter), datasources_iter
+
+    return metadata_updater
+
+
 @contextmanager
 def open_object_store(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
 ) -> Generator[ObjectStore[Datasource, xr.Dataset], None, None]:
     with open_metastore(bucket=bucket, data_type=data_type, mode=mode) as ms:
         ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
-        object_store = ObjectStore[Datasource, xr.Dataset](metastore=ms, datasource_factory=ds_factory)
+
+        # make metadata updater
+        from openghg.store.spec import define_data_type_classes
+
+        dc = define_data_type_classes()[data_type]
+        try:
+            list_keys = dc(bucket=bucket).get_list_metakeys()
+        except (ObjectStoreError, ValueError):
+            list_keys = None
+        metadata_updater = make_metadata_updater_fn(extend_keys=list_keys)
+
+        object_store = ObjectStore[Datasource, xr.Dataset](
+            metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater
+        )
         yield object_store
 
 
@@ -245,7 +386,7 @@ def get_datasource(bucket: str, uuid: str, data_type: str | None = None) -> Data
     """
     if data_type is not None:
         with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
-            return objstore.get_datasource(uuid=uuid)
+            return objstore.retrieve(uuid=uuid)[0]
     else:
         # try iterating over all data types
         from openghg.store.spec import define_data_types
@@ -253,8 +394,8 @@ def get_datasource(bucket: str, uuid: str, data_type: str | None = None) -> Data
         for dtype in define_data_types():
             try:
                 with open_object_store(bucket=bucket, data_type=dtype, mode="r") as objstore:
-                    result = objstore.get_datasource(uuid=uuid)
-            except ObjectStoreError:
+                    result = objstore.retrieve(uuid=uuid)[0]
+            except (ObjectStoreError, IndexError):
                 continue
             else:
                 return result
@@ -270,8 +411,16 @@ class LockingObjectStore(ObjectStore[DatasourceT, T]):
     The context manager (`with` statement) must be used to create, update, and delete data.
     """
 
-    def __init__(self, metastore: MetaStore, datasource_factory: DatasourceFactory, lock: FileLock) -> None:
-        super().__init__(metastore=metastore, datasource_factory=datasource_factory)
+    def __init__(
+        self,
+        metastore: MetaStore,
+        datasource_factory: DatasourceFactory,
+        metadata_updater: MetadataUpdaterT,
+        lock: FileLock,
+    ) -> None:
+        super().__init__(
+            metastore=metastore, datasource_factory=datasource_factory, metadata_updater=metadata_updater
+        )
         self.lock = lock
 
     def __enter__(self) -> Self:
@@ -301,12 +450,13 @@ class LockingObjectStore(ObjectStore[DatasourceT, T]):
         metadata: MetaData | None = None,
         data: T | None = None,
         keys_to_delete: str | list[str] | None = None,
+        extend_keys: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         if not self.lock.is_locked:
             raise LockingError("Object store must be locked to update data.")
 
-        return super().update(uuid, metadata, data, keys_to_delete, **kwargs)
+        return super().update(uuid, metadata, data, keys_to_delete, extend_keys, **kwargs)
 
     def delete(self, uuid: UUID) -> None:
         if not self.lock.is_locked:
@@ -319,12 +469,17 @@ LockingObjectStoreType: TypeAlias = LockingObjectStore[Datasource, xr.Dataset]
 
 
 def locking_object_store(
-    bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
+    bucket: str,
+    data_type: str,
+    mode: Literal["r", "rw"] = "rw",
+    skip_keys: list | None = None,
+    extend_keys: list | None = None,
 ) -> LockingObjectStoreType:
     ms = DataClassMetaStore(bucket=bucket, data_type=data_type)
     ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
+    metadata_updater = make_metadata_updater_fn(skip_keys=skip_keys, extend_keys=extend_keys)
     object_store = LockingObjectStore[Datasource, xr.Dataset](
-        metastore=ms, datasource_factory=ds_factory, lock=ms.lock
+        metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater, lock=ms.lock
     )
 
     return object_store

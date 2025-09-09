@@ -25,14 +25,15 @@ def test_pint_anywhere():
 from openghg.util import cf_ureg
 
 
-@pytest.mark.parametrize("format, expected_units",
-                         [
-                             (None, "1e-9"),  # cf_ureg's default format, which is "openghg"
-                             ("openghg", "1e-9"),
-                             ("cf", "parts_per_billion"), # cf format defined by cf_xarray
-                             ("D", "ppb"),  # pint's default format,
-                          ]
-                         )
+@pytest.mark.parametrize(
+    "format, expected_units",
+    [
+        (None, "1e-9"),  # cf_ureg's default format, which is "openghg"
+        ("openghg", "1e-9"),
+        ("cf", "parts_per_billion"),  # cf format defined by cf_xarray
+        ("D", "ppb"),  # pint's default format,
+    ],
+)
 def test_formatting(format, expected_units):
     """Test that we can specify the format of units when a DataArray is dequantified."""
     da = xr.DataArray(list(range(10)))
@@ -65,14 +66,15 @@ def test_per_mille_per_meg(prefix, suffix):
     assert converted == expected
 
 
-@pytest.mark.parametrize("number,abbrev,long",
-                         [
-                             ("1e-6", "ppm", "ppm"),  # ppm is built-in to pint, so we might be stuck with ppm
-                             ("1e-9", "ppb", "parts_per_billion"),
-                             ("1e-12", "ppt", "parts_per_trillion"),
-                             ("1e-15", "ppq", "parts_per_quadrillion"),
-                          ]
-                         )
+@pytest.mark.parametrize(
+    "number,abbrev,long",
+    [
+        ("1e-6", "ppm", "ppm"),  # ppm is built-in to pint, so we might be stuck with ppm
+        ("1e-9", "ppb", "parts_per_billion"),
+        ("1e-12", "ppt", "parts_per_trillion"),
+        ("1e-15", "ppq", "parts_per_quadrillion"),
+    ],
+)
 def test_parts_per(number, abbrev, long):
     converted = cf_ureg.parse_units(number)
 

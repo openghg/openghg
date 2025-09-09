@@ -5,7 +5,7 @@ import numpy as np
 import base64
 from typing import TYPE_CHECKING
 
-from openghg.util import get_species_info, synonyms, get_datapath
+from openghg.util import get_species_info, load_internal_json, synonyms, get_datapath
 from openghg_calscales.functions import convert
 
 if TYPE_CHECKING:
@@ -113,6 +113,95 @@ def _plot_logo(
     return logo_dict
 
 
+def _plot_single_timeseries(
+    fig: go.Figure,
+    to_plot: ObsData | ObsColumnData,
+    xvar: str | None = None,
+    yvar: str | None = None,
+    units: str | None = None,
+    calibration_scale: str | None = None,
+    species_info: dict | None = None,
+    attributes_data: dict | None = None,
+) -> tuple[str, str]:
+    # Get species info and attributes data, if not passed
+    species_info = species_info or get_species_info()
+    attributes_data = attributes_data or load_internal_json("attributes.json")
+
+    metadata = to_plot.metadata
+    dataset = to_plot.data
+
+    species = metadata["species"]
+    existing_calibration_scale = metadata["calibration_scale"]
+
+    if calibration_scale is not None:
+        target_scale = calibration_scale
+        original_scale = existing_calibration_scale
+
+        if original_scale and target_scale and original_scale != target_scale:
+            logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
+
+            for var_name in (
+                v
+                for v in dataset.data_vars
+                if isinstance(v, str) and (v.lower() == species.lower() or v.startswith(f"{species}_"))
+            ):
+                dataset[var_name] = convert(
+                    c=dataset[var_name],
+                    species=species,
+                    scale_original=original_scale,
+                    scale_new=target_scale,
+                )
+
+            metadata["calibration_scale"] = target_scale
+
+    species_string = _latex2html(species_info[synonyms(species, lower=False)]["print_string"])
+
+    if "satellite" in metadata:
+        satellite = metadata["satellite"]
+        inlet = "column"
+        legend_text = f"{species_string} - {satellite.upper()} ({inlet}) - {metadata['calibration_scale']}"
+    else:
+        site = metadata["site"]
+        inlet = metadata["inlet"]
+        legend_text = f"{species_string} - {site.upper()} ({inlet}) - {metadata['calibration_scale']}"
+
+    x_data = dataset[xvar] if xvar is not None else dataset.time
+
+    if yvar is not None:
+        y_data = dataset[yvar]
+    else:
+        try:
+            y_data = dataset[species]
+        except KeyError:
+            y_data = dataset["mf"]
+
+    y_data = y_data.pint.quantify()
+
+    if units is not None:
+        y_data = y_data.pint.to(units)
+
+    unit_string = f"{y_data.pint.units:cf}"
+
+    # Add NaNs where there are large data gaps
+    x_data_plot, y_data_plot = _plot_remove_gaps(x_data.values, y_data.values)
+
+    # Convert unit string to html
+    unit_string_html = _latex2html(unit_string)
+
+    # Create plot
+    fig.add_trace(
+        go.Scatter(
+            name=legend_text,
+            x=x_data_plot,
+            y=y_data_plot,
+            mode="lines",
+            hovertemplate="%{x|%Y-%m-%d %H:%M}<br> %{y:.1f} " + unit_string_html,
+        )
+    )
+
+    return unit_string_html, species_string
+
+
 def plot_timeseries(
     data: ObsData | ObsColumnData | list[ObsData | ObsColumnData],
     xvar: str | None = None,
@@ -139,8 +228,6 @@ def plot_timeseries(
     Returns:
         go.Figure: Plotly Graph Object Figure
     """
-    from openghg.util import load_internal_json
-
     if not data:
         logger.warning("No data to plot, returning")
         return None
@@ -172,109 +259,43 @@ def plot_timeseries(
     species_strings = []
     unit_strings = []
 
+    # get ascending/descending + set-up for possibly finding units
+    data0 = data[0]
+    dataset = data0.data
+    species = data0.metadata["species"]
+    if yvar is not None:
+        y_data = dataset[yvar]
+    else:
+        try:
+            y_data = dataset[species]
+        except KeyError:
+            y_data = dataset["mf"]
+
+    # Determine whether data is ascending or descending (positioning of legend)
+    y_data_diff = y_data.diff(dim="time").mean().values
+    ascending = float(y_data_diff) >= 0  # float conversion for mypy
+
+    # get units if plotting multiple timeseries
+    if units is None:
+        pint_units = y_data.pint.quantify().pint.units
+        units = f"{pint_units:cf}"
+
+    plot_args = {
+        "xvar": xvar,
+        "yvar": yvar,
+        "units": units,
+        "calibration_scale": calibration_scale,
+        "species_info": species_info,
+        "attributes_data": attributes_data,
+    }
+
     # Loop through inlets/species
-    for i, to_plot in enumerate(data):
-        metadata = to_plot.metadata
-        dataset = to_plot.data
-
-        species = metadata["species"]
-        existing_calibration_scale = metadata["calibration_scale"]
-
-        if calibration_scale is not None:
-            target_scale = calibration_scale
-            original_scale = existing_calibration_scale
-
-            if original_scale and target_scale and original_scale != target_scale:
-                logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
-
-                for var_name in (
-                    v
-                    for v in dataset.data_vars
-                    if isinstance(v, str) and (v.lower() == species.lower() or v.startswith(f"{species}_"))
-                ):
-                    dataset[var_name] = convert(
-                        c=dataset[var_name],
-                        species=species,
-                        scale_original=original_scale,
-                        scale_new=target_scale,
-                    )
-
-                metadata["calibration_scale"] = target_scale
-
-        species_string = _latex2html(species_info[synonyms(species, lower=False)]["print_string"])
-
-        if "satellite" in metadata:
-            satellite = metadata["satellite"]
-            inlet = "column"
-            legend_text = (
-                f"{species_string} - {satellite.upper()} ({inlet}) - {metadata['calibration_scale']}"
-            )
-        else:
-            site = metadata["site"]
-            inlet = metadata["inlet"]
-            legend_text = f"{species_string} - {site.upper()} ({inlet}) - {metadata['calibration_scale']}"
-
-        if xvar is not None:
-            x_data = dataset[xvar]
-        else:
-            x_data = dataset.time
-
-        if yvar is not None:
-            y_data = dataset[yvar]
-        else:
-            try:
-                y_data = dataset[species]
-            except KeyError:
-                y_data = dataset["mf"]
-
-        if units is not None or len(data) > 0:
-            data_attrs = y_data.attrs
-            data_units = data_attrs.get("units", "1")
-
-            if i == 0:
-                if units:
-                    unit_interpret = attributes_data["unit_interpret"]
-                    unit_value = unit_interpret.get(units, "1")
-                else:
-                    unit_value = data_units
-
-            unit_conversion = float(data_units) / float(unit_value)
-        else:
-            unit_conversion = 1
-            # TODO: Not sure what is expected for unit_value here
-            unit_value = "1"
-
-        y_data *= unit_conversion
-
-        unit_string = attributes_data["unit_print"][unit_value]
-
-        # Add NaNs where there are large data gaps
-        x_data_plot, y_data_plot = _plot_remove_gaps(x_data.values, y_data.values)
-
-        # Convert unit string to html
-        unit_string_html = _latex2html(unit_string)
-
-        # Create plot
-        fig.add_trace(
-            go.Scatter(
-                name=legend_text,
-                x=x_data_plot,
-                y=y_data_plot,
-                mode="lines",
-                hovertemplate="%{x|%Y-%m-%d %H:%M}<br> %{y:.1f} " + unit_string_html,
-            )
-        )
+    for to_plot in data:
+        unit_string_html, species_string = _plot_single_timeseries(fig, to_plot, **plot_args)  # type: ignore
 
         # Save units and species names for axis labels
         unit_strings.append(unit_string_html)
         species_strings.append(species_string)
-
-    # Determine whether data is ascending or descending (positioning of legend)
-    y_data_diff = y_data.diff(dim="time").mean()
-    if y_data_diff >= 0:
-        ascending = True
-    else:
-        ascending = False
 
     if len(set(unit_strings)) > 1:
         raise NotImplementedError("Can't plot two different units yet")

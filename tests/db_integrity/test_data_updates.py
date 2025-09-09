@@ -488,7 +488,9 @@ def test_obs_data_read_data_overwrite_version():
     metadata_sf6 = obs_data_sf6.metadata
     assert metadata_sf6["latest_version"] == "v1"
 
+
 # TODO: Add test for different time values as well.
+
 
 def test_obs_data_force_update():
     """

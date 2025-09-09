@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_paris(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     domain: str,
     model: str,
     inlet: str,
@@ -139,6 +139,10 @@ def parse_paris(
 
     if network is not None:
         metadata["network"] = network
+
+    if site is not None and inlet == "column":
+        metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
+        metadata["obs_openghg_uuid"] = fp_data.attrs.get("obs_openghg_uuid", None)
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
