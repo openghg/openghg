@@ -127,6 +127,7 @@ def parse_cams(
         conversion = float(unit_converter.get(old_unit, old_unit))
         ds["species"].values *= conversion
         ds["species"].attrs["units"] = 1
+        
 
         # Get coords from reference footprints
         if get_footprint_kwargs:
@@ -231,7 +232,8 @@ def parse_cams(
 
 def _reorder_dataset(ds: xr.Dataset) -> xr.Dataset:
     """
-    Sort in acending order the dims of dataset when they are in descending order
+    Put sorted coordinates in ascending order. Necessary for CAMS N2O latitude coordinates 
+    (which is sorted in descending order, unlike any other coordinates, or CH4 data).
     Args
         ds: dataset to sort
     Returns
