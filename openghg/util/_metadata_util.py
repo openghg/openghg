@@ -1,5 +1,6 @@
 from typing import Any, cast, Literal
 from collections.abc import Iterable
+import xarray as xr
 import logging
 import math
 
@@ -385,3 +386,67 @@ def get_period(metadata: dict) -> str | None:
         period = None
 
     return period
+
+
+def build_metadata(
+    attributes: dict,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
+    calibration_scale: str | None = None,
+    data_owner: str | None = None,
+    data_owner_email: str | None = None,
+) -> dict:
+    """
+    Construct metadata dictionary from explicit inputs and dataset attributes.
+    Validates consistency between the two sources.
+
+    Args:
+        dataset: Input xarray.Dataset
+        site, species, network, instrument, sampling_period,
+        calibration_scale, data_owner, data_owner_email: Optional inputs
+
+    Returns:
+        dict: Validated metadata
+    """
+    
+    data_attrs = {k.lower().replace(" ", "_"): v for k, v in attributes.items()}
+
+    # Start with user-supplied inputs
+    metadata_initial = {
+        "site": site,
+        "species": species,
+        "network": network,
+        "instrument": instrument,
+        "sampling_period": sampling_period,
+        "calibration_scale": calibration_scale,
+        "data_owner": data_owner,
+        "data_owner_email": data_owner_email,
+    }
+
+    # Merge: fill missing values from dataset.attrs, validate conflicts
+    for key, value in metadata_initial.items():
+        if value is None:
+            # Fill from dataset attrs
+            try:
+                metadata_initial[key] = data_attrs[key]
+            except KeyError:
+                raise ValueError(
+                    f"Input '{key}' must be specified if not included in dataset attributes."
+                )
+        else:
+            # If dataset also provides the key, validate consistency
+            if key in data_attrs:
+                attributes_value = data_attrs[key]
+                if str(value).lower() != str(attributes_value).lower():
+                    try:
+                        if float(value) == float(attributes_value):
+                            continue
+                    except ValueError:
+                        raise ValueError(
+                            f"Input for '{key}': {value} does not match value in dataset attributes: {attributes_value}"
+                        )
+
+    return metadata_initial

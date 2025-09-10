@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import cast
 
 from openghg.types import pathType
-from openghg.util import open_time_nc_fn
+from openghg.util import open_time_nc_fn, build_metadata
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -73,50 +73,23 @@ def parse_openghg(
 
     data = xr_open_fn(filepath)
 
-    # Extract current attributes from input data
+    # Extract attributes from dataset
     attributes = data.attrs
 
-    # Define metadata based on input arguments.
-    metadata_initial = {
-        "site": site,
-        "species": species,
-        "network": network,
-        "instrument": instrument,
-        "sampling_period": sampling_period,
-        "calibration_scale": calibration_scale,
-        "data_owner": data_owner,
-        "data_owner_email": data_owner_email,
-    }
-
-    # Run some checks on the
-    data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
-
-    # Populate metadata with values from attributes if inputs have not been passed
-    for key, value in metadata_initial.items():
-        if value is None:
-            try:
-                metadata_initial[key] = data_attrs[key]
-            except KeyError:
-                raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
-        else:
-            # If attributes are present, check these match to inputs passed
-            if key in attributes:
-                attributes_value = attributes[key]
-                if str(value).lower() != str(attributes_value).lower():
-                    try:
-                        # As we may have things like 1200 != 1200.0
-                        # we'll check if the floats are equal
-                        if float(value) == float(attributes_value):
-                            continue
-                    except ValueError:
-                        # If inputs do not match attribute values, raise a ValueError
-                        raise ValueError(
-                            f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                        )
-
+    metadata_initial = build_metadata(attributes= attributes,
+            site=site,
+            species=species,
+            network=network,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            calibration_scale=calibration_scale,
+            data_owner=data_owner,
+            data_owner_email=data_owner_email,
+        )
+    
     # Read the inlet
     if inlet is None:
-        inlet_val = [v for k, v in data_attrs.items() if "inlet" in k]
+        inlet_val = [v for k, v in data.attrs.items() if "inlet" in k]
 
         if not inlet_val:
             raise ValueError("Cannot read inlet from attributes, please pass as argument.")
