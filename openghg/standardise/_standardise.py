@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 from pandas import Timedelta
+import xarray as xr
 import warnings
 
 from openghg.objectstore import get_writable_bucket
@@ -15,6 +16,7 @@ logger = logging.getLogger("openghg.standardise")
 def standardise(
     data_type: str,
     filepath: str | Path | list[str] | list[Path],
+    dataset: xr.Dataset,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -52,7 +54,10 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(filepath=filepath, **kwargs)
+        if dataset:
+            result = dc.read_dataset(dataset=dataset, **kwargs)
+        else:
+            result = dc.read_file(filepath=filepath, **kwargs)
 
     return result
 
@@ -61,7 +66,8 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: multiPathType,
+    dataset: xr.Dataset=None,
+    filepath: multiPathType=None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
@@ -94,6 +100,7 @@ def standardise_surface(
 
     Args:
         filepath: Filepath(s)
+        dataset: Xarray dataset
         source_format: Data format, for example CRDS, GCWERKS
         site: Site code/name
         network: Network name
@@ -180,6 +187,7 @@ def standardise_surface(
         data_type="surface",
         filepath=filepath,
         precision_filepath=precision_filepath,
+        dataset=dataset,
         source_format=source_format,
         network=network,
         site=site,
