@@ -67,19 +67,34 @@ pip install -e .
 ```
 
 ### Testing and Package Functionality
-With the full development environment installed, you can run comprehensive tests:
+With the full development environment installed, you can run targeted tests:
 
 ```bash
-# Run full test suite
-pytest -v tests/
+# Run individual test files (preferred approach)
+pytest -v tests/util/test_config.py
+pytest -v tests/standardise/test_surface.py
+
+# Run tests for a specific module
+pytest -v tests/dataobjects/
 
 # OpenGHG CLI commands
 python -m openghg --help
 python -c "import openghg"
 
-# Tox environments for automated testing
-tox -e lint
-tox -e type
+# Note: Avoid tox for development as it can be quite slow
+# Use direct pytest commands instead of tox -e lint or tox -e type
+```
+
+### Testing Best Practices
+**Prefer targeted testing over full test suite runs:**
+
+```bash
+# Good: Run tests related to your changes
+pytest -v tests/standardise/test_surface.py  # Single test file
+pytest -v tests/dataobjects/                 # Module directory
+
+# Avoid: Running the entire test suite (slow and unnecessary for most development)
+# pytest tests/  # This runs all 92 test files and can be very slow
 ```
 
 ### Special Test Categories
@@ -95,7 +110,7 @@ pytest -v --run-icos tests/
 ### CI/CD and Automation
 - **GitHub Actions**: `.github/workflows/workflow.yaml`
 - **Pre-commit hooks**: `.pre-commit-config.yaml` 
-- **Tox environments**: `tox.ini` (lint, type, test environments)
+- **Tox environments**: `tox.ini` (lint, type, test environments - avoid for local development due to slowness)
 
 ### Documentation Build
 ```bash
@@ -112,7 +127,7 @@ For standard development with full installation:
 1. `black --check openghg/` - Format validation
 2. `flake8 openghg/ --count --statistics` - Linting  
 3. `mypy --python-version 3.12 openghg/` - Type checking
-4. `pytest tests/` - Run test suite
+4. `pytest tests/specific_module/` or `pytest tests/specific_test_file.py` - Run targeted tests (preferred over full suite)
 
 For minimal environment setup:
 1. Use the alternative minimal setup above
@@ -127,7 +142,7 @@ Key directories and files:
 - `requirements*.txt` - Pip dependency specifications
 - `environment*.yaml` - Conda/micromamba environment specifications  
 - `pyproject.toml` - Modern Python project configuration
-- `tox.ini` - Testing automation configuration
+- `tox.ini` - Testing automation configuration (mainly for CI - avoid for local development)
 - `.github/workflows/` - CI/CD pipeline definitions
 - `doc/` - Sphinx documentation source
 
@@ -158,7 +173,7 @@ Key directories and files:
 1. Use preferred pip-based development environment setup
 2. Edit code files
 3. Run black, flake8, mypy validation  
-4. Run relevant tests with pytest
+4. Run relevant tests with pytest (individual test files or modules, not full suite)
 5. Submit changes
 
 **For minimal validation only:**
@@ -244,17 +259,22 @@ from helpers import clear_test_stores, get_info_datapath
 
 ### Test Categories and Markers
 ```bash
-# Standard tests
-pytest tests/
+# Run individual test files (preferred)
+pytest tests/util/test_config.py
+pytest tests/standardise/test_surface.py
+
+# Run tests for specific modules
+pytest tests/dataobjects/
+pytest tests/standardise/
 
 # CF compliance tests (requires libudunits2-0)
-pytest -v --run-cfchecks tests/
+pytest -v --run-cfchecks tests/specific_test_file.py
 
 # ICOS data tests (requires network, run sparingly)
-pytest -v --run-icos tests/
+pytest -v --run-icos tests/specific_test_file.py
 
 # Specific test timeouts configured (300 seconds default)
-pytest --timeout=300 tests/
+pytest --timeout=300 tests/specific_module/
 ```
 
 ## File Patterns and Conventions
@@ -279,7 +299,7 @@ pytest --timeout=300 tests/
 - **Micromamba/Conda environments**: `environment.yaml`, `environment-dev.yaml`
 - **Dependencies**: `requirements*.txt` files
 - **CI/CD**: `.github/workflows/workflow.yaml`
-- **Quality tools**: `.pre-commit-config.yaml`, `tox.ini`, `mypy.ini`
+- **Quality tools**: `.pre-commit-config.yaml`, `tox.ini` (CI only - avoid for local dev), `mypy.ini`
 
 ## Manual Validation Scenarios
 
@@ -308,7 +328,7 @@ Since automated testing often fails due to network constraints, use these manual
 - Environment: `micromamba create --name openghg_dev python=3.12` + pip installs
 - Full development: `pip install -r requirements.txt -r requirements-dev.txt && pip install -e .`
 - Code quality: black, flake8, mypy  
-- Testing: `pytest tests/`
+- Testing: `pytest tests/module/` or `pytest tests/test_file.py` (prefer individual tests over full suite)
 
 **ALTERNATIVE approach for minimal validation:**
 - Minimal micromamba environment with core packages
