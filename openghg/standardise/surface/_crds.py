@@ -2,8 +2,16 @@ from pathlib import Path
 
 from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
+from openghg.util import (
+    clean_string,
+    find_duplicate_timestamps,
+    format_inlet,
+    get_site_info,
+    load_internal_json,
+)
+
 import pandas as pd
-from pandas import DataFrame, Timedelta
+from pandas import Timedelta
 
 
 def parse_crds(
@@ -41,10 +49,7 @@ def parse_crds(
     Returns:
         dict: Dictionary of gas data
     """
-    from pathlib import Path
-
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import format_inlet
 
     if not isinstance(filepath, Path):
         filepath = Path(filepath)
@@ -77,6 +82,43 @@ def parse_crds(
     return gas_data
 
 
+def _get_raw_dataframe(filepath: Path, drop_duplicates: bool = True) -> pd.DataFrame:
+    """Read raw CRDS data into dataframe with combined data for all gases.
+
+    Args:
+        filepath: path to raw data
+        drop_duplicates: if True, drop duplicate times.
+
+    Returns:
+        dict mapping species to pd.DataFrame containing data for that gas
+
+    Raises:
+        ValueError: if duplicate times found and `drop_duplicates` is False.
+
+    """
+    # parse with multiindex for columns
+    combined_df = pd.read_csv(filepath, header=[0, 1], skiprows=1, sep=r"\s+")
+
+    # parse dates
+    datetime_series = (
+        combined_df.pop(("-", "date")).astype(str)
+        + " "
+        + combined_df.pop(("-", "time")).astype(str).str.zfill(6)
+    )
+    combined_df["time"] = pd.to_datetime(datetime_series, format="%y%m%d %H%M%S")
+    combined_df = combined_df.set_index("time")
+
+    # drop duplicate times
+    dupes = find_duplicate_timestamps(data=combined_df)
+
+    if dupes:
+        if not drop_duplicates:
+            raise ValueError(f"Duplicate dates detected: {dupes}")
+        combined_df = combined_df.loc[~combined_df.index.duplicated(keep="first")]
+
+    return combined_df
+
+
 def _read_data(
     filepath: Path,
     site: str,
@@ -99,13 +141,10 @@ def _read_data(
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
+
     Returns:
         dict: Dictionary of gas data
     """
-    import warnings
-    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
-    from pandas import RangeIndex, read_csv, to_datetime
-
     split_fname = filepath.stem.split(".")
     site = site.lower()
 
@@ -128,35 +167,17 @@ def _read_data(
     else:
         inlet = inlet_fname
 
-    # Catch dtype warnings
-    # TODO - look at setting dtypes - read header and data separately?
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        data = read_csv(
-            filepath,
-            header=None,
-            skiprows=1,
-            sep=r"\s+",
-            index_col=False,
-        )
-        # Combine first two columns into datetime
-        data["time"] = pd.to_datetime(data[0].astype(str) + " " + data[1].astype(str))
-        data = data.drop(columns=[0, 1]).set_index("time")
+    # get data
+    data = _get_raw_dataframe(filepath, drop_duplicates=drop_duplicates)
 
-    dupes = find_duplicate_timestamps(data=data)
+    # get metadata
+    metadata = _read_metadata(filepath)
 
-    if dupes and not drop_duplicates:
-        raise ValueError(f"Duplicate dates detected: {dupes}")
-
-    data = data.loc[~data.index.duplicated(keep="first")]
-
-    # Get the number of gases in dataframe and number of columns of data present for each gas
-    n_gases, n_cols = _gas_info(data=data)
-
-    header = data.head(2)
-    skip_cols = sum([header[column].iloc[0] == "-" for column in header.columns])
-
-    metadata = _read_metadata(filepath=filepath, data=data)
+    # add port and type from raw data, then drop these columns
+    metadata["type"] = data[("-", "type")].iloc[0]
+    metadata["port"] = data[("-", "port")].iloc[0]
+    drop_cols = [col for col in data.columns if col[0] == "-"]
+    data = data.drop(columns=drop_cols)
 
     if network is not None:
         metadata["network"] = network
@@ -184,31 +205,17 @@ def _read_data(
     # This dictionary is used to store the gas data and its associated metadata
     combined_data = {}
 
-    for n in range(n_gases):
-        # Slice the columns
-        gas_data = data.iloc[:, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols]
+    # get gases from first level of column multi-index
+    gases = set([col[0] for col in data.columns])
 
-        # Reset the column numbers
-        gas_data.columns = RangeIndex(gas_data.columns.size)
-        species = gas_data[0].iloc[0]
-        species = species.lower()
-
-        column_labels = [
-            species,
-            f"{species}_variability",
-            f"{species}_number_of_observations",
-        ]
-
-        # Name columns
-        gas_data = gas_data.set_axis(column_labels, axis="columns")
-
-        header_rows = 2
-        # Drop the first two rows now we have the name
-        gas_data = gas_data.drop(index=gas_data.head(header_rows).index)
-        gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
-        # Cast data to float64 / double
-        gas_data = gas_data.astype("float64")
+    for gas in gases:
+        gas_data = data.loc[:, gas]
+        species = gas.lower()
+        gas_data.columns = [species, f"{species}_variability", f"{species}_number_of_observations"]
         gas_data = gas_data.dropna(axis="rows", how="any")
+        gas_data[f"{species}_number_of_observations"] = gas_data[f"{species}_number_of_observations"].astype(
+            int
+        )
 
         # Here we can convert the Dataframe to a Dataset and then write the attributes
         gas_data = gas_data.to_xarray()
@@ -239,21 +246,15 @@ def _read_data(
     return combined_data
 
 
-def _read_metadata(filepath: Path, data: DataFrame) -> dict:
-    """Parse CRDS files and create a metadata dict
+def _read_metadata(filepath: Path) -> dict:
+    """Parse CRDS files and create a metadata dict.
 
     Args:
         filepath: Data filepath
-        data: Raw pandas DataFrame
+
     Returns:
         dict: Dictionary containing metadata
     """
-    from openghg.util import format_inlet
-
-    # Find gas measured and port used
-    type_meas = data[2][2]
-    port = data[3][2]
-
     # Split the filename to get the site and resolution
     split_filename = str(filepath.name).split(".")
 
@@ -280,8 +281,6 @@ def _read_metadata(filepath: Path, data: DataFrame) -> dict:
     metadata["instrument"] = instrument
     metadata["sampling_period"] = str(sampling_period)
     metadata["inlet"] = format_inlet(inlet, key_name="inlet")
-    metadata["port"] = port
-    metadata["type"] = type_meas
 
     return metadata
 
@@ -292,7 +291,7 @@ def _get_site_attributes(
     crds_metadata: dict,
     site_filepath: pathType | None = None,
 ) -> dict:
-    """Gets the site specific attributes for writing to Datsets
+    """Get site specific attributes for writing to Datasets.
 
     Args:
         site: Site name
@@ -300,11 +299,10 @@ def _get_site_attributes(
         crds_metadata: General CRDS metadata
         site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import get_site_info, format_inlet
-
     try:
         site_attributes: dict = crds_metadata["sites"][site.upper()]
         global_attributes: dict = site_attributes["global_attributes"]
@@ -333,35 +331,3 @@ def _get_site_attributes(
     attributes["long_name"] = site_attributes["gcwerks_site_name"]
 
     return attributes
-
-
-def _gas_info(data: DataFrame) -> tuple[int, int]:
-    """Returns the number of columns of data for each gas
-    that is present in the dataframe
-
-    Args:
-        data: Measurement data
-    Returns:
-        tuple (int, int): Number of gases, number of
-        columns of data for each gas
-    """
-    from openghg.util import unanimous
-
-    # Slice the dataframe
-    head_row = data.head(1)
-
-    gases: dict[str, int] = {}
-    # Loop over the gases and find each unique value
-    for column in head_row.columns:
-        s = head_row[column].iloc[0]
-        if s != "-":
-            gases[s] = gases.get(s, 0) + 1
-
-    # Check that we have the same number of columns for each gas
-    if not unanimous(gases):
-        raise ValueError(
-            "Each gas does not have the same number of columns. Please ensure data"
-            "is of the CRDS type expected by this module"
-        )
-
-    return len(gases), list(gases.values())[0]
