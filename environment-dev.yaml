@@ -1,5 +1,5 @@
 # This file contains development, testing, and extra dependencies for OpenGHG.
-# It is intended to be used together with environment.yaml and should not 
+# It is intended to be used together with environment.yaml and should not
 # repeat dependencies from the base file.
 # Usage: conda env create -f environment.yaml -f environment-dev.yaml
 
@@ -16,23 +16,23 @@ dependencies:
   - pre-commit
   - mypy==1.7.1
   - tox>=4.24
-  
-  # Testing dependencies  
+
+  # Testing dependencies
   - pytest
   - pytest-cov
   - pytest-mock
   - requests-mock
   - pytest-tornasync
-  
+
   # Type checking dependencies
   - types-PyYAML
   - types-requests
   - types-toml
   - types-urllib3
-  
+
   # Additional data access tools
   - cdsapi
-  
+
   - pip:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types

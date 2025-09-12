@@ -52,7 +52,7 @@ def parse_openghg(
 
     xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
 
-    em_data = xr_open_fn(filepath).chunk(chunks)
+    em_data = xr_open_fn(filepath).chunk(chunks if chunks is not None else {})
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here

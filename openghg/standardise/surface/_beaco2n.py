@@ -37,7 +37,6 @@ def parse_beaco2n(
         sampling_period = "NOT_SET"
 
     filepath = Path(filepath)
-    datetime_columns = {"time": ["datetime"]}
     use_cols = [1, 5, 6, 7, 8, 9, 10]
     na_values = [-999.0]
 
@@ -46,15 +45,18 @@ def parse_beaco2n(
     try:
         data = pd.read_csv(
             filepath,
-            index_col="time",
+            index_col="datetime",
             usecols=use_cols,
-            parse_dates=datetime_columns,
+            parse_dates=["datetime"],
             na_values=na_values,
         )
     except ValueError as e:
         raise ValueError(
             f"Unable to read data file, please make sure it is in the standard BEACO2N format.\nError: {e}"
         )
+
+    # Rename index to time for consistency
+    data.index.name = "time"
 
     beaco2n_site_data = load_internal_json(filename="beaco2n_site_data.json")
 

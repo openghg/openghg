@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import pandas as pd
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
@@ -242,15 +243,29 @@ def _read_data(
     header = read_csv(filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
     # Read the data in and automatically create a datetime column from the 5 columns
-    # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
+    # Read data without parse_dates to avoid nested sequence deprecation
     data = read_csv(
         filepath,
         skiprows=4,
         sep=r"\s+",
-        parse_dates={"Datetime": [1, 2, 3, 4, 5]},
-        date_format="%Y %m %d %H %M",
-        index_col="Datetime",
+        index_col=False,
     )
+
+    # Combine columns 1-5 for datetime (yyyy, mm, dd, hh, mi)
+    datetime_cols = data.iloc[:, 1:6].astype(str)
+    data["Datetime"] = pd.to_datetime(
+        datetime_cols.iloc[:, 0]
+        + "-"
+        + datetime_cols.iloc[:, 1]
+        + "-"
+        + datetime_cols.iloc[:, 2]
+        + " "
+        + datetime_cols.iloc[:, 3]
+        + ":"
+        + datetime_cols.iloc[:, 4],
+        format="%Y-%m-%d %H:%M",
+    )
+    data = data.drop(columns=data.columns[1:6]).set_index("Datetime")
 
     if data.empty:
         raise ValueError("Cannot process empty file.")
@@ -373,8 +388,8 @@ def _read_precision(filepath: Path) -> tuple[DataFrame, list]:
         header=None,
         sep=r"\s+",
         index_col=0,
-        parse_dates={"Datetime": [0]},
         date_format="%y%m%d",
+        parse_dates=True,
     )
 
     # Drop any duplicates from the index
