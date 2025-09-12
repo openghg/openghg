@@ -6,67 +6,80 @@ Always reference these instructions first and fallback to search or bash command
 
 ## Working Effectively
 
-### Environment Setup - CRITICAL NOTES
-**NETWORK DEPENDENCY WARNING**: This project has severe network timeout issues in CI/constrained environments:
-- Full pip installs (`pip install -r requirements-dev.txt`) FAIL consistently due to 15+ minute timeouts
-- Full conda environment creation (`conda env create -f environment-dev.yaml`) takes 20+ minutes and often gets killed  
-- Even `tox` environments fail due to pip timeout issues
-
-### Recommended Development Setup (Minimal)
-Use this approach for code quality validation without full package installation:
+### Environment Setup - PREFERRED APPROACH
+**Recommended Development Setup**: Use pip for full development environment setup with micromamba for environment management:
 
 ```bash
-# Basic environment setup - NEVER CANCEL, takes ~18 seconds
-conda create --name openghg_dev python=3.12 pytest black flake8 mypy -y
+# Create environment with micromamba (preferred over conda)
+micromamba create --name openghg_dev python=3.12 -y
 
 # Activate environment  
-eval "$(conda shell.bash hook)" && conda activate openghg_dev
+micromamba activate openghg_dev
 
-# Install core scientific packages - NEVER CANCEL, takes ~35 seconds
-conda install -c conda-forge pandas xarray numpy tinydb toml rich msgpack-python -y
+# Install development dependencies (preferred approach)
+pip install -r requirements.txt -r requirements-dev.txt
+pip install -e .
 ```
 
-### Code Quality and Validation - ALWAYS WORKS
-These commands work reliably in the minimal environment:
+### Alternative Setup (Minimal Environment)
+If you encounter network issues or prefer a minimal setup for code quality validation only:
 
 ```bash
-# Code formatting check - takes ~2 seconds
+# Basic environment setup with micromamba
+micromamba create --name openghg_dev python=3.12 pytest black flake8 mypy -y
+
+# Activate environment  
+micromamba activate openghg_dev
+
+# Install core scientific packages
+micromamba install -c conda-forge pandas xarray numpy tinydb toml rich msgpack-python -y
+```
+
+### Code Quality and Validation
+These commands work reliably with the full development environment:
+
+```bash
+# Code formatting check
 black --check openghg/
 
 # Fix code formatting
 black openghg/
 
-# Lint code - takes ~1 second  
+# Lint code
 flake8 openghg/ --count --statistics
 
-# Type checking - takes ~3 seconds (will show import errors for missing deps)
+# Type checking
 mypy --python-version 3.12 openghg/
 ```
 
-### Full Installation Attempts (Often Fail)
-**ONLY attempt these if you have reliable network and 60+ minute timeouts:**
+### Alternative Environment Setup (Conda/Older Systems)
+If micromamba is not available, you can fall back to conda:
 
 ```bash  
-# Full conda environment - takes 20+ minutes, may fail
+# Full conda environment (may take longer)
 conda env create -f environment-dev.yaml
 
-# Full pip development install - frequently fails with timeouts
-pip install -r requirements-dev.txt
+# Alternative conda-based setup
+conda create --name openghg_dev python=3.12 -y
+conda activate openghg_dev
+pip install -r requirements.txt -r requirements-dev.txt
 pip install -e .
-
-# Tox environments - fail due to pip timeouts inside tox
-tox -e lint  # DO NOT use - fails with pip timeouts
-tox -e type  # DO NOT use - fails with pip timeouts
 ```
 
 ### Testing and Package Functionality
-**CRITICAL**: Full test suite and package imports require complete dependency installation which often fails:
+With the full development environment installed, you can run comprehensive tests:
 
 ```bash
-# These WILL FAIL without full installation:
-pytest -v tests/                    # Requires all scientific dependencies
-python -m openghg --help           # Requires addict and other dependencies  
-python -c "import openghg"         # Requires full dependency tree
+# Run full test suite
+pytest -v tests/
+
+# OpenGHG CLI commands
+python -m openghg --help
+python -c "import openghg"
+
+# Tox environments for automated testing
+tox -e lint
+tox -e type
 ```
 
 ### Special Test Categories
@@ -95,12 +108,16 @@ cd doc && make html
 
 ## Validation Workflow
 
-For code changes without full installation:
-1. `black --check openghg/` - Format validation (2 seconds)
-2. `flake8 openghg/ --count --statistics` - Linting (1 second)  
-3. `mypy --python-version 3.12 openghg/` - Type checking (3 seconds)
+For standard development with full installation:
+1. `black --check openghg/` - Format validation
+2. `flake8 openghg/ --count --statistics` - Linting  
+3. `mypy --python-version 3.12 openghg/` - Type checking
+4. `pytest tests/` - Run test suite
 
-**NEVER rely on full package installation in CI environments** - use the minimal setup above.
+For minimal environment setup:
+1. Use the alternative minimal setup above
+2. Validate formatting and linting only
+3. Rely on CI for full integration testing
 
 ## Repository Structure
 
@@ -108,33 +125,29 @@ Key directories and files:
 - `openghg/` - Main Python package (17 submodules)
 - `tests/` - Comprehensive test suite (17 test directories)
 - `requirements*.txt` - Pip dependency specifications
-- `environment*.yaml` - Conda environment specifications  
+- `environment*.yaml` - Conda/micromamba environment specifications  
 - `pyproject.toml` - Modern Python project configuration
 - `tox.ini` - Testing automation configuration
 - `.github/workflows/` - CI/CD pipeline definitions
 - `doc/` - Sphinx documentation source
 
-## Critical Timing and Timeout Requirements
+## Critical Timing and Network Considerations
 
-**NEVER CANCEL these operations:**
+**Standard operations (recommended):**
+- Micromamba environment creation: ~18 seconds
+- Pip dependency installation: Variable, typically 2-5 minutes
+- Full development setup: 5-10 minutes total
+
+**Alternative conda operations:**
 - Conda environment creation: 18 seconds (minimal) to 20+ minutes (full)
 - Conda package installation: 20-35 seconds per batch
-- Pip installs: 15+ minutes before timeout (often fail)
-- Full environment resolution: 20+ minutes (may get killed)
 
-**Set timeouts to 60+ minutes for:**
-- Any conda env create operations
-- Any pip install operations  
-- Any tox environment setup
-
-**Fast operations (1-3 seconds):**
-- Code formatting and linting with existing tools
-- Basic Python syntax validation
+**Note**: In CI or constrained network environments, pip installations may occasionally timeout. The alternative minimal setup provides a reliable fallback for code quality validation.
 
 ## Known Issues and Limitations
 
-1. **Network timeouts**: Pip installs fail consistently in CI environments
-2. **Complex dependencies**: Full conda solve takes 20+ minutes and may fail  
+1. **Network timeouts**: Occasionally pip installs may timeout in CI environments (use alternative setup)
+2. **Complex dependencies**: Full conda solve can take 20+ minutes  
 3. **Import dependencies**: Package has circular imports requiring full dependency tree
 4. **System requirements**: Some features need `libudunits2-0`, `xesmf` C libraries
 5. **Test isolation**: Tests require complex helper infrastructure and full package
@@ -142,15 +155,17 @@ Key directories and files:
 ## Development Workflow
 
 **For most code changes:**
-1. Use minimal conda environment setup
+1. Use preferred pip-based development environment setup
 2. Edit code files
 3. Run black, flake8, mypy validation  
-4. Submit changes (CI will handle full testing)
+4. Run relevant tests with pytest
+5. Submit changes
 
-**For testing changes:**
-1. Attempt full installation if network permits (60+ minute timeout)
-2. Run specific test files: `pytest tests/specific_test.py`
-3. Use CI for comprehensive validation
+**For minimal validation only:**
+1. Use alternative minimal micromamba environment setup
+2. Edit code files
+3. Run black, flake8, mypy validation
+4. Submit changes (CI will handle full testing)
 
 ## CLI and Configuration
 
@@ -261,7 +276,7 @@ pytest --timeout=300 tests/
 ### Configuration Files
 - **Project config**: `pyproject.toml` (modern Python packaging)
 - **Legacy setup**: `setup.cfg` (minor configuration)
-- **Conda environments**: `environment.yaml`, `environment-dev.yaml`
+- **Micromamba/Conda environments**: `environment.yaml`, `environment-dev.yaml`
 - **Dependencies**: `requirements*.txt` files
 - **CI/CD**: `.github/workflows/workflow.yaml`
 - **Quality tools**: `.pre-commit-config.yaml`, `tox.ini`, `mypy.ini`
@@ -287,17 +302,17 @@ Since automated testing often fails due to network constraints, use these manual
 
 ## Summary for Coding Agents
 
-**ALWAYS start with minimal conda environment setup** - never attempt full pip installations in CI environments.
+**PREFERRED approach**: Use pip-based development environment with micromamba for environment management.
 
-**Use these reliable commands for validation:**
-- Environment: 18-second conda environment creation
-- Code quality: black (2s), flake8 (1s), mypy (3s)  
-- Manual verification: syntax checking, import testing
+**Use these commands for standard development:**
+- Environment: `micromamba create --name openghg_dev python=3.12` + pip installs
+- Full development: `pip install -r requirements.txt -r requirements-dev.txt && pip install -e .`
+- Code quality: black, flake8, mypy  
+- Testing: `pytest tests/`
 
-**NEVER attempt in CI environments:**
-- Full pip installations (15+ minute timeouts)
-- Pre-commit hook installation (fails with pip timeouts)
-- Tox environment setup (fails with pip timeouts)
-- Full conda environment creation (20+ minutes, may fail)
+**ALTERNATIVE approach for minimal validation:**
+- Minimal micromamba environment with core packages
+- Code quality validation only: black, flake8, mypy
+- Submit changes and rely on CI for full testing
 
-**For testing changes:** Submit code with basic validation - let CI handle full integration testing with properly configured network and timeout settings.
+**Prefer micromamba over conda** for faster environment creation and dependency resolution.
