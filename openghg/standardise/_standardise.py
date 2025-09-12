@@ -15,8 +15,8 @@ logger = logging.getLogger("openghg.standardise")
 
 def standardise(
     data_type: str,
-    filepath: str | Path | list[str] | list[Path],
-    dataset: xr.Dataset,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    dataset: xr.Dataset | None = None,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
