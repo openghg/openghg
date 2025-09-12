@@ -20,3 +20,5 @@ types-requests
 types-toml
 types-urllib3
 msgpack-types
+# For changelog management
+towncrier

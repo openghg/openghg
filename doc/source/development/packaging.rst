@@ -44,10 +44,38 @@ Before we get to this step we need to make sure everything is set up to do a rel
 
 Make sure to have a fully working devel branch.
 
-Now update the "Unreleased" section of the ``Changelog.md`` with the "{release number} - {date of release}".
+Using towncrier to generate the changelog
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OpenGHG uses `towncrier <https://towncrier.readthedocs.io/>`_ to manage the changelog. This tool collects "news fragments" from the ``newsfragments/`` directory and builds the changelog automatically.
+
+To build the changelog for a new release (e.g., version 0.17.0):
+
+.. code-block:: bash
+
+    towncrier build --version=0.17.0
+
+This will:
+
+1. Collect all news fragments from ``newsfragments/``
+2. Add a new release section to ``CHANGELOG.md`` 
+3. Remove the processed news fragments
+
+You can preview what the changelog will look like without making changes:
+
+.. code-block:: bash
+
+    towncrier build --version=0.17.0 --draft
+
+After running ``towncrier build``, review the generated changelog entry and commit the changes.
+
+Manual changelog updates (legacy)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If needed, you can still manually update the changelog by editing the "Unreleased" section of the ``CHANGELOG.md`` with the "{release number} - {date of release}".
 Ensure all the changes are included in the file. If not update it accordingly.
 
-Also add "Unreleased" section at the top of ``Changelog.md`` along with the link to the latest diff as shown below:
+Also add "Unreleased" section at the top of ``CHANGELOG.md`` along with the link to the latest diff as shown below:
 
 .. code-block:: bash
 
