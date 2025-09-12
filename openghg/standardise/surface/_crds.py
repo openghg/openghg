@@ -175,7 +175,7 @@ def _read_data(
 
     # add port and type from raw data, then drop these columns
     metadata["type"] = data[("-", "type")].iloc[0]
-    metadata["port"] = data[("-", "port")].iloc[0]
+    metadata["port"] = str(data[("-", "port")].iloc[0])
     drop_cols = [col for col in data.columns if col[0] == "-"]
     data = data.drop(columns=drop_cols)
 
