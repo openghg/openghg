@@ -103,6 +103,7 @@ package = "openghg"
 filename = "CHANGELOG.md"
 directory = "newsfragments"
 start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## [{version}] - {{date}}"
 
 [[tool.towncrier.type]]
 directory = "feature"
