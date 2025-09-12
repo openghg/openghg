@@ -136,9 +136,11 @@ def _read_data(
             header=None,
             skiprows=1,
             sep=r"\s+",
-            parse_dates={"time": [0, 1]},
-            index_col="time",
+            index_col=False,
         )
+        # Combine first two columns into datetime
+        data["time"] = pd.to_datetime(data[0].astype(str) + " " + data[1].astype(str))
+        data = data.drop(columns=[0, 1]).set_index("time")
 
     dupes = find_duplicate_timestamps(data=data)
 
@@ -151,7 +153,7 @@ def _read_data(
     n_gases, n_cols = _gas_info(data=data)
 
     header = data.head(2)
-    skip_cols = sum([header[column][0] == "-" for column in header.columns])
+    skip_cols = sum([header[column].iloc[0] == "-" for column in header.columns])
 
     metadata = _read_metadata(filepath=filepath, data=data)
 
@@ -187,7 +189,7 @@ def _read_data(
 
         # Reset the column numbers
         gas_data.columns = RangeIndex(gas_data.columns.size)
-        species = gas_data[0][0]
+        species = gas_data[0].iloc[0]
         species = species.lower()
 
         column_labels = [
@@ -350,7 +352,7 @@ def _gas_info(data: DataFrame) -> tuple[int, int]:
     gases: dict[str, int] = {}
     # Loop over the gases and find each unique value
     for column in head_row.columns:
-        s = head_row[column][0]
+        s = head_row[column].iloc[0]
         if s != "-":
             gases[s] = gases.get(s, 0) + 1
 

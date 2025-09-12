@@ -97,3 +97,6 @@ pythonpath = [
     "."
 ]
 timeout = 300
+markers = [
+    "xesmf: marks tests as requiring xesmf (deselect with '-m \"not xesmf\"')"
+]
