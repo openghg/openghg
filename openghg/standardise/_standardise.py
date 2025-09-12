@@ -159,7 +159,7 @@ def standardise_surface(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-            To disable chunking pass an empty dictionary.
+            To use existing chunks from the raw data (if any), pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         sort_files: Sorts multiple files date-wise.
         concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
@@ -285,7 +285,7 @@ def standardise_column(
         chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
-            To disable chunking pass an empty dictionary.
+            To use existing chunks from the raw data (if any), pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
@@ -381,7 +381,7 @@ def standardise_bc(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
-            To disable chunking pass an empty dictionary.
+            To use existing chunks from the raw data (if any), pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
@@ -473,7 +473,7 @@ def standardise_footprint(
         chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking
-            by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.
+            by OpenGHG as per the TODO RELEASE: add link to documentation. To use existing chunks from the raw data (if any), pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
@@ -609,7 +609,7 @@ def standardise_flux(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-            To disable chunking pass an empty dictionary.
+            To use existing chunks from the raw data (if any), pass an empty dictionary.
         continuous: Whether time stamps have to be continuous.
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
@@ -732,7 +732,7 @@ def standardise_eulerian(
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-            To disable chunking pass an empty dictionary.
+            To use existing chunks from the raw data (if any), pass an empty dictionary.
         info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"

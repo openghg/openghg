@@ -308,9 +308,12 @@ class BaseStore:
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG. If an
+                empty dictionary is passed, then the chunks from the raw data (if any) will be used.
+
+                See documentation for guidance on chunking:
+                https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+
             info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             list[dict]: List of datasources and their uuids
@@ -349,7 +352,7 @@ class BaseStore:
         # Check any specified chunks / default chunks for the data_type are not too large
         # - currently checking the first MetadataAndData object returned only
         # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
-        if chunks == {}:
+        if chunks != {}:
             chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
@@ -438,9 +441,11 @@ class BaseStore:
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG. If an
+                empty dictionary is passed, then the chunks from the raw data (if any) will be used.
+
+                See documentation for guidance on chunking:
+                https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             update_mismatch: This determines how mismatches between the internal data
                 "attributes" and the supplied / derived "metadata" are handled.
                 This includes the options:
