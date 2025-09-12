@@ -175,7 +175,7 @@ def test_read_footprint_high_spatial_resolution(tmpdir):
     footprint_data = footprint_obs.data
 
     footprint_coords = list(footprint_data.coords.keys())
-    footprint_dims = list(footprint_data.sizes.keys())
+    footprint_dims = list(footprint_data.dims)
 
     # Sorting to allow comparison - coords / dims can be stored in different orders
     # depending on how the Dataset has been manipulated
