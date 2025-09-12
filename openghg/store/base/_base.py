@@ -167,10 +167,7 @@ class BaseStore:
             MetadataAndData(metadata=gd["metadata"], data=gd["data"])
             for gd in gas_data.values()
         ]
-        # Wrap dataset in MetadataAndData
-        data: list[MetadataAndData] = [
-            MetadataAndData(metadata=metadata_initial, data=dataset)
-        ]
+
         # Handle chunking
         if chunks == {}:
             chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
@@ -244,12 +241,11 @@ class BaseStore:
         #  Format inputs for downstream standardisation
         fn_input_parameters = self.format_inputs(**kwargs)
         fn_input_parameters["source_format"] = source_format
-
+        results = []
         try:
             datasource_uuids = self._standardise_from_dataset(
                 dataset=dataset,
                 fn_input_parameters=fn_input_parameters,
-                source_format=source_format,
                 update_mismatch=update_mismatch,
                 if_exists=if_exists,
                 new_version=new_version,
@@ -263,7 +259,7 @@ class BaseStore:
             logger.error(msg)
             return [{}]
 
-        return datasource_uuids
+        return results.extend(datasource_uuids)
 
 
     def read_data(
