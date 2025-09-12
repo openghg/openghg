@@ -1,3 +1,4 @@
+from numcodecs import Blosc
 import numpy as np
 import pandas as pd
 import pytest
@@ -11,6 +12,7 @@ from openghg.storage import (
     get_versioned_zarr_directory_store,
     get_versioned_zarr_memory_store,
 )
+from openghg.storage._zarr_store import ZarrStore, VersionedZarrStore
 from openghg.types import DataOverlapError
 from openghg.util._versioning import VersionError
 
@@ -262,13 +264,26 @@ def test_contiguous_update(store_name, is_versioned, request):
 
 
 # ZARR SPECIFIC TESTS
-# @pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
-# def test_zarr_thing(store_name, request):
-#     """Check that data can be added to a new version without affecting an old version."""
-#     store = request.getfixturevalue(store_name)
+@pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
+def test_zarr_encoding(store_name, request):
+    """Check that data can be added to a new version without affecting an old version."""
+    store: ZarrStore = request.getfixturevalue(store_name)
 
+    compressor = Blosc(cname="zstd", clevel=5, shuffle=1)
+    encoding = {dv: {"compressor": compressor} for dv in ds1.data_vars}
 
+    # set `to_zarr_kwargs` here since it wasn't passed to init
+    store.to_zarr_kwargs = {"encoding": encoding}
 
+    if isinstance(store, VersionedZarrStore):
+        store.create_version("v1", checkout=True)
+
+    store.insert(ds1)
+
+    ds = store.get()
+
+    for dv in ds.data_vars:
+        assert ds[dv].encoding["compressor"] == compressor
 
 
 # TESTS FOR VERSIONED STORES
