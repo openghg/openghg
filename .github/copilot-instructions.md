@@ -164,3 +164,140 @@ openghg --default-config
 ```
 
 **Configuration location**: `~/.config/openghg/openghg.conf`
+
+## Detailed Repository Structure
+
+### Main Package Structure (150 Python files)
+```
+openghg/
+├── analyse/        # Data analysis and modeling scenarios
+├── data/           # Data handling and configuration files  
+├── data_processing/ # Processing and resampling utilities
+├── dataobjects/    # Core data object classes (ObsData, FootprintData, etc.)
+├── datapack/       # Data packaging and distribution
+├── objectstore/    # Object storage and metastore functionality
+├── plotting/       # Visualization utilities
+├── retrieve/       # Data retrieval and export functionality
+├── service/        # Service layer interfaces
+├── standardise/    # Data standardization modules (9 submodules)
+├── store/          # Data storage operations
+├── transform/      # Data transformation utilities
+├── tutorial/       # Tutorial and example data
+├── types/          # Type definitions and schemas
+└── util/           # Utility functions and CLI interface
+```
+
+### Test Structure (92 test files)
+```
+tests/
+├── analyse/        # Analysis module tests
+├── data/           # Test data files (13 subdirectories)
+├── data_processing/ # Processing tests
+├── dataobjects/    # Data object tests
+├── datapack/       # Data packaging tests
+├── db_integrity/   # Database integrity tests
+├── helpers/        # Test helper utilities
+├── objectstore/    # Object store tests
+├── retrieve/       # Data retrieval tests
+├── standardise/    # Standardization tests (9 subdirectories)
+├── store/          # Storage operation tests
+├── transform/      # Transform utility tests
+├── tutorial/       # Tutorial tests
+├── types/          # Type definition tests
+└── util/           # Utility function tests
+```
+
+## Common Development Patterns
+
+### Key Import Patterns
+```python
+# Common utility imports
+from openghg.util import create_config, cli
+from openghg.dataobjects import ObsData, FootprintData, FluxData
+from openghg.objectstore import get_object_store
+from openghg.standardise import standardise_surface
+
+# Testing imports (with full installation)
+from helpers import clear_test_stores, get_info_datapath
+```
+
+### Configuration and Data Paths
+- Object store config: `~/.config/openghg/openghg.conf`
+- Default object store: `~/openghg_store`
+- Test data: `tests/data/` (extensive test datasets)
+- Package data: `openghg/data/`
+
+### Test Categories and Markers
+```bash
+# Standard tests
+pytest tests/
+
+# CF compliance tests (requires libudunits2-0)
+pytest -v --run-cfchecks tests/
+
+# ICOS data tests (requires network, run sparingly)
+pytest -v --run-icos tests/
+
+# Specific test timeouts configured (300 seconds default)
+pytest --timeout=300 tests/
+```
+
+## File Patterns and Conventions
+
+### Code Organization
+- **Main modules**: Each subdirectory in `openghg/` is a functional module
+- **Test structure**: Mirrors main package structure exactly
+- **Imports**: Heavy interdependencies between modules
+- **Configuration**: TOML-based configuration files
+- **Data handling**: Extensive use of xarray, pandas, netCDF4
+
+### Common File Locations for Changes
+- **Adding new standardizers**: `openghg/standardise/`
+- **Data object modifications**: `openghg/dataobjects/`  
+- **Utility functions**: `openghg/util/`
+- **Object store changes**: `openghg/objectstore/`
+- **Test helpers**: `tests/helpers/`
+
+### Configuration Files
+- **Project config**: `pyproject.toml` (modern Python packaging)
+- **Legacy setup**: `setup.cfg` (minor configuration)
+- **Conda environments**: `environment.yaml`, `environment-dev.yaml`
+- **Dependencies**: `requirements*.txt` files
+- **CI/CD**: `.github/workflows/workflow.yaml`
+- **Quality tools**: `.pre-commit-config.yaml`, `tox.ini`, `mypy.ini`
+
+## Manual Validation Scenarios
+
+Since automated testing often fails due to network constraints, use these manual validation approaches:
+
+### Code Quality Validation (Always Works)
+1. Check formatting: `black --check openghg/`
+2. Check linting: `flake8 openghg/ --count --statistics`  
+3. Check types: `mypy --python-version 3.12 openghg/`
+
+### File-level Validation
+1. Check import structure: `python -c "import ast; ast.parse(open('file.py').read())"`
+2. Check syntax: `python -m py_compile openghg/module/file.py`
+3. Manual inspection of test structure alignment
+
+### Documentation Verification
+1. Check docstrings are present in new functions
+2. Verify README.md updates for API changes
+3. Check that new modules are documented
+
+## Summary for Coding Agents
+
+**ALWAYS start with minimal conda environment setup** - never attempt full pip installations in CI environments.
+
+**Use these reliable commands for validation:**
+- Environment: 18-second conda environment creation
+- Code quality: black (2s), flake8 (1s), mypy (3s)  
+- Manual verification: syntax checking, import testing
+
+**NEVER attempt in CI environments:**
+- Full pip installations (15+ minute timeouts)
+- Pre-commit hook installation (fails with pip timeouts)
+- Tox environment setup (fails with pip timeouts)
+- Full conda environment creation (20+ minutes, may fail)
+
+**For testing changes:** Submit code with basic validation - let CI handle full integration testing with properly configured network and timeout settings.
