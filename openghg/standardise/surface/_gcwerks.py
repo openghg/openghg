@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import pandas as pd
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
@@ -249,16 +250,20 @@ def _read_data(
         sep=r"\s+",
         index_col=False,
     )
-    
+
     # Combine columns 1-5 for datetime (yyyy, mm, dd, hh, mi)
     datetime_cols = data.iloc[:, 1:6].astype(str)
     data["Datetime"] = pd.to_datetime(
-        datetime_cols.iloc[:, 0] + "-" + 
-        datetime_cols.iloc[:, 1] + "-" + 
-        datetime_cols.iloc[:, 2] + " " +
-        datetime_cols.iloc[:, 3] + ":" + 
-        datetime_cols.iloc[:, 4],
-        format="%Y-%m-%d %H:%M"
+        datetime_cols.iloc[:, 0]
+        + "-"
+        + datetime_cols.iloc[:, 1]
+        + "-"
+        + datetime_cols.iloc[:, 2]
+        + " "
+        + datetime_cols.iloc[:, 3]
+        + ":"
+        + datetime_cols.iloc[:, 4],
+        format="%Y-%m-%d %H:%M",
     )
     data = data.drop(columns=data.columns[1:6]).set_index("Datetime")
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+import pandas as pd
 
 from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
@@ -322,15 +323,19 @@ def _read_data_small_header(
         na_values="-999.99",
         index_col=False,
     )
-    
-    # Combine datetime columns 
+
+    # Combine datetime columns
     data["time"] = pd.to_datetime(
-        data["Year"].astype(str) + "-" +
-        data["Month"].astype(str).str.zfill(2) + "-" +
-        data["Day"].astype(str).str.zfill(2) + " " +
-        data["Hour"].astype(str).str.zfill(2) + ":" +
-        data["Minute"].astype(str).str.zfill(2),
-        format="%Y-%m-%d %H:%M"
+        data["Year"].astype(str)
+        + "-"
+        + data["Month"].astype(str).str.zfill(2)
+        + "-"
+        + data["Day"].astype(str).str.zfill(2)
+        + " "
+        + data["Hour"].astype(str).str.zfill(2)
+        + ":"
+        + data["Minute"].astype(str).str.zfill(2),
+        format="%Y-%m-%d %H:%M",
     )
     data = data.drop(columns=datetime_columns).set_index("time")
 

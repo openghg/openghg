@@ -517,11 +517,11 @@ def unpack_example_archive(archive_path: Path, extract_dir: str | Path | None = 
 
     with tarfile.open(archive_path) as tar:
         filenames = [f.name for f in tar.getmembers()]
-        
+
         # Extract with filtering for Python 3.12+ compatibility
         try:
             # Use data filter if available (Python 3.12+)
-            tar.extractall(path=extract_dir, filter='data')
+            tar.extractall(path=extract_dir, filter="data")
         except (TypeError, ValueError):
             # Fallback for older Python versions
             tar.extractall(path=extract_dir)

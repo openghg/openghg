@@ -37,7 +37,6 @@ def parse_beaco2n(
         sampling_period = "NOT_SET"
 
     filepath = Path(filepath)
-    datetime_columns = {"time": ["datetime"]}
     use_cols = [1, 5, 6, 7, 8, 9, 10]
     na_values = [-999.0]
 

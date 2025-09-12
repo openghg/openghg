@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 from collections.abc import Hashable
+import pandas as pd
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
@@ -548,16 +549,21 @@ def _read_raw_data(
         skipinitialspace=True,
         index_col=False,
     )
-    
+
     # Combine date columns into datetime
     data["time"] = pd.to_datetime(
-        data["sample_year"].astype(str) + "-" +
-        data["sample_month"].astype(str).str.zfill(2) + "-" +
-        data["sample_day"].astype(str).str.zfill(2) + " " +
-        data["sample_hour"].astype(str).str.zfill(2) + ":" +
-        data["sample_minute"].astype(str).str.zfill(2) + ":" +
-        data["sample_seconds"].astype(str).str.zfill(2),
-        format="%Y-%m-%d %H:%M:%S"
+        data["sample_year"].astype(str)
+        + "-"
+        + data["sample_month"].astype(str).str.zfill(2)
+        + "-"
+        + data["sample_day"].astype(str).str.zfill(2)
+        + " "
+        + data["sample_hour"].astype(str).str.zfill(2)
+        + ":"
+        + data["sample_minute"].astype(str).str.zfill(2)
+        + ":"
+        + data["sample_seconds"].astype(str).str.zfill(2),
+        format="%Y-%m-%d %H:%M:%S",
     )
     data = data.drop(columns=date_cols).set_index("time")
 

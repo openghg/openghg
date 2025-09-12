@@ -2,6 +2,7 @@ from pathlib import Path
 
 from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
+import pandas as pd
 from pandas import DataFrame, Timedelta
 
 
