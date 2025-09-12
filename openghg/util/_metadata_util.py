@@ -390,54 +390,43 @@ def get_period(metadata: dict) -> str | None:
 
 def build_metadata(
     attributes: dict,
-    site: str | None = None,
-    species: str | None = None,
-    network: str | None = None,
-    instrument: str | None = None,
-    sampling_period: str | None = None,
-    calibration_scale: str | None = None,
-    data_owner: str | None = None,
-    data_owner_email: str | None = None,
+    fn_input_parameters:dict
 ) -> dict:
     """
     Construct metadata dictionary from explicit inputs and dataset attributes.
     Validates consistency between the two sources.
 
     Args:
-        dataset: Input xarray.Dataset
-        site, species, network, instrument, sampling_period,
-        calibration_scale, data_owner, data_owner_email: Optional inputs
-
+        dataset: Input xarray.Dataset.
+        fn_input_parametes: Dictionary of all the input parameters passed.
     Returns:
         dict: Validated metadata
     """
     
     data_attrs = {k.lower().replace(" ", "_"): v for k, v in attributes.items()}
+    # TODO: Add this method to all the surface parsers.
+    
+    # function-supplied inputs
+    metadata_initial = dict(fn_input_parameters)
 
-    # Start with user-supplied inputs
-    metadata_initial = {
-        "site": site,
-        "species": species,
-        "network": network,
-        "instrument": instrument,
-        "sampling_period": sampling_period,
-        "calibration_scale": calibration_scale,
-        "data_owner": data_owner,
-        "data_owner_email": data_owner_email,
-    }
+    # Ensures required fields exist, else fall back to dataset attrs
+    required_keys = [
+        "site", "species", "network", "instrument",
+        "sampling_period", "calibration_scale",
+        "data_owner", "data_owner_email",
+    ]
 
-    # Merge: fill missing values from dataset.attrs, validate conflicts
-    for key, value in metadata_initial.items():
+    for key in required_keys:
+        value = metadata_initial.get(key)
+
         if value is None:
-            # Fill from dataset attrs
-            try:
+            if key in data_attrs:
                 metadata_initial[key] = data_attrs[key]
-            except KeyError:
+            else:
                 raise ValueError(
                     f"Input '{key}' must be specified if not included in dataset attributes."
                 )
         else:
-            # If dataset also provides the key, validate consistency
             if key in data_attrs:
                 attributes_value = data_attrs[key]
                 if str(value).lower() != str(attributes_value).lower():
