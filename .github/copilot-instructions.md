@@ -114,12 +114,18 @@ pytest -v --run-icos tests/
 
 ### Documentation Build
 ```bash
-# Documentation requirements
+# Install additional documentation dependencies
 pip install -r requirements-doc.txt
 
 # Build docs (requires full OpenGHG installation)
+# Note: This is quite slow as the docs use the sphinx jupyter directive,
+# which downloads tutorial data during the build process
 cd doc && make html
 ```
+
+**Documentation Sites:**
+- Main documentation: https://docs.openghg.org
+- Getting started, tutorials, and releases: https://openghg.org
 
 ## Validation Workflow
 
@@ -319,6 +325,9 @@ Since automated testing often fails due to network constraints, use these manual
 1. Check docstrings are present in new functions
 2. Verify README.md updates for API changes
 3. Check that new modules are documented
+4. Reference documentation sites:
+   - Main docs: https://docs.openghg.org
+   - Getting started and tutorials: https://openghg.org
 
 ## Summary for Coding Agents
 
