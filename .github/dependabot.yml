@@ -1,0 +1,62 @@
+# Dependabot configuration for OpenGHG
+# 
+# What Dependabot does:
+# - Automatically checks for dependency updates across Python packages and GitHub Actions
+# - Opens pull requests when newer versions of dependencies are available
+# - Helps keep dependencies secure and up-to-date with minimal manual effort
+#
+# How maintainers should interact with Dependabot PRs:
+# 1. Review the PR description and changelog links for the updated dependency
+# 2. Check that all CI tests pass (GitHub Actions will run automatically)
+# 3. If tests pass: merge the PR to keep dependencies current
+# 4. If tests fail: investigate the breaking changes and either:
+#    - Fix any compatibility issues in the codebase, or
+#    - Add version constraints if the update introduces breaking changes
+# 5. Configuration adjustments can be made by editing this file (.github/dependabot.yml)
+#
+# References:
+# - Issue: #1461
+# - Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Monitor Python dependencies from pip (pyproject.toml and requirements*.txt files)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    # Group minor and patch updates to reduce PR volume
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Monitor GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
