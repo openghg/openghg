@@ -9,11 +9,6 @@ channels:
   - conda-forge
   - anaconda
 dependencies:
-  # Override base constraints for development
-  - python>=3.9  # Allow broader Python version range for dev
-  - numpy<2.0    # Pin numpy version for compatibility
-  - netcdf4<=1.6.5  # Pin netcdf4 version for compatibility
-  
   # Development and build tools
   - conda-build
   - git
