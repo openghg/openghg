@@ -388,10 +388,7 @@ def get_period(metadata: dict) -> str | None:
     return period
 
 
-def build_metadata(
-    attributes: dict,
-    fn_input_parameters:dict
-) -> dict:
+def build_metadata(attributes: dict, fn_input_parameters: dict) -> dict:
     """
     Construct metadata dictionary from explicit inputs and dataset attributes.
     Validates consistency between the two sources.
@@ -402,18 +399,23 @@ def build_metadata(
     Returns:
         dict: Validated metadata
     """
-    
+
     data_attrs = {k.lower().replace(" ", "_"): v for k, v in attributes.items()}
     # TODO: Add this method to all the surface parsers.
-    
+
     # function-supplied inputs
     metadata_initial = dict(fn_input_parameters)
 
     # Ensures required fields exist, else fall back to dataset attrs
     required_keys = [
-        "site", "species", "network", "instrument",
-        "sampling_period", "calibration_scale",
-        "data_owner", "data_owner_email",
+        "site",
+        "species",
+        "network",
+        "instrument",
+        "sampling_period",
+        "calibration_scale",
+        "data_owner",
+        "data_owner_email",
     ]
 
     for key in required_keys:
@@ -423,9 +425,7 @@ def build_metadata(
             if key in data_attrs:
                 metadata_initial[key] = data_attrs[key]
             else:
-                raise ValueError(
-                    f"Input '{key}' must be specified if not included in dataset attributes."
-                )
+                raise ValueError(f"Input '{key}' must be specified if not included in dataset attributes.")
         else:
             if key in data_attrs:
                 attributes_value = data_attrs[key]

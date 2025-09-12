@@ -111,7 +111,6 @@ class BaseStore:
         DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-
     def _standardise_from_dataset(
         self,
         dataset: xr.Dataset,
@@ -148,24 +147,19 @@ class BaseStore:
         attibutes = dataset.attrs
 
         # Build metadata (merging fn_input_parameters with dataset.attrs)
-        metadata_initial = build_metadata(
-            attributes=attibutes,
-            fn_input_parameters=fn_input_parameters
-        )
+        metadata_initial = build_metadata(attributes=attibutes, fn_input_parameters=fn_input_parameters)
 
         gas_data = self.prepare_surface_gas_data(
-        dataset=dataset,
-        metadata=metadata_initial,
-        update_mismatch=update_mismatch,
-        site_filepath=fn_input_parameters.get("site_filepath"),
-        species_filepath=fn_input_parameters.get("species_filepath"),
-                             
-    )
+            dataset=dataset,
+            metadata=metadata_initial,
+            update_mismatch=update_mismatch,
+            site_filepath=fn_input_parameters.get("site_filepath"),
+            species_filepath=fn_input_parameters.get("species_filepath"),
+        )
 
         # Convert gas_data dict into list of MetadataAndData objects
         data: list[MetadataAndData] = [
-            MetadataAndData(metadata=gd["metadata"], data=gd["data"])
-            for gd in gas_data.values()
+            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in gas_data.values()
         ]
 
         # Handle chunking
@@ -200,10 +194,9 @@ class BaseStore:
         logger.info("Completed processing dataset (parser-free).")
         return datasource_uuids
 
-
     def read_dataset(
         self,
-        dataset:xr.Dataset,
+        dataset: xr.Dataset,
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -228,9 +221,7 @@ class BaseStore:
 
         #  Handle legacy overwrite / force flags consistently
         if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`)."
-            )
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`).")
             if_exists = "new"
         if force and if_exists == "auto":
             if_exists = "new"
@@ -260,7 +251,6 @@ class BaseStore:
             return [{}]
 
         return results.extend(datasource_uuids)
-
 
     def read_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
@@ -1056,13 +1046,15 @@ class BaseStore:
         """
         logger.warning("Align metadata attributes is not implemented for this data type")
         return None
-    
-    def prepare_surface_gas_data(self, 
-            dataset: xr.Dataset,
-            metadata: dict,
-            update_mismatch: str = "never",
-            site_filepath: str | None = None,
-            species_filepath: str | None = None,) -> None:
+
+    def prepare_surface_gas_data(
+        self,
+        dataset: xr.Dataset,
+        metadata: dict,
+        update_mismatch: str = "never",
+        site_filepath: str | None = None,
+        species_filepath: str | None = None,
+    ) -> None:
         """Default to returning None for cases where this method isn't
         defined yet within the child data_type class.
         """
