@@ -1,68 +1,39 @@
-# NOTE: Shared dependencies in this file should be kept in sync with environment.yaml
-# Workflow for synchronization:
-# 1. When updating dependencies in environment.yaml, copy the same versions/constraints here
-# 2. Keep development/testing dependencies (pytest, pre-commit, mypy, etc.) as-is
-# 3. Always verify both files remain valid after changes
+# This file contains development, testing, and extra dependencies for OpenGHG.
+# It is intended to be used together with environment.yaml and should not
+# repeat dependencies from the base file.
+# Usage: conda env create -f environment.yaml -f environment-dev.yaml
+
 name: openghg_dev_env
 channels:
   - openghg
   - conda-forge
   - anaconda
 dependencies:
-  - python>=3.10
+  # Development and build tools
   - conda-build
-  - addict
-  - cf_xarray
-  - dask<2025.9
-  - h5netcdf
-  - filelock
-  - matplotlib
-  - msgpack-python
-  - netcdf4
-  - nbformat
-  - numexpr
-  - numpy
-  - nc-time-axis
-  - openghg_defs
-  - openpyxl
-  - pandas>=2.0
-  - pip
-  - plotly
-  - pyvis
-  - rapidfuzz
-  - requests>=2.25
-  - scipy
-  - setuptools
-  - tinydb
-  - toml
-  - rich
-  - ipywidgets
-  - xarray>=2025.04.0
-  - flox
-  - urllib3>=1.26.3
-  - xesmf>=0.7
-  - zarr==2.18.3
-  - numcodecs
   - git
   - flake8
-  - pint
-  - pint-xarray
   - pre-commit
+  - mypy==1.7.1
+  - tox>=4.24
+
+  # Testing dependencies
   - pytest
   - pytest-cov
   - pytest-mock
   - requests-mock
   - pytest-tornasync
-  - mypy==1.7.1
-  - tox>=4.24
+
+  # Type checking dependencies
   - types-PyYAML
   - types-requests
   - types-toml
   - types-urllib3
-  - openghg_calscales
+
+  # Additional data access tools
   - cdsapi
+
   - pip:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types
-      - icoscp<=0.1.17
       - pytest-timeout
