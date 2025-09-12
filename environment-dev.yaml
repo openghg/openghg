@@ -1,10 +1,15 @@
+# NOTE: Shared dependencies in this file should be kept in sync with environment.yaml
+# Workflow for synchronization:
+# 1. When updating dependencies in environment.yaml, copy the same versions/constraints here
+# 2. Keep development/testing dependencies (pytest, pre-commit, mypy, etc.) as-is
+# 3. Always verify both files remain valid after changes
 name: openghg_dev_env
 channels:
   - openghg
   - conda-forge
   - anaconda
 dependencies:
-  - python>=3.9
+  - python>=3.10
   - conda-build
   - addict
   - cf_xarray
@@ -13,10 +18,10 @@ dependencies:
   - filelock
   - matplotlib
   - msgpack-python
-  - netcdf4<=1.6.5
+  - netcdf4
   - nbformat
   - numexpr
-  - numpy<2.0
+  - numpy
   - nc-time-axis
   - openghg_defs
   - openpyxl
@@ -34,7 +39,6 @@ dependencies:
   - ipywidgets
   - xarray>=2025.04.0
   - flox
-  - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
   - zarr==2.18.3
@@ -60,5 +64,5 @@ dependencies:
   - pip:
       - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
       - msgpack-types
-      - icoscp
+      - icoscp<=0.1.17
       - pytest-timeout
