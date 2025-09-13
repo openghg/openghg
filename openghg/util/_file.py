@@ -8,7 +8,7 @@ from collections.abc import Callable
 import numpy as np
 import xarray as xr
 
-from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
+from openghg.types import pathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
 from openghg.util import align_lat_lon
 
 logger = logging.getLogger("openghg.util.file")
@@ -256,7 +256,7 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
-def check_filepath(filepath: multiPathType, source_format: str) -> list[str] | list[Path]:
+def check_filepath(filepath: str | Path | tuple | list | None, source_format: str) -> list[str] | list[Path]:
     """
     Check that filepath is of the correct format - this assumes the filepath
     should be a str, Path or list but not a tuple (this is only needed for gcwerks).

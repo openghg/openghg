@@ -1,6 +1,5 @@
 from typing import Any, cast, Literal
 from collections.abc import Iterable
-import xarray as xr
 import logging
 import math
 

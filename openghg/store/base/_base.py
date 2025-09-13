@@ -7,7 +7,7 @@ import logging
 import math
 from pathlib import Path
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 from collections.abc import MutableSequence, Sequence, Callable
 
 from pandas import Timestamp
@@ -159,7 +159,7 @@ class BaseStore:
 
         # Convert gas_data dict into list of MetadataAndData objects
         data: list[MetadataAndData] = [
-            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in gas_data.values()
+            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in (gas_data or {}).values()
         ]
 
         # Handle chunking
@@ -245,12 +245,15 @@ class BaseStore:
                 chunks=chunks,
                 info_metadata=info_metadata,
             )
+
         except ValidationError as err:
             msg = f"Unable to validate and store data from dataset. Error: {err}"
             logger.error(msg)
             return [{}]
 
-        return results.extend(datasource_uuids)
+        results.extend(datasource_uuids)
+
+        return results
 
     def read_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
@@ -390,8 +393,8 @@ class BaseStore:
 
     def read_file(
         self,
-        filepath: str | Path | list[str] | list[Path],
         source_format: str,
+        filepath: str | Path | list[str] | list[Path] | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -1054,7 +1057,7 @@ class BaseStore:
         update_mismatch: str = "never",
         site_filepath: str | None = None,
         species_filepath: str | None = None,
-    ) -> None:
+    ) -> Optional[dict]:
         """Default to returning None for cases where this method isn't
         defined yet within the child data_type class.
         """

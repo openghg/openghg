@@ -221,7 +221,7 @@ def multiple_inlets(site: str, site_filepath: pathType | None = None) -> bool:
     return len(heights) > 1
 
 
-def normalise_to_filepath_list(filepath: str | Path | list[str] | list[Path]) -> list[Path]:
+def normalise_to_filepath_list(filepath: str | Path | list[str] | list[Path] | None = None) -> list[Path]:
     """
     Ensure filepath is a list of Path objects.
     Args:

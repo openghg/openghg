@@ -6,7 +6,6 @@ import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
-from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
 
@@ -54,7 +53,13 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        if dataset:
+        filepath_missing = filepath is None or (
+            isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
+        )
+
+        if (filepath_missing and dataset is None) or (not filepath_missing and dataset is not None):
+            raise ValueError("Please specify exactly one of `filepath` or `dataset`.")
+        elif dataset:
             result = dc.read_dataset(dataset=dataset, **kwargs)
         else:
             result = dc.read_file(filepath=filepath, **kwargs)
@@ -67,7 +72,7 @@ def standardise_surface(
     network: str,
     site: str,
     dataset: xr.Dataset = None,
-    filepath: multiPathType = None,
+    filepath: str | Path | list[str] | list[Path] | tuple | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
