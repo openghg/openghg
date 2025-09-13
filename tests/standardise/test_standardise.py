@@ -266,6 +266,53 @@ def test_local_obs_metadata_mismatch_meta():
     # obs = ObsSurface.load()
     # obs.delete(uuid=uuid)
 
+def test_standardise_surface_agage_direct_dataset():
+    """ This is to test the functinonality of direct dataset standardisation works for source_format="agage"
+    """
+    # Here we standardise the data from a filepath
+    thd_agage_filepath = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+
+    standardise_surface(filepath=thd_agage_filepath,
+                    source_format="agage",
+                    site="thd",
+                    network="agage",
+                    store="user",
+                    instrument="GCMD",
+                    sampling_period="1s",
+                    platform="surface-insitu",
+                    # if_exists="new"
+                    )
+
+    # Here we retrieve the data from the obs store
+
+    thd_stored_data = get_obs_surface(site="thd",
+                species="cfc11",
+                store="user",
+                instrument="gcmd",
+                source_format="agage",
+                rename_vars=False
+                )
+
+    thd_agage_dataset = thd_stored_data.data
+    thd_agage_dataset = xr.open_dataset(thd_agage_filepath)
+    standardise_surface(dataset=thd_agage_dataset,
+                    source_format="agage",
+                    site="thd",
+                    network="agage",
+                    store="user",
+                    instrument="GCMD",
+                    sampling_period="1s",
+                    platform="surface-insitu",
+                    )
+    data  = get_obs_surface(site="thd",
+                species="cfc11",
+                store="user",
+                instrument="gcmd",
+                source_format="agage",
+                rename_vars=False
+                )
+    data
+
 
 def test_local_obs_metadata_mismatch_fail():
     """

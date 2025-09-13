@@ -613,14 +613,13 @@ def data_variable_formatter(ds: Dataset, species: str, species_label: str) -> Da
     variable_names = cast(dict[str, Any], ds.variables)
     matched_keys = [var for var in variable_names if species_search in var]
 
-    # If we don't have any variables to rename, raise an error
-    if not matched_keys:
-        raise NameError(f"Cannot find species {species_search} in Dataset variables")
+    species_rename = {
+        var: var.replace(species_search, species_label)
+        for var in matched_keys
+        if not var.startswith(species_label)
+    }
 
-    species_rename = {}
-    for var in matched_keys:
-        species_rename[var] = var.replace(species_search, species_label)
-
-    ds = ds.rename(species_rename)
+    if species_rename:
+        ds = ds.rename(species_rename)
 
     return ds
