@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any, MutableSequence
 from collections.abc import Sequence
 import numpy as np
+import xarray as xr
 
-from openghg.standardise.meta import align_metadata_attributes
+from openghg.standardise.meta import align_metadata_attributes, dataset_formatter, assign_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import pathType, MetadataAndData, DataOverlapError
@@ -464,3 +465,42 @@ class ObsSurface(BaseStore):
 
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
+
+    def prepare_surface_gas_data(
+        self,
+        dataset: xr.Dataset,
+        metadata: dict,
+        update_mismatch: str = "never",
+        site_filepath: str | None = None,
+        species_filepath: str | None = None,
+    ) -> dict:
+        """
+        Wraps a dataset into the gas_data format with metadata, attributes,
+        and CF-compliant attributes applied (like in parser workflow).
+        """
+        # TODO: Replace this logic in surface parsers
+        species = metadata["species"]
+
+        gas_data = {
+            species: {
+                "metadata": metadata,
+                "data": dataset,
+                "attributes": dataset.attrs,
+            }
+        }
+
+        # Format dataset variables
+        gas_data = dataset_formatter(data=gas_data)
+
+        # Attach CF-compliant attributes
+        gas_data = assign_attributes(
+            data=gas_data,
+            site=metadata.get("site"),
+            network=metadata.get("network"),
+            sampling_period=metadata.get("sampling_period"),
+            update_mismatch=update_mismatch,
+            site_filepath=site_filepath,
+            species_filepath=species_filepath,
+        )
+
+        return gas_data

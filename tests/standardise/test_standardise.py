@@ -1,4 +1,6 @@
 import pytest
+import xarray as xr
+
 from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
@@ -112,6 +114,36 @@ def test_standardise_obs_openghg():
     )
 
     results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
+    assert "co2" == results[0].get("species")
+
+
+def test_standardise_obs_openghg_dataset():
+    """
+    Direct dataset standardisation test.
+    Based on reported Issue #477 where ValueError is raised when synchronising the metadata and attributes.
+     - "inlet" and "inlet_height_magl" attribute within netcdf file was a float; "inlet" within metadata is converted to a string with "m" ("185m")
+     - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
+     - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
+    """
+    clear_test_store("user")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
+    dataset = xr.open_dataset(filepath)
+    results = standardise_surface(
+        dataset=dataset,
+        site="TAC",
+        network="DECC",
+        inlet=185,
+        instrument="picarro",
+        source_format="openghg",
+        sampling_period="1h",
+        force=True,
+        store="user",
+        update_mismatch="metadata",
+    )
+
+    results = filt(results)
     assert "co2" == results[0].get("species")
 
 

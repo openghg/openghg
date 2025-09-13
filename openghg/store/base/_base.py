@@ -7,7 +7,7 @@ import logging
 import math
 from pathlib import Path
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 from collections.abc import MutableSequence, Sequence, Callable
 
 from pandas import Timestamp
@@ -24,7 +24,7 @@ from openghg.types import (
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
+from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list, build_metadata
 
 from .._metakeys_config import get_metakeys
 
@@ -110,6 +110,150 @@ class BaseStore:
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def _standardise_from_dataset(
+        self,
+        dataset: xr.Dataset,
+        fn_input_parameters: dict,
+        update_mismatch: str = "never",
+        if_exists: str = "auto",
+        new_version: bool = True,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        info_metadata: dict | None = None,
+    ) -> list[dict]:
+        """
+        Standardise input data from an in-memory xarray.Dataset. This bypasses
+        parser functions and directly prepares the dataset for storage.
+
+        Args:
+            dataset: The xarray.Dataset to standardise and store.
+            fn_input_parameters: Parameters passed from read_dataset.
+            update_mismatch: How mismatches between attributes and metadata are handled.
+            if_exists: What to do if existing data is present.
+            new_version: Whether to create a new version of the datasource.
+            compressor: Compressor to use for storage.
+            filters: Filters to apply on storage.
+            chunks: Chunking schema to apply.
+            info_metadata: Extra metadata to attach.
+
+        Returns:
+            list[dict]: List of datasources and their UUIDs.
+        """
+
+        from openghg.types import MetadataAndData
+
+        attibutes = dataset.attrs
+
+        # Build metadata (merging fn_input_parameters with dataset.attrs)
+        metadata_initial = build_metadata(attributes=attibutes, fn_input_parameters=fn_input_parameters)
+
+        gas_data = self.prepare_surface_gas_data(
+            dataset=dataset,
+            metadata=metadata_initial,
+            update_mismatch=update_mismatch,
+            site_filepath=fn_input_parameters.get("site_filepath"),
+            species_filepath=fn_input_parameters.get("species_filepath"),
+        )
+
+        # Convert gas_data dict into list of MetadataAndData objects
+        data: list[MetadataAndData] = [
+            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in (gas_data or {}).values()
+        ]
+
+        # Handle chunking
+        if chunks == {}:
+            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+
+        self._validate_datasources(data, fn_input_parameters, filepath=None)
+
+        if chunks:
+            logger.info(f"Rechunking dataset with chunks={chunks}")
+            for datasource in data:
+                datasource.data = datasource.data.chunk(chunks)
+
+        # Align attributes vs metadata
+        self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+
+        # Attach any additional metadata
+        self.check_info_keys(info_metadata)
+        if info_metadata is None:
+            info_metadata = {}
+        # data = self.update_metadata(data, {}, additional_metadata=info_metadata)
+
+        # Save datasources to object store
+        datasource_uuids = self.assign_data(
+            data=data,
+            if_exists=if_exists,
+            new_version=new_version,
+            compressor=compressor,
+            filters=filters,
+        )
+
+        logger.info("Completed processing dataset (parser-free).")
+        return datasource_uuids
+
+    def read_dataset(
+        self,
+        dataset: xr.Dataset,
+        source_format: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        force: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        update_mismatch: str = "never",
+        info_metadata: dict | None = None,
+        **kwargs: Any,
+    ) -> list[dict]:
+        """
+        Process an in-memory xarray.Dataset, update metadata, and store in the object store.
+        """
+
+        from openghg.store.spec import check_parser
+        from openghg.util import check_if_need_new_version
+
+        #  Verifies if the provided source_format is presently handled by openghg. This step can be removed to allow users to treat adding dataset as a custom dataset.
+        source_format = check_parser(self._data_type, source_format)
+
+        #  Handle legacy overwrite / force flags consistently
+        if overwrite and if_exists == "auto":
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`).")
+            if_exists = "new"
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        #  Still decide versioning behaviour
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        #  Format inputs for downstream standardisation
+        fn_input_parameters = self.format_inputs(**kwargs)
+        fn_input_parameters["source_format"] = source_format
+        results = []
+        try:
+            datasource_uuids = self._standardise_from_dataset(
+                dataset=dataset,
+                fn_input_parameters=fn_input_parameters,
+                update_mismatch=update_mismatch,
+                if_exists=if_exists,
+                new_version=new_version,
+                compressor=compressor,
+                filters=filters,
+                chunks=chunks,
+                info_metadata=info_metadata,
+            )
+
+        except ValidationError as err:
+            msg = f"Unable to validate and store data from dataset. Error: {err}"
+            logger.error(msg)
+            return [{}]
+
+        results.extend(datasource_uuids)
+
+        return results
 
     def read_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
@@ -249,8 +393,8 @@ class BaseStore:
 
     def read_file(
         self,
-        filepath: str | Path | list[str] | list[Path],
         source_format: str,
+        filepath: str | Path | list[str] | list[Path] | None = None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -900,6 +1044,20 @@ class BaseStore:
         return list_keys
 
     def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
+        """Default to returning None for cases where this method isn't
+        defined yet within the child data_type class.
+        """
+        logger.warning("Align metadata attributes is not implemented for this data type")
+        return None
+
+    def prepare_surface_gas_data(
+        self,
+        dataset: xr.Dataset,
+        metadata: dict,
+        update_mismatch: str = "never",
+        site_filepath: str | None = None,
+        species_filepath: str | None = None,
+    ) -> Optional[dict]:
         """Default to returning None for cases where this method isn't
         defined yet within the child data_type class.
         """

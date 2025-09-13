@@ -3,7 +3,7 @@ from pathlib import Path
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import pathType, multiPathType
+from openghg.types import pathType
 
 logger = logging.getLogger("openghg.standardise")
 
@@ -613,7 +613,7 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: dict
 
 
 def check_gcwerks_input(
-    filepath: multiPathType, precision_filepath: str | Path | list[str] | list[Path] | None
+    filepath: str | Path | tuple | list | None, precision_filepath: str | Path | list[str] | list[Path] | None
 ) -> tuple[list[Path], list[Path]]:
     """
     Check that both filepath and precision_filepath are specified when using the gcwerks

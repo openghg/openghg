@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Any
 from pandas import Timedelta
+import xarray as xr
 import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
-from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
 
@@ -14,7 +14,8 @@ logger = logging.getLogger("openghg.standardise")
 
 def standardise(
     data_type: str,
-    filepath: str | Path | list[str] | list[Path],
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    dataset: xr.Dataset | None = None,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -52,7 +53,16 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(filepath=filepath, **kwargs)
+        filepath_missing = filepath is None or (
+            isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
+        )
+
+        if (filepath_missing and dataset is None) or (not filepath_missing and dataset is not None):
+            raise ValueError("Please specify exactly one of `filepath` or `dataset`.")
+        elif dataset:
+            result = dc.read_dataset(dataset=dataset, **kwargs)
+        else:
+            result = dc.read_file(filepath=filepath, **kwargs)
 
     return result
 
@@ -61,7 +71,8 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: multiPathType,
+    dataset: xr.Dataset | None = None,
+    filepath: str | Path | list[str] | list[Path] | tuple | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
@@ -94,6 +105,7 @@ def standardise_surface(
 
     Args:
         filepath: Filepath(s)
+        dataset: Xarray dataset
         source_format: Data format, for example CRDS, GCWERKS
         site: Site code/name
         network: Network name
@@ -180,6 +192,7 @@ def standardise_surface(
         data_type="surface",
         filepath=filepath,
         precision_filepath=precision_filepath,
+        dataset=dataset,
         source_format=source_format,
         network=network,
         site=site,
