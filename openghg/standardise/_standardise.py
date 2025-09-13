@@ -71,7 +71,7 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    dataset: xr.Dataset = None,
+    dataset: xr.Dataset | None = None,
     filepath: str | Path | list[str] | list[Path] | tuple | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
