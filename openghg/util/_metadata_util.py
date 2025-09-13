@@ -336,7 +336,7 @@ def merge_and_extend_dict(left: dict, right: dict) -> dict:
             if isinstance(combined_value, str):
                 combined_value = [combined_value]
 
-            for v in value:
+            for v in value or []:
                 if v not in combined_value:
                     combined_value.extend(value)
 
@@ -436,12 +436,5 @@ def build_metadata(attributes: dict, fn_input_parameters: dict) -> dict:
                         raise ValueError(
                             f"Input for '{key}': {value} does not match value in dataset attributes: {attributes_value}"
                         )
-
-    for key, value in metadata_initial.items():
-        if key not in required_keys and value is None:
-            if key == "height":
-                metadata_initial[key] = metadata_initial.get("inlet", "not_set")
-            else:
-                metadata_initial[key] = "not_set"
 
     return metadata_initial
