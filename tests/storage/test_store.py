@@ -49,7 +49,7 @@ def memory_store():
 
 @pytest.fixture()
 def versioned_memory_store():
-    """Test MemoryStore."""
+    """Test VersionedMemoryStore."""
     return VersionedMemoryStore()
 
 

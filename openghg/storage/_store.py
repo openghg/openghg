@@ -18,13 +18,9 @@ from typing import Literal
 import pandas as pd
 import xarray as xr
 
-from openghg.types import DataOverlapError
+from openghg.types import DataOverlapError, UpdateError
 from openghg.util._versioning import SimpleVersioning
 from ._indexing import ConflictDeterminer
-
-
-# TODO: this should be in openghg.types (?)
-class UpdateError(Exception): ...
 
 
 class Store(ABC):
@@ -151,6 +147,7 @@ class MemoryStore(Store):
 
     def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
         if self.data is None:
+            # TODO should we check if the data has the append dim? ...zarr wouldn't
             self.data = data
         else:
             if self._conflict_determiner.has_conflicts(data.get_index(self.append_dim)):
@@ -163,6 +160,8 @@ class MemoryStore(Store):
             self.data = xr.concat([self.data, data], dim=self.append_dim).sortby(self.append_dim)
 
     def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+        # TODO how should we handle adding data with a new dimension? or with the append dim when
+        # the input data doesn't have the append dim?
         if self.data is None:
             raise UpdateError("Cannot update empty Store.")
         else:

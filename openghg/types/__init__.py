@@ -35,6 +35,8 @@ from ._errors import (
     StandardiseError,
     ValidationError,
     construct_xesmf_import_error,
+    StorageError,
+    UpdateError,
 )
 from ._types import (
     multiPathType,
