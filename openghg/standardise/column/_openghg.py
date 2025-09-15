@@ -6,7 +6,7 @@ from openghg.util import open_time_nc_fn
 
 
 def parse_openghg(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,

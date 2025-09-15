@@ -18,7 +18,7 @@ from openghg.standardise import (
     standardise_flux_timeseries,
 )
 from openghg.dataobjects import FootprintData
-from openghg.types import AttrMismatchError, ObjectStoreError
+from openghg.types import AttrMismatchError, ObjectStoreError, StandardiseError
 from openghg.util import compress, find_domain
 import numpy as np
 
@@ -302,8 +302,41 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
+def test_standardise_tccon_obs():
+    """
+    Tests standardise column function and associated metadata keys
+    for satellite column data.
+    """
+    filepath = get_column_datapath(filename="hw20230402_20230402.public.qc.nc")
+
+    site = "THW"
+    domain = "EUROPE"
+    species = "ch4"
+    pressure_weights_method = "pressure_weight"
+
+    results = standardise_column(
+        filepath=filepath,
+        site=site,
+        domain=domain,
+        species=species,
+        pressure_weights_method=pressure_weights_method,
+        source_format="tccon",
+        force=True,
+        store="user",
+    )
+
+    assert "ch4" == results[0].get("species")
+
+    data = get_obs_column(species="ch4", site="THW", max_level=3, network="TCCON", store="user")
+
+    assert "file_format_version" in data.metadata
+    assert "data_revision" in data.metadata
+
+    assert data.metadata["pressure_weights_method"] == pressure_weights_method
+
+
 def test_standardise_footprint():
-    """ This is to test standardise_footprint method.
+    """This is to test standardise_footprint method.
     Additionally the get_footprint is also tested by supplying direct store path instead of name."""
 
     from openghg.objectstore import get_readable_buckets
@@ -338,11 +371,10 @@ def test_standardise_footprint():
     # testing direct path supplied to get function should fetch results.
     buckets = get_readable_buckets()
 
-    result = get_footprint(site=site, network=network,
-                           height=height,domain=domain,store=buckets["user"])
+    result = get_footprint(site=site, network=network, height=height, domain=domain, store=buckets["user"])
 
     assert result is not None
-    assert isinstance(result,FootprintData)
+    assert isinstance(result, FootprintData)
     assert result.metadata["site"] == "tmb"
     assert result.metadata["data_type"] == "footprints"
 
@@ -524,7 +556,7 @@ def test_standardise_incomplete_flux():
     # assert that if we specify the domain as the standard EUROPE domain with an non-standard input file,
     # we get an error
 
-    with pytest.raises(ValueError):
+    with pytest.raises(StandardiseError):
         standardise_flux(
             filepath=test_datapath,
             species="co2",
@@ -581,7 +613,7 @@ def test_incompatible_species_for_flux_timeseries():
     """This function tests if incompatible species values is supplied to standardise"""
 
     data_path = get_flux_timeseries_datapath(filename="GBR_2023_2021_13042023_170954.xlsx")
-    with pytest.raises(ValueError):
+    with pytest.raises(StandardiseError):
         standardise_flux_timeseries(
             filepath=data_path, species="hfc123", source="crf", period="years", continuous=False, store="user"
         )
@@ -621,6 +653,7 @@ def test_standardise_sorting_true():
         update_mismatch="attributes",
         if_exists="new",
         sort_files=True,
+        concat_nc_files=False,
     )
 
     assert "20220928.nc" in results[0]["file"]

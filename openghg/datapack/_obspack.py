@@ -30,13 +30,12 @@ import shutil
 import pathlib
 from pathlib import Path
 
-import importlib.resources
 from typing import Sequence, cast
 import logging
 
 from openghg.dataobjects import ObsData, ObsColumnData
 from openghg.types import pathType
-from openghg.util import check_unique, find_repeats, collate_strings
+from openghg.util import check_unique, find_repeats, collate_strings, openghg_data_path
 
 from ._file_structure import (
     find_current_obspacks,
@@ -531,16 +530,13 @@ class ObsPack:
         return obs_types
 
     @staticmethod
-    def default_release_files() -> list:
+    def default_release_files() -> list[Path]:
         """
         Release files which will be included in the created obspack by default.
+
         This will return a list of filepaths to these default files.
         """
-        release_file_ref = importlib.resources.files("openghg") / "data/obspack/obspack_README.md"
-
-        with importlib.resources.as_file(release_file_ref) as f:
-            release_file_path = f
-
+        release_file_path = openghg_data_path() / "obspack/obspack_README.md"
         release_files = [release_file_path]
         return release_files
 

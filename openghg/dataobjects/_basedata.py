@@ -2,13 +2,30 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 
-from openghg.objectstore import get_datasource
-import xarray as xr
-from pandas import Timestamp, Timedelta
+from itertools import islice
 import logging
+
+from pandas import Timestamp, Timedelta
+import xarray as xr
+
+from openghg.objectstore import get_datasource
+
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def truncated_dict_repr(d: dict, length: int = 4) -> str:
+    if len(d) <= length:
+        return repr(d)
+
+    trun_d = dict(islice(d.items(), length))
+    result = repr(trun_d)
+
+    # add "..." to indicate truncation
+    result = result[:-1] + ", ...}"
+
+    return result
 
 
 class _BaseData:
@@ -117,5 +134,39 @@ class _BaseData:
     def __bool__(self) -> bool:
         return bool(self.data)
 
+    def __repr__(self) -> str:
+        cls = self.__class__.__name__
+        meta = self.metadata.copy()
+        to_skip = [
+            "conditions_of_use",
+            "max_latitude",
+            "variables",
+            "title",
+            "processed on",
+            "time_resolution",
+            "author",
+            "ukghg sectors",
+            "min_latitude",
+            "versions",
+            "processed by",
+            "time_resolved",
+            "max_longitude",
+            "data_type",
+            "processed",
+            "min_longitude",
+            "latest_version",
+            "period",
+            "time_period",
+            "height",
+            "conventions",
+            "timestamp",
+            "uuid",
+        ]
+        for key in to_skip:
+            if key in meta:
+                del meta[key]
+        meta_str = truncated_dict_repr(meta)
+        return f"{cls}(metadata={meta_str}, uuid={self._uuid or self.metadata.get('uuid')})"
+
     def __str__(self) -> str:
-        return f"Data: {self.data}\nMetadata: {self.metadata}"
+        return f"Data:\n{self.data}\nMetadata:\n{self.metadata}"

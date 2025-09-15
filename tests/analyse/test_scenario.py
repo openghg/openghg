@@ -29,7 +29,13 @@ def test_scenario_direct_objects():
     bc_input = "MOZART"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network, target_units={"mf_variability": "ppm"}
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        target_units={"mf_variability": "ppm"},
     )
 
     footprint = get_footprint(
@@ -557,9 +563,18 @@ def test_footprints_data_merge(model_scenario_1):
     assert "fp" in combined_dataset
     assert "mf" in combined_dataset
     assert "mf_mod" in combined_dataset
+    assert "bc_mod" in combined_dataset
 
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
+
+    for dv in ("mf_mod", "bc_mod"):
+        assert combined_dataset[dv].attrs["units"] == "1e-9"
+
+    error_in_mod_obs = np.mean(np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)).values
+    error_threshold = 0.1 * np.mean(combined_dataset.mf).values  # somewhat arbitrary, but fails if bc mod units wrong
+
+    assert error_in_mod_obs < error_threshold
 
 
 def test_combine_obs_sampling_period_infer():
@@ -629,6 +644,7 @@ def obs_ch4_dummy():
     }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
+    data.mf.attrs["units"] = "1e-9"
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -690,6 +706,13 @@ def footprint_dummy():
 
     data = xr.Dataset(data_vars, coords=coords)
 
+    # set units for testing with pint
+    data.fp.attrs["units"] = "m2 s mol-1"
+    for d in "nesw":
+        data[f"particle_locations_{d}"].attrs["units"] = "1"  # dimensionless
+    data.lat.attrs["units"] = "degrees_north"
+    data.lon.attrs["units"] = "degrees_east"
+
     # Potential metadata:
     # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
@@ -725,6 +748,11 @@ def flux_ch4_dummy():
     flux = xr.Dataset(
         {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
     )
+
+    # add units for testing with pint
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
@@ -781,6 +809,12 @@ def bc_ch4_dummy():
 
     bc = xr.Dataset(data_vars, coords=coords)
 
+    # add units for testing with pint
+    for d in "nesw":
+        bc[f"vmr_{d}"].attrs["units"] = "1"  # dimensionless
+    bc.lat.attrs["units"] = "degrees_north"
+    bc.lon.attrs["units"] = "degrees_east"
+
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
@@ -800,6 +834,11 @@ def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_
     )
 
     return model_scenario
+
+
+def test_model_scenario_units(model_scenario_ch4_dummy):
+    """Check that units are picked up from obs data."""
+    assert model_scenario_ch4_dummy.units == "1e-9"
 
 
 def test_model_resample_ch4(model_scenario_ch4_dummy):
@@ -825,7 +864,7 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
 
 
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
-    """Test expected modelled observations within footprints_data_merge method with known dummy data"""
+    """Test expected modelled observations within footprints_data_merge method with known dummy data."""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -845,6 +884,7 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     input_fp_values = footprint["fp"]
 
     expected_modelled_mf = (input_fp_values * input_flux_values).sum(dim=("lat", "lon")).values
+    expected_modelled_mf *= 1e9  # fp x flux in mol/mol but output converted to obs units of ppb
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
@@ -886,7 +926,7 @@ def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dum
         model_scenario.combine_obs_footprint()
 
 
-def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
+def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None, obs_units: float = 1.0):
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
@@ -918,12 +958,12 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
         else:
             expected_modelled_baseline += baseline_component
 
-    return expected_modelled_baseline
+    return expected_modelled_baseline / obs_units
 
 
 def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
     """Test expected modelled baseline with known dummy data"""
-    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline(output_units=1)
+    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline().bc_mod
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -938,10 +978,17 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     footprint = footprint_dummy.data.sel(time=time_slice)
     bc = bc_ch4_dummy.data.sel(time=time_slice)
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
+
+def test_bc_sensitivity_ch4(model_scenario_ch4_dummy):
+    """Check that bc sensitivity for each NESW curtain is available."""
+    bc_sensitivity = model_scenario_ch4_dummy.calc_modelled_baseline(output_sensitivity=True)
+
+    for d in "nesw":
+        assert f"bc_{d}" in bc_sensitivity
 
 # %% Test alignment when using platform keyword with dummy data (CH4)
 #  - flask data
@@ -1007,7 +1054,6 @@ def test_model_align_flask(model_scenario_ch4_dummy, platform_metadata, platform
 
     np.testing.assert_allclose(aligned_fp_1, expected_fp_1)
     np.testing.assert_allclose(aligned_fp_2, expected_fp_2)
-
 
 
 # %% Test baseline calculation for short-lived species
@@ -1089,6 +1135,13 @@ def footprint_radon_dummy(footprint_dummy):
 
     footprint_ds = footprint_ds.assign(data_vars)
 
+    # set units for testing with pint
+    footprint_ds.fp.attrs["units"] = "m2 s mol-1"
+    for d in "nesw":
+        footprint_ds[f"particle_locations_{d}"].attrs["units"] = "1"  # dimensionless
+    footprint_ds.lat.attrs["units"] = "degrees_north"
+    footprint_ds.lon.attrs["units"] = "degrees_east"
+
     footprintdata = FootprintData(data=footprint_ds, metadata=footprint_metadata)
 
     return footprintdata
@@ -1117,7 +1170,7 @@ def model_scenario_radon_dummy(obs_radon_dummy, footprint_radon_dummy, bc_radon_
 
 def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
     """Test expected modelled baseline for Rn (short-lived species) with known dummy data"""
-    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline(output_units=1)
+    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline().bc_mod
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1136,7 +1189,7 @@ def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dum
     lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
     lifetime_rn_hrs = lifetime_rn_days * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
@@ -1192,7 +1245,7 @@ def test_modelled_baseline_short_life(
     model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy
 ):
     """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
-    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline(output_units=1)
+    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline().bc_mod
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1211,7 +1264,7 @@ def test_modelled_baseline_short_life(
     lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
     lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs)
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs, obs_units=1e-9)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 

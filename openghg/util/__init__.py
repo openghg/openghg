@@ -4,6 +4,7 @@ Utility functions for OpenGHG
 
 from ._cli import cli
 from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
+from ._data import openghg_data_path
 from ._data_level import format_data_level
 from ._domain import (
     get_domain_info,
@@ -51,7 +52,8 @@ from ._metadata_util import (
     merge_and_extend_dict,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
-from ._registry import AutoRegistry, Registry
+from ._registry import get_parameters, AutoRegistry, Registry
+from ._scale import update_scale
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,
@@ -113,6 +115,7 @@ from ._user import (
 )
 from ._util import (
     find_matching_site,
+    normalise_to_filepath_list,
     multiple_inlets,
     pairwise,
     site_code_finder,
