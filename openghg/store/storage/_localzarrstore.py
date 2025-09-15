@@ -159,6 +159,8 @@ class LocalZarrStore(Store):
 
             self._stores[version] = zarr.storage.DirectoryStore(self.store_path(version=version))
             encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
+            from datetime import datetime
+            print(f"Begin to_zarr: {datetime.now()}")
             dataset.to_zarr(
                 store=self._stores[version],
                 mode="w",
@@ -167,6 +169,7 @@ class LocalZarrStore(Store):
                 compute=True,
                 synchronizer=zarr.ThreadSynchronizer(),
             )
+            print(f"End to_zarr: {datetime.now()}")
 
     def get(self, version: str) -> xr.Dataset:
         """Get the version of the dataset stored in the zarr store.

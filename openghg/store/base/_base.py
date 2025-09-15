@@ -162,7 +162,6 @@ class BaseStore:
 
                 See documentation for guidance on chunking:
                 https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-
             info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
             list[dict]: List of datasources and their uuids
