@@ -1,11 +1,12 @@
 import os
 import logging
 from pathlib import Path
+from typing import Any
 
 import xarray as xr
 import numpy as np
 
-from openghg.util import timestamp_now, open_time_nc_fn
+from openghg.util import find_domain, open_time_nc_fn, timestamp_now
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
@@ -79,7 +80,9 @@ def parse_cams(
 
         # create climatology if required
         if make_climatology:
-            raise ValueError("options not moved from ACRG code yet. Don't hesitate to do if you need it :)")
+            raise NotImplementedError(
+                "options not moved from ACRG code yet. Don't hesitate to do if you need it :)"
+            )
             # cams_seasonal = climatology.monthly_cycle(cams_ds)
             # cams_ds       = climatology.add_full_time(cams_seasonal, start = start, end = end)
 
@@ -111,7 +114,7 @@ def parse_cams(
 
         # Convert altitude coordinates from hlevel to level
         if species.lower() == "co2":
-            raise ValueError(
+            raise NotImplementedError(
                 "convertCAMSaltitude from ACRG has not be transcripted here for co2. Don't hesitate to do."
             )
         z = 0.5 * (
@@ -122,12 +125,11 @@ def parse_cams(
         ds = ds.assign(**{"z": (z_dims, z.data)})
 
         # find the correct unit conversion between mol/mol and species specific parts-per- units
-        unit_converter = {"ppt": 1e-12, "ppb": 1e-9, "ppm": 1e-6, "1e-9 mol mol-1": 1e-9}
-        old_unit = ds["species"].attrs["units"]
-        conversion = float(unit_converter.get(old_unit, old_unit))
-        ds["species"].values *= conversion
-        ds["species"].attrs["units"] = 1
-        
+        unit_converter = {"1e-6 mol mol-1": "ppm", "1e-9 mol mol-1": "ppb", "1e-12 mol mol-1": "ppt"}
+        ds["species"].attrs["units"] = unit_converter.get(
+            ds["species"].attrs["units"], ds["species"].attrs["units"]
+        )
+        ds["species"] = ds["species"].pint.quantify().pint.to("mol/mol").pint.dequantify()
 
         # Get coords from reference footprints
         if get_footprint_kwargs:
@@ -138,8 +140,10 @@ def parse_cams(
             fp_lon = fp["lon"].values
             fp_height = fp["height"].values
         else:
-            raise ValueError(
-                "For now get_footprint_kwargs is not optionnal. Might do something with openghg_defs.domain_info_file"
+            fp_lat, fp_lon = find_domain(domain)
+            fp_height = np.linspace(500.0, 19500.0, 20, endpoint=True)
+            logger.info(
+                "The lon and lat are obtained from `openghg.util` find_domain and we set 20 regurlarly spaced levels  from 500m to 19500m (included)."
             )
 
         # Select the gridcells closest to the edges of the  domain and make sure outside of fp
@@ -155,23 +159,68 @@ def parse_cams(
         west = ds.sel(lon=lon_w, lat=slice(lat_s, lat_n)).drop_vars("lon")
 
         # Interp on footprint grid
+        from datetime import datetime
+
+        t0 = datetime.now()
         vmr_n = _interp_dim(_interp_dim(north, fp_height, "level"), fp_lon, "lon").rename(
             {"species": "vmr_n"}
         )
+        tm1 = datetime.now() - t0
+        print(f"tm1: {tm1}")
+
+        # t0 = datetime.now()
+        # vmr_n2 = xr_interp(north[["species","z"]], "level", fp_height, coord="z").interp(lon=fp_lon)[["species"]].rename({"species": "vmr_n"})
+        # tm2 = (datetime.now() - t0)
+        # print(f"tm2: {tm2}")
+
+        t0 = datetime.now()
         vmr_s = _interp_dim(_interp_dim(south, fp_height, "level"), fp_lon, "lon").rename(
             {"species": "vmr_s"}
         )
-        vmr_e = _interp_dim(_interp_dim(east, fp_height, "level"), fp_lat, "lat").rename({"species": "vmr_e"})
-        vmr_w = _interp_dim(_interp_dim(west, fp_height, "level"), fp_lat, "lat").rename({"species": "vmr_w"})
+        tm1 += datetime.now() - t0
+        print(f"tm1: {tm1}")
 
+        # t0 = datetime.now()
+        # vmr_s2 = xr_interp(south[["species","z"]], "level", fp_height, coord="z").interp(lon=fp_lon)[["species"]].rename({"species": "vmr_s"})
+        # tm2 += (datetime.now() - t0)
+        # print(f"tm2: {tm2}")
+
+        t0 = datetime.now()
+        vmr_e = _interp_dim(_interp_dim(east, fp_height, "level"), fp_lat, "lat").rename({"species": "vmr_e"})
+        tm1 += datetime.now() - t0
+        print(f"tm1: {tm1}")
+
+        # t0 = datetime.now()
+        # vmr_e2 = xr_interp(east[["species","z"]], "level", fp_height, coord="z").interp(lat=fp_lat)[["species"]].rename({"species": "vmr_e"})
+        # tm2 += (datetime.now() - t0)
+        # print(f"tm2: {tm2}")
+
+        t0 = datetime.now()
+        vmr_w = _interp_dim(_interp_dim(west, fp_height, "level"), fp_lat, "lat").rename({"species": "vmr_w"})
+        tm1 += datetime.now() - t0
+        print(f"tm1: {tm1}")
+
+        # t0 = datetime.now()
+        # vmr_w2 = xr_interp(west[["species","z"]], "level", fp_height, coord="z").interp(lat=fp_lat)[["species"]].rename({"species": "vmr_w"})
+        # tm2 += (datetime.now() - t0)
+        # print(f"tm2: {tm2}")
+
+        t0 = datetime.now()
         bc_data = xr.merge([vmr_n, vmr_s, vmr_e, vmr_w])
+        tm1 += datetime.now() - t0
+        print(f"tm1: {tm1}")
+
+        # t0 = datetime.now()
+        # bc_data = xr.merge([vmr_n2, vmr_s2, vmr_e2, vmr_w2]).rename({"level":"height"})
+        # tm2 += (datetime.now() - t0)
+        # print(f"tm2: {tm2}")
 
         bc_data.attrs["title"] = f"ECMWF CAMS {species} volume mixing ratios at domain edges"
         bc_data.attrs["CAMS_resolution"] = gridsize
         bc_data.attrs["author"] = os.getenv("USER")
         bc_data.attrs["date_created"] = str(timestamp_now())
         bc_data.attrs["files_used"] = (
-            ", ".join([file.name for file in filepath_p]) if len(filepath_p) == 1 else filepath_p[0].name
+            ", ".join([file.name for file in filepath_p]) if isinstance(filepath_p, list) else filepath_p.name  # type: ignore
         )
         bc_data.attrs["CAMS_version"] = cams_version
         bc_data.attrs["CAMS_input_observations"] = input_observations
@@ -200,10 +249,10 @@ def parse_cams(
     # If filepath is a single file, the naming scheme of this file can be used
     # as one factor to try and determine the period.
     # If multiple files, this input isn't needed.
-    if len(filepath_p) == 1:
-        input_filepath = filepath_p[0]
-    else:
+    if isinstance(filepath_p, list):
         input_filepath = None
+    else:
+        input_filepath = filepath_p
 
     start_date, end_date, period_str = infer_date_range(
         bc_time, filepath=input_filepath, period=period, continuous=continuous
@@ -230,9 +279,41 @@ def parse_cams(
     return boundary_conditions_data
 
 
+def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
+    return np.interp(xi, x, data, **kwargs)
+
+
+def xr_interp(
+    data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str | None = None
+) -> xr.DataArray:
+    """Iterpolate along given dim.
+
+    If 'coord' is passed, then an alternate coordinate can be used, but the interpolation happens
+    along 'dim'.
+
+    This is useful if there is a "physical" coordinate, like altitude, which depends on lat and lon.
+    So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
+    level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
+    with interp_vals that are on the same scale as 'z'.
+    """
+    dim_coord = data[dim] if coord is None else data[coord]
+    result = xr.apply_ufunc(
+        interp1d_np,
+        data.compute(),
+        dim_coord,
+        interp_vals,
+        input_core_dims=[[dim], [dim], ["__newdim__"]],
+        output_core_dims=[["__newdim__"]],
+        exclude_dims=set((dim,)),
+        vectorize=True,
+    ).rename({"__newdim__": dim})
+    result[dim] = interp_vals
+    return result
+
+
 def _reorder_dataset(ds: xr.Dataset) -> xr.Dataset:
     """
-    Put sorted coordinates in ascending order. Necessary for CAMS N2O latitude coordinates 
+    Put sorted coordinates in ascending order. Necessary for CAMS N2O latitude coordinates
     (which is sorted in descending order, unlike any other coordinates, or CH4 data).
     Args
         ds: dataset to sort
