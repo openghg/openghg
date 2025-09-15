@@ -1,7 +1,7 @@
 import os
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import xarray as xr
 import numpy as np
@@ -256,7 +256,7 @@ def parse_cams(
 
     start_date, end_date, period_str = infer_date_range(
         bc_time, filepath=input_filepath, period=period, continuous=continuous
-    )
+    )  # type: ignore
 
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
@@ -280,7 +280,7 @@ def parse_cams(
 
 
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
-    return np.interp(xi, x, data, **kwargs)
+    return cast(np.ndarray, np.interp(xi, x, data, **kwargs))
 
 
 def xr_interp(
@@ -297,7 +297,7 @@ def xr_interp(
     with interp_vals that are on the same scale as 'z'.
     """
     dim_coord = data[dim] if coord is None else data[coord]
-    result = xr.apply_ufunc(
+    result: xr.DataArray = xr.apply_ufunc(
         interp1d_np,
         data.compute(),
         dim_coord,
