@@ -56,7 +56,7 @@ class Store(ABC):
         ...
 
     def __repr__(self) -> str:
-        return "Store()"
+        return f"{type(self).__name__}()"
 
     @abstractmethod
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
