@@ -27,7 +27,7 @@ maintainers = [
 dependencies = [
 "addict",
 "cf_xarray",
-"dask",
+"dask < 2025.9",
 "filelock",
 "flox",
 "h5netcdf",
