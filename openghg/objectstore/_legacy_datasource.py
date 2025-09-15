@@ -643,10 +643,11 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-            if version not in self._store._stores:
+            if not self._store.version_exists(version):
                 raise ObjectStoreError(f"{version} not found in object store.")
 
-            with xr.open_zarr(self._store._stores[version], consolidated=True) as ds:
+            self._store._vzds.checkout_version(version)
+            with xr.open_zarr(self._store._vzds.store, consolidated=True) as ds:
                 if ds.time.size == 1:
                     start_keys = timestamp_tzaware(start_date)
                     start_data = timestamp_tzaware(ds.time[0].values)
