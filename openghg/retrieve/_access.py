@@ -235,6 +235,8 @@ def get_obs_surface(
         data = update_scale(data, species, calibration_scale)
 
     metadata = retrieved_data.metadata
+    if "scale" not in data.attrs:
+        data.attrs["scale"] = metadata.get("calibration_scale","unknown")
     metadata["calibration_scale"] = data.attrs["scale"]
     metadata.update(data.attrs)
 
