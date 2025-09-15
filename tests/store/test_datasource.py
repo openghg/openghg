@@ -532,7 +532,10 @@ def test_bytes_stored(data, bucket, datasource):
     d.save()
 
     bytes_stored = d.bytes_stored()
-    assert (bytes_stored < 9609) or (bytes_stored < 9619)
+
+    # check that number of bytes is not larger than some value that was valid when the test was created
+    # this value 9619 includes a bit of tolerance. We'll accept anything less than that.
+    assert bytes_stored < 9619
 
     d = Datasource(uuid="xyz456", bucket=bucket)
 
