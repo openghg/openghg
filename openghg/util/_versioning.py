@@ -90,12 +90,12 @@ class SimpleVersioning(Generic[T]):
         """
         self.factory = factory
 
-        if versions is None:
-            self._versions = {}
-            self._current_version: str | None = None
-        else:
+        if versions:
             self._versions = {v: factory(v) for v in versions}
-            self._current_version = self.versions[-1]  # version added last
+            self._current_version: str | None = self.versions[-1]  # version added last
+        else:
+            self._versions = {}
+            self._current_version = None
 
     @property
     def versions(self) -> list[str]:
