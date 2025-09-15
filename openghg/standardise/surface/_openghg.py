@@ -134,7 +134,7 @@ def parse_openghg(
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
-    attributes_needed = attributes_default_keys()
+    attributes_needed = attributes_default_keys(data_type="surface")
     attributes_needed = [param for param in attributes_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
