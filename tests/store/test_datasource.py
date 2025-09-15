@@ -529,7 +529,6 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
 def test_bytes_stored(data, bucket, datasource):
     d = datasource
     d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
-    print(data["ch4"]["data"].nbytes)
     d.save()
 
     bytes_stored = d.bytes_stored()
