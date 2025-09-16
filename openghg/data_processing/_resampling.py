@@ -337,10 +337,11 @@ def apply_funcs(
             all_func_vars = [x for y in func_vars for x in y]
             remaining_vars = [str(dv) for dv in ds.data_vars if dv not in all_func_vars]
 
-            if remainder == "pass":
-                results.append(ds[remaining_vars])
-            else:
-                results.append(ds[remaining_vars].map(remainder))
+            if remaining_vars:
+                if remainder == "pass":
+                    results.append(ds[remaining_vars])
+                else:
+                    results.append(remainder(ds[remaining_vars]))
 
         return xr.merge(results)
 
