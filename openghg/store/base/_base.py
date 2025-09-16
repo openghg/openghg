@@ -163,7 +163,7 @@ class BaseStore:
         ]
 
         # Handle chunking
-        if chunks == {}:
+        if chunks != {}:
             chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
 
         self._validate_datasources(data, fn_input_parameters, filepath=None)
