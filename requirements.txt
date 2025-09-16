@@ -13,7 +13,7 @@ numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
-numpy
+numpy >= 2.0
 openghg_defs
 openpyxl
 pandas >= 2.0
