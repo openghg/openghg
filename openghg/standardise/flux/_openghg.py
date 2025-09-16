@@ -7,7 +7,7 @@ from openghg.standardise.meta import assign_flux_attributes
 
 
 def parse_openghg(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     source: str,
     domain: str,

@@ -14,6 +14,21 @@ from openghg.types import pathType
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+__all__ = [
+    "find_matching_site",
+    "multiple_inlets",
+    "pairwise",
+    "site_code_finder",
+    "normalise_to_filepath_list",
+    "sort_by_filenames",
+    "unanimous",
+    "verify_site",
+    "verify_site_with_satellite",
+    "check_unique",
+    "find_repeats",
+    "collate_strings",
+]
+
 
 def unanimous(seq: dict) -> bool:
     """Checks that all values in an iterable object
@@ -206,17 +221,14 @@ def multiple_inlets(site: str, site_filepath: pathType | None = None) -> bool:
     return len(heights) > 1
 
 
-def sort_by_filenames(filepath: str | Path | list[str | Path]) -> list[str | Path]:
+def normalise_to_filepath_list(filepath: str | Path | list[str] | list[Path]) -> list[Path]:
     """
-    Sorting time on filename basis
-
+    Ensure filepath is a list of Path objects.
     Args:
-        filepath: Path to the file
-
+        filepath: full filename or filenames
     Returns:
-        list[Path]: List of sorted paths
+        list[Path]: filepath as a list of Path objects
     """
-
     # This code is to stop mypy complaints regarding file types
     if isinstance(filepath, str):
         multi_filepath = [Path(filepath)]
@@ -227,6 +239,21 @@ def sort_by_filenames(filepath: str | Path | list[str | Path]) -> list[str | Pat
     else:
         raise TypeError(f"Unsupported type for filepath: {type(filepath)}")
 
+    return multi_filepath
+
+
+def sort_by_filenames(filepath: str | Path | list[str] | list[Path]) -> list[Path]:
+    """
+    Sorting time on filename basis
+
+    Args:
+        filepath: Path to the file
+
+    Returns:
+        list[Path]: List of sorted paths
+    """
+
+    multi_filepath = normalise_to_filepath_list(filepath)
     return sorted(multi_filepath)
 
 

@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Updated
 
+- Refactored individual `read_file` methods on data_type classes in `openghg.store` to use a central `read_file` method on `BaseStore` parent class (`openghg.store.base`). This centralises the `read_file` functionality and ensures the steps for each subclass are consistent. Each data_type class now requires a `format_inputs` method to apply the formatting steps to the input kwargs when standardising. [PR #1415](https://github.com/openghg/openghg/pull/1415)
+ - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+
+## Fixed
+
+- Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
+>>>>>>> devel
 
 ## [0.16.0] - 2025-08-29
 

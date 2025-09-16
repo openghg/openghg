@@ -58,7 +58,7 @@ def test_sync_surface_metadata():
         "station_height_masl": 3209.5,
     }
 
-    updated_metadata, updated_attrs = sync_surface_metadata(metadata=metadata, attributes=attrs)
+    updated_metadata, updated_attrs = sync_surface_metadata(metadata=metadata, attributes=attrs, data_type="surface")
 
     new_meta = {
         "site": "sum",
@@ -126,7 +126,7 @@ def test_parse_openghg_output_with_site_info_attr_mismatch():
     }
 
     with pytest.raises(AttrMismatchError):
-        sync_surface_metadata(metadata, attrs)
+        sync_surface_metadata(metadata, attrs, data_type="surface")
 
 
 def test_metadata_latlon_tolerance():
@@ -140,7 +140,7 @@ def test_metadata_latlon_tolerance():
         "station_latitude": 72.5962,
     }
 
-    sync_surface_metadata(metadata, attrs)
+    sync_surface_metadata(metadata, attrs, data_type="surface")
 
     attrs = {
         "station_longitude": -38.422,
@@ -148,7 +148,7 @@ def test_metadata_latlon_tolerance():
     }
 
     with pytest.raises(AttrMismatchError):
-        sync_surface_metadata(metadata, attrs)
+        sync_surface_metadata(metadata, attrs, data_type="surface")
 
     attrs = {
         "station_longitude": 38.422,
@@ -156,14 +156,14 @@ def test_metadata_latlon_tolerance():
     }
 
     with pytest.raises(AttrMismatchError):
-        sync_surface_metadata(metadata, attrs)
+        sync_surface_metadata(metadata, attrs, data_type="surface")
 
     attrs = {
         "station_longitude": -38.423,
         "station_latitude": 72.597,
     }
 
-    sync_surface_metadata(metadata, attrs)
+    sync_surface_metadata(metadata, attrs, data_type="surface")
 
 
 def test_ensure_mismatch_raises():
@@ -176,7 +176,7 @@ def test_ensure_mismatch_raises():
     attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
     with pytest.raises(AttrMismatchError):
-        sync_surface_metadata(metadata, attrs)
+        sync_surface_metadata(metadata, attrs, data_type="surface")
 
 
 def test_ensure_mismatch_replaced():
@@ -192,6 +192,6 @@ def test_ensure_mismatch_replaced():
 
     attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
-    meta_new, attr_new = sync_surface_metadata(metadata, attrs, update_mismatch="attributes")
+    meta_new, attr_new = sync_surface_metadata(metadata, attrs, update_mismatch="attributes", data_type="surface")
 
     assert meta_new["measurement_type"] == "swallow-carrying-a-flask"
