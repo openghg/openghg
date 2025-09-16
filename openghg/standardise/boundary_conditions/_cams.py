@@ -147,11 +147,10 @@ def get_resample_args(xr_time: xr.DataArray,
         "yearly": pd.Timedelta(365, "D"),
     }
     
-    if period:
-        if org_freq > thres_dict.get(period,period):
-            raise ValueError("Original time resolution is coarser than targeted one.")
-        
-        alias_period = {"daily": "D", "monthly": "MS", "yearly": "YS"}
+    if org_freq > thres_dict.get(period,period):
+        raise ValueError("Original time resolution is coarser than targeted one.")
+    
+    alias_period = {"daily": "D", "monthly": "MS", "yearly": "YS"}
 
     closed = "right" if species == "n2o" else "left"
     return {"time":alias_period.get(period, period), "closed":closed}
@@ -347,15 +346,27 @@ def parse_cams(
     xr_open_fn, filepath = open_time_nc_fn(filepath)
 
     with xr_open_fn(filepath).chunk(chunks) as ds:
+        # Be sure that data are sorted in ascending order (not the case for n2o latitude)
         ds = ds.sortby(list(ds.dims))
-        resample_args = get_resample_args(ds.time, species, period)
-        ds = ds.resample(**resample_args).mean()
+
+        # Resample data
+        if period:
+            resample_args = get_resample_args(ds.time, species, period)
+            ds = ds.resample(**resample_args).mean()
+
+        # Calc pressure if species is "n2o"
         if species.lower() == "n2o":
             ds = calc_altitude_from_pressure(ds)
+
+        # Rename variables
         ds = ds.rename({"latitude": "lat", "longitude": "lon", species.upper(): "species"})
+
+        # Interpolate vmrn/s/e/w variables
         t0 = datetime.now()
         print(t0)
         bc_data = cams_to_domain(ds,"EUROPE",get_footprint_kwargs=get_footprint_kwargs)
+
+        # Create time dimension if not present
         if "time" in bc_data.coords:
             bc_data = update_zero_dim(bc_data, dim="time")
 
@@ -384,9 +395,7 @@ def parse_cams(
                              domain = domain,
                              bc_input = bc_input,
                              )
-    print(datetime.now()-t0)
 
-    print(species, bc_input, domain)
     key = "_".join((species, bc_input, domain))
 
     boundary_conditions_data: dict[str, dict] = {key: {}}
