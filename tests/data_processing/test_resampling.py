@@ -40,12 +40,14 @@ def mhd_ds():
     ch4_repeatability = small_randoms(n)
     integration_flag = binary_randoms(n)
     status_flag = binary_randoms(n)
+    str_status_flag = np.asarray(["NO"[int(i)] for i in status_flag], dtype="<U1")
+
 
     ds = xr.Dataset(
         data_vars={
             "ch4": (["time"], ch4),
             "ch4_repeatability": (["time"], ch4_repeatability),
-            "status_flag": (["time"], status_flag),
+            "status_flag": (["time"], str_status_flag),
             "integration_flag": (["time"], integration_flag),
         },
         coords={"time": (["time"], times)},
