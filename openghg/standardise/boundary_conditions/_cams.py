@@ -362,8 +362,6 @@ def parse_cams(
         ds = ds.rename({"latitude": "lat", "longitude": "lon", species.upper(): "species"})
 
         # Interpolate vmrn/s/e/w variables
-        t0 = datetime.now()
-        print(t0)
         bc_data = cams_to_domain(ds,"EUROPE",get_footprint_kwargs=get_footprint_kwargs)
 
         # Create time dimension if not present
@@ -383,11 +381,9 @@ def parse_cams(
                     )
 
     bc_data.attrs.update(add_attrs) 
-    print(datetime.now()-t0)
 
-    # Test
-    bc_data.to_netcdf("/user/home/bq24992/workingDir/PARIS/CAMS/tmp.nc")
-    print(datetime.now()-t0)
+    # Rechunk data
+    bc_data = bc_data.chunk({"time":366})
 
     # create metadata
     metadata = make_metadata(bc_data, filepath, period, continuous,
