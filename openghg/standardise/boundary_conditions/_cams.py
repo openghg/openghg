@@ -354,9 +354,6 @@ def parse_cams(
 
     bc_data.attrs.update(add_attrs)
 
-    # Rechunk data
-    bc_data = bc_data.chunk({"time": 366})
-
     # create metadata
     metadata = make_metadata(
         bc_data,

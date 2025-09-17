@@ -1,5 +1,6 @@
 import pytest
 from helpers import (
+    get_bc_datapath,
     get_flux_datapath,
     get_footprint_datapath,
     get_surface_datapath,
@@ -11,6 +12,7 @@ from helpers import (
 )
 from openghg.retrieve import get_obs_surface, search, search_footprints, get_footprint, get_obs_column
 from openghg.standardise import (
+    standardise_bc,
     standardise_column,
     standardise_flux,
     standardise_footprint,
@@ -961,3 +963,30 @@ def test_icos_corso_l2_deltao2():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "2" in results[0]["data_level"]
     assert "surface-flask" in results[0]["platform"]
+
+
+def test_standardise_cams_n2o_bc():
+    "Test CAMS parser for boundary_conditions"
+    bc_input = "cams_test"
+    cams_version = "v22r1"
+    domain = "europe"
+    species = "n2o"
+    period = "daily"
+    filename = "cams73_v22r1_n2o_test_202201.nc"
+    data_path = get_bc_datapath(filename=filename)
+
+    results = standardise_bc(
+        filepath=data_path,
+        species=species,
+        bc_input=bc_input,
+        period=period,
+        cams_version=cams_version,
+        domain=domain,
+        source_format="cams",
+        store="user",
+    )
+
+    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input, "file": filename}
+
+    for k, v in expected_metadata.items():
+        assert results[0][k].lower() == v.lower()
