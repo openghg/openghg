@@ -1,9 +1,7 @@
 import os
 import logging
 from pathlib import Path
-from typing import Any
-from datetime import datetime
-from numba import float32, guvectorize
+from typing import Any, Callable, Literal
 
 import xarray as xr
 import numpy as np
@@ -16,16 +14,19 @@ from openghg.retrieve import get_footprint
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-def interp1d_np(data, x, xi, **kwargs):
+
+def interp1d_np(data: xr.Dataset, x: xr.DataArray, xi: np.ndarray, **kwargs):
     return np.interp(xi, x, data, **kwargs)
 
 
-def xr_interp(data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str | None = None):
+def xr_interp(
+    data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str | None = None
+) -> xr.DataArray:
     """Iterpolate along given dim.
-    
+
     If 'coord' is passed, then an alternate coordinate can be used, but the interpolation happens
     along 'dim'.
-    
+
     This is useful if there is a "physical" coordinate, like altitude, which depends on lat and lon.
     So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
     level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
@@ -33,11 +34,11 @@ def xr_interp(data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str 
     """
     dim_coord = data[dim] if coord is None else data[coord]
     result = xr.apply_ufunc(
-        interp1d_np, 
+        interp1d_np,
         data,
         dim_coord,
-        interp_vals, 
-        input_core_dims=[[dim], [dim], ["__newdim__"]], 
+        interp_vals,
+        input_core_dims=[[dim], [dim], ["__newdim__"]],
         output_core_dims=[["__newdim__"]],
         exclude_dims=set((dim,)),
         vectorize=True,
@@ -48,51 +49,18 @@ def xr_interp(data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str 
     return result
 
 
-@guvectorize("(float32[:], float32[:], float32[:], float32[:])", "(n), (n), (m) -> (m)")
-def interp1d_np_gufunc(data, x, xi, out):
-    out[:] = np.interp(xi, x, data)
-
-
-def xr_interp2(data: xr.DataArray, dim: str, interp_vals: np.ndarray, coord: str | None = None):
-    """Iterpolate along given dim.
-
-    If 'coord' is passed, then an alternate coordinate can be used, but the interpolation happens
-    along 'dim'.
-
-    This is useful if there is a "physical" coordinate, like altitude, which depends on lat and lon.
-    So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
-    level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
-    with interp_vals that are on the same scale as 'z'.
-    """
-    dim_coord = data[dim] if coord is None else data[coord]
-    result = xr.apply_ufunc(
-        interp1d_np_gufunc,
-        data,
-        dim_coord,
-        interp_vals,
-        input_core_dims=[[dim], [dim], ["__newdim__"]],
-        output_core_dims=[["__newdim__"]],
-        exclude_dims=set((dim,)),
-        dask="parallelized",
-        output_dtypes=[data.dtype],
-    ).rename({"__newdim__": dim})
-    result[dim] = interp_vals
-    return result
-
-
-def cams_to_domain(ds: xr.Dataset, domain: str, 
-                   xr_interp_fn=xr_interp, 
-                   get_footprint_kwargs: dict | None = None
-                   ) -> xr.Dataset:
+def cams_to_domain(
+    ds: xr.Dataset, domain: str, xr_interp_fn: Callable = xr_interp, get_footprint_kwargs: dict | None = None
+) -> xr.Dataset:
     """
     Interpolate CAMS data on another grid (should be one commonly used in openghg)
     Args:
-        ds: datset to 
+        ds: datset to
         xr_interp_fn: interpolation function to use
         get_footprint_kwargs: kwargs passed to get_footprint from openghg_retrieve to find the footprint data from which the grid will be taken.
             If None, will use function find_domain from openghg.util to get lat/lon and set the height as np.linspace(500.0, 19500.0, 20, endpoint=True)
     Returns:
-        interpolated Dataset with 4 variables: vmr_n/e/s/w 
+        interpolated Dataset with 4 variables: vmr_n/e/s/w
     """
 
     if get_footprint_kwargs:
@@ -110,24 +78,25 @@ def cams_to_domain(ds: xr.Dataset, domain: str,
     lon_w = ds.lon.where(ds.lon < lon.min()).max()
 
     z = 0.5 * (ds.altitude.isel(hlevel=slice(0, -1)).values + ds.altitude.isel(hlevel=slice(1, None)).values)
-    ds = ds.assign_coords({"z": (tuple([dim if dim != "hlevel" else "level" for dim in ds.altitude.dims]), z)})
+    ds = ds.assign_coords(
+        {"z": (tuple([dim if dim != "hlevel" else "level" for dim in ds.altitude.dims]), z)}
+    )
 
     north = ds[["species", "z"]].sel(lat=lat_n, lon=slice(lon_w, lon_e)).drop_vars("lat")
     south = ds[["species", "z"]].sel(lat=lat_s, lon=slice(lon_w, lon_e)).drop_vars("lat")
     east = ds[["species", "z"]].sel(lon=lon_e, lat=slice(lat_s, lat_n)).drop_vars("lon")
     west = ds[["species", "z"]].sel(lon=lon_w, lat=slice(lat_s, lat_n)).drop_vars("lon")
 
-    data_vars = {"vmr_n": xr_interp_fn(north.species, "level", height, "z").interp(lon=lon).astype("float32"),
-                 "vmr_e": xr_interp_fn(east.species, "level", height, "z").interp(lat=lat).astype("float32"),
-                 "vmr_s": xr_interp_fn(south.species, "level", height, "z").interp(lon=lon).astype("float32"),
-                 "vmr_w": xr_interp_fn(west.species, "level", height, "z").interp(lat=lat).astype("float32"),
-                 }
+    data_vars = {
+        "vmr_n": xr_interp_fn(north.species, "level", height, "z").interp(lon=lon).astype("float32"),
+        "vmr_e": xr_interp_fn(east.species, "level", height, "z").interp(lat=lat).astype("float32"),
+        "vmr_s": xr_interp_fn(south.species, "level", height, "z").interp(lon=lon).astype("float32"),
+        "vmr_w": xr_interp_fn(west.species, "level", height, "z").interp(lat=lat).astype("float32"),
+    }
     return xr.Dataset(data_vars)
 
-def get_resample_args(xr_time: xr.DataArray,
-                       species: str,
-                       period: str | None = None
-                       )->dict:
+
+def get_resample_args(xr_time: xr.DataArray, species: str, period: str) -> dict:
     """
     Infer the arguments that will be used for the time resampling of the dataset
     Args:
@@ -138,25 +107,24 @@ def get_resample_args(xr_time: xr.DataArray,
         dict with 2 keys : "time" and "closed; whose values are the one passed to xr.Dataset().resample
     """
     org_freq_str = xr.infer_freq(xr_time)
-    org_freq = pd.to_timedelta(org_freq_str if org_freq_str[0].isdecimal() 
-                               else '1' + org_freq_str)
+    org_freq = pd.to_timedelta(org_freq_str if org_freq_str[0].isdecimal() else "1" + org_freq_str)
     thres_dict = {
         "3h": pd.Timedelta(3, "h"),
         "daily": pd.Timedelta(1, "D"),
         "monthly": pd.Timedelta(31, "D"),
         "yearly": pd.Timedelta(365, "D"),
     }
-    
-    if org_freq > thres_dict.get(period,period):
+
+    if org_freq > thres_dict.get(period, period):
         raise ValueError("Original time resolution is coarser than targeted one.")
-    
+
     alias_period = {"daily": "D", "monthly": "MS", "yearly": "YS"}
 
-    closed = "right" if species == "n2o" else "left"
-    return {"time":alias_period.get(period, period), "closed":closed}
+    closed: Literal["left", "right"] = "right" if species == "n2o" else "left"
+    return {"time": alias_period.get(period, period), "closed": closed}
 
-def calc_altitude_from_pressure(ds: xr.Dataset
-                                )->xr.Dataset:
+
+def calc_altitude_from_pressure(ds: xr.Dataset) -> xr.Dataset:
     """
     Calculate altitude of dataset levels. Specific to CAMS N2O files.
     Args:
@@ -170,8 +138,8 @@ def calc_altitude_from_pressure(ds: xr.Dataset
     del ds["pressure"]
     return ds
 
-def get_gridsize(ds: xr.Dataset
-                 )->str:
+
+def get_gridsize(ds: xr.Dataset) -> str:
     """
     Calculate mean grid cell size of dataset
     Args:
@@ -185,11 +153,11 @@ def get_gridsize(ds: xr.Dataset
 
 
 def _check_and_set_params(
-    filepath: list[Path],
+    filepath: str | Path | list[str] | list[Path],
     cams_version: str | None = None,
     species: str | None = None,
     input_observations: str | None = None,
-) -> tuple[str, str, str]:
+) -> tuple[list[Path], str, str, str]:
     """
     Extract fron the file names informations on species, cams version, input observations used in the files.
     Check that they correspond to parameters cams_version, species and input_observations (if given) and format them to be saved as attributes and metadata.
@@ -201,10 +169,17 @@ def _check_and_set_params(
     Returns:
         tuple containing 1. a string aggregating the cams versions used, 2. the species and 3. a string aggregating the input observations used.
     """
-    cams_version_check, species_check, input_observations_check = [], [], []
+    new_filepath, cams_version_check, species_check, input_observations_check = [], [], [], []
+
+    if not isinstance(filepath, list):
+        filepath = [
+            filepath,
+        ]
 
     for file in filepath:
-        file_keywords = file.name.split("_")
+        new_filepath.append(Path(file))
+
+        file_keywords = new_filepath[-1].name.split("_")
         if file_keywords[0] != "cams73" or file_keywords[3] != "conc" and file_keywords[-1][-3:] != ".nc":
             raise ValueError(
                 "Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don't alter the names from the unzipped CAMS files."
@@ -252,14 +227,10 @@ def _check_and_set_params(
     else:
         input_observations = input_observations_check[0]
 
-    return cams_version, species, input_observations
+    return new_filepath, cams_version, species, input_observations
 
-def make_metadata(ds: xr.Dataset, 
-                  filepath: list[Path], 
-                  period: str,
-                  continuous: bool,
-                  **kwargs
-                  )->dict:
+
+def make_metadata(ds: xr.Dataset, filepath: list[Path], period: str, continuous: bool, **kwargs: Any) -> dict:
     """
     Create metadata dictionnary for standardisation.
     Args:
@@ -302,10 +273,11 @@ def make_metadata(ds: xr.Dataset,
 
     return metadata
 
+
 def parse_cams(
     bc_input: str,
     domain: str,
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str | None = None,
     period: str | None = None,
     cams_version: str | None = None,
@@ -338,8 +310,7 @@ def parse_cams(
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
 
-    
-    cams_version, species, input_observations = _check_and_set_params(
+    filepath, cams_version, species, input_observations = _check_and_set_params(
         filepath, cams_version, species, input_observations
     )
 
@@ -362,40 +333,45 @@ def parse_cams(
         ds = ds.rename({"latitude": "lat", "longitude": "lon", species.upper(): "species"})
 
         # Interpolate vmrn/s/e/w variables
-        bc_data = cams_to_domain(ds,"EUROPE",get_footprint_kwargs=get_footprint_kwargs)
+        bc_data = cams_to_domain(ds, "EUROPE", get_footprint_kwargs=get_footprint_kwargs)
 
         # Create time dimension if not present
         if "time" in bc_data.coords:
             bc_data = update_zero_dim(bc_data, dim="time")
 
     # Add new attributes
-    add_attrs = dict(title = f"ECMWF CAMS {species} volume mixing ratios at domain edges",
-                    CAMS_resolution = get_gridsize(ds),
-                    author = os.getenv("USER"),
-                    date_created = str(timestamp_now()),
-                    files_used = (
-                        ", ".join([file.name for file in filepath]) if isinstance(filepath, list) else filepath.name  # type: ignore
-                        ),
-                    CAMS_version = cams_version,
-                    CAMS_input_observations = input_observations
-                    )
+    add_attrs = dict(
+        title=f"ECMWF CAMS {species} volume mixing ratios at domain edges",
+        CAMS_resolution=get_gridsize(ds),
+        author=os.getenv("USER"),
+        date_created=str(timestamp_now()),
+        files_used=(
+            ", ".join([file.name for file in filepath]) if isinstance(filepath, list) else filepath.name  # type: ignore
+        ),
+        CAMS_version=cams_version,
+        CAMS_input_observations=input_observations,
+    )
 
-    bc_data.attrs.update(add_attrs) 
+    bc_data.attrs.update(add_attrs)
 
     # Rechunk data
-    bc_data = bc_data.chunk({"time":366})
+    bc_data = bc_data.chunk({"time": 366})
 
     # create metadata
-    metadata = make_metadata(bc_data, filepath, period, continuous,
-                             species = species, 
-                             domain = domain,
-                             bc_input = bc_input,
-                             )
+    metadata = make_metadata(
+        bc_data,
+        filepath,
+        period,
+        continuous,
+        species=species,
+        domain=domain,
+        bc_input=bc_input,
+    )
 
     key = "_".join((species, bc_input, domain))
 
     boundary_conditions_data: dict[str, dict] = {key: {}}
-    boundary_conditions_data[key]["data"] = bc_data.rename({"level":"height"})
+    boundary_conditions_data[key]["data"] = bc_data.rename({"level": "height"})
     boundary_conditions_data[key]["metadata"] = metadata
 
     return boundary_conditions_data
