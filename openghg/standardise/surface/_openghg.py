@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import xarray as xr
 from typing import cast
 
 from openghg.types import pathType
@@ -9,8 +10,27 @@ logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+def open_filepath_openghg(
+    filepath: str | Path | list[str] | list[Path] | list[str | Path], domain: str, chunks: dict | None = None
+) -> xr.Dataset:
+    """Function to open files compatible for openghg format
+    Args:
+        filepath: netCDF file
+        domain: domain to realign the file along, e.g. 'europe'
+        chunks: chunking schema for the file"""
+    if isinstance(filepath, list):
+        filepath = [Path(f) for f in filepath]
+    elif isinstance(filepath, str):
+        filepath = Path(filepath)
+
+    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+    data = xr_open_fn(filepath).chunk(chunks)
+    return data
+
+
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
+    dataset: xr.Dataset | None = None,
+    filepath: str | Path | list[str | Path] | None = None,
     site: str | None = None,
     species: str | None = None,
     network: str | None = None,
@@ -22,6 +42,7 @@ def parse_openghg(
     data_owner_email: str | None = None,
     update_mismatch: str = "never",
     site_filepath: pathType | None = None,
+    domain: str | None = None,
     **kwargs: str,
 ) -> dict:
     """
@@ -69,9 +90,10 @@ def parse_openghg(
         dataset_formatter,
     )
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
-
-    data = xr_open_fn(filepath)
+    if filepath is not None and domain is not None:
+        data = open_filepath_openghg(filepath, domain=domain)
+    else:
+        data = data
 
     # Extract current attributes from input data
     attributes = data.attrs
