@@ -83,7 +83,7 @@ def make_species_filter(species: str | list[str] | None) -> str:
     formatted_tuple = "(" + ", ".join(f'"{s}"' for s in species) + ")"
     species_filt = f"""
     # filter species
-    FILTER(LCASE(?varName) in {formatted_tuple})
+    FILTER(LCASE(?species) in {formatted_tuple})
     """
     return species_filt
 
@@ -112,12 +112,14 @@ def data_query(
     species: str | list[str] | None = None,
     inlet: str | list[str] | None = None,
     spec_label: str | None = None,
+    nrt: bool = False,
 ) -> str:
     site_filt = make_site_filter(site)
     data_level_filt = make_data_level_filter(data_level)
     species_filt = make_species_filter(species)
     inlet_filt = make_inlet_filter(inlet)
     spec_filter = make_spec_filter(spec_label)
+    nrt_filter = 'FILTER(!CONTAINS(UCASE(?specLabel), "NRT"))' if not nrt else ""
 
     query = sparql_header()
     query += "SELECT (?stationId as ?site) (?samplingHeight as ?inlet) ?species ?data_level ?file_name (?specLabel as ?spec_label) (?dobj as ?dobj_uri)\n"
@@ -141,6 +143,7 @@ def data_query(
         # spec label
         ?spec rdfs:label ?specLabel .
         {spec_filter}
+        {nrt_filter}
 
         # get sampling height
         ?dobj cpmeta:wasAcquiredBy/cpmeta:hasSamplingHeight ?samplingHeight .
@@ -156,16 +159,6 @@ def data_query(
         ?ds cpmeta:hasColumn ?col .
         FILTER EXISTS {{[] cpmeta:isQualityFlagFor ?col}}
         ?col cpmeta:hasColumnTitle ?varName.
-        {species_filt}
-
-        # filter to link dobj and varName
-        # netCDF data doesn't seem to have the ?colNames variable, so we
-        # need to detect it by checking if ?varName = "value"
-        OPTIONAL {{ ?dobj cpmeta:hasActualColumnNames ?colNames . }}
-        FILTER(
-            COALESCE(CONTAINS(?colNames, concat('"', ?varName, '"')), FALSE)
-            || (!BOUND(?colNames) && (?varName = "value"))
-        )
 
         # get file name
         ?dobj cpmeta:hasName ?file_name .
@@ -178,6 +171,30 @@ def data_query(
 	    BIND(
 		    IF(?varName = "value", ?first_part, ?varName) as ?species
 	    )
+
+        {species_filt}
+
+        # filter to link dobj and varName
+        # netCDF data doesn't seem to have the ?colNames variable, so we
+        # need to detect it by checking if ?varName = "value"
+        # additonal sources are found by looking at file names and the spec
+        # label; this can produce a lot of NRT results, so it is best
+        # to use `nrt=False` (the default)
+        OPTIONAL {{ ?dobj cpmeta:hasActualColumnNames ?colNames . }}
+        OPTIONAL {{ ?dobj cpmeta:hasVariableName ?actVar . }}
+        FILTER(
+            COALESCE(CONTAINS(?colNames, concat('"', ?varName, '"')), FALSE)
+            || COALESCE(?varName = ?actVar, FALSE)
+            # else, check that the variables ?colNames and ?actVar were not found
+            # and then either check that ?varName is "value" or that the species
+            # is found in the file name or spec label
+            || ((!BOUND(?colNames) && !BOUND(?actVar))
+                 && (?varName = "value"
+                     || CONTAINS(LCASE(STR(?file_name)), ?species)
+                     || CONTAINS(LCASE(STR(?specLabel)), ?species)))
+        )
+
+
     }}
     """
     return query
