@@ -30,6 +30,7 @@ To quote a string literal in a SPARQL query, you must use double-quotes.
 """
 
 from collections import defaultdict
+from functools import lru_cache
 import re
 
 from icoscp_core.icos import meta
@@ -245,8 +246,8 @@ def attrs_query(dobj_uri: str) -> str:
             ?o rdfs:label ?o_label .
             OPTIONAL {{?col cpmeta:hasValueType/cpmeta:hasUnit ?unit}}
             # filter to link dobj and col_label
-            ?dobj cpmeta:hasActualColumnNames ?colNames .
-            FILTER(CONTAINS(?colNames, CONCAT('"', ?col_label, '"')))
+            OPTIONAL {{ ?dobj cpmeta:hasActualColumnNames ?colNames . }}
+            FILTER(CONTAINS(?colNames, CONCAT('"', ?col_label, '"')) || !BOUND(?colNames))
     }}
     """
     return query
@@ -301,8 +302,12 @@ def make_query_df(query):
     return pd.DataFrame([parse_binding(b) for b in res.bindings])
 
 
+@lru_cache
 def icos_format_info() -> pd.DataFrame:
-    return make_query_df(format_query()).drop_duplicates(subset="spec_label")
+    format_df = make_query_df(format_query()).drop_duplicates(subset="spec_label")
+    format_df = format_df.set_index("spec_label")
+    format_df["fmt"] = format_df.format.str.split("/").str[-1]
+    return format_df
 
 
 def dobj_info(
@@ -317,6 +322,6 @@ def dobj_info(
     dobj_df = make_query_df(query)
 
     if format_info:
-        return dobj_df.merge(icos_format_info(), on="spec_label", how="left")
+        return dobj_df.merge(icos_format_info().reset_index(), on="spec_label", how="left")
 
     return dobj_df

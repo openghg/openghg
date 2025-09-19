@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from ._queries import attrs_query
+from ._queries import attrs_query, icos_format_info
 
 
 def camel_to_snake(s: str) -> str:
@@ -29,18 +29,22 @@ def get_data_attrs(dobj_uri, species) -> dict[str, dict]:
         data_var = b["col_label"].value
         key = b["p_label"].value.replace(" ", "_")
 
-        # this query gets flag columns from other species, so skip these
+        # the query might get flag columns from other species, so skip these
         if key.startswith("is_a_quality_flag") and species not in b["o_label"].value:
             continue
         elif key == "value_format":
+            key = "dtype"
             val = b["o"].uri.split("/")[-1]
         else:
             val = b["o_label"].value
 
+        if key == "value_type":
+            key = "long_name"
+
         attrs[data_var][key] = val
 
         if "unit" in b:
-            attrs[data_var]["unit"] = b["unit"].value
+            attrs[data_var]["units"] = b["unit"].value
 
     return attrs
 
@@ -188,7 +192,7 @@ def dtypes_dict(columns: list[str], attrs: dict) -> dict[str, np.dtype]:
     """
     dtypes = {}
     for col in columns:
-        if col in attrs and (vtype := attrs[col].get("value_format")):
+        if col in attrs and (vtype := attrs[col].get("dtype")):
             if (dtype := icos_format_to_dtype(vtype)) is not None:
                 dtypes[col] = dtype
     return dtypes
@@ -211,7 +215,9 @@ def parse_icos_atc_time_series_text(
     # skip first column becaues it is just the site name, and skip DecimalDate
     usecols = [col for col in header["columns"][1:] if col != "DecimalDate"]
 
-    df = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
+    na_values = ["-999.99", "-9.99"]  # these are used in some ICOS files
+
+    df = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, na_values=na_values)
 
     # make time index
     date_cols, times = parse_date_columns(df)
@@ -249,11 +255,11 @@ def parse_icos_atc_flask_time_series_text(
     header = get_icos_text_header(icos_text)
     skiprows = int(header["header_lines"]) - 1
 
-    # skip first column becaues it is just the site name
-    usecols = header["columns"][1:]
+    usecols = header["columns"][1:] # skip first column becaues it is just the site name
     parse_dates = ["SamplingStart", "SamplingEnd"]
+    na_values = ["-999.99", "-9.99"]  # these are used in some ICOS files
     df = pd.read_csv(
-        io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, parse_dates=parse_dates
+        io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, parse_dates=parse_dates, na_values=na_values
     )
 
     # convert to timezone-naive
@@ -275,3 +281,44 @@ def parse_icos_atc_flask_time_series_text(
         df = df.astype(dtypes)
 
     return df
+
+
+# FULL PIPELINE
+def make_icos_dataset(icos_df: pd.DataFrame, attrs: dict | None = None, global_attrs: dict | None = None) -> xr.Dataset:
+    attrs = attrs or {}
+    attrs = {camel_to_snake(k): v for k, v in attrs.items()}
+    icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
+    ds = icos_df.to_xarray()
+    for dv in ds.data_vars:
+        ds[dv].attrs = attrs.get(dv, {})
+    if global_attrs is not None:
+        ds.attrs = global_attrs
+    return ds
+
+
+def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
+    # find format
+    fmt = icos_format_info().loc[data_info["spec_label"]].fmt
+    dobj_uri = data_info["dobj_uri"]
+    species = data_info["species"]
+
+    if fmt in ("asciiAtcFlaskTimeSer", "asciiAtcProductTimeSer"):
+        icos_text = get_icos_text_file(dobj_uri)
+        header = get_icos_text_header(icos_text)
+        attrs = get_full_attrs(dobj_uri, species, header)
+
+        if "Flask" in fmt:
+            df = parse_icos_atc_flask_time_series_text(icos_text, species, attrs)
+        else:
+            df = parse_icos_atc_time_series_text(icos_text, species, attrs)
+
+        del header["columns"]  # we're going to change the column names...
+        return make_icos_dataset(df, attrs, header)
+
+    if fmt == "netcdfTimeSeries":
+        ds = get_icos_nc_file(dobj_uri)
+        rename_dict = {dv: camel_to_snake(str(dv)) for dv in ds.data_vars}
+        rename_dict["value"] = species
+        return ds.rename(rename_dict)
+
+    raise NotImplementedError(f"Cannot parse ICOS format {fmt}.")
