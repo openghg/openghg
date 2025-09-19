@@ -113,13 +113,62 @@ def data_query(
     inlet: str | list[str] | None = None,
     spec_label: str | None = None,
     nrt: bool = False,
+    strict: bool = True,
 ) -> str:
+    """Search ICOS CP for data by
+
+    Args:
+        site: site or list of sites to search (e.g. "MHD" or ["JFJ", "CMN"]); if
+        None, search all sites.
+        data_level: ICOS data level: 1, 2 or None for both.
+        species: species or list of species to search for.
+        inlet: inlet or list of inlets. Only exact matches are found. The inlets
+          should be strings, since this is OpenGHG convention, but "100", "100.0",
+          "100m" will all work.
+        spec_label: regex to filter the "spec label" by. If an ordinary string
+          is passed, only spec labels that contain that string as a substring will
+          be matched.
+        nrt: if True, include NRT data. This can return a large number of
+        result.
+        strict: If False, don't try to check that the species found is correct.
+          By default, this is True, and we try to check that the inferred species
+          is present in some other type of metadata.
+
+    Returns:
+        SPARQL query string.
+
+    """
     site_filt = make_site_filter(site)
     data_level_filt = make_data_level_filter(data_level)
     species_filt = make_species_filter(species)
     inlet_filt = make_inlet_filter(inlet)
-    spec_filter = make_spec_filter(spec_label)
-    nrt_filter = 'FILTER(!CONTAINS(UCASE(?specLabel), "NRT"))' if not nrt else ""
+    spec_filt = make_spec_filter(spec_label)
+    nrt_filt = 'FILTER(!CONTAINS(UCASE(?specLabel), "NRT"))' if not nrt else ""
+
+    if strict:
+        strict_filt = """
+        # filter to link dobj and varName
+        # netCDF data doesn't seem to have the ?colNames variable, so we
+        # need to detect it by checking if ?varName = "value"
+        # additonal sources are found by looking at file names and the spec
+        # label; this can produce a lot of NRT results, so it is best
+        # to use `nrt=False` (the default)
+        OPTIONAL {{ ?dobj cpmeta:hasActualColumnNames ?colNames . }}
+        OPTIONAL {{ ?dobj cpmeta:hasVariableName ?actVar . }}
+        FILTER(
+            COALESCE(CONTAINS(?colNames, concat('"', ?varName, '"')), FALSE)
+            || COALESCE(?varName = ?actVar, FALSE)
+            # else, check that the variables ?colNames and ?actVar were not found
+            # and then either check that ?varName is "value" or that the species
+            # is found in the file name or spec label
+            || ((!BOUND(?colNames) && !BOUND(?actVar))
+                 && (?varName = "value"
+                     || CONTAINS(LCASE(STR(?file_name)), ?species)
+                     || CONTAINS(LCASE(STR(?specLabel)), ?species)))
+        )
+        """
+    else:
+        strict_filt = ""
 
     query = sparql_header()
     query += "SELECT (?stationId as ?site) (?samplingHeight as ?inlet) ?species ?data_level ?file_name (?specLabel as ?spec_label) (?dobj as ?dobj_uri)\n"
@@ -142,8 +191,8 @@ def data_query(
 
         # spec label
         ?spec rdfs:label ?specLabel .
-        {spec_filter}
-        {nrt_filter}
+        {spec_filt}
+        {nrt_filt}
 
         # get sampling height
         ?dobj cpmeta:wasAcquiredBy/cpmeta:hasSamplingHeight ?samplingHeight .
@@ -174,26 +223,7 @@ def data_query(
 
         {species_filt}
 
-        # filter to link dobj and varName
-        # netCDF data doesn't seem to have the ?colNames variable, so we
-        # need to detect it by checking if ?varName = "value"
-        # additonal sources are found by looking at file names and the spec
-        # label; this can produce a lot of NRT results, so it is best
-        # to use `nrt=False` (the default)
-        OPTIONAL {{ ?dobj cpmeta:hasActualColumnNames ?colNames . }}
-        OPTIONAL {{ ?dobj cpmeta:hasVariableName ?actVar . }}
-        FILTER(
-            COALESCE(CONTAINS(?colNames, concat('"', ?varName, '"')), FALSE)
-            || COALESCE(?varName = ?actVar, FALSE)
-            # else, check that the variables ?colNames and ?actVar were not found
-            # and then either check that ?varName is "value" or that the species
-            # is found in the file name or spec label
-            || ((!BOUND(?colNames) && !BOUND(?actVar))
-                 && (?varName = "value"
-                     || CONTAINS(LCASE(STR(?file_name)), ?species)
-                     || CONTAINS(LCASE(STR(?specLabel)), ?species)))
-        )
-
+        {strict_filt}
 
     }}
     """
