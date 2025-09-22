@@ -11,20 +11,23 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def open_filepath_openghg(
-    filepath: str | Path | list[str] | list[Path] | list[str | Path], domain: str, chunks: dict | None = None
+    filepath: str | Path | list[str] | list[Path] | list[str | Path] | None,
+    chunks: dict | None = None,
 ) -> xr.Dataset:
     """Function to open files compatible for openghg format
     Args:
         filepath: netCDF file
         domain: domain to realign the file along, e.g. 'europe'
         chunks: chunking schema for the file"""
-    if isinstance(filepath, list):
-        filepath = [Path(f) for f in filepath]
-    elif isinstance(filepath, str):
-        filepath = Path(filepath)
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
-    data = xr_open_fn(filepath).chunk(chunks)
+    if filepath is not None:
+        if isinstance(filepath, list):
+            filepath = [Path(f) for f in filepath]
+        elif isinstance(filepath, str):
+            filepath = Path(filepath)
+
+        xr_open_fn, filepath = open_time_nc_fn(filepath)
+        data = xr_open_fn(filepath).chunk(chunks)
     return data
 
 
@@ -90,10 +93,10 @@ def parse_openghg(
         dataset_formatter,
     )
 
-    if filepath is not None and domain is not None:
-        data = open_filepath_openghg(filepath, domain=domain)
+    if dataset is not None:
+        data = dataset
     else:
-        data = data
+        data = open_filepath_openghg(filepath)
 
     # Extract current attributes from input data
     attributes = data.attrs

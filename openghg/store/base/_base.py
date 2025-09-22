@@ -118,8 +118,9 @@ class BaseStore:
 
     def _standardise_from_file(
         self,
-        filepath: Path | list[Path],
         fn_input_parameters: dict,
+        dataset: xr.Dataset | None = None,
+        filepath: str | Path | list[str] | list[Path] | None = None,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
         update_mismatch: str = "never",
@@ -183,11 +184,14 @@ class BaseStore:
             logger.exception(msg)
             raise ValueError(msg)
 
-        fn_input_parameters["filepath"] = filepath
+        if dataset is None:
+            fn_input_parameters["filepath"] = filepath
+        else:
+            fn_input_parameters["dataset"] = dataset
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
+            parameters=fn_input_parameters, fn=parser_fn
         )
 
         # Call appropriate standardisation function with input parameters
@@ -233,15 +237,19 @@ class BaseStore:
             filters=filters,
         )
 
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
+        else:
+            filepaths = []
         for x in datasource_uuids:
-            if isinstance(filepath, list) and len(filepath) == 1:
-                filepath = filepath[0]
-
-            if isinstance(filepath, Path):
-                x.update({"file": filepath.name})
-                logger.info(f"Completed processing: {filepath.name}.")
-            elif isinstance(filepath, list):
-                filepath_str = ", ".join([fp.name for fp in filepath])
+            if not filepaths:
+                continue
+            if len(filepaths) == 1:
+                fp = filepaths[0]
+                x.update({"file": fp.name})
+                logger.info(f"Completed processing: {fp.name}.")
+            else:
+                filepath_str = ", ".join(fp.name for fp in filepaths)
                 x.update({"files": filepath_str})
                 logger.info(f"Completed processing files: {filepath_str}.")
 
@@ -249,10 +257,11 @@ class BaseStore:
 
     def read_file(
         self,
-        filepath: str | Path | list[str] | list[Path],
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
+        filepath: str | Path | list[str] | list[Path] | None = None,
+        dataset: xr.Dataset | None = None,
         overwrite: bool = False,
         force: bool = False,
         compressor: Any | None = None,
@@ -340,8 +349,28 @@ class BaseStore:
 
         fn_input_parameters["source_format"] = source_format
 
+        if dataset is not None:
+            try:
+                results = self._standardise_from_file(
+                    dataset=dataset,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                )
+            except StandardiseError as err:
+                logger.error(f"Unable to standardise dataset. Error: {err}")
+                return [{}]
+            return results
+
         # Make sure filepaths contains Path objects
-        filepaths = normalise_to_filepath_list(filepath)
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
 
         # Check hashes of previous files (included after any filepath(s) formatting)
         _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
@@ -494,7 +523,7 @@ class BaseStore:
         self,
         data: list[MetadataAndData],
         fn_input_parameters: dict,
-        filepath: Path | list[Path] | None = None,
+        filepath: str | Path | list[str] | list[Path] | None = None,
     ) -> None:
         """
         Validate the standardise datasources against the data_type schema.
@@ -509,6 +538,8 @@ class BaseStore:
         """
         validate_params = self.find_data_schema_inputs()
 
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
             validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
@@ -516,9 +547,9 @@ class BaseStore:
             try:
                 self.validate_data(datasource.data, **validate_kwargs)
             except ValidationError as err:
-                if isinstance(filepath, list):
-                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
-                elif isinstance(filepath, Path):
+                if isinstance(filepaths, list):
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepaths])}. Error: {err}"
+                elif isinstance(filepaths, Path):
                     msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
                 else:
                     msg = f"Unable to validate and store supplied data. Error: {err}"
