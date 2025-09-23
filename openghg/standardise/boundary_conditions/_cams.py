@@ -1,7 +1,7 @@
 import os
 import logging
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Callable, cast, Literal
 
 import xarray as xr
 import numpy as np
@@ -48,7 +48,7 @@ def xr_interp(
         output_dtypes=[data.dtype],
     ).rename({"__newdim__": dim})
     result[dim] = interp_vals
-    return result
+    return cast(xr.DataArray, result)
 
 
 def cams_to_domain(
