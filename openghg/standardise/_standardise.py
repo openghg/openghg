@@ -5,6 +5,7 @@ import xarray as xr
 import warnings
 
 from openghg.objectstore import get_writable_bucket
+from openghg.types import multiPathType
 from openghg.util import sort_by_filenames
 from numcodecs import Blosc
 import logging
@@ -73,7 +74,7 @@ def standardise_surface(
     network: str,
     site: str,
     dataset: xr.Dataset | None = None,
-    filepath: str | Path | list[str] | list[Path] | tuple | None = None,
+    filepath: multiPathType | tuple | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
