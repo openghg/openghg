@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def open_filepath_openghg(
     filepath: str | Path | list[str] | list[Path] | list[str | Path] | None,
     chunks: dict | None = None,
-) -> xr.Dataset:
+) -> xr.Dataset | None:
     """Function to open files compatible for openghg format
     Args:
         filepath: netCDF file
