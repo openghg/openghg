@@ -1,4 +1,5 @@
 import pytest
+from copy import deepcopy
 from openghg.util import get_overlap_keys, merge_dict, merge_and_extend_dict
 
 
@@ -321,8 +322,8 @@ def test_merge_and_extend_dict(left, right, expected_output):
     6. Check tag and other values can be combined
     7. Check repeated tags aren't added more than once
     """
-    left_copy = left.copy()
-    right_copy = right.copy()
+    left_copy = deepcopy(left)
+    right_copy = deepcopy(right)
     output = merge_and_extend_dict(left, right)
 
     # Check neither of original dicts have been modified
