@@ -7,7 +7,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 
-from openghg.util import find_domain, open_time_nc_fn, timestamp_now
+from openghg.util import find_domain, normalise_to_filepath_list, open_time_nc_fn, timestamp_now
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
 
@@ -15,7 +15,7 @@ logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def interp1d_np(data: xr.Dataset, x: xr.DataArray, xi: np.ndarray, **kwargs):
+def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
     return np.interp(xi, x, data, **kwargs)
 
 
@@ -31,9 +31,11 @@ def xr_interp(
     So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
     level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
     with interp_vals that are on the same scale as 'z'.
+
+    The function is based on https://tutorial.xarray.dev/advanced/apply_ufunc/example-interp.html
     """
     dim_coord = data[dim] if coord is None else data[coord]
-    result = xr.apply_ufunc(
+    result: xr.DataArray = xr.apply_ufunc(
         interp1d_np,
         data,
         dim_coord,
@@ -153,11 +155,11 @@ def get_gridsize(ds: xr.Dataset) -> str:
 
 
 def _check_and_set_params(
-    filepath: str | Path | list[str] | list[Path],
+    filepath: list[Path],
     cams_version: str | None = None,
     species: str | None = None,
     input_observations: str | None = None,
-) -> tuple[list[Path], str, str, str]:
+) -> tuple[str, str, str]:
     """
     Extract fron the file names informations on species, cams version, input observations used in the files.
     Check that they correspond to parameters cams_version, species and input_observations (if given) and format them to be saved as attributes and metadata.
@@ -169,17 +171,10 @@ def _check_and_set_params(
     Returns:
         tuple containing 1. a string aggregating the cams versions used, 2. the species and 3. a string aggregating the input observations used.
     """
-    new_filepath, cams_version_check, species_check, input_observations_check = [], [], [], []
-
-    if not isinstance(filepath, list):
-        filepath = [
-            filepath,
-        ]
+    cams_version_check, species_check, input_observations_check = [], [], []
 
     for file in filepath:
-        new_filepath.append(Path(file))
-
-        file_keywords = new_filepath[-1].name.split("_")
+        file_keywords = file.name.split("_")
         if file_keywords[0] != "cams73" or file_keywords[3] != "conc" and file_keywords[-1][-3:] != ".nc":
             raise ValueError(
                 "Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don't alter the names from the unzipped CAMS files."
@@ -227,7 +222,7 @@ def _check_and_set_params(
     else:
         input_observations = input_observations_check[0]
 
-    return new_filepath, cams_version, species, input_observations
+    return cams_version, species, input_observations
 
 
 def make_metadata(ds: xr.Dataset, filepath: list[Path], period: str, continuous: bool, **kwargs: Any) -> dict:
@@ -309,14 +304,14 @@ def parse_cams(
     Returns:
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
-
-    filepath, cams_version, species, input_observations = _check_and_set_params(
-        filepath, cams_version, species, input_observations
+    filepath_list = normalise_to_filepath_list(filepath)
+    cams_version, species, input_observations = _check_and_set_params(
+        filepath_list, cams_version, species, input_observations
     )
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
+    xr_open_fn, filepath_list = open_time_nc_fn(filepath_list)
 
-    with xr_open_fn(filepath).chunk(chunks) as ds:
+    with xr_open_fn(filepath_list).chunk(chunks) as ds:
         # Be sure that data are sorted in ascending order (not the case for n2o latitude)
         ds = ds.sortby(list(ds.dims))
 
@@ -324,6 +319,8 @@ def parse_cams(
         if period:
             resample_args = get_resample_args(ds.time, species, period)
             ds = ds.resample(**resample_args).mean()
+        else:
+            period = f"original frequency ({str(xr.infer_freq(ds.time))})"
 
         # Calc pressure if species is "n2o"
         if species.lower() == "n2o":
@@ -345,9 +342,7 @@ def parse_cams(
         CAMS_resolution=get_gridsize(ds),
         author=os.getenv("USER"),
         date_created=str(timestamp_now()),
-        files_used=(
-            ", ".join([file.name for file in filepath]) if isinstance(filepath, list) else filepath.name  # type: ignore
-        ),
+        files_used=(", ".join([file.name for file in filepath_list])),  # type: ignore
         CAMS_version=cams_version,
         CAMS_input_observations=input_observations,
     )
@@ -357,7 +352,7 @@ def parse_cams(
     # create metadata
     metadata = make_metadata(
         bc_data,
-        filepath,
+        filepath_list,
         period,
         continuous,
         species=species,
