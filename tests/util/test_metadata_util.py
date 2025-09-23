@@ -321,5 +321,13 @@ def test_merge_and_extend_dict(left, right, expected_output):
     6. Check tag and other values can be combined
     7. Check repeated tags aren't added more than once
     """
+    left_copy = left.copy()
+    right_copy = right.copy()
     output = merge_and_extend_dict(left, right)
+
+    # Check neither of original dicts have been modified
+    assert left == left_copy
+    assert right == right_copy
+
     assert output == expected_output
+
