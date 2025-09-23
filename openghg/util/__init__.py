@@ -50,7 +50,7 @@ from ._metadata_util import (
     get_overlap_keys,
     merge_dict,
     merge_and_extend_dict,
-    build_metadata,
+    build_surface_metadata,
 )
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import get_parameters, AutoRegistry, Registry

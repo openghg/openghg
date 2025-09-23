@@ -7,7 +7,7 @@ import logging
 import math
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 from collections.abc import MutableSequence, Sequence, Callable
 
 from pandas import Timestamp
@@ -24,7 +24,13 @@ from openghg.types import (
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list, build_metadata
+from openghg.util import (
+    timestamp_now,
+    to_lowercase,
+    hash_file,
+    normalise_to_filepath_list,
+    build_surface_metadata,
+)
 
 from .._metakeys_config import get_metakeys
 
@@ -142,25 +148,20 @@ class BaseStore:
             list[dict]: List of datasources and their UUIDs.
         """
 
-        from openghg.types import MetadataAndData
-
         attibutes = dataset.attrs
 
         # Build metadata (merging fn_input_parameters with dataset.attrs)
-        metadata_initial = build_metadata(attributes=attibutes, fn_input_parameters=fn_input_parameters)
+        metadata_initial = build_surface_metadata(
+            attributes=attibutes, fn_input_parameters=fn_input_parameters
+        )
 
-        gas_data = self.prepare_surface_gas_data(
+        data = self.prepare_data(
             dataset=dataset,
             metadata=metadata_initial,
             update_mismatch=update_mismatch,
             site_filepath=fn_input_parameters.get("site_filepath"),
             species_filepath=fn_input_parameters.get("species_filepath"),
         )
-
-        # Convert gas_data dict into list of MetadataAndData objects
-        data: list[MetadataAndData] = [
-            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in (gas_data or {}).values()
-        ]
 
         # Handle chunking
         if chunks != {}:
@@ -1050,19 +1051,19 @@ class BaseStore:
         logger.warning("Align metadata attributes is not implemented for this data type")
         return None
 
-    def prepare_surface_gas_data(
+    def prepare_data(
         self,
         dataset: xr.Dataset,
         metadata: dict,
         update_mismatch: str = "never",
         site_filepath: str | None = None,
         species_filepath: str | None = None,
-    ) -> Optional[dict]:
+    ) -> list[MetadataAndData]:
         """Default to returning None for cases where this method isn't
         defined yet within the child data_type class.
         """
         logger.warning("Align metadata attributes is not implemented for this data type")
-        return None
+        return []
 
     def define_loop_params(self) -> dict:
         """Default to returning an empty dict if there are no loop parameters."""

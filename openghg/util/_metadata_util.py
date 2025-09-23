@@ -396,7 +396,7 @@ def get_period(metadata: dict) -> str | None:
     return period
 
 
-def build_metadata(attributes: dict, fn_input_parameters: dict) -> dict:
+def build_surface_metadata(attributes: dict, fn_input_parameters: dict) -> dict:
     """
     Construct metadata dictionary from explicit inputs and dataset attributes.
     Validates consistency between the two sources.

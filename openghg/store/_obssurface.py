@@ -466,14 +466,14 @@ class ObsSurface(BaseStore):
     def set_hash(self, file_hash: str, filename: str) -> None:
         self._file_hashes[file_hash] = filename
 
-    def prepare_surface_gas_data(
+    def prepare_data(
         self,
         dataset: xr.Dataset,
         metadata: dict,
         update_mismatch: str = "never",
         site_filepath: str | None = None,
         species_filepath: str | None = None,
-    ) -> dict:
+    ) -> list[MetadataAndData]:
         """
         Wraps a dataset into the gas_data format with metadata, attributes,
         and CF-compliant attributes applied (like in parser workflow).
@@ -503,4 +503,9 @@ class ObsSurface(BaseStore):
             species_filepath=species_filepath,
         )
 
-        return gas_data
+        # Convert gas_data dict into list of MetadataAndData objects
+        data: list[MetadataAndData] = [
+            MetadataAndData(metadata=gd["metadata"], data=gd["data"]) for gd in (gas_data or {}).values()
+        ]
+
+        return data
