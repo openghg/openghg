@@ -1,4 +1,5 @@
 import pytest
+from copy import deepcopy
 from openghg.util import get_overlap_keys, merge_dict, merge_and_extend_dict
 
 
@@ -297,6 +298,11 @@ def test_merge_null_values_ignore():
         ({"tag": "decc"}, {"tag": ["gemma"]}, {"tag": ["decc", "gemma"]}),
         ({"tag": ["decc"]}, {"tag": ["gemma", "gemma_v2"]}, {"tag": ["decc", "gemma", "gemma_v2"]}),
         (
+            {'tag': ['gemma', 'gemma_v2']},
+            {'tag': ['gemma', 'gemma_v2', 'gemma_v3']},
+            {'tag': ['gemma', 'gemma_v2', 'gemma_v3']}
+        ),
+        (
             {"site": "bsd", "inlet": "10m", "tag": "decc"},
             {"tag": "gemma"},
             {"site": "bsd", "inlet": "10m", "tag": ["decc", "gemma"]},
@@ -312,8 +318,17 @@ def test_merge_and_extend_dict(left, right, expected_output):
     """
     1-3. Check tags can be combined into a list from str/list combinations
     4. Check multiple tags can be added at once
-    5. Check tag and other values can be combined
-    6. Check repeated tags aren't added more than once
+    5. Check overlapping tags between left, right are not repeated
+    6. Check tag and other values can be combined
+    7. Check repeated tags aren't added more than once
     """
+    left_copy = deepcopy(left)
+    right_copy = deepcopy(right)
     output = merge_and_extend_dict(left, right)
+
+    # Check neither of original dicts have been modified
+    assert left == left_copy
+    assert right == right_copy
+
     assert output == expected_output
+
