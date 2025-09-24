@@ -160,7 +160,7 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
-    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability"]), expected_others)
+    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability", "status_flag"]), expected_others)
 
     assert result.ch4.attrs == mhd_ds.ch4.attrs
     assert result.ch4_repeatability.attrs == mhd_ds.ch4_repeatability.attrs
@@ -168,6 +168,8 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
         "long_name": "mole fraction of methane in air_variability",
         "units": "1e-9",
     }
+
+    assert "status_flag" in result
 
 
 def test_surface_obs_resampling_with_variability(tac_ds):
