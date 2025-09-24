@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 
 - Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
+- Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 
 ## [0.16.0] - 2025-08-29
 
