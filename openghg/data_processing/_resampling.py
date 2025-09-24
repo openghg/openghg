@@ -27,9 +27,10 @@ possible using `surface_obs_resampler` as a base.
 from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
+import logging
 from typing import Any, Concatenate, Literal
 
-import logging
+import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
@@ -81,6 +82,63 @@ def mean_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
     ds_resampled = ds.resample(time=averaging_period).mean(skipna=False, keep_attrs=True)
 
     return ds_resampled
+
+
+def _is_numeric_dtype(var: xr.DataArray) -> bool:
+    """Check if a DataArray's dtype can be used in numeric aggregations like mean().
+
+    This includes:
+    - Numeric types (int, float, complex)
+    - Boolean type
+    - Datetime types (datetime64, timedelta64)
+
+    This is based on xarray.core.common._is_numeric_aggregatable_dtype, but reproduced
+    here to avoid using a private function.
+
+    """
+    return bool(
+        np.issubdtype(var.dtype, np.number)
+        or (var.dtype == np.bool_)
+        or np.issubdtype(var.dtype, np.datetime64)
+        or np.issubdtype(var.dtype, np.timedelta64)
+    )
+
+
+@register
+@add_averaging_attrs
+def default_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
+    """Resample numeric data to mean over averaging period, other data to first value.
+
+    This is meant to be a safe default resampling function. Using `mean_resample` as a
+    default would drop non-numeric data.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+
+    Returns:
+        xr.Dataset with all numeric data variables mean resampled over averaging period
+          and the first value in each averaging period of non-numeric data variables
+    """
+    numeric_vars = []
+    non_numeric_vars = []
+    for dv in ds.data_vars:
+        if _is_numeric_dtype(ds[dv]):
+            numeric_vars.append(dv)
+        else:
+            non_numeric_vars.append(dv)
+
+    to_merge = []
+
+    if numeric_vars:
+        to_merge.append(ds[numeric_vars].resample(time=averaging_period).mean(skipna=False, keep_attrs=True))
+
+    if non_numeric_vars:
+        to_merge.append(
+            ds[non_numeric_vars].resample(time=averaging_period).first(skipna=False, keep_attrs=True)
+        )
+
+    return xr.merge(to_merge)
 
 
 @register
@@ -286,7 +344,7 @@ def apply_funcs(
     ds: xr.Dataset,
     funcs: Sequence[DatasetOpType],
     func_vars: Sequence[list[str]],
-    remainder: Callable | Literal["pass", "drop"] = "pass",
+    remainder: DatasetOpType | Literal["pass", "drop"] = "pass",
     keep_attrs: bool | Literal["default"] = True,
 ) -> xr.Dataset:
     """Apply functions to the data variables of a dataset.
@@ -337,10 +395,11 @@ def apply_funcs(
             all_func_vars = [x for y in func_vars for x in y]
             remaining_vars = [str(dv) for dv in ds.data_vars if dv not in all_func_vars]
 
-            if remainder == "pass":
-                results.append(ds[remaining_vars])
-            else:
-                results.append(ds[remaining_vars].map(remainder))
+            if remaining_vars:
+                if remainder == "pass":
+                    results.append(ds[remaining_vars])
+                else:
+                    results.append(remainder(ds[remaining_vars]))
 
         return xr.merge(results)
 
@@ -399,8 +458,21 @@ def resampler(
 
     apply_func_kwargs = apply_func_kwargs or {"keep_attrs": True}
 
-    if "remainder" not in apply_func_kwargs:
-        apply_func_kwargs["remainder"] = partial(mean_resample, averaging_period=averaging_period)
+    # check for remainder and set default if None, otherwise, if string, try to interpret
+    # as resampling function
+    remainder = apply_func_kwargs.get("remainder")
+    if remainder is None:
+        apply_func_kwargs["remainder"] = partial(default_resample, averaging_period=averaging_period)
+    elif isinstance(remainder, str) and remainder not in ("drop", "pass"):
+        try:
+            func = registry.functions[remainder]
+        except KeyError as e:
+            raise ValueError(
+                f"Value {remainder} for apply_func_kwargs['remainder'] not recognised as a resampling function."
+            ) from e
+        else:
+            func_kwargs = registry.select_params(remainder, kwargs)
+            apply_func_kwargs["remainder"] = partial(func, **func_kwargs)
 
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
