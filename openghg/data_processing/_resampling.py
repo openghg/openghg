@@ -458,7 +458,7 @@ def resampler(
 
     apply_func_kwargs = apply_func_kwargs or {"keep_attrs": True}
 
-    # check for reaminder and set default if None, otherwise, if string, try to interpret
+    # check for remainder and set default if None, otherwise, if string, try to interpret
     # as resampling function
     remainder = apply_func_kwargs.get("remainder")
     if remainder is None:
