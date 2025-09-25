@@ -16,7 +16,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
-    return np.interp(xi, x, data, **kwargs)
+    # np.interp returns a scalar if `xi` is a scalar, but we know `xi` is an array
+    return cast(np.ndarray, np.interp(xi, x, data, **kwargs))
 
 
 def xr_interp(
