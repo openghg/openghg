@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Bug causing regrid_uniform_cc to fail for data arrays with time dimension. [PR #1482](https://github.com/openghg/openghg/pull/1482)
 - Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
 - Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 - Fixed bug in `merge_and_extend_dict` to make sure repeated values in `left` and `right` produce unique values in output and to ensure `left` and `right` are not modified in place. [PR #1477](https://github.com/openghg/openghg/pull/1477)
