@@ -1,7 +1,7 @@
 import os
 import logging
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Callable, cast, Literal
 
 import xarray as xr
 import numpy as np
