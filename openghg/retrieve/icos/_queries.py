@@ -134,6 +134,7 @@ def data_query(
     inlet: str | list[str] | None = None,
     spec_label: str | None = None,
     project: str | list[str] | None = ["icos", "euroObspack"],
+    custom_filter: str = "",
     strict: bool = True,
 ) -> str:
     """Search ICOS CP for data by
@@ -151,6 +152,7 @@ def data_query(
           be matched.
         project: list of case-sensitive project names as defined here:
           https://meta.icos-cp.eu/ontologies/cpmeta/Project
+        custom_filter: text added directly to the end of the SPARQL query string
         strict: If False, don't try to check that the species found is correct.
           By default, this is True, and we try to check that the inferred species
           is present in some other type of metadata.
@@ -196,8 +198,11 @@ def data_query(
 
     query += f"""
     WHERE {{
-        # filter to select only data without a previous version
+        # filter to select only data without a subsequent version
         FILTER NOT EXISTS {{[] cpmeta:isNextVersionOf ?dobj}}
+
+        # Filter empty entries (e.g. failed uploads)
+        FILTER EXISTS {{ ?dobj cpmeta:hasSizeInBytes ?anyValue }}
 
         # get station ID (e.g. TAC, JFJ, etc)
         ?dobj cpmeta:wasAcquiredBy/prov:wasAssociatedWith ?station .
@@ -247,6 +252,8 @@ def data_query(
         {project_filt}
 
         {strict_filt}
+
+        {custom_filter}
 
     }}
     """
