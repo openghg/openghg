@@ -29,9 +29,10 @@ For instance
 To quote a string literal in a SPARQL query, you must use double-quotes.
 """
 
-from collections import defaultdict
+# from collections import defaultdict
 from functools import lru_cache
-import re
+
+# import re
 
 from icoscp_core.icos import meta
 import pandas as pd
@@ -83,10 +84,29 @@ def make_species_filter(species: str | list[str] | None) -> str:
     # sparql requires double quotes for strings, so we can't just use f"... {tuple(species)}"
     formatted_tuple = "(" + ", ".join(f'"{s}"' for s in species) + ")"
     species_filt = f"""
-    # filter species
-    FILTER(LCASE(?species) in {formatted_tuple})
+        # filter species
+        FILTER(LCASE(?species) in {formatted_tuple})
     """
     return species_filt
+
+
+def make_project_filter(project: str | list[str] | None) -> str:
+    if project is None:
+        return ""
+
+    if isinstance(project, str):
+        project = [project]
+
+    # sparql requires double quotes for strings, so we can't just use f"... {tuple(species)}"
+    formatted_tuple = (
+        "(" + ", ".join(f"<http://meta.icos-cp.eu/resources/projects/{p}>" for p in project) + ")"
+    )
+    project_filt = f"""
+        # filter project
+        ?spec cpmeta:hasAssociatedProject ?project .
+        FILTER(?project in {formatted_tuple})
+    """
+    return project_filt
 
 
 def make_inlet_filter(inlet: str | list[str] | None) -> str:
@@ -113,7 +133,7 @@ def data_query(
     species: str | list[str] | None = None,
     inlet: str | list[str] | None = None,
     spec_label: str | None = None,
-    nrt: bool = False,
+    project: str | list[str] | None = ["icos", "euroObspack"],
     strict: bool = True,
 ) -> str:
     """Search ICOS CP for data by
@@ -129,8 +149,8 @@ def data_query(
         spec_label: regex to filter the "spec label" by. If an ordinary string
           is passed, only spec labels that contain that string as a substring will
           be matched.
-        nrt: if True, include NRT data. This can return a large number of
-        result.
+        project: list of case-sensitive project names as defined here:
+          https://meta.icos-cp.eu/ontologies/cpmeta/Project
         strict: If False, don't try to check that the species found is correct.
           By default, this is True, and we try to check that the inferred species
           is present in some other type of metadata.
@@ -144,7 +164,7 @@ def data_query(
     species_filt = make_species_filter(species)
     inlet_filt = make_inlet_filter(inlet)
     spec_filt = make_spec_filter(spec_label)
-    nrt_filt = 'FILTER(!CONTAINS(UCASE(?specLabel), "NRT"))' if not nrt else ""
+    project_filt = make_project_filter(project)
 
     if strict:
         strict_filt = """
@@ -172,7 +192,7 @@ def data_query(
         strict_filt = ""
 
     query = sparql_header()
-    query += "SELECT (?stationId as ?site) (?samplingHeight as ?inlet) ?species ?data_level ?file_name (?specLabel as ?spec_label) (?dobj as ?dobj_uri)\n"
+    query += "SELECT (?stationId as ?site) (?samplingHeight as ?inlet) ?species ?data_level ?file_name (?specLabel as ?spec_label) (?project as ?project_name) (?dobj as ?dobj_uri)\n"
 
     query += f"""
     WHERE {{
@@ -187,13 +207,13 @@ def data_query(
         # get object spec
         ?dobj cpmeta:hasObjectSpec ?spec .
 
+        # get data level
         ?spec cpmeta:hasDataLevel ?data_level .
         {data_level_filt}
 
         # spec label
         ?spec rdfs:label ?specLabel .
         {spec_filt}
-        {nrt_filt}
 
         # get sampling height
         ?dobj cpmeta:wasAcquiredBy/cpmeta:hasSamplingHeight ?samplingHeight .
@@ -217,12 +237,14 @@ def data_query(
         # the first part of the filename if ?varName = "value"
         # the species extracted from filename is probably less
         # reliable
-    	BIND(STRBEFORE(STR(?file_name), "_") AS ?first_part)
-	    BIND(
-		    IF(?varName = "value", ?first_part, ?varName) as ?species
-	    )
+        BIND(STRBEFORE(STR(?file_name), "_") AS ?first_part)
+        BIND(
+            IF(?varName = "value", ?first_part, ?varName) as ?species
+        )
 
         {species_filt}
+
+        {project_filt}
 
         {strict_filt}
 
@@ -279,7 +301,7 @@ def format_query() -> str:
     return query
 
 
-def parse_binding(b):
+def parse_binding(b: dict) -> dict:
     """Parse `BindingsList` returned to meta.sparql_select."""
     res = {}
     for k, v in b.items():
@@ -297,7 +319,7 @@ def parse_binding(b):
     return res
 
 
-def make_query_df(query):
+def make_query_df(query: str) -> pd.DataFrame:
     res = meta.sparql_select(query=query)
     return pd.DataFrame([parse_binding(b) for b in res.bindings])
 
