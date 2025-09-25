@@ -255,11 +255,16 @@ def parse_icos_atc_flask_time_series_text(
     header = get_icos_text_header(icos_text)
     skiprows = int(header["header_lines"]) - 1
 
-    usecols = header["columns"][1:] # skip first column becaues it is just the site name
+    usecols = header["columns"][1:]  # skip first column becaues it is just the site name
     parse_dates = ["SamplingStart", "SamplingEnd"]
     na_values = ["-999.99", "-9.99"]  # these are used in some ICOS files
     df = pd.read_csv(
-        io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, parse_dates=parse_dates, na_values=na_values
+        io.StringIO(icos_text),
+        skiprows=skiprows,
+        sep=";",
+        usecols=usecols,
+        parse_dates=parse_dates,
+        na_values=na_values,
     )
 
     # convert to timezone-naive
@@ -284,7 +289,9 @@ def parse_icos_atc_flask_time_series_text(
 
 
 # FULL PIPELINE
-def make_icos_dataset(icos_df: pd.DataFrame, attrs: dict | None = None, global_attrs: dict | None = None) -> xr.Dataset:
+def make_icos_dataset(
+    icos_df: pd.DataFrame, attrs: dict | None = None, global_attrs: dict | None = None
+) -> xr.Dataset:
     attrs = attrs or {}
     attrs = {camel_to_snake(k): v for k, v in attrs.items()}
     icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
@@ -317,6 +324,17 @@ def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
 
     if fmt == "netcdfTimeSeries":
         ds = get_icos_nc_file(dobj_uri)
+        drop_vars = [
+            "datetime",
+            "time_decimal",
+            "time_components",
+            "solartime_components",
+            "assimilation_concerns",
+            "obspack_id",
+            "obs_num",
+            "obspack_num",
+        ]
+        ds = ds.drop_vars(drop_vars)
         rename_dict = {dv: camel_to_snake(str(dv)) for dv in ds.data_vars}
         rename_dict["value"] = species
         return ds.rename(rename_dict)
