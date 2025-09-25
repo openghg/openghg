@@ -25,16 +25,16 @@ def xr_interp(
 ) -> xr.DataArray:
     """Iterpolate along given dim.
 
-    If 'coord' is passed, then an alternate coordinate can be used, but the interpolation happens
-    along 'dim'.
+        If 'coord' is passed, then an alternate coordinate can be used, but the interpolation happens
+        along 'dim'.
 
-    This is useful if there is a "physical" coordinate, like altitude, which depends on lat and lon.
-    So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
-    level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
-    with interp_vals that are on the same scale as 'z'.
-Note: `data[coord]` (or `data[dim]` if `coord` is `None`) must be sorted in increasing order. If not
-the interpolation will not fail, but the results will be meaningless. See the docs for `np.interp` for details.
-    The function is based on https://tutorial.xarray.dev/advanced/apply_ufunc/example-interp.html
+        This is useful if there is a "physical" coordinate, like altitude, which depends on lat and lon.
+        So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts
+        level to a height, dependant on lat, then setting dim='level' and coord='z' will allow interpolation
+        with interp_vals that are on the same scale as 'z'.
+    Note: `data[coord]` (or `data[dim]` if `coord` is `None`) must be sorted in increasing order. If not
+    the interpolation will not fail, but the results will be meaningless. See the docs for `np.interp` for details.
+        The function is based on https://tutorial.xarray.dev/advanced/apply_ufunc/example-interp.html
     """
     dim_coord = data[dim] if coord is None else data[coord]
     result: xr.DataArray = xr.apply_ufunc(
