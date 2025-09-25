@@ -306,7 +306,10 @@ def parse_binding(b: dict) -> dict:
     res = {}
     for k, v in b.items():
         if hasattr(v, "uri"):
-            res[k] = v.uri
+            if k == "project_name":
+                res[k] = v.uri.split("/")[-1]
+            else:
+                res[k] = v.uri
         else:
             val = v.value
             if v.datatype is not None and v.datatype.split("#")[-1] in ("float", "double"):
