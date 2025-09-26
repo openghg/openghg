@@ -290,9 +290,10 @@ class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
             VersionError if no version is currently checked out.
 
         """
+        source = self._current  # will raise VersionError if no version checked out
+
         if v not in self.versions:
             self._versions[v] = self.factory(v)
-        source = self._current  # will raise VersionError if no version checked out
         dest = self._versions[v]
         zarr.convenience.copy_store(source, dest)
 
