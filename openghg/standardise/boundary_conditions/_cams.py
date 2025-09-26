@@ -306,12 +306,13 @@ def parse_cams(
     Returns:
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
+
+    xr_open_fn, filepath_list = open_time_nc_fn(filepath_list)
+
     filepath_list = normalise_to_filepath_list(filepath)
     cams_version, species, input_observations = _check_and_set_params(
         filepath_list, cams_version, species, input_observations
     )
-
-    xr_open_fn, filepath_list = open_time_nc_fn(filepath_list)
 
     with xr_open_fn(filepath_list).chunk(chunks) as ds:
         # Be sure that data are sorted in ascending order (not the case for n2o latitude)
