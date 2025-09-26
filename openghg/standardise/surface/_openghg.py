@@ -32,8 +32,8 @@ def open_filepath_openghg(
 
 
 def parse_openghg(
-    dataset: xr.Dataset | None = None,
     filepath: str | Path | list[str | Path] | None = None,
+    dataset: xr.Dataset | None = None,
     site: str | None = None,
     species: str | None = None,
     network: str | None = None,
