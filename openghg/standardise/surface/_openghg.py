@@ -45,7 +45,6 @@ def parse_openghg(
     data_owner_email: str | None = None,
     update_mismatch: str = "never",
     site_filepath: pathType | None = None,
-    domain: str | None = None,
     **kwargs: str,
 ) -> dict:
     """
