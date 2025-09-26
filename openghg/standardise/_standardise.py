@@ -33,6 +33,13 @@ def standardise(
     """
     from openghg.store import get_data_class
 
+    filepath_missing = filepath is None or (
+        isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
+    )
+
+    if (filepath_missing and dataset is None) or (not filepath_missing and dataset is not None):
+        raise ValueError("Please specify exactly one of `filepath` or `dataset`.")
+
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
 
