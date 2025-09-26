@@ -307,7 +307,7 @@ def parse_cams(
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
 
-    xr_open_fn, filepath_list = open_time_nc_fn(filepath_list)
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
     filepath_list = normalise_to_filepath_list(filepath)
     cams_version, species, input_observations = _check_and_set_params(
