@@ -266,7 +266,7 @@ def test_contiguous_update(store_name, is_versioned, request):
 # ZARR SPECIFIC TESTS
 @pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
 def test_zarr_encoding(store_name, request):
-    """Check that data can be added to a new version without affecting an old version."""
+    """Check that data can be compressed with a specified encoding."""
     store: ZarrStore = request.getfixturevalue(store_name)
 
     compressor = Blosc(cname="zstd", clevel=5, shuffle=1)

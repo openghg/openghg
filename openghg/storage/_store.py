@@ -1,13 +1,37 @@
 """Storage for a single Xarray Dataset.
 
-This module contains the interface (abstract base class) `Store`, as well
+This module contains the interface (abstract base class) ``Store``, as well
 as two concrete implementations:
-- `MemoryStore`
-- `VersionedMemoryStore`
+
+- ``MemoryStore``
+- ``VersionedMemoryStore``
 
 These concrete implementations are mainly used for testing.
 Their value is that they produce the same results as the Zarr implementations of
-the `Store` interface, using Xarray operations.
+the ``Store`` interface, using Xarray operations.
+
+The ``Store`` class provides a basic "CRUD" interface for storing Xarray ``Dataset``s:
+
+- ``Store.insert`` creates/initialises storage if no data is present, otherwise it appends
+  new data to the store. If the new data "conflicts" with existing data, this is an error
+  by default: existing data should not be modified by insert. There is an option to ignore
+  any conflicts in the new data.
+- ``Store.update`` updates existing data. This method cannot add new data, so an error is raised
+  if the data provided does not "conflict" with the existing data. There is an option to ignore
+  "non-conflicts".
+- ``Store.get`` returns the stored data as an ``xr.Dataset``
+- ``Store.clear`` clears the stored data, and ``Store.delete`` clears the data and removes
+   any other artefacts (files, directories, etc.) created when storage is initialised.
+
+The interface ``Store`` does not define what constitudes a "conflict" or "non-conflict", but
+for data with a time coordinate, a conflict occurs when new data (passed to ``insert`` or ``update``)
+has time coordinate values that "match" stored time coordinate values.
+Match might mean exact equality, or equality up to some tolerance.
+
+``Store`` has some other methods for convenience:
+
+- ``Store.upsert`` does an update followed by an insert (similar to updating a dictionary)
+- ``Store.overwrite`` clears the store then inserts data
 
 """
 
@@ -49,7 +73,7 @@ class Store(ABC):
             None
 
         Raises:
-            DataOverlapError if conflicts found and `on_conflict` == "error".
+            DataOverlapError: if conflicts found and `on_conflict` == "error".
         """
         ...
 
@@ -69,7 +93,7 @@ class Store(ABC):
             None
 
         Raises:
-            UpdateError if nonconflicts found and `on_nonconflict` == "error".
+            UpdateError: if nonconflicts found and `on_nonconflict` == "error".
         """
         ...
 
@@ -164,19 +188,23 @@ class MemoryStore(Store):
         # the input data doesn't have the append dim?
         if self.data is None:
             raise UpdateError("Cannot update empty Store.")
-        else:
-            if self._conflict_determiner.has_nonconflicts(data.get_index(self.append_dim)):
-                if on_nonconflict == "error":
-                    raise UpdateError("Cannot add new values with `update`.")
 
-                # otherwise, select conflicts/overlapping values
-                data = self._conflict_determiner.select_conflicts(data, self.append_dim)
+        # we assume that the data has a coordinate for the append dim below
+        if self.append_dim not in data.coords:
+            raise ValueError(f"Provided data does not have append dim {self.append_dim}")
 
-            # merge new data with existing data from other time points
-            # NOTE: this might not work properly if index options have been used to set
-            # a tolerance for defining conflicts
-            existing_data = self.data.drop_sel({self.append_dim: data.coords[self.append_dim]})
-            self.data = xr.merge([existing_data, data])
+        if self._conflict_determiner.has_nonconflicts(data.get_index(self.append_dim)):
+            if on_nonconflict == "error":
+                raise UpdateError("Cannot add new values with `update`.")
+
+            # otherwise, select conflicts/overlapping values
+            data = self._conflict_determiner.select_conflicts(data, self.append_dim)
+
+        # merge new data with existing data from other time points
+        # NOTE: this might not work properly if index options have been used to set
+        # a tolerance for defining conflicts
+        existing_data = self.data.drop_sel({self.append_dim: data.coords[self.append_dim]})
+        self.data = xr.merge([existing_data, data])
 
     def get(self) -> xr.Dataset:
         return self.data if self.data is not None else xr.Dataset()
