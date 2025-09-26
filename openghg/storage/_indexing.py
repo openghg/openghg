@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, Protocol
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -7,40 +7,7 @@ import pandas as pd
 import xarray as xr
 
 
-class HasConflictsMethod(Protocol):
-    def conflicts(self, other: Iterable) -> npt.NDArray[np.bool_]: ...
-
-
-class ConflictsMixin(HasConflictsMethod):
-    """Mixin to add helper methods for a class with a `.conflicts()` method."""
-
-    def nonconflicts(self, other: Iterable) -> npt.NDArray[np.bool_]:
-        return ~self.conflicts(other)
-
-    def has_conflicts(self, other: Iterable) -> bool:
-        return bool(np.any(self.conflicts(other)))
-
-    def has_nonconflicts(self, other: Iterable) -> bool:
-        return bool(np.any(self.nonconflicts(other)))
-
-    def select_conflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
-        try:
-            other = ds[dim].values
-        except KeyError as e:
-            raise ValueError(f"Dimension {dim} not found.") from e
-
-        return ds.where(ds[dim][self.conflicts(other)], drop=True)
-
-    def select_nonconflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
-        try:
-            other = ds[dim].values
-        except KeyError as e:
-            raise ValueError(f"Dimension {dim} not found.") from e
-
-        return ds.where(ds[dim][self.nonconflicts(other)], drop=True)
-
-
-class ConflictDeterminer(ConflictsMixin):
+class ConflictDeterminer:
     def __init__(self, index: pd.Index, **index_options: Any) -> None:
         """Create ConflictDeterminer object.
 
@@ -71,3 +38,28 @@ class ConflictDeterminer(ConflictsMixin):
         result: npt.NDArray[np.bool_] = indexer != -1
 
         return result
+
+    def nonconflicts(self, other: Iterable) -> npt.NDArray[np.bool_]:
+        return ~self.conflicts(other)
+
+    def has_conflicts(self, other: Iterable) -> bool:
+        return bool(np.any(self.conflicts(other)))
+
+    def has_nonconflicts(self, other: Iterable) -> bool:
+        return bool(np.any(self.nonconflicts(other)))
+
+    def select_conflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
+        try:
+            other = ds[dim].values
+        except KeyError as e:
+            raise ValueError(f"Dimension {dim} not found.") from e
+
+        return ds.where(ds[dim][self.conflicts(other)], drop=True)
+
+    def select_nonconflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
+        try:
+            other = ds[dim].values
+        except KeyError as e:
+            raise ValueError(f"Dimension {dim} not found.") from e
+
+        return ds.where(ds[dim][self.nonconflicts(other)], drop=True)
