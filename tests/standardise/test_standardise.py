@@ -139,10 +139,34 @@ def test_standardise_obs_openghg_dataset():
         force=True,
         store="user",
         update_mismatch="metadata",
+        tag=["direct_dataset"]
     )
 
     results = filt(results)
     assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="TAC", species="co2", source_format="openghg", network="decc")
+
+    tag = retrieved_data.metadata["tag"]
+
+    assert "direct_dataset" in tag
+
+def test_standardise_surface_no_filepath_dataset_error():
+    """
+    Test to verify ValueError is raised when standardise_surface supplied without values for filepath and datset arguments.
+    """
+    with pytest.raises(ValueError, match="Please specify exactly one of `filepath` or `dataset`."):
+        standardise_surface(
+            site="TAC",
+            network="DECC",
+            inlet=185,
+            instrument="picarro",
+            source_format="openghg",
+            sampling_period="1h",
+            force=True,
+            store="user",
+            update_mismatch="metadata",
+        )
 
 def test_standardise_obs_metadata_mismatch(reset_mock_user_config):
     """
