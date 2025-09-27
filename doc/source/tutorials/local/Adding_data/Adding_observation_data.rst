@@ -321,6 +321,43 @@ created when we run ``openghg --quickstart``.
 The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
 to more than one store.
 
+Adding In-memory dataset to the object store
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Up to this point, we have seen how to specify a file path and add data to the object store.
+In many workflows, however, you may already have your data available in memory as an ``xarray.Dataset``.
+The ``standardise_surface`` function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.
+
+This approach is especially useful when your data has already been processed in Python or retrieved from another source (such as a remote server or API) and you want to store it straight away.
+
+Let’s start by importing ``xarray`` and converting an example file into an ``xarray.Dataset``:
+
+.. jupyter-execute::
+
+    import xarray as xr
+
+    data_url = "https://github.com/openghg/example_data/raw/main/timeseries/decc-picarro_co2.tar.gz"
+
+    tac_openghg_data = retrieve_example_data(url=data_url)
+    data = xr.open_dataset(tac_openghg_data[0])
+
+Now that we have our dataset in memory, we can provide it directly to the ``dataset`` argument of ``standardise_surface``.
+This will standardise the data and add it to the object store just as if we had supplied a file path:
+
+.. jupyter-execute::
+
+    from openghg.standardise import standardise_surface
+
+    decc_results = standardise_surface(
+        dataset=data,
+        source_format="openghg",
+        site="TAC",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h"
+    )
+
+
 2. Searching for data
 ---------------------
 
