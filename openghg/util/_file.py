@@ -3,10 +3,12 @@ import bz2
 from functools import partial, wraps
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator, Optional, Union
 from collections.abc import Callable
 import numpy as np
 import xarray as xr
+from contextlib import contextmanager
+
 
 from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
 from openghg.util import align_lat_lon
@@ -405,3 +407,57 @@ def open_time_nc_fn(
         sel_month=sel_month,
         check_coords=check_coords,
     )
+
+
+@contextmanager
+def open_file_cm(
+    filepath: Union[str, Path, list[str], list[Path]],
+    chunks: dict | None = None,
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = "time",
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager for safely opening NetCDF files in openghg.
+
+    Ensures datasets are closed after use, regardless of errors.
+    Works for single or multiple netCDF files across different networks.
+    """
+    ds = None
+    try:
+        if filepath is not None:
+            if isinstance(filepath, list):
+                filepath = [Path(f) for f in filepath]
+            elif isinstance(filepath, str):
+                filepath = Path(filepath)
+
+        xr_open_fn, filepath = open_time_nc_fn(
+            filepath=filepath,
+            realign_on_domain=realign_on_domain,
+            sel_month=sel_month,
+            check_coords=check_coords,
+        )
+        ds = xr_open_fn(filepath).chunk(chunks)
+        yield ds
+    finally:
+        if ds is not None:
+            ds.close()
+
+
+@contextmanager
+def get_dataset(  # type: ignore
+    dataset: xr.Dataset | None = None,
+    filepath: Optional[Union[str, Path, list[str], list[Path]]] = None,
+    **kwargs,
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager to return a dataset from either an existing xarray.Dataset
+    or by opening from filepath.
+    """
+    if dataset is not None:
+        yield dataset
+    else:
+        if filepath is None:
+            raise ValueError("filepath must be provided if dataset is None")
+        with open_file_cm(filepath, **kwargs) as ds:
+            yield ds

@@ -35,6 +35,7 @@ from ._file import (
     read_header,
     open_nc_fn,
     open_time_nc_fn,
+    get_dataset,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
