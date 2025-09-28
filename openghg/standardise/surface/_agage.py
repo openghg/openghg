@@ -11,13 +11,14 @@ from openghg.standardise.meta import (
     dataset_formatter,
 )
 from openghg.types import pathType
-from openghg.util import clean_string, format_inlet
+from openghg.util import clean_string, format_inlet, get_dataset
 
 
 def parse_agage(
-    filepath: pathType,
     site: str,
     network: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    dataset: xr.Dataset | None = None,
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
@@ -44,7 +45,7 @@ def parse_agage(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    filepath = Path(filepath)
+    # filepath = Path(filepath)
 
     network = clean_string(network)
     instrument = clean_string(instrument)
@@ -84,7 +85,7 @@ def parse_agage(
     species = str(filepath).split(sep="_")[-2]
     species = define_species_label(species)[0]
 
-    with xr.open_dataset(filepath) as dataset:
+    with get_dataset(dataset=dataset, filepath=filepath) as dataset:
         data = dataset.to_dataframe()
 
         if data.empty:

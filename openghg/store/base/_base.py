@@ -188,7 +188,6 @@ class BaseStore:
             fn_input_parameters["filepath"] = filepath
         else:
             fn_input_parameters["dataset"] = dataset
-            fn_input_parameters["source_format"] = "openghg"
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
