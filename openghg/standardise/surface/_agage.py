@@ -45,14 +45,13 @@ def parse_agage(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    # filepath = Path(filepath)
 
     network = clean_string(network)
     instrument = clean_string(instrument)
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    with xr.load_dataset(filepath) as ds:
+    with xr.load_dataset(filepath) as ds:  # type: ignore
         file_params = ds.attrs
 
     # if we're not passed the instrument name, get it from the file:
