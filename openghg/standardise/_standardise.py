@@ -62,6 +62,9 @@ def standardise(
 
     with dclass(bucket=bucket) as dc:
         if dataset is not None:
+            logger.info(
+                "The ability to pass dataset directly to the standardise function is currently availble for {data_type = ['surface'], source_format=['agage', 'openghg', 'co2_games']} "
+            )
             result = dc.read_file(dataset=dataset, **kwargs)
         else:
             result = dc.read_file(filepath=filepath, **kwargs)
