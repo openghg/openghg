@@ -453,6 +453,16 @@ def get_dataset(  # type: ignore
     """
     Context manager to return a dataset from either an existing xarray.Dataset
     or by opening from filepath.
+    Args:
+        dataset: Xarray dataset
+        filepath: Filepath of the data
+    Yields:
+        xr.Dataset:
+            The opened or provided dataset. If opened from file(s), the dataset
+            is automatically closed when leaving the context manager.
+    Raises:
+        ValueError:
+            If both ``dataset`` and ``filepath`` are ``None``.
     """
     if dataset is not None:
         yield dataset
