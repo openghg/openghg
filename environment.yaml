@@ -2,12 +2,12 @@ name: openghg_env
 channels:
   - openghg
   - conda-forge
-  - defaults
   - anaconda
 dependencies:
-  - python>=3.9
+  - python>=3.10
   - addict
-  - dask
+  - cf_xarray
+  - dask<2025.9
   - h5netcdf
   - filelock
   - matplotlib
@@ -15,25 +15,36 @@ dependencies:
   - netcdf4
   - nbformat
   - numexpr
-  - numpy
+  - numpy  # Note numpy >= 2.0 is currently included as a pip requirement below
   - nc-time-axis
   - openghg_defs
+  - openpyxl
   - pandas>=2.0
   - pip
+  - pint
+  - pint-xarray
   - plotly
   - pyvis
   - rapidfuzz
   - requests>=2.25
+  - setuptools
   - scipy
   - tinydb
   - toml
   - rich
   - ipywidgets
-  - xarray
+  - xarray>=2025.04.0
+  - flox
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
-  - zarr
+  - zarr==2.18.3
   - numcodecs
+  - sympy
+  - networkx
+  - openghg_calscales
   - pip:
     - icoscp
+    - numpy >= 2.0
+# numpy >= 2.0 is included in pip requirements because icoscp will try and downgrade numpy to <2.0
+# - can remove and use definition above again when https://github.com/ICOS-Carbon-Portal/data/issues/391 is resolved.

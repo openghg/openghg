@@ -1,15 +1,17 @@
 from __future__ import annotations
 import logging
-import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional
 import warnings
 import numpy as np
 from numpy import ndarray
+from xarray import DataArray
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from xarray import DataArray, Dataset
+from openghg.types import pathType
+from openghg.util import synonyms
 
 __all__ = ["Flux"]
 
@@ -18,7 +20,7 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[ndarray | DataArray]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -32,7 +34,9 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(
+        self, binary_data: bytes, metadata: dict, file_metadata: dict, source_format: str = "openghg"
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -53,214 +57,60 @@ class Flux(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
 
-    def read_file(
-        self,
-        filepath: Union[str, Path],
-        species: str,
-        source: str,
-        domain: str,
-        database: Optional[str] = None,
-        database_version: Optional[str] = None,
-        model: Optional[str] = None,
-        source_format: str = "openghg",
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-        period: Optional[Union[str, tuple]] = None,
-        chunks: Optional[Dict] = None,
-        continuous: bool = True,
-        if_exists: str = "auto",
-        save_current: str = "auto",
-        overwrite: bool = False,
-        force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
-        """Read flux / emissions file
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs for Flux. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_flux()
+        function.
 
         Args:
-            filepath: Path of flux / emissions file
-            species: Species name
-            domain: Flux / Emissions domain
-            source: Flux / Emissions source
-            database: Name of database source for this input (if relevant)
-            database_version: Name of database version (if relevant)
-            model: Model name (if relevant)
-            source_format : Type of data being input e.g. openghg (internal format)
-            time_resolved: If this is a high resolution file
-            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
-            period: Period of measurements. Only needed if this can not be inferred from the time coords
-            If specified, should be one of:
-                - "yearly", "monthly"
-                - suitable pandas Offset Alias
-                - tuple of (value, unit) as would be passed to pandas.Timedelta function
-            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
-            continuous: Whether time stamps have to be continuous.
-            if_exists: What to do if existing data is present.
-                - "auto" - checks new and current data for timeseries overlap
-                   - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
-                - "new" - just include new data and ignore previous
-                - "combine" - replace and insert new data into current timeseries
-            save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-                - "n" / "no" - Allow current data to updated / deleted
-            overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
-            compressor: A custom compressor to use. If None, this will default to
-                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
         Returns:
-            dict: Dictionary of datasource UUIDs data assigned to
+            dict: Formatted parameters for this data type.
         """
-        from openghg.types import FluxTypes
         from openghg.util import (
             clean_string,
-            load_flux_parser,
-            check_if_need_new_version,
         )
 
-        species = clean_string(species)
-        source = clean_string(source)
-        domain = clean_string(domain)
+        params = kwargs.copy()
 
-        if high_time_resolution:
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["source"] = clean_string(params.get("source"))
+        params["domain"] = clean_string(params.get("domain"))
+
+        # Checking inputs
+        # - check time_resolved details are set in preference to high_time_resolution
+        if params.get("high_time_resolution"):
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
             )
-            time_resolved = high_time_resolution
+            params["time_resolved"] = params["high_time_resolution"]
 
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
-
-        try:
-            source_format = FluxTypes[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Load the data retrieve object
-        parser_fn = load_flux_parser(source_format=source_format)
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return {}
-
-        filepath = next(iter(unseen_hashes.values()))
-
-        if chunks is None:
-            chunks = {}
-
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "species": species,
-            "domain": domain,
-            "source": source,
-            "time_resolved": time_resolved,
-            "period": period,
-            "continuous": continuous,
-            "data_type": "flux",
-            "chunks": chunks,
-        }
-
-        optional_keywords: dict[Any, Any] = {
-            "database": database,
-            "database_version": database_version,
-            "model": model,
-        }
-
-        signature = inspect.signature(parser_fn)
-        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-        input_parameters: dict[Any, Any] = param.copy()
-
-        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        for param, param_value in optional_keywords.items():
-            if param in fn_accepted_parameters:
-                input_parameters[param] = param_value
-            else:
-                logger.warning(
-                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                    f"This is not accepted by the current standardisation function: {parser_fn}"
-                )
-
-        flux_data = parser_fn(**input_parameters)
-
-        # Checking against expected format for Flux
-        for split_data in flux_data.values():
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
-
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
-
-        required = tuple(min_required)
-
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
-
-        data_type = "flux"
-        datasource_uuids = self.assign_data(
-            data=flux_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            required_keys=required,
-            compressor=compressor,
-            filters=filters,
-        )
-
-        # Record the file hash in case we see this file again
-        self.store_hashes(unseen_hashes)
-
-        return datasource_uuids
+        return params
 
     def transform_data(
         self,
-        datapath: Union[str, Path],
+        datapath: pathType,
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
-        **kwargs: Dict,
-    ) -> Dict:
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        info_metadata: dict | None = None,
+        **kwargs: dict,
+    ) -> list[dict]:
         """
         Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
@@ -296,8 +146,8 @@ class Flux(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.types import FluxDatabases
-        from openghg.util import load_flux_database_parser, check_if_need_new_version
+        from openghg.store.spec import define_transform_parsers
+        from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -310,56 +160,60 @@ class Flux(BaseStore):
 
         datapath = Path(datapath)
 
+        transform_parsers = define_transform_parsers()[self._data_type]
+
         try:
-            data_type = FluxDatabases[database.upper()].value
+            transform_parsers[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_flux_database_parser(database=database)
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
 
         # Define parameters to pass to the parser function from kwargs
-        param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
+        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
 
         flux_data = parser_fn(**param)
 
         # Checking against expected format for Flux
-        for split_data in flux_data.values():
-            em_data = split_data["data"]
-            Flux.validate_data(em_data)
+        for mdd in flux_data:
+            Flux.validate_data(mdd.data)
 
         required_keys = ("species", "source", "domain")
 
-        if optional_metadata:
-            common_keys = set(required_keys) & set(optional_metadata.keys())
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
 
             if common_keys:
                 raise ValueError(
                     f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
                 )
             else:
-                for key, parsed_data in flux_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
+                for parsed_data in flux_data:
+                    parsed_data.metadata.update(info_metadata)
 
-        data_type = "flux"
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
-            data_type=data_type,
             required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )
 
+        # "date" used to be part of the "keys" in the old datasource_uuids format
+        if "date" in param:
+            for du in datasource_uuids:
+                du["date"] = param["date"]
+
         return datasource_uuids
 
     @staticmethod
-    def schema() -> DataSchema:
+    def schema() -> DataSchema:  # type: ignore[override]
         """
         Define schema for flux / emissions Dataset.
 
@@ -372,27 +226,9 @@ class Flux(BaseStore):
         Returns:
             DataSchema : Contains schema for Flux.
         """
-        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
+        data_vars: dict[str, tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
-
-    @staticmethod
-    def validate_data(data: Dataset) -> None:
-        """
-        Validate input data against Flux schema - definition from
-        Flux.schema() method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Flux schema.
-        """
-        data_schema = Flux.schema()
-        data_schema.validate_data(data)

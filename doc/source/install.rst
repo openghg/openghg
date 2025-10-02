@@ -39,12 +39,11 @@ of libraries can be installed without making changes to versions of libraries ne
 pip
 ---
 
-First create a virtual environment
+First create a virtual environment and activate it
 
 .. code-block:: bash
 
     python -m venv /path/to/env/openghg_env
-    # Activate the environment
     source /path/to/env/bin/activate
 
 Here change ``/path/to/env`` with your own path.

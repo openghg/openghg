@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 from pathlib import Path
-from typing import Dict, Optional
 import uuid
 import toml
 import shutil
@@ -196,7 +195,7 @@ def create_config(silent: bool = False) -> None:
     user_config_path.write_text(toml.dumps(config))
 
 
-def _user_multstore_input() -> Dict:
+def _user_multstore_input() -> dict:
     """Ask the user to input data about shared object stores
 
     Returns:
@@ -224,7 +223,7 @@ def _user_multstore_input() -> Dict:
     return stores
 
 
-def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[str] = None) -> Dict:
+def _combine_config(config_version: str, object_stores: dict, user_id: str | None = None) -> dict:
     """Combine parts required into the proper dictionary format
 
     Args:
@@ -247,7 +246,7 @@ def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[
 
 
 # @lru_cache
-def read_local_config() -> Dict:
+def read_local_config() -> dict:
     """Reads the local config file.
 
     Returns:
@@ -264,7 +263,7 @@ def read_local_config() -> Dict:
                 or run openghg --quickstart"
             ) from e
 
-    config: Dict = toml.loads(config_path.read_text())
+    config: dict = toml.loads(config_path.read_text())
 
     try:
         _ = config["object_store"]["user"]
@@ -377,10 +376,76 @@ def _check_valid_store(store_path: Path) -> bool:
     data_dir = Path(store_path).joinpath("data")
     # Now check if there's a zarr folder in the data directory
     store_dirs = list(data_dir.glob("*"))
-    # Let's take the first data directory and see if there's a zarr folder in it
-    if not store_dirs:
-        raise ObjectStoreError("No data found in the object store, please check the path and try again.")
 
+    # if no store dirs, assume this is an empty zarr store
+    if not store_dirs:
+        return True
+
+    # Let's take the first data directory and see if there's a zarr folder in it
     store_data_dir = store_dirs[0]
 
     return store_data_dir.joinpath("zarr").exists()
+
+
+def handle_direct_store_path(path: str, name: str | None = None, add_new_store: bool = False) -> str:
+    """
+    Try to interpret a given name as a direct object store path.
+    If valid and not in config, optionally prompt to add it to the config.
+
+    Args:
+        path: The potential path to an object store.
+        add_new_store: Whether to prompt user to add the path to config.
+
+    Returns:
+        str: Resolved path string.
+    """
+    possible_path = Path(path).expanduser().resolve()
+
+    if not (possible_path.exists() or possible_path.is_absolute()):
+        raise ObjectStoreError(f"'{path}' is not a valid path or store name.")
+
+    logger.warning(
+        f"'{path}' is not a configured writable store name but looks like a path. " "Using it directly."
+    )
+
+    if add_new_store:
+        if name is not None:
+            name = name
+        else:
+            name = possible_path.name  # e.g., 'my_store' from '/tmp/my_store'
+        _add_path_to_config(possible_path, name=name)
+
+    return str(possible_path)
+
+
+def _add_path_to_config(path: Path, name: str | None = None) -> None:
+    """
+    Add a new object store path to the user's config.
+
+    Args:
+        path: The path to add.
+        name: Optional name for the new store. If None, ask the user.
+
+    Returns:
+        None
+    """
+
+    config_path = get_user_config_path()
+    config = {}
+
+    if config_path.exists():
+        config = toml.loads(config_path.read_text())
+
+    if name in config.get("object_store", {}):
+        raise ObjectStoreError(f"A store with the name '{name}' already exists in the config.")
+
+    # Ensure "object_store" exists before inserting
+    if "object_store" not in config:
+        config["object_store"] = {}
+
+    config["object_store"][name] = {"path": str(path), "permissions": "rw"}
+
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(toml.dumps(config))
+
+    logger.info(f"Added store '{name}' with path '{path}' to config.")

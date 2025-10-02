@@ -1,13 +1,14 @@
+import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 from pandas import DataFrame
 
-from openghg.types import optionalPathType
+from openghg.standardise.meta import dataset_formatter
+from openghg.types import pathType, multiPathType
+
+logger = logging.getLogger("openghg.standardise")
 
 
-def find_files(
-    data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6"
-) -> List[Tuple[Path, Path]]:
+def find_files(data_path: pathType, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
     """A helper file to find GCWERKS data and precisions file in a given folder.
     It searches for .C files of the format macehead.19.C, looks for a precisions file
     named macehead.19.precions.C and if it exists creates a tuple for these files.
@@ -39,13 +40,13 @@ def find_files(
 
         if data_match:
             prec_filepath = data_path / Path(Path(file).stem + ".precisions.C")
-            data_filepath = data_path / data_match.group()
+            filepath = data_path / data_match.group()
 
             if any(s in data_match.group() for s in skip_str):
                 continue
 
             if prec_filepath.exists():
-                data_precision_tuples.append((data_filepath, prec_filepath))
+                data_precision_tuples.append((filepath, prec_filepath))
 
     data_precision_tuples.sort()
 
@@ -53,21 +54,20 @@ def find_files(
 
 
 def parse_gcwerks(
-    data_filepath: Union[str, Path],
-    precision_filepath: Union[str, Path],
+    filepath: pathType,
+    precision_filepath: pathType,
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
-        data_filepath: Path of data file
+        filepath: Path of data file
         precision_filepath: Path of precision file
         site: Three letter code or name for site
         instrument: Instrument name
@@ -78,7 +78,7 @@ def parse_gcwerks(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of source_name : UUIDs
@@ -88,7 +88,7 @@ def parse_gcwerks(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json
 
-    data_filepath = Path(data_filepath)
+    filepath = Path(filepath)
     precision_filepath = Path(precision_filepath)
 
     # Do some setup for processing
@@ -106,16 +106,16 @@ def parse_gcwerks(
 
     # Check if the site code passed matches that read from the filename
     site = _check_site(
-        filepath=data_filepath,
+        filepath=filepath,
         site_code=site,
         gc_params=gc_params,
     )
 
     # If we're not passed the instrument name and we can't find it raise an error
     if instrument is None:
-        instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=True)
+        instrument = _check_instrument(filepath=filepath, gc_params=gc_params, should_raise=True)
     else:
-        fname_instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=False)
+        fname_instrument = _check_instrument(filepath=filepath, gc_params=gc_params, should_raise=False)
 
         if fname_instrument is not None and instrument != fname_instrument:
             raise ValueError(
@@ -125,7 +125,7 @@ def parse_gcwerks(
     instrument = str(instrument)
 
     gas_data = _read_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         precision_filepath=precision_filepath,
         site=site,
         instrument=instrument,
@@ -133,6 +133,8 @@ def parse_gcwerks(
         sampling_period=sampling_period,
         gc_params=gc_params,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     # Assign attributes to the data for CF compliant NetCDFs
     gas_data = assign_attributes(
@@ -142,7 +144,7 @@ def parse_gcwerks(
     return gas_data
 
 
-def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
+def _check_site(filepath: Path, site_code: str, gc_params: dict) -> str:
     """Check if the site passed in matches that in the filename
 
     Args:
@@ -176,7 +178,7 @@ def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
     return site_code
 
 
-def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = False) -> Union[str, None]:
+def _check_instrument(filepath: Path, gc_params: dict, should_raise: bool = False) -> str | None:
     """Ensure we have the correct instrument or translate an instrument
     suffix to an instrument name.
 
@@ -211,18 +213,18 @@ def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = Fals
 
 
 def _read_data(
-    data_filepath: Path,
+    filepath: Path,
     precision_filepath: Path,
     site: str,
     instrument: str,
     network: str,
-    gc_params: Dict,
-    sampling_period: Optional[str] = None,
-) -> Dict:
+    gc_params: dict,
+    sampling_period: str | None = None,
+) -> dict:
     """Read data from the data and precision files
 
     Args:
-        data_filepath: Path of data file
+        filepath: Path of data file
         precision_filepath: Path of precision file
         site: Name of site
         instrument: Instrument name
@@ -237,12 +239,12 @@ def _read_data(
     from pandas import read_csv
 
     # Read header
-    header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
+    header = read_csv(filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=4,
         sep=r"\s+",
         parse_dates={"Datetime": [1, 2, 3, 4, 5]},
@@ -254,7 +256,7 @@ def _read_data(
         raise ValueError("Cannot process empty file.")
 
     # This metadata will be added to when species are split and attributes are written
-    metadata: Dict[str, str] = {
+    metadata: dict[str, str] = {
         "instrument": instrument,
         "site": site,
         "network": network,
@@ -279,7 +281,7 @@ def _read_data(
     units = {}
     scale = {}
 
-    flag_columns: List[Series] = []
+    flag_columns: list[Series] = []
     species = []
     columns_renamed = {}
     for column in data.columns:
@@ -349,7 +351,7 @@ def _read_data(
     return gas_data
 
 
-def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
+def _read_precision(filepath: Path) -> tuple[DataFrame, list]:
     """Read GC precision file
 
     Args:
@@ -385,12 +387,12 @@ def _split_species(
     data: DataFrame,
     site: str,
     instrument: str,
-    species: List,
-    metadata: Dict,
-    units: Dict,
-    scale: Dict,
-    gc_params: Dict,
-) -> Dict:
+    species: list,
+    metadata: dict,
+    units: dict,
+    scale: dict,
+    gc_params: dict,
+) -> dict:
     """Splits the species into separate dataframe into sections to be stored within individual Datasources
 
     Args:
@@ -532,12 +534,12 @@ def _split_species(
             combined_data[data_key]["data"] = spec_data
             combined_data[data_key]["attributes"] = attributes
 
-    to_return: Dict = combined_data.to_dict()
+    to_return: dict = combined_data.to_dict()
 
     return to_return
 
 
-def _get_sampling_period(instrument: str, gc_params: Dict) -> str:
+def _get_sampling_period(instrument: str, gc_params: dict) -> str:
     """Process the suffix from the filename to get the correct instrument name
     then retrieve the sampling period of that instrument from metadata.
 
@@ -557,7 +559,7 @@ def _get_sampling_period(instrument: str, gc_params: Dict) -> str:
     return sampling_period
 
 
-def _get_inlets(site_code: str, gc_params: Dict) -> Dict:
+def _get_inlets(site_code: str, gc_params: dict) -> dict:
     """Get the inlets we expect to be at this site and create a
     mapping dictionary so we get consistent labelling.
 
@@ -582,7 +584,7 @@ def _get_inlets(site_code: str, gc_params: Dict) -> Dict:
     return mapping_dict
 
 
-def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict) -> Dict[str, str]:
+def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: dict) -> dict[str, str]:
     """Gets the site specific attributes for writing to Datsets
 
     Args:
@@ -598,7 +600,7 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
     site = site.upper()
     instrument = instrument.lower()
 
-    attributes: Dict[str, str] = gc_params["sites"][site]["global_attributes"]
+    attributes: dict[str, str] = gc_params["sites"][site]["global_attributes"]
 
     attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     try:
@@ -608,3 +610,59 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
         raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
     return attributes
+
+
+def check_gcwerks_input(
+    filepath: multiPathType, precision_filepath: str | Path | list[str] | list[Path] | None
+) -> tuple[list[Path], list[Path]]:
+    """
+    Check that both filepath and precision_filepath are specified when using the gcwerks
+    source format. At the moment this can be specified as:
+        - filepath can contain tuples of (filepath, precision_filepath) pairs
+            - This will be deprecated.
+        - filepath and precision_filepath can be specified separately but must be the same length
+
+    Args:
+        filepath: Filepath or filepath and precision_filepath pairs for the input files
+        precision_filepath: Precision filepath details to link with filepath.
+    Returns:
+        list, list: Filepath and precision filepath details as lists
+    """
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    if isinstance(precision_filepath, str):
+        precision_filepath = [Path(precision_filepath)]
+    elif isinstance(precision_filepath, Path):
+        precision_filepath = [precision_filepath]
+
+    filepaths: list[Path] = []
+    precision_filepaths: list[Path] = []
+
+    for fp in filepath:
+        if isinstance(fp, tuple):
+            if precision_filepath is None:
+                logger.warning(
+                    "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` input instead."
+                )
+            else:
+                msg = "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` only."
+                logger.exception(msg)
+                raise TypeError(msg)
+
+            filepaths.append(Path(fp[0]))
+            precision_filepaths.append(Path(fp[1]))
+        else:
+            if precision_filepath is None:
+                msg = "For GCWERKS format, filepath and precision_filepath must be specified."
+                logger.exception(msg)
+                raise TypeError(msg)
+            filepaths.append(Path(fp))
+
+    if len(filepaths) != len(precision_filepaths):
+        raise TypeError(
+            f"For GCWERKS data the same number of files should be supplied filepath and precision_filepath. Currently {len(filepaths)} and {len(precision_filepaths)}"
+        )
+
+    return filepaths, precision_filepaths

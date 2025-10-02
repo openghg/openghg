@@ -9,7 +9,7 @@ from pandas import Timestamp
 #     filepath = get_surface_datapath(filename="Charlton_Community_Center.csv", source_format="BEACO2N")
 
 #     result = beacon.read_file(
-#         data_filepath=filepath,
+#         filepath=filepath,
 #         site="charlton community centre",
 #         network="BEACO2N",
 #         inlet="5m",
@@ -78,7 +78,7 @@ def test_read_glasgow_valid_data():
     filepath = get_surface_datapath(filename="175_BELLAHOUSTONACADEMY.csv", source_format="BEACO2N")
 
     result = parse_beaco2n(
-        data_filepath=filepath,
+        filepath=filepath,
         site="BELLAHOUSTONACADEMY",
         network="BEACO2N",
         inlet="99m",
@@ -97,7 +97,7 @@ def test_read_glasgow_no_valid_data():
     filepath = get_surface_datapath(filename="171_UNIVERSITYOFSTRATHCLYDE.csv", source_format="BEACO2N")
 
     result = parse_beaco2n(
-        data_filepath=filepath,
+        filepath=filepath,
         site="UNIVERSITYOFSTRATHCLYDE",
         network="BEACO2N",
         inlet="99m",
@@ -110,11 +110,11 @@ def test_incorrect_file_read_raises():
     filepath = get_surface_datapath(filename="incorrect_format.csv", source_format="BEACO2N")
 
     with pytest.raises(ValueError):
-        parse_beaco2n(data_filepath=filepath, site="test", network="test", inlet="test")
+        parse_beaco2n(filepath=filepath, site="test", network="test", inlet="test")
 
 
 def test_incorrect_site_raises():
     filepath = get_surface_datapath(filename="Unknown_site.csv", source_format="BEACO2N")
 
     with pytest.raises(ValueError):
-        parse_beaco2n(data_filepath=filepath, site="test", network="test", inlet="test")
+        parse_beaco2n(filepath=filepath, site="test", network="test", inlet="test")

@@ -19,10 +19,10 @@ def load_CRDS():
     bsd_108m = get_surface_datapath("bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_248m = get_surface_datapath("bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    standardise_surface(filepaths=tac_100m, source_format="CRDS", site="tac", network="DECC", store="user")
-    standardise_surface(filepaths=hfd_50m, source_format="CRDS", site="hfd", network="DECC", store="user")
+    standardise_surface(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC", store="user")
+    standardise_surface(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC", store="user")
     standardise_surface(
-        filepaths=[bsd_42m, bsd_108m, bsd_248m],
+        filepath=[bsd_42m, bsd_108m, bsd_248m],
         source_format="CRDS",
         site="bsd",
         network="DECC",

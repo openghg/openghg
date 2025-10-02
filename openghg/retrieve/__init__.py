@@ -4,7 +4,6 @@ from ._access import (
     get_footprint,
     get_obs_column,
     get_obs_surface,
-    get_obs_surface_local,
 )
 from ._export import get_ceda_file
 from ._search import (

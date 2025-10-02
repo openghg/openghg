@@ -1,30 +1,33 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Hashable, Optional, Union, cast
-
+from typing import Any, cast
+from collections.abc import Hashable
 import xarray as xr
-from openghg.types import optionalPathType
+
+from openghg.standardise.meta import dataset_formatter
+from openghg.types import pathType
+from openghg.util import check_and_set_null_variable, not_set_metadata_values, open_nc_fn
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
-    data_filepath: Union[str, Path],
+    filepath: str | Path | list[str] | list[Path],
     site: str,
-    measurement_type: str,
-    inlet: Optional[str] = None,
+    measurement_type: str | None,
+    inlet: str | None = None,
     network: str = "NOAA",
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-    **kwarg: Dict,
-) -> Dict:
+    site_filepath: pathType | None = None,
+    **kwarg: dict,
+) -> dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
 
     Args:
-        data_filepath: Data filepath
+        filepath: Data filepath
         site: Three letter site code
         inlet: Inlet height (as value unit e.g. "10m")
         measurement_type: One of ("flask", "insitu", "pfp")
@@ -37,21 +40,41 @@ def parse_noaa(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "attributes" - update mismatches based on input attributes
                 - "metadata" - update mismatches based on input metadata
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of data and metadata
     """
     if sampling_period is None:
-        sampling_period = "NOT_SET"
+        sampling_period = check_and_set_null_variable(sampling_period)
 
     sampling_period = str(sampling_period)
 
-    file_extension = Path(data_filepath).suffix
+    valid_types = ("flask", "insitu", "pfp")
 
-    if file_extension == ".nc":
+    if measurement_type is None:
+        raise ValueError(
+            f"measurement_type must be specified for source_format='noaa'. This must be one of {valid_types}"
+        )
+    elif measurement_type not in valid_types:
+        raise ValueError(f"measurement_type is '{measurement_type}' but must be one of {valid_types}")
+
+    if isinstance(filepath, list):
+        file_extensions = [Path(fp).suffix for fp in filepath]
+        if all([ext == ".nc" for ext in file_extensions]):
+            input_is_nc = True
+        else:
+            raise ValueError("For multiple input files must all be '.nc' files. Currently: {filepath}")
+    else:
+        file_extension = Path(filepath).suffix
+        if file_extension == ".nc":
+            input_is_nc = True
+        else:
+            input_is_nc = False
+
+    if input_is_nc:
         return _read_obspack(
-            data_filepath=data_filepath,
+            filepath=filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -61,8 +84,9 @@ def parse_noaa(
             site_filepath=site_filepath,
         )
     else:
+        single_filepath = cast(str | Path, filepath)
         return _read_raw_file(
-            data_filepath=data_filepath,
+            filepath=single_filepath,
             site=site,
             inlet=inlet,
             measurement_type=measurement_type,
@@ -152,9 +176,7 @@ def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     return processed_ds
 
 
-def _split_inlets(
-    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
-) -> Dict:
+def _split_inlets(obspack_ds: xr.Dataset, attributes: dict, metadata: dict, inlet: str | None = None) -> dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -184,7 +206,7 @@ def _split_inlets(
     # If so we need to select the data for each inlet and indicate this is a separate Datasource
     # Each data key is labelled based on the species and the inlet (if needed)
 
-    gas_data: Dict[str, Dict] = {}
+    gas_data: dict[str, dict] = {}
     if height_var in obspack_ds.data_vars:
         if inlet is not None:
             # TODO: Add to logging?
@@ -270,19 +292,19 @@ def _split_inlets(
 
 
 def _read_obspack(
-    data_filepath: Union[str, Path],
+    filepath: str | Path | list[str] | list[Path],
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict[str, Dict]:
+    site_filepath: pathType | None = None,
+) -> dict[str, dict]:
     """Read NOAA ObsPack NetCDF files
 
     Args:
-        data_filepath: Path to file
+        filepath: Path to file
         site: Three letter site code
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -294,7 +316,7 @@ def _read_obspack(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of results
@@ -302,12 +324,9 @@ def _read_obspack(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
 
-    valid_types = ("flask", "insitu", "pfp")
+    xr_open_fn, filepath = open_nc_fn(filepath)
 
-    if measurement_type not in valid_types:
-        raise ValueError(f"measurement_type must be one of {valid_types}")
-
-    with xr.open_dataset(data_filepath) as temp:
+    with xr_open_fn(filepath) as temp:
         obspack_ds = temp
         orig_attrs = temp.attrs
 
@@ -338,7 +357,8 @@ def _read_obspack(
     processed_ds = processed_ds.set_coords(["time"])
 
     # Estimate sampling period using metadata and midpoint time
-    if sampling_period == "NOT_SET":
+    not_set_values = not_set_metadata_values()
+    if sampling_period in not_set_values:
         sampling_period_estimate = _estimate_sampling_period(obspack_ds)
     else:
         sampling_period_estimate = -1.0
@@ -360,7 +380,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
-    metadata["data_source"] = "noaa_obspack"
+    metadata["dataset_source"] = "noaa_obspack"
     metadata["data_type"] = "surface"
 
     # Add additional sampling_period_estimate if sampling_period is not set
@@ -369,21 +389,24 @@ def _read_obspack(
             sampling_period_estimate
         )  # convert to string to keep consistent with "sampling_period"
 
+    # Define not_set value to use as a default
+    not_set_value = not_set_values[0]
+
     # Add instrument if present
     if instrument is not None:
         metadata["instrument"] = instrument
     else:
-        metadata["instrument"] = orig_attrs.get("instrument", "NOT_SET")
+        metadata["instrument"] = orig_attrs.get("instrument", not_set_value)
 
     # Add data owner details, station position and calibration scale, if present
-    metadata["data_owner"] = orig_attrs.get("provider_1_name", "NOT_SET")
-    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", "NOT_SET")
-    metadata["station_longitude"] = orig_attrs.get("site_longitude", "NOT_SET")
-    metadata["station_latitude"] = orig_attrs.get("site_latitude", "NOT_SET")
-    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
+    metadata["data_owner"] = orig_attrs.get("provider_1_name", not_set_value)
+    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", not_set_value)
+    metadata["station_longitude"] = orig_attrs.get("site_longitude", not_set_value)
+    metadata["station_latitude"] = orig_attrs.get("site_latitude", not_set_value)
+    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", not_set_value)
 
     # Create attributes with copy of metadata values
-    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
+    attributes = cast(dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
@@ -402,6 +425,8 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
+    gas_data = dataset_formatter(data=gas_data)
+
     gas_data = assign_attributes(
         data=gas_data,
         site=site,
@@ -414,20 +439,20 @@ def _read_obspack(
 
 
 def _read_raw_file(
-    data_filepath: Union[str, Path],
+    filepath: pathType,
     site: str,
     sampling_period: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+) -> dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.
 
     Args:
-        data_filepath: Path of file to load
+        filepath: Path of file to load
         site: Site name
         sampling_period: Sampling period
         measurement_type: One of flask, insitu or pfp
@@ -439,7 +464,7 @@ def _read_raw_file(
               - "never" - don't update mismatches and raise an AttrMismatchError
               - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
 
     Returns:
@@ -452,21 +477,23 @@ def _read_raw_file(
     if inlet is None:
         raise ValueError("Inlet must be specified to derive data from NOAA raw (txt) files.")
 
-    data_filepath = Path(data_filepath)
-    filename = data_filepath.name
+    filepath = Path(filepath)
+    filename = filepath.name
 
     species = filename.split("_")[0].lower()
 
-    source_name = data_filepath.stem
+    source_name = filepath.stem
     source_name = source_name.split("-")[0]
 
     gas_data = _read_raw_data(
-        data_filepath=data_filepath,
+        filepath=filepath,
         inlet=inlet,
         species=species,
         measurement_type=measurement_type,
         sampling_period=sampling_period,
     )
+
+    gas_data = dataset_formatter(data=gas_data)
 
     gas_data = assign_attributes(
         data=gas_data, site=site, network="NOAA", update_mismatch=update_mismatch, site_filepath=site_filepath
@@ -476,19 +503,19 @@ def _read_raw_file(
 
 
 def _read_raw_data(
-    data_filepath: Path,
+    filepath: Path,
     species: str,
     inlet: str,
     sampling_period: str,
     measurement_type: str = "flask",
-) -> Dict:
+) -> dict:
     """Separates the gases stored in the dataframe in
     separate dataframes and returns a dictionary of gases
     with an assigned UUID as gas:UUID and a list of the processed
     dataframes
 
     Args:
-        data_filepath: Path of datafile
+        filepath: Path of datafile
         species: Species string such as CH4, CO
         measurement_type: Type of measurements e.g. flask
     Returns:
@@ -497,7 +524,7 @@ def _read_raw_data(
     from openghg.util import clean_string, get_site_info, load_internal_json, read_header
     from pandas import read_csv
 
-    header = read_header(filepath=data_filepath)
+    header = read_header(filepath=filepath)
 
     column_names = header[-1][14:].split()
 
@@ -514,7 +541,7 @@ def _read_raw_data(
     ]
 
     data = read_csv(
-        data_filepath,
+        filepath,
         skiprows=n_skip,
         names=column_names,
         sep=r"\s+",
@@ -537,7 +564,7 @@ def _read_raw_data(
     site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
-        site = str(data_filepath.name).split("_")[1].upper()
+        site = str(filepath.name).split("_")[1].upper()
 
         if site not in site_data:
             raise ValueError(f"The site {site} is not recognized.")
@@ -638,7 +665,7 @@ def _estimate_sampling_period(obspack_ds: xr.Dataset, min_estimate: float = 10.0
     hourly_s = 60 * 60
     daily_s = hourly_s * 24
     weekly_s = daily_s * 7
-    monthly_s = weekly_s * 28  # approx
+    monthly_s = daily_s * 28  # approx
     yearly_s = daily_s * 365  # approx
 
     sampling_period_estimate = 0.0  # seconds

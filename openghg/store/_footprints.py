@@ -1,14 +1,13 @@
 from __future__ import annotations
 import logging
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import cast, Any
 import warnings
 import numpy as np
+
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.store.storage import ChunkingSchema
-from openghg.util import species_lifetime
-from xarray import Dataset
+from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 
 __all__ = ["Footprints"]
 
@@ -24,7 +23,7 @@ class Footprints(BaseStore):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -184,314 +183,105 @@ class Footprints(BaseStore):
 
     #     """
 
-    def read_file(
-        self,
-        filepath: Union[List, str, Path],
-        site: str,
-        domain: str,
-        model: str,
-        inlet: Optional[str] = None,
-        height: Optional[str] = None,
-        met_model: Optional[str] = None,
-        species: Optional[str] = None,
-        network: Optional[str] = None,
-        period: Optional[Union[str, tuple]] = None,
-        continuous: bool = True,
-        chunks: Optional[Dict] = None,
-        source_format: str = "acrg_org",
-        retrieve_met: bool = False,
-        high_spatial_resolution: bool = False,
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-        short_lifetime: bool = False,
-        if_exists: str = "auto",
-        save_current: str = "auto",
-        overwrite: bool = False,
-        force: bool = False,
-        sort: bool = False,
-        drop_duplicates: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
-        """Reads footprints data files and returns the UUIDS of the Datasources
-        the processed data has been assigned to
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs for Footprints. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_footprint()
+        function.
 
         Args:
-            filepath: Path(s) of file(s) to standardise
-            site: Site name
-            domain: Domain of footprints
-            model: Model used to create footprint (e.g. NAME or FLEXPART)
-            inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-            height: Alias for inlet. One of height or inlet MUST be included.
-            met_model: Underlying meteorlogical model used (e.g. UKV)
-            species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
-            network: Network name
-            period: Period of measurements. Only needed if this can not be inferred from the time coords
-            chunks: Chunking schema to use when storing data.
-            continuous: Whether time stamps have to be continuous.
-            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-            source_format : Type of data being input e.g. acrg_org
-            retrieve_met: Whether to also download meterological data for this footprints area
-            high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-            time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-                           Note this will be set to True automatically if species="co2" (Carbon Dioxide).
-            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
-            short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
-                            Note this will be set to True if species has an associated lifetime.
-            if_exists: What to do if existing data is present.
-                - "auto" - checks new and current data for timeseries overlap
-                   - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
-                - "new" - just include new data and ignore previous
-                - "combine" - replace and insert new data into current timeseries
-            save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-                - "n" / "no" - Allow current data to updated / deleted
-            overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
-            sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
-            drop_duplicates: Drop duplicate timestamps, keeping the first value
-            compressor: A custom compressor to use. If None, this will default to
-                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
         Returns:
-            dict: UUIDs of Datasources data has been assigned to
+            dict: Formatted parameters for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
         """
-        from openghg.types import FootprintTypes
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            check_and_set_null_variable,
+        )
 
-        from openghg.util import clean_string, format_inlet, check_if_need_new_version, load_footprint_parser
+        params = kwargs.copy()
 
-        if not isinstance(filepath, list):
-            filepath = [filepath]
+        # Apply clean string formatting
+        params["site"] = clean_string(params.get("site"))
+        params["satellite"] = clean_string(params.get("satellite"))
+        params["obs_region"] = clean_string(params.get("obs_region"))
+        params["network"] = clean_string(params.get("network"))
+        params["domain"] = clean_string(params.get("domain"))
+        params["inlet"] = clean_string(params.get("inlet"))
+        params["height"] = clean_string(params.get("height"))
+        params["species"] = clean_string(params.get("species"))
+        params["met_model"] = clean_string(params.get("met_model"))
 
-        if high_time_resolution:
+        # Checking inputs
+        # - check time_resolved details are set in preference to high_time_resolution
+        if params.get("high_time_resolution") is not None:
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
             )
-            time_resolved = high_time_resolution
+            params["time_resolved"] = params["high_time_resolution"]
+            params.pop("high_time_resolution")
 
-        # We wanted sorted Path objects
-        filepath = sorted([Path(f) for f in filepath])
+        # - check either site or (satellite and obs_region) are included
+        if params.get("satellite") is not None and params.get("obs_region") is not None:
+            params["continuous"] = False
+            logger.info("For satellite data, 'continuous' is set to `False`")
+        elif params.get("site") is None:
+            msg = "Please pass either site or satellite and obs_region values"
+            logger.exception(msg)
+            raise ValueError(msg)
 
-        site = clean_string(site)
-        network = clean_string(network)
-        domain = clean_string(domain)
-
-        # Make sure `inlet` OR the alias `height` is included
-        # Note: from this point only `inlet` variable should be used.
-        if inlet is None and height is None:
+        # - make sure `inlet` OR the alias `height` is included
+        #    - note: from this point only `inlet` variable should be used.
+        inlet = params.get("inlet")
+        if inlet is None and params.get("height") is None:
             raise ValueError("One of inlet (or height) must be specified as an input")
         elif inlet is None:
-            inlet = height
+            params["inlet"] = params["height"]
+            params.pop("height")
 
-        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
-        inlet = clean_string(inlet)
-        inlet = format_inlet(inlet)
-        inlet = cast(str, inlet)
+        # Apply individual formatting as appropriate
 
-        # Ensure we have a value for species
+        # - try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        params["inlet"] = format_inlet(params.get("inlet"))
+        params["inlet"] = cast(str, params["inlet"])
+
+        # - ensure we have a value for species
+        species = params.get("species")
         if species is None:
-            species = "inert"
+            params["species"] = "inert"
         else:
-            species = clean_string(species)
+            params["species"] = synonyms(species)
 
-        # Ensure we have a clear missing value for met_model
-        if met_model is None:
-            met_model = "NOT_SET"
-        else:
-            met_model = clean_string(met_model)
+        # - check time_resolved and short_lifetime values are appropriate for species
+        time_resolved = params.get("time_resolved", False)
+        short_lifetime = params.get("short_lifetime", False)
+        params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
 
-        if network is not None:
-            network = clean_string(network)
-
-        try:
-            source_format = FootprintTypes[source_format.upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown data type {source_format} selected.")
-
-        # Load the data retrieve object
-        parser_fn = load_footprint_parser(source_format=source_format)
-
-        # file_hash = hash_file(filepath=filepath)
-        # if file_hash in self._file_hashes and not overwrite:
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return {}
-
-        filepath = list(unseen_hashes.values())
-
-        if not filepath:
-            return {}
-
-        # Do some housekeeping on the inputs
-        if species == "co2":
-            # Expect co2 data to have high time resolution
-            if not time_resolved:
-                logger.info("Updating time_resolved to True for co2 data")
-                time_resolved = True
-
-            if sort:
-                logger.info(
-                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
-                )
-
-        if short_lifetime:
-            if species == "inert":
-                raise ValueError(
-                    "When indicating footprint is for short lived species, 'species' input must be included"
-                )
-        else:
-            if species == "inert":
-                lifetime = None
-            else:
-                lifetime = species_lifetime(species)
-                if lifetime is not None:
-                    # TODO: May want to add a check on length of lifetime here
-                    logger.info("Updating short_lifetime to True since species has an associated lifetime")
-                    short_lifetime = True
-
-        chunks = self.check_chunks(
-            filepaths=filepath,
-            chunks=chunks,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            short_lifetime=short_lifetime,
-        )
-
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "site": site,
-            "domain": domain,
-            "model": model,
-            "inlet": inlet,
-            "met_model": met_model,
-            "species": species,
-            "network": network,
-            "time_resolved": time_resolved,
-            "high_spatial_resolution": high_spatial_resolution,
-            "short_lifetime": short_lifetime,
-            "period": period,
-            "continuous": continuous,
-            "chunks": chunks,
-        }
-
-        input_parameters: dict[Any, Any] = param.copy()
-
-        # # TODO: Decide if we want to include details below / switch any parameters to be optional.
-        # optional_keywords: dict[Any, Any] = {}
-
-        # signature = inspect.signature(parser_fn)
-        # fn_accepted_parameters = [param.name for param in signature.parameters.values()]
-
-        # # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
-        # for param, param_value in optional_keywords.items():
-        #     if param in fn_accepted_parameters:
-        #         input_parameters[param] = param_value
-        #     else:
-        #         logger.warning(
-        #             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-        #             f"This is not accepted by the current standardisation function: {parser_fn}"
-        #         )
-
-        footprint_data = parser_fn(**input_parameters)
-
-        # Checking against expected format for footprints
-        # Based on configuration (some user defined, some inferred)
-        for split_data in footprint_data.values():
-            fp_data = split_data["data"]
-            Footprints.validate_data(
-                fp_data,
-                high_spatial_resolution=high_spatial_resolution,
-                time_resolved=time_resolved,
-                short_lifetime=short_lifetime,
-            )
-
-        if species == "co2" and sort is True:
+        if params.get("time_resolved") and params.get("sort") is True:
             logger.info(
                 "Sorting high time resolution data is very memory intensive, we recommend not sorting."
             )
 
-        # These are the keys we will take from the metadata to search the
-        # metadata store for a Datasource, they should provide as much detail as possible
-        # to uniquely identify a Datasource
-        required = (
-            "site",
-            "model",
-            "inlet",
-            "domain",
-            "time_resolved",
-            "high_spatial_resolution",
-            "short_lifetime",
-            "species",
-            "met_model",
-        )
+        # Ensure we have a clear missing value (not_set) where needed (required keys)
+        params["met_model"] = check_and_set_null_variable(params.get("met_model"))
 
-        if optional_metadata:
-            common_keys = set(required) & set(optional_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for key, parsed_data in footprint_data.items():
-                    parsed_data["metadata"].update(optional_metadata)
-
-        data_type = "footprints"
-        # TODO - filter options
-        datasource_uuids = self.assign_data(
-            data=footprint_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            required_keys=required,
-            sort=sort,
-            drop_duplicates=drop_duplicates,
-            compressor=compressor,
-            filters=filters,
-        )
-
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # footprint_data = update_metadata(
-        #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        # )
-
-        # Record the file hash in case we see the file(s) again
-        self.store_hashes(unseen_hashes)
-
-        return datasource_uuids
+        return params
 
     @staticmethod
-    def schema(
+    def schema(  # type: ignore[override]
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str | None = None,
     ) -> DataSchema:
         """
         Define schema for footprint Dataset.
@@ -515,6 +305,8 @@ class Footprints(BaseStore):
             high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
+            source_format: optional string containing source format; necessary for "time resolved" footprints since the
+                the schema is different for PARIS/FLEXPART and ACRG formats.
 
         Returns:
             DataSchema object describing this format.
@@ -529,7 +321,7 @@ class Footprints(BaseStore):
         # # footprint internal format consistent with this.
 
         # Names of data variables and associated dimensions (as a tuple)
-        data_vars: Dict[str, Tuple[str, ...]] = {}
+        data_vars: dict[str, tuple[str, ...]] = {}
         # Internal data types of data variables and coordinates
         dtypes = {
             "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
@@ -562,8 +354,15 @@ class Footprints(BaseStore):
         if time_resolved:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
-            data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
-            dtypes["fp_HiTRes"] = np.floating
+            if source_format in ("PARIS", "FLEXPART"):
+                data_vars["fp_time_resolved"] = ("time", "lat", "lon", "H_back")
+                data_vars["fp_residual"] = ("time", "lat", "lon")
+                dtypes["fp_time_resolved"] = np.floating
+                dtypes["fp_residual"] = np.floating
+            else:
+                data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
+                dtypes["fp_HiTRes"] = np.floating
+
             dtypes["H_back"] = np.number  # float or integer
 
         # Includes particle location directions - one for each regional boundary
@@ -580,8 +379,8 @@ class Footprints(BaseStore):
             dtypes["particle_locations_w"] = np.floating
 
         # TODO: Could also add check for meteorological + other data
-        # "pressure", "wind_speed", "wind_direction", "PBLH"
-        # "release_lon", "release_lat"
+        # "air_temperature", "air_pressure", "wind_speed", "wind_from_direction",
+        # "atmosphere_boundary_layer_thickness", "release_lon", "release_lat"
 
         # Include options for short lifetime footprints (short-lived species)
         # This includes additional particle ages (allow calculation of decay based on particle lifetimes)
@@ -600,50 +399,13 @@ class Footprints(BaseStore):
 
         return data_format
 
-    @staticmethod
-    def validate_data(
-        data: Dataset,
-        particle_locations: bool = True,
-        high_spatial_resolution: bool = False,
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-        short_lifetime: bool = False,
-    ) -> None:
-        """
-        Validate data against Footprint schema - definition from
-        Footprints.schema(...) method.
-
-        Args:
-            data : xarray Dataset in expected format
-
-            See Footprints.schema() method for details on optional inputs.
-
-        Returns:
-            None
-
-            Raises a ValueError with details if the input data does not adhere
-            to the Footprints schema.
-        """
-        if high_time_resolution:
-            warnings.warn(
-                "This argument is deprecated and will be replaced in future versions with time_resolved.",
-                DeprecationWarning,
-            )
-            time_resolved = high_time_resolution
-        data_schema = Footprints.schema(
-            particle_locations=particle_locations,
-            high_spatial_resolution=high_spatial_resolution,
-            time_resolved=time_resolved,
-            short_lifetime=short_lifetime,
-        )
-        data_schema.validate_data(data)
-
     def chunking_schema(
         self,
         time_resolved: bool = False,
         high_time_resolution: bool = False,
         high_spatial_resolution: bool = False,
         short_lifetime: bool = False,
+        source_format: str = "",
     ) -> ChunkingSchema:
         """
         Get chunking schema for footprint data.
@@ -671,7 +433,7 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
         if time_resolved:
-            var = "fp_HiTRes"
+            var = "fp_HiTRes" if source_format.upper() not in ("PARIS", "FLEXPART") else "fp_time_resolved"
             time_chunk_size = 24
             secondary_vars = ["lat", "lon", "H_back"]
         else:

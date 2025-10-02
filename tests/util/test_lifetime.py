@@ -94,6 +94,6 @@ def test_species_info_file_mock():
     from openghg_defs import species_info_file
 
     # Check local filepath is being used when external module is called.
-    expected_location_end = Path("openghg/tests/data/info/species_info.json")
+    expected_location_end = Path("tests/data/info/species_info.json")
 
-    assert species_info_file.parts[-5:] == expected_location_end.parts
+    assert species_info_file.parts[-4:] == expected_location_end.parts

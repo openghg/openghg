@@ -6,7 +6,7 @@ import numpy as np
 
 @pytest.fixture(scope="session")
 def data():
-    return pd.DataFrame(np.random.randint(0, 100, size=(100, 4)), columns=["time","a", "b", "c"]).to_xarray()
+    return pd.DataFrame(np.random.randint(0, 100, size=(100, 4)), columns=["time", "a", "b", "c"]).to_xarray()
 
 
 @pytest.fixture(scope="session")

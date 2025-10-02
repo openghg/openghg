@@ -4,6 +4,7 @@ Tests for the TinyDB based metastore.
 It should be possible to use these tests with any metastore,
 provided the fixtures are changed.
 """
+
 import pytest
 import tinydb
 from openghg.objectstore.metastore import TinyDBMetaStore
@@ -205,3 +206,63 @@ def test_update_error_if_not_unique(metastore):
 
     with pytest.raises(MetastoreError):
         metastore.update(where={"key": 123}, to_update={"key2": 234})
+
+
+def test_search_range_via(metastore):
+    """Check if we can search by a range of values."""
+    metastore.insert({"key": 1})
+
+    def test_fn(v):
+        """Check if v is in the range 0 to 2"""
+        return 0 <= v <= 2
+
+    result = metastore.search(search_functions={"KEY": test_fn})
+
+    assert result is not None
+
+    metastore.insert({"key": 1.5})
+
+    result = metastore.search(search_functions={"KEY": test_fn})
+
+    assert len(result) == 2
+
+
+def test_negative_lookup(metastore):
+    metastore.insert({"key": 1})
+    metastore.insert({"key": 1, "extra_key": 2})
+
+    result = metastore.search(negative_lookup_keys=["extra_KEY"])
+
+    assert len(result) == 1
+
+
+@pytest.mark.parametrize(
+    "search_list_keys, expected_names",
+    [
+        ({"groups": "user"}, ["user1", "user2", "user3", "user4"]),
+        ({"groups": "sudo"}, ["user3", "user4"]),
+        ({"groups": ["another-user"]}, ["user4"]),
+        ({"groups": ["sudo", "user"]}, ["user3", "user4"]),
+        ({"groups": ["admin", "user"]}, ["user2"]),
+    ],
+)
+def test_search_list(metastore, search_list_keys, expected_names):
+    """
+    Test lists within the metastore can be searched for values contained within them.
+    1. Check "user" can be found in the groups key for all entries
+    2. Check "sudo" can be found in the groups key for selected entries
+    3. Check a list input can be used in the search
+    4. Check multiple search terms can be included and matching values in any order found (1)
+    5. Check multiple search terms can be included and matching values in any order found (2)
+    """
+    metastore.insert({"name": "user1", "groups": ["user"]})
+    metastore.insert({"name": "user2", "groups": ["admin", "user"]})
+    metastore.insert({"name": "user3", "groups": ["sudo", "user"]})
+    metastore.insert({"name": "user4", "groups": ["user", "another-user", "sudo"]})
+
+    results = metastore.search(search_list_keys=search_list_keys)
+
+    names = [result["name"] for result in results]
+
+    for name in expected_names:
+        assert name in names

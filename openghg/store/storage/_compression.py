@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 import time
 import zarr
 import numcodecs
@@ -11,7 +11,7 @@ import xarray as xr
 from openghg.store.storage import get_zarr_encoding
 
 
-def compare_compression(filepath: Path) -> Dict:
+def compare_compression(filepath: Path) -> dict:
     """This compresses the given dataset to a temporary zarr ZipStore
     to test the compression ratio. A dictionary containing the final size of
     the data, the compression ratio and the time taken for the compression
@@ -30,7 +30,7 @@ def compare_compression(filepath: Path) -> Dict:
 
     filepath = Path(filepath)
     orig_size = filepath.stat().st_size
-    compression_info: Dict[str, Any] = {"original_filesize": orig_size}
+    compression_info: dict[str, Any] = {"original_filesize": orig_size}
     print(f"Original file size: {orig_size}")
 
     best_ratio = 0.0

@@ -1,19 +1,24 @@
 addict
-dask
+cf-xarray
+dask < 2025.9
 filelock
+flox
 h5netcdf
 icoscp
 ipywidgets
 matplotlib
 msgpack
 nbformat
-numcodecs
+numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
-numpy
+numpy >= 2.0
 openghg_defs
+openpyxl
 pandas >= 2.0
+pint
+pint-xarray
 plotly
 pyvis
 rapidfuzz
@@ -23,5 +28,9 @@ scipy
 tinydb
 toml
 urllib3 >= 1.26.3
-xarray
-zarr
+xarray >= 2025.04.0
+zarr==2.18.3
+openghg-calscales
+sympy
+networkx
+cdsapi

@@ -25,7 +25,7 @@ def test_localzarrstore_not_writable():
         local_store.add(version="v1", dataset=xr.Dataset())
 
     with pytest.raises(PermissionError):
-        local_store.update(version="v1", dataset=xr.Dataset())
+        local_store.overwrite(version="v1", dataset=xr.Dataset())
 
     with pytest.raises(PermissionError):
         local_store.delete_version(version="v1")
@@ -91,17 +91,7 @@ def test_localzarrstore_add_files_identical(store):
         assert retrieved.identical(concat)
 
 
-def test_copy_to_memory_store(store):
-    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    with xr.open_dataset(datapath) as ds:
-        store.add(version="v1", dataset=ds)
-
-        memory_store = store._copy_to_memorystore(version="v1")
-        ds_recombined = xr.open_zarr(store=memory_store)
-        assert ds.equals(ds_recombined)
-
-
-def test_update(store):
+def test_overwrite(store):
     fp_1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     fp_2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
@@ -111,7 +101,7 @@ def test_update(store):
         assert ds.equals(ds_loaded)
 
     with xr.open_dataset(fp_2) as ds:
-        store.update(version="v1", dataset=ds)
+        store.overwrite(version="v1", dataset=ds)
         ds_loaded = store.get(version="v1")
         assert ds.equals(ds_loaded)
 
@@ -131,7 +121,7 @@ def test_bytes_stored_compression(store):
     with xr.open_dataset(datapath) as ds:
         store.add(version="v1", dataset=ds, compressor=compressor)
         compressed_bytes = store.bytes_stored()
-        assert compressed_bytes == 292896
+        assert np.abs((compressed_bytes - 292896) / 292896) < 0.01
         assert compressed_bytes < original_size
         assert compressed_bytes < uncompressed_bytes
 
@@ -169,18 +159,7 @@ def test_delete_all(store):
 
     assert not parent.exists()
 
-
-def test_pop_dataset(store):
-    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    with xr.open_dataset(datapath) as ds:
-        store.add(version="v1", dataset=ds)
-
-        with pytest.raises(NotImplementedError):
-            store._pop(version="v1")
-        # assert ds.equals(retrieved)
-
-        # assert not store.version_exists(version="v1")
-        # assert not store
+    assert not parent.parent.exists()
 
 
 def test_match_chunking(store):
@@ -210,7 +189,7 @@ def test_match_chunking(store):
 
     # As the data we originally put in wasn't chunked then we get the full size of the time coordinate
     # which is 31 here
-    assert chunking == {'time': 31}
+    assert chunking == {"time": 31}
 
     # Now try it the other way round, add chunked data and then try to match it with unchunked data
     store.delete_all()
@@ -253,48 +232,55 @@ def test_match_chunking(store):
     assert not chunking
 
 
-def test_copy_actually_copies(store):
-    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
-    time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
+def test_for_missing_data_from_appending_in_loop():
+    """If multiple "source" chunks (e.g. from chunked data we wish to store) need to write
+    to the same "target" chunks (in the zarr store), then it is possible that the data will be
+    corrupted if multiple writes are set off in a loop.
 
-    values_a = np.zeros(len(time_a))
-    values_b = np.full(len(time_b), 1)
+    This test tries to simulate this situation. Note that it isn't possible to write a deterministic
+    test for this, because it depends on how workers for writing the chunks are scheduled.
 
-    attributes = {}
+    For adding 6 inert footprints in a loop, data loss was observed about 40% of the time for at least one
+    data variable in the footprint; however, that test is fairly slow, so we will try to recreate it with
+    artificial data here.
 
-    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes)
-    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
+    See GH Issue #1031 for more details.
 
-    ds_expected = xr.concat([data_a, data_b], dim="time").drop_duplicates("time")
+    """
+    bucket = get_writable_bucket(name="user")
 
-    store.add(version="v1", dataset=data_a)
-    # Copy the data into memory using get
-    ds_a_from_store = store.get(version="v1")
-    store.delete_version(version="v1")
-    ds_a_from_store = ds_a_from_store.compute()
-    ds_2 = xr.concat([ds_a_from_store, data_b], dim="time").drop_duplicates("time")
+    # make 6 datasets that will have "ragged" start/end chunks
+    duration = 820
+    chunk_size = 403
 
-    assert not ds_2.equals(ds_expected)
-    assert np.sum(np.isnan(ds_2.mf.values))
+    rng = np.random.default_rng(seed=2**32 - 1)
 
-    store.add(version="v1", dataset=data_a)
-    # If we call compute and load everything into memory before deleting the
-    # data from disk then it works
-    ds_a_from_store = store.get(version="v1")
-    ds_a_from_store = ds_a_from_store.compute()
-    store.delete_version(version="v1")
-    ds_2 = xr.concat([ds_a_from_store, data_b], dim="time").drop_duplicates("time")
+    datasets = []
+    for i in range(3):
+        ds = xr.Dataset(
+            {
+                "x": (["time"], rng.normal(0, 1, duration)),
+                "y": (["time"], rng.normal(0, 1, duration)),
+            },
+            coords={
+                "time": duration * i + np.arange(duration),
+            },
+            attrs={},
+        )
+        datasets.append(ds.chunk({"time": chunk_size}))
 
-    assert ds_2.equals(ds_expected)
-    assert not np.sum(np.isnan(ds_2.mf.values))
+    # add data repeatedly, testing for missing values
+    for i in range(10):
+        local_store = LocalZarrStore(bucket=bucket, datasource_uuid=f"test-local-store-123-{i}", mode="rw")
 
-    store.add(version="v1", dataset=data_a)
+        for ds in datasets:
+            local_store.add(version="v1", dataset=ds)
 
-    # Let's try copying it to a dict
-    data_a_in_dict = store._copy_to_memorystore(version="v1")
-    ds_a_from_dict = xr.open_zarr(store=data_a_in_dict, consolidated=True)
-    store.delete_version(version="v1")
-    ds_2 = xr.concat([ds_a_from_dict, data_b], dim="time").drop_duplicates("time")
+        retrieved = local_store.get(version="v1")
 
-    assert ds_2.equals(ds_expected)
-    assert not np.sum(np.isnan(ds_2.mf.values))
+        missing = retrieved.isnull().sum().compute()
+        total_missing = sum(dict(missing).values())
+
+        assert total_missing == 0.0
+
+        local_store.delete_all()

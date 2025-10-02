@@ -5,7 +5,6 @@ from tempfile import TemporaryDirectory
 
 from helpers import get_mobile_datapath
 from openghg.dataobjects import ObsData
-from openghg.standardise.surface import parse_glasow_licor
 from openghg.util import to_dashboard, to_dashboard_mobile
 from pandas import DataFrame, date_range
 
@@ -102,27 +101,3 @@ def test_export_to_dashboard():
         assert tmp_path.exists()
         exported_data = json.loads(tmp_path.read_text())
         assert exported_data == for_export
-
-
-def test_to_dashboard_mobile_return_dict():
-    test_data = get_mobile_datapath(filename="glasgow_licor_sample.txt")
-
-    data = parse_glasow_licor(filepath=test_data)
-
-    exported = to_dashboard_mobile(data=data)
-
-    exported_data = exported["ch4"]["data"]
-
-    lon_data = exported_data["lon"]
-    lat_data = exported_data["lat"]
-    ch4_data = exported_data["z"]
-
-    assert lon_data[:2] == [-4.2321, -4.23209667]
-    assert lat_data[:2] == [55.82689833, 55.82698]
-    assert ch4_data[:2] == [13.43, 21.05]
-    assert exported["ch4"]["metadata"] == {
-        "units": "ppb",
-        "notes": "measurement value is methane enhancement over background",
-        "sampling_period": "NOT_SET",
-        "data_type": "surface",
-    }

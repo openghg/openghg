@@ -8,7 +8,14 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
+from openghg.standardise import (
+    standardise_surface,
+    standardise_footprint,
+    standardise_flux,
+    standardise_bc,
+    standardise_column,
+    standardise_eulerian,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -17,11 +24,14 @@ def data_read():
 
     # DECC network sites
     network = "DECC"
+    bsd_250_path = get_surface_datapath(
+        filename="bsd.picarro.1minute.250m.min.dat", source_format="CRDS"
+    )  # fake, for elevate inlets
     bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     bsd_108_path = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_42_path = get_surface_datapath(filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
 
-    bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
+    bsd_paths = [bsd_250_path, bsd_248_path, bsd_108_path, bsd_42_path]
 
     standardise_surface(store="user", filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
 
@@ -73,17 +83,35 @@ def data_read():
 
     # Obs Surface - openghg pre-formatted data
     # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
-    openghg_path = get_surface_datapath(
+    openghg_path_1 = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
     standardise_surface(
         store="user",
-        filepath=openghg_path,
+        filepath=openghg_path_1,
         source_format="OPENGHG",
         site="tac",
         network="DECC",
         instrument="picarro",
-        sampling_period="1H",
+        sampling_period="1h",
+        update_mismatch="metadata",
+    )
+
+    # Adding additional data which doesn't overlap data above
+    # but adding "tag" keyword for this
+    openghg_path_2 = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc", source_format="OPENGHG"
+    )
+    standardise_surface(
+        store="user",
+        filepath=openghg_path_2,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h",
+        tag=["ceda_v1", "gemma_v1"],
+        update_mismatch="metadata",
     )
 
     # Obs Column data
@@ -100,8 +128,9 @@ def data_read():
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
-    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
-    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    # Note: added out of order to check this can still be retrieved
+    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     species = "co2"
     source = "gpp-cardamom"

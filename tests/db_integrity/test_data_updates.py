@@ -10,10 +10,9 @@ from helpers import (
     get_surface_datapath,
 )
 from openghg.objectstore import get_writable_bucket
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux, search
+from openghg.objectstore import get_datasource, open_object_store
+from openghg.retrieve import get_flux, get_obs_surface, search
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
-from openghg.store.base import Datasource
 from openghg.types import DataOverlapError
 
 
@@ -109,7 +108,7 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd():
+def bsd_data_read_gcmd(force=False):
     """
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
@@ -129,6 +128,7 @@ def bsd_data_read_gcmd():
         site=site,
         network=network,
         instrument=instrument,
+        force=force,
     )
 
 
@@ -380,8 +380,8 @@ def test_obs_data_read_data_diff():
 
     bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = get_datasource(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = get_datasource(uuid=uuid_n2o, bucket=bucket)
 
     assert d_sf6._latest_version == "v2"
     assert d_n2o._latest_version == "v2"
@@ -469,8 +469,8 @@ def test_obs_data_read_data_overwrite_version():
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
     bucket = get_writable_bucket(name="user")
-    d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
+    d_sf6 = get_datasource(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = get_datasource(bucket=bucket, uuid=uuid_n2o)
 
     assert d_sf6._latest_version == "v1"
     assert d_n2o._latest_version == "v1"
@@ -490,6 +490,24 @@ def test_obs_data_read_data_overwrite_version():
 
 
 # TODO: Add test for different time values as well.
+
+
+def test_obs_data_force_update():
+    """
+    Loading same obs surface data twice and checking if using the force=True
+    keyword allows the same data to be added again and a new version created.
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    bsd_data_read_gcmd(force=True)
+
+    # Search for an expected species
+    # GCMD data
+    data_sf6 = get_obs_surface(site="bsd", species="sf6", inlet="108m")
+
+    assert data_sf6 is not None
+    assert data_sf6.metadata["latest_version"] == "v2"
 
 
 #  Look at different data frequencies for the same data
@@ -587,8 +605,8 @@ def test_obs_data_read_two_frequencies():
 
     bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = get_datasource(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = get_datasource(uuid=uuid_co_minutely, bucket=bucket)
 
     assert d_co_hourly._latest_version == "v1"
     assert d_co_minutely._latest_version == "v1"
@@ -636,13 +654,13 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(if_exists="new")
 
-    with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = metastore.select("uuid")
+    with open_object_store(bucket=bucket, data_type="surface") as objstore:
+        uuids = objstore.uuids
 
-    datasources = []
-    for uuid in uuids:
-        datasource = Datasource(bucket=bucket, uuid=uuid)
-        datasources.append(datasource)
+        datasources = []
+        for uuid in uuids:
+            datasource = objstore.get_datasource(uuid=uuid)
+            datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]
     one_species_data = data[0]
@@ -683,7 +701,7 @@ def test_metadata_update():
 
     # Set expectations for start and end date (for GC data this is altered from file details
     # based on known sampling period).
-    sampling_period = 75
+    sampling_period = 1
     sampling_period_td = pd.Timedelta(seconds=int(sampling_period))
     time_buffer = pd.Timedelta(seconds=1)  # Buffer subtracted from end to make this exclusive end.
     expected_start_1 = str(pd.Timestamp("2014-01-01T00:13", tz="utc") - sampling_period_td / 2.0)
@@ -809,7 +827,7 @@ def test_metadata_update():
             "TAC-185magl_UKV_EUROPE_TEST_201405.nc",
             "TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc",
             "TAC",
-            "EUROPE",
+            "TEST",
             "NAME",
             "UKV",
             "185m",
@@ -819,7 +837,7 @@ def test_metadata_update():
             "HFD-100magl_UKV_EUROPE_202001_TRUNCATED.nc",
             "HFD-100magl_UKV_rn_EUROPE_202001_TRUNCATED.nc",
             "HFD",
-            "EUROPE",
+            "TEST",
             "NAME",
             "UKV",
             "100m",
@@ -863,8 +881,8 @@ def test_standardising_footprint_with_additional_keys(
         store="user",
     )
 
-    standard_dict = standard_standardised[next(iter(standard_standardised))]
-    special_dict = special_standardised[next(iter(special_standardised))]
+    standard_dict = standard_standardised[0]
+    special_dict = special_standardised[0]
 
     assert special_dict["new"] == True
     assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?
@@ -939,7 +957,9 @@ def test_standardising_footprint_met_model():
     )
 
     # Check data retrieved contains the correct concatenated date range from both 201606 and 201607 files.
-    footprint_search_no_met_model = search(site=site, domain=domain, met_model="not_set", data_type="footprints")
+    footprint_search_no_met_model = search(
+        site=site, domain=domain, met_model="not_set", data_type="footprints"
+    )
     footprint_retrieve_no_met_model = footprint_search_no_met_model.retrieve()
     footprint_data_no_met_model = footprint_retrieve_no_met_model.data
 

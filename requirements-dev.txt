@@ -1,3 +1,6 @@
+# Install main dependencies
+-r requirements.txt
+
 # Required for testing
 cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
 flake8
@@ -8,8 +11,9 @@ pytest-cov
 pytest-mock
 pytest-timeout
 requests-mock
+tox >=4.24
 # For mypy
-mypy==1.7.1
+mypy==1.10.0
 types-paramiko
 types-PyYAML
 types-requests

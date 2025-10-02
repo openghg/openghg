@@ -1,6 +1,6 @@
-from typing import Optional, Union, cast, overload
+from typing import cast, overload
 import logging
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 __all__ = ["format_inlet", "extract_height_name"]
 
@@ -12,8 +12,8 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 def format_inlet(
     inlet: str,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
+    key_name: str | None = None,
+    special_keywords: list | None = None,
 ) -> str: ...
 
 
@@ -21,17 +21,35 @@ def format_inlet(
 def format_inlet(
     inlet: None,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
+    key_name: str | None = None,
+    special_keywords: list | None = None,
 ) -> None: ...
 
 
+@overload
 def format_inlet(
-    inlet: Optional[str],
+    inlet: slice,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
-) -> Optional[str]:
+    key_name: str | None = None,
+    special_keywords: list | None = None,
+) -> slice: ...
+
+
+@overload
+def format_inlet(
+    inlet: list[str | slice | None],
+    units: str = "m",
+    key_name: str | None = None,
+    special_keywords: list | None = None,
+) -> list[str | slice | None]: ...
+
+
+def format_inlet(
+    inlet: str | slice | None | list[str | slice | None],
+    units: str = "m",
+    key_name: str | None = None,
+    special_keywords: list | None = None,
+) -> str | slice | None | list[str | slice | None]:
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -55,7 +73,7 @@ def format_inlet(
             If so do not apply any formatting.
             If this is not set a special keyword of "multiple" and "column" will still be allowed.
     Returns:
-        str: formatted inlet string / None
+        same type as input, with all strings formatted
 
     Usage:
         >>> format_inlet("10")
@@ -66,6 +84,8 @@ def format_inlet(
             "10m"
         >>> format_inlet("10.111")
             "10.1m"
+        >>> format_inlet(["10", 100])
+            ["10m", "100m"]
         >>> format_inlet("multiple")
             "multiple"
         >>> format_inlet("10m", key_name="inlet")
@@ -75,8 +95,13 @@ def format_inlet(
         >>> format_inlet("10m", key_name="station_height_masl")
             "10"
     """
-    if inlet is None:
-        return None
+    # process list recursively
+    if isinstance(inlet, list):
+        return [format_inlet(x) for x in inlet]
+
+    # pass through None and slice
+    if inlet is None or isinstance(inlet, slice):
+        return inlet
 
     # By default the special keyword is "multiple" for data containing multiple inlets.
     # This will be included if data is a combined object from the object store.
@@ -141,10 +166,10 @@ def format_inlet(
 
 def extract_height_name(
     site: str,
-    network: Optional[str] = None,
-    inlet: Optional[str] = None,
-    site_filepath: optionalPathType = None,
-) -> Optional[Union[str, list]]:
+    network: str | None = None,
+    inlet: str | None = None,
+    site_filepath: pathType | None = None,
+) -> str | list | None:
     """
     Extract the relevant height associated with NAME from the
     "height_name" variable, if present from site_info data.
@@ -168,8 +193,7 @@ def extract_height_name(
 
     site_data = get_site_info(site_filepath=site_filepath)
 
-    if site:
-        site_upper = site.upper()
+    site_upper = site.upper()
 
     if network is None:
         network = next(iter(site_data[site_upper]))
@@ -188,7 +212,7 @@ def extract_height_name(
             if isinstance(height_name_extracted, list):
                 # Check if multiple values for height_name_extracted are present (list > 1)
                 if len(height_name_extracted) == 1:
-                    height_name: Optional[str] = height_name_extracted[0]
+                    height_name: str | None = height_name_extracted[0]
                 else:
                     # If this is ambiguous, check "height" attr to match against site inlet value
                     # This assumes two lists of the same length map to each other with translating values

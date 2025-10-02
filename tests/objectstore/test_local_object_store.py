@@ -1,5 +1,6 @@
 # from pathlib import Path
 
+from pathlib import Path
 import tempfile
 
 import pytest
@@ -85,7 +86,7 @@ def test_get_object_lock_path(tmp_path):
 
     assert data_path.stem == lock_path.stem.split(".")[0]
     assert data_path.suffix == lock_path.suffixes[0]
-    assert lock_path.suffixes[1] == ".lock"
+    assert lock_path.suffixes[1] == ".lock_v2"
 
     # test getting lock even if file doesn't exist yet
     key2 = "key2"
