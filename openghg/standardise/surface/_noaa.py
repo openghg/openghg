@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 from collections.abc import Hashable
+import pandas as pd
 import xarray as xr
 
 from openghg.standardise.meta import dataset_formatter
@@ -546,10 +547,25 @@ def _read_raw_data(
         names=column_names,
         sep=r"\s+",
         skipinitialspace=True,
-        parse_dates={"time": date_cols},
-        date_format="%Y %m %d %H %M %S",
-        index_col="time",
+        index_col=False,
     )
+
+    # Combine date columns into datetime
+    data["time"] = pd.to_datetime(
+        data["sample_year"].astype(str)
+        + "-"
+        + data["sample_month"].astype(str).str.zfill(2)
+        + "-"
+        + data["sample_day"].astype(str).str.zfill(2)
+        + " "
+        + data["sample_hour"].astype(str).str.zfill(2)
+        + ":"
+        + data["sample_minute"].astype(str).str.zfill(2)
+        + ":"
+        + data["sample_seconds"].astype(str).str.zfill(2),
+        format="%Y-%m-%d %H:%M:%S",
+    )
+    data = data.drop(columns=date_cols).set_index("time")
 
     # Drop duplicates
     data = data.loc[~data.index.duplicated(keep="first")]
