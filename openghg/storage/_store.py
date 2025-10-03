@@ -23,7 +23,7 @@ The ``Store`` class provides a basic "CRUD" interface for storing Xarray ``Datas
 - ``Store.clear`` clears the stored data, and ``Store.delete`` clears the data and removes
    any other artefacts (files, directories, etc.) created when storage is initialised.
 
-The interface ``Store`` does not define what constitudes a "conflict" or "non-conflict", but
+The interface ``Store`` does not define what constitutes a "conflict" or "non-conflict", but
 for data with a time coordinate, a conflict occurs when new data (passed to ``insert`` or ``update``)
 has time coordinate values that "match" stored time coordinate values.
 Match might mean exact equality, or equality up to some tolerance.
@@ -86,7 +86,7 @@ class Store(ABC):
 
         Args:
             data: xr.Dataset to add to Store
-            on_nonconflict: if "error", raise IndexError if any non-conflicts found. If "ignore", then
+            on_nonconflict: if "error", raise UpdateError if any non-conflicts found. If "ignore", then
                 ignore any non-conflicting values in `data`, and insert only conflicting values.
 
         Returns:
@@ -108,9 +108,12 @@ class Store(ABC):
 
     @abstractmethod
     def get(self) -> xr.Dataset:
-        """Return the stored data."""
+        """Return the stored data.
+
+        If Store is empty, return empty Dataset.
+        """
         if not bool(self):
-            return xr.Dataset()  # TODO: should this raise an error instead?
+            return xr.Dataset()
         raise NotImplementedError
 
     @abstractmethod
@@ -184,8 +187,6 @@ class MemoryStore(Store):
             self.data = xr.concat([self.data, data], dim=self.append_dim).sortby(self.append_dim)
 
     def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
-        # TODO how should we handle adding data with a new dimension? or with the append dim when
-        # the input data doesn't have the append dim?
         if self.data is None:
             raise UpdateError("Cannot update empty Store.")
 

@@ -67,7 +67,7 @@ class MetastoreError(OpenGHGError):
 
 
 class StorageError(OpenGHGError):
-    """Raised for errors with data storage (e.g. ZarrSore)."""
+    """Raised for errors with data storage (e.g. ZarrStore)."""
 
 
 class UpdateError(StorageError):
