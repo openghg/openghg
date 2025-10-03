@@ -1,9 +1,8 @@
-from typing import Any, Dict, Optional, Iterable
+from typing import Any
+from collections.abc import Iterable
 
 
-def get_zarr_encoding(
-    data_vars: Iterable, compressor: Optional[Any] = None, filters: Optional[Any] = None
-) -> Dict:
+def get_zarr_encoding(data_vars: Iterable, compressor: Any | None = None, filters: Any | None = None) -> dict:
     """Return a dictionary of zarr compression settings for the given data.
 
     Args:

@@ -1,14 +1,15 @@
+import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+import pandas as pd
 from pandas import DataFrame
 
 from openghg.standardise.meta import dataset_formatter
-from openghg.types import optionalPathType
+from openghg.types import pathType, multiPathType
+
+logger = logging.getLogger("openghg.standardise")
 
 
-def find_files(
-    data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6"
-) -> List[Tuple[Path, Path]]:
+def find_files(data_path: pathType, skip_str: str | list[str] = "sf6") -> list[tuple[Path, Path]]:
     """A helper file to find GCWERKS data and precisions file in a given folder.
     It searches for .C files of the format macehead.19.C, looks for a precisions file
     named macehead.19.precions.C and if it exists creates a tuple for these files.
@@ -54,17 +55,16 @@ def find_files(
 
 
 def parse_gcwerks(
-    filepath: Union[str, Path],
-    precision_filepath: Union[str, Path],
+    filepath: pathType,
+    precision_filepath: pathType,
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
@@ -145,7 +145,7 @@ def parse_gcwerks(
     return gas_data
 
 
-def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
+def _check_site(filepath: Path, site_code: str, gc_params: dict) -> str:
     """Check if the site passed in matches that in the filename
 
     Args:
@@ -179,7 +179,7 @@ def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
     return site_code
 
 
-def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = False) -> Union[str, None]:
+def _check_instrument(filepath: Path, gc_params: dict, should_raise: bool = False) -> str | None:
     """Ensure we have the correct instrument or translate an instrument
     suffix to an instrument name.
 
@@ -219,9 +219,9 @@ def _read_data(
     site: str,
     instrument: str,
     network: str,
-    gc_params: Dict,
-    sampling_period: Optional[str] = None,
-) -> Dict:
+    gc_params: dict,
+    sampling_period: str | None = None,
+) -> dict:
     """Read data from the data and precision files
 
     Args:
@@ -243,21 +243,35 @@ def _read_data(
     header = read_csv(filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
     # Read the data in and automatically create a datetime column from the 5 columns
-    # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
+    # Read data without parse_dates to avoid nested sequence deprecation
     data = read_csv(
         filepath,
         skiprows=4,
         sep=r"\s+",
-        parse_dates={"Datetime": [1, 2, 3, 4, 5]},
-        date_format="%Y %m %d %H %M",
-        index_col="Datetime",
+        index_col=False,
     )
+
+    # Combine columns 1-5 for datetime (yyyy, mm, dd, hh, mi)
+    datetime_cols = data.iloc[:, 1:6].astype(str)
+    data["Datetime"] = pd.to_datetime(
+        datetime_cols.iloc[:, 0]
+        + "-"
+        + datetime_cols.iloc[:, 1]
+        + "-"
+        + datetime_cols.iloc[:, 2]
+        + " "
+        + datetime_cols.iloc[:, 3]
+        + ":"
+        + datetime_cols.iloc[:, 4],
+        format="%Y-%m-%d %H:%M",
+    )
+    data = data.drop(columns=data.columns[1:6]).set_index("Datetime")
 
     if data.empty:
         raise ValueError("Cannot process empty file.")
 
     # This metadata will be added to when species are split and attributes are written
-    metadata: Dict[str, str] = {
+    metadata: dict[str, str] = {
         "instrument": instrument,
         "site": site,
         "network": network,
@@ -282,7 +296,7 @@ def _read_data(
     units = {}
     scale = {}
 
-    flag_columns: List[Series] = []
+    flag_columns: list[Series] = []
     species = []
     columns_renamed = {}
     for column in data.columns:
@@ -352,7 +366,7 @@ def _read_data(
     return gas_data
 
 
-def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
+def _read_precision(filepath: Path) -> tuple[DataFrame, list]:
     """Read GC precision file
 
     Args:
@@ -374,8 +388,8 @@ def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
         header=None,
         sep=r"\s+",
         index_col=0,
-        parse_dates={"Datetime": [0]},
         date_format="%y%m%d",
+        parse_dates=True,
     )
 
     # Drop any duplicates from the index
@@ -388,12 +402,12 @@ def _split_species(
     data: DataFrame,
     site: str,
     instrument: str,
-    species: List,
-    metadata: Dict,
-    units: Dict,
-    scale: Dict,
-    gc_params: Dict,
-) -> Dict:
+    species: list,
+    metadata: dict,
+    units: dict,
+    scale: dict,
+    gc_params: dict,
+) -> dict:
     """Splits the species into separate dataframe into sections to be stored within individual Datasources
 
     Args:
@@ -535,12 +549,12 @@ def _split_species(
             combined_data[data_key]["data"] = spec_data
             combined_data[data_key]["attributes"] = attributes
 
-    to_return: Dict = combined_data.to_dict()
+    to_return: dict = combined_data.to_dict()
 
     return to_return
 
 
-def _get_sampling_period(instrument: str, gc_params: Dict) -> str:
+def _get_sampling_period(instrument: str, gc_params: dict) -> str:
     """Process the suffix from the filename to get the correct instrument name
     then retrieve the sampling period of that instrument from metadata.
 
@@ -560,7 +574,7 @@ def _get_sampling_period(instrument: str, gc_params: Dict) -> str:
     return sampling_period
 
 
-def _get_inlets(site_code: str, gc_params: Dict) -> Dict:
+def _get_inlets(site_code: str, gc_params: dict) -> dict:
     """Get the inlets we expect to be at this site and create a
     mapping dictionary so we get consistent labelling.
 
@@ -585,7 +599,7 @@ def _get_inlets(site_code: str, gc_params: Dict) -> Dict:
     return mapping_dict
 
 
-def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict) -> Dict[str, str]:
+def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: dict) -> dict[str, str]:
     """Gets the site specific attributes for writing to Datsets
 
     Args:
@@ -601,7 +615,7 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
     site = site.upper()
     instrument = instrument.lower()
 
-    attributes: Dict[str, str] = gc_params["sites"][site]["global_attributes"]
+    attributes: dict[str, str] = gc_params["sites"][site]["global_attributes"]
 
     attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     try:
@@ -611,3 +625,59 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
         raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
     return attributes
+
+
+def check_gcwerks_input(
+    filepath: multiPathType, precision_filepath: str | Path | list[str] | list[Path] | None
+) -> tuple[list[Path], list[Path]]:
+    """
+    Check that both filepath and precision_filepath are specified when using the gcwerks
+    source format. At the moment this can be specified as:
+        - filepath can contain tuples of (filepath, precision_filepath) pairs
+            - This will be deprecated.
+        - filepath and precision_filepath can be specified separately but must be the same length
+
+    Args:
+        filepath: Filepath or filepath and precision_filepath pairs for the input files
+        precision_filepath: Precision filepath details to link with filepath.
+    Returns:
+        list, list: Filepath and precision filepath details as lists
+    """
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    if isinstance(precision_filepath, str):
+        precision_filepath = [Path(precision_filepath)]
+    elif isinstance(precision_filepath, Path):
+        precision_filepath = [precision_filepath]
+
+    filepaths: list[Path] = []
+    precision_filepaths: list[Path] = []
+
+    for fp in filepath:
+        if isinstance(fp, tuple):
+            if precision_filepath is None:
+                logger.warning(
+                    "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` input instead."
+                )
+            else:
+                msg = "Passing a tuple for filepath to provide the associated precision_filepath is deprecated. Please use direct `precision_filepath` only."
+                logger.exception(msg)
+                raise TypeError(msg)
+
+            filepaths.append(Path(fp[0]))
+            precision_filepaths.append(Path(fp[1]))
+        else:
+            if precision_filepath is None:
+                msg = "For GCWERKS format, filepath and precision_filepath must be specified."
+                logger.exception(msg)
+                raise TypeError(msg)
+            filepaths.append(Path(fp))
+
+    if len(filepaths) != len(precision_filepaths):
+        raise TypeError(
+            f"For GCWERKS data the same number of files should be supplied filepath and precision_filepath. Currently {len(filepaths)} and {len(precision_filepaths)}"
+        )
+
+    return filepaths, precision_filepaths

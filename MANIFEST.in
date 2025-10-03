@@ -1,6 +1,5 @@
 include README.md
 include MANIFEST.in
-include setup.py
 include requirements*.txt
 include py.typed
 include versioneer.py

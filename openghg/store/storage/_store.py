@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 from xarray import Dataset
 from collections.abc import Iterator
 
@@ -13,8 +13,8 @@ class Store(ABC):
         self,
         version: str,
         dataset: Dataset,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
     ) -> None:
         """Add an xr.Dataset to the zarr store."""
         pass
@@ -40,11 +40,6 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def store_key(self, version: str) -> str:
-        """Return the key of this zarr store"""
-        pass
-
-    @abstractmethod
     def version_exists(self, version: str) -> bool:
         """Check if a version exists in the current store"""
         pass
@@ -55,16 +50,8 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def _pop(self, version: str) -> Dataset:
-        """Pop some data from the store. This removes the data at this version from the store
-        and returns it."""
-        pass
-
-    @abstractmethod
-    def update(
-        self, version: str, dataset: Dataset, compressor: Optional[Any], filters: Optional[Any]
-    ) -> None:
-        """Update the data at the given key"""
+    def overwrite(self, version: str, dataset: Dataset, compressor: Any | None, filters: Any | None) -> None:
+        """Overwrite the data at the given key"""
         pass
 
     @abstractmethod

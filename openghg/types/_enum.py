@@ -8,16 +8,20 @@ class SurfaceTypes(Enum):
     GCWERKS = "GCWERKS"
     AGAGE = "AGAGE"
     ICOS = "ICOS"
+    ICOS_CORSO = "ICOS_CORSO"
     NOAA = "NOAA"
     BEACO2N = "BEACO2N"
     NPL = "NPL"
     OPENGHG = "OPENGHG"
+    CO2_GAMES = "CO2_GAMES"
+    NIWA = "NIWA"
 
 
 class ColumnTypes(Enum):
     """Types of column data files that can be standardised"""
 
     OPENGHG = "OPENGHG"
+    TCCON = "TCCON"
 
 
 class ColumnSources(Enum):
@@ -61,6 +65,12 @@ class FluxTimeseriesTypes(Enum):
     CRF = "Crf"
 
 
+class EulerianModelTypes(Enum):
+    """For standardising eulerian model data"""
+
+    OPENGHG = "OPENGHG"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
@@ -72,3 +82,7 @@ class DataTypes(Enum):
     NPL = "NPL"
     OPENGHG = "OPENGHG"
     INTEM = "INTEM"
+
+
+class BoundaryConditions(Enum):
+    OPENGHG = "OPENGHG"

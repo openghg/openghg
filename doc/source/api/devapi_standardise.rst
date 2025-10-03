@@ -57,6 +57,6 @@ These ensure the metadata and attributes stored with data are correct.
 
 .. autofunction:: openghg.standardise.meta.define_species_label
 
-.. autofunction:: openghg.standardise.meta.metadata_default_keys
+.. autofunction:: openghg.standardise.meta.attributes_default_keys
 
 .. autofunction:: openghg.standardise.meta.sync_surface_metadata

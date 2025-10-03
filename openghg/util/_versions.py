@@ -14,21 +14,21 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, IO, Union, Tuple
+from typing import IO
 
 __all__ = ["show_versions", "check_if_need_new_version"]
 
 
-def get_sys_info() -> List:
+def get_sys_info() -> list:
     """Returns system information as a list
 
     Returns:
         list: List of system information
     """
-    blob: List[Tuple] = []
+    blob: list[tuple] = []
 
     # get full commit hash
-    commit: Union[str, bytes, None] = None
+    commit: str | bytes | None = None
     if os.path.isdir(".git") and os.path.isdir("openghg"):
         try:
             pipe = subprocess.Popen(
@@ -74,7 +74,7 @@ def get_sys_info() -> List:
     return blob
 
 
-def netcdf_and_hdf5_versions() -> List:
+def netcdf_and_hdf5_versions() -> list:
     """Returns the versions of NetCDF and HDF5 libraries installed.
 
     Returns:
@@ -140,7 +140,7 @@ def show_versions(file: IO = sys.stdout) -> None:
         ("sphinx", lambda mod: mod.__version__),
     ]
 
-    deps_blob: List[Tuple] = []
+    deps_blob: list[tuple] = []
     for modname, ver_f in deps:
         try:
             if modname in sys.modules:
