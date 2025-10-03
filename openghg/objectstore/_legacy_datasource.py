@@ -90,6 +90,30 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         else:
             self.save()
 
+    def save(self) -> None:
+        """Save this Datasource object as JSON to the object store
+
+        Args:
+            bucket: Bucket to hold data
+            compression: True if data should be compressed on save
+        Returns:
+            None
+        """
+        from openghg.objectstore import set_object_from_json
+
+        DO_NOT_STORE = {
+            "_store",
+            "_bucket",
+            "_status",
+            "_start_date",
+            "_end_date",
+        }
+
+        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+        set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
+        self._store.close()
+
+    # properties
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
 
@@ -106,19 +130,65 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         """
         return self._end_date
 
-    def add_metadata_key(self, key: str, value: str) -> None:
-        """Add a label to the metadata dictionary with the key value pair
-        This will overwrite any previous entry stored at that key.
+    def key(self) -> str:
+        """Returns the Datasource's key
 
-        Args:
-            key: Key for dictionary
-            value: Value for dictionary
         Returns:
-            None
+            str: Key for Datasource in object store
         """
-        value = str(value)
-        self._metadata[key.lower()] = value.lower()
+        return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
+    def uuid(self) -> str:
+        """Return the UUID of this object
+
+        Returns:
+            str: UUID
+        """
+        return self._uuid
+
+    def metadata(self) -> dict:
+        """Return the metadata of this Datasource
+
+        Returns:
+            dict: Metadata of Datasource
+        """
+        return self._metadata
+
+    def data_type(self) -> str:
+        """Returns the data type held by this Datasource
+
+        Returns:
+            str: Data type held by Datasource
+        """
+        return self._data_type
+
+    def latest_version(self) -> str:
+        """Return the string of the latest version
+
+        Returns:
+            str: Latest version
+        """
+        return self._latest_version
+
+    def get_period(self) -> str | None:
+        """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
+        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
+
+        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str or None: time period in the form of number and time unit e.g. "12s" if found in metadata, else None
+        """
+        # Extract period associated with data from metadata
+        # This will be the "sampling_period" for obs and "time_period" for other
+        from openghg.util._metadata_util import get_period as _get_period
+
+        if "period" not in self._metadata:
+            self._metadata["period"] = _get_period(self._metadata)
+
+        return cast(str | None, self._metadata["period"])
+
+    # Methods related storing, getting, deleting data
     def add(self, data: xr.Dataset, **kwargs) -> None:
         if (period := kwargs.pop("period", None)) is not None:
             self._metadata["period"] = period
@@ -128,6 +198,27 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     def delete(self) -> None:
         self.delete_all_data()
         delete_object(bucket=self._bucket, key=self.key())
+
+    def get_data(self, version: str = "latest") -> xr.Dataset:
+        """Get the version of the dataset stored in the zarr store.
+
+        Args:
+            version: Version string, e.g. v1, v2
+        Returns:
+            None
+        """
+        if version == "latest":
+            version = self._latest_version
+
+        return self._store.get(version=version)
+
+    def bytes_stored(self) -> int:
+        """Get the amount of data stored in the zarr store in bytes
+
+        Returns:
+            int: Number of bytes
+        """
+        return self._store.bytes_stored()
 
     def add_data(
         self,
@@ -339,6 +430,20 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         del self._data_keys[version]
         del self._timestamps[version]
 
+    # Metadata methods
+    def add_metadata_key(self, key: str, value: str) -> None:
+        """Add a label to the metadata dictionary with the key value pair
+        This will overwrite any previous entry stored at that key.
+
+        Args:
+            key: Key for dictionary
+            value: Value for dictionary
+        Returns:
+            None
+        """
+        value = str(value)
+        self._metadata[key.lower()] = value.lower()
+
     def add_metadata(
         self, metadata: dict, skip_keys: list | None = None, extend_keys: list | None = None
     ) -> None:
@@ -385,75 +490,33 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self._metadata = merged_and_extended_metadata
 
-    def get_period(self) -> str | None:
-        """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
-        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
-
-        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
-
-        Returns:
-            str or None: time period in the form of number and time unit e.g. "12s" if found in metadata, else None
-        """
-        # Extract period associated with data from metadata
-        # This will be the "sampling_period" for obs and "time_period" for other
-        from openghg.util._metadata_util import get_period as _get_period
-
-        if "period" not in self._metadata:
-            self._metadata["period"] = _get_period(self._metadata)
-
-        return cast(str | None, self._metadata["period"])
-
-    def save(self) -> None:
-        """Save this Datasource object as JSON to the object store
+    # Date range (and "data keys") methods
+    def data_keys(self, version: str = "latest") -> list:
+        """Returns the dateranges of data covered by a specific version of the data stored.
 
         Args:
-            bucket: Bucket to hold data
-            compression: True if data should be compressed on save
+            version: Version of keys to retrieve
         Returns:
-            None
-        """
-        from openghg.objectstore import set_object_from_json
-
-        DO_NOT_STORE = {
-            "_store",
-            "_bucket",
-            "_status",
-            "_start_date",
-            "_end_date",
-        }
-
-        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
-        set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
-        self._store.close()
-
-    def key(self) -> str:
-        """Returns the Datasource's key
-
-        Returns:
-            str: Key for Datasource in object store
-        """
-        return f"{Datasource._datasource_root}/uuid/{self._uuid}"
-
-    def get_data(self, version: str = "latest") -> xr.Dataset:
-        """Get the version of the dataset stored in the zarr store.
-
-        Args:
-            version: Version string, e.g. v1, v2
-        Returns:
-            None
+            list: List of data keys
         """
         if version == "latest":
             version = self._latest_version
 
-        return self._store.get(version=version)
+        try:
+            keys = self._data_keys[version]
+        except KeyError:
+            raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
 
-    def bytes_stored(self) -> int:
-        """Get the amount of data stored in the zarr store in bytes
+        return keys
+
+    def all_data_keys(self) -> dict:
+        """Return a summary of the versions of data stored for
+        this Datasource
 
         Returns:
-            int: Number of bytes
+            dict: Dictionary of versions
         """
-        return self._store.bytes_stored()
+        return self._data_keys
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource
@@ -495,65 +558,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         return create_daterange_str(start=start, end=end)
 
-    def uuid(self) -> str:
-        """Return the UUID of this object
-
-        Returns:
-            str: UUID
-        """
-        return self._uuid
-
-    def metadata(self) -> dict:
-        """Return the metadata of this Datasource
-
-        Returns:
-            dict: Metadata of Datasource
-        """
-        return self._metadata
-
-    def data_type(self) -> str:
-        """Returns the data type held by this Datasource
-
-        Returns:
-            str: Data type held by Datasource
-        """
-        return self._data_type
-
-    def data_keys(self, version: str = "latest") -> list:
-        """Returns the dateranges of data covered by a specific version of the data stored.
-
-        Args:
-            version: Version of keys to retrieve
-        Returns:
-            list: List of data keys
-        """
-        if version == "latest":
-            version = self._latest_version
-
-        try:
-            keys = self._data_keys[version]
-        except KeyError:
-            raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
-
-        return keys
-
-    def all_data_keys(self) -> dict:
-        """Return a summary of the versions of data stored for
-        this Datasource
-
-        Returns:
-            dict: Dictionary of versions
-        """
-        return self._data_keys
-
-    def latest_version(self) -> str:
-        """Return the string of the latest version
-
-        Returns:
-            str: Latest version
-        """
-        return self._latest_version
-
+    # Integrity check
     def integrity_check(self) -> None:
         """Checks to ensure all data stored by this Datasource exists in the object store.
 
