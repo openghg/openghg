@@ -207,7 +207,11 @@ def test_insert_twice(store_name, is_versioned, request, ds1, ds5):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+<<<<<<< HEAD
 def test_error_on_insert_overlap(store_name, is_versioned, request, ds1):
+=======
+def test_error_on_insert_overlap(store_name, is_versioned, request):
+>>>>>>> c65712b68 (Use "overlap" instead of "conflict")
     """Test an error is raised on overlap."""
     store = request.getfixturevalue(store_name)
 
@@ -221,7 +225,11 @@ def test_error_on_insert_overlap(store_name, is_versioned, request, ds1):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+<<<<<<< HEAD
 def test_insert_ignore_overlap(store_name, is_versioned, request, ds1, ds4):
+=======
+def test_insert_ignore_overlap(store_name, is_versioned, request):
+>>>>>>> c65712b68 (Use "overlap" instead of "conflict")
     """Test that insert with `on_overlap = 'ignore'` inserts non-overlaping values."""
     store = request.getfixturevalue(store_name)
 
@@ -260,7 +268,11 @@ def test_update(store_name, is_versioned, request, ds1, twice_ds1):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
+<<<<<<< HEAD
 def test_update_ignore_nonoverlaps(store_name, is_versioned, request, ds1, ds4):
+=======
+def test_update_ignore_nonoverlaps(store_name, is_versioned, request):
+>>>>>>> c65712b68 (Use "overlap" instead of "conflict")
     """Test `update` with non-overlaps ignored."""
     store = request.getfixturevalue(store_name)
 
