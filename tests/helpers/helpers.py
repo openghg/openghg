@@ -1,29 +1,45 @@
-""" Some helper functions for things we do in tests frequently
-"""
-import os
+"""Some helper functions for things we do in tests frequently"""
+
+import getpass
 import shutil
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
 
-__all__ = [
-    "get_surface_datapath",
-    "get_emissions_datapath",
-    "get_bc_datapath",
-    "get_footprint_datapath",
-    "glob_files",
-    "clear_test_store",
-    "all_datasource_keys",
-]
+
+def temporary_store_paths() -> Dict[str, Path]:
+    # Add some uppercasing and numbers here to enusure paths work
+    # with other characters - see https://github.com/openghg/openghg/issues/701
+    user = getpass.getuser()  # get current system user
+
+    base_tmp = Path(tempfile.gettempdir()) / f"openghg-testing-{user}"
+
+    return {
+        "user": base_tmp / f"openghg_testing-STORE_123",
+        "group": base_tmp / f"openghg_testing_group_store",
+        "shared": base_tmp / f"openghg_testing_shared_store",
+    }
 
 
-def clear_test_store():
-    # Clears the testing object store
-    path = os.getenv("OPENGHG_TEST")
-    if path is not None:
-        try:
-            shutil.rmtree(path)
-        except FileNotFoundError:
-            pass
+def clear_test_store(name: str) -> None:
+    """Clear one of the testing object stores
+
+    Args:
+        name: Name of store to clear
+    Returns:
+        None
+    """
+    tmp_stores = temporary_store_paths()
+    path = tmp_stores[name]
+    shutil.rmtree(path=path, ignore_errors=True)
+
+
+def clear_test_stores() -> None:
+    """Clears the testing object stores"""
+    # Clears the testing object stores
+    tmp_stores = temporary_store_paths()
+    for path in tmp_stores.values():
+        shutil.rmtree(path=path, ignore_errors=True)
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:
@@ -44,18 +60,18 @@ def get_surface_datapath(filename: str, source_format: str) -> Path:
 
 
 def get_mobile_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the mobile test data file"""
     return get_datapath_base(data_type="mobile", filename=filename)
 
 
 def get_column_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the column test data file"""
     return get_datapath_base(data_type="column", filename=filename)
 
 
-def get_emissions_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
-    return get_datapath_base(data_type="emissions", filename=filename)
+def get_flux_datapath(filename: str) -> Path:
+    """Return the path to the flux test data file"""
+    return get_datapath_base(data_type="flux", filename=filename)
 
 
 def get_bc_datapath(filename: str) -> Path:
@@ -84,6 +100,10 @@ def get_retrieval_datapath(filename: str):
 
 def get_info_datapath(filename: str):
     return Path(__file__).parent.parent.joinpath(f"data/info/{filename}").resolve()
+
+
+def get_obspack_datapath(filename: str):
+    return Path(__file__).parent.parent.joinpath(f"data/obspack/{filename}").resolve()
 
 
 def glob_files(search_str: str, data_type: str) -> List:
@@ -125,8 +145,9 @@ def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
 
 
 def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
-    from openghg.objectstore import get_bucket
     from pathlib import Path
+
+    from openghg.objectstore import get_bucket
 
     if not isinstance(key, list):
         key = [key]
@@ -137,7 +158,33 @@ def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
 def all_datasource_keys(keys: Dict) -> List[str]:
     ds_keys = []
     for key_data in keys.values():
-        data_keys = list(key_data["keys"].values())
-        ds_keys.extend(data_keys)
+        ds_keys.extend(key_data["keys"])
 
     return ds_keys
+
+
+def get_flux_timeseries_datapath(filename: str) -> Path:
+    """Return the path to the flux_timeseries test data file"""
+    return get_datapath_base(data_type="flux_timeseries", filename=filename)
+
+
+def print_dict_diff(dict1: dict, dict2: dict, skip_missing: bool = False) -> None:
+    all_keys = set(dict1.keys()).union(set(dict2.keys()))
+
+    print("\nDiff of dicts:\n")
+    print(f"{'key':<20}{'dict1':<20}{'dict2':<20}")
+
+    for key in all_keys:
+        val1 = dict1.get(key, "Missing")
+        val2 = dict2.get(key, "Missing")
+
+        if skip_missing and "Missing" in (val1, val2):
+            continue
+
+        if val1 != val2:
+            try:
+                print_val1 = ", ".join(val1) if isinstance(val1, list) else val1
+                print_val2 = ", ".join(val2) if isinstance(val2, list) else val2
+                print(f"{key:<20}{print_val1:<20}{print_val2:<20}")
+            except TypeError:
+                print(key, val1, val2)

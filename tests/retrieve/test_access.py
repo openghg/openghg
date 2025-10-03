@@ -3,18 +3,18 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import (
-    attributes_checker_get_obs,
-    call_function_packager,
-    get_emissions_datapath,
-    get_footprint_datapath,
-    get_surface_datapath,
-    metadata_checker_obssurface,
-)
+from helpers import call_function_packager
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
-from openghg.util import compress, compress_str, hash_bytes
+from openghg.retrieve import (
+    get_bc,
+    get_flux,
+    get_footprint,
+    get_obs_column,
+    get_obs_surface,
+    search,
+)
 from openghg.types import SearchError
+from openghg.util import compress, compress_str, hash_bytes
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -41,6 +41,21 @@ from pandas import Timedelta, Timestamp
 # ]
 
 
+def test_get_obs_surface_average_works_without_longname():
+    # The stored dataset here doesn't have a long_name attribute so failed
+    # Now works with checks
+    obsdata = get_obs_surface(
+        site="mhd",
+        species="ch4",
+        inlet="10magl",
+        average="4h",
+        instrument="gcmd",
+    )
+
+    assert obsdata.data.attrs["averaged_period_str"] == "4h"
+    assert obsdata.data.attrs["averaged_period"] == 14400
+
+
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
     [
@@ -51,7 +66,6 @@ from pandas import Timedelta, Timestamp
     ],
 )
 def test_get_obs_surface(inlet_keyword, inlet_value):
-
     if inlet_keyword == "inlet":
         obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
     elif inlet_keyword == "height":
@@ -60,8 +74,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
     assert co2_data.time[-1] == Timestamp("2020-12-01T22:31:30")
-    assert co2_data.mf[0] == 409.55
-    assert co2_data.mf[-1] == 417.65
+    assert 409.55 in co2_data.mf[0].values
+    assert 417.65 in co2_data.mf[-1].values
 
     metadata = obsdata.metadata
 
@@ -100,7 +114,6 @@ def test_no_data_raises():
         assert "Unable to find results for" in excinfo
         assert f"site='{site}'" in excinfo
         assert f"species='{species}'" in excinfo
-
 
 
 # def test_get_obs_surface_ranked_data_only():
@@ -235,6 +248,26 @@ def test_timeslice_slices_correctly():
     )
 
     sliced_co2_data = timeslice_data.data
+    assert 409.93 == sliced_co2_data["mf"].values[-1]
+    assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
+    assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
+
+
+def test_convert_units_get_obs():
+
+    timeslice_data = get_obs_surface(
+        site="bsd",
+        species="co2",
+        inlet="248m",
+        start_date="2017-01-01",
+        end_date="2018-03-03",
+        target_units={"mf": "ppb"},
+    )
+
+    sliced_co2_data = timeslice_data.data
+    assert "1e-9" in sliced_co2_data["mf"].attrs["units"]
+    assert "parts_per_billion" in sliced_co2_data["mf"].attrs["units_definition"]
+    np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-6)
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
 
@@ -248,7 +281,7 @@ def test_timeslice_slices_correctly_exclusive():
 
     sliced_mhd_data = timeslice_data.data
 
-    sampling_period = Timedelta(75, unit="seconds")
+    sampling_period = Timedelta(1, unit="seconds")
 
     assert sliced_mhd_data.time[0] == (Timestamp("2012-01-11T00:13") - sampling_period / 2.0)
     assert sliced_mhd_data.time[-1] == (Timestamp("2012-02-04T23:47") - sampling_period / 2.0)
@@ -256,6 +289,7 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[-1] == 1891.094
 
 
+@pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
@@ -294,20 +328,69 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
 
 def test_get_obs_column():
-    column_data = get_obs_column(species="ch4", satellite="gosat")
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=10)
 
     obscolumn = column_data.data
 
-    assert "xch4" in obscolumn
+    assert "mf" in obscolumn
+    assert "mf_prior_factor" in obscolumn
+    assert "mf_prior_upper_level_factor" in obscolumn
+    assert "mf_repeatability" in obscolumn
+
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
-    assert obscolumn.attrs["species"] == "ch4"
+    assert np.isclose(obscolumn["mf"][0], 1238.2743)
+    assert obscolumn.attrs["species"] == "CH4"
+    assert "1e-9" in obscolumn["mf"].attrs["units"]
+
+
+def test_unit_conversion_get_obs_column():
+    """To test unit conversion applied on the data"""
+    column_data = get_obs_column(
+        species="ch4", satellite="gosat", max_level=10, target_units={"mf": "ppm", "mf_repeatability": "ppm"}
+    )
+
+    obs_column_data = column_data.data
+
+    assert "1e-6" in obs_column_data["mf"].attrs["units"]
+    assert "1e-6" in obs_column_data["mf_repeatability"].attrs["units"]
+    assert obs_column_data["mf"].values[0] == pytest.approx(1.2382743, rel=3e-8)
+
+
+def test_get_obs_column_max_level():
+    # test max level defaults to highest available if out of range
+    column_data = get_obs_column(species="ch4", satellite="gosat", max_level=100)
+    obscolumn = column_data.data
+    assert np.isclose(obscolumn["mf"][0], 1818.2135)
 
 
 def test_get_flux():
     flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe")
 
     flux = flux_data.data
+
+    assert "mol m-2 s-1" in flux["flux"].attrs["units"]
+    assert float(flux.lat.max()) == pytest.approx(79.057)
+    assert float(flux.lat.min()) == pytest.approx(10.729)
+    assert float(flux.lon.max()) == pytest.approx(39.38)
+    assert float(flux.lon.min()) == pytest.approx(-97.9)
+    assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
+
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_conver_units_get_flux():
+    """To test unit conversion applied on the data"""
+
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", target_units={"flux": "millimol / m2 / second"}
+    )
+
+    flux = flux_data.data
+
+    assert "mmol m-2 s-1" in flux["flux"].attrs["units"]
 
     assert float(flux.lat.max()) == pytest.approx(79.057)
     assert float(flux.lat.min()) == pytest.approx(10.729)
@@ -321,8 +404,22 @@ def test_get_flux():
     assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
+def test_get_flux_range():
+    """Test data can be retrieved with a start and end date range when data is added non-sequentially (check conftest.py)"""
+    flux_data = get_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2012-05-01"
+    )
+
+    flux = flux_data.data
+
+    # Check a single time value has been retrieved
+    time = flux["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
 def test_get_flux_no_result():
-    """Test sensible error message is being returned when no results are found 
+    """Test sensible error message is being returned when no results are found
     with input keywords for get_flux function"""
     with pytest.raises(SearchError) as execinfo:
         get_flux(species="co2", source="cinnamon", domain="antarctica")
@@ -342,8 +439,7 @@ def test_get_bc():
     assert float(bc.lon.max()) == pytest.approx(39.38)
     assert float(bc.lon.min()) == pytest.approx(-97.9)
 
-    bc_variables = ['height', 'lat', 'lon', 'time',
-                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    bc_variables = ["height", "lat", "lon", "time", "vmr_e", "vmr_n", "vmr_s", "vmr_w"]
     assert sorted(list(bc.variables)) == bc_variables
 
     time = bc["time"]
@@ -359,7 +455,7 @@ def test_get_bc():
         ("inlet", "10"),
     ],
 )
-def test_get_footprint(inlet_keyword,inlet_value):
+def test_get_footprint(inlet_keyword, inlet_value):
     if inlet_keyword == "inlet":
         fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
     elif inlet_keyword == "height":
@@ -371,15 +467,15 @@ def test_get_footprint(inlet_keyword,inlet_value):
     assert footprint.time[0] == Timestamp("2020-08-01")
     assert footprint.time[-1] == Timestamp("2020-08-01")
 
-    assert metadata["max_longitude"] == pytest.approx(float(footprint.lon.max()))
-    assert metadata["min_longitude"] == pytest.approx(float(footprint.lon.min()))
-    assert metadata["max_latitude"] == pytest.approx(float(footprint.lat.max()))
-    assert metadata["min_latitude"] == pytest.approx(float(footprint.lat.min()))
-    assert metadata["time_resolution"] == "standard_time_resolution"
+    assert metadata["max_longitude"] == pytest.approx(float(footprint["lon"].max()))
+    assert metadata["min_longitude"] == pytest.approx(float(footprint["lon"].min()))
+    assert metadata["max_latitude"] == pytest.approx(float(footprint["lat"].max()))
+    assert metadata["min_latitude"] == pytest.approx(float(footprint["lat"].min()))
+    assert metadata["time_resolved"] == "false"
 
 
 def test_get_footprint_no_result():
-    """Test sensible error message is being returned when no results are found 
+    """Test sensible error message is being returned when no results are found
     with input keywords for get_footprint function"""
     with pytest.raises(SearchError) as execinfo:
         get_footprint(site="seville", domain="spain", height="10m", model="test_model")
@@ -388,3 +484,25 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
+
+
+def test_get_obs_surface_elevate_inlets():
+    """Test if searching by range for multiple inlets returns a combined dataset with
+    an "inlet" data variable.
+    """
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4")
+
+    assert "inlet" in result.data.data_vars
+    assert "WMO-X2004A" in result.metadata["calibration_scale"]
+
+
+def test_get_obs_convert_calibration_scale():
+    """To test that the openghg_calscales "convert" function converts the calibration_scale of the fetched data to user specified calibration scale"""
+
+    result = get_obs_surface(site="bsd", inlet=slice(248, 250), species="ch4", calibration_scale="CSIRO-94")
+
+    assert "CSIRO-94" == result.data["mf"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_number_of_observations"].attrs["calibration_scale"]
+    assert "CSIRO-94" == result.data["mf_variability"].attrs["calibration_scale"]
+    assert "calibration_scale" not in result.data["inlet"].attrs
+    assert "CSIRO-94" in result.metadata["calibration_scale"]

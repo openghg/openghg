@@ -1,0 +1,6 @@
+Created: 10 Nov 23 07:37 GMT
+     -      -         -    -       ch4     ch4   ch4       co2     co2   co2 
+  date   time      type port         C   stdev     N         C   stdev     N 
+140616 033330       air   10       nan     nan   nan       nan     nan   nan 
+140616 033430       air   10   1906.27   1.697    17       nan     nan   nan 
+140616 033530       air   10   1907.20   0.792    17    405.30   0.382    17 

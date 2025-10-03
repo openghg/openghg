@@ -1,8 +1,9 @@
-""" This file contains functions used to export data in compliant formats for archiving with
-    facilities such as CEDA
+"""This file contains functions used to export data in compliant formats for archiving with
+facilities such as CEDA
 
 
 """
+
 __all__ = ["get_ceda_file"]
 
 
@@ -43,7 +44,7 @@ def get_ceda_file(  # type: ignore
 
     # Load in JSON for storing data for CEDA compliance
     # JSON feels cleaner to work with/read here
-    with open(compliance_path, "r") as f:
+    with open(compliance_path) as f:
         ceda_comp = json.load(f)
 
     if not site:

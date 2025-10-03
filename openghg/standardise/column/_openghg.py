@@ -1,21 +1,23 @@
 from pathlib import Path
-from typing import Dict, List, MutableMapping, Optional, Union, cast
+from typing import cast
+from collections.abc import MutableMapping
 
-import xarray as xr
+from openghg.util import open_time_nc_fn
 
 
 def parse_openghg(
-    data_filepath: Union[str, Path],
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
+    filepath: str | Path | list[str] | list[Path],
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
     platform: str = "satellite",
+    chunks: dict | None = None,
     **kwargs: str,
-) -> Dict:
+) -> dict:
     """
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
@@ -30,7 +32,7 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        data_filepath: Path of observation file
+        filepath: Path of observation file
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
@@ -47,23 +49,25 @@ def parse_openghg(
             - "satellite"
             - "site"
             Note: this will be superceded if site or satellite keywords are specified.
+        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+            for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            To disable chunking pass in an empty dictionary.
         kwargs: Any additional attributes to be associated with the data.
-
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    # from openghg.standardise.meta import metadata_default_keys, assign_attributes
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
-    data_filepath = Path(data_filepath)
+    data = xr_open_fn(filepath).chunk(chunks)
 
-    if data_filepath.suffix != ".nc":
-        raise ValueError("Input file must be a .nc (netcdf) file.")
-
-    with xr.open_dataset(data_filepath) as temp:
-        data = temp
+    # TODO: Remove this once ragged arrays from xarray is handled
+    if "exposure_id" in data:
+        data = data.drop_vars("exposure_id")
+        data = data.drop_vars("id")
 
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)
@@ -260,6 +264,7 @@ def parse_openghg(
     # Update attributes to match metadata after cleaning
     attributes.update(metadata)
 
+    # TODO: Decide if the key here should be more descriptive that just `species`
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     # gas_data = assign_attributes(data=gas_data, site=site, network=network)
@@ -267,7 +272,7 @@ def parse_openghg(
     return gas_data
 
 
-def metadata_default_satellite_column() -> List[str]:
+def metadata_default_satellite_column() -> list[str]:
     """
     Define default keys for satellite column data
     """
@@ -286,7 +291,7 @@ def metadata_default_satellite_column() -> List[str]:
     return default_keys
 
 
-def metadata_default_site_column() -> List[str]:
+def metadata_default_site_column() -> list[str]:
     """
     Define default keys for site column data
     """
@@ -303,7 +308,7 @@ def metadata_default_site_column() -> List[str]:
     return default_keys
 
 
-TranslationDict = Dict[str, Union[str, List[str]]]
+TranslationDict = dict[str, str | list[str]]
 
 
 def satellite_attribute_translation() -> TranslationDict:

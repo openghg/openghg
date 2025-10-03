@@ -1,28 +1,37 @@
 Searching and plotting
 ======================
 
-In this short tutorial we’ll show how to retrieve some data and create a
+In this short tutorial we'll show how to retrieve some data and create a
 simple plot using one of our plotting functions.
 
-As in the `previous tutorial <Adding_observation_data.ipynb>`__, we will
-start by setting up our temporary object store for our data. If you’ve
-already create your own local object store you can skip the next few
-steps and move onto the **Searching** section.
+Using the tutorial object store
+-------------------------------
+
+As in the :ref:`previous tutorial <using-the-tutorial-object-store>`,
+we will use the tutorial object store to avoid cluttering your personal
+object store.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
+Now we'll add some data to the tutorial store.
 
 .. code:: ipython3
 
     from openghg.tutorial import populate_surface_data
-
-.. code:: ipython3
-
     populate_surface_data()
 
-Searching
----------
+1. Searching
+------------
 
-Let’s search for all the methane data from Tacolneston to do this we
-need to know the site code. We can see a summary of known site codes
-using the ``summary_site_codes()`` function
+Let's search for all the methane data from Tacolneston.
+To do this we need to know the site code ("TAC").
+
+If we didn't know the site code, we could find it using
+the ``summary_site_codes()`` function:
 
 .. code:: ipython3
 
@@ -35,9 +44,8 @@ using the ``summary_site_codes()`` function
     summary
 
 The output of this function is a `pandas
-DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__.
-If we wanted to filter this to include sites containing the name
-“Tacolneston” we could do so as follows:
+DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__,
+so we can filter to find sites containing the name “Tacolneston”:
 
 .. code:: ipython3
 
@@ -46,10 +54,11 @@ If we wanted to filter this to include sites containing the name
 
     summary[find_tacolneston]
 
-As you can see, there will sometimes be multiple entries for a site if
-this is included under multiple networks.
+This shows us that the site code for Tacolneston is "TAC", and also that
+there are two entries for Tacolneston, since it is included under
+multiple networks.
 
-If we wanted to see all available data associated with Tacolneston we
+To see all available data associated with Tacolneston we
 can search for this using the site code of “TAC”.
 
 .. code:: ipython3
@@ -76,20 +85,89 @@ to extract, for example, just the methane data:
     tac_surface_search = search_surface(site="TAC", species="ch4")
     tac_surface_search.results
 
+Keyword options when searching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When searching it is also possible to specify multiple options for keywords.
+If this is done using a list, then datasources which have any of the
+specified values will be found. For example if we wanted to search for methane
+at two specific inlets we could write:
+
+.. code:: ipython3
+
+    from openghg.retrieve import search_surface
+
+    tac_surface_search = search_surface(site="TAC", species="ch4", inlet=["100m", "185m"])
+    tac_surface_search.results
+
+This will return results from both the 100m and 185m inlets (but not the 54m inlet).
+
+Note: it is also possible to specify a dictionary to provide an option between
+different keywords but this would most often be for backwards compatability
+(e.g. if a new keyword is introduced and a previous one retired but still
+present for some data sources) and so will not be demonstrated in this tutorial.
+
 There are also equivalent search functions for other data types
-including ``search_footprints``, ``search_emissions`` and ``search_bc``.
+including ``search_footprints``, ``search_flux`` and ``search_bc``.
+
+Searching for a range of values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An alternative way to search for multiple inlet values is by specifying a range of values:
+
+.. code:: ipython3
+
+    from openghg.retrieve import search_surface
+
+    tac_surface_search = search_surface(site="TAC", species="ch4", inlet=slice("100m", "185m"))
+    tac_surface_search.results
+
+Again, this will return results from both the 100m and 185m inlets.
+
+When a slice is used to specify ``inlet`` heights in ``get_obs_surface``, the search results will be
+combined into a single output with an ``inlet`` data variable, if possible.
+This is useful when the inlet height changes slightly.
+
+Suppose that we have surface data at the BSD site, with inlet heights 248m and 250m. To retrieve
+this data as a single dataset, we use:
+
+.. code:: ipython3
+
+    from openghg.retrieve import get_obs_surface
+
+    bsd_surface_data = get_obs_surface(site="BSD", species="ch4", inlet=slice("248m", "250m"))
+
+The data in ``bsd_surface_data.data`` will have an ``inlet`` data variable, which contains the inlet
+height at each time.
+
+Note that call
+
+.. code:: ipython3
+
+    bsd_surface_data = get_obs_surface(site="BSD", species="ch4", inlet=["248m", "250m"])
+
+would raise an error, because two datasources would be found, and without specifying a slice, OpenGHG
+doesn't know to combine this data.
+
+Further, the range ``inlet=slice("240m", "260m")`` would also work, so the exact values do not need to be
+specified.
+
+2. Plotting
+-----------
 
 If we want to take a look at the data from the 185m inlet we can first
 retrieve the data from the object store and then create a quick
-timeseries plot. See the
-```SearchResults`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults>`__
-object documentation for more information.
+timeseries plot. See the |SearchResults|_ object documentation for more information.
+
+.. |SearchResults| replace:: ``SearchResults``
+.. _SearchResults: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult
 
 .. code:: ipython3
 
     data_185m = tac_surface_search.retrieve(inlet="185m")
 
-   **NOTE:** the plots created below may not show up on the online
+.. note::
+   The plots created below may not show up on the online
    documentation version of this notebook.
 
 We can visualise this data using the in-built plotting commands from the
@@ -100,15 +178,29 @@ this is displayed:
 
     from openghg.plotting import plot_timeseries
 
-    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+    # without calibration_scale conversion
+    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm")
+    # with calibration scale conversion
 
-Plot all the data
------------------
+
+    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Concentration", units="ppm", calibration_scale="TU-87")
+
+.. note::
+
+    Passing `calibration_scale="TU-87"` in the function call will change the calibration scale of the existing data before plotting.
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_185m.html" width="100%" height="400"></iframe>
+
+Plotting multiple timeseries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If there are multiple results for a given search, we can also retrieve
-all the data and receive a ``list`` of
-```ObsData`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData>`__
-objects.
+all the data and receive a ``list`` of |ObsData|_ objects.
+
+.. |ObsData| replace:: ``ObsData``
+.. _ObsData: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData
 
 .. code:: ipython3
 
@@ -121,30 +213,31 @@ and and responsive, even with relatively large amounts of data.
 
 .. code:: ipython3
 
+    # without calibration scale conversion
     plot_timeseries(data=all_ch4_tac, units="ppb")
 
-Compare different sites
------------------------
+    # with calibration scale conversion
+    plot_timeseries(data=all_ch4_tac, units="ppb", calibration_scale="TU-87")
+
+
+.. raw:: html
+
+   <iframe src="../../../_static/tac_surface_all.html" width="100%" height="400"></iframe>
+
+3. Comparing different sites
+----------------------------
 
 We can easily compare data for the same species from different sites by
-doing a quick search to see what’s available
+doing a quick search to see what's available
 
 .. code:: ipython3
 
     ch4_data = search_surface(species="ch4")
 
-.. code:: ipython3
-
-    ch4_data
-
-Then we refine our search to only retrieve the sites (and inlets) that
-we want:
-
-.. code:: ipython3
-
     ch4_data.results
 
-We can retrieve the data we want to compare and make a plot
+Then we refine our search to only retrieve the sites (and inlets) that
+we want to compare and make a plot
 
 .. code:: ipython3
 
@@ -154,3 +247,7 @@ We can retrieve the data we want to compare and make a plot
 .. code:: ipython3
 
     plot_timeseries(data=[bsd_data, tac_data], title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+
+.. raw:: html
+
+   <iframe src="../../../_static/bsd_tac_ch4.html" width="100%" height="400"></iframe>

@@ -1,15 +1,18 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from rich.progress import track
 import logging
-from openghg.store import ObsSurface
+from openghg.standardise import standardise_surface
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def add_noaa_obspack(
-    data_directory: Union[str, Path], project: Optional[str] = None, overwrite: bool = False
-) -> Dict:
+    data_directory: str | Path,
+    project: str | None = None,
+    overwrite: bool = False,
+    store: str | None = None,
+) -> list[dict]:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
 
@@ -18,8 +21,11 @@ def add_noaa_obspack(
         project (optional) : Can specify project or type to process only e.g. "surface"
         or "surface-flask"
         overwrite : Whether to overwrite existing entries in the object store
+        store: Name of object store to write to
+
     Returns:
-        Dict: Details of data which has been processed into the object store
+        list: of dicts with details of data which has been processed into the object store
+
     Examples:
         To add all NOAA ObsPack data (which can be processed) to the object store:
         >>> add_noaa_obspack(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"))
@@ -55,7 +61,7 @@ def add_noaa_obspack(
     project_names_not_implemented = _create_project_names(project_options_not_implemented_yet)
 
     # If a specific project has been specified, extract file matching strings
-    if project:
+    if project is not None:
         if project in project_names:
             projects_to_read = [project]
         elif project in project_options:
@@ -73,46 +79,51 @@ def add_noaa_obspack(
 
     # ObsPack may contain nc or txt files
     # Try and extract one and then the other if possible
-    files = _find_noaa_files(data_directory, ".nc")
+    files = _find_noaa_files(data_directory=data_directory, ext=".nc")
     if not files:
-        files = _find_noaa_files(data_directory, ".txt")
+        files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
+    # TODO - remove this once we can ensure all files will be processed correctly
+    files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
-    processed_summary: Dict[str, Dict] = {}
-    for filepath in files:
+    processed_summary: list[dict] = []
+    for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
-        project = param["project"]
+        _project = param["project"]
         measurement_type = param["measurement_type"]
 
-        if project in projects_to_read:
-            processed = ObsSurface.read_file(
-                filepath,
-                site=site,
-                measurement_type=measurement_type,
-                network="NOAA",
-                source_format="NOAA",
-                overwrite=overwrite,
-            )
-        elif project in project_names_not_implemented:
-            logger.warning(
-                f"Not processing {filepath.name} - no standardisation for {project} data implemented yet."
-            )
-            processed = {}
-        else:
-            processed = {}
+        processed: list[dict] = []
+        if _project in projects_to_read:
+            try:
+                # TODO - can we streamline this a bit to save repeated loads?
+                processed = standardise_surface(
+                    store=store,
+                    filepath=filepath,
+                    site=site,
+                    measurement_type=measurement_type,
+                    network="NOAA",
+                    source_format="NOAA",
+                    overwrite=overwrite,
+                )
+            except Exception:
+                files_with_errors.append(filepath.name)
+            else:
+                processed_summary.extend(processed)
 
-        # Expect "processed" dictionary and/or "error" dictionary within `processed`
-        for key, value in processed.items():
-            if key not in processed_summary:
-                processed_summary[key] = {}
-            for key_in, value_in in value.items():
-                processed_summary[key][key_in] = value_in
+        elif _project in project_names_not_implemented:
+            logger.warning(
+                f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
+            )
+
+    if files_with_errors:
+        err_string = "\n".join(files_with_errors)
+        logger.info(f"We were unable to process {len(files_with_errors)} files - these were:\n {err_string}.")
 
     return processed_summary
 
 
-def _param_from_filename(filename: Union[str, Path]) -> Dict:
+def _param_from_filename(filename: str | Path) -> dict:
     """
     Extract parameter from the NOAA filename based on the agreed naming convention.
     See: https://gml.noaa.gov/ccgg/obspack/documentation.html
@@ -127,11 +138,11 @@ def _param_from_filename(filename: Union[str, Path]) -> Dict:
         >>> _param_from_filename("ch4_esp_surface-flask_2_representative.nc")
         {"species": "ch4", "site" : "esp", "project": "surface-flask", "measurement_type": "flask"}
     """
-
     if isinstance(filename, str):
         extracted_param = filename.split("_")
     else:
         extracted_param = filename.name.split("_")
+
     param = {}
     param["species"] = extracted_param[0]
     param["site"] = extracted_param[1]
@@ -141,9 +152,8 @@ def _param_from_filename(filename: Union[str, Path]) -> Dict:
     return param
 
 
-def _create_project_names(input_dict: Dict) -> List:
-    """
-    Creates full project names as would be included in the NOAA filepath
+def _create_project_names(input_dict: dict) -> list:
+    """Creates full project names as would be included in the NOAA filepath
 
     Expects input dictionary for each the type e.g. "surface" and the
     associated measurement types e.g. ["flask", "insitu", "pfp"]
@@ -162,18 +172,19 @@ def _create_project_names(input_dict: Dict) -> List:
     for key, values in input_dict.items():
         if not isinstance(values, list):
             values = [values]
+
         full_names = ["-".join([key, value]) for value in values]
         projects.extend(full_names)
+
     return projects
 
 
-def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
-    """
-    Find obs files in NOAA ObsPack.
+def _find_noaa_files(data_directory: str | Path, ext: str) -> list[Path]:
+    """Find obs files in NOAA ObsPack.
 
     Expected directory structure is:
      - <ObsPack>/data/<filetype>/
-       - e.g. obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24/data/nc/
+         - e.g. obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24/data/nc/
 
     Args:
         data_directory: Top level ObsPack data directory to search
@@ -189,7 +200,6 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
         >>> _find_noaa_files("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24/data/nc", ".nc")
         ["ch4_esp_surface-flask_2_representative.nc", ...]
     """
-
     # ObsPack may contain nc or txt files:
     # - For nc files found, these should all the data files
     # - For txt files found, we need to make sure files are found in the correct
@@ -199,7 +209,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     elif ext == ".txt":
         subdirectories = ["data/txt", "txt"]
     else:
-        raise ValueError("Did not recognise input for extension: {ext}. Should be one of '.txt' or '.nc'")
+        raise ValueError(f"Did not recognise input for extension: {ext}. Should be one of '.txt' or '.nc'")
 
     data_directory = Path(data_directory).expanduser().resolve()
 
@@ -207,9 +217,12 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     # extract nc files.
     for subdir in subdirectories:
         path_to_search = data_directory / subdir
+
         logger.info(f"Searching for {ext} files within {path_to_search}")
+
         files = list(path_to_search.glob(f"*{ext}"))
         suffix_values = [file.suffix for file in files]
+
         if ext in suffix_values:
             break
     else:

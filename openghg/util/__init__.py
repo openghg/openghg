@@ -1,18 +1,25 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
+
 from ._cli import cli
+from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
+from ._data import openghg_data_path
+from ._data_level import format_data_level
 from ._domain import (
     get_domain_info,
     find_domain,
     find_coord_name,
-    convert_longitude,
+    convert_lon_to_180,
+    convert_lon_to_360,
     convert_internal_longitude,
     cut_data_extent,
+    align_lat_lon,
 )
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
+    check_filepath,
     compress,
     compress_json,
     compress_str,
@@ -21,20 +28,50 @@ from ._file import (
     decompress_str,
     get_datapath,
     get_logfile_path,
-    load_column_parser,
-    load_column_source_parser,
-    load_emissions_database_parser,
-    load_emissions_parser,
     load_json,
     load_internal_json,
-    load_surface_parser,
+    load_standardise_parser,
+    load_transform_parser,
     read_header,
+    open_nc_fn,
+    open_time_nc_fn,
 )
+from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
-from ._inlet import format_inlet
+from ._inlet import format_inlet, extract_height_name
+from ._metadata_util import (
+    null_metadata_values,
+    not_set_metadata_values,
+    remove_null_keys,
+    check_number_match,
+    check_str_match,
+    check_value_match,
+    check_not_set_value,
+    get_overlap_keys,
+    merge_dict,
+    merge_and_extend_dict,
+)
+from ._platform import define_platform, format_platform, get_platform_from_info
+from ._registry import get_parameters, AutoRegistry, Registry
+from ._scale import update_scale
 from ._site import get_site_info, sites_in_network
-from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
-from ._strings import clean_string, is_number, remove_punctuation, to_lowercase
+from ._species import (
+    get_species_info,
+    synonyms,
+    species_lifetime,
+    check_lifetime_monthly,
+    check_species_lifetime,
+    check_species_time_resolved,
+    molar_mass,
+)
+from ._strings import (
+    clean_string,
+    extract_float,
+    is_number,
+    remove_punctuation,
+    to_lowercase,
+    check_and_set_null_variable,
+)
 from ._time import (
     check_date,
     check_nan,
@@ -46,13 +83,17 @@ from ._time import (
     daterange_contains,
     daterange_from_str,
     daterange_overlap,
+    dates_overlap,
     daterange_to_str,
+    evaluate_sampling_period,
     find_daterange_gaps,
     find_duplicate_timestamps,
     first_last_dates,
     in_daterange,
     parse_period,
+    dates_in_range,
     relative_time_offset,
+    infer_frequency,
     sanitise_daterange,
     split_daterange_str,
     split_encompassed_daterange,
@@ -64,16 +105,28 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import create_config, get_user_id, get_user_config_path, read_local_config, check_config
+from ._user import (
+    create_config,
+    get_user_id,
+    get_user_config_path,
+    read_local_config,
+    check_config,
+    handle_direct_store_path,
+)
 from ._util import (
     find_matching_site,
+    normalise_to_filepath_list,
     multiple_inlets,
     pairwise,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
+    sort_by_filenames,
     unanimous,
     verify_site,
+    verify_site_with_satellite,
+    check_unique,
+    find_repeats,
+    collate_strings,
 )
-from ._versions import show_versions
+
+from ._units import assign_units, cf_ureg
+from ._versions import show_versions, check_if_need_new_version

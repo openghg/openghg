@@ -19,11 +19,13 @@ from openghg.util import (
     in_daterange,
     parse_period,
     relative_time_offset,
+    infer_frequency,
     split_daterange_str,
     split_encompassed_daterange,
     time_offset,
     timestamp_tzaware,
     trim_daterange,
+    dates_in_range,
 )
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import Dataset
@@ -86,7 +88,6 @@ def test_daterange_overlap():
 
 
 def test_closest_daterange():
-
     dateranges = [
         "2012-01-01-00:00:00+00:00_2014-01-01-00:00:00+00:00",
         "2014-01-02-00:00:00+00:00_2015-01-01-00:00:00+00:00",
@@ -177,14 +178,6 @@ def test_combining_overlapping_dateranges():
 
     combined = combine_dateranges(dateranges=dateranges)
 
-    combined = [
-        "2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00",
-        "2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00",
-        "2007-04-01-00:00:00_2007-09-01-00:00:00",
-    ]
-
-    return False
-
     assert combined == [
         "2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00",
         "2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00",
@@ -220,7 +213,6 @@ def test_combining_big_daterange():
 
 
 def test_split_daterange_str():
-
     start_true = Timestamp("2001-01-01-00:00:00", tz="UTC")
     end_true = Timestamp("2001-03-01-00:00:00", tz="UTC")
 
@@ -334,7 +326,9 @@ def test_check_date():
 
     assert check_date(date=date_str) == date_str
     assert check_date(date="this") == "NA"
-    assert check_date(date="1001") == "NA"
+
+    # "1001" is interpreted as a date string, not an integer, so it is successfully parsed to pd.Timestamp to Jan 1st, 1001
+    #  assert check_date(date="1001") == "NA"
 
     unix_timestamp_ms = 1636043284779
 
@@ -373,6 +367,7 @@ def test_check_duplicate_timestamps():
     "test_input,expected",
     [
         ("12H", (12, "hours")),
+        ("varies", (1, "seconds")),
         ("yearly", (1, "years")),
         ("monthly", (1, "months")),
         ((1, "minute"), (1, "minutes")),
@@ -443,6 +438,46 @@ def test_relative_time_offset(kwargs, expected):
     assert relative_time_offset(**kwargs) == expected
 
 
+def test_relative_time_offset_with_vaies():
+    print(relative_time_offset)
+
+
+@pytest.mark.parametrize(
+    "start,end,periods,expected_freq",
+    [
+        ("2012-01-01T00:00:00", "2012-01-01T00:01:00", 61, "s"),
+        ("2012-01-01T00:00:00", "2012-01-01T00:01:00", 2, "60s"),
+        ("2012-01-01T00:00:00", "2012-01-01T01:00:00", 2, "1h"),
+        ("2012-01-01T00:00:00", "2012-01-02T00:00:00", 2, "1.0D"),
+        ("2012-01-01T00:00:00", "2012-02-01T00:00:00", 2, "MS"),
+        ("2012-01-01T00:00:00", "2012-02-02T00:00:00", 2, "32.0D"),
+        ("2012-01-01T00:00:00", "2013-01-01T00:00:00", 2, "YS"),
+        ("2012-01-01T00:00:00", "2013-01-03T00:00:00", 2, "368.0D"),
+    ],
+)
+def test_infer_frequency(start, end, periods, expected_freq):
+    """
+    1. Checking frequency can be inferred for timestamps >2 points (should use pd.infer_freq)
+    2-8. Check specific cases where only 2 timestamps are included
+       2. Check < 1 hour include seconds as an integer
+       3. Check < 1 day includes hours as an integer
+       4. Check <~ 1 month includes days as a 1DP float
+       5. Check ~= month (28, 30, 31 days) but <~ year (365, 366) is set to "MS"
+         - We don't check this is the start of the month (so a little dodgy)
+           but this is an approximation to align with pandas freq strings
+       6. Check other time in this range is given in days as a 1DP float
+       7. Check ~= year (365, 366) is set to "YS"
+         - Again, we don't check this is the start of the year, and this is
+           another approximation to align with pandas frequency strings
+       8. Check any other time is given in days as a 1DP float
+
+    """
+    timestamps = pd.date_range(start, end, periods=periods)
+    freq = infer_frequency(timestamps)
+
+    assert freq == expected_freq
+
+
 def test_in_daterange():
     start_a = timestamp_tzaware("2021-01-01")
     end_a = timestamp_tzaware("2021-06-01")
@@ -456,3 +491,42 @@ def test_in_daterange():
     end_b = timestamp_tzaware("1980-01-01")
 
     assert not in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)
+
+
+def test_dates_in_range():
+    keys = [
+        "2022-01-01_2022-01-07",
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+        "2022-02-26_2022-03-04",
+        "2022-03-05_2022-03-11",
+    ]
+
+    start_date = pd.Timestamp(2022, 1, 10)
+    end_date = pd.Timestamp(2022, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    expected_result = [
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+    ]
+
+    assert result == expected_result
+
+    start_date = pd.Timestamp(2024, 1, 10)
+    end_date = pd.Timestamp(2024, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    assert not result

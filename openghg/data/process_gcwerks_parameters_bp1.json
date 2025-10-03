@@ -206,7 +206,7 @@
     "default_scales": {
       "N2O": "WMO-X2006A",
       "CH4": "WMO-X2004A",
-      "CO2": "WMO-X2007",
+      "CO2": "WMO-X2019",
       "CO": "WMO-X2014A"
     },
     "BSD": {

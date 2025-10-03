@@ -1,13 +1,11 @@
-""" Helper functions to provide datapaths etc used in the tutorial notebooks
+"""Helper functions to provide datapaths etc used in the tutorial notebooks"""
 
-"""
 import contextlib
 import os
 import shutil
 import tarfile
 import warnings
 from pathlib import Path
-from typing import List, Union
 import logging
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
@@ -80,7 +78,7 @@ def populate_footprint_co2() -> None:
                 # height = "185m"
                 inlet = "185m"
                 model = "NAME"
-                metmodel = "UKV"
+                met_model = "UKV"
 
                 standardise_footprint(
                     filepath=tac_co2_path,
@@ -88,7 +86,7 @@ def populate_footprint_co2() -> None:
                     inlet=inlet,
                     domain=domain,
                     model=model,
-                    metmodel=metmodel,
+                    met_model=met_model,
                     species=species,
                 )
 
@@ -131,7 +129,7 @@ def populate_flux_co2() -> None:
         species=species,
         source=source_natural,
         domain=domain,
-        high_time_resolution=True,
+        time_resolved=True,
     )
     standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain)
 
@@ -239,15 +237,133 @@ def populate_surface_data() -> None:
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                standardise_surface(filepaths=bsd_paths, source_format="crds", site="bsd", network="decc")
-                standardise_surface(filepaths=tac_paths, source_format="crds", site="tac", network="decc")
+                standardise_surface(filepath=bsd_paths, source_format="crds", site="bsd", network="decc")
+                standardise_surface(filepath=tac_paths, source_format="crds", site="tac", network="decc")
                 standardise_surface(
-                    filepaths=capegrim_tuple,
+                    filepath=capegrim_tuple,
                     instrument="medusa",
                     source_format="gcwerks",
                     site="cgo",
                     network="agage",
                 )
+
+    logger.info("Done.")
+
+
+def populate_satellite_footprint() -> None:
+    """Populates the tutorial object store with satellite footprint data from the example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_footprint
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/footprint/GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+    print(satellite_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_footprint(
+                    filepath=satellite_data[-1],
+                    model="name",
+                    domain="southamerica",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    inlet="column",
+                )
+
+    logger.info("Done.")
+
+
+def populate_column_data() -> None:
+    """Populates the tutorial object store with satellite observation data from the example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_column
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+    print(satellite_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat",
+                )
+
+    logger.info("Done.")
+
+
+def populate_flux_data_satellite() -> None:
+    """Populates the tutorial object store with flux data for similar domain as satellite data from the example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    from openghg.standardise import standardise_flux
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/flux/ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc.tar.gz"
+
+    satellite_data_anthro = "https://github.com/openghg/example_data/raw/main/flux/ch4-anthro-no-fire_SOUTHAMERICA_2011_EDGAR-sectors-yearly.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+    satellit_data_anhro = retrieve_example_data(url=satellite_data_anthro)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_flux(
+                    filepath=satellite_data[-1], species="ch4", source="all", domain="southamerica"
+                )
+                standardise_flux(
+                    filepath=satellit_data_anhro[-1], species="ch4", source="anthro", domain="southamerica"
+                )
+
+    logger.info("Done.")
+
+
+def populate_bc_southamerica() -> None:
+    """Populates the tutorial object store with boundary conditions data for similar domain as satellite data from the example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    logger.info("Retrieving data...")
+    sa_2016_bc = "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_SOUTHAMERICA_201601_CAMS-inversion.nc.tar.gz"
+
+    bc_data_path = retrieve_example_data(url=sa_2016_bc)[0]
+
+    bc_input = "CAMS"
+    domain = "southamerica"
+    species = "ch4"
+
+    logger.info("Standardising boundary conditions...")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
 
     logger.info("Done.")
 
@@ -260,7 +376,7 @@ def download_edgar_data() -> Path:
     This is currently a limited subset of v6.0 CH4 data (2014-2015)
 
     TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.
-    """    
+    """
 
     use_tutorial_store()
 
@@ -312,7 +428,21 @@ def clear_example_cache() -> None:
         shutil.rmtree(extracted_examples, ignore_errors=True)
 
 
-def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) -> List[Path]:
+def retrieve_example_obspack(extract_dir: str | Path | None = None) -> Path:
+    """Retrieves our example ObsPack dataset, extracts it and returns the path to the folder.
+
+    Args:
+        url: URL to retrieve.
+        extract_dir: Folder to extract example tarballs to
+    Returns:
+        Path: Path to directory
+    """
+    url = "https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz"
+    files = retrieve_example_data(url=url, extract_dir=extract_dir)
+    return files[0].parent
+
+
+def retrieve_example_data(url: str, extract_dir: str | Path | None = None) -> list[Path]:
     """Retrieve data from the OpenGHG example data repository, cache the downloaded data,
     extract the data and return the filepaths of the extracted files.
 
@@ -373,7 +503,7 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     return unpack_example_archive(archive_path=download_path, extract_dir=extract_dir)
 
 
-def unpack_example_archive(archive_path: Path, extract_dir: Union[str, Path, None] = None) -> List[Path]:
+def unpack_example_archive(archive_path: Path, extract_dir: str | Path | None = None) -> list[Path]:
     """Unpacks an tar file to a temporary folder, or extract_dir if given.
     Returns the filepath(s) of the objects.
 

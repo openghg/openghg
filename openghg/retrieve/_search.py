@@ -1,118 +1,34 @@
-""" Generic search functions that can be used to find data in
-    the object store
+"""Generic search functions that can be used to find data in
+the object store.
 
 """
+
 import logging
-from typing import Any, Dict, List, Optional, Union
-from openghg.store import load_metastore
-from openghg.store.spec import define_data_type_classes, define_data_types
-from openghg.util import decompress, running_on_hub
-from tinydb.database import TinyDB
+import pandas as pd
+from typing import Any
+import warnings
+from openghg.objectstore import open_object_store
+from openghg.store.spec import define_data_types
+from openghg.objectstore import get_readable_buckets
+from openghg.types import ObjectStoreError
 from openghg.dataobjects import SearchResults
+from ._search_helpers import process_search_kwargs, define_list_search
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def _find_and(x: Any, y: Any) -> Any:
-    return x & y
-
-
-def _find_or(x: Any, y: Any) -> Any:
-    return x | y
-
-
-def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
-    """Search a metadata database and return dictionary of the
-    metadata for each Datasource keyed by their UUIDs.
-
-    Args:
-        search_terms: Keys we want to find
-        database: The tinydb database for the storage object
-    Returns:
-        dict: Dictionary of metadata
-    """
-    from functools import reduce
-
-    from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
-    from pandas import Timedelta
-    from tinydb import Query
-
-    # Do this here otherwise we have to produce them for every datasource
-    start_date = search_terms.get("start_date")
-    end_date = search_terms.get("end_date")
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    else:
-        start_date = timestamp_tzaware(start_date) + Timedelta("1s")
-
-    if end_date is None:
-        end_date = timestamp_now()
-    else:
-        end_date = timestamp_tzaware(end_date) - Timedelta("1s")
-
-    q = Query()
-
-    search_attrs = [getattr(q, k) == v for k, v in search_terms.items()]
-    result = database.search(reduce(_find_and, search_attrs))
-
-    x = [s["uuid"] for s in result]
-
-    # Add in a quick check to make sure we don't have dupes
-    # TODO - remove this once a more thorough tests are added
-    if len(x) != len(set(x)):
-        error_msg = "Multiple results found with same UUID!"
-        logger.error(error_msg)
-        raise ValueError(error_msg)
-
-    return {s["uuid"]: s for s in result}
-
-
-def metadata_lookup(
-    metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
-) -> Union[bool, str]:
-    """Searches the passed database for the given metadata
-
-    Args:
-        metadata: Keys we are required to find
-        database: The tinydb database for the storage object
-        additional: Keys we'd like to find (currently unused)
-    Returns:
-        str or bool: UUID string if matching Datasource found, otherwise False
-    """
-    from functools import reduce
-
-    from openghg.types import DatasourceLookupError
-    from tinydb import Query
-
-    q = Query()
-
-    search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
-    required_result = database.search(reduce(_find_and, search_attrs))
-
-    if not required_result:
-        return False
-
-    if len(required_result) > 1:
-        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
-
-    uuid: str = required_result[0]["uuid"]
-
-    return uuid
-
-
 def search_bc(
-    species: Optional[str] = None,
-    bc_input: Optional[str] = None,
-    domain: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
+    species: str | None = None,
+    bc_input: str | None = None,
+    domain: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for boundary condition data
+    """Search for boundary condition data.
 
     Args:
         species: Species name
@@ -132,7 +48,6 @@ def search_bc(
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -152,13 +67,13 @@ def search_bc(
 
 
 def search_eulerian(
-    model: Optional[str] = None,
-    species: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    model: str | None = None,
+    species: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for eulerian data
+    """Search for eulerian data.
 
     Args:
         model: Eulerian model name
@@ -169,7 +84,6 @@ def search_eulerian(
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -186,41 +100,42 @@ def search_eulerian(
 
 
 def search_flux(
-    species: Optional[str] = None,
-    source: Optional[str] = None,
-    domain: Optional[str] = None,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
-    model: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    high_time_resolution: Optional[bool] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
+    database: str | None = None,
+    database_version: str | None = None,
+    model: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    time_resolved: bool | None = None,
+    high_time_resolution: bool | None = None,  # DEPRECATED: use time_resolved instead
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for emissions data
+    """Search for flux / emissions data.
 
     Args:
         species: Species name
-        domain: Emissions domain
-        source: Emissions source
+        domain: Flux / Emissions domain
+        source: Flux / Emissions source
         database: Name of database source for this input (if relevant)
         database_version: Name of database version (if relevant)
         model: Model name (if relevant)
         source_format : Type of data being input e.g. openghg (internal format)
-        high_time_resolution: If this is a high resolution file
+        time_resolved: If this is a high resolution file
         period: Period of measurements. Only needed if this can not be inferred from the time coords
                 If specified, should be one of:
                     - "yearly", "monthly"
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         continuous: Whether time stamps have to be continuous.
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -235,33 +150,34 @@ def search_flux(
         model=model,
         start_date=start_date,
         end_date=end_date,
-        high_time_resolution=high_time_resolution,
+        time_resolved=high_time_resolution,
         period=period,
         continuous=continuous,
-        data_type="emissions",
+        data_type="flux",
         **kwargs,
     )
 
 
 def search_footprints(
-    site: Optional[str] = None,
-    inlet: Optional[str] = None,
-    domain: Optional[str] = None,
-    model: Optional[str] = None,
-    height: Optional[str] = None,
-    metmodel: Optional[str] = None,
-    species: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    network: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-    continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,
-    high_time_res: Optional[bool] = None,
-    short_lifetime: Optional[bool] = None,
+    site: str | None = None,
+    inlet: str | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    height: str | None = None,
+    met_model: str | None = None,
+    species: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    network: str | None = None,
+    period: str | tuple | None = None,
+    continuous: bool | None = None,
+    high_spatial_resolution: bool | None = None,  # TODO need to give False to get only low spatial res
+    time_resolved: bool | None = None,
+    high_time_resolution: bool | None = None,  # DEPRECATED: use time_resolved instead
+    short_lifetime: bool | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for footprints data
+    """Search for footprints data.
 
     Args:
         site: Site name
@@ -269,15 +185,16 @@ def search_footprints(
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         height: Alias for inlet
-        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        met_model: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
         kwargs: Additional search terms
@@ -286,77 +203,109 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    if start_date is not None:
-        start_date = str(start_date)
-    if end_date is not None:
-        end_date = str(end_date)
+    args: dict[str, Any] = {
+        "site": site,
+        "inlet": inlet,
+        "height": height,
+        "domain": domain,
+        "model": model,
+        "met_model": met_model,
+        "species": species,
+        "network": network,
+        "start_date": start_date,
+        "end_date": end_date,
+        "period": period,
+        "continuous": continuous,
+        "high_spatial_resolution": high_spatial_resolution,
+        "short_lifetime": short_lifetime,
+    }
 
-    # Allow inlet or height to be specified, both or either may be included
-    # within the metadata so could use either to search
-    inlet = format_inlet(inlet)
-    height = format_inlet(height)
+    # Keys in metastore are stored as strings; convert non-string arguments to strings.
+    for k in ["start_date", "end_date"]:
+        if args[k] is not None:
+            args[k] = str(args[k])
 
-    return search(
-        site=site,
-        inlet=inlet,
-        height=height,
-        domain=domain,
-        model=model,
-        metmodel=metmodel,
-        species=species,
-        network=network,
-        start_date=start_date,
-        end_date=end_date,
-        period=period,
-        continuous=continuous,
-        high_spatial_res=high_spatial_res,
-        high_time_res=high_time_res,
-        short_lifetime=short_lifetime,
-        data_type="footprints",
-        **kwargs,
-    )
+    # Either (or both) of 'high_time_resolution' and 'time_resolved' may be in the metatore,
+    # so both are allowed in search but deprecation warning passed.
+    # - ensure passing time_resolved=True gives back all relevant footprints.
+    if high_time_resolution is not None:
+        warnings.warn(
+            "The 'high_time_resolution' argument is deprecated and will be replaced in future versions with 'time_resolved'.",
+            DeprecationWarning,
+        )
+        if time_resolved is None:
+            time_resolved = high_time_resolution
+
+    high_time_resolution = time_resolved  # Includes at the moment for backwards compatability
+    args["option_time_resolved"] = {
+        "time_resolved": time_resolved,
+        "high_time_resolution": high_time_resolution,
+    }
+
+    # Either (or both) of 'inlet' and 'height' may be in the metastore, so
+    # both are allowed for search.
+    args["inlet"] = format_inlet(inlet)
+    args["height"] = format_inlet(height)
+
+    args["data_type"] = "footprints"  # generic `search` needs the data type
+
+    # merge kwargs and args, keeping values from args on key conflict
+    kwargs.update(args)
+
+    return search(**kwargs)
 
 
 def search_surface(
-    species: Union[str, List[str], None] = None,
-    site: Union[str, List[str], None] = None,
-    inlet: Union[str, List[str], None] = None,
-    height: Union[str, List[str], None] = None,
-    instrument: Union[str, List[str], None] = None,
-    measurement_type: Union[str, List[str], None] = None,
-    source_format: Union[str, List[str], None] = None,
-    network: Union[str, List[str], None] = None,
-    start_date: Union[str, List[str], None] = None,
-    end_date: Union[str, List[str], None] = None,
-    data_source: Optional[str] = None,
-    sampling_height: Optional[str] = None,
-    icos_data_level: Optional[int] = None,
-    dataset_source: Optional[str] = None,
+    species: str | list[str] | None = None,
+    site: str | list[str] | None = None,
+    inlet: str | slice | None | list[str | slice | None] = None,
+    height: str | slice | None | list[str | slice | None] = None,
+    instrument: str | list[str] | None = None,
+    data_level: str | list[str] | dict | None = None,
+    data_sublevel: str | list[str] | None = None,
+    dataset_source: str | None = None,
+    data_source: str | None = None,
+    platform: str | None = None,
+    measurement_type: str | list[str] | None = None,
+    source_format: str | list[str] | None = None,
+    network: str | list[str] | None = None,
+    start_date: str | list[str] | None = None,
+    end_date: str | list[str] | None = None,
+    sampling_height: str | None = None,
+    icos_data_level: int | str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Cloud object store search
+    """Cloud object store search.
 
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height above ground level in metres
+        inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
+            search for a range of values. `lower` and `upper` can be int, float, or strings
+            such as '100m'.
         height: Alias for inlet
         instrument: Instrument name
+        data_level: Data quality assurance level (0-3)
+        data_sublevel: Typically used for "L1" data depending on different QA
+            performed before data is finalised.
+        data_source: Where data was retrieved from (used especially when retrieved from external archives)
+            e.g. "internal", "noaa_obspack", "icoscp", "ceda_archive". This
+            argument only needs to be used to narrow the search to data solely from retrieval methods.
+        dataset_source: External name applied to source of the dataset,
+            for example "ICOS", "InGOS", "European ObsPack", "CEDA 2023.06"
+        platform: Type of measurement platform e.g. "surface-insitu", "surface-flask"
         measurement_type: Measurement type
-        data_type: Data type e.g. "surface", "column", "emissions"
+        data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
-        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
-        argument only needs to be used to narrow the search to data solely from these sources.
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
-        dataset_source: For ICOS data only: dataset source name, for example ICOS, InGOS, European ObsPack
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
-    from openghg.util import format_inlet
+    from openghg.util import format_inlet, format_data_level, format_platform
 
     if start_date is not None:
         start_date = str(start_date)
@@ -367,26 +316,43 @@ def search_surface(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    if isinstance(inlet, list):
-        inlet = [format_inlet(value) for value in inlet]
+    inlet = format_inlet(inlet)
+
+    # Ensure data_level input is formatted
+    if isinstance(data_level, list):
+        data_level = [format_data_level(value) for value in data_level]
+    elif isinstance(data_level, dict):
+        data_level = {k: format_data_level(v) for k, v in data_level.items()}
     else:
-        inlet = format_inlet(inlet)
+        data_level = format_data_level(data_level)
+
+    # The icos_data_level keyword may be present but for all newly retrieved ICOS data this
+    # will be replaced with just data_level.
+    if icos_data_level is not None:
+        warnings.warn(
+            "The 'icos_data_level' argument is deprecated and will be replaced in future versions with 'data_level'.",
+            DeprecationWarning,
+        )
+
+    platform = format_platform(platform)
 
     results = search(
         species=species,
         site=site,
         inlet=inlet,
         instrument=instrument,
+        data_level=data_level,
+        data_sublevel=data_sublevel,
+        data_source=data_source,
+        dataset_source=dataset_source,
         measurement_type=measurement_type,
         data_type="surface",
         source_format=source_format,
         start_date=start_date,
         end_date=end_date,
-        data_source=data_source,
         network=network,
         sampling_height=sampling_height,
         icos_data_level=icos_data_level,
-        dataset_source=dataset_source,
         **kwargs,
     )
 
@@ -394,17 +360,17 @@ def search_surface(
 
 
 def search_column(
-    satellite: Optional[str] = None,
-    domain: Optional[str] = None,
-    selection: Optional[str] = None,
-    site: Optional[str] = None,
-    species: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    platform: Optional[str] = None,
+    satellite: str | None = None,
+    domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    species: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    platform: str | None = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search column data
+    """Search column data.
 
     Args:
         satellite: Name of satellite (if relevant)
@@ -419,13 +385,15 @@ def search_column(
         species: Species name or synonym e.g. "ch4"
         instrument: Instrument name e.g. "TANSO-FTS"
         network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
-        platform: Type of platform. Should be one of:
-            - "satellite"
-            - "site"
+        platform: Type of platform. One of "satellite", "column-insitu".
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_platform
+
+    platform = format_platform(platform)
+
     return search(
         satellite=satellite,
         domain=domain,
@@ -445,6 +413,15 @@ def search(**kwargs: Any) -> SearchResults:
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
 
+    Though any types can be passed as keyword arguments, these will be interpreted in the following ways:
+     - None - argument will be ignored.
+     - list/tuple - an OR search will be created for the argument and each of the values.
+     - dict - an OR search will be created for the key, value pairs.
+       - Note: in this case the name of argument itself will be ignored.
+     - str/other - argument used directly.
+
+    All input search values are formatted (openghg.utils.clean_string).
+
     This function detects the running environment and routes the call
     to either the cloud or local search function.
 
@@ -463,83 +440,44 @@ def search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from openghg.cloud import call_function
-
-    if running_on_hub():
-        post_data: Dict[str, Union[str, Dict]] = {}
-        post_data["function"] = "search"
-        post_data["search_terms"] = kwargs
-
-        result = call_function(data=post_data)
-
-        content = result["content"]
-
-        found = content["found"]
-        compressed_response = content["result"]
-
-        if found:
-            data_str = decompress(compressed_response)
-            sr = SearchResults.from_json(data=data_str)
-        else:
-            sr = SearchResults()
-    else:
-        sr = local_search(**kwargs)
-
-    return sr
-
-
-# TODO
-# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
-# facing interfaces to a more general search function, this would also make it easier to enforce types
-# TODO - rename this function!
-# 2.
-# _base_search()
-# 1.
-# _store_search()
-def local_search(**kwargs: Any) -> SearchResults:
-    """Search for observations data. Any keyword arguments may be passed to the
-    the function and these keywords will be used to search metadata.
-
-    This function will only perform a "local" search. It may be used either by a cloud function
-    or when using OpenGHG locally, it does no environment detection.
-    We suggest using the search function that takes care of everything for you.
-
-    Example / commonly used arguments are given below.
-
-    Args:
-        species: Terms to search for in Datasources
-        locations: Where to search for the terms in species
-        inlet: Inlet height such as 100m
-        instrument: Instrument name such as picarro
-        find_all: Require all search terms to be satisfied
-        start_date: Start datetime for search.
-        If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_date: End datetime for search.
-        If None an end datetime of the current datetime is set
-    Returns:
-        SearchResults or None: SearchResults object is results found, otherwise None
-    """
-    import itertools
-
-    from openghg.store.base import Datasource
-    from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
+        dates_overlap,
+        format_inlet,
         synonyms,
         timestamp_epoch,
         timestamp_now,
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
-    from tinydb import Query
+    from openghg.util import handle_direct_store_path
 
-    if running_on_hub():
-        raise ValueError(
-            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
-        )
+    # Select and format the search terms
+    # - ignore any kwargs which are None
+    # - clean search terms directly or within data structures
+    search_kwargs = {}
+    for k, v in kwargs.items():
+        if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
+            v = format_inlet(v)
+        elif isinstance(v, (list, tuple)):
+            v = [clean_string(value) for value in v if value is not None]
+            if not v:  # Check empty list
+                v = None
+        elif isinstance(v, dict):
+            v = {key: clean_string(value) for key, value in v.items() if value is not None}
+            if not v:  # Check empty dict
+                v = None
+        elif k.lower() in ["start_date", "end_date"]:
+            if v is not None:
+                v = pd.Timestamp(v)
+        # To avoid clean string function
+        elif k.lower() in ["store", "add_new_store"]:
+            search_kwargs[k] = v
+        else:
+            v = clean_string(v)
 
-    # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
+        if v is not None:
+            search_kwargs[k] = v
 
     # Species translation
     species = search_kwargs.get("species")
@@ -551,116 +489,117 @@ def local_search(**kwargs: Any) -> SearchResults:
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
+    # get data types to search and validate
     data_type = search_kwargs.get("data_type")
-    data_type_classes = define_data_type_classes()
+    valid_data_types = define_data_types()
 
     types_to_search = []
     if data_type is not None:
         if not isinstance(data_type, list):
             data_type = [data_type]
 
-        valid_data_types = define_data_types()
         for d in data_type:
             if d not in valid_data_types:
                 raise ValueError(
                     f"{data_type} is not a valid data type, please select one of {valid_data_types}"
                 )
-            # Get the object we want to load in from the object store
-            type_class = data_type_classes[d]
-            types_to_search.append(type_class)
+            types_to_search.append(d)
     else:
-        types_to_search.extend(data_type_classes.values())
+        types_to_search.extend(valid_data_types)
 
-    try:
-        start_date = search_kwargs["start_date"]
-    except KeyError:
-        start_date = None
-    else:
-        del search_kwargs["start_date"]
+    # Get a dictionary of all the readable buckets available
+    # We'll iterate over each of them
+    readable_buckets = get_readable_buckets()
 
-    try:
-        end_date = search_kwargs["end_date"]
-    except KeyError:
-        end_date = None
-    else:
-        del search_kwargs["end_date"]
+    # If we're given a store then we'll just read from that one
+    store = search_kwargs.pop("store", None)
+    add_new_store = search_kwargs.pop("add_new_store", False)
+    bucket_path = ""
 
-    # Here we process the kwargs and flatten out the lists so
-    # we create the combinations of search queries correctly
-    a_list = {}
-    not_a_list = {}
-    for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
-            a_list[k] = v
+    if store:
+        if store in readable_buckets:
+            try:
+                readable_buckets = {store: readable_buckets[store]}
+            except KeyError as e:
+                raise ValueError(f"Value for {store} cannot be processed") from e
         else:
-            not_a_list[k] = v
+            bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
+            readable_buckets = {store: bucket_path}
 
-    # If we have lists of values to find we need to flatten them out
-    expanded_search = []
-    if a_list:
-        keys, values = zip(*a_list.items())
-        for v in itertools.product(*values):
-            d = dict(zip(keys, v))
-            if not_a_list:
-                d.update(not_a_list)
-            expanded_search.append(d)
-    else:
-        expanded_search.append(not_a_list)
+    # Keywords to apply a list search rather than exact match
+    # At the moment this is primarily the "tag" keyword
+    list_search = define_list_search()
 
-    general_results = []
-    for data_type_class in types_to_search:
-        meta_key = data_type_class._metakey
+    start_date = search_kwargs.pop("start_date", None)
+    end_date = search_kwargs.pop("end_date", None)
 
-        with load_metastore(key=meta_key) as metastore:
-            for v in expanded_search:
-                res = metastore.search(Query().fragment(v))
-                if res:
-                    general_results.extend(res)
+    expanded_search = process_search_kwargs(search_kwargs, list_search=list_search)
+    general_metadata = {}
 
-    # Add in a quick check to make sure we don't have dupes
-    uuids = [s["uuid"] for s in general_results]
-    # TODO - remove this once a more thorough tests are added
-    if len(uuids) != len(set(uuids)):
-        error_msg = "Multiple results found with same UUID!"
-        logger.exception(msg=error_msg)
-        raise ValueError(error_msg)
+    for bucket_name, bucket in readable_buckets.items():
+        metastore_records = []
+        for data_type in types_to_search:
+            with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
+                for v in expanded_search:
+                    res = objstore.search(**v)
+                    if res:
+                        metastore_records.extend(res)
 
-    # Here we create a dictionary of the metadata keyed by the Datasource UUID
-    # we'll create a pandas DataFrame out of this in the SearchResult object
-    # for better printing / searching within a notebook
-    keyed_metadata = {r["uuid"]: r for r in general_results}
+        if not metastore_records:
+            continue
 
-    data_keys = {}
-    # Narrow the search to a daterange if dates passed
-    if start_date is not None or end_date is not None:
-        if start_date is None:
-            start_date = timestamp_epoch()
-        else:
-            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+        # Add in a quick check to make sure we don't have dupes
+        # TODO - remove this once a more thorough tests are added
+        uuids = [s["uuid"] for s in metastore_records]
+        if len(uuids) != len(set(uuids)):
+            error_msg = "Multiple results found with same UUID!"
+            logger.exception(msg=error_msg)
+            raise ValueError(error_msg)
 
-        if end_date is None:
-            end_date = timestamp_now()
-        else:
-            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+        # Here we create a dictionary of the metadata keyed by the Datasource UUID
+        # we'll create a pandas DataFrame out of this in the SearchResult object
+        # for better printing / searching within a notebook
+        metadata = {r["uuid"]: r for r in metastore_records}
+        # Add in the object store to the metadata the user sees
+        for m in metadata.values():
+            m.update({"object_store": bucket})
 
-        metadata_in_daterange = {}
+        # Narrow the search to a daterange if dates passed
+        if start_date is not None or end_date is not None:
+            if start_date is None:
+                start_date = timestamp_epoch()
+            else:
+                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
 
-        for uid, record in keyed_metadata.items():
-            _keys = Datasource.load(uuid=uid, shallow=True).keys_in_daterange(
-                start_date=start_date, end_date=end_date
-            )
+            if end_date is None:
+                end_date = timestamp_now()
+            else:
+                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
 
-            if _keys:
-                metadata_in_daterange[uid] = record
-                data_keys[uid] = _keys
+            metadata_in_daterange = {}
 
-        if not data_keys:
-            logger.warning("No data found for the dates given, please try a wider search.")
-        # Update the metadata we'll use to create the SearchResults object
-        keyed_metadata = metadata_in_daterange
-    else:
-        # Here we only need to retrieve the keys
-        for uid in keyed_metadata:
-            data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
+            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
+            for uid, record in metadata.items():
+                meta_start = record["start_date"]
+                meta_end = record["end_date"]
 
-    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata), start_result="data_type")
+                if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
+                    metadata_in_daterange[uid] = record
+
+            if not metadata_in_daterange:
+                logger.warning(
+                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
+                )
+            # Update the metadata we'll use to create the SearchResults object
+            metadata = metadata_in_daterange
+
+        # Remove once more comprehensive tests are done
+        dupe_uuids = [k for k in metadata if k in general_metadata]
+        if dupe_uuids:
+            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
+
+        general_metadata.update(metadata)
+
+    return SearchResults(
+        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
+    )

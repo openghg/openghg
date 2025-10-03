@@ -1,23 +1,84 @@
-from openghg.util import create_config, get_user_id, check_config
-import toml
+import builtins
 from pathlib import Path
+import tempfile
 import pytest
+import toml
+from unittest.mock import patch
+from openghg.types import ConfigFileError, ObjectStoreError
+from openghg.util import check_config, create_config, read_local_config, handle_direct_store_path
 
 
 @pytest.fixture
-def mock_config(mocker, scope="module"):
-    mock_path = str(Path().home().joinpath("openghg_store"))
-    mock_conf = {"object_store": {"local_store": mock_path}, "user_id": "test-uuid-100"}
-    mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
+def tmp_config_path(tmp_path):
+    return tmp_path.joinpath("config_folder").joinpath("mock_config.conf")
 
 
-def test_get_user_id(mock_config):
-    user_id = get_user_id()
-    assert user_id == "test-uuid-100"
+@pytest.fixture
+def mock_get_user_config_path(tmp_config_path, mocker):
+    tmp_config_path.parent.mkdir(parents=True)
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=tmp_config_path)
 
 
-def test_create_config(mocker, tmpdir):
-    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+@pytest.fixture
+def write_mock_config(tmp_path, tmp_config_path):
+    mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
+    mock_path = tmp_path.joinpath("mock_store")
+    mock_shared_path = tmp_path.joinpath("mock_shared_store")
+    mock_conf = {
+        "object_store": {
+            "user": {"path": str(mock_path), "permissions": "rw"},
+            "shared": {"path": str(mock_shared_path), "permission": "rw"},
+        },
+        "user_id": mock_uuid,
+    }
+
+    tmp_config_path.write_text(toml.dumps(mock_conf))
+
+
+def test_read_config_check_old_stores(mock_get_user_config_path, write_mock_config, caplog):
+    """This tests the read_local_config function when the user has an old store in their config file.
+    This test and the _check_valid_store function may be removed once the move to the new store setup is complete.
+    """
+    config = read_local_config()
+
+    user_store_path = Path(config["object_store"]["user"]["path"])
+
+    # Let's mock some data having been written to the object store
+    zarr_store_folderpath = user_store_path.joinpath("data/test-uuid-123/zarr")
+    zarr_store_folderpath.mkdir(parents=True)
+
+    config = read_local_config()
+
+    assert "Zarr storage format and will be ignored" not in caplog.text
+
+    zarr_store_folderpath.rmdir()
+
+    config = read_local_config()
+
+    assert len(config["object_store"]) == 1
+    assert "Zarr storage format and will be ignored" in caplog.text
+
+    # Let's now make a zarr folder and make sure this object store is still valid
+    shared_store_path = Path(config["object_store"]["shared"]["path"])
+    zarr_store_folderpath = shared_store_path.joinpath("data/test-uuid-123/zarr")
+    zarr_store_folderpath.mkdir(parents=True)
+
+    config = read_local_config()
+    assert len(config["object_store"]) == 1
+
+    # Now we remove the zarr store and check the config again
+    # As there's now a folder structure there a ConfigFileError should be raised
+    # as the store is no longer valid and OpenGHG can't find a valid store
+    zarr_store_folderpath.rmdir()
+
+    with pytest.raises(ConfigFileError):
+        read_local_config()
+
+
+def test_create_config(monkeypatch, mocker, tmp_path):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
+
     mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
     mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
     mocker.patch("openghg.util._user.uuid.uuid4", side_effect=mock_uuids)
@@ -29,18 +90,105 @@ def test_create_config(mocker, tmpdir):
     config = toml.loads(mock_config_path.read_text())
 
     assert config["user_id"] == "test-uuid-100"
-    assert config["object_store"]["local_store"] == str(user_obj_expected)
+    assert config["object_store"]["user"]["path"] == str(user_obj_expected)
+    assert config["object_store"]["user"]["permissions"] == "rw"
 
 
-def test_check_config(mock_config, mocker, caplog):
-    with pytest.raises(ValueError):
+def test_create_config_migrate(mocker, monkeypatch, tmp_path, caplog):
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    # make config file at tmp_path/.config/openghg/openghg.conf
+    mock_old_config_path = tmp_path / ".config" / "openghg" / "openghg.conf"
+    mock_old_config_path.parent.mkdir(parents=True)
+
+    mock_config_content = "This is just a mock config file."
+    mock_old_config_path.write_text(mock_config_content)
+
+    mock_new_config_path = tmp_path / ".openghg" / "openghg.conf"
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_new_config_path)
+
+    create_config(silent=True)
+
+    assert "Moved user config file from" in caplog.text
+    assert "Cannot update an existing configuration silently. Please run interactively." in caplog.text
+    assert mock_new_config_path.read_text() == mock_config_content
+
+
+def test_check_config(mocker, caplog, monkeypatch, tmp_path):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
+
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
+
+    with pytest.raises(ConfigFileError):
         check_config()
 
     mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
     mock_path = "/tmp/mock_store"
-    mock_conf = {"object_store": {"local_store": mock_path}, "user_id": mock_uuid}
+    mock_conf = {
+        "object_store": {"user": {"path": mock_path, "permissions": "rw"}},
+        "user_id": mock_uuid,
+        "config_version": "2",
+    }
     mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
+
+    mock_config_path.write_text("testing-123")
 
     check_config()
 
     assert " /tmp/mock_store does not exist but will be created." in caplog.text
+
+
+def test_create_config_duplicates(monkeypatch, mocker, tmp_path, capsys):
+    """
+    Test simulates input values submitted after invoking the create_config method. It verifies if the value error is raised for duplicate store names and store paths.
+    """
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    mock_config_path = tmp_path.joinpath("mock_config.conf")
+
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
+    mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
+    mocker.patch("openghg.util._user.uuid.uuid4", side_effect=mock_uuids)
+
+    create_config(silent=True)
+
+    config = toml.loads(mock_config_path.read_text())
+
+    with patch.object(
+        builtins,
+        "input",
+        side_effect=iter(["n", "y", "user", config["object_store"]["user"]["path"], "r", "n"]),
+    ):
+        with pytest.raises(ValueError, match="Paths of the following new stores match those ") as exc_info:
+            create_config(silent=False)
+
+    exception = exc_info.value
+    captured = capsys.readouterr()
+
+    assert "Some names match those of existing stores: ['user'], please update manually" in str(captured)
+    assert "user" in str(exception)
+    assert config["object_store"]["user"]["path"] in str(exception)
+
+
+def test_handle_direct_store_path(caplog, reset_mock_user_config):
+    """Test the function to directly add the path to config, as well as looks for the ObjectStore error if the store details already exist in the config."""
+    path = Path(tempfile.gettempdir()) / "openghg-testing-direct-store"
+    name = "direct_store"
+    handle_direct_store_path(path=path, name=name, add_new_store=True)
+
+    assert (
+        f"'{path}' is not a configured writable store name but looks like a path. "
+        "Using it directly." in caplog.text
+    )
+    assert f"Added store '{name}' with path '{path}' to config." in caplog.text
+
+    handle_direct_store_path(path=path, add_new_store=True)
+    assert (
+        f"'{path}' is not a configured writable store name but looks like a path. "
+        "Using it directly." in caplog.text
+    )
+    assert "openghg-testing-direct-store" in caplog.text
+
+    with pytest.raises(ObjectStoreError):
+        handle_direct_store_path(path=path, add_new_store=True)

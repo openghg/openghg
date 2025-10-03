@@ -1,14 +1,41 @@
-from helpers import get_bc_datapath
+import numpy as np
+import pytest
+from helpers import get_bc_datapath, clear_test_store
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions, load_metastore, recombine_datasets
+from openghg.standardise import standardise_bc, standardise_from_binary_data
+from openghg.store import BoundaryConditions
 from openghg.util import hash_bytes
 from xarray import open_dataset
-import numpy as np
 
 
 def test_read_data_monthly(mocker):
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
-    # mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+    class FakeUUID:
+        """A class that mocks `uuid.uuid4`.
+
+        It has a `hex` property, which is used by some of our code.
+        The values returned by `hex` are 0, 1, 2, ... (as strings).
+
+        It only returns one uuid, but could be changed to return a different UUID
+        each time.
+        """
+
+        hex_num = 0
+        uuid_num = 0
+
+        def __init__(self) -> None:
+            pass
+
+        def __str__(self) -> str:
+            return "test-uuid-1"
+
+        @property
+        def hex(self) -> str:
+            self.hex_num += 1
+            return str(self.hex_num)
+
+    fake_uuid = FakeUUID()
+    mocker.patch("uuid.uuid4", side_effect=lambda: fake_uuid)
+    mocker.patch("openghg.objectstore._objectstore.uuid4", side_effect=lambda: fake_uuid)
 
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
@@ -26,27 +53,44 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    proc_results = BoundaryConditions.read_data(
-        binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
+    proc_results = standardise_from_binary_data(
+        data_type="boundary_conditions",
+        store="user",
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata,
+        source_format="openghg",
     )
 
-    # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results["ch4_mozart_europe"]["new"] is True
+    assert proc_results is not None and len(proc_results) == 1
+
+    expected_info = {
+        "uuid": "test-uuid-1",
+        "new": True,
+        "species": "ch4",
+        "bc_input": "mozart",
+        "domain": "europe",
+    }
+    assert expected_info.items() <= proc_results[0].items()
 
 
 def test_read_file_monthly():
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
-    proc_results = BoundaryConditions.read_file(
+    proc_results = standardise_bc(
+        store="user",
         filepath=test_datapath,
         species="ch4",
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
-        overwrite=True,
+        force=True,
     )
 
-    assert "ch4_mozart_europe" in proc_results
+    assert len(proc_results) == 1
+
+    expected_info = {"species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
@@ -91,7 +135,8 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    BoundaryConditions.read_file(
+    standardise_bc(
+        store="user",
         filepath=test_datapath,
         species=species,
         bc_input=bc_input,
@@ -152,7 +197,8 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    BoundaryConditions.read_file(
+    standardise_bc(
+        store="user",
         filepath=test_datapath,
         species=species,
         bc_input=bc_input,
@@ -208,36 +254,6 @@ def test_read_file_co2_no_time_dim():
 # TODO: Add test around non-continuous data and key word?
 
 
-def test_datasource_add_lookup():
-    from openghg.store import datasource_lookup
-
-    bc = BoundaryConditions()
-
-    fake_datasource = {"ch4_mozart_europe_201208": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "ch4_mozart_europe_201208": {
-            "metadata": {
-                "species": "ch4",
-                "domain": "europe",
-                "bc_input": "mozart",
-                "date": "201208",
-            }
-        }
-    }
-
-    with load_metastore(key="test-key-123") as metastore:
-        bc.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
-
-        assert bc.datasources() == ["mock-uuid-123456"]
-
-        required = ["species", "domain", "bc_input", "date"]
-
-        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
-
-        assert lookup["ch4_mozart_europe_201208"] == fake_datasource["ch4_mozart_europe_201208"]["uuid"]
-
-
 def test_bc_schema():
     """Check expected data variables are being included for default BoundaryConditions schema"""
     data_schema = BoundaryConditions.schema()
@@ -249,3 +265,56 @@ def test_bc_schema():
     assert "vmr_w" in data_vars
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_info_metadata_raise_error():
+    """
+    Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
+    """
+
+    clear_test_store("user")
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    with pytest.raises(ValueError):
+        standardise_bc(
+            store="user",
+            filepath=test_datapath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            info_metadata={"purpose": "openghg_tests", "species": "co2"},
+        )
+
+
+def test_info_metadata():
+    """
+    Test to verify optional metadata supplied as dictionary gets stored as metadata
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        info_metadata={"project": "openghg_test", "tag": "tests"},
+    )
+
+    search_results = search(
+        species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
+    )
+
+    bc_obs = search_results.retrieve_all()
+    metadata = bc_obs.metadata
+
+    assert "project" in metadata
+    assert "tag" in metadata

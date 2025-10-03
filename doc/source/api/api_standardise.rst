@@ -30,6 +30,10 @@ Footprints
 
 .. autofunction:: openghg.standardise.standardise_footprint
 
+Flux Timeseries
+^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_flux_timeseries
 
 Helpers
 =======

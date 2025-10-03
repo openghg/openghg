@@ -1,7 +1,3 @@
-
-from typing import Optional
-
-
 class OpenGHGError(Exception):
     """Top level OpenGHG error"""
 
@@ -26,6 +22,10 @@ class DatasourceLookupError(OpenGHGError):
     """Raised if Datasource lookup fails"""
 
 
+class DatasourceCombineError(OpenGHGError):
+    """Raised if we are unable to combine previous data within a Datasource with new data"""
+
+
 class EncodingError(ObjectStoreError):
     pass
 
@@ -42,11 +42,51 @@ class SearchError(OpenGHGError):
     """Related to searching the object store"""
 
 
+class ParseError(OpenGHGError):
+    """Data is not in correct format for requested parse function"""
+
+
 class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
 
 
-def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
+class MetadataFormatError(OpenGHGError):
+    """Metadata value not within expected format"""
+
+
+class DataOverlapError(OpenGHGError):
+    """New data overlaps with current data stored"""
+
+
+class ConfigFileError(OpenGHGError):
+    """Raised for errors with configuration file"""
+
+
+class MetastoreError(OpenGHGError):
+    """Raised for errors with the metadata store"""
+
+
+class ZarrStoreError(OpenGHGError):
+    """Raised for errors with the zarr store"""
+
+
+class KeyExistsError(ZarrStoreError):
+    """Raised if key already exists in zarr store"""
+
+
+class MetadataMissingError(OpenGHGError):
+    """Raised if unable to determine/find a metadata value"""
+
+
+class StandardiseError(OpenGHGError):
+    """Raised if there is a problem during standardisation within the parse function"""
+
+
+class ValidationError(OpenGHGError):
+    """Raised if the data produced by the parse function cannot be validated as a valid internal format"""
+
+
+def construct_xesmf_import_error(exception: ImportError | None = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."
         " To use transform modules please follow instructions"

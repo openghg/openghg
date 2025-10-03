@@ -1,14 +1,19 @@
+from unittest import mock
+
 import pytest
 from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_flux,
     search_eulerian,
+    search_flux,
     search_footprints,
     search_surface,
 )
+from openghg.dataobjects import data_manager
 from pandas import Timestamp
+
+from tests.helpers.helpers import print_dict_diff
 
 
 @pytest.mark.parametrize(
@@ -18,7 +23,10 @@ from pandas import Timestamp
         ("height", "50m"),
         ("inlet", "50magl"),
         ("inlet", "50"),
-        ("inlet", 50),   # May remove this later as really we expect a string here
+        ("inlet", 50),  # May remove this later as really we expect a string here
+        ("inlet", slice(40, 60.0)),
+        ("inlet", slice("40m", "60.0m")),
+        ("inlet", slice("50m", "50.0m")),
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -42,7 +50,7 @@ def test_search_surface(inlet_keyword, inlet_value):
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "heathfield",
         "data_type": "surface",
         "inlet_height_magl": "50",
@@ -53,16 +61,33 @@ def test_search_surface(inlet_keyword, inlet_value):
     assert not search_surface(site="hfd", species="co2", inlet="888m")
 
 
-def test_search_surface_range():
-    # TODO: Work out what's going on here
+def test_search_surface_selects_dates():
+    res = search_surface(site="hfd", species="co2", inlet="50m")
 
-    res = search_surface(site='TAC',
-                         species='co2',
-                         inlet='185',
-                         # start_date='2013-02-01',
-                         # end_date='2013-03-01'
-                         )
-    
+    data = res.retrieve_all().data
+
+    assert data.time[0] == Timestamp("2013-11-23T12:28:30")
+    assert data.time[-1] == Timestamp("2020-06-24T09:41:30")
+
+    res = search_surface(
+        site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date="2014-12-31"
+    )
+
+    data_sliced = res.retrieve_all().data
+
+    assert data_sliced.time[0] == Timestamp("2014-01-01T22:36:30")
+    assert data_sliced.time[-1] == Timestamp("2014-01-07T09:17:30")
+
+
+def test_search_surface_range():
+    res = search_surface(
+        site="TAC",
+        species="co2",
+        inlet="185",
+        start_date="2013-02-01",
+        end_date="2013-03-01",
+    )
+
     assert res is not None
 
     key = next(iter(res.metadata))
@@ -81,6 +106,28 @@ def test_search_surface_range():
     assert res.metadata[key].items() >= partial_metdata.items()
 
 
+@pytest.mark.parametrize(
+    "keyword,value",
+    [
+        ("data_type", "surface"),
+        ("data_source", "internal"),
+    ],
+)
+def test_search_internal_key_present(keyword, value):
+    """
+    Check keys which weren't specified in standardise function have been
+    added correctly to the metadata.
+    Currently testing for search_surface but could expand to other data_types.
+    """
+
+    res = search_surface(site="hfd", inlet="50m", species="co2")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert keyword in metadata
+    assert metadata[keyword] == value
+
+
 def test_search_site():
     res = search(site="bsd", species="co2", inlet="42m")
 
@@ -93,23 +140,30 @@ def test_search_site():
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "bilsdale",
         "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
-    res = search(site="bsd", species="co2", inlet="108m", instrument="picarro", calibration_scale="wmo-x2007")
+    res = search(
+        site="bsd",
+        species="co2",
+        inlet="108m",
+        instrument="picarro",
+        calibration_scale="wmo-x2019",
+    )
 
     expected = {
         "site": "bsd",
@@ -120,20 +174,21 @@ def test_search_site():
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "bilsdale",
         "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(site="atlantis")
@@ -141,35 +196,47 @@ def test_search_site():
     assert not res
 
 
+def test_search_site_data_version():
+    """Test that latest version value is added to metadata"""
+
+    res = search(site="bsd", species="co2", inlet="42m")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert "latest_version" in metadata
+    assert metadata["latest_version"] == "v1"
+
+
 def test_multi_type_search():
     res = search(species="ch4")
 
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {'surface', 'eulerian_model', 'column'}
+    assert data_types == {"surface", "eulerian_model", "column"}
 
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     obs = res.retrieve_all()
 
     # Make sure the retrieval works correctly
     data_types = set([ob.metadata["data_type"] for ob in obs])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     res = search(species="ch4", data_type=["surface"])
 
-    assert len(res.metadata) == 7
-
-    res = search(species="co2", data_type=["surface", "emissions"])
-
     assert len(res.metadata) == 8
+
+    res = search(species="co2", data_type=["surface", "flux"])
+
+    assert len(res.metadata) == 9
 
 
 def test_many_term_search():
+    """Test search using list inputs. This should create an OR search between the terms in the arguments with lists."""
     res = search(site=["bsd", "tac"], species=["co2", "ch4"], inlet=["42m", "100m"])
 
     assert len(res.metadata) == 4
@@ -185,6 +252,47 @@ def test_many_term_search():
     assert inlets == {"100m", "42m"}
 
 
+def test_optional_term_search():
+    """Test search using dict inputs. This should create an OR search between the key, value pairs in the dictionaries"""
+    # Note: had to be careful to not create duplicates as this currently raises an error.
+    res = search(
+        site="bsd",
+        inlet_option={"inlet": "42m", "height": "42m"},
+        name_option={"station_long_name": "bilsdale, uk", "long_name": "bilsdale"},
+        data_level={"icos_data_level": 2, "data_level": "not_set"},
+    )
+
+    assert len(res.metadata) == 3
+    assert res.metadata
+
+    inlets = set([x["inlet"] for x in res.metadata.values()])
+    assert inlets == {"42m"}
+
+
+@pytest.mark.parametrize(
+    "tag",
+    ["gemma_v1", ["ceda_v1"], ["gemma_v1", "ceda_v1"]],
+)
+def test_search_by_tag(tag):
+    """
+    Test to check we can search by tag. Setup
+     - "DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc" data has been added with:
+       - tag=["ceda_v1", "gemma_v1"]
+
+    1. Check passing a string with a correct tag
+    2. Check passing a list with a correct tag
+    3. Check passing both tags out of order
+    """
+    res = search_surface(tag=tag)
+    assert len(res.metadata) == 1
+
+    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185m", "species": "co2"}
+
+    key = next(iter(res.metadata))
+
+    assert res.metadata[key].items() >= partial_metadata.items()
+
+
 def test_nonsense_terms():
     res = search(site="london", species="ch4")
 
@@ -193,6 +301,7 @@ def test_nonsense_terms():
     res = search(site="bsd", species="sparrow")
 
     assert not res
+
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -203,12 +312,28 @@ def test_nonsense_terms():
         ("inlet", "10"),
     ],
 )
-def test_search_footprints(inlet_keyword,inlet_value):
+def test_search_footprints(inlet_keyword, inlet_value):
+    """
+    Test search for footprint data which has been added to the object store.
+    This has been stored using one footprint file which represents a year of data.
+    """
 
     if inlet_keyword == "inlet":
-        res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB",
+            network="LGHG",
+            inlet=inlet_value,
+            domain="EUROPE",
+            model="test_model",
+        )
     elif inlet_keyword == "height":
-        res = search_footprints(site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB",
+            network="LGHG",
+            height=inlet_value,
+            domain="EUROPE",
+            model="test_model",
+        )
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -224,6 +349,184 @@ def test_search_footprints(inlet_keyword,inlet_value):
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_footprints_multiple():
+    """
+    Test search for footprint source which is comprised of multiple uploaded files.
+    Each file contains cutdown hourly data and covers 1 month:
+        - 2016-07-01 (3 time points)
+        - 2016-08-01 (3 time points)
+    """
+    res = search_footprints(
+        site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", high_time_resolution=False
+    )
+
+    key = next(iter(res.metadata))
+    partial_metadata = {
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "domain": "test",
+        "model": "name",
+        "met_model": "ukv",
+        "network": "decc",
+        "time_period": "1 hour",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved footprint data found from the search contains data spanning
+    # the whole range.
+    footprint_data = res.retrieve()
+
+    data = footprint_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-08-01T02:00:00")
+
+
+def test_search_footprints_select():
+    """
+    Test limited date range can be searched for footprint source.
+    (Same data as previous test)
+    """
+    res = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        model="NAME",
+        start_date="2016-01-01",
+        end_date="2016-07-31",
+    )
+
+    # Test retrieved footprint data found from the search contains data
+    # spanning the reduced date range
+    footprint_data = res.retrieve()
+    data = footprint_data.data
+    time = data["time"]
+
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-07-01T02:00:00")
+
+
+@pytest.mark.parametrize(
+    "time_resolved_keyword,value",
+    [
+        ("time_resolved", True),
+        ("high_time_resolution", True),
+    ],
+)
+def test_search_footprints_time_resolved(time_resolved_keyword, value):
+    """Test search for time resolved footprints
+
+    Expected behaviour: searching for footprints with
+    keyword argument `time_resolved = True` should only
+    return results for time resolved footprints.
+    """
+
+    # Check search for footprints returns multiple entries
+    res_all = search_footprints(
+        site="TAC",
+    )
+
+    # Based on loaded data in conftest.py,
+    # more than one footprint for TAC should be found (standard, time_resolved)
+    assert res_all.results.shape[0] > 1
+
+    # Check searching using the time_resolved keyword, finds only the time resolved footprint.
+    res = search_footprints(site="TAC", **{time_resolved_keyword: value})
+
+    # results dataframes should have exactly one row (only time resolved footprint)
+    assert res.results.shape[0] == 1
+
+    # check attributes include time_resolved
+    metadata = res.retrieve().metadata
+    assert metadata["time_resolved"] == "true"
+
+
+@pytest.fixture()
+def previous_htr_footprint_setup():
+    """
+    Mimic the previous setup when adding "high_time_resolution" (now
+    termed "time_resolved") footprints so this has the previous
+    high_time_resolution="true" key rather than the new time_resolved="true".
+    """
+    from helpers import get_footprint_datapath
+    from openghg.standardise import standardise_footprint
+
+    # Add high time resolution footprint
+    hitres_fp_datapath = get_footprint_datapath("TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc")
+    standardise_footprint(
+        store="user",
+        filepath=hitres_fp_datapath,
+        site="TAC",
+        model="NAME",
+        network="DECC",
+        height="185m",
+        domain="TEST",
+        met_model="UKV",
+        time_resolved=True,
+    )
+
+    # Find this footprint and update the metadata
+    dm = data_manager(data_type="footprints", site="TAC", inlet="185m", time_resolved=True, store="user")
+    uuid = next(iter(dm.metadata))
+
+    # Removed time_resolved key
+    to_delete = "time_resolved"
+    value = dm.metadata[uuid][to_delete]
+    dm.update_metadata(uuid=uuid, to_delete=to_delete)
+
+    # Add high_time_resolution key
+    to_add = {"high_time_resolution": value}
+    dm.update_metadata(uuid=uuid, to_update=to_add)
+
+    yield
+
+    # Remove temporary datasource from the object store
+    dm = data_manager(
+        data_type="footprints", site="TAC", inlet="185m", high_time_resolution=True, store="user"
+    )
+    uuid = next(iter(dm.metadata))
+    dm.delete_datasource(uuid=uuid)
+
+
+def test_search_high_time_resolution(previous_htr_footprint_setup):
+    """
+    Check backwards comptability for footprints added to an object store
+    prior to the use of time_resolved keyword in preference to
+    high_time_resolution.
+    """
+
+    # Check search for footprints returns expected footprint using high_time_resolution
+    res1 = search_footprints(
+        site="TAC",
+        inlet="185m",
+        high_time_resolution=True,
+    )
+
+    # Check results to ensure footprint labeled as high_time_resolution is found
+    assert res1.results.shape[0] == 1
+
+    # Check attributes
+    metadata1 = res1.retrieve().metadata
+    assert metadata1["high_time_resolution"] == "true"
+
+    # Check search for footprints returns expected footprint using time_resolved
+    res2 = search_footprints(
+        site="TAC",
+        inlet="185m",
+        time_resolved=True,
+    )
+
+    # Check results to ensure footprint labeled as high_time_resolution is found
+    assert res2.results.shape[0] == 1
+
+    # check attributes
+    metadata2 = res2.retrieve().metadata
+    assert metadata2["high_time_resolution"] == "true"
 
 
 def test_search_flux():
@@ -248,7 +551,7 @@ def test_search_flux():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
@@ -272,7 +575,7 @@ def test_search_flux_select():
         source="gpp-cardamom",
         domain="europe",
         start_date="2012-01-01",
-        end_date="2013-01-01"
+        end_date="2013-01-01",
     )
 
     key = next(iter(res.metadata))
@@ -284,7 +587,7 @@ def test_search_flux_select():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
@@ -359,3 +662,20 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_for_float_inlet(tmp_path):
+    """Test searching for a decimal valued inlet"""
+    from openghg.objectstore.metastore import open_metastore
+
+    bucket = str(tmp_path / "_metastore._data")
+
+    # Just use metastore here because we don't need to mock data.
+    with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
+        metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
+
+    with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
+        print(search(store="temp", data_type="surface"))
+        result = search(inlet="12.3m", data_type="surface", store="temp")
+
+    assert result

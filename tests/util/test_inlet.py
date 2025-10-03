@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import format_inlet
+from openghg.util import extract_height_name, format_inlet
 
 
 @pytest.mark.parametrize(
@@ -16,7 +16,7 @@ from openghg.util import format_inlet
         (None, None),
         (10, "10m"),
         (10.0, "10m"),
-        (20.23456, "20.2m")
+        (20.23456, "20.2m"),
     ],
 )
 def test_format_inlet(test_input, expected):
@@ -45,7 +45,7 @@ def test_format_inlet(test_input, expected):
 def test_format_inlet_keyname(test_input, expected, key_name):
     """
     Test format_inlet formats inlet names in the right way when a key_name
-    is specified. The function will derive whether a unit needs to be 
+    is specified. The function will derive whether a unit needs to be
     included or not.
     """
     output = format_inlet(test_input, key_name=key_name)
@@ -60,3 +60,22 @@ def test_format_inlet_special():
 
     output = format_inlet(special_keyword, special_keywords=[special_keyword])
     assert output == special_keyword
+
+
+@pytest.mark.parametrize(
+    "site,network,inlet,expected",
+    [
+        ("POCN25", None, None, None),  # height_name not present
+        ("BAO", None, None, "300magl"),  # 1 network, 1 height_name value
+        ("MHD", "AGAGE", None, "10magl"),  # 1 height_name value
+        ("cgo", "AGAGE", "10m", "10magl"),  # Multiple height_name values
+        ("WAO", "ICOS", "10m", ["10magl", "20magl"]),  # height_name is dictionary
+    ],
+)
+def test_extract_height_name(site, network, inlet, expected):
+    """
+    Test 'height_name' variable can be extracted from site_info file.
+    """
+    height_name = extract_height_name(site, network, inlet)
+
+    assert height_name == expected

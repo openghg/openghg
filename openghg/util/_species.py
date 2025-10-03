@@ -1,12 +1,25 @@
-from typing import List, Optional, Union, Dict, Any
+import logging
+from typing import Optional, Any
 
 from openghg.util import load_json
-from openghg.types import optionalPathType
-
-__all__ = ["get_species_info", "synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
+from openghg.types import pathType
 
 
-def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
+__all__ = [
+    "get_species_info",
+    "synonyms",
+    "species_lifetime",
+    "check_lifetime_monthly",
+    "check_species_lifetime",
+    "check_species_time_resolved",
+    "molar_mass",
+]
+
+
+logger = logging.getLogger("openghg.util.species")
+
+
+def get_species_info(species_filepath: pathType | None = None) -> dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/species_info JSON file by default.
@@ -27,7 +40,7 @@ def synonyms(
     species: str,
     lower: bool = True,
     allow_new_species: bool = True,
-    species_filepath: optionalPathType = None,
+    species_filepath: pathType | None = None,
 ) -> str:
     """Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.
@@ -46,6 +59,10 @@ def synonyms(
     Included this here so this occurs in one place which can be linked to
     and changed if needed.
     """
+    # If the species value is inert it should directly return rather than going through below logic
+    if species.lower() == "inert":
+        return species.lower()
+
     # Load in the species data
     species_data = get_species_info(species_filepath=species_filepath)
 
@@ -78,10 +95,10 @@ def synonyms(
         return species
 
 
-LifetimeType = Optional[Union[str, List[str]]]
+LifetimeType = Optional[str | list[str]]
 
 
-def species_lifetime(species: Union[str, None], species_filepath: optionalPathType = None) -> LifetimeType:
+def species_lifetime(species: str | None, species_filepath: pathType | None = None) -> LifetimeType:
     """Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
@@ -104,7 +121,7 @@ def species_lifetime(species: Union[str, None], species_filepath: optionalPathTy
     lifetime_keywords = ["lifetime", "lifetime_monthly"]
     for key in lifetime_keywords:
         try:
-            lifetime: Optional[list] = species_data[key]
+            lifetime: list | None = species_data[key]
         except KeyError:
             continue
         else:
@@ -135,7 +152,52 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
         return False
 
 
-def molar_mass(species: str, species_filepath: optionalPathType = None) -> float:
+def check_species_lifetime(species: str, short_lifetime: bool = False) -> bool:
+    """
+    Check whether a species has a [short] lifetime (relevant for footprint types).
+    Args:
+        species: Name of species
+        short_lifetime: Flag for whether this species has a short lifetime
+            (and so requires a specific footprint with this taken into account)
+    Returns:
+        bool : The short_lifetime flag
+    """
+    if species == "inert":
+        if short_lifetime is True:
+            raise ValueError(
+                "When indicating footprint is for short lived species, 'species' input must be included"
+            )
+        short_lifetime = False
+        lifetime = None
+    else:
+        lifetime = species_lifetime(species)
+        if lifetime is not None:
+            # TODO: May want to add a check on length of lifetime here
+            short_lifetime = True
+            logger.info("Updating short_lifetime to True since species has an associated lifetime")
+
+    return short_lifetime
+
+
+def check_species_time_resolved(species: str, time_resolved: bool = False) -> bool:
+    """
+    Check whether a species requires a time_resolved footprint.
+    Note: at the moment this is only relevant for "co2".
+    Args:
+        species: Name of species
+    Returns:
+        bool: The time_resolved flag
+    """
+    species = synonyms(species, lower=True, allow_new_species=True)
+    if species == "co2":
+        if not time_resolved:
+            time_resolved = True
+            logger.info("Updating time_resolved to True for CO2 data")
+
+    return time_resolved
+
+
+def molar_mass(species: str, species_filepath: pathType | None = None) -> float:
     """Extracts the molar mass of a species.
 
     Args:

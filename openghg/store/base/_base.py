@@ -1,197 +1,1091 @@
-""" This file contains the BaseStore class from which other retrieve
-    modules inherit.
+"""This file contains the BaseStore class from which other storage
+modules inherit.
 """
-from typing import Dict, List, Optional, Type, TypeVar, Union
+
+from __future__ import annotations
+import logging
+import math
+from pathlib import Path
+from types import TracebackType
+from typing import Any, TypeVar
+from collections.abc import MutableSequence, Sequence, Callable
 
 from pandas import Timestamp
-from tinydb import TinyDB
+import xarray as xr
+from xarray import Dataset
 
-__all__ = ["BaseStore"]
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import locking_object_store
+from openghg.store._data_schema import DataSchema
+from openghg.store.storage import ChunkingSchema
+from openghg.types import (
+    DatasourceLookupError,
+    StandardiseError,
+    ValidationError,
+    MetadataAndData,
+)
+from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
+
+from .._metakeys_config import get_metakeys
+
 
 T = TypeVar("T", bound="BaseStore")
 
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+class ClassDefinitionError(Exception): ...
+
 
 class BaseStore:
+    _registry: dict[str, type[BaseStore]] = {}
+    _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
 
-    def __init__(self) -> None:
-        from addict import Dict as aDict
-        from openghg.util import timestamp_now
+    def __init__(self, bucket: str) -> None:
+        # from openghg.objectstore import get_object_from_json, exists
 
-        self._creation_datetime = timestamp_now()
+        self._creation_datetime = str(timestamp_now())
         self._stored = False
-
-        # Use an addict Dict here for easy nested data storage
-        self._datasource_table = aDict()
-        # Keyed by Datasource UUID
-        self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
-        self._file_hashes: Dict[str, str] = {}
+        self._file_hashes: dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
-        self._retrieved_hashes: Dict[str, Dict] = {}
-        # Keyed by UUID
-        self._rank_data = aDict()
+        self._retrieved_hashes: dict[str, dict] = {}
+        # Where we'll store this object's metastore
+        self._metakey = ""
+
+        if exists(bucket=bucket, key=self.key()):
+            data = get_object_from_json(bucket=bucket, key=self.key())
+            # Update myself
+            self.__dict__.update(data)
+
+        # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
+        self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
+        self._bucket = bucket
+        self._datasource_uuids = self._objectstore.get_uuids()
+
+    def __init_subclass__(cls) -> None:
+        if cls._data_type == "":
+            raise ClassDefinitionError(
+                f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
+            )
+        if cls._data_type in BaseStore._registry:
+            raise ClassDefinitionError(
+                f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
+            )
+        BaseStore._registry[cls._data_type] = cls
+
+    def __enter__(self) -> BaseStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg="", exc_info=exc_val)
+        else:
+            self.save()
 
     @classmethod
-    def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-        """Check if the object is already saved in the object
-        store
-
-        Args:
-            bucket: Bucket for data storage
-        Returns:
-            bool: True if object exists
-        """
-        from openghg.objectstore import exists, get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = f"{cls._root}/uuid/{cls._uuid}"
-
-        does_exist: bool = exists(bucket=bucket, key=key)
-
-        return does_exist
+    def metakey(cls) -> str:
+        return str(cls._metakey)
 
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
-        """Create an object from data
+    def key(cls) -> str:
+        return f"{cls._root}/uuid/{cls._uuid}"
+
+    def save(self) -> None:
+        # from openghg.objectstore import set_object_from_json
+
+        self._objectstore.close()
+        set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
+
+    def to_data(self) -> dict:
+        # We don't need to store the metadata store, it has its own location
+        # QUESTION - Is this cleaner than the previous specifying
+        DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
+        return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def read_data(
+        self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
+    ) -> list[dict] | None:
+        raise NotImplementedError
+
+    def _standardise_from_file(
+        self,
+        filepath: Path | list[Path],
+        fn_input_parameters: dict,
+        source_format: str | None = None,
+        parser_fn: Callable | None = None,
+        update_mismatch: str = "never",
+        if_exists: str = "auto",
+        new_version: bool = True,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        info_metadata: dict | None = None,
+    ) -> list[dict]:
+        """
+        Standardise input data from a filepath or set of filepaths. This will also
+        store the data in the object store.
 
         Args:
-            data: JSON data
+            filepath: Filepath or filepaths to data to be standardised.
+            fn_input_parameters: Set of input parameters from read_file
+            source_format: Name of associated format for the provide filepath. This
+                will access an appropriate parse function to use for standardisation.
+            parser_fn: Option to pass parser function directly rather than a source_format.
+            update_mismatch: This determines how mismatches between the internal data
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+                **Note: at the moment this has only been implemented for ObsSurface**
+            if_exists: What to do if existing data is present.
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            new_version: Whether to create a new version of the datasource.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG. If an
+                empty dictionary is passed, then the chunks from the raw data (if any) will be used.
+
+                See documentation for guidance on chunking:
+                https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
         Returns:
-            cls: Class object of cls type
+            list[dict]: List of datasources and their uuids
+
+        TODO: Consider how to apply update_mismatch (via align_metadata_attributes() methods)
+            for all data types, rather than just ObsSurface.
+        TODO: Apply check_chunks for all data types (currently just Footprint) but make sure
+            this still works as expected.
         """
-        from addict import Dict as aDict
-        from openghg.util import timestamp_tzaware
 
-        if not data:
-            raise ValueError("Unable to create object with empty dictionary")
+        from openghg.util import load_standardise_parser, split_function_inputs
 
-        c = cls()
-        c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
-        c._datasource_uuids = data["datasource_uuids"]
-        c._file_hashes = data["file_hashes"]
-        c._retrieved_hashes = data.get("retrieved_hashes", {})
-        c._datasource_table = aDict(data["datasource_table"])
-        c._rank_data = aDict(data["rank_data"])
-        c._stored = False
+        if not parser_fn and source_format is not None:
+            # Load the data retrieve object
+            parser_fn = load_standardise_parser(data_type=self._data_type, source_format=source_format)
+        else:
+            msg = "Either 'source_format' must be specified so an appropriate parse function can be found or a parser_fn must be specified directly."
+            logger.exception(msg)
+            raise ValueError(msg)
 
-        return c
+        fn_input_parameters["filepath"] = filepath
 
-    def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
+        # Call appropriate standardisation function with input parameters
+        try:
+            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+        except (TypeError, ValueError) as err:
+            msg = f"Error during standardisation of file(s): {filepath}. Error: {err}"
+            logger.exception(msg)
+            raise StandardiseError(msg)
+
+        # Check any specified chunks / default chunks for the data_type are not too large
+        # - currently checking the first MetadataAndData object returned only
+        # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
+        if chunks != {}:
+            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+
+        # Current workflow: if any datasource fails validation, whole filepath fails
+        self._validate_datasources(data, fn_input_parameters, filepath=filepath)
+
+        # Ensure the data is chunked
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
+            for datasource in data:
+                datasource.data = datasource.data.chunk(chunks)
+
+        self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+
+        # Check to ensure no required keys are being passed through info_metadata dict
+        # before adding details
+        self.check_info_keys(info_metadata)
+        if info_metadata is None:
+            info_metadata = {}
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
+
+        # Create Datasources, save them to the object store and get their UUIDs
+        datasource_uuids = self.assign_data(
+            data=data,
+            if_exists=if_exists,
+            new_version=new_version,
+            compressor=compressor,
+            filters=filters,
+        )
+
+        for x in datasource_uuids:
+            if isinstance(filepath, list) and len(filepath) == 1:
+                filepath = filepath[0]
+
+            if isinstance(filepath, Path):
+                x.update({"file": filepath.name})
+                logger.info(f"Completed processing: {filepath.name}.")
+            elif isinstance(filepath, list):
+                filepath_str = ", ".join([fp.name for fp in filepath])
+                x.update({"files": filepath_str})
+                logger.info(f"Completed processing files: {filepath_str}.")
+
+        return datasource_uuids
+
+    def read_file(
+        self,
+        filepath: str | Path | list[str] | list[Path],
+        source_format: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        force: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        chunks: dict | None = None,
+        update_mismatch: str = "never",
+        concat_nc_files: bool | None = None,
+        info_metadata: dict | None = None,
+        **kwargs: Any,
+    ) -> list[dict]:
+        """
+        Process files, standardise and store in the object store.
+        This function makes use of standardise parse functions to create consistent
+        internal data. This allows for data_type specific formatting dependent
+        on the expected inputs.
+
+        Args:
+            filepath: Filepath or set of filepaths to load and standardise,
+            source_format: Name of associated format for the provide filepath.
+            if_exists: What to do if existing data is present.
+                - "auto" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "combine" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG. If an
+                empty dictionary is passed, then the chunks from the raw data (if any) will be used.
+
+                See documentation for guidance on chunking:
+                https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            update_mismatch: This determines how mismatches between the internal data
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+            concat_nc_files: if all files are netcdf files, open as one concatenated dataset.
+                - None - check all file extensions and set to True is all are ".nc" or ".nc4"
+                - True - attempt to open concatenated if all files are recognised as netcdf files.
+                - False - open and standardise each file individually.
+            info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
+            **kwargs: Specific keywords associated with the data type. See
+                the openghg.standardise.standardise_* functions for details
+                of what keywords are expected for this.
         Returns:
-            dict: Dictionary version of object
+            list[dict]: Details of the datasource uuids for the processed files.
         """
-        data: Dict[str, Union[str, bool, Dict]] = {}
-        data["creation_datetime"] = str(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["file_hashes"] = self._file_hashes
-        data["retrieved_hashes"] = self._retrieved_hashes
-        data["rank_data"] = self._rank_data
 
-        return data
+        from openghg.store.spec import check_parser
+        from openghg.util import (
+            check_if_need_new_version,
+        )
+
+        # Check source format
+        source_format = check_parser(self._data_type, source_format)
+
+        # Check versioning details
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+
+        fn_input_parameters["source_format"] = source_format
+
+        # Make sure filepaths contains Path objects
+        filepaths = normalise_to_filepath_list(filepath)
+
+        # Check hashes of previous files (included after any filepath(s) formatting)
+        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
+
+        if not unseen_hashes:
+            return [{}]
+
+        filepaths = list(unseen_hashes.values())
+
+        if not filepaths:
+            return [{}]
+
+        # Check if filepaths are all netcdf files
+        file_extensions = [fp.suffix for fp in filepaths]
+        nc_extensions = [".nc", ".nc4"]
+        if all([ext in nc_extensions for ext in file_extensions]):
+            if concat_nc_files is None:
+                concat_nc_files = True
+        else:
+            if concat_nc_files is True:
+                logger.warning(
+                    f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
+                )
+            concat_nc_files = False
+
+        # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
+        if concat_nc_files:
+            try:
+                results = self._standardise_from_file(
+                    filepath=filepaths,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                )
+            except StandardiseError:
+                logger.warning(
+                    "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
+                )
+            else:
+                self.store_hashes(unseen_hashes)
+                return results
+
+        # If not, loop over multiple filepaths when present
+        loop_params = self.define_loop_params()
+
+        results = []
+
+        for i, fp in enumerate(filepaths):
+
+            # fn_input_parameters["filepath"] = fp
+            if loop_params:
+                for key1, key2 in loop_params.items():
+                    if fn_input_parameters.get(key2) is not None:
+                        fn_input_parameters[key1] = fn_input_parameters[key2][i]
+
+            try:
+                datasource_uuids = self._standardise_from_file(
+                    filepath=fp,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                )
+            except ValidationError as err:
+                msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
+                logger.error(msg)
+                validated = False
+                break
+            else:
+                validated = True
+
+            if not validated:
+                continue
+
+            results.extend(datasource_uuids)
+
+        self.store_hashes(unseen_hashes)
+
+        return results
+
+    def store_data(self, *args: Any, **kwargs: Any) -> list[dict] | None:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> list[dict]:
+        raise NotImplementedError
+
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs.
+        Note: This is a placeholder as we expect this to be implemented for all subclasses.
+        """
+        raise NotImplementedError("The format_inputs() method should be created for each subclass")
+
+    def create_schema_kwargs(
+        self, schema_params: list, fn_input_parameters: dict, datasource: MetadataAndData
+    ) -> dict:
+        """
+        Create the keyword arguments needed when creating a data type schema.
+
+        Each data_type class has an associated schema which is used to validate that data
+        returned for the parse_* functions matches to our expected internal format.
+        For some data_type classes this requires some additional keywords to define the
+        appropriate schema. This function is to create the kwargs from the appropriate data.
+
+        This will look for the appropriate values first within the formatted user inputs
+        (fn_input_parameters) and then within the metadata of the created datasource.
+        This order of preference is mainly used to account for boolean values which
+        are turned into strings to be stored within the metadata.
+
+        Args:
+            schema_params: Parameters which we need to create the schema
+            fn_input_parameters: Input parameters which have been provided by the user / defaults.
+            datasource: Produced datasource which contains data and metadata.
+        Returns:
+            dict: Keyword arguments for the data type to create the schema
+        """
+        from collections import ChainMap
+
+        kwargs = {}
+
+        # ChainMap links a number of dictionaries so they can be treated as a single unit.
+        # - if keys overlap should use the earlier value
+        sources = ChainMap(fn_input_parameters, datasource.metadata)
+        for key in schema_params:
+            if key in sources:
+                kwargs[key] = sources[key]
+
+        return kwargs
+
+    @staticmethod
+    def schema(**kwargs: Any) -> DataSchema:
+        """
+        Defined schema for an internal Dataset. This is a placeholder and will
+        return an empty DataSchema object
+        """
+        return DataSchema(None, None, None)
+
+    def _validate_datasources(
+        self,
+        data: list[MetadataAndData],
+        fn_input_parameters: dict,
+        filepath: Path | list[Path] | None = None,
+    ) -> None:
+        """
+        Validate the standardise datasources against the data_type schema.
+        Args:
+            data: xarray Dataset in expected format
+            fn_input_parameters: Input parameters which have been provided by the user / defaults.
+            filepath: Filepath or list of filepaths to the data, if present.
+        Returns:
+            None
+        Raises
+            ValidationError: if input data does not pass the schema checks.
+        """
+        validate_params = self.find_data_schema_inputs()
+
+        # Current workflow: if any datasource fails validation, whole filepath fails
+        for datasource in data:
+            validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
+
+            try:
+                self.validate_data(datasource.data, **validate_kwargs)
+            except ValidationError as err:
+                if isinstance(filepath, list):
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
+                elif isinstance(filepath, Path):
+                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
+                else:
+                    msg = f"Unable to validate and store supplied data. Error: {err}"
+                logger.error(msg)
+                raise ValidationError(msg)
 
     @classmethod
-    def load(cls: Type[T], bucket: Optional[str] = None) -> T:
-        """Load an object from the datastore using the passed
-        bucket and UUID
-
-        Args:
-            bucket: Bucket to store object
-        Returns:
-            class: Class created from JSON data
+    def validate_data(cls, ds: Dataset, **kwargs: Any) -> None:
         """
-        from openghg.objectstore import get_bucket, get_object_from_json
+        Class method for validation of a dataset against the defined schema.
+        Args:
+            ds: xarray Dataset in expected format
+            kwargs: Keywords argument for defining the schema. See the .schema() method
+                for the underlying data_type class for details.
+        Returns:
+            None
+        Raises
+            ValidationError: if input data does not pass the schema checks.
+        """
+        if kwargs:
+            data_schema = cls.schema(**kwargs)
+        else:
+            data_schema = cls.schema()
+        data_schema.validate_data(ds)
 
-        if not cls.exists():
-            return cls()
+    def find_data_schema_inputs(self) -> list:
+        """
+        Extract the expected inputs for the schema method.
+        """
+        from openghg.util import get_parameters
 
-        if bucket is None:
-            bucket = get_bucket()
+        fn = self.schema
+        inputs = get_parameters(fn)
 
-        key = f"{cls._root}/uuid/{cls._uuid}"
-        data = get_object_from_json(bucket=bucket, key=key)
+        return inputs
 
-        return cls.from_data(data=data)
+    def find_chunking_schema_inputs(self) -> list:
+        """
+        Extract the expected inputs for the chunking_schema method.
+        """
+        from openghg.util import get_parameters
 
-    def save(cls) -> None:
-        """Save the object to the object store
+        fn = self.chunking_schema
+        inputs = get_parameters(fn)
+
+        return inputs
+
+    def chunking_schema(self) -> ChunkingSchema:
+        raise NotImplementedError
+
+    def _check_chunks_datasource(
+        self,
+        datasource: MetadataAndData,
+        fn_input_parameters: dict,
+        chunks: dict[str, int] | None = None,
+        max_chunk_size: int = 300,
+    ) -> dict[str, int]:
+        """
+        Check chunks for a datasource.
 
         Args:
-            bucket: Bucket for data
+            datasource: Produced datasource which contains data and metadata.
+            fn_input_parameters: Input parameters which have been provided by the user / defaults.
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+        Returns:
+            dict:  Dictionary of chunk sizes
+        """
+        chunking_params = self.find_chunking_schema_inputs()
+
+        # Check any specified chunks / default chunks for the data_type are not too large
+        chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, datasource)
+        chunks = self.check_chunks(
+            ds=datasource.data, chunks=chunks, max_chunk_size=max_chunk_size, **chunking_kwargs
+        )
+
+        return chunks
+
+    # TODO: Decide if it would be useful to make this into a @classmethod - use cls rather than self
+    def check_chunks(
+        self,
+        ds: xr.Dataset,
+        chunks: dict[str, int] | None = None,
+        max_chunk_size: int = 300,
+        **chunking_kwargs: Any,
+    ) -> dict[str, int]:
+        """Check the chunk size of a variable in a dataset and return the chunk size
+
+        Args:
+            ds: dataset to check
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+            max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+        Returns:
+            Dict: Dictionary of chunk sizes
+        """
+        try:
+            default_schema = self.chunking_schema(**chunking_kwargs)
+        except NotImplementedError:
+            logger.warn(f"No chunking schema found for {type(self).__name__}")
+            return {}
+
+        variable = default_schema.variable
+        default_chunks = default_schema.chunks
+        secondary_dimensions = default_schema.secondary_dims
+
+        dim_sizes = dict(ds[variable].sizes)
+        var_dtype_bytes = ds[variable].dtype.itemsize
+
+        if secondary_dimensions is not None:
+            missing_dims = [dim for dim in secondary_dimensions if dim not in dim_sizes]
+            if missing_dims:
+                raise ValueError(f"The following dimensions are missing: {missing_dims}")
+
+        # Make the 'chunks' dict, using dim_sizes for any unspecified dims
+        specified_chunks = default_chunks if chunks is None else chunks
+        # TODO - revisit this type hinting
+        chunks = dict(dim_sizes, **specified_chunks)  # type: ignore
+
+        # So now we want to check the size of the chunks
+        # We need to add in the sizes of the other dimensions so we calculate
+        # the chunk size correctly
+        # TODO - should we check if the specified chunk size is greater than the dimension size?
+        MB_to_bytes = 1024 * 1024
+        bytes_to_MB = 1 / MB_to_bytes
+
+        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))  # bytes
+        max_chunk_size_bytes = max_chunk_size * MB_to_bytes
+
+        if current_chunksize > max_chunk_size_bytes:
+            # Do we want to check the secondary dimensions really?
+            # if secondary_dimensions is not None:
+            # raise NotImplementedError("Secondary dimensions scaling not yet implemented")
+            # ratio = np.power(max_chunk_size / current_chunksize, 1 / len(secondary_dimensions))
+            # for dim in secondary_dimensions:
+            #     # Rescale chunks, but don't allow chunks smaller than 10
+            #     chunks[dim] = max(int(ratio * chunks[dim]), 10)
+            # else:
+            raise ValueError(
+                f"Chunk size {current_chunksize * bytes_to_MB} is greater than the maximum chunk size {max_chunk_size}"
+            )
+
+        # Do we need to supply the chunks of the other dimensions?
+        # rechunk = {k: v for k, v in chunks.items() if v < dim_sizes[k]}
+        # rechunk = {}
+        # for k in dim_sizes:
+        #     if chunks[k] < dim_sizes[k]:
+        #         rechunk[k] = chunks.pop(k)
+        return chunks
+
+    def store_hashes(self, hashes: dict[str, Path]) -> None:
+        """Store the hashes of files we've seen before
+
+        Args:
+            hahes: Dictionary of hashes
         Returns:
             None
         """
-        from openghg.objectstore import get_bucket, set_object_from_json
+        name_only = {k: v.name for k, v in hashes.items()}
+        self._file_hashes.update(name_only)
 
-        bucket = get_bucket()
+    def check_hashes(
+        self, filepaths: str | Path | list[str] | list[Path], force: bool
+    ) -> tuple[dict[str, Path], dict[str, Path]]:
+        """Check the hashes of the files passed against the hashes of previously
+        uploaded files. Two dictionaries are returned, one containing the hashes
+        of files we've seen before and one containing the hashes of files we haven't.
 
-        obs_key = f"{cls._root}/uuid/{cls._uuid}"
+        A warning is logged if we've seen any of the files before
 
-        cls._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=cls.to_data())
+        Args:
+            filepaths: List of filepaths
+            force: If force is True then we will expect to process all the filepaths, not just the
+            unseen ones
+        Returns:
+            tuple: seen files, unseen files
+        """
+        if isinstance(filepaths, str):
+            filepaths = [Path(filepaths)]
+        elif isinstance(filepaths, Path):
+            filepaths = [filepaths]
+        elif isinstance(filepaths, list):
+            filepaths = [Path(filepath) for filepath in filepaths]
 
-    @classmethod
-    def uuid(cls: Type[T]) -> str:
+        unseen: dict[str, Path] = {}
+        seen: dict[str, Path] = {}
+
+        for filepath in filepaths:
+            file_hash = hash_file(filepath=filepath)
+            if file_hash in self._file_hashes:
+                seen[file_hash] = filepath
+            else:
+                unseen[file_hash] = filepath
+
+        if force:
+            unseen = {**seen, **unseen}
+
+        if seen:
+            logger.warning("Skipping previously standardised files, see log for list.")
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
+
+            if unseen:
+                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
+
+        if unseen:
+            to_process = "\n".join([str(v) for v in unseen.values()])
+            logger.debug(f"Processing the following files:\n{to_process}")
+        else:
+            logger.info("No new files to process.")
+
+        return seen, unseen
+
+    def add_metakeys(self, force: bool = False) -> dict:
+        """
+        Check metakeys are included from relevant config file and add as the `.metakeys`
+        attributes if not.
+        """
+        if not hasattr(self, "metakeys") or force:
+            try:
+                metakeys = get_metakeys(bucket=self._bucket)[self._data_type]
+            except KeyError:
+                raise ValueError(
+                    f"No metakeys for {self._data_type}, please update metakeys configuration file."
+                )
+
+            self.metakeys = metakeys
+
+        return self.metakeys
+
+    def get_informational_dict_keys(self) -> dict:
+        """This collects together the informational keys associated with
+        this object. This currently includes general informational keys.
+        Returns:
+            dict: key name and associated details (including "type" details)
+        TODO: Update to include data_type specific keys as appropriate
+        """
+        from openghg.store._metakeys_config import define_general_informational_keys
+
+        # # Can add this if we're happy with the format of "informational" keys
+        # # being included within the config files
+        # metakeys = self.add_metakeys()
+        # informational = metakeys.get("informational", {})
+        informational = {}
+
+        gen_informational_keys = define_general_informational_keys()
+        informational.update(gen_informational_keys)
+
+        return informational
+
+    MST = TypeVar("MST", bound=MutableSequence[MetadataAndData])
+
+    def update_metadata(
+        self, data: MST, input_parameters: dict, additional_metadata: dict | None = None
+    ) -> MST:
+        """This adds additional metadata keys to the metadata within the data dictionary.
+
+        Args:
+            data: sequence (e.g. list) of objects containing data and metadata for datasource
+            input_parameters: Input parameters from read_file...
+            additional_metadata: Keys to add to the metadata dictionary
+        Returns:
+            list of data and metadata objects with updated metadata
+        """
+        from openghg.util import merge_dict
+
+        # Get defined metakeys from the config setup
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        # Informational keys add useful detail but are not used for categorisation
+        informational = self.get_informational_dict_keys()
+
+        if additional_metadata is None:
+            additional_metadata = {}
+
+        for parsed_data in data:
+            metadata = parsed_data.metadata
+
+            # Sources of additional metadata - order in list is order of preference.
+            sources = [input_parameters, additional_metadata]
+            for source in sources:
+                # merge "required" keys from source into metadata; on conflict, keep value from metadata
+                metadata = merge_dict(metadata, source, keys_right=required)
+
+            required_not_found = set(required) - set(metadata.keys())
+            if required_not_found:
+                raise ValueError(
+                    f"The following required keys are missing: {', '.join(required_not_found)}. Please specify."
+                )
+
+            # Check if named optional keys are included in the input_parameters and add
+            optional_matched = set(optional) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=optional_matched)
+
+            # Check if named informational keys are included in the input parameters and add
+            informational_matched = set(informational) & set(input_parameters.keys())
+            metadata = merge_dict(metadata, input_parameters, keys_right=informational_matched)
+
+            # Add additional metadata keys
+            if additional_metadata:
+                # Ensure required keys aren't added again (or clash with values from input_parameters)
+                additional_metadata_to_add = set(additional_metadata.keys()) - set(required)
+                metadata = merge_dict(metadata, additional_metadata, keys_right=additional_metadata_to_add)
+
+            parsed_data.metadata = metadata
+
+        return data
+
+    def check_info_keys(self, info_metadata: dict | None) -> None:
+        """Check the informational metadata is not being used to set required keys.
+
+        Args:
+            info_metadata: Additional informational metadata
+        Returns:
+            None
+        Raises:
+            ValueError: if any keys within info_metadata are within the required set of keys.
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+
+        # Check if anything in info_metadata tries to override our required keys
+        if info_metadata is not None:
+            common_keys = set(required) & set(info_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+
+    def get_lookup_keys(self, data: MutableSequence[MetadataAndData]) -> list[str]:
+        """This creates the list of keys required to perform the Datasource lookup.
+        If info_metadata is passed in then those keys may be taken into account
+        if they exist in the list of stored optional keys.
+
+        Args:
+            data: Dictionary containing data and metadata for datasource
+
+        Returns:
+            tuple: Tuple of keys
+        """
+        metakeys = self.add_metakeys()
+        required = metakeys["required"]
+        # We might not get any optional keys
+        optional = metakeys.get("optional", {})
+
+        lookup_keys = list(required)
+
+        # Note: Just grabbing the first entry in data at the moment
+        # In principle the metadata should have the same keys for all entries
+        # but should check that assumption is reasonable
+        parsed_data_representative = data[0]
+        metadata = parsed_data_representative.metadata
+
+        # Matching between potential optional keys and those present in the metadata
+        optional_lookup = set(optional) & set(metadata.keys())
+        lookup_keys.extend(list(optional_lookup))
+
+        return lookup_keys
+
+    def get_list_metakeys(self) -> list[str]:
+        """This defines the metakeys which are expected to be stored as lists
+        and so should be extended rather than overwritten when the metadata
+        is merged with existing metadata.
+        Returns:
+            list: list of keys to extend rather than replace
+        """
+        from openghg.store._metakeys_config import find_list_metakeys
+
+        metakeys = self.add_metakeys()
+        list_keys = find_list_metakeys(metakeys=metakeys)
+
+        return list_keys
+
+    def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
+        """Default to returning None for cases where this method isn't
+        defined yet within the child data_type class.
+        """
+        logger.warning("Align metadata attributes is not implemented for this data type")
+        return None
+
+    def define_loop_params(self) -> dict:
+        """Default to returning an empty dict if there are no loop parameters."""
+        return {}
+
+    def assign_data(
+        self,
+        data: MutableSequence[MetadataAndData],
+        required_keys: Sequence[str] | None = None,
+        sort: bool = True,
+        drop_duplicates: bool = True,
+        min_keys: int | None = None,
+        extend_keys: list | None = None,
+        if_exists: str = "auto",
+        new_version: bool = True,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+    ) -> list[dict]:
+        """Assign data to a Datasource. This will either create a new Datasource
+        Create or get an existing Datasource for each gas in the file
+
+            Args:
+                data: Dictionary containing data and metadata for species
+                overwrite: If True overwrite current data stored
+                required_keys: Required minimum keys to lookup unique Datasource
+                sort: Sort data in time dimension
+                drop_duplicates: Drop duplicate timestamps, keeping the first value
+                min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
+                extend_keys: Keys to add to to current keys (extend a list), if present.
+                if_exists: What to do if existing data is present.
+                    - "auto" - checks new and current data for timeseries overlap
+                        - adds data if no overlap
+                        - raises DataOverlapError if there is an overlap
+                    - "new" - just include new data and ignore previous
+                    - "combine" - replace and insert new data into current timeseries
+                new_version: Create a new version for the data and save current
+                    data to a previous version.
+                compressor: Compression for zarr encoding
+                filters: Filters for zarr encoding
+            Returns:
+                dict mapping key based on required keys to Datasource UUIDs created or updated
+        """
+        from openghg.util import not_set_metadata_values
+        from openghg.util._metadata_util import get_period
+
+        datasource_uuids = []
+
+        # Get the metadata keys for this type
+        if not required_keys:
+            required_keys = self.get_lookup_keys(data=data)
+
+        # Define keys which should be extended rather than overwriting
+        if not extend_keys:
+            extend_keys = self.get_list_metakeys()
+
+        with self._objectstore as objectstore:
+            lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+            # TODO - remove this when the lowercasing of metadata gets removed
+            # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+            skip_keys = ["object_store"]
+
+            for uuid, parsed_data in zip(lookup_results, data):
+                metadata = parsed_data.metadata
+                dataset = parsed_data.data
+
+                ignore_values = not_set_metadata_values()
+
+                # Do we want all the metadata in the Dataset attributes?
+                to_add = {
+                    k: v for k, v in metadata.items() if k not in dataset.attrs and v not in ignore_values
+                }
+                dataset.attrs.update(to_add)
+
+                # Take a copy of the metadata so we can update it
+                meta_copy = metadata.copy()
+                period = get_period(meta_copy)
+                # kwargs for creating/updating
+                cu_kwargs = dict(
+                    sort=sort,
+                    drop_duplicates=drop_duplicates,
+                    skip_keys=skip_keys,
+                    extend_keys=extend_keys,
+                    new_version=new_version,
+                    if_exists=if_exists,
+                    compressor=compressor,
+                    filters=filters,
+                    period=period,
+                )
+
+                # Make sure all the metadata is lowercase for easier searching later
+                # TODO - do we want to do this or should be just perform lowercase comparisons?
+                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
+
+                # add data type (this used to come from the Datasource)
+                meta_copy["data_type"] = self._data_type
+
+                if new_ds := uuid is None:  # use := so mypy knows uuid is not None in "else" clause
+                    stored_uuid = objectstore.create(metadata=meta_copy, data=dataset, **cu_kwargs)
+                else:
+                    stored_uuid = uuid
+                    # ignore mypy in next line due to bug: https://github.com/python/mypy/issues/8862
+                    objectstore.update(uuid=uuid, metadata=meta_copy, data=dataset, **cu_kwargs)  # type: ignore
+
+                required_info = {
+                    k: v
+                    for k, v in metadata.items()
+                    if k in required_keys and v is not None and v not in not_set_metadata_values()
+                }
+                datasource_uuids.append({"uuid": stored_uuid, "new": new_ds, **required_info})
+
+        return datasource_uuids
+
+    def datasource_lookup(
+        self,
+        data: MutableSequence[MetadataAndData],
+        required_keys: Sequence[str],
+        min_keys: int | None = None,
+    ) -> list[str | None]:
+        """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
+        to be present and will require at least min_keys of these to be present when searching.
+
+        As some metadata value might change (such as data owners etc) we don't want to do an exact
+        search on *all* the metadata so we extract a subset (the required keys) and search for these.
+
+        Args:
+            metastore: Metadata database
+            data: Combined data dictionary of form {key: {data: Dataset, metadata: Dict}}
+            required_keys: Iterable of keys to extract from metadata
+            min_keys: The minimum number of required keys, if not given it will be set
+            to the length of required_keys
+        Return:
+            dict: Dictionary of datasource information
+        """
+        from openghg.util import to_lowercase
+
+        if min_keys is None:
+            min_keys = len(required_keys)
+
+        results: list[str | None] = []
+        for _data in data:
+            metadata = _data.metadata
+
+            required_metadata = {
+                k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
+            }
+
+            if len(required_metadata) < min_keys:
+                missing_keys = set(required_keys) - set(required_metadata)
+                raise ValueError(
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}\n"
+                    + f"Missing keys: {missing_keys}"
+                )
+
+            required_result = self._objectstore.search(required_metadata)
+
+            if not required_result:
+                results.append(None)
+            elif len(required_result) > 1:
+                raise DatasourceLookupError("More than one Datasource found for metadata, refine lookup.")
+            else:
+                results.append(required_result[0]["uuid"])
+
+        return results
+
+    def uuid(self) -> str:
         """Return the UUID of this object
 
         Returns:
             str: UUID of object
         """
-        return cls._uuid
+        return self._uuid
 
-    def datasources(self: T) -> List[str]:
+    def datasources(self) -> list[str]:
         """Return the list of Datasources UUIDs associated with this object
 
         Returns:
             list: List of Datasource UUIDs
         """
-        return list(self._datasource_uuids.keys())
+        return self._datasource_uuids
 
-    def remove_datasource(self: T, uuid: str) -> None:
-        """Remove the Datasource with the given uuid from the list
-        of Datasources
-
-        Args:
-            uuid (str): UUID of Datasource to be removed
-        Returns:
-            None
-        """
-        del self._datasource_uuids[uuid]
-
-    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-            metastore: TinyDB metadata store
-        Returns:
-            None
-        """
-        from openghg.util import to_lowercase
-
-        for key, uuid_data in uuids.items():
-            new = uuid_data["new"]
-            # Only add if this is a new Datasource
-            if new:
-                meta_copy = data[key]["metadata"].copy()
-                uid = uuid_data["uuid"]
-                meta_copy["uuid"] = uuid_data["uuid"]
-
-                # Make sure all the metadata is lowercase for easier searching later
-                meta_copy = to_lowercase(d=meta_copy)
-                metastore.insert(meta_copy)
-                self._datasource_uuids[uid] = key
-
-    def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+    def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> dict:
         """Get the rank for the given Datasource for a given date range
 
         Args:
@@ -201,8 +1095,8 @@ class BaseStore:
         Returns:
             dict: Dictionary of rank and daterange covered by that rank
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
-
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
@@ -220,7 +1114,7 @@ class BaseStore:
 
         return ranked
 
-    def clear_rank(self: T, uuid: str) -> None:
+    def clear_rank(self, uuid: str) -> None:
         """Clear the ranking data for a Datasource
 
         Args:
@@ -228,6 +1122,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         if uuid in self._rank_data:
             del self._rank_data[uuid]
             self.save()
@@ -235,11 +1130,11 @@ class BaseStore:
             raise ValueError("No ranking data set for that UUID.")
 
     def set_rank(
-        self: T,
+        self,
         uuid: str,
-        rank: Union[int, str],
-        date_range: Union[str, List[str]],
-        overwrite: Optional[bool] = False,
+        rank: int | str,
+        date_range: str | list[str],
+        overwrite: bool | None = False,
     ) -> None:
         """Set the rank of a Datasource associated with this object.
 
@@ -257,6 +1152,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from copy import deepcopy
 
         from openghg.util import (
@@ -377,22 +1273,22 @@ class BaseStore:
 
         self.save()
 
-    def rank_data(self: T) -> Dict:
+    def rank_data(self) -> dict:
         """Return a dictionary of rank data keyed
         by UUID
 
             Returns:
                 dict: Dictionary of rank data
         """
-        rank_dict: Dict = self._rank_data.to_dict()
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
+        rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
 
-    def clear_datasources(self: T) -> None:
+    def clear_datasources(self) -> None:
         """Remove all Datasources from the object
 
         Returns:
             None
         """
-        self._datasource_table.clear()
         self._datasource_uuids.clear()
         self._file_hashes.clear()
