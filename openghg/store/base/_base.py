@@ -619,9 +619,9 @@ class BaseStore:
 
         Args:
             ds: dataset to check
-            variable: Name of the variable that we want to check for max chunksize
-            chunk_dimension: Dimension to chunk over
-            secondary_dimensions: List of secondary dimensions to chunk over
+            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
+                    for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                    See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
             auto_scale_to_fit_max_chunk_size: Whether to apply automatic chunk rescaling
                 based on the maximum chunk size.
@@ -648,7 +648,7 @@ class BaseStore:
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks
-        # TODO - revisit this type hinting
+
         chunks = dim_sizes
         chunks.update(specified_chunks)
 
