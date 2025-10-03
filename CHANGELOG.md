@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. Note this also required explicit inclusion of `numpy>=2.0` otherwise this get downgraded to `numpy<2.0` based on `icoscp` current stated requirements. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
+- Added in quick fix around `force=True`. Previously, this automatically set `if_exists` to `"new"` which meant a new version was always created. The problem was that if multiple files were being added this kept creating them on new versions. Now this produces a warning that this operation may result in a `DataOverlapErro` and to advise using `if_exists="new"` for the first file and `if_exists="auto"` afterwards. [PR #1150](https://github.com/openghg/openghg/pull/1150).
 
 ## Fixed
 
