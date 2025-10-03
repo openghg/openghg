@@ -260,4 +260,4 @@ class Flux(BaseStore):
         time_chunk_size = 336  # 336 = 14 * 24 so high res. fp chunks fit evenly
         secondary_vars = ["lat", "lon"]
 
-        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)        
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)
