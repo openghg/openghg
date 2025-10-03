@@ -43,8 +43,8 @@ def grid_out(grid_da):
     lat_in = grid_da.lat
     lon_in = grid_da.lon
 
-    dlat = lat_in.diff(dim="lat").mean()
-    dlon = lon_in.diff(dim="lon").mean()
+    dlat = lat_in.diff(dim="lat").mean().values
+    dlon = lon_in.diff(dim="lon").mean().values
     dlat_2 = dlat / 2
     dlon_2 = dlon / 2
 
@@ -52,10 +52,10 @@ def grid_out(grid_da):
     nlon = len(lon_in)
 
     # Select lat and lon in 1/4 and 3/4 position of array
-    lat_start = lat_in[nlat // 4 - 1]
-    lat_end = lat_in[nlat * 3 // 4 - 1]
-    lon_start = lon_in[nlon // 4 - 1]
-    lon_end = lon_in[nlon * 3 // 4 - 1]
+    lat_start = lat_in[nlat // 4 - 1].values
+    lat_end = lat_in[nlat * 3 // 4 - 1].values
+    lon_start = lon_in[nlon // 4 - 1].values
+    lon_end = lon_in[nlon * 3 // 4 - 1].values
 
     # Create 2x2 for the centre points of the new grid.
     lat_out = np.linspace(lat_start + dlat_2, lat_end + dlat_2, 2)

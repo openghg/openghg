@@ -28,12 +28,12 @@ def test_clean_string():
 
 
 def test_is_number():
-    from numpy import NaN
+    from numpy import nan
 
     assert is_number(99)
     assert is_number("-9999.999")
     assert not is_number("sparrow")
-    assert is_number(NaN)
+    assert is_number(nan)
     assert is_number("NaN")
 
     assert not is_number(False)
@@ -56,7 +56,7 @@ def test_is_number():
         ("1e2", 1e2),
         ("100m", 100.0),
         ("100magl", 100.0),
-        ("to +inf and beyond", float("inf"))
+        ("to +inf and beyond", float("inf")),
     ],
 )
 def test_extract_float(string_val, float_val):

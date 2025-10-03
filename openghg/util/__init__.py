@@ -1,9 +1,10 @@
 """
-    Utility functions for OpenGHG
+Utility functions for OpenGHG
 """
 
 from ._cli import cli
 from ._combine import combine_and_elevate_inlet, combine_data_objects, combine_multisite
+from ._data import openghg_data_path
 from ._data_level import format_data_level
 from ._domain import (
     get_domain_info,
@@ -18,6 +19,7 @@ from ._domain import (
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
+    check_filepath,
     compress,
     compress_json,
     compress_str,
@@ -31,7 +33,8 @@ from ._file import (
     load_standardise_parser,
     load_transform_parser,
     read_header,
-    check_function_open_nc,
+    open_nc_fn,
+    open_time_nc_fn,
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -46,7 +49,11 @@ from ._metadata_util import (
     check_not_set_value,
     get_overlap_keys,
     merge_dict,
+    merge_and_extend_dict,
 )
+from ._platform import define_platform, format_platform, get_platform_from_info
+from ._registry import get_parameters, AutoRegistry, Registry
+from ._scale import update_scale
 from ._site import get_site_info, sites_in_network
 from ._species import (
     get_species_info,
@@ -86,6 +93,7 @@ from ._time import (
     parse_period,
     dates_in_range,
     relative_time_offset,
+    infer_frequency,
     sanitise_daterange,
     split_daterange_str,
     split_encompassed_daterange,
@@ -103,17 +111,22 @@ from ._user import (
     get_user_config_path,
     read_local_config,
     check_config,
+    handle_direct_store_path,
 )
 from ._util import (
     find_matching_site,
+    normalise_to_filepath_list,
     multiple_inlets,
     pairwise,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     sort_by_filenames,
     unanimous,
     verify_site,
+    verify_site_with_satellite,
+    check_unique,
+    find_repeats,
+    collate_strings,
 )
+
+from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version

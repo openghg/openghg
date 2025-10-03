@@ -4,7 +4,7 @@ import gzip
 import json
 import pandas as pd
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Union, Optional, TYPE_CHECKING
+from typing import Any, Literal, TYPE_CHECKING
 from addict import Dict as aDict
 
 if TYPE_CHECKING:
@@ -15,11 +15,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def to_dashboard(
-    data: Union[ObsData, List[ObsData]],
-    selected_vars: List,
+    data: ObsData | list[ObsData],
+    selected_vars: list,
     downsample_n: int = 3,
-    filename: Optional[str] = None,
-) -> Union[Dict, None]:
+    filename: str | None = None,
+) -> dict | None:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
 
@@ -105,11 +105,11 @@ def to_dashboard(
         return None
     else:
         # TODO - remove this once addict is stubbed
-        export_dict: Dict = to_export.to_dict()
+        export_dict: dict = to_export.to_dict()
         return export_dict
 
 
-def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
+def to_dashboard_mobile(data: dict, filename: str | Path | None = None) -> dict | None:
     """Export the Glasgow LICOR data to JSON for the dashboard
 
     Args:
@@ -136,22 +136,22 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> 
             json.dump(to_export, f)
         return None
     else:
-        to_return: Dict = to_export.to_dict()
+        to_return: dict = to_export.to_dict()
         return to_return
 
 
 def to_dashboard_agage(
-    data: Union[ObsData, List[ObsData]],
-    export_folder: Union[str, Path],
+    data: ObsData | list[ObsData],
+    export_folder: str | Path,
     downsample_n: int = 3,
     compress_json: bool = False,
     float_to_int: bool = False,
     selection_level: Literal["site", "inlet"] = "inlet",
     mock_inlet: bool = False,
     drop_na: bool = True,
-    default_site: Optional[str] = None,
-    default_species: Optional[str] = None,
-    default_inlet: Optional[str] = None,
+    default_site: str | None = None,
+    default_species: str | None = None,
+    default_inlet: str | None = None,
 ) -> None:
     """Takes ObsData objects produced by OpenGHG and outputs them to JSON
     files. Files are named using the following convention:
@@ -218,7 +218,7 @@ def to_dashboard_agage(
     # We'll use this to convert floats to ints
     float_to_int_multiplier = 1000
 
-    dashboard_config: Dict[str, Any] = {}
+    dashboard_config: dict[str, Any] = {}
     dashboard_config["selection_level"] = selection_level
     dashboard_config["float_to_int"] = float_to_int
     dashboard_config["compressed_json"] = compress_json

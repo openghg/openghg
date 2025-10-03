@@ -1,8 +1,8 @@
 import logging
-from typing import List, Optional, Union, Dict, Any
+from typing import Optional, Any
 
 from openghg.util import load_json
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 
 __all__ = [
@@ -19,7 +19,7 @@ __all__ = [
 logger = logging.getLogger("openghg.util.species")
 
 
-def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_species_info(species_filepath: pathType | None = None) -> dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/species_info JSON file by default.
@@ -40,7 +40,7 @@ def synonyms(
     species: str,
     lower: bool = True,
     allow_new_species: bool = True,
-    species_filepath: optionalPathType = None,
+    species_filepath: pathType | None = None,
 ) -> str:
     """Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.
@@ -95,10 +95,10 @@ def synonyms(
         return species
 
 
-LifetimeType = Optional[Union[str, List[str]]]
+LifetimeType = Optional[str | list[str]]
 
 
-def species_lifetime(species: Union[str, None], species_filepath: optionalPathType = None) -> LifetimeType:
+def species_lifetime(species: str | None, species_filepath: pathType | None = None) -> LifetimeType:
     """Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
@@ -121,7 +121,7 @@ def species_lifetime(species: Union[str, None], species_filepath: optionalPathTy
     lifetime_keywords = ["lifetime", "lifetime_monthly"]
     for key in lifetime_keywords:
         try:
-            lifetime: Optional[list] = species_data[key]
+            lifetime: list | None = species_data[key]
         except KeyError:
             continue
         else:
@@ -197,7 +197,7 @@ def check_species_time_resolved(species: str, time_resolved: bool = False) -> bo
     return time_resolved
 
 
-def molar_mass(species: str, species_filepath: optionalPathType = None) -> float:
+def molar_mass(species: str, species_filepath: pathType | None = None) -> float:
     """Extracts the molar mass of a species.
 
     Args:

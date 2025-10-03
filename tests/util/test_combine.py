@@ -12,6 +12,7 @@ from openghg.util import combine_and_elevate_inlet, combine_data_objects, combin
 
 from helpers import clear_test_stores, get_surface_datapath
 
+
 def make_obs_dataset(start: str, end: str) -> xr.Dataset:
     times = pd.date_range(start, end, inclusive="left")  # daily frequency
     values = np.arange(0, len(times))
@@ -45,7 +46,9 @@ def test_combine_data_objects(make_obs_data):
     result = combine_data_objects(data_objects)
 
     assert result.metadata == {"test": 1, "inlet": "10m"}
-    assert (result.data.time.values == pd.date_range("2024-01-01", "2024-05-01", inclusive="left").values).all()
+    assert (
+        result.data.time.values == pd.date_range("2024-01-01", "2024-05-01", inclusive="left").values
+    ).all()
 
 
 def test_combine_data_objects_by_inlet(make_obs_data):
@@ -53,7 +56,9 @@ def test_combine_data_objects_by_inlet(make_obs_data):
 
     result = combine_and_elevate_inlet(data_objects)
 
-    expected_values = np.concatenate([x * np.ones(len(ds.data.time.values)) for x, ds in zip([10.0, 11.0, 12.0, 10.0], data_objects)])
+    expected_values = np.concatenate(
+        [x * np.ones(len(ds.data.time.values)) for x, ds in zip([10.0, 11.0, 12.0, 10.0], data_objects)]
+    )
 
     np.testing.assert_equal(result.data.inlet.values, expected_values)
 
@@ -65,7 +70,9 @@ def test_combine_data_objects_by_site():
 
     result = combine_multisite(data_objects)
 
-    expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, "abcd")], dim="site")
+    expected_dataset = xr.concat(
+        [do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, "abcd")], dim="site"
+    )
 
     xr.testing.assert_equal(result.data, expected_dataset)
 
@@ -82,7 +89,9 @@ def surface_data():
 
     hfd_100_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
-    standardise_surface(store="user", filepath=hfd_100_path, source_format="CRDS", site="hfd", network=network)
+    standardise_surface(
+        store="user", filepath=hfd_100_path, source_format="CRDS", site="hfd", network=network
+    )
 
     tac_path = get_surface_datapath(filename="tac.picarro.1minute.100m.test.dat", source_format="CRDS")
     standardise_surface(store="user", filepath=tac_path, source_format="CRDS", site="tac", network=network)
@@ -91,7 +100,9 @@ def surface_data():
 def test_combine_by_site_on_real_data(surface_data):
     data_objects = search_surface(store="user", species="co2", site=["hfd", "tac", "bsd"]).retrieve_all()
 
-    expected_dataset = xr.concat([do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, ["hfd", "tac", "bsd"])], dim="site")
+    expected_dataset = xr.concat(
+        [do.data.expand_dims({"site": [x]}) for do, x in zip(data_objects, ["hfd", "tac", "bsd"])], dim="site"
+    )
     result = combine_multisite(data_objects)
 
     xr.testing.assert_equal(expected_dataset, result.data)
@@ -114,7 +125,9 @@ def test_combine_and_elevate_inlet_on_real_data(surface_data):
 
     result = combine_and_elevate_inlet(data_objects)
 
-    np.testing.assert_array_equal(result.data.inlet.values, np.array([10.0] * step + [11.0] * step + [12.0] * step))
+    np.testing.assert_array_equal(
+        result.data.inlet.values, np.array([10.0] * step + [11.0] * step + [12.0] * step)
+    )
 
 
 def test_combine_and_elevate_inlet_on_real_data_overlap_raises_error(surface_data):
@@ -151,7 +164,8 @@ def test_combine_and_elevate_inlet_on_real_data_overlap_override_on_conflict(sur
         ds = data_object.data.isel(time=slice(i * step, (i + 2) * step), drop=True)
         data_objects.append(ObsData(md, ds))
 
-
     result = combine_and_elevate_inlet(data_objects)
 
-    np.testing.assert_array_equal(result.data.inlet.values, np.array([10.0] * step + [10.0] * step + [11.0] * step))
+    np.testing.assert_array_equal(
+        result.data.inlet.values, np.array([10.0] * step + [10.0] * step + [11.0] * step)
+    )

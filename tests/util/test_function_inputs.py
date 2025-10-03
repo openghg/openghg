@@ -20,13 +20,10 @@ def test_split_function_inputs():
     can be called correctly
     """
 
-    parameters = {"site": "tac",
-                  "inlet": "10m",
-                  "species": "ch4",
-                  "return_values": False}
-    
+    parameters = {"site": "tac", "inlet": "10m", "species": "ch4", "return_values": False}
+
     fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
-    
+
     # Expect all parameters to be found and included in dictionary
     assert fn_inputs == parameters
     assert remaining_inputs == {}
@@ -40,14 +37,12 @@ def test_split_function_inputs():
 def test_split_function_inputs_default():
     """
     Check correct parameters can be selected for function when
-    not all input keywords are specified. 
+    not all input keywords are specified.
     Check function can be called correctly and use defaults.
     """
 
-    parameters = {"site": "tac",
-                  "inlet": "10m",
-                  "species": "ch4"}
-    
+    parameters = {"site": "tac", "inlet": "10m", "species": "ch4"}
+
     fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     # Expect selected parameters to be found and included in dictionary
@@ -67,11 +62,8 @@ def test_split_function_inputs_extra():
     Check function can be called correctly.
     """
 
-    parameters = {"site": "tac",
-                  "inlet": "10m",
-                  "species": "ch4",
-                  "additional_key": "not_needed"}
-    
+    parameters = {"site": "tac", "inlet": "10m", "species": "ch4", "additional_key": "not_needed"}
+
     fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     # Remove key which does not match to the function call for checking
@@ -100,7 +92,7 @@ def test_split_function_inputs_not_all():
     """
 
     parameters = {"species": "ch4"}
-    
+
     fn_inputs, remaining_inputs = split_function_inputs(parameters, fn)
 
     assert fn_inputs == parameters

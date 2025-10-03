@@ -13,6 +13,8 @@ from openghg.retrieve import (
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
 
+from tests.helpers.helpers import print_dict_diff
+
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -103,8 +105,10 @@ def test_search_surface_range():
 
     assert res.metadata[key].items() >= partial_metdata.items()
 
+
 @pytest.mark.parametrize(
-    "keyword,value", [
+    "keyword,value",
+    [
         ("data_type", "surface"),
         ("data_source", "internal"),
     ],
@@ -141,15 +145,16 @@ def test_search_site():
         "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(
@@ -174,15 +179,16 @@ def test_search_site():
         "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(site="atlantis")
@@ -261,6 +267,30 @@ def test_optional_term_search():
 
     inlets = set([x["inlet"] for x in res.metadata.values()])
     assert inlets == {"42m"}
+
+
+@pytest.mark.parametrize(
+    "tag",
+    ["gemma_v1", ["ceda_v1"], ["gemma_v1", "ceda_v1"]],
+)
+def test_search_by_tag(tag):
+    """
+    Test to check we can search by tag. Setup
+     - "DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc" data has been added with:
+       - tag=["ceda_v1", "gemma_v1"]
+
+    1. Check passing a string with a correct tag
+    2. Check passing a list with a correct tag
+    3. Check passing both tags out of order
+    """
+    res = search_surface(tag=tag)
+    assert len(res.metadata) == 1
+
+    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185m", "species": "co2"}
+
+    key = next(iter(res.metadata))
+
+    assert res.metadata[key].items() >= partial_metadata.items()
 
 
 def test_nonsense_terms():
@@ -634,13 +664,13 @@ def test_search_eulerian_model():
     assert partial_metadata.items() <= res.metadata[key].items()
 
 
-
 def test_search_for_float_inlet(tmp_path):
     """Test searching for a decimal valued inlet"""
     from openghg.objectstore.metastore import open_metastore
 
     bucket = str(tmp_path / "_metastore._data")
 
+    # Just use metastore here because we don't need to mock data.
     with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
         metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
 

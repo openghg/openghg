@@ -10,7 +10,9 @@ def test_read_file():
 
     proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")
 
-    assert "geoschem_ch4_2015-01-01" in proc_results
+    assert len(proc_results) == 1
+    expected_info = {"model": "geoschem", "species": "ch4", "date": "2015-01-01"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
@@ -20,8 +22,8 @@ def test_read_file():
 
     assert euler_obs
 
-    eulerian_data = euler_obs.data
-    metadata = euler_obs.metadata
+    eulerian_data = euler_obs.data  # type: ignore  ...retrieve_all probably returns a single ObsData object in this case...
+    metadata = euler_obs.metadata  # type: ignore ...same reason
 
     orig_data = open_dataset(test_datapath)
 
@@ -49,7 +51,7 @@ def test_read_file():
         assert metadata[key] == expected_value
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -63,11 +65,11 @@ def test_optional_metadata_raise_error():
             filepath=test_datapath,
             model="GEOSChem",
             species="ch4",
-            optional_metadata={"species": "ch4", "tag": "tests"},
+            info_metadata={"species": "ch4", "tag": "tests"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -78,7 +80,7 @@ def test_optional_metadata():
         filepath=test_datapath,
         model="GEOSChem",
         species="ch4",
-        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+        info_metadata={"project": "openghg_tests", "tag": "tests"},
     )
 
     search_results = search(

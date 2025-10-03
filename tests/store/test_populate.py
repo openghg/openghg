@@ -1,4 +1,4 @@
-from helpers import get_surface_datapath
+from helpers import get_surface_datapath, filt
 from openghg.store import add_noaa_obspack
 
 
@@ -11,23 +11,21 @@ def test_read_noaa_obspack_ch4():
      - aircraft pfp file: "..._aircraft-pfp_..." - this should be ignored for now
     """
     data_directory = get_surface_datapath("ObsPack_ch4", source_format="NOAA")
-    out = add_noaa_obspack(data_directory=data_directory, store="user")
-
-    processed = out["processed"]
+    processed = add_noaa_obspack(data_directory=data_directory, store="user")
 
     # Check first file in folder has been processed
     filename1 = "ch4_esp_surface-flask_2_representative.nc"
-    key1 = "ch4"
-    assert filename1 in processed.keys()
-    processed_1 = processed[filename1]
-    assert key1 in processed_1.keys()
+    processed1 = filt(processed, file=filename1)
+    assert processed1  # results exist for file=filename1
+    assert processed1[0]["species"] == "ch4"
 
     # Check second file in folder has been processed
     filename2 = "ch4_spf_surface-flask_1_ccgg_Event.nc"
-    key2 = "ch4_-2820m"  # Negative heights given in file!
-    assert filename2 in processed.keys()
-    processed_2 = processed[filename2]
-    assert key2 in processed_2.keys()
+    processed2 = filt(processed, file=filename2)
+    assert processed2
+
+    # Negative heights given in file!
+    assert any({"species": "ch4", "inlet": "-2820m"}.items() <= proc.items() for proc in processed2)
     # TODO: update this test when we have thought a way around negative inlet heights
     # being supplied.
 
