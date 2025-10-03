@@ -180,14 +180,9 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**param)
 
-        time_resolved = flux_data[0].metadata.get("time_resolved", False) or flux_data[0].metadata.get(
-            "high_time_resolution", False
-        )
-
         chunks = self.check_chunks(
             ds=flux_data[0].data,
             chunks=None,
-            time_resolved=time_resolved,
             auto_scale_to_fit_max_chunk_size=True,
         )
         if chunks:
