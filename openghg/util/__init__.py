@@ -90,6 +90,8 @@ from ._time import (
     find_daterange_gaps,
     find_duplicate_timestamps,
     first_last_dates,
+    get_dataset_daterange,
+    get_representative_daterange_str,
     in_daterange,
     parse_period,
     dates_in_range,

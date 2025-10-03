@@ -9,7 +9,14 @@ import xarray as xr
 
 from openghg.objectstore import exists, get_object_from_json
 from openghg.objectstore._local_store import delete_object
-from openghg.util import split_daterange_str, timestamp_tzaware
+from openghg.util import (
+    create_daterange_str,
+    daterange_overlap,
+    get_representative_daterange_str,
+    split_daterange_str,
+    timestamp_now,
+    timestamp_tzaware,
+)
 from openghg.types import DataOverlapError, ObjectStoreError
 
 from ._datasource import AbstractDatasource, DatasourceFactory
@@ -30,7 +37,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     _datasource_root = "datasource"
 
     def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
-        from openghg.util import timestamp_now
         from openghg.store.storage import LocalZarrStore
 
         self._uuid = uuid
@@ -207,15 +213,13 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        from openghg.util import daterange_overlap, timestamp_now
-
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
 
         # Ensure data is in time order
         time_coord = "time"
-        new_daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
+        new_daterange_str = get_representative_daterange_str(dataset=data, period=period)
 
         if self._latest_version and not new_version:
             version_str = self._latest_version
@@ -381,65 +385,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self._metadata = merged_and_extended_metadata
 
-    def get_dataset_daterange(self, dataset: xr.Dataset) -> tuple[Timestamp, Timestamp]:
-        """Get the daterange for the passed Dataset
-
-        Args:
-            dataset (xarray.DataSet): Dataset to parse
-        Returns:
-            tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
-
-        """
-        from openghg.util import timestamp_tzaware
-
-        try:
-            start = timestamp_tzaware(dataset.time.min().values)
-            end = timestamp_tzaware(dataset.time.max().values)
-
-            return start, end
-        except AttributeError:
-            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
-
-    def get_representative_daterange_str(self, dataset: xr.Dataset, period: str | None = None) -> str:
-        """Get representative daterange which incorporates any period the data covers.
-
-        A representative daterange covers the start - end time + any additional period that is covered
-        by each time point. The start and end times can be extracted from the input dataset and
-        any supplied period used to extend the end of the date range to cover the representative period.
-
-        If there is only one time point (i.e. start and end datetimes are the same) and no period is
-        supplied 1 additional second will be added to ensure these values are not identical.
-
-        Args:
-            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
-            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
-                creation of a pandas Timedelta or DataOffset object.
-
-        Returns:
-            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
-        """
-        from openghg.util import create_daterange_str, relative_time_offset
-        from pandas import Timedelta
-
-        # Extract start and end dates from grouped data
-        start_date, end_date = self.get_dataset_daterange(dataset)
-
-        # If period is defined add this to the end date
-        # This ensure start-end range includes time period covered by data
-        if period is not None:
-            period_td = relative_time_offset(period=period)
-            end_date = (
-                end_date + period_td - Timedelta(seconds=1)
-            )  # Subtract 1 second to make this exclusive end.
-
-        # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
-        if start_date == end_date:
-            end_date += Timedelta(seconds=1)
-
-        daterange_str = create_daterange_str(start=start_date, end=end_date)
-
-        return daterange_str
-
     def get_period(self) -> str | None:
         """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
         "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
@@ -516,8 +461,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        from openghg.util import split_daterange_str
-
         if not self._data_keys:
             return
 
@@ -548,31 +491,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             str: Daterange covered by this Datasource
         """
-        from openghg.util import create_daterange_str
-
         start, end = self.daterange()
 
         return create_daterange_str(start=start, end=end)
-
-    def in_daterange(self, start_date: str | Timestamp, end_date: str | Timestamp) -> bool:
-        """Check if the data contained within this Datasource overlaps with the
-        dates given.
-
-        Args:
-            start: Start datetime
-            end: End datetime
-        Returns:
-            bool: True if overlap
-        """
-        from openghg.util import in_daterange as _in_daterange
-        from openghg.util import timestamp_tzaware
-
-        start_date = timestamp_tzaware(start_date)
-        end_date = timestamp_tzaware(end_date)
-
-        return _in_daterange(
-            start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
-        )
 
     def uuid(self) -> str:
         """Return the UUID of this object
