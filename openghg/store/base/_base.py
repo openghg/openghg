@@ -587,7 +587,8 @@ class BaseStore:
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
-            auto_scale_to_fit_max_chunk_size:
+            auto_scale_to_fit_max_chunk_size: Whether to apply automatic chunk rescaling
+                based on the maximum chunk size.
         Returns:
             dict:  Dictionary of chunk sizes
         """
@@ -622,7 +623,8 @@ class BaseStore:
             chunk_dimension: Dimension to chunk over
             secondary_dimensions: List of secondary dimensions to chunk over
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
-            auto_scale_to_fit_max_chunk_size:
+            auto_scale_to_fit_max_chunk_size: Whether to apply automatic chunk rescaling
+                based on the maximum chunk size.
         Returns:
             Dict: Dictionary of chunk sizes
         """
