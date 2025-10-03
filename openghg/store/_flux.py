@@ -249,37 +249,15 @@ class Flux(BaseStore):
 
         return data_format
 
-    def chunking_schema(
-        self,
-        time_resolved: bool = False,
-        high_time_resolution: bool = False,
-    ) -> ChunkingSchema:
+    def chunking_schema(self) -> ChunkingSchema:
         """
         Get chunking schema for footprint data.
-
-        Args:
-            time_resolved : Set footprint variable to be high time resolution.
-            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
 
         Returns:
             dict: Chunking schema for footprint data.
         """
-
-        if high_time_resolution:
-            warnings.warn(
-                "This argument is deprecated and will be replaced in future versions with time_resolved.",
-                DeprecationWarning,
-            )
-            time_resolved = high_time_resolution
-
         var = "flux"
+        time_chunk_size = 336  # 336 = 14 * 24 so high res. fp chunks fit evenly
+        secondary_vars = ["lat", "lon"]
 
-        if time_resolved:
-            # TODO: check performance of this chunk size
-            time_chunk_size = 336  # 336 = 14 * 24 so high res. fp chunks fit evenly
-            secondary_vars = ["lat", "lon"]
-        else:
-            time_chunk_size = 336  # fits evenly into fp chunk size and works for global edgar...
-            secondary_vars = ["lat", "lon"]
-
-        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)        
