@@ -29,11 +29,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: environment-dev.yaml
+          environment-file: environment.yaml
           cache-environment: true
           post-cleanup: "all"
           init-shell: bash
           create-args: >-
+            -f environment-dev.yaml
             python=${{ matrix.python-version }}
       - name: Install OpenGHG
         run: conda develop .

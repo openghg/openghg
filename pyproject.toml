@@ -31,7 +31,7 @@ dependencies = [
 "filelock",
 "flox",
 "h5netcdf",
-"icoscp <= 0.1.17",
+"icoscp",
 "ipywidgets",
 "matplotlib",
 "msgpack",
@@ -40,7 +40,7 @@ dependencies = [
 "nc-time-axis",
 "netcdf4",
 "numexpr",
-"numpy",
+"numpy >= 2.0",
 "openghg_defs",
 "openpyxl",
 "pandas >= 2.0",
@@ -98,6 +98,10 @@ pythonpath = [
 ]
 timeout = 300
 
+markers = [
+    "xesmf: marks tests as requiring xesmf (deselect with '-m \"not xesmf\"')"
+]
+
 [tool.towncrier]
 package = "openghg"
 filename = "CHANGELOG.md"
@@ -134,3 +138,4 @@ showcontent = true
 directory = "misc"
 name = "Miscellaneous"
 showcontent = true
+
