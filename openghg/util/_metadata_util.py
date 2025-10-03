@@ -305,6 +305,16 @@ def merge_dict(
     return merged_dict
 
 
+def _as_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Iterable):
+        return [v for v in value]
+    return [value]
+
+
 def merge_and_extend_dict(left: dict, right: dict) -> dict:
     """
     The merge_and_extend_dict function combined two dictionaries, combining
@@ -325,11 +335,10 @@ def merge_and_extend_dict(left: dict, right: dict) -> dict:
     for key in overlapping_keys:
         if key in right:
             value = right[key]
-            if isinstance(value, str):
-                value = [value]
+            value = _as_list(value)
 
             if key in left:
-                combined_value: str | list = left[key]
+                combined_value: list = _as_list(left[key])
             else:
                 combined_value = []
 
@@ -338,7 +347,7 @@ def merge_and_extend_dict(left: dict, right: dict) -> dict:
 
             for v in value:
                 if v not in combined_value:
-                    combined_value.extend(value)
+                    combined_value.append(v)
 
             merged_dict[key] = combined_value
 

@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openghg"
-version = "0.15.0"
+version = "0.16.0"
 description = "OpenGHG: A platform for greenhouse​ gas data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,10 +26,12 @@ maintainers = [
 
 dependencies = [
 "addict",
-"dask",
+"cf_xarray",
+"dask < 2025.9",
 "filelock",
+"flox",
 "h5netcdf",
-"icoscp <= 0.1.17",
+"icoscp",
 "ipywidgets",
 "matplotlib",
 "msgpack",
@@ -38,10 +40,12 @@ dependencies = [
 "nc-time-axis",
 "netcdf4",
 "numexpr",
-"numpy",
+"numpy >= 2.0",
 "openghg_defs",
 "openpyxl",
 "pandas >= 2.0",
+"pint",
+"pint_xarray",
 "plotly",
 "pyvis",
 "rapidfuzz",
@@ -51,7 +55,7 @@ dependencies = [
 "tinydb",
 "toml",
 "urllib3 >= 1.26.3",
-"xarray",
+"xarray >= 2025.04.0",
 "zarr==2.18.3",
 "openghg-calscales"
 ]

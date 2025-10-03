@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     model: str,
     species: str,
     start_date: str | None = None,

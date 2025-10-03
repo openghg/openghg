@@ -376,14 +376,12 @@ def _check_valid_store(store_path: Path) -> bool:
     data_dir = Path(store_path).joinpath("data")
     # Now check if there's a zarr folder in the data directory
     store_dirs = list(data_dir.glob("*"))
-    # Let's take the first data directory and see if there's a zarr folder in it
+
+    # if no store dirs, assume this is an empty zarr store
     if not store_dirs:
-        logger.info(
-            f"No data found in the object store {store_path}, "
-            "so we are treating this empty store as a zarr store."
-        )
         return True
 
+    # Let's take the first data directory and see if there's a zarr folder in it
     store_data_dir = store_dirs[0]
 
     return store_data_dir.joinpath("zarr").exists()
