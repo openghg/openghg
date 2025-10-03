@@ -188,6 +188,7 @@ def mock_retrieve_remote(mocker):
     )
 
 
+@pytest.mark.icos
 def test_retrieved_prevents_storing_twice(mock_retrieve_remote, caplog):
     """Test if retrieving the same data twice issues a warning the second time."""
     clear_test_stores()
@@ -199,6 +200,7 @@ def test_retrieved_prevents_storing_twice(mock_retrieve_remote, caplog):
     assert "Skipping data that overlaps existing data" in caplog.text
 
 
+@pytest.mark.icos
 def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
     """Test if retrieving the same data twice does *not* issue a warning if
     `force=True` is passed to `retrieve_atmospheric` (and hence propegated down
@@ -211,6 +213,7 @@ def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
 
     retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
     assert "Skipping data that overlaps existing data" not in caplog.text
+
 
 @pytest.mark.icos
 def test_retrieve_icos_attr_mismatch_error():
@@ -239,36 +242,3 @@ def test_icos_obspack():
     )
 
     assert "icos_smr" in retrieved_data.data
-
-
-# @pytest.fixture
-# def mock_get_station(mocker):
-
-#     from icoscp.station import Station
-
-#     mocker.patch(
-#         "station.get",
-#         return_value=Station(),
-#     )
-
-#     station.get
-
-
-def test_updated_downloaded_data(caplog):
-    """
-    """
-    clear_test_stores()
-
-    # obsdata = retrieve_atmospheric(site="tac",
-    #                                species="ch4",
-    #                                inlet="185m",
-    #                                store="user")
-
-    obsdata = retrieve_atmospheric(site="BIK",
-                                   species = "CH4",
-                                   data_level=2,
-                                   dataset_source="ICOS Combined",
-                                   update_mismatch="from_source",
-                                   store="user")
-
-    print(obsdata)
