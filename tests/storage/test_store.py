@@ -142,8 +142,8 @@ def test_insert_twice(store_name, is_versioned, request):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_error_on_insert_conflict(store_name, is_versioned, request):
-    """Test an error is raised on conflict."""
+def test_error_on_insert_overlap(store_name, is_versioned, request):
+    """Test an error is raised on overlap."""
     store = request.getfixturevalue(store_name)
 
     if is_versioned:
@@ -156,8 +156,8 @@ def test_error_on_insert_conflict(store_name, is_versioned, request):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_insert_ignore_conflict(store_name, is_versioned, request):
-    """Test that insert with `on_conflict = 'ignore'` inserts non-conflicting values."""
+def test_insert_ignore_overlap(store_name, is_versioned, request):
+    """Test that insert with `on_overlap = 'ignore'` inserts non-overlaping values."""
     store = request.getfixturevalue(store_name)
 
     if is_versioned:
@@ -166,10 +166,10 @@ def test_insert_ignore_conflict(store_name, is_versioned, request):
     store.insert(ds1)
 
     # all values should be ignored
-    store.insert(ds1, on_conflict="ignore")
+    store.insert(ds1, on_overlap="ignore")
 
-    # ds4 has four non-conflicting values, so four values should be added
-    store.insert(ds4, on_conflict="ignore")
+    # ds4 has four non-overlaping values, so four values should be added
+    store.insert(ds4, on_overlap="ignore")
 
     # check values
     expected = np.hstack([ds1.x.values, ds4.x.values[-4:]])
@@ -195,8 +195,8 @@ def test_update(store_name, is_versioned, request):
 
 
 @pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_update_ignore_nonconflicts(store_name, is_versioned, request):
-    """Test `update` with non-conflicts ignored."""
+def test_update_ignore_nonoverlaps(store_name, is_versioned, request):
+    """Test `update` with non-overlaps ignored."""
     store = request.getfixturevalue(store_name)
 
     if is_versioned:
@@ -207,7 +207,7 @@ def test_update_ignore_nonconflicts(store_name, is_versioned, request):
     xr.testing.assert_equal(store.get(), ds1)
 
     # update the values with "ignore"
-    store.update(ds4, on_nonconflict="ignore")
+    store.update(ds4, on_nonoverlap="ignore")
 
     expected = np.hstack([ds1.x.values[:4], ds4.x.values[:-4]])
     np.testing.assert_equal(store.get().x.values, expected)

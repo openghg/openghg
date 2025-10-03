@@ -7,18 +7,18 @@ import pandas as pd
 import xarray as xr
 
 
-class ConflictDeterminer:
+class OverlapDeterminer:
     def __init__(self, index: pd.Index, **index_options: Any) -> None:
-        """Create ConflictDeterminer object.
+        """Create OverlapDeterminer object.
 
         This object can be used to test other arrays/indexes (or, generally, Iterables)
-        against the stored index to check if any values in the other array "conflict" with
-        the stored index.
+        against the stored index to check if any values in the other array overlap (or "conflict")
+        with the stored index.
 
-        With no index options, a "conflict" is an exact match, but options can be passed
+        With no index options, an overlap is an exact match, but options can be passed
         to match inexact matches. For instance
 
-        >>> ConflictDeterminer(idx, method="nearest", tolerance=1e-2)
+        >>> OverlapDeterminer(idx, method="nearest", tolerance=1e-2)
 
         will consider any value within 1e-2 of a values in `idx` to be a conflict.
 
@@ -33,33 +33,33 @@ class ConflictDeterminer:
         self.index = index
         self.index_options = index_options
 
-    def conflicts(self, other: Iterable) -> npt.NDArray[np.bool_]:
+    def overlaps(self, other: Iterable) -> npt.NDArray[np.bool_]:
         indexer = self.index.get_indexer(other, **self.index_options)
         result: npt.NDArray[np.bool_] = indexer != -1
 
         return result
 
-    def nonconflicts(self, other: Iterable) -> npt.NDArray[np.bool_]:
-        return ~self.conflicts(other)
+    def nonoverlaps(self, other: Iterable) -> npt.NDArray[np.bool_]:
+        return ~self.overlaps(other)
 
-    def has_conflicts(self, other: Iterable) -> bool:
-        return bool(np.any(self.conflicts(other)))
+    def has_overlaps(self, other: Iterable) -> bool:
+        return bool(np.any(self.overlaps(other)))
 
-    def has_nonconflicts(self, other: Iterable) -> bool:
-        return bool(np.any(self.nonconflicts(other)))
+    def has_nonoverlaps(self, other: Iterable) -> bool:
+        return bool(np.any(self.nonoverlaps(other)))
 
-    def select_conflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
+    def select_overlaps(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
         try:
             other = ds[dim].values
         except KeyError as e:
             raise ValueError(f"Dimension {dim} not found.") from e
 
-        return ds.where(ds[dim][self.conflicts(other)], drop=True)
+        return ds.where(ds[dim][self.overlaps(other)], drop=True)
 
-    def select_nonconflicts(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
+    def select_nonoverlaps(self, ds: xr.Dataset, dim: str) -> xr.Dataset:
         try:
             other = ds[dim].values
         except KeyError as e:
             raise ValueError(f"Dimension {dim} not found.") from e
 
-        return ds.where(ds[dim][self.nonconflicts(other)], drop=True)
+        return ds.where(ds[dim][self.nonoverlaps(other)], drop=True)

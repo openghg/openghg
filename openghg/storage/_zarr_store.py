@@ -10,7 +10,7 @@ from zarr._storage.store import Store as AbstractZarrStore
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
-from ._indexing import ConflictDeterminer
+from ._indexing import OverlapDeterminer
 from ._store import Store, UpdateError
 
 
@@ -82,9 +82,9 @@ class ZarrStore(Store, Generic[ZST]):
         return self._store
 
     @property
-    def _conflict_determiner(self) -> ConflictDeterminer:
+    def _overlap_determiner(self) -> OverlapDeterminer:
         index = self.get().get_index(self.append_dim)
-        return ConflictDeterminer(index=index, **self.index_options)
+        return OverlapDeterminer(index=index, **self.index_options)
 
     def __bool__(self) -> bool:
         return bool(self.store)
@@ -106,7 +106,7 @@ class ZarrStore(Store, Generic[ZST]):
         result = xr.open_zarr(self.store, consolidated=True).sortby(self.append_dim)
         return cast(xr.Dataset, result)
 
-    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+    def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
         if not self.store:
             data.to_zarr(
                 store=self.store,
@@ -117,12 +117,12 @@ class ZarrStore(Store, Generic[ZST]):
                 **self.to_zarr_kwargs,
             )
         else:
-            if self._conflict_determiner.has_conflicts(data.get_index(self.append_dim)):
-                if on_conflict == "error":
-                    raise DataOverlapError("Cannot insert data with conflicts if `on_conflict` == 'error'")
+            if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
+                if on_overlap == "error":
+                    raise DataOverlapError("Cannot insert data with overlaps if `on_overlap` == 'error'")
 
-                # otherwise, select non-conflicts
-                data = self._conflict_determiner.select_nonconflicts(data, self.append_dim)
+                # otherwise, select non-overlaps
+                data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)
 
             data.to_zarr(
                 store=self.store,
@@ -135,16 +135,16 @@ class ZarrStore(Store, Generic[ZST]):
                 **self.to_zarr_kwargs,
             )
 
-    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+    def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
         if not self.store:
             raise UpdateError("Cannot update empty Store.")
         else:
-            if self._conflict_determiner.has_nonconflicts(data.get_index(self.append_dim)):
-                if on_nonconflict == "error":
+            if self._overlap_determiner.has_nonoverlaps(data.get_index(self.append_dim)):
+                if on_nonoverlap == "error":
                     raise UpdateError("Cannot add new values with `update`.")
 
                 # otherwise, select conflicts/overlapping values
-                data = self._conflict_determiner.select_conflicts(data, self.append_dim)
+                data = self._overlap_determiner.select_overlaps(data, self.append_dim)
 
             # nothing to update
             if not bool(data):
@@ -241,7 +241,7 @@ class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
             versions: Versions to instantiate; these are loaded using the
               `factory` function.
             append_dim: dimension to append new data along.
-            index_options: options for the index used to resolve conflicts when
+            index_options: options for the index used to resolve overlaps/conflicts when
               adding data to the store.
             to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
               Not all parameters will be passed on. See here for the full description
@@ -311,7 +311,7 @@ def get_versioned_zarr_directory_store(
         path: root path where zarr `DirectoryStore`s will be based.
         versions: list of versions to load.
         append_dim: dimension to append new data along.
-        index_options: options for the index used to resolve conflicts when
+        index_options: options for the index used to resolve overlaps/conflicts when
           adding data to the store.
         to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
 
@@ -345,7 +345,7 @@ def get_versioned_zarr_memory_store(
     Args:
         versions: list of versions to load.
         append_dim: dimension to append new data along.
-        index_options: options for the index used to resolve conflicts when
+        index_options: options for the index used to resolve overlaps/conflicts when
           adding data to the store.
         to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
 

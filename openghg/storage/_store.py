@@ -13,18 +13,18 @@ the ``Store`` interface, using Xarray operations.
 The ``Store`` class provides a basic "CRUD" interface for storing Xarray ``Dataset``s:
 
 - ``Store.insert`` creates/initialises storage if no data is present, otherwise it appends
-  new data to the store. If the new data "conflicts" with existing data, this is an error
+  new data to the store. If the new data "overlaps" with existing data, this is an error
   by default: existing data should not be modified by insert. There is an option to ignore
-  any conflicts in the new data.
+  any overlaps in the new data.
 - ``Store.update`` updates existing data. This method cannot add new data, so an error is raised
-  if the data provided does not "conflict" with the existing data. There is an option to ignore
-  "non-conflicts".
+  if the data provided does not "overlap" with the existing data. There is an option to ignore
+  "non-overlaps".
 - ``Store.get`` returns the stored data as an ``xr.Dataset``
 - ``Store.clear`` clears the stored data, and ``Store.delete`` clears the data and removes
    any other artefacts (files, directories, etc.) created when storage is initialised.
 
-The interface ``Store`` does not define what constitutes a "conflict" or "non-conflict", but
-for data with a time coordinate, a conflict occurs when new data (passed to ``insert`` or ``update``)
+The interface ``Store`` does not define what constitutes a "overlap" or "non-overlap", but
+for data with a time coordinate, an overlap occurs when new data (passed to ``insert`` or ``update``)
 has time coordinate values that "match" stored time coordinate values.
 Match might mean exact equality, or equality up to some tolerance.
 
@@ -44,7 +44,7 @@ import xarray as xr
 
 from openghg.types import DataOverlapError, UpdateError
 from openghg.util._versioning import SimpleVersioning
-from ._indexing import ConflictDeterminer
+from ._indexing import OverlapDeterminer
 
 
 class Store(ABC):
@@ -59,41 +59,41 @@ class Store(ABC):
         return "Store()"
 
     @abstractmethod
-    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+    def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
         """Insert an xr.Dataset to the store.
 
         If no data is present in the Store, this method should initialise storage.
 
         Args:
             data: xr.Dataset to add to Store
-            on_conflict: if "error", raise DataOverlapError if any conflicts found. If "ignore", then
-                ignore any conflicting values in `data`, and insert only non-conflicting values.
+            on_overlap: if "error", raise DataOverlapError if any overlaps found. If "ignore", then
+                ignore any overlaping values in `data`, and insert only non-overlaping values.
 
         Returns:
             None
 
         Raises:
-            DataOverlapError: if conflicts found and `on_conflict` == "error".
+            DataOverlapError: if overlaps found and `on_overlap` == "error".
         """
         ...
 
     @abstractmethod
-    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+    def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
         """Update the data in the Store with data in an xr.Dataset.
 
         Note: by default, only existing data can be updated, so an error is raised if there are
-        non-conflicting times in the new data. This can be overridden.
+        non-overlaping times in the new data. This can be overridden.
 
         Args:
             data: xr.Dataset to add to Store
-            on_nonconflict: if "error", raise UpdateError if any non-conflicts found. If "ignore", then
-                ignore any non-conflicting values in `data`, and insert only conflicting values.
+            on_nonoverlap: if "error", raise UpdateError if any non-overlaps found. If "ignore", then
+                ignore any non-overlaping values in `data`, and insert only overlaping values.
 
         Returns:
             None
 
         Raises:
-            UpdateError: if nonconflicts found and `on_nonconflict` == "error".
+            UpdateError: if nonoverlaps found and `on_nonoverlap` == "error".
         """
         ...
 
@@ -103,8 +103,8 @@ class Store(ABC):
         Note: the order of updating and inserting can matter. Override this method if this order does not
         have the desired effect.
         """
-        self.update(data, on_nonconflict="ignore")
-        self.insert(data, on_conflict="ignore")
+        self.update(data, on_nonoverlap="ignore")
+        self.insert(data, on_overlap="ignore")
 
     @abstractmethod
     def get(self) -> xr.Dataset:
@@ -124,7 +124,7 @@ class Store(ABC):
     def overwrite(self, data: xr.Dataset) -> None:
         """Write data to Store, deleting any existing data."""
         self.clear()
-        self.insert(data, on_conflict="ignore")  # "ignore" to avoid checking for conflicts
+        self.insert(data, on_overlap="ignore")  # "ignore" to avoid checking for conflicts
 
     def delete(self) -> None:
         """Delete the store.
@@ -168,25 +168,25 @@ class MemoryStore(Store):
         self.data = None
 
     @property
-    def _conflict_determiner(self) -> ConflictDeterminer:
+    def _overlap_determiner(self) -> OverlapDeterminer:
         index = self.data.get_index(self.append_dim) if self.data else pd.Index([])
-        return ConflictDeterminer(index=index, **self.index_options)
+        return OverlapDeterminer(index=index, **self.index_options)
 
-    def insert(self, data: xr.Dataset, on_conflict: Literal["error", "ignore"] = "error") -> None:
+    def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
         if self.data is None:
             # TODO should we check if the data has the append dim? ...zarr wouldn't
             self.data = data
         else:
-            if self._conflict_determiner.has_conflicts(data.get_index(self.append_dim)):
-                if on_conflict == "error":
+            if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
+                if on_overlap == "error":
                     raise DataOverlapError("Cannot insert data with conflicts if `on_conflict` == 'error'")
 
-                # otherwise, select non-conflicts
-                data = self._conflict_determiner.select_nonconflicts(data, self.append_dim)
+                # otherwise, select non-overlaps
+                data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)
 
             self.data = xr.concat([self.data, data], dim=self.append_dim).sortby(self.append_dim)
 
-    def update(self, data: xr.Dataset, on_nonconflict: Literal["error", "ignore"] = "error") -> None:
+    def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
         if self.data is None:
             raise UpdateError("Cannot update empty Store.")
 
@@ -194,16 +194,16 @@ class MemoryStore(Store):
         if self.append_dim not in data.coords:
             raise ValueError(f"Provided data does not have append dim {self.append_dim}")
 
-        if self._conflict_determiner.has_nonconflicts(data.get_index(self.append_dim)):
-            if on_nonconflict == "error":
+        if self._overlap_determiner.has_nonoverlaps(data.get_index(self.append_dim)):
+            if on_nonoverlap == "error":
                 raise UpdateError("Cannot add new values with `update`.")
 
-            # otherwise, select conflicts/overlapping values
-            data = self._conflict_determiner.select_conflicts(data, self.append_dim)
+            # otherwise, select overlaps/overlapping values
+            data = self._overlap_determiner.select_overlaps(data, self.append_dim)
 
         # merge new data with existing data from other time points
         # NOTE: this might not work properly if index options have been used to set
-        # a tolerance for defining conflicts
+        # a tolerance for defining overlaps
         existing_data = self.data.drop_sel({self.append_dim: data.coords[self.append_dim]})
         self.data = xr.merge([existing_data, data])
 
