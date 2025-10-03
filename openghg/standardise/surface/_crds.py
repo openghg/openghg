@@ -211,8 +211,13 @@ def _read_data(
     for gas in gases:
         gas_data = data.loc[:, gas]
         species = gas.lower()
-        gas_data.columns = [species, f"{species}_variability", f"{species}_number_of_observations"]
-        gas_data = gas_data.dropna(axis="rows", how="any")
+
+        try:
+            gas_data.columns = [species, f"{species}_variability", f"{species}_number_of_observations"]
+        except ValueError as e:
+            raise ValueError("CRDS data should have three columns per gas.") from e
+
+        gas_data = gas_data.dropna(axis="index", how="any")
         gas_data[f"{species}_number_of_observations"] = gas_data[f"{species}_number_of_observations"].astype(
             int
         )
