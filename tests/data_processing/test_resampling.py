@@ -40,12 +40,14 @@ def mhd_ds():
     ch4_repeatability = small_randoms(n)
     integration_flag = binary_randoms(n)
     status_flag = binary_randoms(n)
+    str_status_flag = np.asarray(["NO"[int(i)] for i in status_flag], dtype="<U1")
+
 
     ds = xr.Dataset(
         data_vars={
             "ch4": (["time"], ch4),
             "ch4_repeatability": (["time"], ch4_repeatability),
-            "status_flag": (["time"], status_flag),
+            "status_flag": (["time"], str_status_flag),
             "integration_flag": (["time"], integration_flag),
         },
         coords={"time": (["time"], times)},
@@ -158,7 +160,7 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
-    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability"]), expected_others)
+    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability", "status_flag"]), expected_others)
 
     assert result.ch4.attrs == mhd_ds.ch4.attrs
     assert result.ch4_repeatability.attrs == mhd_ds.ch4_repeatability.attrs
@@ -166,6 +168,8 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
         "long_name": "mole fraction of methane in air_variability",
         "units": "1e-9",
     }
+
+    assert "status_flag" in result
 
 
 def test_surface_obs_resampling_with_variability(tac_ds):
