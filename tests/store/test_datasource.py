@@ -248,7 +248,7 @@ def test_save(bucket):
     datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save()
 
-    exists(bucket=bucket, key=datasource.key())
+    exists(bucket=bucket, key=datasource.key)
 
 
 def test_save_footprint(bucket, datasource):
@@ -306,7 +306,7 @@ def test_save_and_load(data, bucket):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
-    d_2 = Datasource.load(bucket=bucket, uuid=d.uuid())
+    d_2 = Datasource.load(bucket=bucket, uuid=d.uuid)
 
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"

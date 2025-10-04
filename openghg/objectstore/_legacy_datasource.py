@@ -45,7 +45,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         self._start_date = None
         self._end_date = None
         self._status: dict | None = None
-        self._data_keys = defaultdict(list)
+        self._data_keys = defaultdict(list)  # dict mapping version to lists of daterange strings
         self._data_type = data_type
         # Hold information regarding the versions of the data
         self._latest_version: str = ""
@@ -114,77 +114,51 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         self._store.close()
 
     # properties
+    @property
     def start_date(self) -> Timestamp:
-        """Returns the starting datetime for the data in this Datasource
-
-        Returns:
-            Timestamp: Timestamp for start of data
-        """
+        """Start datetime for the data in this Datasource."""
         return self._start_date
 
+    @property
     def end_date(self) -> Timestamp:
-        """Returns the end datetime for the data in this Datasource
-
-        Returns:
-            Timestamp: Timestamp for end of data
-        """
+        """End datetime for the data in this Datasource."""
         return self._end_date
 
+    @property
     def key(self) -> str:
-        """Returns the Datasource's key
-
-        Returns:
-            str: Key for Datasource in object store
-        """
+        """Key for Datasource in object store."""
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
+    @property
     def uuid(self) -> str:
-        """Return the UUID of this object
-
-        Returns:
-            str: UUID
-        """
+        """UUID of this object."""
         return self._uuid
 
+    @property
     def metadata(self) -> dict:
-        """Return the metadata of this Datasource
-
-        Returns:
-            dict: Metadata of Datasource
-        """
+        """Metadata of this Datasource."""
         return self._metadata
 
+    @property
     def data_type(self) -> str:
-        """Returns the data type held by this Datasource
-
-        Returns:
-            str: Data type held by Datasource
-        """
+        """Data type held by this Datasource."""
         return self._data_type
 
+    @property
     def latest_version(self) -> str:
-        """Return the string of the latest version
-
-        Returns:
-            str: Latest version
-        """
+        """String of the latest version."""
         return self._latest_version
 
-    def get_period(self) -> str | None:
-        """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
-        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
-
-        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
-
-        Returns:
-            str or None: time period in the form of number and time unit e.g. "12s" if found in metadata, else None
-        """
+    @property
+    def period(self) -> str | None:
+        """Period from metadata for creating a pandas Timedelta or DataOffset object."""
         # Extract period associated with data from metadata
         # This will be the "sampling_period" for obs and "time_period" for other
-        from openghg.util._metadata_util import get_period as _get_period
+        # TODO: May want to add period as a potential data variable so would need to extract from there if needed
+        from openghg.util._metadata_util import get_period
 
         if "period" not in self._metadata:
-            self._metadata["period"] = _get_period(self._metadata)
+            self._metadata["period"] = get_period(self._metadata)
 
         return cast(str | None, self._metadata["period"])
 
@@ -304,13 +278,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        # Extract period associated with data from metadata
-        # TODO: May want to add period as a potential data variable so would need to extract from there if needed
-        period = self.get_period()
-
         # Ensure data is in time order
         time_coord = "time"
-        new_daterange_str = get_representative_daterange_str(dataset=data, period=period)
+        new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
 
         if self._latest_version and not new_version:
             version_str = self._latest_version
@@ -542,10 +512,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             tuple (Timestamp, Timestamp): Start, end timestamps
         """
-        if self._start_date is None and self._data_keys is not None:
+        if self.start_date is None and self._data_keys is not None:
             self.update_daterange()
 
-        return self._start_date, self._end_date
+        return self.start_date, self.end_date
 
     def daterange_str(self) -> str:
         """Get the daterange this Datasource covers as a string in
