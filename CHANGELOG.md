@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 - `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
+- Tidied `Datasource` by moving date range methods to `util` and reorganising methods. [PR #1545](https://github.com/openghg/openghg/pull/1545)
 
 ## [0.17.0] - 2025-11-15
 

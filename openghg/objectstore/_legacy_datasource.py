@@ -62,6 +62,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self.update_daterange()
 
+    # Methods to satisfy AbstractDatasource ABC
     @classmethod
     def load(cls, uuid: str, bucket: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> Self:
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
@@ -75,20 +76,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         ds._data_keys = defaultdict(list, ds._data_keys)
 
         return ds
-
-    def __enter__(self) -> Datasource:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: BaseException | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def save(self) -> None:
         """Save this Datasource object as JSON to the object store
@@ -110,8 +97,46 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         }
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
-        set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
+        set_object_from_json(bucket=self._bucket, key=self.key, data=internal_metadata)
         self._store.close()
+
+    def add(self, data: xr.Dataset, **kwargs) -> None:
+        if (period := kwargs.pop("period", None)) is not None:
+            self._metadata["period"] = period
+
+        self.add_data(metadata={}, data=data, data_type=self._data_type, **kwargs)
+
+    def get_data(self, version: str = "latest") -> xr.Dataset:
+        """Get the version of the dataset stored in the zarr store.
+
+        Args:
+            version: Version string, e.g. v1, v2
+        Returns:
+            None
+        """
+        if version == "latest":
+            version = self._latest_version
+
+        return self._store.get(version=version)
+
+    def delete(self) -> None:
+        self.delete_all_data()
+        delete_object(bucket=self._bucket, key=self.key)
+
+    # Context manager
+    def __enter__(self) -> Datasource:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: BaseException | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
 
     # properties
     @property
@@ -162,38 +187,12 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         return cast(str | None, self._metadata["period"])
 
-    # Methods related storing, getting, deleting data
-    def add(self, data: xr.Dataset, **kwargs) -> None:
-        if (period := kwargs.pop("period", None)) is not None:
-            self._metadata["period"] = period
-
-        self.add_data(metadata={}, data=data, data_type=self._data_type, **kwargs)
-
-    def delete(self) -> None:
-        self.delete_all_data()
-        delete_object(bucket=self._bucket, key=self.key())
-
-    def get_data(self, version: str = "latest") -> xr.Dataset:
-        """Get the version of the dataset stored in the zarr store.
-
-        Args:
-            version: Version string, e.g. v1, v2
-        Returns:
-            None
-        """
-        if version == "latest":
-            version = self._latest_version
-
-        return self._store.get(version=version)
-
-    def bytes_stored(self) -> int:
-        """Get the amount of data stored in the zarr store in bytes
-
-        Returns:
-            int: Number of bytes
-        """
+    @property
+    def nbytes(self) -> int:
+        """Size of data stored in bytes."""
         return self._store.bytes_stored()
 
+    # Methods related storing, getting, deleting data
     def add_data(
         self,
         metadata: dict,
