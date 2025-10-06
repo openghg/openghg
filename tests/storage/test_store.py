@@ -435,11 +435,12 @@ def test_clear_data_from_old_version(store_name, request, ds1):
     # checkout v1 and clear it
     store.checkout_version("v1")
     store.clear()
-    assert not store
+    assert not store.has_data("v1")
 
     # check out v2 and test that it is not empty
     store.checkout_version("v2")
-    assert store
+    assert store.has_data("v2")
+    assert store  # since at least one version has data, store evaluates to True
 
 
 @pytest.mark.parametrize("store_name", versioned_store_names)

@@ -166,6 +166,16 @@ class VersionedStore(Store, Versioning):
 
         return any(bools)
 
+    def has_data(self, version: str) -> bool:
+        """Check if a particular version has data.
+
+        Since the __bool__ method for a versioned store only
+        checks if there exists a non-empty version, we need
+        a separate method to check if a particular version is non-empty.
+        """
+        with self.remember_current_version():
+            return super().__bool__()
+
     def bytes_stored(self) -> int:
         total_bytes = 0
         with self.remember_current_version():
