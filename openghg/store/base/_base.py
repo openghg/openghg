@@ -116,7 +116,7 @@ class BaseStore:
     ) -> list[dict] | None:
         raise NotImplementedError
 
-    def _standardise_from_file(
+    def _standardise_and_store(
         self,
         fn_input_parameters: dict,
         dataset: xr.Dataset | None = None,
@@ -351,7 +351,7 @@ class BaseStore:
 
         if dataset is not None:
             try:
-                results = self._standardise_from_file(
+                results = self._standardise_and_store(
                     dataset=dataset,
                     fn_input_parameters=fn_input_parameters,
                     source_format=source_format,
@@ -399,7 +399,7 @@ class BaseStore:
         # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
         if concat_nc_files:
             try:
-                results = self._standardise_from_file(
+                results = self._standardise_and_store(
                     filepath=filepaths,
                     fn_input_parameters=fn_input_parameters,
                     source_format=source_format,
@@ -433,7 +433,7 @@ class BaseStore:
                         fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
             try:
-                datasource_uuids = self._standardise_from_file(
+                datasource_uuids = self._standardise_and_store(
                     filepath=fp,
                     fn_input_parameters=fn_input_parameters,
                     source_format=source_format,
