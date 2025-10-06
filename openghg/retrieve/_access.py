@@ -210,6 +210,15 @@ def get_obs_surface(
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
 
+        # check for negative uncertainties and set to NaN
+        uncertainty_data_vars = [
+            dv
+            for dv in data.data_vars
+            if str(dv).endswith("repeatability") or str(dv).endswith("variability")
+        ]
+        for dv in uncertainty_data_vars:
+            data[dv] = data[dv].where(data[dv] >= 0.0)  # keep data non-negative values, others set to NaN
+
         var_to_delete = []
         for var in data:
             if data[var].isnull().all():

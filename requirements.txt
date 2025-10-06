@@ -1,6 +1,6 @@
 addict
 cf-xarray
-dask < 2025.9
+dask < 2025.10
 filelock
 flox
 h5netcdf
