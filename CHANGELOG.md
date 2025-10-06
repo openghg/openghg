@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. Note this also required explicit inclusion of `numpy>=2.0` otherwise this get downgraded to `numpy<2.0` based on `icoscp` current stated requirements. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
-- Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. [PR #1493](https://github.com/openghg/openghg/pull/1493)
+- Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. Upper bounds use `<=` with latest stable versions rather than `<` with next major version. [PR #1493](https://github.com/openghg/openghg/pull/1493)
 
 ## Fixed
 
