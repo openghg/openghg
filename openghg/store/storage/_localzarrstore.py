@@ -8,7 +8,6 @@ from typing import Any, Literal, cast
 
 import xarray as xr
 
-from openghg.objectstore import get_folder_size
 from openghg.storage import get_versioned_zarr_directory_store
 from openghg.store.storage._encoding import get_zarr_encoding
 from openghg.store.storage._store import Store
@@ -43,7 +42,7 @@ class LocalZarrStore(Store):
 
     def __bool__(self) -> bool:
         """Return True if any version of the store is not empty."""
-        return any(self._vzds._versions.values())
+        return bool(self._vzds)
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self._bucket}, {self._datasource_uuid}, {self._mode})"
@@ -174,8 +173,11 @@ class LocalZarrStore(Store):
         Returns:
             xr.Dataset: Dataset from the store
         """
-        version = self._check_version(version)
-        self._vzds.checkout_version(version)
+        try:
+            self._vzds.checkout_version(version)
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
+
         return self._vzds.get()  # pass option `consolidated=True`?
 
     def delete_version(self, version: str) -> None:
@@ -187,8 +189,11 @@ class LocalZarrStore(Store):
             None
         """
         self._check_writable()
-        version = self._check_version(version)
-        self._vzds.delete_version(version)
+
+        try:
+            self._vzds.delete_version(version)
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
 
     def delete_all(self) -> None:
         """Delete all data from the zarr store.
@@ -197,9 +202,7 @@ class LocalZarrStore(Store):
             None
         """
         self._check_writable()
-
-        for version in self._vzds.versions:
-            self._vzds.delete_version(version)
+        self._vzds.delete_all_versions()
 
         if self._stores_path.exists():
             self._stores_path.rmdir()
@@ -241,8 +244,4 @@ class LocalZarrStore(Store):
         Returns:
             int: Number of bytes stored in zarr store
         """
-        bytes_stored = 0
-        for version in self._vzds.versions:
-            bytes_stored += get_folder_size(folder_path=self.store_path(version=version))
-
-        return bytes_stored
+        return self._vzds.bytes_stored()

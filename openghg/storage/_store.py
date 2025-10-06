@@ -33,6 +33,10 @@ Match might mean exact equality, or equality up to some tolerance.
 - ``Store.upsert`` does an update followed by an insert (similar to updating a dictionary)
 - ``Store.overwrite`` clears the store then inserts data
 
+
+The ``VersionedStore`` ABC defines extra methods for subclasses of ``Store`` that also
+implement the ``Versioning`` interface.
+
 """
 
 from __future__ import annotations
@@ -43,17 +47,16 @@ import pandas as pd
 import xarray as xr
 
 from openghg.types import DataOverlapError, UpdateError
-from openghg.util._versioning import SimpleVersioning
+from openghg.util._versioning import SimpleVersioning, Versioning
 from ._indexing import OverlapDeterminer
 
 
 class Store(ABC):
     """Interface for means of storing a single dataset."""
 
-    @abstractmethod
     def __bool__(self) -> bool:
         """Return True is Store is not empty."""
-        ...
+        raise NotImplementedError
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}()"
@@ -147,6 +150,32 @@ class Store(ABC):
         raise NotImplementedError
 
 
+class VersionedStore(Store, Versioning):
+    """Store with versioning methods.
+
+    This class functions mostly like a mixin class to update
+    methods from Store to make sense with multiple versions.
+    """
+
+    def __bool__(self) -> bool:
+        bools = []
+        with self.remember_current_version():
+            for version in self.versions:
+                self.checkout_version(version)
+                bools.append(super().__bool__())  # get number of bytes from Store.bytes_stored
+
+        return any(bools)
+
+    def bytes_stored(self) -> int:
+        total_bytes = 0
+        with self.remember_current_version():
+            for version in self.versions:
+                self.checkout_version(version)
+                total_bytes += super().bytes_stored()  # get number of bytes from Store.bytes_stored
+
+        return total_bytes
+
+
 class MemoryStore(Store):
     """Simple in-memory implementation of Store interface."""
 
@@ -214,7 +243,7 @@ class MemoryStore(Store):
         return self.data.nbytes if self.data is not None else 0  # type: ignore
 
 
-class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
+class VersionedMemoryStore(VersionedStore, SimpleVersioning[xr.Dataset | None], MemoryStore):
     """Versioned in-memory storage of Xarray Datasets."""
 
     def __init__(
@@ -233,6 +262,9 @@ class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
         )
         self.append_dim = append_dim
         self.index_options = index_options or {}
+
+    def __repr__(self) -> str:
+        return f"VersionedMemoryStore(append_dim={self.append_dim})"
 
     # make .data an alias for ._current
     @property

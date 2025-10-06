@@ -11,7 +11,7 @@ from zarr._storage.store import Store as AbstractZarrStore
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
 from ._indexing import OverlapDeterminer
-from ._store import Store, UpdateError
+from ._store import Store, UpdateError, VersionedStore
 
 
 logger = logging.getLogger("openghg.storage")
@@ -212,7 +212,7 @@ def get_zarr_memory_store(
     )
 
 
-class VersionedZarrStore(SimpleVersioning[ZST], ZarrStore[ZST]):
+class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
     """Zarr storage with versions.
 
     This class uses the methods from `ZarrStore` but overrides the `._store` attribute

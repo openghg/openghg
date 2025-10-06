@@ -1,8 +1,45 @@
+from abc import ABC, abstractmethod
 from collections import UserDict, UserList
 from collections.abc import Callable, Iterable
+from contextlib import contextmanager
 from copy import deepcopy
-from typing import Generic, Protocol, runtime_checkable, TypeVar
+from typing import Generic, Iterator, Protocol, runtime_checkable, TypeVar
 from collections.abc import Mapping
+
+
+class Versioning(ABC):
+    """Interface for versioning."""
+
+    @property
+    @abstractmethod
+    def versions(self) -> list[str]: ...
+
+    @property
+    @abstractmethod
+    def current_version(self) -> str: ...
+
+    @abstractmethod
+    def checkout_version(self, v: str) -> None: ...
+
+    @abstractmethod
+    def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None: ...
+
+    @abstractmethod
+    def delete_version(self, v: str) -> None: ...
+
+    @contextmanager
+    def remember_current_version(self) -> Iterator[None]:
+        """Context manager to remember current version and restore it once context is exited."""
+        try:
+            current_version = self.current_version
+        except VersionError:
+            current_version = None
+
+        try:
+            yield
+        finally:
+            if current_version is not None and current_version in self.versions:
+                self.checkout_version(current_version)
 
 
 @runtime_checkable
@@ -20,7 +57,7 @@ class VersionError(Exception): ...
 T = TypeVar("T")  # underlying class type
 
 
-class SimpleVersioning(Generic[T]):
+class SimpleVersioning(Versioning, Generic[T]):
     """Work with versions of an object.
 
     This can be used to create a "versioned" subclass of the class T in some circumstances, by
@@ -206,6 +243,10 @@ class SimpleVersioning(Generic[T]):
 
         if v == self._current_version:
             self._current_version = None
+
+    def delete_all_versions(self) -> None:
+        for version in self.versions:
+            self.delete_version(version)
 
 
 def next_version(v: str) -> str:
