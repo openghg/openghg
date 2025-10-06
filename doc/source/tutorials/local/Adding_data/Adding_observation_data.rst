@@ -326,7 +326,7 @@ Adding In-memory dataset to the object store
 
 Up to this point, we have seen how to specify a file path and add data to the object store.
 In many workflows, however, you may already have your data available in memory as an ``xarray.Dataset``.
-The ``standardise_surface`` function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.
+For the appropriate `source_format` inputs, the ``standardise_surface`` function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.
 
 This approach is especially useful when your data has already been processed in Python or retrieved from another source (such as a remote server or API) and you want to store it straight away.
 
