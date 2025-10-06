@@ -1,6 +1,7 @@
 from collections.abc import Callable, Iterable
 import logging
 from pathlib import Path
+import re
 from typing import Any, cast, Generic, Literal, TypeVar
 
 import xarray as xr
@@ -93,10 +94,13 @@ class ZarrStore(Store, Generic[ZST]):
         self.store.rmdir()
 
     def bytes_stored(self) -> int:
-        try:
-            return cast(int, self.store.getsize())
-        except AttributeError:
+        if not hasattr(self.store, "getsize"):
             return 0
+
+        nbytes = 0
+        for key in self.store.keys():
+            nbytes += self.store.getsize(key)  # type: ignore
+        return nbytes
 
     def get(self) -> xr.Dataset:
         if not bool(self):
@@ -303,6 +307,7 @@ def get_versioned_zarr_directory_store(
     versions: Iterable[str] | None = None,
     append_dim: str = "time",
     index_options: dict | None = None,
+    version_pat: str = r"v\d+",
     **to_zarr_kwargs: Any,
 ) -> VersionedZarrStore[zarr.DirectoryStore]:
     """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
@@ -312,7 +317,8 @@ def get_versioned_zarr_directory_store(
         versions: list of versions to load.
         append_dim: dimension to append new data along.
         index_options: options for the index used to resolve overlaps/conflicts when
-          adding data to the store.
+            adding data to the store.
+        version_pat: regex pattern to match existing versions
         to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
 
     Returns:
@@ -320,7 +326,19 @@ def get_versioned_zarr_directory_store(
         storage.
 
     """
+    versions = set([]) if versions is None else set(versions)
 
+    # make path or look for versions if it already exists
+    if not path.exists():
+        path.mkdir(parents=True)
+    else:
+        # look for existing versions
+        compiled_reg = re.compile(version_pat)
+        for f in sorted(path.iterdir()):
+            if compiled_reg.match(str(f.name)):
+                versions.add(f.name)
+
+    # factory function to create a Directory Stores corresponding to versions
     def factory(v: str) -> zarr.DirectoryStore:
         """Factory for versioning."""
         return zarr.DirectoryStore(path / v)

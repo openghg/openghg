@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterator
 import logging
 from pathlib import Path
-import re
 from typing import Any, Literal, cast
 
 import xarray as xr
@@ -26,19 +25,7 @@ class LocalZarrStore(Store):
         self._root_store_key = f"data/{datasource_uuid}/zarr"
         self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
 
-        # Here we ensure we have the correct directory structure for the zarr stores
-        # and do a lookup for existing version of the store
-        versions = []
-
-        if not self._stores_path.exists():
-            self._stores_path.mkdir(parents=True)
-        else:
-            compiled_reg = re.compile(r"v\d+")
-            for f in sorted(self._stores_path.iterdir()):
-                if compiled_reg.match(str(f.name)):
-                    versions.append(f.name)
-
-        self._vzds = get_versioned_zarr_directory_store(path=self._stores_path, versions=versions)
+        self._vzds = get_versioned_zarr_directory_store(path=self._stores_path)
 
     def __bool__(self) -> bool:
         """Return True if any version of the store is not empty."""
