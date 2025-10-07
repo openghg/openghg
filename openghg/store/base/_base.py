@@ -523,7 +523,7 @@ class BaseStore:
         self,
         data: list[MetadataAndData],
         fn_input_parameters: dict,
-        filepath: str | Path | list[str] | list[Path] | None = None,
+        filepath: Path | list[Path] | None = None,
     ) -> None:
         """
         Validate the standardise datasources against the data_type schema.

@@ -61,10 +61,7 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        if dataset is not None:
-            result = dc.read_file(dataset=dataset, **kwargs)
-        else:
-            result = dc.read_file(filepath=filepath, **kwargs)
+        result = dc.read_file(dataset=dataset, filepath=filepath, **kwargs)
     return result
 
 
