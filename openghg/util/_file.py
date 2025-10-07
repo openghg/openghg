@@ -423,7 +423,6 @@ def open_file_cm(
     Ensures datasets are closed after use, regardless of errors.
     Works for single or multiple netCDF files across different networks.
     """
-    ds = None
     try:
         if filepath is not None:
             if isinstance(filepath, list):
