@@ -423,6 +423,8 @@ def open_netcdfs(
     Ensures datasets are closed after use, regardless of errors.
     Works for single or multiple netCDF files across different networks.
     """
+    #  Avoid UnboundLocalError if exception occurs before ds is assigned
+    ds = None
     try:
         if filepath is not None:
             if isinstance(filepath, list):
