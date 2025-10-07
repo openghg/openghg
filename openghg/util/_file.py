@@ -410,7 +410,7 @@ def open_time_nc_fn(
 
 
 @contextmanager
-def open_file(
+def open_netcdfs(
     filepath: str | Path | list[str] | list[Path],
     chunks: dict | None = None,
     realign_on_domain: str | None = None,
@@ -468,5 +468,5 @@ def get_dataset(  # type: ignore
     else:
         if filepath is None:
             raise ValueError("filepath must be provided if dataset is None")
-        with open_file(filepath, **kwargs) as ds:
+        with open_netcdfs(filepath, **kwargs) as ds:
             yield ds
