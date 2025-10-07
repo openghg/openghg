@@ -11,7 +11,7 @@ from openghg.util import find_domain, normalise_to_filepath_list, open_time_nc_f
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
 
-logger = logging.getLogger("openghg.standardise.boundary_conditions")
+logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
