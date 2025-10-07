@@ -3,7 +3,7 @@ import bz2
 from functools import partial, wraps
 import json
 from pathlib import Path
-from typing import Any, Iterator, Optional, Union
+from typing import Any, Iterator
 from collections.abc import Callable
 import numpy as np
 import xarray as xr
@@ -410,8 +410,8 @@ def open_time_nc_fn(
 
 
 @contextmanager
-def open_file_cm(
-    filepath: Union[str, Path, list[str], list[Path]],
+def open_file(
+    filepath: str | Path | list[str] | list[Path],
     chunks: dict | None = None,
     realign_on_domain: str | None = None,
     sel_month: bool = False,
@@ -446,7 +446,7 @@ def open_file_cm(
 @contextmanager
 def get_dataset(  # type: ignore
     dataset: xr.Dataset | None = None,
-    filepath: Optional[Union[str, Path, list[str], list[Path]]] = None,
+    filepath: str | Path | list[str] | list[Path] | None = None,
     **kwargs,
 ) -> Iterator[xr.Dataset]:
     """
@@ -468,5 +468,5 @@ def get_dataset(  # type: ignore
     else:
         if filepath is None:
             raise ValueError("filepath must be provided if dataset is None")
-        with open_file_cm(filepath, **kwargs) as ds:
+        with open_file(filepath, **kwargs) as ds:
             yield ds
