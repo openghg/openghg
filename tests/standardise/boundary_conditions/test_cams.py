@@ -52,9 +52,10 @@ def test_parse_cams():
 
     # test data
     bc_data = results[f"{species}_{bc_input}_{domain}"]["data"].compute()
-    assert np.isclose(bc_data["vmr_n"].values.mean(), 313.4628)
-    assert np.isclose(bc_data["vmr_s"].values.mean(), 335.2974)
-    assert np.isclose(bc_data["vmr_w"].values.mean(), 323.7399)
-    assert np.isclose(bc_data["vmr_e"].values.mean(), 324.3560)
+    assert np.isclose(bc_data["vmr_n"].values.mean(), 313.4994)
+    assert np.isclose(bc_data["vmr_s"].values.mean(), 335.2557)
+    assert np.isclose(bc_data["vmr_w"].values.mean(), 323.5323)
+    assert np.isclose(bc_data["vmr_e"].values.mean(), 324.0306)
 
+    assert bc_data.time.size == 3
     assert bc_data.time.values[0] == np.datetime64("2022-01-01T00:00")

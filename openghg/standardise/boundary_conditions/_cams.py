@@ -227,7 +227,7 @@ def _check_and_set_params(
     return cams_version, species, input_observations
 
 
-def make_metadata(ds: xr.Dataset, filepath: list[Path], period: str, continuous: bool, **kwargs: Any) -> dict:
+def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) -> dict:
     """
     Create metadata dictionnary for standardisation.
     Args:
@@ -247,13 +247,9 @@ def make_metadata(ds: xr.Dataset, filepath: list[Path], period: str, continuous:
     # If filepath is a single file, the naming scheme of this file can be used
     # as one factor to try and determine the period.
     # If multiple files, this input isn't needed.
-    if isinstance(filepath, list):
-        input_filepath = None
-    else:
-        input_filepath = filepath
 
     start_date, end_date, period_str = infer_date_range(
-        ds.time, filepath=input_filepath, period=period, continuous=continuous
+        ds.time, filepath=None, period=period, continuous=continuous
     )
 
     metadata["start_date"] = str(start_date)
@@ -307,14 +303,14 @@ def parse_cams(
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
 
-    xr_open_fn, filepath_list = open_time_nc_fn(filepath)
+    xr_open_fn, filepath = open_time_nc_fn(filepath)
 
-    filepath_list = normalise_to_filepath_list(filepath_list)
+    filepath_list = normalise_to_filepath_list(filepath)
     cams_version, species, input_observations = _check_and_set_params(
         filepath_list, cams_version, species, input_observations
     )
 
-    with xr_open_fn(filepath_list).chunk(chunks) as ds:
+    with xr_open_fn(filepath).chunk(chunks) as ds:
         # Be sure that data are sorted in ascending order (not the case for n2o latitude)
         ds = ds.sortby(list(ds.dims))
 
@@ -355,7 +351,6 @@ def parse_cams(
     # create metadata
     metadata = make_metadata(
         bc_data,
-        filepath_list,
         period,
         continuous,
         species=species,
