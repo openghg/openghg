@@ -1,10 +1,10 @@
 addict
 cf-xarray
-dask < 2025.9
+dask < 2025.10
 filelock
 flox
 h5netcdf
-icoscp <= 0.1.17
+icoscp
 ipywidgets
 matplotlib
 msgpack
@@ -13,7 +13,7 @@ numcodecs < 0.16
 nc-time-axis
 netcdf4
 numexpr
-numpy
+numpy >= 2.0
 openghg_defs
 openpyxl
 pandas >= 2.0

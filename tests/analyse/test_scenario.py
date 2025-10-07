@@ -630,7 +630,7 @@ def obs_ch4_dummy():
      - "mf" values are from 1, 48
     """
 
-    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
 
     ntime = len(time)
     values = np.arange(0, ntime, 1)
@@ -739,7 +739,7 @@ def flux_ch4_dummy():
     """
     from openghg.dataobjects import FluxData
 
-    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="YS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
 
@@ -781,7 +781,7 @@ def bc_ch4_dummy():
     """
     from openghg.dataobjects import BoundaryConditionsData
 
-    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="YS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
     height = [500, 1500]
@@ -898,7 +898,7 @@ def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dum
     """Tests if disjoint timeseries are existing in obs and footprint data
     It raises error"""
 
-    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="H")
+    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="h")
 
     ntime = len(time)
     values = np.arange(0, ntime, 1)

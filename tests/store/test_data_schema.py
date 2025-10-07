@@ -18,7 +18,7 @@ def test_data_schema():
 @pytest.fixture(scope="module")
 def dummy_data_1():
     time = np.array(["2018-10-01", "2018-07-02"], dtype=np.datetime64)
-    lat = np.zeros(2, dtype=np.float16)
+    lat = np.zeros(2, dtype=np.float32)
     lon = np.zeros(2, dtype=np.float32)
 
     shape = (len(time), len(lat), len(lon))
