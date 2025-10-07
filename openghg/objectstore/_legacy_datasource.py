@@ -643,7 +643,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-            if not self._store.version_exists(version):
+            if version not in self._store._vzds.versions:
                 raise ObjectStoreError(f"{version} not found in object store.")
 
             self._store._vzds.checkout_version(version)
