@@ -120,7 +120,7 @@ class BaseStore:
         self,
         fn_input_parameters: dict,
         dataset: xr.Dataset | None = None,
-        filepath: str | Path | list[str] | list[Path] | None = None,
+        filepath: Path | list[Path] | None = None,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
         update_mismatch: str = "never",
