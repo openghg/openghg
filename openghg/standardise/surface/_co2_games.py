@@ -4,7 +4,7 @@ import copy
 import xarray as xr
 
 from openghg.types import pathType
-from openghg.util import get_dataset
+from openghg.util import get_data
 from openghg.standardise.meta import (
     assign_attributes,
     dataset_formatter,
@@ -55,7 +55,7 @@ def parse_co2_games(
 
     gas_data: dict = {}
 
-    with get_dataset(dataset=dataset, filepath=filepath) as dataset:
+    with get_data(dataset=dataset, filepath=filepath) as dataset:
         # Use dictionary comprehension to split data variables into individual datasets
         attributes = dataset.attrs
         metadata = {

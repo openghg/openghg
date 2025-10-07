@@ -11,7 +11,7 @@ from openghg.standardise.meta import (
     dataset_formatter,
 )
 from openghg.types import pathType
-from openghg.util import clean_string, format_inlet, get_dataset
+from openghg.util import clean_string, format_inlet, get_data
 
 
 def parse_agage(
@@ -84,7 +84,7 @@ def parse_agage(
     species = str(filepath).split(sep="_")[-2]
     species = define_species_label(species)[0]
 
-    with get_dataset(dataset=dataset, filepath=filepath) as dataset:
+    with get_data(dataset=dataset, filepath=filepath) as dataset:
         data = dataset.to_dataframe()
 
         if data.empty:

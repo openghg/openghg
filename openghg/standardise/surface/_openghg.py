@@ -4,7 +4,7 @@ import xarray as xr
 from typing import cast
 
 from openghg.types import pathType
-from openghg.util import get_dataset
+from openghg.util import get_data
 
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -71,7 +71,7 @@ def parse_openghg(
         dataset_formatter,
     )
 
-    with get_dataset(dataset=dataset, filepath=filepath) as data:
+    with get_data(dataset=dataset, filepath=filepath) as data:
 
         # Extract current attributes from input data
         attributes = data.attrs

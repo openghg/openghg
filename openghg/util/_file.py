@@ -444,7 +444,7 @@ def open_netcdfs(
 
 
 @contextmanager
-def get_dataset(  # type: ignore
+def get_data(  # type: ignore
     dataset: xr.Dataset | None = None,
     filepath: str | Path | list[str] | list[Path] | None = None,
     **kwargs,
