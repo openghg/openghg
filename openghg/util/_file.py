@@ -435,7 +435,7 @@ def open_netcdfs(
         realign_on_domain=realign_on_domain,
         sel_month=sel_month,
         check_coords=check_coords,
-        )
+    )
     ds = xr_open_fn(filepath)
 
     try:
