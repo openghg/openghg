@@ -51,8 +51,11 @@ def parse_agage(
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    with xr.load_dataset(filepath) as ds:  # type: ignore
-        file_params = ds.attrs
+    if dataset is None:
+        with xr.load_dataset(filepath) as dataset:
+            file_params = dataset.attrs
+    else:
+        file_params = dataset.attrs
 
     # if we're not passed the instrument name, get it from the file:
 
@@ -81,8 +84,7 @@ def parse_agage(
 
     instrument = str(instrument)
 
-    species = str(filepath).split(sep="_")[-2]
-    species = define_species_label(species)[0]
+    species = file_params.get("species", None)
 
     with get_data(dataset=dataset, filepath=filepath) as dataset:
         data = dataset.to_dataframe()

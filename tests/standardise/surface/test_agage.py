@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath
 from openghg.standardise.surface import parse_agage
 
 mpl_logger = logging.getLogger("matplotlib")

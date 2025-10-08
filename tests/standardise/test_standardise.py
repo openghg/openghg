@@ -1014,3 +1014,51 @@ def test_icos_corso_l2_deltao2():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "2" in results[0]["data_level"]
     assert "surface-flask" in results[0]["platform"]
+
+
+def test_standardise_agage_using_filepath():
+    """
+    Test standardisation of AGAGE data using file path input.
+    """
+    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+
+    results = standardise_surface(
+        filepath=thd_path,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        force=True,
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+
+    assert retrieved_data is not None
+
+
+def test_standardise_agage_using_dataset():
+    """
+    Test standardisation of AGAGE data using dataset input.
+    """
+    thd_dataset = xr.open_dataset(get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"))
+
+    results = standardise_surface(
+        dataset=thd_dataset,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        force=True,
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+
+    assert retrieved_data is not None
