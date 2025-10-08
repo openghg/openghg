@@ -64,7 +64,7 @@ def parse_co2_games(
             "inlet": attributes["dataset_intake_ht"],
             "inlet_height_magl": attributes["dataset_intake_ht"],
             "network": network,
-            "instrument": "NOT_SET",
+            "instrument": "surface-insitu" if "insitu" in attributes["dataset_project"] else "NOT_SET",
             "sampling_period": attributes["dataset_data_frequency_unit"],
             "calibration_scale": attributes["dataset_calibration_scale"],
             "data_owner": "NOT_SET",
