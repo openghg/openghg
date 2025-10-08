@@ -4,7 +4,7 @@ from pathlib import Path
 from openghg.util import clean_string, timestamp_now, synonyms, open_time_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
 
-logger = logging.getLogger("openghg.transform.boundary_conditions")
+logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
