@@ -163,7 +163,7 @@ class BoundaryConditions(BaseStore):
         transform_parsers = define_transform_parsers()[self._data_type]
 
         try:
-            data_type = transform_parsers[database.upper()].value
+            transform_parsers[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
@@ -196,12 +196,10 @@ class BoundaryConditions(BaseStore):
                 for parsed_data in bc_data:
                     parsed_data.metadata.update(info_metadata)
 
-        data_type = "boundary_conditions"
         datasource_uuids = self.assign_data(
             data=bc_data,
             if_exists=if_exists,
             new_version=new_version,
-            data_type=data_type,
             required_keys=required_keys,
             compressor=compressor,
             filters=filters,

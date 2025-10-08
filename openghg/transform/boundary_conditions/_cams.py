@@ -1,6 +1,7 @@
 import os
 import logging
 from pathlib import Path
+import pathlib
 from typing import Any, Callable, cast, Literal
 
 import xarray as xr
@@ -270,7 +271,7 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
 def parse_cams(
     bc_input: str,
     domain: str,
-    filepath: str | Path | list[str] | list[Path],
+    datapath: pathlib.Path,
     species: str | None = None,
     period: str | None = None,
     cams_version: str | None = None,
@@ -303,9 +304,9 @@ def parse_cams(
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
+    xr_open_fn, filepath = open_time_nc_fn(datapath)
 
-    filepath_list = normalise_to_filepath_list(filepath)
+    filepath_list = normalise_to_filepath_list(datapath)
     cams_version, species, input_observations = _check_and_set_params(
         filepath_list, cams_version, species, input_observations
     )
