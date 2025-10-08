@@ -424,25 +424,25 @@ def open_netcdfs(
     Works for single or multiple netCDF files across different networks.
     """
     #  Avoid UnboundLocalError if exception occurs before ds is assigned
-    ds = None
-    try:
-        if filepath is not None:
-            if isinstance(filepath, list):
-                filepath = [Path(f) for f in filepath]
-            elif isinstance(filepath, str):
-                filepath = Path(filepath)
+    if filepath is not None:
+        if isinstance(filepath, list):
+            filepath = [Path(f) for f in filepath]
+        elif isinstance(filepath, str):
+            filepath = Path(filepath)
 
-        xr_open_fn, filepath = open_time_nc_fn(
-            filepath=filepath,
-            realign_on_domain=realign_on_domain,
-            sel_month=sel_month,
-            check_coords=check_coords,
+    xr_open_fn, filepath = open_time_nc_fn(
+        filepath=filepath,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
         )
-        ds = xr_open_fn(filepath).chunk(chunks)
+    ds = xr_open_fn(filepath)
+
+    try:
+        ds = ds.chunk(chunks)
         yield ds
     finally:
-        if ds is not None:
-            ds.close()
+        ds.close()
 
 
 @contextmanager
