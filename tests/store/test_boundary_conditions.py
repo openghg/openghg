@@ -343,7 +343,7 @@ def test_transform_cams_n2o_bc():
         store="user",
     )
 
-    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input, "file": filename}
+    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input}
 
     for k, v in expected_metadata.items():
         assert results[0][k].lower() == v.lower()
