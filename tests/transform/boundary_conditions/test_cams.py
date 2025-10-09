@@ -21,7 +21,7 @@ def test_parse_cams():
     data_path = get_bc_datapath(filename="cams73_v22r1_n2o_test_202201.nc")
 
     results = parse_cams(
-        filepath=data_path,
+        datapath=data_path,
         species=species,
         bc_input=bc_input,
         period=period,

@@ -134,6 +134,9 @@ class BoundaryConditions(BaseStore):
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
+        cams_version: str | None = None,
+        input_observations: str | None = None,
+        get_footprint_kwargs: str | None = None,
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
@@ -183,7 +186,7 @@ class BoundaryConditions(BaseStore):
         for mdd in bc_data:
             BoundaryConditions.validate_data(mdd.data)
 
-        required_keys = ("species", "source", "domain")
+        required_keys = ("species", "bc_input", "domain")
 
         if info_metadata:
             common_keys = set(required_keys) & set(info_metadata.keys())
