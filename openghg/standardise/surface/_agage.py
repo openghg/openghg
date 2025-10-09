@@ -84,6 +84,7 @@ def parse_agage(
     instrument = str(instrument)
 
     species = file_params.get("species", None)
+    species = define_species_label(species)
 
     with get_data(dataset=dataset, filepath=filepath) as dataset:
         data = dataset.to_dataframe()
