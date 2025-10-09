@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import re
 import xarray as xr
@@ -17,7 +15,7 @@ from openghg.util import clean_string, format_inlet, get_data
 def parse_agage(
     site: str,
     network: str,
-    filepath: str | Path | list[str] | list[Path] | None = None,
+    filepath: pathType | None = None,
     dataset: xr.Dataset | None = None,
     inlet: str | None = None,
     instrument: str | None = None,
@@ -52,6 +50,7 @@ def parse_agage(
     # get the parameters from the file metadata, as opposed to from the .json file
 
     if dataset is None:
+        filepath = str(filepath)
         with xr.load_dataset(filepath) as dataset:
             file_params = dataset.attrs
     else:
