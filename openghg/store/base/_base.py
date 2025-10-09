@@ -241,17 +241,18 @@ class BaseStore:
             filepaths = normalise_to_filepath_list(filepath)
         else:
             filepaths = []
-        for x in datasource_uuids:
-            if not filepaths:
-                continue
-            if len(filepaths) == 1:
-                fp = filepaths[0]
-                x.update({"file": fp.name})
-                logger.info(f"Completed processing: {fp.name}.")
-            else:
-                filepath_str = ", ".join(fp.name for fp in filepaths)
-                x.update({"files": filepath_str})
-                logger.info(f"Completed processing files: {filepath_str}.")
+        if not filepaths:
+            logger.info("Filepath not provided, cannot log completed processing of files.")
+        else:
+            for x in datasource_uuids:
+                if len(filepaths) == 1:
+                    fp = filepaths[0]
+                    x.update({"file": fp.name})
+                    logger.info(f"Completed processing: {fp.name}.")
+                else:
+                    filepath_str = ", ".join(fp.name for fp in filepaths)
+                    x.update({"files": filepath_str})
+                    logger.info(f"Completed processing files: {filepath_str}.")
 
         return datasource_uuids
 
