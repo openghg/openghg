@@ -4,7 +4,8 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
-from openghg.types import pathType
+from openghg.types import pathType, TransformError
+from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
 import numpy as np
 
 if TYPE_CHECKING:
@@ -134,9 +135,6 @@ class BoundaryConditions(BaseStore):
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
-        cams_version: str | None = None,
-        input_observations: str | None = None,
-        get_footprint_kwargs: str | None = None,
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
@@ -148,9 +146,7 @@ class BoundaryConditions(BaseStore):
             - openghg.transform.boundary_conditions.parse_{database.lower()}
                 - e.g. openghg.transform.boundary_conditions.parse_cams()"""
 
-        import inspect
         from openghg.store.spec import define_transform_parsers
-        from openghg.util import load_transform_parser, check_if_need_new_version
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -159,9 +155,12 @@ class BoundaryConditions(BaseStore):
             )
             if_exists = "new"
 
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        datapath = Path(datapath)
+        fn_input_parameters["datapath"] = Path(datapath)
 
         transform_parsers = define_transform_parsers()[self._data_type]
 
@@ -173,14 +172,20 @@ class BoundaryConditions(BaseStore):
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
-        # Find all parameters that can be accepted by parse function
-        all_param = list(inspect.signature(parser_fn).parameters.keys())
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        # Define parameters to pass to the parser function from kwargs
-        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
-        param["datapath"] = datapath  # Add datapath explicitly (for now)
+        # param["datapath"] = datapath  # Add datapath explicitly (for now)
 
-        bc_data = parser_fn(**param)
+        # Call appropriate standardisation function with input parameters
+        try:
+            bc_data = parser_fn(**parser_input_parameters)
+        except (TypeError, ValueError) as err:
+            msg = f"Error during transformation of data(s): {datapath}. Error: {err}"
+            logger.exception(msg)
+            raise TransformError(msg)
 
         # Checking against expected format for Flux
         for mdd in bc_data:
@@ -198,6 +203,11 @@ class BoundaryConditions(BaseStore):
             else:
                 for parsed_data in bc_data:
                     parsed_data.metadata.update(info_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        bc_data = self.update_metadata(
+            bc_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         datasource_uuids = self.assign_data(
             data=bc_data,
