@@ -137,10 +137,9 @@ def calc_altitude_from_pressure(ds: xr.Dataset) -> xr.Dataset:
     Returns:
         ds: dataset whith new variable altitude (in meter)
     """
-    ds["pressure"] = ds.ap + ds.bp * ds.Psurf
+    pressure = ds.ap + ds.bp * ds.Psurf
     scale_height = 7.64e3  # in metres
-    ds["altitude"] = -scale_height * np.log(ds.pressure / ds.Psurf)
-    del ds["pressure"]
+    ds["altitude"] = -scale_height * np.log(pressure / ds.Psurf)
     return ds
 
 
