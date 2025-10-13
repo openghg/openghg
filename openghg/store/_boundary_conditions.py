@@ -208,9 +208,4 @@ class BoundaryConditions(BaseStore):
             filters=filters,
         )
 
-        # "date" used to be part of the "keys" in the old datasource_uuids format
-        if "date" in param:
-            for du in datasource_uuids:
-                du["date"] = param["date"]
-
         return datasource_uuids
