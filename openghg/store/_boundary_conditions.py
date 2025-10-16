@@ -177,7 +177,6 @@ class BoundaryConditions(BaseStore):
             fn_input_parameters, parser_fn
         )
 
-        # param["datapath"] = datapath  # Add datapath explicitly (for now)
 
         # Call appropriate standardisation function with input parameters
         try:
