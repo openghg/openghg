@@ -61,17 +61,17 @@ dependencies = [
 ]
 
 optional-dependencies = [
-Jinja2,
-notebook,
-nbsphinx,
-pydata-sphinx-theme,
-sphinx,
-sphinx-issues >= 3.0.1,
-sphinx_rtd_theme,
-sphinxcontrib-programoutput,
-sphinx-autodoc-typehints,
-sphinx_togglebutton,
-jupyter-sphinx,
+"Jinja2",
+"notebook",
+"nbsphinx",
+"pydata-sphinx-theme",
+"sphinx",
+"sphinx-issues >= 3.0.1",
+"sphinx_rtd_theme",
+"sphinxcontrib-programoutput",
+"sphinx-autodoc-typehints",
+"sphinx_togglebutton",
+"jupyter-sphinx",
 ]
 
 classifiers = [
