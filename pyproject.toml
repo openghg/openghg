@@ -60,27 +60,27 @@ dependencies = [
     "cdsapi>=0.7.7",
 ]
 
-[project.optional-dependencies]
-docs = [
-"Jinja2",
-"notebook",
-"nbsphinx",
-"pydata-sphinx-theme",
-"sphinx",
-"sphinx-issues >= 3.0.1",
-"sphinx_rtd_theme",
-"sphinxcontrib-programoutput",
-"sphinx-autodoc-typehints",
-"sphinx_togglebutton",
-"jupyter-sphinx",
-]
-
 classifiers = [
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS"]
+
+[project.optional-dependencies]
+docs = [
+    "Jinja2",
+    "notebook",
+    "nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx-issues >= 3.0.1",
+    "sphinx_rtd_theme",
+    "sphinxcontrib-programoutput",
+    "sphinx-autodoc-typehints",
+    "sphinx_togglebutton",
+    "jupyter-sphinx"
+]
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
