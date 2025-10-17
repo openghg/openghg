@@ -60,7 +60,7 @@ dependencies = [
     "cdsapi>=0.7.7",
 ]
 
-optional-dependencies = [
+[project.optional-dependencies] = [
 "Jinja2",
 "notebook",
 "nbsphinx",
