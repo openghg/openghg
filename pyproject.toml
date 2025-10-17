@@ -55,7 +55,6 @@ dependencies = [
     "xarray>=2025.4.0",
     "zarr==2.18.3",
     "openghg-calscales",
-    "uv",
     "sympy>=1.14.0",
     "networkx>=3.4.2",
     "cdsapi>=0.7.7",
