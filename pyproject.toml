@@ -60,6 +60,37 @@ dependencies = [
     "cdsapi>=0.7.7",
 ]
 
+[dependency-groups]
+dev=[cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
+"flake8",
+"pre-commit",
+"pytest >= 6.2.5",
+"pytest-tornasync",
+"pytest-cov",
+"pytest-mock",
+"pytest-timeout",
+"requests-mock",
+"tox >=4.24",
+"mypy==1.10.0",
+"types-paramiko",
+"types-PyYAML",
+"types-requests",
+"types-toml",
+"types-urllib3",
+"msgpack-types"]
+docs = [
+    "Jinja2",
+    "notebook",
+    "nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx-issues >= 3.0.1",
+    "sphinx_rtd_theme",
+    "sphinxcontrib-programoutput",
+    "sphinx-autodoc-typehints",
+    "sphinx_togglebutton",
+    "jupyter-sphinx"
+]
 classifiers = [
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
