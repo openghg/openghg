@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 import xarray as xr
 
 from openghg.types import MetadataAndData
@@ -9,8 +10,16 @@ logger = logging.getLogger("openghg.standardise.met")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def parse_ecmwf(filepath, chunks: dict | None = None):
-    """ """
+def parse_ecmwf(filepath: str | Path, chunks: dict | None = None) -> list[MetadataAndData]:
+    """
+    Parse Met ECMWF data (typically downloaded from the Copernicus Climate Data Store).
+
+    Args:
+        filepath: Single filepath to netcdf file
+        chunks: Chunks to use when opening and storing data
+    Returns:   
+        list[MetadataAndData]: List of parsed data objects
+    """
 
     with xr.open_dataset(filepath).chunk(chunks) as data:
 
