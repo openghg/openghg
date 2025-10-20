@@ -255,6 +255,9 @@ Output for individual sources can also be created by specifying the
     modelled_obs_anthro = scenario.calc_modelled_obs(sources="anthro", recalculate=True)
     modelled_obs_anthro.plot()
 
+
+Note: units are automatically aligned for satellite data, as in the "Working with units" section of :ref:`Comparing observations to emissions`.
+
 *Plotting functions to be added for 2D / 3D data*
 
 4. Cleanup

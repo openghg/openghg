@@ -271,11 +271,7 @@ def test_optional_term_search():
 
 @pytest.mark.parametrize(
     "tag",
-    [
-        "gemma_v1",
-        ["ceda_v1"],
-        ["gemma_v1", "ceda_v1"]
-    ],
+    ["gemma_v1", ["ceda_v1"], ["gemma_v1", "ceda_v1"]],
 )
 def test_search_by_tag(tag):
     """
@@ -290,10 +286,7 @@ def test_search_by_tag(tag):
     res = search_surface(tag=tag)
     assert len(res.metadata) == 1
 
-    partial_metadata = {"site": "tac",
-                         "network": "decc",
-                         "inlet": "185m",
-                         "species": "co2"}
+    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185m", "species": "co2"}
 
     key = next(iter(res.metadata))
 

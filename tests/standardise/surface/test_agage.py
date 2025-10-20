@@ -91,6 +91,23 @@ def test_read_invalid_instrument_raises():
             network="agage",
         )
 
+def test_read_variabilities():
+    """
+    Check that if an AGAGE file has a mf_variability variable, it is read in
+    """
+    cgo_path = get_surface_datapath(filename='agage_cgo_cfc-11_20250704-test-variabilities.nc', source_format="GC_nc")
+
+    data = parse_agage(
+        filepath=cgo_path,
+        site="cgo",
+        instrument="GCMD",
+        network="agage",
+    )
+
+    assert "cfc11_variability" in data['cfc11_70m']['data'].variables
+
+
+
 
 def test_expected_metadata_thd_cfc11():
     cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")

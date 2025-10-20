@@ -6,7 +6,7 @@ import pandas as pd
 import xarray as xr
 
 from openghg.analyse._alignment import time_of_day_offset
-from openghg.analyse._utils import match_dataset_dims, reindex_on_dims
+from openghg.analyse._utils import reindex_on_dims
 
 
 def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArray:
@@ -20,14 +20,20 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
         DataArray containing footprint times flux.
 
     """
-    footprint, flux = match_dataset_dims([footprint, flux], dims=["lat", "lon"])
+    flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
 
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
     flux = flux.reindex_like(footprint, method="ffill")
 
-    result = cast(xr.DataArray, footprint.fp * flux.flux)
-    return result
+    # align chunks for time after filling
+    fp_time_chunks = footprint.fp.chunksizes.get("time")
+    if fp_time_chunks is not None:
+        fp_time_chunk = fp_time_chunks[0]
+        flux = flux.chunk({"time": fp_time_chunk})
+
+    result = footprint.fp.pint.quantify() * flux.flux.pint.quantify()
+    return cast(xr.DataArray, result.pint.dequantify())
 
 
 # helper functions for time-resolved calculation
@@ -142,6 +148,7 @@ def _make_hf_flux_rolling_avg_array(
     flux_hf_rolling = flux_hf_rolling.assign_coords(
         {"H_back": np.arange(0, max_h_back, highest_res_h, dtype=h_back_type)[::-1]}
     )
+    flux_hf_rolling.H_back.attrs["units"] = fp_high_time_res.H_back.attrs.get("units")
 
     # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
     flux_hf_rolling = flux_hf_rolling.sel(H_back=fp_high_time_res.H_back)
@@ -176,6 +183,8 @@ def _make_high_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> x
     # create rolling windows
     flux_high_freq = _make_hf_flux_rolling_avg_array(flux_high_freq, fp)
 
+    flux_high_freq.attrs["units"] = flux.attrs.get("units")
+
     return flux_high_freq
 
 
@@ -183,7 +192,6 @@ def _make_high_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> x
 def fp_x_flux_time_resolved(
     fp: xr.DataArray | xr.Dataset, flux: xr.DataArray | xr.Dataset, averaging: str | None = None
 ) -> xr.DataArray:
-
     if isinstance(flux, xr.Dataset):
         flux = flux.flux
         flux = cast(xr.DataArray, flux)
@@ -211,18 +219,24 @@ def fp_x_flux_time_resolved(
 
     # create low res. (monthly) flux and calculate low res. fp x flux
     flux_low_freq = _make_low_freq_flux(flux, fp)
-    fp_x_flux_residual = fp_residual * flux_low_freq
+    fp_x_flux_residual = fp_residual.pint.quantify() * flux_low_freq.pint.quantify()
 
     # Calculate time resolution for flux
     flux_res_hours = calc_hourly_freq(flux.time, input_nanoseconds=True)
 
     # if resolution coarser than "H_back" dimension, just sum over "H_back" and use low freq. flux
     if flux_res_hours > _max_h_back(fp):
-        return fp_time_resolved.sum("H_back") * flux_low_freq + fp_x_flux_residual
+        result = (
+            fp_time_resolved.sum("H_back").pint.quantify() * flux_low_freq.pint.quantify()
+            + fp_x_flux_residual
+        )
+        return cast(xr.DataArray, result.pint.dequantify())
 
     # create high frequency flux (resampled to gcd of footprint time and H_back frequencies) with H_back dim
     flux_high_freq = _make_high_freq_flux(flux, fp)
 
-    fp_x_flux = (flux_high_freq * fp_time_resolved).sum("H_back") + fp_x_flux_residual
+    fp_x_flux = (flux_high_freq.pint.quantify() * fp_time_resolved.pint.quantify()).sum(
+        "H_back"
+    ) + fp_x_flux_residual
 
-    return fp_x_flux
+    return cast(xr.DataArray, fp_x_flux.pint.dequantify())

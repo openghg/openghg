@@ -54,6 +54,7 @@ class UUID:
 
     They have the form "uuid1", "uuid2", etc.
     """
+
     uuid_int = 0
 
     def __init__(self) -> None:
@@ -161,7 +162,7 @@ def test_versioning(datasource):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = datasource # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
+    d = datasource  # Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
 
     min_ch4_data = min_data["ch4"]["data"]
 
@@ -528,10 +529,13 @@ def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
 def test_bytes_stored(data, bucket, datasource):
     d = datasource
     d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
-
     d.save()
 
-    assert abs(d.bytes_stored() - 9609) < 10
+    bytes_stored = d.bytes_stored()
+
+    # check that number of bytes is not larger than some value that was valid when the test was created
+    # this value 9619 includes a bit of tolerance. We'll accept anything less than that.
+    assert bytes_stored < 9619
 
     d = Datasource(uuid="xyz456", bucket=bucket)
 

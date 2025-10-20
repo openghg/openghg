@@ -66,6 +66,14 @@ class MetastoreError(OpenGHGError):
     """Raised for errors with the metadata store"""
 
 
+class StorageError(OpenGHGError):
+    """Raised for errors with data storage (e.g. ZarrStore)."""
+
+
+class UpdateError(StorageError):
+    """Raised for errors updating data."""
+
+
 class ZarrStoreError(OpenGHGError):
     """Raised for errors with the zarr store"""
 
@@ -76,6 +84,14 @@ class KeyExistsError(ZarrStoreError):
 
 class MetadataMissingError(OpenGHGError):
     """Raised if unable to determine/find a metadata value"""
+
+
+class StandardiseError(OpenGHGError):
+    """Raised if there is a problem during standardisation within the parse function"""
+
+
+class ValidationError(OpenGHGError):
+    """Raised if the data produced by the parse function cannot be validated as a valid internal format"""
 
 
 def construct_xesmf_import_error(exception: ImportError | None = None) -> str:

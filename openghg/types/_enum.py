@@ -21,6 +21,7 @@ class ColumnTypes(Enum):
     """Types of column data files that can be standardised"""
 
     OPENGHG = "OPENGHG"
+    TCCON = "TCCON"
 
 
 class ColumnSources(Enum):

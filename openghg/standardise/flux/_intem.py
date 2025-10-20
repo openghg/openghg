@@ -6,7 +6,7 @@ from openghg.store import infer_date_range
 
 
 def parse_intem(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     species: str,
     source: str,
     chunks: dict,
