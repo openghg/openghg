@@ -17,7 +17,7 @@ def parse_ecmwf(filepath: str | Path, chunks: dict | None = None) -> list[Metada
     Args:
         filepath: Single filepath to netcdf file
         chunks: Chunks to use when opening and storing data
-    Returns:   
+    Returns:
         list[MetadataAndData]: List of parsed data objects
     """
 
