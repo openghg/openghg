@@ -13,21 +13,24 @@ import logging
 
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
-def _sort_filepath(filepath: pathType | list[pathType])->list[pathType]:
+
+def _sort_filepath(filepath: pathType | list[pathType]) -> list[pathType]:
     """
     Makes sure that the filepaths are sorted in time ascending order. Sorting is based on the filename
-    as it reads the last character of the filename that are supposed to indicate the month of the obs. 
+    as it reads the last character of the filename that are supposed to indicate the month of the obs.
     Args:
         filepath: (list of) filepath to sort
     Returns:
         sorted filepath(s)
     """
     if not isinstance(filepath, list):
-        filepath = [filepath,]
-    
-    files = pd.DataFrame(dict(files = filepath))
+        filepath = [
+            filepath,
+        ]
+
+    files = pd.DataFrame(dict(files=filepath))
     files["date"] = files.files.apply(lambda x: x.name.split("_")[-1][:-3])
-    files.sort_values(by="date",ignore_index=True,inplace=True)
+    files.sort_values(by="date", ignore_index=True, inplace=True)
     return files.files.to_list()
 
 
@@ -45,17 +48,19 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     """
     if quality_filt:
         logger.info(f"Applying filter based on variable 'qual_flag'.")
-        ds = ds.where(ds.qual_flag==1, drop=True)
+        ds = ds.where(ds.qual_flag == 1, drop=True)
     ds = ds.dropna("time").sortby("time")
 
-    if ds[f"X{species.upper()}"].size==0:
+    if ds[f"X{species.upper()}"].size == 0:
         raise ValueError("All the data have been filtered by quality flag and/or by `xr.Dataset.dropna()`.")
 
     if not resample:
         return ds
 
     output = ds.resample(time="h").mean(dim="time")
-    output[f"x{species}_uncertainty"] = ds[f"X{species.upper()}"].resample(time="h").max(dim="time") - ds[f"X{species.upper()}"].resample(time="h").min(dim="time")
+    output[f"x{species}_uncertainty"] = ds[f"X{species.upper()}"].resample(time="h").max(dim="time") - ds[
+        f"X{species.upper()}"
+    ].resample(time="h").min(dim="time")
 
     logger.warning(
         "Not sure that we should resample at this stage (and also resample the uncertainty like that)."
@@ -63,6 +68,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     output = output.dropna("time")
 
     return output
+
 
 def parse_gemini(
     filepath: pathType | list[pathType],
@@ -76,7 +82,7 @@ def parse_gemini(
     NOTE: when this parser was written, data and network were new and no documentation was available.
     The data are so standardise on the same way than the TCCON data (see parser_tccon in _tccon.py and info therein).
     Assumed variables equivalencies with TCCON data (for ch4) are assumed as follow:
-        - "xch4" in TCCON data => "XCH4" 
+        - "xch4" in TCCON data => "XCH4"
         - "prior_ch4" in TCCON data ~> "ch4_apriori" (this one is dry, whereas the TCCON one is wet)
         - "prior_h2o" in TCCON data ~> "h2o_apriori" (this one is dry, whereas the TCCON one is wet)
         - "ak_xch4" in TCCON data => "XCH4_AK"
@@ -96,21 +102,23 @@ def parse_gemini(
     """
     filepath = _sort_filepath(filepath)
 
-    var_to_read = [f"X{species.upper()}", 
-                   f"X{species.upper()}_AK", 
-                   f"{species}_apriori", 
-                   "h2o_apriori",
-                   "pressure_grid", 
-                   "height_grid", 
-                   "qual_flag",
-                   "latitude",
-                   "longitude",
-                   "obs_height"]
-    
+    var_to_read = [
+        f"X{species.upper()}",
+        f"X{species.upper()}_AK",
+        f"{species}_apriori",
+        "h2o_apriori",
+        "pressure_grid",
+        "height_grid",
+        "qual_flag",
+        "latitude",
+        "longitude",
+        "obs_height",
+    ]
+
     # open datasets
     ds_list = list()
     for file in filepath:
-        tmp = xr.open_dataset(file,decode_times = False)[var_to_read]
+        tmp = xr.open_dataset(file, decode_times=False)[var_to_read]
         tmp["time"] = pd.to_datetime(tmp.time, unit="s")
 
         for var in tmp.data_vars:
@@ -119,7 +127,7 @@ def parse_gemini(
 
         ds_list.append(tmp)
 
-    data = xr.merge(ds_list, join='outer')
+    data = xr.merge(ds_list, join="outer")
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
@@ -128,7 +136,7 @@ def parse_gemini(
     attributes["file_end_date"] = str(data.time.values.max())
 
     site_gemini_shortname = np.unique(file.name.split("_")[-2])
-    if len(site_gemini_shortname)>1:
+    if len(site_gemini_shortname) > 1:
         raise ValueError("Seems like there is more than one site here.")
     site_gemini_shortname = site_gemini_shortname[0]
 
@@ -152,7 +160,7 @@ def parse_gemini(
         if species == "ch4":
             if "ppm" in data[var].attrs["units"]:
                 data[var] *= 1e3
-                data[var].attrs["units"] = data[var].attrs["units"].replace("ppm","ppb")
+                data[var].attrs["units"] = data[var].attrs["units"].replace("ppm", "ppb")
             elif "ppb" not in data[var].attrs["units"]:
                 raise ValueError("The units are not those expected.")
         else:
@@ -163,15 +171,25 @@ def parse_gemini(
             logging.warning(f"No unit conversion is implemented for {species}.")
 
     # Derive pressure thickness
-    press = -data["pressure_grid"].diff(dim="altitude",n=1)
-    press["altitude"] = np.arange(0,press.altitude.size)
-    press0 = data["pressure_grid"].isel(altitude=-1).expand_dims({"altitude":[press.altitude.size,]})
-    data["dpj"] = xr.merge([press0,press]).pressure_grid
+    press = -data["pressure_grid"].diff(dim="altitude", n=1)
+    press["altitude"] = np.arange(0, press.altitude.size)
+    press0 = (
+        data["pressure_grid"]
+        .isel(altitude=-1)
+        .expand_dims(
+            {
+                "altitude": [
+                    press.altitude.size,
+                ]
+            }
+        )
+    )
+    data["dpj"] = xr.merge([press0, press]).pressure_grid
 
     # Derive gravity
-    mean_earth_radius = 6371.01e3 # meters
+    mean_earth_radius = 6371.01e3  # meters
     surface_gravity = 9.80665
-    data["gravity"] =  surface_gravity * mean_earth_radius / (mean_earth_radius+data["height_grid"]*1e3)
+    data["gravity"] = surface_gravity * mean_earth_radius / (mean_earth_radius + data["height_grid"] * 1e3)
 
     # Derive pressure weight (hj), wet to dry conversion factor,
     # dry mole fraction of water (fdry_h2o) and prior dry xch4
@@ -198,14 +216,14 @@ def parse_gemini(
             f"X{species.upper()}": f"x{species}",
             f"{species}_apriori": f"{species}_profile_apriori",
             f"X{species.upper()}_AK": f"x{species}_averaging_kernel",
-            "altitude": "lev"
+            "altitude": "lev",
         }
     )
-    
+
     data = data.drop_vars(["longitude", "latitude", "h2o_apriori", "obs_height"])
 
     # Altitude
-    data = data.rename({"height_grid":"altitude"})
+    data = data.rename({"height_grid": "altitude"})
     if data["altitude"].attrs["units"] == "km above sea level":
         data["altitude"] *= 1e3
         data["altitude"].attrs["units"] = "m"
@@ -232,7 +250,3 @@ def parse_gemini(
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     return gas_data
-
-
-
-    
