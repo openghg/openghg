@@ -177,6 +177,7 @@ class BoundaryConditions(BaseStore):
             fn_input_parameters, parser_fn
         )
 
+
         # Call appropriate standardisation function with input parameters
         try:
             bc_data = parser_fn(**parser_input_parameters)
