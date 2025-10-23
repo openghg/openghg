@@ -278,155 +278,153 @@ def parse_edgar(
         # Open the dataset using xarray
         edgar_ds = xr.open_dataset(temp_file.name, cache=False)
 
-        # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
-        name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
+    # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
+    name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
 
-        # check that data variable `name` is in `edgar_ds`
-        if name not in edgar_ds.data_vars:
-            if version.startswith("v8"):
-                raise ValueError(
-                    f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
-                )
-            else:
-                raise ValueError(f"Data variable {name} not present.")
-
-        # Convert from kg/m2/s to mol/m2/s
-        species_molar_mass = molar_mass(species_label)
-        kg_to_g = 1e3
-
-        flux_da = edgar_ds[name]
-        flux_da = flux_da * kg_to_g / species_molar_mass
-        units = "mol/m2/s"
-
-        # TODO: some options for f-gases (.emi files) have different units...
-        # need to catch this
-
-        lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
-        lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
-        if lat_name is None or lon_name is None:
+    # check that data variable `name` is in `edgar_ds`
+    if name not in edgar_ds.data_vars:
+        if version.startswith("v8"):
             raise ValueError(
-                f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
-                " Please check this is a 2D grid map."
+                f"Data variable {name} not present. We only support 'flx_nc' files, not 'emi_nc' files, for EDGAR v8.0"
             )
-
-        # Check range of longitude values and convert to -180 - +180
-        flux_da = convert_internal_longitude(
-            flux_da, lon_name=lon_name
-        )  # TODO is this creating NaNs for East Asia domain?
-
-        lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
-
-        if lat_out is not None and lon_out is not None:
-            # Will produce import error if xesmf has not been installed.
-            from openghg.transform import regrid_uniform_cc
-            from openghg.util import cut_data_extent
-
-            # To improve performance of regridding algorithm cut down the data
-            # to match the output grid (with buffer).
-            flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
-            flux_values = flux_da_cut.values
-
-            lat_in_cut = flux_da_cut[lat_name]
-            lon_in_cut = flux_da_cut[lon_name]
-
-            # area conservative regrid
-            flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
         else:
-            lat_out = flux_da[lat_name]
-            lon_out = flux_da[lon_name]
-            flux_values = flux_da.values
+            raise ValueError(f"Data variable {name} not present.")
 
-        edgar_attrs = edgar_ds.attrs
+    # Convert from kg/m2/s to mol/m2/s
+    species_molar_mass = molar_mass(species_label)
+    kg_to_g = 1e3
 
-        # Check for "time" dimension and add if missing.
-        flux_ndim = flux_values.ndim
-        time_name = "time"
-        if time_name in flux_da:
-            time = flux_da[time_name].values
-            flux = (
-                flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
-            )
-        elif time_name not in flux_da and flux_ndim == 2:
-            time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
-            flux = flux_values[np.newaxis, ...]
-        else:
-            raise ValueError(
-                f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
-                f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
-            )
+    flux_da = edgar_ds[name]
+    flux_da = flux_da * kg_to_g / species_molar_mass
+    units = "mol/m2/s"
 
-        dims = ("time", "lat", "lon")
+    # TODO: some options for f-gases (.emi files) have different units...
+    # need to catch this
 
-        em_data = xr.Dataset(
-            {"flux": (dims, flux)}, coords={"time": time, "lat": lat_out, "lon": lon_out}, attrs=edgar_attrs
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+    if lat_name is None or lon_name is None:
+        raise ValueError(
+            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
+            " Please check this is a 2D grid map."
         )
 
-        # Some attributes are numpy types we can't serialise to JSON so convert them
-        # to their native types here
-        attrs = {}
-        for key, value in em_data.attrs.items():
-            try:
-                attrs[key] = value.item()
-            except AttributeError:
-                attrs[key] = value
+    # Check range of longitude values and convert to -180 - +180
+    flux_da = convert_internal_longitude(
+        flux_da, lon_name=lon_name
+    )  # TODO is this creating NaNs for East Asia domain?
 
-        author_name = "OpenGHG Cloud"
-        em_data.attrs["author"] = author_name
+    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
 
-        metadata = {}
-        metadata.update(attrs)
+    if lat_out is not None and lon_out is not None:
+        # Will produce import error if xesmf has not been installed.
+        from openghg.transform import regrid_uniform_cc
+        from openghg.util import cut_data_extent
 
-        raw_edgar_domain = "globaledgar"
-        if domain is None:
-            domain = raw_edgar_domain
+        # To improve performance of regridding algorithm cut down the data
+        # to match the output grid (with buffer).
+        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
+        flux_values = flux_da_cut.values
 
-        source = source if source is not None else edgar_file_info["source"]
-        metadata["species"] = species_label
-        metadata["domain"] = domain
-        metadata["source"] = source
-        metadata["database"] = "EDGAR"
-        metadata["database_version"] = edgar_file_info["version"]
-        metadata["author"] = author_name
-        metadata["processed"] = str(timestamp_now())
-        metadata["data_type"] = "flux"
+        lat_in_cut = flux_da_cut[lat_name]
+        lon_in_cut = flux_da_cut[lon_name]
 
-        attrs = {"author": metadata["author"], "processed": metadata["processed"]}
+        # area conservative regrid
+        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
+    else:
+        lat_out = flux_da[lat_name]
+        lon_out = flux_da[lon_name]
+        flux_values = flux_da.values
 
-        # Infer the date range associated with the flux data
-        em_time = em_data.time
-        start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+    edgar_attrs = edgar_ds.attrs
 
-        prior_info_dict = {
-            "EDGAR": {
-                "version": f"EDGAR {edgar_version}",
-                "filename": edgar_file.name,
-                "raw_resolution": "0.1 degrees x 0.1 degrees",
-                "reference": edgar_ds.attrs["source"],
-            }
+    # Check for "time" dimension and add if missing.
+    flux_ndim = flux_values.ndim
+    time_name = "time"
+    if time_name in flux_da:
+        time = flux_da[time_name].values
+        flux = flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
+    elif time_name not in flux_da and flux_ndim == 2:
+        time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
+        flux = flux_values[np.newaxis, ...]
+    else:
+        raise ValueError(
+            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
+            f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
+        )
+
+    dims = ("time", "lat", "lon")
+
+    em_data = xr.Dataset(
+        {"flux": (dims, flux)}, coords={"time": time, "lat": lat_out, "lon": lon_out}, attrs=edgar_attrs
+    )
+
+    # Some attributes are numpy types we can't serialise to JSON so convert them
+    # to their native types here
+    attrs = {}
+    for key, value in em_data.attrs.items():
+        try:
+            attrs[key] = value.item()
+        except AttributeError:
+            attrs[key] = value
+
+    author_name = "OpenGHG Cloud"
+    em_data.attrs["author"] = author_name
+
+    metadata = {}
+    metadata.update(attrs)
+
+    raw_edgar_domain = "globaledgar"
+    if domain is None:
+        domain = raw_edgar_domain
+
+    source = source if source is not None else edgar_file_info["source"]
+    metadata["species"] = species_label
+    metadata["domain"] = domain
+    metadata["source"] = source
+    metadata["database"] = "EDGAR"
+    metadata["database_version"] = edgar_file_info["version"]
+    metadata["author"] = author_name
+    metadata["processed"] = str(timestamp_now())
+    metadata["data_type"] = "flux"
+
+    attrs = {"author": metadata["author"], "processed": metadata["processed"]}
+
+    # Infer the date range associated with the flux data
+    em_time = em_data.time
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+
+    prior_info_dict = {
+        "EDGAR": {
+            "version": f"EDGAR {edgar_version}",
+            "filename": edgar_file.name,
+            "raw_resolution": "0.1 degrees x 0.1 degrees",
+            "reference": edgar_ds.attrs["source"],
         }
+    }
 
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
+    metadata["start_date"] = str(start_date)
+    metadata["end_date"] = str(end_date)
 
-        metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
-        metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
-        metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
-        metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
+    metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
+    metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
+    metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
+    metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
 
-        metadata["time_resolution"] = "standard"
-        metadata["time_period"] = period_str
+    metadata["time_resolution"] = "standard"
+    metadata["time_period"] = period_str
 
-        key = "_".join((species_label, source, domain, date))
+    key = "_".join((species_label, source, domain, date))
 
-        emissions_data: dict[str, dict] = {}
-        emissions_data[key] = {}
-        emissions_data[key]["data"] = em_data
-        emissions_data[key]["metadata"] = metadata
-        emissions_data[key]["attributes"] = attrs
+    emissions_data: dict[str, dict] = {}
+    emissions_data[key] = {}
+    emissions_data[key]["data"] = em_data
+    emissions_data[key]["metadata"] = metadata
+    emissions_data[key]["attributes"] = attrs
 
-        emissions_data = assign_flux_attributes(emissions_data, units=units, prior_info_dict=prior_info_dict)
+    emissions_data = assign_flux_attributes(emissions_data, units=units, prior_info_dict=prior_info_dict)
 
-        return emissions_data
+    return emissions_data
 
 
 def _check_lat_lon(
