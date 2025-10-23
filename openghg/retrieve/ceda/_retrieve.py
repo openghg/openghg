@@ -1,4 +1,5 @@
 import logging
+import tempfile
 from typing import Any
 
 from openghg.dataobjects import ObsData
@@ -90,7 +91,7 @@ def retrieve(
         To retrieve already cached data from the object store
         >>> retrieve_surface(site="BSD", species="ch4)
     """
-    import io
+    # import io
 
     import xarray as xr
     from openghg.retrieve import search_surface
@@ -118,12 +119,14 @@ def retrieve(
         logger.error("No data retrieved.")
         return None
 
-    with io.BytesIO(binary_data) as buf:
-        # Type ignored as buf is file-like which should be accepted by xarray
-        # open_dataset - https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html
-        # 27/07/2022: file-like (including BytesIO) isn't included in the accepted types
-        #  - Union[str, PathLike[Any], AbstractDataStore]
-        dataset = xr.open_dataset(buf).load()  # type:ignore
+    #     # Type ignored as buf is file-like which should be accepted by xarray
+    #     # open_dataset - https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html
+    #     # 27/07/2022: file-like (including BytesIO) isn't included in the accepted types
+    #  - Union[str, PathLike[Any], AbstractDataStore]
+    with tempfile.NamedTemporaryFile(suffix=".nc") as tmp_file:
+        tmp_file.write(binary_data)
+        tmp_file.flush()
+        dataset = xr.open_dataset(tmp_file.name, cache=False)  # type:ignore
 
     # We expect to be dealing with timeseries data here
     # We'll take the attributes as metadata
