@@ -39,7 +39,7 @@ dependencies:
   - urllib3>=1.26.3
   - xesmf>=0.7
   - zarr==2.18.3
-  - numcodecs
+  - numcodecs<0.16
   - sympy
   - networkx
   - openghg_calscales
