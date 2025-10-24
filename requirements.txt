@@ -4,6 +4,7 @@ dask < 2025.10
 filelock
 flox
 h5netcdf >= 1.0.0, <= 1.6.4
+h5py < 3.15
 icoscp
 ipywidgets
 matplotlib >= 3.5, <= 3.10.6
