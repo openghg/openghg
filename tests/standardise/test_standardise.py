@@ -19,7 +19,7 @@ from openghg.standardise import (
 )
 from openghg.dataobjects import FootprintData
 from openghg.types import AttrMismatchError, ObjectStoreError, StandardiseError
-from openghg.util import compress, find_domain
+from openghg.util import find_domain
 import numpy as np
 
 

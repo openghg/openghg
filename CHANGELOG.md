@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
 ### Added
-
+- Added transform function for boundary conditions along with parser to standardise CAMS N2O and CH4 boundary conditions.[PR #1496](https://github.com/openghg/openghg/pull/1496)
 - Added new submodule `openghg.storage` with classes for storing xr.Datasets. These classes will be used to reimplement `LocalZarrStore`. [PR #1391](https://github.com/openghg/openghg/pull/1391)
 
 ### Updated
