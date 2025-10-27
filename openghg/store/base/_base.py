@@ -373,8 +373,8 @@ class BaseStore:
         if filepath is not None:
             filepaths = normalise_to_filepath_list(filepath)
 
-        # Check hashes of previous files (included after any filepath(s) formatting)
-        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
+            # Check hashes of previous files (included after any filepath(s) formatting)
+            _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
 
         if not unseen_hashes:
             return [{}]
