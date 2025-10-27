@@ -797,7 +797,7 @@ def standardise_from_binary_data(
     bucket = get_writable_bucket(name=store)
 
     with dclass(bucket) as dc:
-        result = dc.read_data(
+        result = dc.read_raw_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
     return result

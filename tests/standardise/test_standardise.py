@@ -130,7 +130,7 @@ def test_standardise_obs_openghg_dataset():
     )
     dataset = xr.open_dataset(filepath)
     results = standardise_surface(
-        dataset=dataset,
+        data=dataset,
         site="TAC",
         network="DECC",
         inlet=185,
@@ -157,7 +157,7 @@ def test_standardise_surface_no_filepath_dataset_error():
     """
     Test to verify ValueError is raised when standardise_surface supplied without values for filepath and datset arguments.
     """
-    with pytest.raises(ValueError, match="Please specify exactly one of `filepath` or `dataset`."):
+    with pytest.raises(ValueError, match="Please specify exactly one of `filepath` or `data`."):
         standardise_surface(
             site="TAC",
             network="DECC",
@@ -1055,7 +1055,7 @@ def test_standardise_agage_using_dataset():
     thd_dataset = xr.open_dataset(get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"))
 
     results = standardise_surface(
-        dataset=thd_dataset,
+        data=thd_dataset,
         site="thd",
         instrument="gcmd",
         network="AGAGE",
@@ -1114,7 +1114,7 @@ def test_standardise_co2_games_using_dataset():
     ))
 
     results = standardise_surface(
-        dataset=co2_games_data,
+        data=co2_games_data,
         site="bsd",
         network="CO2_GAMES",
         source_format="CO2_GAMES",
