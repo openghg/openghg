@@ -7,19 +7,20 @@ dependencies:
   - python>=3.10
   - addict
   - cf_xarray
-  - dask<2025.9
-  - h5netcdf
+  - dask<2025.10
+  - h5netcdf>=1.0.0,<=1.6.4
+  - h5py<3.15
   - filelock
-  - matplotlib
-  - msgpack-python
-  - netcdf4
+  - matplotlib>=3.5,<=3.10.6
+  - msgpack-python>=1.0,<=1.1.1
+  - netcdf4>=1.6.0,<=1.7.2
   - nbformat
   - numexpr
   - numpy  # Note numpy >= 2.0 is currently included as a pip requirement below
   - nc-time-axis
   - openghg_defs
   - openpyxl
-  - pandas>=2.0
+  - pandas>=2.0,<=2.3.3
   - pip
   - pint
   - pint-xarray
@@ -28,23 +29,22 @@ dependencies:
   - rapidfuzz
   - requests>=2.25
   - setuptools
-  - scipy
-  - tinydb
-  - toml
-  - rich
+  - scipy>=1.10,<=1.16.2
+  - tinydb>=4.0,<=4.8.2
+  - toml>=0.10,<=0.10.2
+  - rich>=12.0,<=14.1.0
   - ipywidgets
-  - xarray>=2025.04.0
+  - xarray>=2025.04.0,<=2025.9.1
   - flox
-  - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
   - zarr==2.18.3
-  - numcodecs
+  - numcodecs<0.16
   - sympy
   - networkx
   - openghg_calscales
   - pip:
     - icoscp
-    - numpy >= 2.0
+    - numpy>=2.0,<=2.3.3
 # numpy >= 2.0 is included in pip requirements because icoscp will try and downgrade numpy to <2.0
 # - can remove and use definition above again when https://github.com/ICOS-Carbon-Portal/data/issues/391 is resolved.
