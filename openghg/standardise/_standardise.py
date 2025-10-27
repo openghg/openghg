@@ -61,7 +61,7 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(data=data, filepath=filepath, **kwargs)
+        result = dc.read_data(data=data, filepath=filepath, **kwargs)
     return result
 
 

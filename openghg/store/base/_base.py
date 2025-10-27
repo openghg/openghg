@@ -111,7 +111,7 @@ class BaseStore:
         DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(
+    def read_raw_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
     ) -> list[dict] | None:
         raise NotImplementedError
@@ -256,7 +256,7 @@ class BaseStore:
 
         return datasource_uuids
 
-    def read_file(
+    def read_data(
         self,
         source_format: str,
         if_exists: str = "auto",
