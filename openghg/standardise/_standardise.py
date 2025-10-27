@@ -16,7 +16,7 @@ logger = logging.getLogger("openghg.standardise")
 def standardise(
     data_type: str,
     filepath: str | Path | list[str] | list[Path] | None = None,
-    dataset: xr.Dataset | None = None,
+    data: xr.Dataset | None = None,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -37,8 +37,8 @@ def standardise(
         isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
     )
 
-    if (filepath_missing and dataset is None) or (not filepath_missing and dataset is not None):
-        raise ValueError("Please specify exactly one of `filepath` or `dataset`.")
+    if (filepath_missing and data is None) or (not filepath_missing and data is not None):
+        raise ValueError("Please specify exactly one of `filepath` or `data`.")
 
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
@@ -61,7 +61,7 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(dataset=dataset, filepath=filepath, **kwargs)
+        result = dc.read_file(data=data, filepath=filepath, **kwargs)
     return result
 
 
@@ -69,7 +69,7 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    dataset: xr.Dataset | None = None,
+    data: xr.Dataset | None = None,
     filepath: multiPathType | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
@@ -188,7 +188,7 @@ def standardise_surface(
     return standardise(
         store=store,
         data_type="surface",
-        dataset=dataset,
+        data=data,
         filepath=filepath,
         precision_filepath=precision_filepath,
         source_format=source_format,
