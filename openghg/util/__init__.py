@@ -131,4 +131,4 @@ from ._util import (
 from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version
 
-from _met import _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
+from ._met import _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
