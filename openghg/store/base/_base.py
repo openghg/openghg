@@ -226,13 +226,13 @@ class BaseStore:
             info_metadata = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        data = self.update_metadata(
+        updated_data = self.update_metadata(
             parsed_data, additional_input_parameters, additional_metadata=info_metadata
         )
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = self.assign_data(
-            data=data,
+            data=updated_data,
             if_exists=if_exists,
             new_version=new_version,
             compressor=compressor,
