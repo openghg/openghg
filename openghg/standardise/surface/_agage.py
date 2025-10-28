@@ -87,9 +87,9 @@ def parse_agage(
     species = define_species_label(species)[0]
 
     with get_data(dataset=data, filepath=filepath) as dataset:
-        data = dataset.to_dataframe()
+        dataframe = dataset.to_dataframe()
 
-        if data.empty:
+        if dataframe.empty:
             raise ValueError("Cannot process empty file.")
 
         # This metadata will be added to when species are split and attributes are written
@@ -113,7 +113,7 @@ def parse_agage(
 
         # sampling period should be in the metadata of the openghg datasource as a single value.
 
-        extracted_sampling_periods = data["sampling_period"].unique()
+        extracted_sampling_periods = dataframe["sampling_period"].unique()
         if len(extracted_sampling_periods) == 1:
             extracted_sampling_period = extracted_sampling_periods[0]
             single_sampling_period = True
@@ -142,12 +142,12 @@ def parse_agage(
         # These .nc files do not have flags attached to them.
         # The precisions are a variable in the xarray data, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
-        data["mf_repeatability"] = data["mf_repeatability"].astype(float)
-        if "mf_variability" in data.columns:
-            data["mf_variability"] = data["mf_variability"].astype(float)
+        dataframe["mf_repeatability"] = dataframe["mf_repeatability"].astype(float)
+        if "mf_variability" in dataframe.columns:
+            dataframe["mf_variability"] = dataframe["mf_variability"].astype(float)
 
         gas_data = _format_species(
-            data=data,
+            data=dataframe,
             species=species,
             metadata=metadata,
             units=units,
