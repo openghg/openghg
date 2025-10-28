@@ -6,24 +6,24 @@ from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 
-__all__ = ["Met"]
+__all__ = ["SiteMet"]
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class Met(BaseStore):
+class SiteMet(BaseStore):
     """ """
 
-    _data_type = "met"
-    _root = "Met"
+    _data_type = "site_met"
+    _root = "SiteMet"
     _uuid = "dbb725a1-4102-4804-b732-9e2159fe04f1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """
-        Apply appropriate formatting for expected inputs for Met data. Expected
-        inputs will typically be defined within the openghg.standardise.standardise_met()
+        Apply appropriate formatting for expected inputs for SiteMet data. Expected
+        inputs will typically be defined within the openghg.standardise.standardise_site_met()
         function.
 
         Args:
@@ -66,6 +66,7 @@ class Met(BaseStore):
             "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
             "lon": np.floating,
             "time": np.datetime64,
+            "pressure_level": np.floating,
         }
 
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)

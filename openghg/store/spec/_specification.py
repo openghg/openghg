@@ -33,7 +33,7 @@ def define_data_types() -> tuple[str, ...]:
         "boundary_conditions",
         "eulerian_model",
         "flux_timeseries",
-        "met",
+        "site_met",
     )
 
     return data_types
@@ -51,18 +51,19 @@ def define_data_type_classes() -> dict[str, Any]:
         ObsColumn,
         ObsSurface,
         FluxTimeseries,
-        Met,
+        SiteMet,
     )
 
     data_type_classes = {
         "surface": ObsSurface,
         "column": ObsColumn,
         "flux": Flux,
-        "met": Met,
+        "site_met": SiteMet,
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,
         "eulerian_model": EulerianModel,
         "flux_timeseries": FluxTimeseries,
+        "site_met": SiteMet,
     }
 
     return data_type_classes
@@ -91,7 +92,7 @@ def define_standardise_parsers() -> dict[str, Any]:
         "footprints": FootprintTypes,
         "eulerian_model": EulerianModelTypes,
         "boundary_conditions": BoundaryConditions,
-        "met": MetTypes,
+        "site_met": MetTypes,
     }
 
     return data_type_parsers
