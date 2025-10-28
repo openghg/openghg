@@ -25,7 +25,6 @@ def parse_ecmwf(
     Returns:
         list[MetadataAndData]: List of parsed data objects
     """
-    print("parsing yay")
     with xr.open_dataset(filepath).chunk(chunks) as data:
 
         rename_coords = {"valid_time": "time", "latitude": "lat", "longitude": "lon"}
