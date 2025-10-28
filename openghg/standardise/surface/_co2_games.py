@@ -18,7 +18,7 @@ def parse_co2_games(
     site: str,
     measurement_type: str,
     filepath: str | Path | list[str] | list[Path] | None = None,
-    dataset: xr.Dataset | None = None,
+    data: xr.Dataset | None = None,
     inlet: str | None = None,
     network: str = "icos",
     instrument: str | None = None,
@@ -55,9 +55,9 @@ def parse_co2_games(
 
     gas_data: dict = {}
 
-    with get_data(dataset=dataset, filepath=filepath) as dataset:
+    with get_data(dataset=data, filepath=filepath) as data:
         # Use dictionary comprehension to split data variables into individual datasets
-        attributes = dataset.attrs
+        attributes = data.attrs
         metadata = {
             "site": attributes["site_code"],
             "species": "co2",
@@ -77,7 +77,7 @@ def parse_co2_games(
             "units": units,
         }
 
-        gas_dataset = {f"co2_{model}": dataset[[model]] for model in list_of_models}
+        gas_dataset = {f"co2_{model}": data[[model]] for model in list_of_models}
         for model in gas_dataset.keys():
             data_var = list(gas_dataset[model].data_vars.keys())[0]
             gas_data[model] = {}

@@ -12,7 +12,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def parse_openghg(
     filepath: str | Path | list[str] | list[Path] | None = None,
-    dataset: xr.Dataset | None = None,
+    data: xr.Dataset | None = None,
     site: str | None = None,
     species: str | None = None,
     network: str | None = None,
@@ -71,7 +71,7 @@ def parse_openghg(
         dataset_formatter,
     )
 
-    with get_data(dataset=dataset, filepath=filepath) as data:
+    with get_data(dataset=data, filepath=filepath) as data:
 
         # Extract current attributes from input data
         attributes = data.attrs

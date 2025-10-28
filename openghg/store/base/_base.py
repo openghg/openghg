@@ -119,7 +119,7 @@ class BaseStore:
     def _standardise_and_store(
         self,
         fn_input_parameters: dict,
-        dataset: xr.Dataset | None = None,
+        data: xr.Dataset | None = None,
         filepath: Path | list[Path] | None = None,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
@@ -184,10 +184,10 @@ class BaseStore:
             logger.exception(msg)
             raise ValueError(msg)
 
-        if dataset is None:
+        if data is None:
             fn_input_parameters["filepath"] = filepath
         else:
-            fn_input_parameters["dataset"] = dataset
+            fn_input_parameters["data"] = data
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
@@ -196,7 +196,7 @@ class BaseStore:
 
         # Call appropriate standardisation function with input parameters
         try:
-            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+            parsed_data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
         except (TypeError, ValueError) as err:
             msg = f"Error during standardisation of file(s): {filepath}. Error: {err}"
             logger.exception(msg)
@@ -206,18 +206,18 @@ class BaseStore:
         # - currently checking the first MetadataAndData object returned only
         # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
         if chunks != {}:
-            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+            chunks = self._check_chunks_datasource(parsed_data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
-        self._validate_datasources(data, fn_input_parameters, filepath=filepath)
+        self._validate_datasources(parsed_data, fn_input_parameters, filepath=filepath)
 
-        # Ensure the data is chunked
+        # Ensure the parsed_data is chunked
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
-            for datasource in data:
+            for datasource in parsed_data:
                 datasource.data = datasource.data.chunk(chunks)
 
-        self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+        self.align_metadata_attributes(data=parsed_data, update_mismatch=update_mismatch)
 
         # Check to ensure no required keys are being passed through info_metadata dict
         # before adding details
@@ -226,7 +226,9 @@ class BaseStore:
             info_metadata = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
+        data = self.update_metadata(
+            parsed_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = self.assign_data(
@@ -262,7 +264,7 @@ class BaseStore:
         if_exists: str = "auto",
         save_current: str = "auto",
         filepath: str | Path | list[str] | list[Path] | None = None,
-        dataset: xr.Dataset | None = None,
+        data: xr.Dataset | None = None,
         overwrite: bool = False,
         force: bool = False,
         compressor: Any | None = None,
@@ -350,10 +352,10 @@ class BaseStore:
 
         fn_input_parameters["source_format"] = source_format
 
-        if dataset is not None:
+        if data is not None:
             try:
                 results = self._standardise_and_store(
-                    dataset=dataset,
+                    data=data,
                     fn_input_parameters=fn_input_parameters,
                     source_format=source_format,
                     update_mismatch=update_mismatch,
@@ -376,90 +378,90 @@ class BaseStore:
             # Check hashes of previous files (included after any filepath(s) formatting)
             _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
 
-        if not unseen_hashes:
-            return [{}]
+            if not unseen_hashes:
+                return [{}]
 
-        filepaths = list(unseen_hashes.values())
+            filepaths = list(unseen_hashes.values())
 
-        if not filepaths:
-            return [{}]
+            if not filepaths:
+                return [{}]
 
-        # Check if filepaths are all netcdf files
-        file_extensions = [fp.suffix for fp in filepaths]
-        nc_extensions = [".nc", ".nc4"]
-        if all([ext in nc_extensions for ext in file_extensions]):
-            if concat_nc_files is None:
-                concat_nc_files = True
-        else:
-            if concat_nc_files is True:
-                logger.warning(
-                    f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
-                )
-            concat_nc_files = False
-
-        # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
-        if concat_nc_files:
-            try:
-                results = self._standardise_and_store(
-                    filepath=filepaths,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except StandardiseError:
-                logger.warning(
-                    "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
-                )
+            # Check if filepaths are all netcdf files
+            file_extensions = [fp.suffix for fp in filepaths]
+            nc_extensions = [".nc", ".nc4"]
+            if all([ext in nc_extensions for ext in file_extensions]):
+                if concat_nc_files is None:
+                    concat_nc_files = True
             else:
-                self.store_hashes(unseen_hashes)
-                return results
+                if concat_nc_files is True:
+                    logger.warning(
+                        f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
+                    )
+                concat_nc_files = False
 
-        # If not, loop over multiple filepaths when present
-        loop_params = self.define_loop_params()
+            # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
+            if concat_nc_files:
+                try:
+                    results = self._standardise_and_store(
+                        filepath=filepaths,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except StandardiseError:
+                    logger.warning(
+                        "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
+                    )
+                else:
+                    self.store_hashes(unseen_hashes)
+                    return results
 
-        results = []
+            # If not, loop over multiple filepaths when present
+            loop_params = self.define_loop_params()
 
-        for i, fp in enumerate(filepaths):
+            results = []
 
-            # fn_input_parameters["filepath"] = fp
-            if loop_params:
-                for key1, key2 in loop_params.items():
-                    if fn_input_parameters.get(key2) is not None:
-                        fn_input_parameters[key1] = fn_input_parameters[key2][i]
+            for i, fp in enumerate(filepaths):
 
-            try:
-                datasource_uuids = self._standardise_and_store(
-                    filepath=fp,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except ValidationError as err:
-                msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
-                logger.error(msg)
-                validated = False
-                break
-            else:
-                validated = True
+                # fn_input_parameters["filepath"] = fp
+                if loop_params:
+                    for key1, key2 in loop_params.items():
+                        if fn_input_parameters.get(key2) is not None:
+                            fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
-            if not validated:
-                continue
+                try:
+                    datasource_uuids = self._standardise_and_store(
+                        filepath=fp,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except ValidationError as err:
+                    msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
+                    logger.error(msg)
+                    validated = False
+                    break
+                else:
+                    validated = True
 
-            results.extend(datasource_uuids)
+                if not validated:
+                    continue
 
-        self.store_hashes(unseen_hashes)
+                results.extend(datasource_uuids)
+
+            self.store_hashes(unseen_hashes)
 
         return results
 

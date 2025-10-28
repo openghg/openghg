@@ -16,7 +16,7 @@ def parse_agage(
     site: str,
     network: str,
     filepath: pathType | None = None,
-    dataset: xr.Dataset | None = None,
+    data: xr.Dataset | None = None,
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
@@ -49,12 +49,12 @@ def parse_agage(
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    if dataset is None:
+    if data is None:
         filepath = str(filepath)
         with xr.load_dataset(filepath) as dataset:
             file_params = dataset.attrs
     else:
-        file_params = dataset.attrs
+        file_params = data.attrs
 
     # if we're not passed the instrument name, get it from the file:
 
@@ -86,7 +86,7 @@ def parse_agage(
     species = file_params.get("species", None)
     species = define_species_label(species)[0]
 
-    with get_data(dataset=dataset, filepath=filepath) as dataset:
+    with get_data(dataset=data, filepath=filepath) as dataset:
         data = dataset.to_dataframe()
 
         if data.empty:
@@ -140,7 +140,7 @@ def parse_agage(
         scale = dataset.calibration_scale
 
         # These .nc files do not have flags attached to them.
-        # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
+        # The precisions are a variable in the xarray data, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
         data["mf_repeatability"] = data["mf_repeatability"].astype(float)
         if "mf_variability" in data.columns:
