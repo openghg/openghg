@@ -8,6 +8,6 @@ from ._standardise import (
     standardise_eulerian,
     standardise_from_binary_data,
     standardise_flux_timeseries,
-    standardise_met,
+    standardise_site_met,
 )
 from ._summarise import summary_source_formats, summary_site_codes

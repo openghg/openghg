@@ -897,7 +897,7 @@ def standardise_flux_timeseries(
     )
 
 
-def standardise_met(
+def standardise_site_met(
     filepath: str | Path,
     site: str,
     network: str,
@@ -913,7 +913,7 @@ def standardise_met(
     """ """
 
     return standardise(
-        data_type="met",
+        data_type="site_met",
         filepath=filepath,
         site=site,
         network=network,
