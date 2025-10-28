@@ -49,7 +49,7 @@
             "platform": {
                 "type": [
                     "platform"
-                ]                
+                ]
             }
         },
         "optional": {
@@ -86,12 +86,12 @@
         }
     },
     "footprints": {
-        "required": {           
+        "required": {
             "model": {
                 "type": [
                     "str"
                 ]
-            },            
+            },
             "domain": {
                 "type": [
                     "str"
@@ -139,7 +139,7 @@
                 "type": [
                     "str"
             ]
-            },            
+            },
             "obs_region": {
                 "type": [
                     "str"
@@ -269,7 +269,7 @@
             "dataset_source": {
                 "type": [
                     "str"
-                ]                
+                ]
             },
             "data_source": {
                 "type": [
@@ -289,7 +289,7 @@
         },
         "optional": {}
     },
-    "met": {
+    "site_met": {
         "required": {
             "site": {
                 "type": [
@@ -304,7 +304,7 @@
             "met_source": {
                 "type": [
                     "str"
-                ]                
+                ]
             }
         },
         "optional": {}
