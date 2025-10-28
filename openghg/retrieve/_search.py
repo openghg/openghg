@@ -408,7 +408,7 @@ def search_column(
     )
 
 
-def search_met(
+def search_site_met(
     site: str | None = None,
     network: str | None = None,
     met_source: str | None = None,
@@ -418,7 +418,7 @@ def search_met(
         site=site,
         network=network,
         met_source=met_source,
-        data_type="met",
+        data_type="site_met",
         **kwargs,
     )
 
