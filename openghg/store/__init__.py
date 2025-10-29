@@ -10,7 +10,6 @@ from ._obssurface import ObsSurface
 from ._populate import add_noaa_obspack
 from ._met import SiteMet
 
-# from ._metstore import METStore
 from ._meta import data_class_info, get_data_class
 from ._flux_timeseries import FluxTimeseries
 from ._metakeys_config import (
