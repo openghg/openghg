@@ -4,6 +4,7 @@ import numpy as np
 from openghg.util import _get_site_data  # , timestamp_tzaware
 from openghg.util import _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
 import pathlib
+import xarray as xr
 
 import logging
 
@@ -20,13 +21,13 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-__all__ = ["pull_site_met", "check_cds_access"]
+__all__ = ["pull_site_met", "check_cds_access", "_create_dummy_dataset", "retrieve_site_met"]
 
 
 def check_cds_access() -> None:
     """
-    Print instructions to access the Copernicus Data Store API and
-    check that the user has access.
+    Print instructions to access the Copernicus Data Store API and check that the user has access.
+    (could be moved to utils._met.py?)
     """
     print(
         """To access data through the Copernicus API:
@@ -126,7 +127,7 @@ def pull_site_met(
     if variables is None:
         variables = default_variables.copy()
     else:
-        print("Being able to extract variables is currently not implementing. Downloading default variables")
+        # print("Being able to extract variables is currently not implementing. Downloading default variables")
         variables = default_variables.copy()
 
         valid_variables = [
@@ -153,6 +154,12 @@ def pull_site_met(
         ), f"""One of more of the variables passed does not exist in ERA5 data. \
         The problematic variables are {set(variables) - set(valid_variables)}"""
 
+        # the u- and v- component of wind are always downloaded
+        if "u_component_of_wind" not in variables:
+            variables.append("u_component_of_wind")
+        if "v_component_of_wind" not in variables:
+            variables.append("v_component_of_wind")
+
     latitude, longitude, site_height, inlet_heights = _get_site_data(site, network)
 
     if height is not None:
@@ -170,6 +177,7 @@ def pull_site_met(
     measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
     # Calculate the ERA5 pressure levels required
     ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
+    formatted_pressure_levels = [str(x) for x in ecmwf_pressure_levels]
 
     if not isinstance(years, list):
         years = [years]
@@ -213,7 +221,7 @@ def pull_site_met(
                 "product_type": "reanalysis",
                 "format": "netcdf",
                 "variable": variables,
-                "pressure_level": ecmwf_pressure_levels,
+                "pressure_level": formatted_pressure_levels,
                 "year": str(year),
                 "month": month,
                 "day": [str(x).zfill(2) for x in range(1, 32)],
@@ -257,3 +265,11 @@ def pull_site_met(
     # }
 
     # return METData(data=dataset, metadata=metadata)
+
+
+def _create_dummy_dataset(request: dict, tmpdir: str) -> xr.Dataset:
+    cds_client = cdsapi.Client()
+    dataset_name = "reanalysis-era5-pressure-levels"
+    _ = cds_client.retrieve(name=dataset_name, request=request, target=tmpdir)
+    dataset = xr.open_dataset(tmpdir)
+    return dataset
