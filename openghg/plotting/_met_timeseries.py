@@ -20,7 +20,7 @@ def plot_met_timeseries(
     inlet_height: str | None = None,
     subplot_height: int = 100,
 ) -> go.Figure:
-    """Plot a timeseries
+    """Plot timeseries of meteorology for a particular site. METData object must be produced using the corresponding search function search_site_met(site="TAC")
 
     Args:
         data: ObsData object or list of objects
@@ -28,6 +28,7 @@ def plot_met_timeseries(
         title: Title for the plot
         variables: List of variable names to plot (if None all variables in data will be plotted)
         inlet_height: Inlet height to plot. If None, the extracted pressure levels are plotted. If "all", all inlets are plotted, interpolated linearly. If a specific height is given, the data is interpolated linearly to this height (eg. "10magl").
+        subplot_height: height of each subplot. default is 100
     Returns:
         go.Figure: Plotly Graph Object Figure
     """
