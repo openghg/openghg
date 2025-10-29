@@ -64,6 +64,7 @@ def _altitude_to_ecmwf_pressure(measure_pressure: list[float], return_closest: b
             ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(p - valid_levels)
 
         pressure_levels = valid_levels[np.unique(ecwmf_pressure_indices).astype(int)]
+        pressure_levels = [float(x) for x in pressure_levels]
 
     return pressure_levels
 
