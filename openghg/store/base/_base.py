@@ -258,7 +258,7 @@ class BaseStore:
 
         return datasource_uuids
 
-    def read_data(
+    def standardise_and_store(
         self,
         source_format: str,
         if_exists: str = "auto",

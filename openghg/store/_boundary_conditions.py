@@ -56,7 +56,7 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_data(filepath=filepath, source_format=source_format, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """

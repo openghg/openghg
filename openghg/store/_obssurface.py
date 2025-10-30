@@ -87,14 +87,14 @@ class ObsSurface(BaseStore):
                 raise ValueError("No valid metadata arguments passed, please check documentation.")
 
             if precision_data is None:
-                result = self.read_data(filepath=filepath, **meta_kwargs)
+                result = self.standardise_and_store(filepath=filepath, **meta_kwargs)
             else:
                 # We'll assume that if we have precision data it's GCWERKS
                 # We don't read anything from the precision filepath so it's name doesn't matter
                 precision_filepath = tmpdir_path.joinpath("precision_data.C")
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
-                result = self.read_data(
+                result = self.standardise_and_store(
                     filepath=filepath,
                     precision_filepath=[precision_filepath],
                     site_filepath=site_filepath,
