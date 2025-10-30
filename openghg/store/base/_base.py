@@ -383,9 +383,6 @@ class BaseStore:
 
             filepaths = list(unseen_hashes.values())
 
-            if not filepaths:
-                return [{}]
-
             # Check if filepaths are all netcdf files
             file_extensions = [fp.suffix for fp in filepaths]
             nc_extensions = [".nc", ".nc4"]
