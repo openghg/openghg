@@ -50,12 +50,11 @@ def parse_agage(
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    if data is None:
-        if filepath is not None:
-            filepath = Path(filepath)
-            with xr.load_dataset(filepath) as dataset:
-                file_params = dataset.attrs
-    else:
+    if data is None and filepath is not None:
+        filepath = Path(filepath)
+        with xr.load_dataset(filepath) as dataset:
+            file_params = dataset.attrs
+    elif data is not None:
         file_params = data.attrs
 
     # if we're not passed the instrument name, get it from the file:
