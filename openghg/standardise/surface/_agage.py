@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import re
 import xarray as xr
@@ -50,9 +51,10 @@ def parse_agage(
     # get the parameters from the file metadata, as opposed to from the .json file
 
     if data is None:
-        filepath = str(filepath)
-        with xr.load_dataset(filepath) as dataset:
-            file_params = dataset.attrs
+        if filepath is not None:
+            filepath = Path(filepath)
+            with xr.load_dataset(filepath) as dataset:
+                file_params = dataset.attrs
     else:
         file_params = data.attrs
 
