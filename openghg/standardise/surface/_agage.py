@@ -1,4 +1,3 @@
-from pathlib import Path
 import pandas as pd
 import re
 import xarray as xr
@@ -48,46 +47,37 @@ def parse_agage(
     network = clean_string(network)
     instrument = clean_string(instrument)
 
-    # get the parameters from the file metadata, as opposed to from the .json file
-
-    if data is None and filepath is not None:
-        filepath = Path(filepath)
-        with xr.load_dataset(filepath) as dataset:
-            file_params = dataset.attrs
-    elif data is not None:
-        file_params = data.attrs
-
-    # if we're not passed the instrument name, get it from the file:
-
     file_instrument = None
 
-    if "instrument_type" in file_params.keys():
-        # For multiple values in instrument_type of file updating the instrument metadata to multiple
-        instrument_number = len(file_params["instrument_type"].split("/"))
-        if instrument_number > 1:
-            file_instrument = "multiple"
-            instrument = file_instrument
-        else:
-            file_instrument = clean_string(file_params["instrument_type"])
-            if instrument is None:
-                instrument = file_instrument
-
-    elif instrument is None:
-        raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
-
-    if instrument != "multiple":
-        if file_instrument and instrument:
-            if file_instrument != instrument:
-                raise ValueError(
-                    f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
-                )
-
-    instrument = str(instrument)
-
-    species = file_params.get("species", None)
-    species = define_species_label(species)[0]
-
     with get_data(dataset=data, filepath=filepath) as dataset:
+        file_attributes = dataset.attrs
+
+        if "instrument_type" in file_attributes.keys():
+            # For multiple values in instrument_type of file updating the instrument metadata to multiple
+            instrument_number = len(file_attributes["instrument_type"].split("/"))
+            if instrument_number > 1:
+                file_instrument = "multiple"
+                instrument = file_instrument
+            else:
+                file_instrument = clean_string(file_attributes["instrument_type"])
+                if instrument is None:
+                    instrument = file_instrument
+
+        elif instrument is None:
+            raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
+
+        if instrument != "multiple":
+            if file_instrument and instrument:
+                if file_instrument != instrument:
+                    raise ValueError(
+                        f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
+                    )
+
+        instrument = str(instrument)
+
+        species = file_attributes.get("species", None)
+        species = define_species_label(species)[0]
+
         dataframe = dataset.to_dataframe()
 
         if dataframe.empty:
@@ -100,17 +90,17 @@ def parse_agage(
             "network": network,
         }
 
-        metadata["instrument_name_0"] = clean_string(file_params["instrument"])
+        metadata["instrument_name_0"] = clean_string(file_attributes["instrument"])
 
         # fetching all instrument_n values from the file
         pattern = re.compile(r"^instrument_(\d+)$")
 
-        for key in file_params:
+        for key in file_attributes:
             match = pattern.match(key)
             if match:
                 number = match.group(1)
                 new_key = f"instrument_name_{number}"
-                metadata[new_key] = file_params[key]
+                metadata[new_key] = file_attributes[key]
 
         # sampling period should be in the metadata of the openghg datasource as a single value.
 
@@ -153,7 +143,7 @@ def parse_agage(
             metadata=metadata,
             units=units,
             scale=scale,
-            file_params=file_params,
+            file_params=file_attributes,
         )
 
         gas_data = dataset_formatter(data=gas_data)
