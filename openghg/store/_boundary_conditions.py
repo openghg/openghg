@@ -27,7 +27,7 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(
+    def read_raw_data(
         self,
         binary_data: bytes,
         metadata: dict,
@@ -56,7 +56,7 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """

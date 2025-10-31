@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pandas as pd
 import re
 import xarray as xr
@@ -11,13 +10,14 @@ from openghg.standardise.meta import (
     dataset_formatter,
 )
 from openghg.types import pathType
-from openghg.util import clean_string, format_inlet
+from openghg.util import clean_string, format_inlet, get_data
 
 
 def parse_agage(
-    filepath: pathType,
     site: str,
     network: str,
+    filepath: pathType | None = None,
+    data: xr.Dataset | None = None,
     inlet: str | None = None,
     instrument: str | None = None,
     sampling_period: str | None = None,
@@ -44,15 +44,18 @@ def parse_agage(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    filepath = Path(filepath)
 
     network = clean_string(network)
     instrument = clean_string(instrument)
 
     # get the parameters from the file metadata, as opposed to from the .json file
 
-    with xr.load_dataset(filepath) as ds:
-        file_params = ds.attrs
+    if data is None and filepath is not None:
+        filepath = Path(filepath)
+        with xr.load_dataset(filepath) as dataset:
+            file_params = dataset.attrs
+    elif data is not None:
+        file_params = data.attrs
 
     # if we're not passed the instrument name, get it from the file:
 
@@ -81,13 +84,13 @@ def parse_agage(
 
     instrument = str(instrument)
 
-    species = str(filepath).split(sep="_")[-2]
+    species = file_params.get("species", None)
     species = define_species_label(species)[0]
 
-    with xr.open_dataset(filepath) as dataset:
-        data = dataset.to_dataframe()
+    with get_data(dataset=data, filepath=filepath) as dataset:
+        dataframe = dataset.to_dataframe()
 
-        if data.empty:
+        if dataframe.empty:
             raise ValueError("Cannot process empty file.")
 
         # This metadata will be added to when species are split and attributes are written
@@ -111,7 +114,7 @@ def parse_agage(
 
         # sampling period should be in the metadata of the openghg datasource as a single value.
 
-        extracted_sampling_periods = data["sampling_period"].unique()
+        extracted_sampling_periods = dataframe["sampling_period"].unique()
         if len(extracted_sampling_periods) == 1:
             extracted_sampling_period = extracted_sampling_periods[0]
             single_sampling_period = True
@@ -138,14 +141,14 @@ def parse_agage(
         scale = dataset.calibration_scale
 
         # These .nc files do not have flags attached to them.
-        # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
+        # The precisions are a variable in the xarray data, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
-        data["mf_repeatability"] = data["mf_repeatability"].astype(float)
-        if "mf_variability" in data.columns:
-            data["mf_variability"] = data["mf_variability"].astype(float)
+        dataframe["mf_repeatability"] = dataframe["mf_repeatability"].astype(float)
+        if "mf_variability" in dataframe.columns:
+            dataframe["mf_variability"] = dataframe["mf_variability"].astype(float)
 
         gas_data = _format_species(
-            data=data,
+            data=dataframe,
             species=species,
             metadata=metadata,
             units=units,
