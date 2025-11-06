@@ -310,6 +310,53 @@ To install the hook
 
 The hook should now run each time you make a commit.
 
+Changelog Management
+====================
+
+OpenGHG uses `towncrier <https://towncrier.readthedocs.io/>`_ to manage the changelog automatically. This avoids merge conflicts and makes it easier to track changes.
+
+Adding news fragments
+---------------------
+
+When making changes to OpenGHG, you should add a "news fragment" to the ``newsfragments/`` directory. The file should be named ``{issue_or_pr_number}.{type}`` where:
+
+**Fragment types:**
+
+- ``feature`` - for new features (appears in "Added" section)
+- ``update`` - for updates/changes (appears in "Updated" section) 
+- ``bugfix`` - for bug fixes (appears in "Fixed" section)
+- ``doc`` - for documentation changes
+- ``removal`` - for removed features
+- ``misc`` - for miscellaneous changes
+
+**Examples:**
+
+.. code-block:: bash
+
+    # For a new feature related to issue #1234
+    echo "Added support for new data format" > newsfragments/1234.feature
+    
+    # For a bug fix related to PR #5678
+    echo "Fixed crash when loading large files" > newsfragments/5678.bugfix
+    
+    # For an update related to issue #9012
+    echo "Improved performance of data processing" > newsfragments/9012.update
+
+The news fragment should contain a brief description of your change. It will automatically be linked to the PR/issue number when the changelog is built.
+
+**Important:** Add the news fragment file to your git commit along with your code changes. This ensures that every change is documented.
+
+Building the changelog
+----------------------
+
+During the release process, maintainers will run:
+
+.. code-block:: bash
+
+    towncrier build --version=X.Y.Z
+
+This collects all news fragments and adds them to the ``CHANGELOG.md`` file in the appropriate sections.
+
 Testing
 =======
 

@@ -98,6 +98,45 @@ pythonpath = [
     "."
 ]
 timeout = 300
+
 markers = [
     "xesmf: marks tests as requiring xesmf (deselect with '-m \"not xesmf\"')"
 ]
+
+[tool.towncrier]
+package = "openghg"
+filename = "CHANGELOG.md"
+directory = "newsfragments"
+start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## [{version}] - {{date}}"
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "update" 
+name = "Updated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous"
+showcontent = true
+

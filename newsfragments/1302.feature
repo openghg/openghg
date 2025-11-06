@@ -1,0 +1,1 @@
+Set up towncrier tool for changelog management to avoid merge conflicts and streamline release process.

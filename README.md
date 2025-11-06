@@ -228,6 +228,31 @@ pytest -v --run-icos tests/
 If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us
 know some details about your setup.
 
+### Contributing to the Changelog
+
+OpenGHG uses [towncrier](https://towncrier.readthedocs.io/) to manage the changelog. When making changes, please add a "news fragment" to the `newsfragments/` directory:
+
+```bash
+# For a new feature related to issue #1234
+echo "Added support for new data format" > newsfragments/1234.feature
+
+# For a bug fix related to PR #5678  
+echo "Fixed crash when loading large files" > newsfragments/5678.bugfix
+
+# For an update related to issue #9012
+echo "Improved performance of data processing" > newsfragments/9012.update
+```
+
+**Fragment types:**
+- `feature` - new features (maps to "Added" in changelog)
+- `update` - updates/changes (maps to "Updated" in changelog)
+- `bugfix` - bug fixes (maps to "Fixed" in changelog)
+- `doc` - documentation changes
+- `removal` - removed features
+- `misc` - miscellaneous changes
+
+The news fragment file should be committed along with your code changes. This avoids merge conflicts and ensures all changes are documented.
+
 ## Documentation
 
 For further documentation and tutorials please visit [our documentation](https://docs.openghg.org/).
