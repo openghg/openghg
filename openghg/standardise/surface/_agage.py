@@ -52,7 +52,7 @@ def parse_agage(
     with get_data(dataset=data, filepath=filepath) as dataset:
         file_attributes = dataset.attrs
 
-        if "instrument_type" in file_attributes.keys():
+        if "instrument_type" in file_attributes:
             # For multiple values in instrument_type of file updating the instrument metadata to multiple
             instrument_number = len(file_attributes["instrument_type"].split("/"))
             if instrument_number > 1:
