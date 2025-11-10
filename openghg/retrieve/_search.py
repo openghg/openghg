@@ -7,10 +7,8 @@ import logging
 import pandas as pd
 from typing import Any
 import warnings
-from openghg.objectstore import open_object_store
-from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
-from openghg.types import ObjectStoreError
+from openghg.objectstore.metastore._classic_metastore import open_multi_metastore
 from openghg.dataobjects import SearchResults
 from ._search_helpers import process_search_kwargs, define_list_search
 
@@ -489,29 +487,13 @@ def search(**kwargs: Any) -> SearchResults:
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
-    # get data types to search and validate
+    # get data types to search and validate; if `None`, all types will be searched
     data_type = search_kwargs.get("data_type")
-    valid_data_types = define_data_types()
 
-    types_to_search = []
-    if data_type is not None:
-        if not isinstance(data_type, list):
-            data_type = [data_type]
-
-        for d in data_type:
-            if d not in valid_data_types:
-                raise ValueError(
-                    f"{data_type} is not a valid data type, please select one of {valid_data_types}"
-                )
-            types_to_search.append(d)
-    else:
-        types_to_search.extend(valid_data_types)
-
-    # Get a dictionary of all the readable buckets available
-    # We'll iterate over each of them
+    # get dictionary of all readable buckets availble
+    # potentially narrowing to a single store/bucket
     readable_buckets = get_readable_buckets()
 
-    # If we're given a store then we'll just read from that one
     store = search_kwargs.pop("store", None)
     add_new_store = search_kwargs.pop("add_new_store", False)
     bucket_path = ""
@@ -526,80 +508,54 @@ def search(**kwargs: Any) -> SearchResults:
             bucket_path = handle_direct_store_path(path=store, add_new_store=add_new_store)
             readable_buckets = {store: bucket_path}
 
-    # Keywords to apply a list search rather than exact match
-    # At the moment this is primarily the "tag" keyword
-    list_search = define_list_search()
-
     start_date = search_kwargs.pop("start_date", None)
     end_date = search_kwargs.pop("end_date", None)
 
+    # Keywords to apply a list search rather than exact match
+    # At the moment this is primarily the "tag" keyword
+    list_search = define_list_search()
     expanded_search = process_search_kwargs(search_kwargs, list_search=list_search)
-    general_metadata = {}
 
-    for bucket_name, bucket in readable_buckets.items():
-        metastore_records = []
-        for data_type in types_to_search:
-            with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
-                for v in expanded_search:
-                    res = objstore.search(**v)
-                    if res:
-                        metastore_records.extend(res)
+    metastore_records = []
 
-        if not metastore_records:
-            continue
+    # TODO: use object store here
+    with open_multi_metastore(
+        buckets=store, data_types=data_type, suppress_object_store_errors=True
+    ) as metastore:
+        for v in expanded_search:
+            res = metastore.search(**v)
+            if res:
+                metastore_records.extend(res)
 
-        # Add in a quick check to make sure we don't have dupes
-        # TODO - remove this once a more thorough tests are added
-        uuids = [s["uuid"] for s in metastore_records]
-        if len(uuids) != len(set(uuids)):
-            error_msg = "Multiple results found with same UUID!"
-            logger.exception(msg=error_msg)
-            raise ValueError(error_msg)
+    metadata = {r.get("multi_uuid", r["uuid"]): r for r in metastore_records}
 
-        # Here we create a dictionary of the metadata keyed by the Datasource UUID
-        # we'll create a pandas DataFrame out of this in the SearchResult object
-        # for better printing / searching within a notebook
-        metadata = {r["uuid"]: r for r in metastore_records}
-        # Add in the object store to the metadata the user sees
-        for m in metadata.values():
-            m.update({"object_store": bucket})
+    # Narrow the search to a daterange if dates passed
+    if start_date is not None or end_date is not None:
+        if start_date is None:
+            start_date = timestamp_epoch()
+        else:
+            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
 
-        # Narrow the search to a daterange if dates passed
-        if start_date is not None or end_date is not None:
-            if start_date is None:
-                start_date = timestamp_epoch()
-            else:
-                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+        if end_date is None:
+            end_date = timestamp_now()
+        else:
+            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
 
-            if end_date is None:
-                end_date = timestamp_now()
-            else:
-                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+        metadata_in_daterange = {}
 
-            metadata_in_daterange = {}
+        # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
+        for uid, record in metadata.items():
+            meta_start = record["start_date"]
+            meta_end = record["end_date"]
 
-            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
-            for uid, record in metadata.items():
-                meta_start = record["start_date"]
-                meta_end = record["end_date"]
+            if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
+                metadata_in_daterange[uid] = record
 
-                if dates_overlap(start_a=start_date, end_a=end_date, start_b=meta_start, end_b=meta_end):
-                    metadata_in_daterange[uid] = record
-
-            if not metadata_in_daterange:
-                logger.warning(
-                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
-                )
-            # Update the metadata we'll use to create the SearchResults object
-            metadata = metadata_in_daterange
-
-        # Remove once more comprehensive tests are done
-        dupe_uuids = [k for k in metadata if k in general_metadata]
-        if dupe_uuids:
-            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
-
-        general_metadata.update(metadata)
+        if not metadata_in_daterange:
+            logger.warning("No data found for the dates given, please try a wider search.")
+        # Update the metadata we'll use to create the SearchResults object
+        metadata = metadata_in_daterange
 
     return SearchResults(
-        metadata=general_metadata, start_result="data_type", start_date=start_date, end_date=end_date
+        metadata=metadata, start_result="data_type", start_date=start_date, end_date=end_date
     )
