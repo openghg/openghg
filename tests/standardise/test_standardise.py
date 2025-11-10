@@ -1,4 +1,5 @@
 import pytest
+import xarray as xr
 from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
@@ -19,7 +20,7 @@ from openghg.standardise import (
 )
 from openghg.dataobjects import FootprintData
 from openghg.types import AttrMismatchError, ObjectStoreError, StandardiseError
-from openghg.util import compress, find_domain
+from openghg.util import find_domain
 import numpy as np
 
 
@@ -113,6 +114,61 @@ def test_standardise_obs_openghg():
 
     results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
     assert "co2" == results[0].get("species")
+
+
+def test_standardise_obs_openghg_dataset():
+    """
+    Direct dataset standardisation test.
+    Based on reported Issue #477 where ValueError is raised when synchronising the metadata and attributes.
+     - "inlet" and "inlet_height_magl" attribute within netcdf file was a float; "inlet" within metadata is converted to a string with "m" ("185m")
+     - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
+     - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
+    """
+    clear_test_store("user")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
+    dataset = xr.open_dataset(filepath)
+    results = standardise_surface(
+        data=dataset,
+        site="TAC",
+        network="DECC",
+        inlet=185,
+        instrument="picarro",
+        source_format="openghg",
+        sampling_period="1h",
+        force=True,
+        store="user",
+        update_mismatch="metadata",
+        tag=["direct_dataset"]
+    )
+
+    results = filt(results)
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="TAC", species="co2", source_format="openghg", network="decc")
+
+    tag = retrieved_data.metadata["tag"]
+
+    assert "direct_dataset" in tag
+
+
+def test_standardise_surface_no_filepath_dataset_error():
+    """
+    Test to verify ValueError is raised when standardise_surface supplied without values for filepath and datset arguments.
+    """
+    with pytest.raises(ValueError, match="Please specify exactly one of `filepath` or `data`."):
+        standardise_surface(
+            site="TAC",
+            network="DECC",
+            inlet=185,
+            instrument="picarro",
+            source_format="openghg",
+            sampling_period="1h",
+            force=True,
+            store="user",
+            update_mismatch="metadata",
+        )
 
 
 def test_standardise_obs_metadata_mismatch(reset_mock_user_config):
@@ -961,3 +1017,116 @@ def test_icos_corso_l2_deltao2():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "2" in results[0]["data_level"]
     assert "surface-flask" in results[0]["platform"]
+
+
+def test_standardise_agage_using_filepath():
+    """
+    Test standardisation of AGAGE data using file path input.
+    """
+    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+
+    results = standardise_surface(
+        filepath=thd_path,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        force=True,
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+
+    assert retrieved_data is not None
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "gcmd"
+    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["source_format"] == "AGAGE"
+    assert retrieved_data.metadata["site"] == "thd"
+
+
+def test_standardise_agage_using_dataset():
+    """
+    Test standardisation of AGAGE data using dataset input.
+    """
+    thd_dataset = xr.open_dataset(get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"))
+
+    results = standardise_surface(
+        data=thd_dataset,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        force=True,
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "gcmd"
+    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["source_format"] == "AGAGE"
+    assert retrieved_data.metadata["site"] == "thd"
+
+
+def test_standardise_co2_games_using_filepath():
+    """
+    Test standardisation of CO2-GAMES data using file path input.
+    """
+    clear_test_stores()
+    co2_games_data = get_surface_datapath(
+        filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+    )
+
+    results = standardise_surface(
+        filepath=co2_games_data,
+        site="bsd",
+        network="CO2_GAMES",
+        source_format="CO2_GAMES",
+        sampling_period="1h",
+        store="user",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN")
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "surface-insitu"
+    assert retrieved_data.metadata["network"] == "co2_games"
+    assert retrieved_data.metadata["dataset_source"] == "PTEN"
+
+
+def test_standardise_co2_games_using_dataset():
+    """
+    Test standardisation of CO2-GAMES data using dataset input.
+    """
+    clear_test_stores()
+    co2_games_data = xr.open_dataset(get_surface_datapath(
+        filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+    ))
+
+    results = standardise_surface(
+        data=co2_games_data,
+        site="bsd",
+        network="CO2_GAMES",
+        source_format="CO2_GAMES",
+        sampling_period="1h",
+        store="user",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN")
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "surface-insitu"
+    assert retrieved_data.metadata["network"] == "co2_games"
+    assert retrieved_data.metadata["dataset_source"] == "PTEN"

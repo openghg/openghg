@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
 ### Added
-
+- Added transform function for boundary conditions along with parser to standardise CAMS N2O and CH4 boundary conditions.[PR #1496](https://github.com/openghg/openghg/pull/1496)
 - Added new submodule `openghg.storage` with classes for storing xr.Datasets. These classes will be used to reimplement `LocalZarrStore`. [PR #1391](https://github.com/openghg/openghg/pull/1391)
 
 ### Updated
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. Note this also required explicit inclusion of `numpy>=2.0` otherwise this get downgraded to `numpy<2.0` based on `icoscp` current stated requirements. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
 - Added in quick fix around `force=True`. Previously, this automatically set `if_exists` to `"new"` which meant a new version was always created. The problem was that if multiple files were being added this kept creating them on new versions. Now this produces a warning that this operation may result in a `DataOverlapErro` and to advise using `if_exists="new"` for the first file and `if_exists="auto"` afterwards. [PR #1150](https://github.com/openghg/openghg/pull/1150).
+- Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. Upper bounds use `<=` with latest stable versions rather than `<` with next major version. Also added explicit pin for h5py < 3.15 to resolve Python 3.10 test failures. [PR #1493](https://github.com/openghg/openghg/pull/1493)
 
 ## Fixed
 
@@ -26,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 - Fixed bug in `merge_and_extend_dict` to make sure repeated values in `left` and `right` produce unique values in output and to ensure `left` and `right` are not modified in place. [PR #1477](https://github.com/openghg/openghg/pull/1477)
 
+## Added
+
+- Check for negative uncertainty values (these are converted to NaN). [PR #1480](https://github.com/openghg/openghg/pull/1480)
 
 ## [0.16.0] - 2025-08-29
 

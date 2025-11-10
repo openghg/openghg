@@ -35,7 +35,7 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(
+    def read_raw_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, source_format: str = "openghg"
     ) -> list[dict] | None:
         """Ready a footprint from binary data
@@ -58,7 +58,7 @@ class Flux(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """

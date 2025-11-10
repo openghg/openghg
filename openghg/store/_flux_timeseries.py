@@ -25,7 +25,7 @@ class FluxTimeseries(BaseStore):
     _uuid = "099b597b-0598-4efa-87dd-472dfe027f5d8"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
-    def read_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
+    def read_raw_data(self, binary_data: bytes, metadata: dict, file_metadata: dict) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
@@ -46,7 +46,7 @@ class FluxTimeseries(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, **metadata)
+            return self.standardise_and_store(filepath=filepath, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """
