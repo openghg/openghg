@@ -84,7 +84,7 @@ jobs:
           cd doc
           make
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        uses: JamesIves/github-pages-deploy-action@v4.7.4
         with:
           branch: gh-pages
           folder: "doc/build/html"
