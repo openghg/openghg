@@ -358,6 +358,33 @@ def test_standardise_column():
     assert data.metadata["selection"] == "land"
 
 
+def test_standardise_oco2_satellite_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for OCO2 satellite column data.
+    """
+    oco2_datapath = get_column_datapath(filename="oco2-spectrometer_oco2_20150131-336_co2-column.nc")
+
+    results = standardise_column(filepath=oco2_datapath,
+                   species="co2",
+                   platform="satellite",
+                   obs_region="china",
+                   satellite="oco2",
+                   network="oco2",
+                   instrument="oco2-spectrometer",
+                   store="user",
+                   if_exists="new",
+                   force=True,
+                   tag="test_oco2_dataset"
+                   )
+
+    assert "co2" == results[0].get("species")
+
+    data = get_obs_column(species="co2", max_level=3, satellite="oco2")
+
+    assert data.metadata["obs_region"] == "china"
+
+
 def test_standardise_tccon_obs():
     """
     Tests standardise column function and associated metadata keys
