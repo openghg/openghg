@@ -227,6 +227,10 @@ For example, we can add column data from the "GOSAT" satellite. First we retriev
 
 Now we add this data to the object store using ``standardise_column``, passing the below arguments:
 
+.. note::
+    For column site data the satellite argument is replaced with the site argument and platform is set to "site-column".
+    (Inversions check the platform value to determine whether the data is surface or column data)
+
 .. jupyter-execute::
     standardise_column(
                     filepath=satellite_data[-1],
