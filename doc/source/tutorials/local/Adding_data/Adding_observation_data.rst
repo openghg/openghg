@@ -44,7 +44,7 @@ won't affect your use of OpenGHG outside of this tutorial.
 
     use_tutorial_store()
 
-1. Adding and standardising data
+1. Adding and standardising surface data
 --------------------------------
 
 .. note::
@@ -211,6 +211,34 @@ species and instrument and do not need an accompanying precisions file. These ca
 
 The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly.
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
+
+2. Adding and standardising column data
+--------------------------------
+
+Similar to the surface data, we can also add column data to the object store. The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+
+For example, we can add column data from the "GOSAT" satellite. First we retrieve the example data.
+
+.. jupyter-execute::
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+
+Now we add this data to the object store using ``standardise_column``, passing the below arguments:
+
+.. jupyter-execute::
+    standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat",
+                )
+
+.. note::
+    The above data is only supplied with obs_region as "brazil". However, value for the domain can also passed on. Please refer to the `standardise_column` documentation for more details.
 
 .. _note-on-datasources:
 
