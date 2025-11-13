@@ -16,6 +16,8 @@ def parse_openghg(
     instrument: str | None = None,
     platform: str = "satellite",
     chunks: dict | None = None,
+    data_owner: str | None = None,
+    data_owner_email: str | None = None,
     **kwargs: str,
 ) -> dict:
     """
