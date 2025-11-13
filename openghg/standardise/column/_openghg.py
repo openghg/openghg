@@ -16,8 +16,6 @@ def parse_openghg(
     instrument: str | None = None,
     platform: str = "satellite",
     chunks: dict | None = None,
-    data_owner: str | None = "NOT_SET",
-    data_owner_email: str | None = "NOT_SET",
     **kwargs: str,
 ) -> dict:
     """
@@ -77,18 +75,10 @@ def parse_openghg(
     attributes = cast(MutableMapping, data.attrs)
 
     if satellite is not None and platform == "satellite":
-        satellite = clean_string(satellite)
         metadata_required = metadata_default_satellite_column()
         metadata_required.remove("selection")
         platform = "satellite"
 
-        if "contact" in attributes:
-            if "gosat" in satellite:
-                contact = attributes.pop("contact").split(" ")
-            elif "oco2" in satellite:
-                contact = attributes.pop("contact").split(";")
-            data_owner = contact[0]
-            data_owner_email = contact[-1]
     elif site is not None or platform == "site":
         metadata_required = metadata_default_site_column()
         platform = "site"
@@ -111,8 +101,6 @@ def parse_openghg(
         "platform": platform,
         "data_type": "column",
         "source_format": "openghg",
-        "data_owner": data_owner,
-        "data_owner_email": data_owner_email,
     }
 
     # TODO: Tidy this up a bit (maybe split some into a separate function?)
@@ -121,6 +109,16 @@ def parse_openghg(
     metadata = {}
     key_translation = satellite_attribute_translation()
     # Populate metadata with values from attributes if inputs have not been passed
+    if "contact" in attributes and satellite == "oco2":
+        contact = attributes.pop("contact").split(":")
+        data_owner = contact[0]
+        data_owner_email = contact[-1]
+
+        key_translation.pop("data_owner")
+        key_translation.pop("data_owner_email")
+        metadata["data_owner"] = data_owner
+        metadata["data_owner_email"] = data_owner_email
+
     for key, value in metadata_initial.items():
         if key in metadata_required:
             # Extract equivalent key from passed file if present using translation
