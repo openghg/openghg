@@ -76,13 +76,17 @@ def parse_openghg(
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)
 
-    if satellite is not None or platform == "satellite":
+    if satellite is not None and platform == "satellite":
+        satellite = clean_string(satellite)
         metadata_required = metadata_default_satellite_column()
         metadata_required.remove("selection")
         platform = "satellite"
 
         if "contact" in attributes:
-            contact = attributes.pop("contact").split(":")
+            if "gosat" in satellite:
+                contact = attributes.pop("contact").split(" ")
+            elif "oco2" in satellite:
+                contact = attributes.pop("contact").split(";")
             data_owner = contact[0]
             data_owner_email = contact[-1]
     elif site is not None or platform == "site":
