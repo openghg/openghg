@@ -55,6 +55,8 @@ def parse_openghg(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
+        data_owner: Name of data owner.
+        data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
