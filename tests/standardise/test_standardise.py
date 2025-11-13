@@ -365,6 +365,8 @@ def test_standardise_oco2_satellite_column():
     """
     oco2_datapath = get_column_datapath(filename="oco2-spectrometer_oco2_20150131-336_co2-column.nc")
 
+    oco2_datapath_attrs = xr.open_dataset(oco2_datapath).attrs
+
     results = standardise_column(filepath=oco2_datapath,
                    species="co2",
                    platform="satellite",
@@ -383,6 +385,8 @@ def test_standardise_oco2_satellite_column():
     data = get_obs_column(species="co2", max_level=3, satellite="oco2")
 
     assert data.metadata["obs_region"] == "china"
+    assert data.metadata["data_owner"] in oco2_datapath_attrs.get("contact", "").lower()
+    assert data.metadata["data_owner_email"] in oco2_datapath_attrs.get("contact", "").lower()
 
 
 def test_standardise_tccon_obs():
