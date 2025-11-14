@@ -224,9 +224,9 @@ The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 The input formats supported for standardise_column are:
 
     - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
-    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>` for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>` to learn about schema for different data types.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>`_ to learn about schema for different data types.
 
-The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>` and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
+The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
 
 To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
 
@@ -401,7 +401,7 @@ This will standardise the data and add it to the object store just as if we had 
     )
 
 
-1. Searching for data
+2. Searching for data
 ---------------------
 
 Searching the object store
