@@ -45,7 +45,7 @@ won't affect your use of OpenGHG outside of this tutorial.
     use_tutorial_store()
 
 1. Adding and standardising surface data
---------------------------------
+----------------------------------------
 
 .. note::
     Outside of this tutorial, if you have write access to multiple object stores you
@@ -213,7 +213,7 @@ The data will be processed in the same way as the old AGAGE data, and stored in 
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
 
 2. Adding and standardising column data
---------------------------------
+---------------------------------------
 
 Similar to the surface data, we can also add column data to the object store. The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 
@@ -244,7 +244,7 @@ Now we add this data to the object store using ``standardise_column``, passing t
                 )
 
 .. note::
-    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref: `Adding ancillary data tutorisl <Adding_ancilliary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref: `Adding ancillary data tutorial <Adding_ancilliary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
 
 .. _note-on-datasources:
 
