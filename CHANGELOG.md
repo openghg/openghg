@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
 - Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. Upper bounds use `<=` with latest stable versions rather than `<` with next major version. Also added explicit pin for h5py < 3.15 to resolve Python 3.10 test failures. [PR #1493](https://github.com/openghg/openghg/pull/1493)
 - Refactored parse_agage function to integrate instrument metadata validation and species label definition logic within the get_dataset implementation in agage.py. [PR #1510](https://github.com/openghg/openghg/pull/1510)
+- Updated `parse_openghg` for column data to recognise "data_owner" and "data_owner_email" from the file. [PR #1519](https://github.com/openghg/openghg/pull/1519)
 
 ## Fixed
 
