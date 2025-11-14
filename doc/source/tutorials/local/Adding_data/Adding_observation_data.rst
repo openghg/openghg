@@ -215,9 +215,15 @@ Ensure that the ``source_format`` argument matches the input filetype, as the tw
 2. Adding and standardising column data
 ---------------------------------------
 
-Similar to the surface data, we can also add column data to the object store. The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+Similar to the surface data, we can also add column data to the object store.
+The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 
-We support "openghg" and "tccon" source formats. "GOSAT" and "OCO-2" satellite data are pre-processed via the "ACRG" codebase into "openghg" format.
+The input formats supported for standardise_column are:
+
+    - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>` for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>` to learn about schema for different data types.
+
+The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>` and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
 
 To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
 
@@ -231,7 +237,7 @@ Now we add this data to the object store using ``standardise_column``, passing t
 
 .. note::
     For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
-    (Inversions check the platform value to determine whether the data is surface or column data)
+    (Inversions check the platform value to determine whether the data is satellite or site-column data)
 
 .. jupyter-execute::
     standardise_column(
@@ -244,7 +250,7 @@ Now we add this data to the object store using ``standardise_column``, passing t
                 )
 
 .. note::
-    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref: `Adding ancillary data tutorial <Adding_ancilliary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref:`Adding ancillary spatial data <Adding_ancillary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
 
 .. _note-on-datasources:
 
@@ -392,7 +398,7 @@ This will standardise the data and add it to the object store just as if we had 
     )
 
 
-2. Searching for data
+1. Searching for data
 ---------------------
 
 Searching the object store
