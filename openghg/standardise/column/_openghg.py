@@ -74,7 +74,7 @@ def parse_openghg(
     # Extract current attributes from input data
     attributes = cast(MutableMapping, data.attrs)
 
-    if satellite is not None and platform == "satellite":
+    if satellite is not None or platform == "satellite":
         metadata_required = metadata_default_satellite_column()
         metadata_required.remove("selection")
         platform = "satellite"
