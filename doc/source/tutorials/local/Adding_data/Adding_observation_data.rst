@@ -217,6 +217,8 @@ Ensure that the ``source_format`` argument matches the input filetype, as the tw
 
 Similar to the surface data, we can also add column data to the object store. The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 
+We support "openghg" and "tccon" source formats. "GOSAT" and "OCO-2" satellite data are pre-processed via the "ACRG" codebase into "openghg" format.
+
 For example, we can add column data from the "GOSAT" satellite. First we retrieve the example data.
 
 .. jupyter-execute::
@@ -228,7 +230,7 @@ For example, we can add column data from the "GOSAT" satellite. First we retriev
 Now we add this data to the object store using ``standardise_column``, passing the below arguments:
 
 .. note::
-    For column site data the satellite argument is replaced with the site argument and platform is set to "site-column".
+    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
     (Inversions check the platform value to determine whether the data is surface or column data)
 
 .. jupyter-execute::
