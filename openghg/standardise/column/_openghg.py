@@ -53,6 +53,8 @@ def parse_openghg(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
+        data_owner: Name of data owner.
+        data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
@@ -76,6 +78,7 @@ def parse_openghg(
         metadata_required = metadata_default_satellite_column()
         metadata_required.remove("selection")
         platform = "satellite"
+
     elif site is not None or platform == "site":
         metadata_required = metadata_default_site_column()
         platform = "site"
@@ -106,6 +109,14 @@ def parse_openghg(
     metadata = {}
     key_translation = satellite_attribute_translation()
     # Populate metadata with values from attributes if inputs have not been passed
+    if "contact" in attributes and satellite == "oco2":
+        data_owner, data_owner_email = attributes.pop("contact").split(":", 1)
+
+        key_translation.pop("data_owner")
+        key_translation.pop("data_owner_email")
+        metadata["data_owner"] = data_owner
+        metadata["data_owner_email"] = data_owner_email
+
     for key, value in metadata_initial.items():
         if key in metadata_required:
             # Extract equivalent key from passed file if present using translation
