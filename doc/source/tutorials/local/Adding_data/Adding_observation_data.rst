@@ -44,8 +44,11 @@ won't affect your use of OpenGHG outside of this tutorial.
 
     use_tutorial_store()
 
-1. Adding and standardising surface data
+1. Adding and standardising data
 ----------------------------------------
+
+Adding and standardising surface data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
     Outside of this tutorial, if you have write access to multiple object stores you
@@ -212,8 +215,8 @@ species and instrument and do not need an accompanying precisions file. These ca
 The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly.
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
 
-2. Adding and standardising column data
----------------------------------------
+Adding and standardising column data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Similar to the surface data, we can also add column data to the object store.
 The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
