@@ -375,8 +375,6 @@ def test_standardise_oco2_satellite_column():
                    network="oco2",
                    instrument="oco2-spectrometer",
                    store="user",
-                   if_exists="new",
-                   force=True,
                    tag="test_oco2_dataset"
                    )
 
