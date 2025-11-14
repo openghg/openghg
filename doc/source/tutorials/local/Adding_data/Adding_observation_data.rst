@@ -48,7 +48,7 @@ won't affect your use of OpenGHG outside of this tutorial.
 ----------------------------------------
 
 Adding and standardising surface data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
     Outside of this tutorial, if you have write access to multiple object stores you
