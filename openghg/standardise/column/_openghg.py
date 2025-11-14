@@ -110,9 +110,7 @@ def parse_openghg(
     key_translation = satellite_attribute_translation()
     # Populate metadata with values from attributes if inputs have not been passed
     if "contact" in attributes and satellite == "oco2":
-        contact = attributes.pop("contact").split(":")
-        data_owner = contact[0]
-        data_owner_email = contact[-1]
+        data_owner, data_owner_email = attributes.pop("contact").split(":", 1)
 
         key_translation.pop("data_owner")
         key_translation.pop("data_owner_email")
