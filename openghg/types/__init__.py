@@ -32,7 +32,12 @@ from ._errors import (
     ZarrStoreError,
     KeyExistsError,
     MetadataMissingError,
+    StandardiseError,
+    TransformError,
+    ValidationError,
     construct_xesmf_import_error,
+    StorageError,
+    UpdateError,
 )
 from ._types import (
     multiPathType,

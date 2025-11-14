@@ -270,7 +270,7 @@ def parse_edgar(
 
     # get dataset
     # using .open("rb") for pathlib.Path and zipfile.Path compatibility
-    edgar_ds = xr.open_dataset(edgar_file.open("rb"))
+    edgar_ds = xr.open_dataset(edgar_file.open("rb"), engine="h5netcdf")
 
     # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"

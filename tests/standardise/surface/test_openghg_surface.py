@@ -35,7 +35,7 @@ def test_read_file_no_attr():
     # TODO: May need to update this if we decide to update this list.
     # Note: other necessary attributes inferred from pre-existing site info details
 
-    data = parse_openghg(filepath, **param)
+    data = parse_openghg(filepath=filepath, **param)
 
     output_co2 = data["co2"]
     data_co2 = output_co2["data"]
@@ -45,7 +45,7 @@ def test_read_file_no_attr():
     assert attributes["site"] == param["site"]
     assert attributes["species"] == param["species"]
 
-    attribute_keys = attributes_default_keys()
+    attribute_keys = attributes_default_keys(data_type="surface")
     expected_metadata = {param: value for param, value in attributes.items() if param in attribute_keys}
 
     metadata = output_co2["metadata"]

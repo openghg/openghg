@@ -45,7 +45,10 @@ won't affect your use of OpenGHG outside of this tutorial.
     use_tutorial_store()
 
 1. Adding and standardising data
---------------------------------
+----------------------------------------
+
+Adding and standardising surface data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
     Outside of this tutorial, if you have write access to multiple object stores you
@@ -212,6 +215,46 @@ species and instrument and do not need an accompanying precisions file. These ca
 The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly.
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
 
+Adding and standardising column data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similar to the surface data, we can also add column data to the object store.
+The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+
+The input formats supported for standardise_column are:
+
+    - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>`_ to learn about schema for different data types.
+
+The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
+
+To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
+
+.. jupyter-execute::
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+
+Now we add this data to the object store using ``standardise_column``, passing the below arguments:
+
+.. note::
+    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
+    (Inversions check the platform value to determine whether the data is satellite or site-column data)
+
+.. jupyter-execute::
+    standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat",
+                )
+
+.. note::
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref:`Adding ancillary spatial data <Adding_ancillary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
+
 .. _note-on-datasources:
 
 Note on Datasources
@@ -320,6 +363,43 @@ created when we run ``openghg --quickstart``.
 
 The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
 to more than one store.
+
+Adding In-memory dataset to the object store
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Up to this point, we have seen how to specify a file path and add data to the object store.
+In many workflows, however, you may already have your data available in memory as an ``xarray.Dataset``.
+For the appropriate `source_format` inputs, the ``standardise_surface`` function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.
+
+This approach is especially useful when your data has already been processed in Python or retrieved from another source (such as a remote server or API) and you want to store it straight away.
+
+Let’s start by importing ``xarray`` and converting an example file into an ``xarray.Dataset``:
+
+.. jupyter-execute::
+
+    import xarray as xr
+
+    data_url = "https://github.com/openghg/example_data/raw/main/timeseries/decc-picarro_co2.tar.gz"
+
+    tac_openghg_data = retrieve_example_data(url=data_url)
+    data = xr.open_dataset(tac_openghg_data[0])
+
+Now that we have our dataset in memory, we can provide it directly to the ``dataset`` argument of ``standardise_surface``.
+This will standardise the data and add it to the object store just as if we had supplied a file path:
+
+.. jupyter-execute::
+
+    from openghg.standardise import standardise_surface
+
+    decc_results = standardise_surface(
+        dataset=data,
+        source_format="openghg",
+        site="TAC",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1h"
+    )
+
 
 2. Searching for data
 ---------------------

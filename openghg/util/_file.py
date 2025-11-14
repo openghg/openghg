@@ -3,10 +3,12 @@ import bz2
 from functools import partial, wraps
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 from collections.abc import Callable
 import numpy as np
 import xarray as xr
+from contextlib import contextmanager
+
 
 from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
 from openghg.util import align_lat_lon
@@ -256,7 +258,7 @@ def get_logfile_path() -> Path:
     return Path("/tmp/openghg.log")
 
 
-def check_filepath(filepath: multiPathType, source_format: str) -> list[str | Path]:
+def check_filepath(filepath: multiPathType, source_format: str) -> list[str] | list[Path]:
     """
     Check that filepath is of the correct format - this assumes the filepath
     should be a str, Path or list but not a tuple (this is only needed for gcwerks).
@@ -330,11 +332,11 @@ def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> 
 
 
 def open_nc_fn(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = None,
-) -> tuple[Callable, str | Path | list[str | Path]]:
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -387,11 +389,11 @@ def open_nc_fn(
 
 
 def open_time_nc_fn(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = "time",
-) -> tuple[Callable, str | Path | list[str | Path]]:
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -405,3 +407,68 @@ def open_time_nc_fn(
         sel_month=sel_month,
         check_coords=check_coords,
     )
+
+
+@contextmanager
+def open_netcdfs(
+    filepath: str | Path | list[str] | list[Path],
+    chunks: dict | None = None,
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = "time",
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager for safely opening NetCDF files in openghg.
+
+    Ensures datasets are closed after use, regardless of errors.
+    Works for single or multiple netCDF files across different networks.
+    """
+    #  Avoid UnboundLocalError if exception occurs before ds is assigned
+    if filepath is not None:
+        if isinstance(filepath, list):
+            filepath = [Path(f) for f in filepath]
+        elif isinstance(filepath, str):
+            filepath = Path(filepath)
+
+    xr_open_fn, filepath = open_time_nc_fn(
+        filepath=filepath,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
+    )
+    ds = xr_open_fn(filepath)
+
+    try:
+        ds = ds.chunk(chunks)
+        yield ds
+    finally:
+        ds.close()
+
+
+@contextmanager
+def get_data(  # type: ignore
+    dataset: xr.Dataset | None = None,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    **kwargs,
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager to return a dataset from either an existing xarray.Dataset
+    or by opening from filepath.
+    Args:
+        dataset: Xarray dataset
+        filepath: Filepath of the data
+    Yields:
+        xr.Dataset:
+            The opened or provided dataset. If opened from file(s), the dataset
+            is automatically closed when leaving the context manager.
+    Raises:
+        ValueError:
+            If both ``dataset`` and ``filepath`` are ``None``.
+    """
+    if dataset is not None:
+        yield dataset
+    else:
+        if filepath is None:
+            raise ValueError("filepath must be provided if dataset is None")
+        with open_netcdfs(filepath, **kwargs) as ds:
+            yield ds
