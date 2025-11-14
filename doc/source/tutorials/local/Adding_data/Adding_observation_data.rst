@@ -243,6 +243,9 @@ Now we add this data to the object store using ``standardise_column``, passing t
     (Inversions check the platform value to determine whether the data is satellite or site-column data)
 
 .. jupyter-execute::
+
+    from openghg.standardise import standardise_column
+
     standardise_column(
                     filepath=satellite_data[-1],
                     species="ch4",
@@ -392,7 +395,7 @@ This will standardise the data and add it to the object store just as if we had 
     from openghg.standardise import standardise_surface
 
     decc_results = standardise_surface(
-        dataset=data,
+        data=data,
         source_format="openghg",
         site="TAC",
         network="DECC",
@@ -401,7 +404,7 @@ This will standardise the data and add it to the object store just as if we had 
     )
 
 
-2. Searching for data
+1. Searching for data
 ---------------------
 
 Searching the object store
