@@ -219,7 +219,7 @@ Similar to the surface data, we can also add column data to the object store. Th
 
 We support "openghg" and "tccon" source formats. "GOSAT" and "OCO-2" satellite data are pre-processed via the "ACRG" codebase into "openghg" format.
 
-For example, we can add column data from the "GOSAT" satellite. First we retrieve the example data.
+To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
 
 .. jupyter-execute::
 
@@ -244,7 +244,7 @@ Now we add this data to the object store using ``standardise_column``, passing t
                 )
 
 .. note::
-    The above data is only supplied with obs_region as "brazil". However, value for the domain can also passed on. Please refer to the `standardise_column` documentation for more details.
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref: `Adding ancillary data tutorisl <Adding_ancilliary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
 
 .. _note-on-datasources:
 
