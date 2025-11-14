@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
 - Issue with importlib.resources.files and editable installs. [PR #1429](https://github.com/opengh/openghg/pull/1429)
 - Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package) and `flox` dependency. [PR #1440](https://github.com/openghg/openghg/pull/1440)
-- Added section on standardising column satellite data in the tutorials. Added references to missing standardise_column and parse_tccon api in doc.[PR#]()
+- Added section on standardising column satellite data in the tutorials. Added references to missing standardise_column and parse_tccon api in doc. [PR#1516](https://github.com/openghg/openghg/pull/1516)
 
 ## [0.15.0] - 2025-07-02
 
