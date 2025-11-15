@@ -401,8 +401,14 @@ This will standardise the data and add it to the object store just as if we had 
         network="DECC",
         instrument="picarro",
         sampling_period="1h",
+        tag="in-memory-dataset",
     )
 
+The details of the added can be viewed in the returned results dictionary.
+
+.. jupyter-execute::
+
+    decc_results
 
 1. Searching for data
 ---------------------
@@ -506,7 +512,7 @@ Tacolneston data (“TAC”) site measured at the “185m” inlet with tag as "
 
     from openghg.retrieve import get_obs_surface
 
-    co2_data = get_obs_surface(site="tac", species="co2", inlet="185m")
+    co2_data = get_obs_surface(site="tac", species="co2", inlet="185m", tag="project1")
 
 If we view our returned ``obs_data`` variable this will contain:
 
@@ -553,7 +559,7 @@ For example, to convert the mole fraction from the default unit
 .. jupyter-execute::
 
     co2_ppb = get_obs_surface(
-        site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}
+        site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, tag="project1"
     )
 
 .. jupyter-execute::
@@ -584,7 +590,7 @@ If you prefer to keep the data **quantified** (i.e., retaining the Pint unit obj
 
 .. jupyter-execute::
 
-    co2_ppb_quantified = get_obs_surface(site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, is_dequantified=False)
+    co2_ppb_quantified = get_obs_surface(site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, is_dequantified=False, tag="project1")
 
 You can then access the Pint units directly:
 
