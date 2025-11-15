@@ -2,13 +2,13 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devels, feature/document_build_failing_reforms]
+    branches: [master, devel]
     tags:
       - "*"
     paths-ignore:
       - 'CHANGELOG.md'
   pull_request:
-    branches: [master, devel, feature/document_build_failing_reforms]
+    branches: [master, devel]
     paths-ignore:
       - 'CHANGELOG.md'
   workflow_dispatch:
