@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.17.0...HEAD)
 
-## [0.17.0] - 2025-11-14
+## [0.17.0] - 2025-11-15
 
 ### Added
 - Added transform function for boundary conditions along with parser to standardise CAMS N2O and CH4 boundary conditions.[PR #1496](https://github.com/openghg/openghg/pull/1496)
