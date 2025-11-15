@@ -400,7 +400,7 @@ This will standardise the data and add it to the object store just as if we had 
         site="TAC",
         network="DECC",
         instrument="picarro",
-        sampling_period="1h"
+        sampling_period="1h",
     )
 
 
@@ -500,7 +500,7 @@ To access the surface data we have added so far we can use the
 species and inlet height to retrieve our data. Using `get_*` functions will only allow one set of data to be returned and will give details if this is not the case.
 
 In this case we want to extract the carbon dioxide (“co2”) data from the
-Tacolneston data (“TAC”) site measured at the “185m” inlet:
+Tacolneston data (“TAC”) site measured at the “185m” inlet with tag as "project1":
 
 .. jupyter-execute::
 
