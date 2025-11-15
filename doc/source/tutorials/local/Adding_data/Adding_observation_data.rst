@@ -56,7 +56,7 @@ Adding and standardising surface data
     the ``store`` argument of the standardise functions.
 
 Source formats
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 OpenGHG can process and store several source formats in the object store,
 including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
@@ -102,7 +102,7 @@ Now we'll find all data with source format ``"CRDS"``.
     summary[summary["Source format"] == "CRDS"]
 
 DECC network
-~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 We will start by adding data to the object store from Tacolneston, which is a *surface site*
 in the DECC network. (Data at surface sites is measured in-situ.)
@@ -148,7 +148,7 @@ any errors have been encountered when trying to access and standardise
 this data.
 
 AGAGE data
-~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 OpenGHG can also process data from the `AGAGE network <https://agage.mit.edu/>`_.
 
@@ -234,7 +234,7 @@ site, so if scales or other factors change multiple versions may be
 stored for easy future comparison.
 
 Other keywords
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 When adding data in this way there are other keywords which can be used to
 distinguish between different data sets as required including:
@@ -249,7 +249,7 @@ See the `standardise_surface` documentation for a full list of inputs.
 
 
 Informational keywords
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to the keywords demonstrated for adding data and described above which are used to distinguish
 between different data sets being stored, the following informational details can also be added to help describe the data.
@@ -308,7 +308,7 @@ Note that for both `info_metadata` and `tag` that these options are available fo
 observations).
 
 Multiple stores
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 If you have write access to more than one object store you'll need to pass in the name of that store
 to the ``store`` argument.
