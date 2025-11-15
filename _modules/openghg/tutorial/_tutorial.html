@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -624,7 +624,6 @@
     <span class="n">satellite_data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/footprint/GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc.tar.gz&quot;</span>
 
     <span class="n">satellite_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">satellite_data_url</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">satellite_data</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
@@ -654,7 +653,7 @@
     <span class="n">satellite_data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz&quot;</span>
 
     <span class="n">satellite_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">satellite_data_url</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">satellite_data</span><span class="p">)</span>
+
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
@@ -893,7 +892,13 @@
     <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">archive_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
         <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tar</span><span class="o">.</span><span class="n">getmembers</span><span class="p">()]</span>
 
-    <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">archive_path</span><span class="p">,</span> <span class="n">extract_dir</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">)</span>
+        <span class="c1"># Extract with filtering for Python 3.12+ compatibility</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Use data filter if available (Python 3.12+)</span>
+            <span class="n">tar</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="c1"># Fallback for older Python versions</span>
+            <span class="n">tar</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">)</span>
 
     <span class="n">extracted_filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
 

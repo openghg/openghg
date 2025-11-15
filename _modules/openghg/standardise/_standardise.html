@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -337,6 +337,7 @@
   <h1>Source code for openghg.standardise._standardise</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
@@ -351,7 +352,8 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise</span><span class="p">(</span>
     <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
@@ -367,6 +369,13 @@
 <span class="sd">        dict: Dictionary of result data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_data_class</span>
+
+    <span class="n">filepath_missing</span> <span class="o">=</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">filepath_missing</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">filepath_missing</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify exactly one of `filepath` or `data`.&quot;</span><span class="p">)</span>
 
     <span class="n">dclass</span> <span class="o">=</span> <span class="n">get_data_class</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
     <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
@@ -389,7 +398,7 @@
         <span class="k">pass</span>
 
     <span class="k">with</span> <span class="n">dclass</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">dc</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">standardise_and_store</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
@@ -399,8 +408,9 @@
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
-    <span class="n">precision_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">precision_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -426,6 +436,7 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise surface measurements and store the data in the object store.</span>
 
@@ -489,28 +500,34 @@
 <span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
-<span class="sd">            To disable chunking pass an empty dictionary.</span>
+<span class="sd">            To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
 <span class="sd">        sort_files: Sorts multiple files date-wise.</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of result data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.surface</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_gcwerks_input</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_filepath</span>
 
-    <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
-        <span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">check_gcwerks_input</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">filepath</span> <span class="o">=</span> <span class="n">check_filepath</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">source_format</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
+            <span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">check_gcwerks_input</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">check_filepath</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">source_format</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">sort_files</span><span class="p">:</span>
-        <span class="c1"># Don&#39;t sort filepaths for gcwerks because this needs to map in order to precision_filepaths</span>
-        <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="n">sort_by_filenames</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sort_files</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t sort filepaths for gcwerks because this needs to map in order to precision_filepaths</span>
+            <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">sort_by_filenames</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
         <span class="n">precision_filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">,</span>
         <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
@@ -539,12 +556,15 @@
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
 
+<div class="viewcode-block" id="standardise_column">
+<a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_column">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_column</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
     <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -567,6 +587,7 @@
     <span class="n">pressure_weights_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read column observation file</span>
 
@@ -609,9 +630,12 @@
 <span class="sd">        chunks: Specifies chunking schema for data storage (default is None). It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</span>
-<span class="sd">            To disable chunking pass an empty dictionary.</span>
+<span class="sd">            To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
-
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -641,13 +665,15 @@
         <span class="n">pressure_weights_method</span><span class="o">=</span><span class="n">pressure_weights_method</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="standardise_bc">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_bc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_bc</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -665,6 +691,7 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise boundary condition data and store it in the object store.</span>
 
@@ -702,9 +729,13 @@
 <span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</span>
-<span class="sd">            To disable chunking pass an empty dictionary.</span>
+<span class="sd">            To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
-<span class="sd">    returns:</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
+<span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -728,6 +759,7 @@
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -735,7 +767,7 @@
 <div class="viewcode-block" id="standardise_footprint">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_footprint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_footprint</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -769,6 +801,7 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
 <span class="sd">    the processed data has been assigned to</span>
@@ -791,7 +824,7 @@
 <span class="sd">        chunks: Chunk schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</span>
-<span class="sd">            by OpenGHG as per the TODO RELEASE: add link to documentation. To disable chunking pass an empty dictionary.</span>
+<span class="sd">            by OpenGHG as per the TODO RELEASE: add link to documentation. To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        retrieve_met: Whether to also download meterological data for this footprints area</span>
 <span class="sd">        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
@@ -824,6 +857,10 @@
 <span class="sd">            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
 <span class="sd">        sort_files: Sort multiple files datewise</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict / None: Dictionary containing confirmation of standardisation process. None</span>
 <span class="sd">        if file already processed.</span>
@@ -835,7 +872,9 @@
         <span class="p">)</span>
         <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">sort_files</span><span class="p">:</span>
@@ -875,6 +914,7 @@
         <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
         <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -882,7 +922,7 @@
 <div class="viewcode-block" id="standardise_flux">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_flux">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_flux</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -905,6 +945,7 @@
     <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process flux / emissions data</span>
 
@@ -922,7 +963,7 @@
 <span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
-<span class="sd">            To disable chunking pass an empty dictionary.</span>
+<span class="sd">            To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
@@ -946,6 +987,10 @@
 <span class="sd">        filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
 <span class="sd">            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    returns:</span>
 <span class="sd">        dict: Dictionary of Datasource UUIDs data assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -961,6 +1006,7 @@
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
@@ -980,12 +1026,13 @@
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_eulerian</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
@@ -1003,6 +1050,7 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read Eulerian model output</span>
 
@@ -1039,8 +1087,12 @@
 <span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
 <span class="sd">            for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
 <span class="sd">            See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
-<span class="sd">            To disable chunking pass an empty dictionary.</span>
+<span class="sd">            To use existing chunks from the raw data (if any), pass an empty dictionary.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of result data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1064,6 +1116,7 @@
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -1096,7 +1149,7 @@
     <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">dclass</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">dc</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span>
             <span class="n">binary_data</span><span class="o">=</span><span class="n">binary_data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">file_metadata</span><span class="o">=</span><span class="n">file_metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
@@ -1105,7 +1158,7 @@
 <div class="viewcode-block" id="standardise_flux_timeseries">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_flux_timeseries">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_flux_timeseries</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
@@ -1125,6 +1178,7 @@
     <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process one dimension timeseries file</span>
 
@@ -1168,6 +1222,10 @@
 <span class="sd">        filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
 <span class="sd">            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
 <span class="sd">        info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
+<span class="sd">        concat_nc_files: if all files are netcdf files, open as one concatenated dataset.</span>
+<span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
+<span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
+<span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of datasource UUIDs data assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1200,6 +1258,7 @@
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
+        <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

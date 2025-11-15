@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Store &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>Store &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
@@ -62,8 +62,8 @@
     <link rel="prev" title="Standardise - metadata" href="devapi_metadata.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -129,8 +129,8 @@
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -389,8 +389,32 @@ the format of the data file, collect metadata and then store the data and metada
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">BoundaryConditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process boundary condition data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.read_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for BoundaryConditions. Expected
+inputs will typically be defined within the openghg.standardse.standardise_bc()
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted parameters for this data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>TODO: Decide if we can phase out additional_metadata or if this could be</dt><dd><p>added to params.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.read_raw_data" title="Link to this definition">#</a></dt>
 <dd><p>Ready a footprint from binary data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -406,71 +430,6 @@ the format of the data file, collect metadata and then store the data and metada
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.read_file" title="Link to this definition">#</a></dt>
-<dd><p>Read boundary conditions file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path of boundary conditions file</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Species name</p></li>
-<li><p><strong>bc_input</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Input used to create boundary conditions. For example:
-- a model name such as “MOZART” or “CAMS”
-- a description such as “UniformAGAGE” (uniform values based on AGAGE average)</p></li>
-<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Region for boundary conditions</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of data being input e.g. openghg (internal format)</p></li>
-<li><p><strong>period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <p>Period of measurements. Only needed if this can not be inferred from the time coords
-If specified, should be one of:</p>
-<blockquote>
-<div><ul>
-<li><p>”yearly”, “monthly”</p></li>
-<li><p>suitable pandas Offset Alias</p></li>
-<li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>continuous</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether time stamps have to be continuous.</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.
-See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/api/codecs.html">https://zarr.readthedocs.io/en/stable/api/codecs.html</a> for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters.</p></li>
-<li><p><strong>chunks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-for example {“time”: 100}. If None then a chunking schema will be set automatically by OpenGHG.
-See documentation for guidance on chunking: <a class="reference external" href="https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking">https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</a>.
-To disable chunking pass in an empty dictionary.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>of dictionaries of files processed and datasource UUIDs data assigned to, plus “required” metadata</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -510,24 +469,26 @@ To disable chunking pass in an empty dictionary.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.validate_data" title="Link to this definition">#</a></dt>
-<dd><p>Validate input data against BoundaryConditions schema - definition from
-BoundaryConditions.schema() method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></span>) – xarray Dataset in expected format</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>None</p>
-<p>Raises a ValueError with details if the input data does not adhere
-to the BoundaryConditions schema.</p>
-</p>
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.transform_data">
+<span class="sig-name descname"><span class="pre">transform_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.transform_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.transform_data" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
 </dd>
 </dl>
+<p>Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
+The underlying parser functions will be of the form:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>openghg.transform.boundary_conditions.parse_{database.lower()}</dt><dd><ul>
+<li><p>e.g. openghg.transform.boundary_conditions.parse_cams()</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -549,54 +510,21 @@ to the BoundaryConditions schema.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">EulerianModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process Eulerian model data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.EulerianModel.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.read_file" title="Link to this definition">#</a></dt>
-<dd><p>Read Eulerian model output</p>
+<dt class="sig sig-object py" id="openghg.store.EulerianModel.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for EulerianModel. Expected
+inputs will typically be defined within the openghg.standardise.standardise_eulerian()
+function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path of Eulerian model species output</p></li>
-<li><p><strong>model</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Eulerian model name</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Species name</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Data format, for example openghg (internal format)</p></li>
-<li><p><strong>start_date</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Start date (inclusive) associated with model run</p></li>
-<li><p><strong>end_date</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – End date (exclusive) associated with model run</p></li>
-<li><p><strong>setup</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Additional setup details for run</p></li>
-<li><p><strong>tag</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Special tagged values to add to the Datasource. This will be added to any
-current values if the tag key already exists in a list.</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.
-See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/api/codecs.html">https://zarr.readthedocs.io/en/stable/api/codecs.html</a> for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters.</p></li>
-<li><p><strong>chunks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-for example {“time”: 100}. If None then a chunking schema will be set automatically by OpenGHG.
-See documentation for guidance on chunking: <a class="reference external" href="https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking">https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</a>.
-To disable chunking pass in an empty dictionary.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
-</ul>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted parameters for this data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -616,27 +544,6 @@ To disable chunking pass in an empty dictionary.</p></li>
 </dd>
 </dl>
 <p>TODO: Decide on data_vars checks as we build up the use of this data_type</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.EulerianModel.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.validate_data" title="Link to this definition">#</a></dt>
-<dd><p>Validate input data against EulerianModel schema - definition from
-EulerianModel.schema() method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></span>) – xarray Dataset in expected format</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>None</p>
-<p>Raises a ValueError with details if the input data does not adhere
-to the EulerianModel schema.</p>
-</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -675,8 +582,32 @@ Some data may be cached locally for quicker access.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.read_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="openghg.store.Footprints.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for Footprints. Expected
+inputs will typically be defined within the openghg.standardise.standardise_footprint()
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted parameters for this data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>TODO: Decide if we can phase out additional_metadata or if this could be</dt><dd><p>added to params.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.Footprints.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.read_raw_data" title="Link to this definition">#</a></dt>
 <dd><p>Ready a footprint from binary data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -684,77 +615,6 @@ Some data may be cached locally for quicker access.</p>
 <li><p><strong>binary_data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></span>) – Footprint data</p></li>
 <li><p><strong>metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Dictionary of metadata</p></li>
 <li><p><strong>file_metadat</strong> – File metadata</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>UUIDs of Datasources data has been assigned to</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">satellite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'acrg_org'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retrieve_met</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_spatial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_lifetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.read_file" title="Link to this definition">#</a></dt>
-<dd><p>Reads footprints data files and returns the UUIDS of the Datasources
-the processed data has been assigned to</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path(s) of file(s) to standardise</p></li>
-<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Site name</p></li>
-<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Domain of footprints</p></li>
-<li><p><strong>satellite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Satellite name</p></li>
-<li><p><strong>obs_region</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The geographic region covered by the data (“BRAZIL”, “INDIA”, “UK”).</p></li>
-<li><p><strong>model</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Model used to create footprint (e.g. NAME or FLEXPART)</p></li>
-<li><p><strong>inlet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Height above ground level in metres. Format ‘NUMUNIT’ e.g. “10m”</p></li>
-<li><p><strong>height</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Alias for inlet. One of height or inlet MUST be included.</p></li>
-<li><p><strong>met_model</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Underlying meteorlogical model used (e.g. UKV)</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)</p></li>
-<li><p><strong>network</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Network name</p></li>
-<li><p><strong>period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Period of measurements. Only needed if this can not be inferred from the time coords</p></li>
-<li><p><strong>tag</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Special tagged values to add to the Datasource. This will be added to any
-current values if the tag key already exists in a list.</p></li>
-<li><p><strong>continuous</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether time stamps have to be continuous.</p></li>
-<li><p><strong>chunks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,
-for example {“time”: 100}. If None then a chunking schema will be set automatically by OpenGHG.</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of data being input e.g. acrg_org</p></li>
-<li><p><strong>retrieve_met</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to also download meterological data for this footprints area</p></li>
-<li><p><strong>high_spatial_resolution</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Indicate footprints include both a low and high spatial resolution.</p></li>
-<li><p><strong>time_resolved</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Indicate footprints are high time resolution (include H_back dimension)
-Note this will be set to True automatically if species=”co2” (Carbon Dioxide).</p></li>
-<li><p><strong>high_time_resolution</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – This argument is deprecated and will be replaced in future versions with time_resolved.</p></li>
-<li><p><strong>short_lifetime</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Indicate footprint is for a short-lived species. Needs species input.
-Note this will be set to True if species has an associated lifetime.</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>sort</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.</p></li>
-<li><p><strong>drop_duplicates</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Drop duplicate timestamps, keeping the first value</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.
-See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/api/codecs.html">https://zarr.readthedocs.io/en/stable/api/codecs.html</a> for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -808,30 +668,6 @@ footprint internal formats consistent with this.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particle_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_spatial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_lifetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.validate_data" title="Link to this definition">#</a></dt>
-<dd><p>Validate data against Footprint schema - definition from
-Footprints.schema(…) method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></span>) – xarray Dataset in expected format</p></li>
-<li><p><strong>inputs.</strong> (<em>See Footprints.schema</em><em>(</em><em>) </em><em>method for details on optional</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>None</p>
-<p>Raises a ValueError with details if the input data does not adhere
-to the Footprints schema.</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <div class="toctree-wrapper compound">
@@ -845,68 +681,29 @@ to the Footprints schema.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process emissions / flux data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsColumn.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'satellite'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">satellite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_weights_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.read_file" title="Link to this definition">#</a></dt>
-<dd><p>Read column observation file</p>
+<dt class="sig sig-object py" id="openghg.store.ObsColumn.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for ObsColumn. Expected
+inputs will typically be defined within the openghg.standardse.standardise_column()
+function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path of observation file</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Species name or synonym e.g. “ch4”</p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of platform. Should be one of:
-- “satellite”
-- “site”</p></li>
-<li><p><strong>satellite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of satellite (if relevant). Should include satellite OR site.</p></li>
-<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – For satellite only. If data has been selected on an area include the
-identifier name for domain covered. This can map to previously defined domains
-(see openghg_defs “domain_info.json” file) or a newly defined domain.</p></li>
-<li><p><strong>selection</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – For satellite only, identifier for any data selection which has been
-performed on satellite data. This can be based on any form of filtering, binning etc.
-but should be unique compared to other selections made e.g. “land”, “glint”, “upperlimit”.
-If not specified, domain will be used.</p></li>
-<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Site code/name (if relevant). Should include satellite OR site.</p></li>
-<li><p><strong>instrument</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Instrument name e.g. “TANSO-FTS”</p></li>
-<li><p><strong>network</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of in-situ or satellite network e.g. “TCCON”, “GOSAT”</p></li>
-<li><p><strong>tag</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Special tagged values to add to the Datasource. This will be added to any
-current values if the tag key already exists in a list.</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of data being input e.g. openghg (internal format)</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.
-See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/api/codecs.html">https://zarr.readthedocs.io/en/stable/api/codecs.html</a> for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters.</p></li>
-<li><p><strong>pressure_weights_method</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – method to use to derive TCCON pressure_weights.</p></li>
-<li><p><strong>chunks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-for example {“time”: 100}. If None then a chunking schema will be set automatically by OpenGHG.
-See documentation for guidance on chunking: <a class="reference external" href="https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking">https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</a>.
-To disable chunking pass in an empty dictionary.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
-</ul>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of datasource UUIDs data assigned to</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Formatted parameters and any additional parameters</dt><dd><p>for this data type.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p>(dict, dict)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>TODO: Decide if we can phase out additional_metadata or if this could be</dt><dd><p>added to params.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -949,27 +746,6 @@ Default = “lev”</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsColumn.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.validate_data" title="Link to this definition">#</a></dt>
-<dd><p>Validate input data against Emissions schema - definition from
-Emissions.schema() method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></span>) – xarray Dataset in expected format</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>None</p>
-<p>Raises a ValueError with details if the input data does not adhere
-to the Emissions schema.</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <div class="toctree-wrapper compound">
@@ -983,8 +759,101 @@ to the Emissions schema.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process surface observation data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="openghg.store.ObsSurface.align_metadata_attributes">
+<span class="sig-name descname"><span class="pre">align_metadata_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.align_metadata_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.align_metadata_attributes" title="Link to this definition">#</a></dt>
+<dd><p>Check values within metadata and attributes are consistent and update (in place).
+This is a wrapper for separate openghg.util.align_metadata_attributes() function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">MetadataAndData</span></code>]</span>) – sequence of MetadataAndData objects</p></li>
+<li><p><strong>update_mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>TODO: At the moment the align_metadata_attributes() function is only applicable</dt><dd><p>to surface data but this should be generalised to all data types.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.ObsSurface.define_loop_params">
+<span class="sig-name descname"><span class="pre">define_loop_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.define_loop_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.define_loop_params" title="Link to this definition">#</a></dt>
+<dd><p>If filepath is supplied as a list, depending on the data type this will be
+looped over to extract each file. If there are additional parameters which need to
+be looped over as well (when defined) these are defined here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dictionary of name of loop parameters within inputs and to pass</dt><dd><p>to the relevant parse functions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.ObsSurface.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for ObsColumn. Expected
+inputs will typically be defined within the openghg.standardse.standardise_surface()
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted parameters for this data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>TODO: Decide if we can phase out additional_metadata or if this could be</dt><dd><p>added to params.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.ObsSurface.read_multisite_aqmesh">
+<span class="sig-name descname"><span class="pre">read_multisite_aqmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aqmesh_glasgow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aqmesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insitu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_multisite_aqmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_multisite_aqmesh" title="Link to this definition">#</a></dt>
+<dd><p>Read AQMesh data for the Glasgow network</p>
+<p>NOTE - temporary function until we know what kind of AQMesh data
+we’ll be retrieve in the future.</p>
+<p>This data is different in that it contains multiple sites in the same file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaultdict</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.ObsSurface.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_raw_data" title="Link to this definition">#</a></dt>
 <dd><p>Reads binary data passed in by serverless function.
 The data dictionary should contain sub-dictionaries that contain
 data and metadata keys.</p>
@@ -1006,128 +875,6 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_sublevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insitu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_site_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_file" title="Link to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>Process files and store in the object store. This function</dt><dd><p>utilises the process functions of the other classes in this submodule
-to handle each data type.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Filepath(s)</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Data format, for example CRDS, GCWERKS</p></li>
-<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Site code/name</p></li>
-<li><p><strong>network</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Network name</p></li>
-<li><p><strong>inlet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Inlet height. Format ‘NUMUNIT’ e.g. “10m”.
-If retrieve multiple files pass None, OpenGHG will attempt to
-extract this from the file.</p></li>
-<li><p><strong>height</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Alias for inlet.</p></li>
-<li><p><strong>data.</strong> (<em>read inlets from</em>)</p></li>
-<li><p><strong>instrument</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Instrument name</p></li>
-<li><p><strong>data_level</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – <p>The level of quality control which has been applied to the data.
-This should follow the convention of:</p>
-<blockquote>
-<div><ul>
-<li><p>”0”: raw sensor output</p></li>
-<li><p>”1”: automated quality assurance (QA) performed</p></li>
-<li><p>”2”: final data set</p></li>
-<li><p>”3”: elaborated data products using the data</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>data_sublevel</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Can be used to sub-categorise data (typically “L1”) depending on different QA performed
-before data is finalised.</p></li>
-<li><p><strong>dataset_source</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dataset source name, for example “ICOS”, “InGOS”, “European ObsPack”, “CEDA 2023.06”</p></li>
-<li><p><strong>sampling_period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).</p></li>
-<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Type of measurement platform e.g. “surface-insitu”, “surface-flask”</p></li>
-<li><p><strong>measurement_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of measurement. For some source_formats this value is added
-to the attributes. Platform should be used in preference.
-If platform is specified and measurement_type is not, this will be
-set to match the platform.</p></li>
-<li><p><strong>verify_site_code</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Verify the site code</p></li>
-<li><p><strong>site_filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – <p>Alternative site info file (see openghg/openghg_defs repository for format).
-Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</p>
-<blockquote>
-<div><p>update_mismatch: This determines whether mismatches between the internal data</p>
-</div></blockquote>
-<p>attributes and the supplied / derived metadata can be updated or whether
-this should raise an AttrMismatchError.
-If True, currently updates metadata with attribute value.</p>
-</p></li>
-<li><p><strong>precision_filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Only needed for GCWERKS source format.
-Accompanying precision_filepath is needed for each filepath.</p></li>
-<li><p><strong>tag</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Special tagged values to add to the Datasource. This will be added to any
-current values if the tag key already exists in a list.</p></li>
-<li><p><strong>update_mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>This determines how mismatches between the internal data
-“attributes” and the supplied / derived “metadata” are handled.
-This includes the options:</p>
-<blockquote>
-<div><ul>
-<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
-<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
-<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.</p></li>
-<li><p><strong>https</strong> (<em>See</em>) – //zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters</p></li>
-<li><p><strong>chunks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-for example {“time”: 100}. If None then a chunking schema will be set automatically by OpenGHG.
-See documentation for guidance on chunking: <a class="reference external" href="https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking">https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking</a>.
-To disable chunking pass in an empty dictionary.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of Datasource UUIDs</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-<p>TODO: Should “measurement_type” be changed to “platform” to align
-with ModelScenario and ObsColumn?</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.read_multisite_aqmesh">
-<span class="sig-name descname"><span class="pre">read_multisite_aqmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aqmesh_glasgow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aqmesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insitu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_multisite_aqmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_multisite_aqmesh" title="Link to this definition">#</a></dt>
-<dd><p>Read AQMesh data for the Glasgow network</p>
-<p>NOTE - temporary function until we know what kind of AQMesh data
-we’ll be retrieve in the future.</p>
-<p>This data is different in that it contains multiple sites in the same file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaultdict</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1203,30 +950,6 @@ See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/ap
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.validate_data" title="Link to this definition">#</a></dt>
-<dd><p>Validate input data against ObsSurface schema - definition from
-ObsSurface.schema() method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></span>) – xarray Dataset in expected format</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Species name</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>None</p>
-<p>Raises a ValueError with details if the input data does not adhere
-to the ObsSurface schema.</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <div class="toctree-wrapper compound">
@@ -1248,8 +971,28 @@ _metakey = f”{_root}/uuid/{_uuid}/metastore</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.FluxTimeseries.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.read_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="openghg.store.FluxTimeseries.format_inputs">
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.format_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.format_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Apply appropriate formatting for expected inputs for FluxTimeseries. Expected
+inputs will typically be defined within the openghg.standardise.standardise_flux_timeseries()
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – Set of keyword arguments. Selected keywords will be
+appropriately formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted parameters for this data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.FluxTimeseries.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.read_raw_data" title="Link to this definition">#</a></dt>
 <dd><p>Ready a footprint from binary data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1261,75 +1004,6 @@ _metakey = f”{_root}/uuid/{_uuid}/metastore</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>UUIDs of Datasources data has been assigned to</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.FluxTimeseries.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'crf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.read_file" title="Link to this definition">#</a></dt>
-<dd><p>Read one dimension timeseries file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</span>) – Path of flux timeseries / emissions timeseries file</p></li>
-<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Species name</p></li>
-<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Region for Flux timeseries</p></li>
-<li><p><strong>source</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Source of the emissions data, e.g. “energy”, “anthro”, default is ‘anthro’.</p></li>
-<li><p><strong>region</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Region/Country of the CRF data</p></li>
-<li><p><strong>domain</strong> – Geographic domain, default is ‘None’. Instead region is used to identify area</p></li>
-<li><p><strong>database</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of database source for this input (if relevant)</p></li>
-<li><p><strong>database_version</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of database version (if relevant)</p></li>
-<li><p><strong>model</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Model name (if relevant)</p></li>
-<li><p><strong>source_format</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of data being input e.g. openghg (internal format)</p></li>
-<li><p><strong>period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Period of measurements. Only needed if this can not be inferred from the time coords</p></li>
-<li><p><strong>specified</strong> (<em>If</em>) – <ul>
-<li><p>“yearly”, “monthly”</p></li>
-<li><p>suitable pandas Offset Alias</p></li>
-<li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
-</ul>
-</p></li>
-<li><p><strong>of</strong> (<em>should be one</em>) – <ul>
-<li><p>“yearly”, “monthly”</p></li>
-<li><p>suitable pandas Offset Alias</p></li>
-<li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
-</ul>
-</p></li>
-<li><p><strong>tag</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Special tagged values to add to the Datasource. This will be added to any
-current values if the tag key already exists in a list.</p></li>
-<li><p><strong>continuous</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether time stamps have to be continuous.</p></li>
-<li><p><strong>if_exists</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>What to do if existing data is present.
-- “auto” - checks new and current data for timeseries overlap</p>
-<blockquote>
-<div><ul>
-<li><p>adds data if no overlap</p></li>
-<li><p>raises DataOverlapError if there is an overlap</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>”new” - just include new data and ignore previous</p></li>
-<li><p>”combine” - replace and insert new data into current timeseries</p></li>
-</ul>
-</p></li>
-<li><p><strong>save_current</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Whether to save data in current form and create a new version.
-- “auto” - this will depend on if_exists input (“auto” -&gt; False), (other -&gt; True)
-- “y” / “yes” - Save current data exactly as it exists as a separate (previous) version
-- “n” / “no” - Allow current data to updated / deleted</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Deprecated. This will use options for if_exists=”new”.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Force adding of data even if this is identical to data stored.</p></li>
-<li><p><strong>compressor</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A custom compressor to use. If None, this will default to
-<em class="xref py py-obj">Blosc(cname=”zstd”, clevel=5, shuffle=Blosc.SHUFFLE)</em>.
-See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/api/codecs.html">https://zarr.readthedocs.io/en/stable/api/codecs.html</a> for more information on compressors.</p></li>
-<li><p><strong>filters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filters to apply to the data on storage, this defaults to no filtering. See
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/tutorial.html#filters">https://zarr.readthedocs.io/en/stable/tutorial.html#filters</a> for more information on picking filters.</p></li>
-<li><p><strong>info_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Allows to pass in additional tags to describe the data. e.g {“comment”:”Quality checks have been applied”}</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of datasource UUIDs data assigned to</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -1360,29 +1034,6 @@ See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/ap
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>DataSchema</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.FluxTimeseries.validate_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.validate_data" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-<p>Validate input data against FluxTimeseries schema - definition from
-FluxTimeseries.schema() method.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>data : xarray Dataset in expected format</p>
-</dd>
-<dt>Returns:</dt><dd><p>None</p>
-</dd>
-</dl>
-</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Raises: ValueError if the input data does not match the schema</dt><dd><p>to the FluxTimeseries schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1462,10 +1113,10 @@ keyword arguments for searching of metadata and a <code class="docutils literal 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#storage">Storage</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-boundaryconditions">openghg.store.BoundaryConditions</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.read_data"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.read_data()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.read_file"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.format_inputs"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.format_inputs()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.read_raw_data"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.read_raw_data()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.schema"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.validate_data"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.validate_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.transform_data"><code class="docutils literal notranslate"><span class="pre">BoundaryConditions.transform_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1473,9 +1124,8 @@ keyword arguments for searching of metadata and a <code class="docutils literal 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-emissions">openghg.store.Emissions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-eulerianmodel">openghg.store.EulerianModel</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.EulerianModel"><code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.EulerianModel.read_file"><code class="docutils literal notranslate"><span class="pre">EulerianModel.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.EulerianModel.format_inputs"><code class="docutils literal notranslate"><span class="pre">EulerianModel.format_inputs()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.EulerianModel.schema"><code class="docutils literal notranslate"><span class="pre">EulerianModel.schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.EulerianModel.validate_data"><code class="docutils literal notranslate"><span class="pre">EulerianModel.validate_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1483,31 +1133,30 @@ keyword arguments for searching of metadata and a <code class="docutils literal 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-footprints">openghg.store.Footprints</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints"><code class="docutils literal notranslate"><span class="pre">Footprints</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.chunking_schema"><code class="docutils literal notranslate"><span class="pre">Footprints.chunking_schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.read_data"><code class="docutils literal notranslate"><span class="pre">Footprints.read_data()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.read_file"><code class="docutils literal notranslate"><span class="pre">Footprints.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.format_inputs"><code class="docutils literal notranslate"><span class="pre">Footprints.format_inputs()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.read_raw_data"><code class="docutils literal notranslate"><span class="pre">Footprints.read_raw_data()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.schema"><code class="docutils literal notranslate"><span class="pre">Footprints.schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.Footprints.validate_data"><code class="docutils literal notranslate"><span class="pre">Footprints.validate_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-obscolumn">openghg.store.ObsColumn</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsColumn"><code class="docutils literal notranslate"><span class="pre">ObsColumn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsColumn.read_file"><code class="docutils literal notranslate"><span class="pre">ObsColumn.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsColumn.format_inputs"><code class="docutils literal notranslate"><span class="pre">ObsColumn.format_inputs()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsColumn.schema"><code class="docutils literal notranslate"><span class="pre">ObsColumn.schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsColumn.validate_data"><code class="docutils literal notranslate"><span class="pre">ObsColumn.validate_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-obssurface">openghg.store.ObsSurface</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface"><code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_data"><code class="docutils literal notranslate"><span class="pre">ObsSurface.read_data()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_file"><code class="docutils literal notranslate"><span class="pre">ObsSurface.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.align_metadata_attributes"><code class="docutils literal notranslate"><span class="pre">ObsSurface.align_metadata_attributes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.define_loop_params"><code class="docutils literal notranslate"><span class="pre">ObsSurface.define_loop_params()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.format_inputs"><code class="docutils literal notranslate"><span class="pre">ObsSurface.format_inputs()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_multisite_aqmesh"><code class="docutils literal notranslate"><span class="pre">ObsSurface.read_multisite_aqmesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_raw_data"><code class="docutils literal notranslate"><span class="pre">ObsSurface.read_raw_data()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.schema"><code class="docutils literal notranslate"><span class="pre">ObsSurface.schema()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.store_data"><code class="docutils literal notranslate"><span class="pre">ObsSurface.store_data()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.ObsSurface.validate_data"><code class="docutils literal notranslate"><span class="pre">ObsSurface.validate_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1515,10 +1164,9 @@ keyword arguments for searching of metadata and a <code class="docutils literal 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg-store-fluxtimeseries">openghg.store.FluxTimeseries</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries._data_type"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries._data_type</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.read_data"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.read_data()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.read_file"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.read_file()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.format_inputs"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.format_inputs()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.read_raw_data"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.read_raw_data()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.schema"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.schema()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.store.FluxTimeseries.validate_data"><code class="docutils literal notranslate"><span class="pre">FluxTimeseries.validate_data()</span></code></a></li>
 </ul>
 </li>
 </ul>

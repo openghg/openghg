@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../../../../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -339,7 +339,16 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset_formatter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">pathType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">clean_string</span><span class="p">,</span>
+    <span class="n">find_duplicate_timestamps</span><span class="p">,</span>
+    <span class="n">format_inlet</span><span class="p">,</span>
+    <span class="n">get_site_info</span><span class="p">,</span>
+    <span class="n">load_internal_json</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
 
 
 <div class="viewcode-block" id="parse_crds">
@@ -379,10 +388,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_attributes</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_inlet</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
@@ -416,6 +422,43 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_raw_dataframe</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read raw CRDS data into dataframe with combined data for all gases.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: path to raw data</span>
+<span class="sd">        drop_duplicates: if True, drop duplicate times.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict mapping species to pd.DataFrame containing data for that gas</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if duplicate times found and `drop_duplicates` is False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># parse with multiindex for columns</span>
+    <span class="n">combined_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">)</span>
+
+    <span class="c1"># parse dates</span>
+    <span class="n">datetime_series</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">combined_df</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;date&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="o">+</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">combined_df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">datetime_series</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
+    <span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+    <span class="c1"># drop duplicate times</span>
+    <span class="n">dupes</span> <span class="o">=</span> <span class="n">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">combined_df</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dupes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">drop_duplicates</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate dates detected: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">combined_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">combined_df</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_read_data</span><span class="p">(</span>
     <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -438,13 +481,10 @@
 <span class="sd">        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">find_duplicate_timestamps</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">load_internal_json</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">to_datetime</span>
-
     <span class="n">split_fname</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
@@ -467,33 +507,17 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_fname</span>
 
-    <span class="c1"># Catch dtype warnings</span>
-    <span class="c1"># TODO - look at setting dtypes - read header and data separately?</span>
-    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
-            <span class="n">filepath</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
-            <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
-            <span class="n">index_col</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="c1"># get data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_get_raw_dataframe</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">)</span>
 
-    <span class="n">dupes</span> <span class="o">=</span> <span class="n">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1"># get metadata</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">_read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dupes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">drop_duplicates</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate dates detected: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
-
-    <span class="c1"># Get the number of gases in dataframe and number of columns of data present for each gas</span>
-    <span class="n">n_gases</span><span class="p">,</span> <span class="n">n_cols</span> <span class="o">=</span> <span class="n">_gas_info</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="n">header</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">skip_cols</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">header</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
-
-    <span class="n">metadata</span> <span class="o">=</span> <span class="n">_read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1"># add port and type from raw data, then drop these columns</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">drop_cols</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
@@ -521,31 +545,22 @@
     <span class="c1"># This dictionary is used to store the gas data and its associated metadata</span>
     <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_gases</span><span class="p">):</span>
-        <span class="c1"># Slice the columns</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">skip_cols</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">n_cols</span> <span class="p">:</span> <span class="n">skip_cols</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_cols</span><span class="p">]</span>
+    <span class="c1"># get gases from first level of column multi-index</span>
+    <span class="n">gases</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
 
-        <span class="c1"># Reset the column numbers</span>
-        <span class="n">gas_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">RangeIndex</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">gas</span> <span class="ow">in</span> <span class="n">gases</span><span class="p">:</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">gas</span><span class="p">]</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">gas</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-        <span class="n">column_labels</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">species</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gas_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CRDS data should have three columns per gas.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
-        <span class="c1"># Name columns</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">set_axis</span><span class="p">(</span><span class="n">column_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
-
-        <span class="n">header_rows</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="c1"># Drop the first two rows now we have the name</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">gas_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">header_rows</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">gas_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
-        <span class="c1"># Cast data to float64 / double</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+        <span class="n">gas_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="nb">int</span>
+        <span class="p">)</span>
 
         <span class="c1"># Here we can convert the Dataframe to a Dataset and then write the attributes</span>
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
@@ -576,21 +591,15 @@
     <span class="k">return</span> <span class="n">combined_data</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse CRDS files and create a metadata dict</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse CRDS files and create a metadata dict.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Data filepath</span>
-<span class="sd">        data: Raw pandas DataFrame</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_inlet</span>
-
-    <span class="c1"># Find gas measured and port used</span>
-    <span class="n">type_meas</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">port</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
-
     <span class="c1"># Split the filename to get the site and resolution</span>
     <span class="n">split_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
@@ -617,8 +626,6 @@
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
-    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">port</span>
-    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">type_meas</span>
 
     <span class="k">return</span> <span class="n">metadata</span>
 
@@ -629,7 +636,7 @@
     <span class="n">crds_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">site_filepath</span><span class="p">:</span> <span class="n">pathType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get site specific attributes for writing to Datasets.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site name</span>
@@ -637,11 +644,10 @@
 <span class="sd">        crds_metadata: General CRDS metadata</span>
 <span class="sd">        site_filepath: Alternative site info file (see openghg/openghg_defs repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_site_info</span><span class="p">,</span> <span class="n">format_inlet</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">site_attributes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">crds_metadata</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">][</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
         <span class="n">global_attributes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
@@ -670,38 +676,6 @@
     <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;gcwerks_site_name&quot;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">attributes</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_gas_info</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the number of columns of data for each gas</span>
-<span class="sd">    that is present in the dataframe</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: Measurement data</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        tuple (int, int): Number of gases, number of</span>
-<span class="sd">        columns of data for each gas</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">unanimous</span>
-
-    <span class="c1"># Slice the dataframe</span>
-    <span class="n">head_row</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">gases</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Loop over the gases and find each unique value</span>
-    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">head_row</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">head_row</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
-            <span class="n">gases</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">gases</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-
-    <span class="c1"># Check that we have the same number of columns for each gas</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">unanimous</span><span class="p">(</span><span class="n">gases</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Each gas does not have the same number of columns. Please ensure data&quot;</span>
-            <span class="s2">&quot;is of the CRDS type expected by this module&quot;</span>
-        <span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">gases</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">gases</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 
                 </article>

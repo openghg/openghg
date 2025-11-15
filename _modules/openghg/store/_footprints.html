@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -337,16 +337,14 @@
   <h1>Source code for openghg.store._footprints</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkingSchema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_species_lifetime</span><span class="p">,</span> <span class="n">check_species_time_resolved</span><span class="p">,</span> <span class="n">synonyms</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Footprints&quot;</span><span class="p">]</span>
 
@@ -364,9 +362,9 @@
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;62db5bdf-c88d-4e56-97f4-40336d37f18c&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
 
-<div class="viewcode-block" id="Footprints.read_data">
-<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.read_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Footprints.read_raw_data">
+<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.read_raw_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
 
 <span class="sd">        Args:</span>
@@ -392,7 +390,7 @@
         <span class="c1">#     return Footprints.read_file(filepath=filepath, **metadata)</span>
 
     <span class="c1"># @staticmethod</span>
-    <span class="c1"># def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -&gt; Dict:</span>
+    <span class="c1"># def read_raw_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -&gt; Dict:</span>
     <span class="c1">#     &quot;&quot;&quot;Ready a footprint from binary data</span>
 
     <span class="c1">#     Args:</span>
@@ -527,280 +525,104 @@
 
     <span class="c1">#     &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Footprints.read_file">
-<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.read_file">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
-        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">met_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;acrg_org&quot;</span><span class="p">,</span>
-        <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-        <span class="n">save_current</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
-<span class="sd">        the processed data has been assigned to</span>
+<div class="viewcode-block" id="Footprints.format_inputs">
+<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.format_inputs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply appropriate formatting for expected inputs for Footprints. Expected</span>
+<span class="sd">        inputs will typically be defined within the openghg.standardise.standardise_footprint()</span>
+<span class="sd">        function.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filepath: Path(s) of file(s) to standardise</span>
-<span class="sd">            site: Site name</span>
-<span class="sd">            domain: Domain of footprints</span>
-<span class="sd">            satellite: Satellite name</span>
-<span class="sd">            obs_region: The geographic region covered by the data (&quot;BRAZIL&quot;, &quot;INDIA&quot;, &quot;UK&quot;).</span>
-<span class="sd">            model: Model used to create footprint (e.g. NAME or FLEXPART)</span>
-<span class="sd">            inlet: Height above ground level in metres. Format &#39;NUMUNIT&#39; e.g. &quot;10m&quot;</span>
-<span class="sd">            height: Alias for inlet. One of height or inlet MUST be included.</span>
-<span class="sd">            met_model: Underlying meteorlogical model used (e.g. UKV)</span>
-<span class="sd">            species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)</span>
-<span class="sd">            network: Network name</span>
-<span class="sd">            period: Period of measurements. Only needed if this can not be inferred from the time coords</span>
-<span class="sd">            tag: Special tagged values to add to the Datasource. This will be added to any</span>
-<span class="sd">                current values if the tag key already exists in a list.</span>
-<span class="sd">            continuous: Whether time stamps have to be continuous.</span>
-<span class="sd">            chunks: Chunk schema to use when storing data the NetCDF. It expects a dictionary of dimension name and chunk size,</span>
-<span class="sd">                for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
-<span class="sd">            source_format : Type of data being input e.g. acrg_org</span>
-<span class="sd">            retrieve_met: Whether to also download meterological data for this footprints area</span>
-<span class="sd">            high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">            time_resolved: Indicate footprints are high time resolution (include H_back dimension)</span>
-<span class="sd">                           Note this will be set to True automatically if species=&quot;co2&quot; (Carbon Dioxide).</span>
-<span class="sd">            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
-<span class="sd">            short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
-<span class="sd">                            Note this will be set to True if species has an associated lifetime.</span>
-<span class="sd">            if_exists: What to do if existing data is present.</span>
-<span class="sd">                - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                   - adds data if no overlap</span>
-<span class="sd">                   - raises DataOverlapError if there is an overlap</span>
-<span class="sd">                - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">                - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">            save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">                - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">                - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">                - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
-<span class="sd">            overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">            force: Force adding of data even if this is identical to data stored.</span>
-<span class="sd">            sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.</span>
-<span class="sd">            drop_duplicates: Drop duplicate timestamps, keeping the first value</span>
-<span class="sd">            compressor: A custom compressor to use. If None, this will default to</span>
-<span class="sd">                `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
-<span class="sd">                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
-<span class="sd">            filters: Filters to apply to the data on storage, this defaults to no filtering. See</span>
-<span class="sd">                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.</span>
-<span class="sd">            info_metadata: Allows to pass in additional tags to describe the data. e.g {&quot;comment&quot;:&quot;Quality checks have been applied&quot;}</span>
+<span class="sd">            kwargs: Set of keyword arguments. Selected keywords will be</span>
+<span class="sd">                appropriately formatted.</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get initial values which exist within this function scope using locals</span>
-        <span class="c1"># MUST be at the top of the function</span>
-        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="sd">            dict: Formatted parameters for this data type.</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store.spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_standardise_parsers</span>
+<span class="sd">        TODO: Decide if we can phase out additional_metadata or if this could be</span>
+<span class="sd">            added to params.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
             <span class="n">format_inlet</span><span class="p">,</span>
             <span class="n">check_and_set_null_variable</span><span class="p">,</span>
-            <span class="n">check_if_need_new_version</span><span class="p">,</span>
-            <span class="n">split_function_inputs</span><span class="p">,</span>
-            <span class="n">load_standardise_parser</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Apply clean string formatting</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;satellite&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;satellite&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;obs_region&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;obs_region&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;domain&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inlet&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;met_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;met_model&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Checking inputs</span>
+        <span class="c1"># - check time_resolved details are set in preference to high_time_resolution</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;high_time_resolution&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
                 <span class="ne">DeprecationWarning</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_resolved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;high_time_resolution&quot;</span><span class="p">]</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;high_time_resolution&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs_region</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">satellite</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">satellite</span><span class="p">)</span>
-            <span class="n">obs_region</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obs_region</span><span class="p">)</span>
-            <span class="n">continuous</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># - check either site or (satellite and obs_region) are included</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;satellite&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;obs_region&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;continuous&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;For satellite data, &#39;continuous&#39; is set to `False`&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please pass either site or satellite and obs_region values&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Please pass either site or satellite and obs_region values&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
-        <span class="n">domain</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
-
-        <span class="c1"># Make sure `inlet` OR the alias `height` is included</span>
-        <span class="c1"># Note: from this point only `inlet` variable should be used.</span>
-        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># - make sure `inlet` OR the alias `height` is included</span>
+        <span class="c1">#    - note: from this point only `inlet` variable should be used.</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of inlet (or height) must be specified as an input&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Try to ensure inlet is &#39;NUM&#39;&#39;UNIT&#39; e.g. &quot;10m&quot;</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
+        <span class="c1"># Apply individual formatting as appropriate</span>
 
-        <span class="c1"># Ensure we have a value for species</span>
+        <span class="c1"># - try to ensure inlet is &#39;NUM&#39;&#39;UNIT&#39; e.g. &quot;10m&quot;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inlet&quot;</span><span class="p">))</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">])</span>
+
+        <span class="c1"># - ensure we have a value for species</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;inert&quot;</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;inert&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="c1"># Ensure we have a clear missing value for met_model</span>
-        <span class="n">met_model</span> <span class="o">=</span> <span class="n">check_and_set_null_variable</span><span class="p">(</span><span class="n">met_model</span><span class="p">)</span>
-        <span class="n">met_model</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">met_model</span><span class="p">)</span>
+        <span class="c1"># - check time_resolved and short_lifetime values are appropriate for species</span>
+        <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_resolved&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">short_lifetime</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;short_lifetime&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;time_resolved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">check_species_time_resolved</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span> <span class="n">time_resolved</span><span class="p">)</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;short_lifetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">check_species_lifetime</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span> <span class="n">short_lifetime</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
-
-        <span class="c1"># Do some housekeeping on the inputs</span>
-        <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">check_species_time_resolved</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">time_resolved</span><span class="p">)</span>
-        <span class="n">short_lifetime</span> <span class="o">=</span> <span class="n">check_species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">short_lifetime</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">time_resolved</span> <span class="ow">and</span> <span class="n">sort</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_resolved&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sort&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;Sorting high time resolution data is very memory intensive, we recommend not sorting.&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># Specify any additional metadata to be added</span>
-        <span class="n">additional_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Ensure we have a clear missing value (not_set) where needed (required keys)</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;met_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">check_and_set_null_variable</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;met_model&quot;</span><span class="p">))</span>
 
-        <span class="n">standardise_parsers</span> <span class="o">=</span> <span class="n">define_standardise_parsers</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">source_format</span> <span class="o">=</span> <span class="n">standardise_parsers</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data type </span><span class="si">{</span><span class="n">source_format</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Load the data retrieve object</span>
-        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_standardise_parser</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
-
-        <span class="c1"># Get current parameter values and filter to only include function inputs</span>
-        <span class="n">fn_current_parameters</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Make a copy of parameters passed to function</span>
-        <span class="n">fn_input_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">fn_current_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fn_input_parameters</span><span class="p">}</span>
-
-        <span class="c1"># file_hash = hash_file(filepath=filepath)</span>
-        <span class="c1"># if file_hash in self._file_hashes and not overwrite:</span>
-        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs.&quot;</span>
-                <span class="s2">&quot;See documentation for details of these inputs and options.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
-
-        <span class="c1"># Making sure new version will be created by default if force keyword is included.</span>
-        <span class="k">if</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">if_exists</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">if_exists</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>
-
-        <span class="n">new_version</span> <span class="o">=</span> <span class="n">check_if_need_new_version</span><span class="p">(</span><span class="n">if_exists</span><span class="p">,</span> <span class="n">save_current</span><span class="p">)</span>
-
-        <span class="n">_</span><span class="p">,</span> <span class="n">unseen_hashes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_hashes</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">unseen_hashes</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[{}]</span>
-
-        <span class="n">filepath</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[{}]</span>
-
-        <span class="c1"># Define parameters to pass to the parser function and remaining keys</span>
-        <span class="n">parser_input_parameters</span><span class="p">,</span> <span class="n">additional_input_parameters</span> <span class="o">=</span> <span class="n">split_function_inputs</span><span class="p">(</span>
-            <span class="n">fn_input_parameters</span><span class="p">,</span> <span class="n">parser_fn</span>
-        <span class="p">)</span>
-
-        <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">parser_input_parameters</span><span class="p">)</span>
-
-        <span class="n">chunks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_chunks</span><span class="p">(</span>
-            <span class="n">ds</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
-            <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-            <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
-            <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
-            <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">chunks</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rechunking with chunks=</span><span class="si">{</span><span class="n">chunks</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Checking against expected format for footprints</span>
-        <span class="c1"># Based on configuration (some user defined, some inferred)</span>
-        <span class="c1"># Also check for alignment of domain coordinates</span>
-        <span class="k">for</span> <span class="n">mdd</span> <span class="ow">in</span> <span class="n">footprint_data</span><span class="p">:</span>
-            <span class="n">mdd</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
-
-            <span class="n">Footprints</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span>
-                <span class="n">mdd</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-                <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
-                <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
-                <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span> <span class="ow">and</span> <span class="n">sort</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Sorting high time resolution data is very memory intensive, we recommend not sorting.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Check to ensure no required keys are being passed through info_metadata dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_info_keys</span><span class="p">(</span><span class="n">info_metadata</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">info_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">additional_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">info_metadata</span><span class="p">)</span>
-
-        <span class="c1"># Mop up and add additional keys to metadata which weren&#39;t passed to the parser</span>
-        <span class="n">footprint_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span>
-            <span class="n">footprint_data</span><span class="p">,</span> <span class="n">additional_input_parameters</span><span class="p">,</span> <span class="n">additional_metadata</span>
-        <span class="p">)</span>
-
-        <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
-        <span class="c1"># TODO - filter options</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span>
-            <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
-            <span class="n">new_version</span><span class="o">=</span><span class="n">new_version</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-            <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
-            <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">,</span>
-            <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
-            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># TODO: MAY NEED TO ADD BACK IN OR CAN DELETE</span>
-        <span class="c1"># update_keys = [&quot;start_date&quot;, &quot;end_date&quot;, &quot;latest_version&quot;]</span>
-        <span class="c1"># footprint_data = update_metadata(</span>
-        <span class="c1">#     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys</span>
-        <span class="c1"># )</span>
-
-        <span class="c1"># Record the file hash in case we see the file(s) again</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">unseen_hashes</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">datasource_uuids</span></div>
+        <span class="k">return</span> <span class="n">params</span></div>
 
 
 <div class="viewcode-block" id="Footprints.schema">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.schema">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span>  <span class="c1"># type: ignore[override]</span>
         <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -923,49 +745,6 @@
         <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data_format</span></div>
-
-
-<div class="viewcode-block" id="Footprints.validate_data">
-<a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.validate_data">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">validate_data</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
-        <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate data against Footprint schema - definition from</span>
-<span class="sd">        Footprints.schema(...) method.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data : xarray Dataset in expected format</span>
-
-<span class="sd">            See Footprints.schema() method for details on optional inputs.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-
-<span class="sd">            Raises a ValueError with details if the input data does not adhere</span>
-<span class="sd">            to the Footprints schema.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
-                <span class="ne">DeprecationWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">time_resolved</span> <span class="o">=</span> <span class="n">high_time_resolution</span>
-        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span>
-            <span class="n">particle_locations</span><span class="o">=</span><span class="n">particle_locations</span><span class="p">,</span>
-            <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
-            <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
-            <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
-            <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Footprints.chunking_schema">

@@ -1,3 +1,5 @@
+.. _Adding_ancillary_data:
+
 Adding ancillary spatial data
 =============================
 

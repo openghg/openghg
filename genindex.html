@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; OpenGHG 0.16.0 documentation</title>
+    <title>Index &#8212; OpenGHG 0.17.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/thebelab-helper.js"></script>
@@ -59,8 +59,8 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
-    <meta name="docbuild:last-update" content="Sep 01, 2025"/>
+  <meta name="docsearch:version" content="0.17.0" />
+    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
   </head>
   
   
@@ -126,8 +126,8 @@
       
     
     
-    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.16.0 documentation - Home"/>
-    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.16.0 documentation - Home"/>
+    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
   
   
 </a></div>
@@ -392,6 +392,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.add_obs_column">add_obs_column() (openghg.analyse.ModelScenario method)</a>
 </li>
+      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.align_metadata_attributes">align_metadata_attributes() (openghg.store.ObsSurface method)</a>
+</li>
       <li><a href="api/devapi_metadata.html#openghg.standardise.meta.assign_attributes">assign_attributes() (in module openghg.standardise.meta)</a>, <a href="api/devapi_standardise.html#openghg.standardise.meta.assign_attributes">[1]</a>
 </li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.meta.assign_flux_attributes">assign_flux_attributes() (in module openghg.standardise.meta)</a>
@@ -488,6 +490,8 @@
 </li>
       <li><a href="api/devapi_util.html#openghg.util.decompress_str">decompress_str() (in module openghg.util)</a>
 </li>
+      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.define_loop_params">define_loop_params() (openghg.store.ObsSurface method)</a>
+</li>
       <li><a href="api/devapi_standardise.html#openghg.standardise.meta.define_species_label">define_species_label() (in module openghg.standardise.meta)</a>
 </li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">delete_datasource() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">[1]</a>
@@ -532,18 +536,32 @@
 </li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.FluxData">FluxData (class in openghg.dataobjects)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.FluxData">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries">FluxTimeseries (class in openghg.store)</a>
 </li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.FootprintData">FootprintData (class in openghg.dataobjects)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.FootprintData">[1]</a>
 </li>
       <li><a href="api/devapi_store.html#openghg.store.Footprints">Footprints (class in openghg.store)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_analyse.html#openghg.analyse.ModelScenario.footprints_data_merge">footprints_data_merge() (openghg.analyse.ModelScenario method)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.format_inlet">format_inlet() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.format_inlet">[1]</a>
 </li>
+      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.format_inputs">format_inputs() (openghg.store.BoundaryConditions method)</a>
+
+      <ul>
+        <li><a href="api/devapi_store.html#openghg.store.EulerianModel.format_inputs">(openghg.store.EulerianModel method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries.format_inputs">(openghg.store.FluxTimeseries method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.Footprints.format_inputs">(openghg.store.Footprints method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.ObsColumn.format_inputs">(openghg.store.ObsColumn method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.format_inputs">(openghg.store.ObsSurface method)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_types.html#openghg.types.FunctionError">FunctionError (class in openghg.types)</a>, <a href="api/devapi_types.html#openghg.types.FunctionError">[1]</a>
 </li>
   </ul></td>
@@ -698,6 +716,8 @@
 </li>
       <li><a href="api/devapi_util.html#openghg.util.parse_period">parse_period() (in module openghg.util)</a>
 </li>
+      <li><a href="api/devapi_standardise.html#openghg.standardise.column.parse_tccon">parse_tccon() (in module openghg.standardise.column)</a>
+</li>
       <li><a href="api/devapi_util.html#openghg.util.parse_url_filename">parse_url_filename() (in module openghg.util)</a>
 </li>
       <li><a href="api/devapi_types.html#openghg.types.pathType">pathType (in module openghg.types)</a>
@@ -748,42 +768,28 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_data">read_data() (openghg.store.BoundaryConditions method)</a>
-
-      <ul>
-        <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries.read_data">(openghg.store.FluxTimeseries method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_data">(openghg.store.Footprints method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_data">(openghg.store.ObsSurface method)</a>
-</li>
-      </ul></li>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_file">read_file() (openghg.store.BoundaryConditions method)</a>
-
-      <ul>
-        <li><a href="api/devapi_store.html#openghg.store.EulerianModel.read_file">(openghg.store.EulerianModel method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries.read_file">(openghg.store.FluxTimeseries method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_file">(openghg.store.Footprints method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsColumn.read_file">(openghg.store.ObsColumn method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_file">(openghg.store.ObsSurface method)</a>
-</li>
-      </ul></li>
       <li><a href="api/devapi_util.html#openghg.util.read_header">read_header() (in module openghg.util)</a>
 </li>
       <li><a href="api/devapi_util.html#openghg.util.read_local_config">read_local_config() (in module openghg.util)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">read_multisite_aqmesh() (openghg.store.ObsSurface method)</a>
 </li>
+      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_raw_data">read_raw_data() (openghg.store.BoundaryConditions method)</a>
+
+      <ul>
+        <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries.read_raw_data">(openghg.store.FluxTimeseries method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_raw_data">(openghg.store.Footprints method)</a>
+</li>
+        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_raw_data">(openghg.store.ObsSurface method)</a>
+</li>
+      </ul></li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.refresh">refresh() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.refresh">[1]</a>
 </li>
       <li><a href="api/api_transform.html#openghg.transform.regrid_uniform_cc">regrid_uniform_cc() (in module openghg.transform)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_util.html#openghg.util.relative_time_offset">relative_time_offset() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.remove_punctuation">remove_punctuation() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.remove_punctuation">[1]</a>
@@ -842,10 +848,10 @@
 </li>
       <li><a href="api/api_types.html#openghg.types.SearchError">SearchError (class in openghg.types)</a>, <a href="api/devapi_types.html#openghg.types.SearchError">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults">SearchResults (class in openghg.dataobjects)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.SearchResults">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_objectstore.html#openghg.objectstore.set_object">set_object() (in module openghg.objectstore)</a>
 </li>
       <li><a href="api/devapi_objectstore.html#openghg.objectstore.set_object_from_file">set_object_from_file() (in module openghg.objectstore)</a>
@@ -861,6 +867,8 @@
       <li><a href="api/devapi_util.html#openghg.util.split_encompassed_daterange">split_encompassed_daterange() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.standardise_bc">standardise_bc() (in module openghg.standardise)</a>
+</li>
+      <li><a href="api/api_standardise.html#openghg.standardise.standardise_column">standardise_column() (in module openghg.standardise)</a>
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.standardise_flux">standardise_flux() (in module openghg.standardise)</a>
 </li>
@@ -890,15 +898,17 @@
 </li>
       <li><a href="api/api_util.html#openghg.util.timestamp_now">timestamp_now() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.timestamp_now">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_util.html#openghg.util.timestamp_tzaware">timestamp_tzaware() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.timestamp_tzaware">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_util.html#openghg.util.to_dashboard">to_dashboard() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.to_dashboard_mobile">to_dashboard_mobile() (in module openghg.util)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.to_lowercase">to_lowercase() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.to_lowercase">[1]</a>
+</li>
+      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.transform_data">transform_data() (openghg.store.BoundaryConditions method)</a>
 </li>
       <li><a href="api/devapi_util.html#openghg.util.trim_daterange">trim_daterange() (in module openghg.util)</a>
 </li>
@@ -934,20 +944,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_util.html#openghg.util.valid_daterange">valid_daterange() (in module openghg.util)</a>
 </li>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.validate_data">validate_data() (openghg.store.BoundaryConditions static method)</a>
-
-      <ul>
-        <li><a href="api/devapi_store.html#openghg.store.EulerianModel.validate_data">(openghg.store.EulerianModel static method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.FluxTimeseries.validate_data">(openghg.store.FluxTimeseries static method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.Footprints.validate_data">(openghg.store.Footprints static method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsColumn.validate_data">(openghg.store.ObsColumn static method)</a>
-</li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.validate_data">(openghg.store.ObsSurface static method)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_util.html#openghg.util.verify_site">verify_site() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.verify_site">[1]</a>
