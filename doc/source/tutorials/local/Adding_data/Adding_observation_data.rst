@@ -215,49 +215,6 @@ species and instrument and do not need an accompanying precisions file. These ca
 The data will be processed in the same way as the old AGAGE data, and stored in the object store accordingly.
 Ensure that the ``source_format`` argument matches the input filetype, as the two are not compatible.
 
-Adding and standardising column data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Similar to the surface data, we can also add column data to the object store.
-The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
-
-The input formats supported for standardise_column are:
-
-    - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
-    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>`_ to learn about schema for different data types.
-
-The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
-
-To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
-
-.. jupyter-execute::
-
-    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
-
-    satellite_data = retrieve_example_data(url=satellite_data_url)
-
-Now we add this data to the object store using ``standardise_column``, passing the below arguments:
-
-.. note::
-    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
-    (Inversions check the platform value to determine whether the data is satellite or site-column data)
-
-.. jupyter-execute::
-
-    from openghg.standardise import standardise_column
-
-    standardise_column(
-                    filepath=satellite_data[-1],
-                    species="ch4",
-                    platform="satellite",
-                    satellite="gosat",
-                    obs_region="brazil",
-                    network="gosat",
-                )
-
-.. note::
-    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref:`Adding ancillary spatial data <Adding_ancillary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
-
 .. _note-on-datasources:
 
 Note on Datasources
@@ -366,6 +323,49 @@ created when we run ``openghg --quickstart``.
 
 The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
 to more than one store.
+
+Adding and standardising column data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similar to the surface data, we can also add column data to the object store.
+The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+
+The input formats supported for standardise_column are:
+
+    - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>`_ to learn about schema for different data types.
+
+The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
+
+To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
+
+.. jupyter-execute::
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+
+Now we add this data to the object store using ``standardise_column``, passing the below arguments:
+
+.. note::
+    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
+    (Inversions check the platform value to determine whether the data is satellite or site-column data)
+
+.. jupyter-execute::
+
+    from openghg.standardise import standardise_column
+
+    standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat",
+                )
+
+.. note::
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref:`Adding ancillary spatial data <Adding_ancillary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
 
 Adding In-memory dataset to the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
