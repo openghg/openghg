@@ -410,7 +410,7 @@ The details of the added can be viewed in the returned results dictionary.
 
     decc_results
 
-1. Searching for data
+2. Searching for data
 ---------------------
 
 Searching the object store
