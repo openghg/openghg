@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
 - Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 - Fixed bug in `merge_and_extend_dict` to make sure repeated values in `left` and `right` produce unique values in output and to ensure `left` and `right` are not modified in place. [PR #1477](https://github.com/openghg/openghg/pull/1477)
+- Fixed retrieve_all() function where the value to fetch latest version was overridden in the loop. [PR #1522](https://github.com/openghg/openghg/pull/1522)
 
 ## [0.16.0] - 2025-08-29
 
