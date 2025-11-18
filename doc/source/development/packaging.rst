@@ -54,7 +54,7 @@ Also add "Unreleased" section at the top of ``Changelog.md`` along with the link
    [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
    [0.8.0] - 2024-03-19
 
-Now updated the value of "version" in ``pyproject.toml`` to the new release version. Suppose the new version is ``0.17.0`` then update the file as shown below:
+Now update the value of "version" in ``pyproject.toml`` to the new release version. Suppose the new version is ``0.17.0`` then update the file as shown below:
 
 .. code-block:: toml
 
