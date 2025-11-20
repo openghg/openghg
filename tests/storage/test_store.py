@@ -339,7 +339,7 @@ def test_zarr_encoding(store_name, request, ds1):
     encoding = {dv: {"compressor": compressor} for dv in ds1.data_vars}
 
     # set `to_zarr_kwargs` here since it wasn't passed to init
-    store.to_zarr_kwargs = {"encoding": encoding}
+    store.encoding = encoding
 
     if isinstance(store, VersionedZarrStore):
         store.create_version("v1", checkout=True)

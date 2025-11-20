@@ -8,7 +8,6 @@ from typing import Any, Literal, cast
 import xarray as xr
 
 from openghg.storage import get_versioned_zarr_directory_store
-from openghg.store.storage._encoding import get_zarr_encoding
 from openghg.store.storage._store import Store
 from openghg.types import ZarrStoreError
 
@@ -136,6 +135,13 @@ class LocalZarrStore(Store):
         self._check_writable()
         version = version.lower()
 
+        # Update encoding; this will only apply to new variables; existing variables
+        # will have their encoding set to match what was previously used by xarray.
+        if compressor:
+            self._vzds.compressor = compressor
+        if filters:
+            self._vzds.filters = filters
+
         # Append new data to the zarr store for the current version
         if self.version_exists(version):
             self._vzds.checkout_version(version)
@@ -144,11 +150,6 @@ class LocalZarrStore(Store):
             if not self._vzds.versions and version != "v1":
                 raise ValueError("First version must be v1")
             self._vzds.create_version(version, checkout=True)
-
-            # set encoding
-            # TODO: make this a method; do we want to overwrite or update?
-            encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
-            self._vzds.to_zarr_kwargs = {"encoding": encoding}
 
         self._vzds.insert(dataset)
 
@@ -165,7 +166,7 @@ class LocalZarrStore(Store):
         except ValueError as e:
             raise ZarrStoreError(f"Invalid version: {version}") from e
 
-        return self._vzds.get()  # pass option `consolidated=True`?
+        return self._vzds.get()
 
     def delete_version(self, version: str) -> None:
         """Delete a version from the store.
@@ -219,9 +220,11 @@ class LocalZarrStore(Store):
         self._check_writable()
         self._vzds.checkout_version(version.lower())
 
-        # set encoding
-        encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
-        self._vzds.to_zarr_kwargs = {"encoding": encoding}
+        # update encoding
+        if compressor:
+            self._vzds.compressor = compressor
+        if filters:
+            self._vzds.filters = filters
 
         self._vzds.overwrite(dataset)
 

@@ -158,6 +158,7 @@ class VersionedStore(Store, Versioning):
     """
 
     def __bool__(self) -> bool:
+        """Return True if any version has data."""
         bools = []
         with self.remember_current_version():
             for version in self.versions:
@@ -177,6 +178,7 @@ class VersionedStore(Store, Versioning):
             return super().__bool__()
 
     def bytes_stored(self) -> int:
+        """Bytes stored in Store across all versions."""
         total_bytes = 0
         with self.remember_current_version():
             for version in self.versions:
@@ -218,7 +220,7 @@ class MemoryStore(Store):
         else:
             if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
                 if on_overlap == "error":
-                    raise DataOverlapError("Cannot insert data with conflicts if `on_conflict` == 'error'")
+                    raise DataOverlapError("Cannot insert data with overlaps if `on_overlap` == 'error'")
 
                 # otherwise, select non-overlaps
                 data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)

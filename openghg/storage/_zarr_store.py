@@ -11,6 +11,7 @@ from zarr._storage.store import Store as AbstractZarrStore
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
+from ._encoding import get_zarr_encoding
 from ._indexing import OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
 
@@ -20,7 +21,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
-    accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options", "encoding"]
+    accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options"]
     result = {}
     for k, v in to_zarr_kwargs.items():
         if k in accepted_keys:
@@ -39,6 +40,9 @@ class ZarrStore(Store, Generic[ZST]):
         zarr_store: ZST,
         append_dim: str = "time",
         index_options: dict | None = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        encoding: dict | None = None,
         **to_zarr_kwargs: Any,
     ) -> None:
         """Pass an instantiated Zarr Store.
@@ -50,6 +54,9 @@ class ZarrStore(Store, Generic[ZST]):
             zarr_store: instantiated Zarr Store.
             append_dim: dimension to insert new data along.
             index_options: options for index, such as `method = "nearest"`
+            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            encoding: dictionary mapping data variables to encoding dictionary
             to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
               Not all parameters will be passed on. See here for the full description
               of the parameters: https://docs.xarray.dev/en/latest/generated/xarray.Dataset.to_zarr.html
@@ -59,13 +66,15 @@ class ZarrStore(Store, Generic[ZST]):
               - `zarr_format` (automatically inferred by default)
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
-              - `encoding`: dictionary mapping data variables to encoding dictionary
 
         """
         super().__init__()
         self._store = zarr_store
         self.append_dim = append_dim
         self.index_options = index_options or {}
+        self.compressor = compressor
+        self.filters = filters
+        self.encoding = encoding or {}
         self.to_zarr_kwargs = to_zarr_kwargs
 
     # use property to control assignment of `to_zarr_kwargs`
@@ -112,12 +121,15 @@ class ZarrStore(Store, Generic[ZST]):
 
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
         if not self.store:
+            encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
+            encoding.update(self.encoding)
             data.to_zarr(
                 store=self.store,
                 mode="w",
                 consolidated=True,
                 compute=True,
                 synchronizer=zarr.ThreadSynchronizer(),
+                encoding=encoding,
                 **self.to_zarr_kwargs,
             )
         else:
@@ -152,7 +164,7 @@ class ZarrStore(Store, Generic[ZST]):
 
             # nothing to update
             if not bool(data):
-                logger.warning("No data to update with")
+                logger.warning("No data to update with.")
                 return None
 
             try:
@@ -168,7 +180,7 @@ class ZarrStore(Store, Generic[ZST]):
             except (ValueError, IndexError) as e:
                 # possible issue with non-contiguous data
                 raise NotImplementedError(
-                    "Cannot update Zarr store, possibly due to non-contiguous data."
+                    "Cannot update Zarr store, possibly due to non-contiguous data. "
                     "Updating with non-contiguous data is currently not supported."
                 ) from e
 
@@ -231,6 +243,9 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
         versions: Iterable[str] | None = None,
         append_dim: str = "time",
         index_options: dict | None = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        encoding: dict | None = None,
         **to_zarr_kwargs: Any,
     ) -> None:
         """Create VersionedZarrStore object.
@@ -247,6 +262,9 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
             append_dim: dimension to append new data along.
             index_options: options for the index used to resolve overlaps/conflicts when
               adding data to the store.
+            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            encoding: dictionary mapping data variables to encoding dictionary
             to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
               Not all parameters will be passed on. See here for the full description
               of the parameters: https://docs.xarray.dev/en/latest/generated/xarray.Dataset.to_zarr.html
@@ -256,7 +274,6 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
               - `zarr_format` (automatically inferred by default)
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
-              - `encoding`: dictionary mapping data variables to encoding dictionary
 
         """
         super().__init__(
@@ -268,6 +285,9 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
         # which is delegated to the current version).
         self.append_dim = append_dim
         self.index_options = index_options or {}
+        self.compressor = compressor
+        self.filters = filters
+        self.encoding = encoding or {}
         self.to_zarr_kwargs = parse_to_zarr_kwargs(to_zarr_kwargs)
 
     # make ._store an alias for ._current

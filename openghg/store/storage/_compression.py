@@ -8,7 +8,7 @@ import tempfile
 from numcodecs import Blosc
 import xarray as xr
 
-from openghg.store.storage import get_zarr_encoding
+from openghg.storage._encoding import get_zarr_encoding
 
 
 def compare_compression(filepath: Path) -> dict:
