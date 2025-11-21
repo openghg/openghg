@@ -186,7 +186,7 @@ class ZarrStore(Store, Generic[ZST]):
 
 
 def get_zarr_directory_store(
-    path: Path, append_dim: str = "time", index_options: dict | None = None, **to_zarr_kwargs: Any
+    path: Path, append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
 ) -> ZarrStore[zarr.DirectoryStore]:
     """Factory function to create ZarrStore objects based on a zarr.DirectoryStore.
 
@@ -195,20 +195,19 @@ def get_zarr_directory_store(
         append_dim: dimension to append new data along.
         index_options: options for index along append dimension; for instance
           `method = "nearest"`.
-        to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
 
     Returns:
         ZarrStore based on zarr.DirectoryStore.
 
     """
     store = zarr.DirectoryStore(path)
-    return ZarrStore[zarr.DirectoryStore](
-        store, append_dim=append_dim, index_options=index_options, **to_zarr_kwargs
-    )
+    return ZarrStore[zarr.DirectoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 def get_zarr_memory_store(
-    append_dim: str = "time", index_options: dict | None = None, **to_zarr_kwargs: Any
+    append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
 ) -> ZarrStore[zarr.MemoryStore]:
     """Factory function to create ZarrStore objects based on a zarr.MemoryStore.
 
@@ -216,16 +215,15 @@ def get_zarr_memory_store(
         append_dim: dimension to append new data along.
         index_options: options for index along append dimension; for instance
           `method = "nearest"`.
-        to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
 
     Returns:
         ZarrStore based on zarr.MemoryStore.
 
     """
     store = zarr.MemoryStore()
-    return ZarrStore[zarr.MemoryStore](
-        store, append_dim=append_dim, index_options=index_options, **to_zarr_kwargs
-    )
+    return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
@@ -328,7 +326,7 @@ def get_versioned_zarr_directory_store(
     append_dim: str = "time",
     index_options: dict | None = None,
     version_pat: str = r"v\d+",
-    **to_zarr_kwargs: Any,
+    **kwargs: Any,
 ) -> VersionedZarrStore[zarr.DirectoryStore]:
     """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
 
@@ -339,7 +337,8 @@ def get_versioned_zarr_directory_store(
         index_options: options for the index used to resolve overlaps/conflicts when
             adding data to the store.
         version_pat: regex pattern to match existing versions
-        to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
 
     Returns:
         VersionedZarrStore object with zarr.DirectoryStore as the underlying
@@ -368,7 +367,7 @@ def get_versioned_zarr_directory_store(
         versions=versions,
         append_dim=append_dim,
         index_options=index_options,
-        **to_zarr_kwargs,
+        **kwargs,
     )
 
 
@@ -376,7 +375,7 @@ def get_versioned_zarr_memory_store(
     versions: Iterable[str] | None = None,
     append_dim: str = "time",
     index_options: dict | None = None,
-    **to_zarr_kwargs: Any,
+    **kwargs: Any,
 ) -> VersionedZarrStore[zarr.MemoryStore]:
     """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore.
 
@@ -385,7 +384,8 @@ def get_versioned_zarr_memory_store(
         append_dim: dimension to append new data along.
         index_options: options for the index used to resolve overlaps/conflicts when
           adding data to the store.
-        to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
 
     Returns:
         VersionedZarrStore object with zarr.MemoryStore as the underlying
@@ -402,5 +402,5 @@ def get_versioned_zarr_memory_store(
         versions=versions,
         append_dim=append_dim,
         index_options=index_options,
-        **to_zarr_kwargs,
+        **kwargs,
     )
