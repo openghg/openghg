@@ -55,7 +55,7 @@ class Store(ABC):
     """Interface for means of storing a single dataset."""
 
     def __bool__(self) -> bool:
-        """Return True is Store is not empty."""
+        """Return True if Store is not empty."""
         raise NotImplementedError
 
     def __repr__(self) -> str:
@@ -163,7 +163,7 @@ class VersionedStore(Store, Versioning):
         with self.remember_current_version():
             for version in self.versions:
                 self.checkout_version(version)
-                bools.append(super().__bool__())  # get number of bytes from Store.bytes_stored
+                bools.append(super().__bool__())  # check if version non-empty via Store.__bool__
 
         return any(bools)
 
@@ -173,12 +173,23 @@ class VersionedStore(Store, Versioning):
         Since the __bool__ method for a versioned store only
         checks if there exists a non-empty version, we need
         a separate method to check if a particular version is non-empty.
+
+        Args:
+            version: version to check.
+
+        Returns:
+            True if given version has data.
         """
         with self.remember_current_version():
+            self.checkout_version(version)
             return super().__bool__()
 
     def bytes_stored(self) -> int:
-        """Bytes stored in Store across all versions."""
+        """Bytes stored in Store across all versions.
+
+        Returns:
+            Number of bytes stored across all versions.
+        """
         total_bytes = 0
         with self.remember_current_version():
             for version in self.versions:
@@ -200,7 +211,7 @@ class MemoryStore(Store):
         self.index_options = index_options or {}
 
     def __repr__(self) -> str:
-        return f"MemoryStore({self.data!r}, append_dim={self.append_dim})"
+        return f"{type(self).__name__}({self.data!r}, append_dim={self.append_dim})"
 
     def __bool__(self) -> bool:
         return self.data is not None
@@ -271,12 +282,10 @@ class VersionedMemoryStore(VersionedStore, SimpleVersioning[xr.Dataset | None], 
         super().__init__(
             factory=lambda _: None,  # empty MemoryStore initialised with data = None
             versions=versions,
+            data=data,
+            append_dim=append_dim,
+            index_options=index_options,
         )
-        self.append_dim = append_dim
-        self.index_options = index_options or {}
-
-    def __repr__(self) -> str:
-        return f"VersionedMemoryStore(append_dim={self.append_dim})"
 
     # make .data an alias for ._current
     @property

@@ -162,7 +162,7 @@ class LocalZarrStore(Store):
             xr.Dataset: Dataset from the store
         """
         try:
-            self._vzds.checkout_version(version)
+            self._vzds.checkout_version(version.lower())
         except ValueError as e:
             raise ZarrStoreError(f"Invalid version: {version}") from e
 
@@ -179,7 +179,7 @@ class LocalZarrStore(Store):
         self._check_writable()
 
         try:
-            self._vzds.delete_version(version)
+            self._vzds.delete_version(version.lower())
         except ValueError as e:
             raise ZarrStoreError(f"Invalid version: {version}") from e
 
@@ -218,7 +218,11 @@ class LocalZarrStore(Store):
 
         """
         self._check_writable()
-        self._vzds.checkout_version(version.lower())
+
+        try:
+            self._vzds.checkout_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
 
         # update encoding
         if compressor:

@@ -107,7 +107,7 @@ class ZarrStore(Store, Generic[ZST]):
             return 0
 
         nbytes = 0
-        for key in self.store.keys():
+        for key in self.store:
             nbytes += self.store.getsize(key)  # type: ignore
         return nbytes
 
@@ -359,7 +359,7 @@ def get_versioned_zarr_directory_store(
 
     # factory function to create a Directory Stores corresponding to versions
     def factory(v: str) -> zarr.DirectoryStore:
-        """Factory for versioning."""
+        """Factory function to create a Directory Store corresponding to version."""
         return zarr.DirectoryStore(path / v)
 
     return VersionedZarrStore[zarr.DirectoryStore](

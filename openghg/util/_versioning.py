@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from collections import UserDict, UserList
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from copy import deepcopy
-from typing import Generic, Iterator, Protocol, runtime_checkable, TypeVar
+from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
 from collections.abc import Mapping
 
 
@@ -111,6 +111,7 @@ class SimpleVersioning(Versioning, Generic[T]):
         self,
         factory: Callable[[str], T],
         versions: Iterable[str] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Create SimpleVersioning object.
 
@@ -118,11 +119,8 @@ class SimpleVersioning(Versioning, Generic[T]):
             factory: factory function to create the versioned objects given a
             version string.
             versions: initial list of versions.
-            super_init: if True, pass kwargs to `super().__init__`, which might
-              be helpful, since this class is intended to be used with multiple
-              inheritence.
-            **kwargs: arguments to pass via `super().__init__`; these are ignored if
-              if `super_init` is False.
+            **kwargs: arguments to pass via `super().__init__`; if no kwargs are passed
+              `super().__init__()` is called, but `TypeError`s are suppressed.
 
         """
         self.factory = factory
@@ -130,9 +128,16 @@ class SimpleVersioning(Versioning, Generic[T]):
         if versions:
             self._versions = {v: factory(v) for v in versions}
             self._current_version: str | None = self.versions[-1]  # version added last
+            self.checkout_version(self._current_version)
         else:
             self._versions = {}
             self._current_version = None
+
+        try:
+            super().__init__(**kwargs)
+        except Exception as e:
+            if kwargs:
+                raise e
 
     @property
     def versions(self) -> list[str]:
@@ -152,7 +157,12 @@ class SimpleVersioning(Versioning, Generic[T]):
 
     @_current.setter
     def _current(self, value: T) -> None:
-        self._versions[self.current_version] = value
+        try:
+            self._versions[self.current_version] = value
+        except VersionError as e:
+            # ignore assigning None without version checked out
+            if value is not None:
+                raise e
 
     def checkout_version(self, v: str) -> None:
         """Checkout specified version.
