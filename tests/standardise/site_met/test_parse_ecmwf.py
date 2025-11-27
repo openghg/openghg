@@ -1,5 +1,6 @@
 import pytest
-import os
+
+from openghg.util import clean_string
 from openghg.standardise.site_met import parse_ecmwf
 from helpers import get_met_datapath
 
@@ -51,4 +52,4 @@ def test_ecmwf_site_met(site, network, filename):
 
     assert metadata["site"] == site
     assert metadata["network"] == network
-    assert metadata["source"] == "ECMWF ERA5"
+    assert metadata["met_source"] == clean_string("ECMWF ERA5")
