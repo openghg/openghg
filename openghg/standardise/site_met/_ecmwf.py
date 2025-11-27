@@ -12,11 +12,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_ecmwf(
-    filepath: str | Path,
-    site: str,
-    network: str,
-    met_source: str | None = None,
-    chunks: dict | None = None
+    filepath: str | Path, site: str, network: str, met_source: str | None = None, chunks: dict | None = None
 ) -> list[MetadataAndData]:
     """
     Parse Met ECMWF data (typically downloaded from the Copernicus Climate Data Store).
