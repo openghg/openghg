@@ -901,7 +901,7 @@ def standardise_site_met(
     filepath: str | Path,
     site: str,
     network: str,
-    met_source: str = None,
+    met_source: str | None = None,
     source_format: str = "ecmwf",
     if_exists: str = "auto",
     save_current: str = "auto",
