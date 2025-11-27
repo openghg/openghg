@@ -3,7 +3,7 @@ from pathlib import Path
 import xarray as xr
 
 from openghg.types import MetadataAndData
-from openghg.util import timestamp_now, _get_site_data
+from openghg.util import timestamp_now, _get_site_data, clean_string
 from openghg.util import _get_site_pressure
 
 
@@ -60,6 +60,7 @@ def parse_ecmwf(
 
         if met_source is None:
             met_source = "ECMWF ERA5"
+            met_source = clean_string(met_source)
 
         metadata = {
             "author": "OpenGHG Cloud",
