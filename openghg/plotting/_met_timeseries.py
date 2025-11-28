@@ -5,7 +5,7 @@ from pandas import Timestamp
 import numpy as np
 import plotly.express as px
 
-from openghg.util import _get_site_data
+from openghg.util import _get_site_data, format_inlet
 
 
 # from openghg.retrieve.met import get_site_pressure
@@ -66,6 +66,9 @@ def plot_met_timeseries(
     fig = make_subplots(rows=len(variables), cols=1, shared_xaxes=True, subplot_titles=variables)
 
     legend = True
+
+    if inlet_height not in [None, "all"]:
+        inlet_height = format_inlet(inlet_height)
 
     for nvar, v in enumerate(variables):
         units = data.data[v].attrs["units"]
