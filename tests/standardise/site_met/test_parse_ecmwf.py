@@ -31,7 +31,7 @@ def test_ecmwf_site_met(site, network, filename):
     assert dataset is not None
 
 
-    expected_dims = ["time", "lat", "lon", "pressure_level", "inlet_height"]
+    expected_dims = ["time", "lat", "lon", "pressure_level", "inlet"]
 
     expected_vars = ["u_wind", "v_wind"]
 
@@ -44,7 +44,7 @@ def test_ecmwf_site_met(site, network, filename):
     assert not missing_vars, f"Missing variables in footprint file: {missing_vars}"
 
 
-    assert len(dataset.inlet_height.values) == len(dataset.inlet_pressure.values)
+    assert len(dataset.inlet.values) == len(dataset.inlet_pressure.values)
 
     # test metadata
 

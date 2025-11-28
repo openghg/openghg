@@ -17,7 +17,7 @@ def plot_met_timeseries(
     end_date: str | None = None,
     title: str | None = None,
     variables: list[str] | None = None,
-    inlet_height: str | None = None,
+    inlet: str | None = None,
     subplot_height: int = 100,
 ) -> go.Figure:
     """Plot timeseries of meteorology for a particular site. METData object must be produced using the corresponding search function search_site_met(site="TAC")
@@ -27,7 +27,7 @@ def plot_met_timeseries(
         start_date and end_date: as strings
         title: Title for the plot
         variables: List of variable names to plot (if None all variables in data will be plotted)
-        inlet_height: Inlet height to plot. If None, the extracted pressure levels are plotted. If "all", all inlets are plotted, interpolated linearly. If a specific height is given, the data is interpolated linearly to this height (eg. "10magl").
+        inlet: Inlet height to plot. If None, the extracted pressure levels are plotted. If "all", all inlets are plotted, interpolated linearly. If a specific height is given, the data is interpolated linearly to this height (eg. "10magl").
         subplot_height: height of each subplot. default is 100
     Returns:
         go.Figure: Plotly Graph Object Figure
@@ -48,9 +48,9 @@ def plot_met_timeseries(
                     f"{v} is not one of the variables in the data, please select one of {list(data.data.keys())} or fetch more data"
                 )
     site = data.metadata["site"]
-    latitude, longitude, _, inlet_heights = _get_site_data(site=site, network=data.metadata["network"])
+    latitude, longitude, _, inlets = _get_site_data(site=site, network=data.metadata["network"])
 
-    # measure_pressure = get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
+    # measure_pressure = get_site_pressure(inlet_heights=inlets, site_height=site_height)
 
     if start_date is not None or end_date is not None:
         start_date = Timestamp(data.data.time.values[0]) if start_date is None else start_date
@@ -67,8 +67,8 @@ def plot_met_timeseries(
 
     legend = True
 
-    if inlet_height not in [None, "all"]:
-        inlet_height = format_inlet(inlet_height)
+    if inlet not in [None, "all"]:
+        inlet = format_inlet(inlet)
 
     for nvar, v in enumerate(variables):
         units = data.data[v].attrs["units"]
@@ -76,27 +76,27 @@ def plot_met_timeseries(
         layouts[f"yaxis{nvar + 1}"] = {"title": units}
 
         # format the levels to plot (whether as extracted or interpolated) and their labels
-        if inlet_height is None:
+        if inlet is None:
             # plot the met for all pressure levels, as present in the data
             pressure_level = sorted(dataset.pressure_level.values)
 
             names = [f"{pl} hPa" for pl in pressure_level]
 
-        elif inlet_height == "all":
+        elif inlet == "all":
             # plot the met for all inlets, interpolated linearly to the corresponding pressure
             pressure_level = dataset.inlet_pressure.values
-            names = [hg for hg in dataset.inlet_height.values]
+            names = [hg for hg in dataset.inlet.values]
             names = [x for _, x in sorted(zip(pressure_level, names), reverse=True)]
             pressure_level = sorted(pressure_level)
 
-        elif inlet_height in dataset.inlet_height.values:
+        elif inlet in dataset.inlet.values:
             # plot the met for the specific inlet height, interpolated linearly to the corresponding pressure
-            pressure_level = [float(dataset.inlet_pressure.sel(inlet_height=inlet_height).values)]
-            names = [inlet_height]
+            pressure_level = [float(dataset.inlet_pressure.sel(inlet=inlet).values)]
+            names = [inlet]
 
         else:
             raise ValueError(
-                f"The inlet_height {inlet_height} is not valid. Please pass None, 'all' or one of {dataset.inlet_height.values}"
+                f"The inlet {inlet} is not valid. Please pass None, 'all' or one of {dataset.inlet.values}"
             )
 
         pressure_level = [round(x, 2) for x in pressure_level]

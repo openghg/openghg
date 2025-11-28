@@ -49,8 +49,8 @@ def parse_ecmwf(
 
         data = data.assign_coords(
             {
-                "inlet_height": (("inlet_height"), inlet_heights),
-                "inlet_pressure": (("inlet_height"), inlet_pressures),
+                "inlet": (("inlet"), inlet_heights),
+                "inlet_pressure": (("inlet"), inlet_pressures),
             }
         )
 
