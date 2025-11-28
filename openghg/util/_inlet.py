@@ -178,14 +178,14 @@ def extract_inlet_value(
     Returns:
         float: Numerical value for the inlet
     """
-    
+
     inlet = format_inlet(inlet, units, special_keywords=None)
 
     try:
         inlet_value = float(inlet)
     except ValueError:
         inlet_value = float(inlet.strip(units))
-    
+
     return inlet_value
 
 
