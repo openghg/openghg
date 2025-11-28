@@ -1,4 +1,5 @@
 import numpy as np
+from openghg.util._inlet import extract_inlet_value
 
 
 def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
@@ -10,8 +11,6 @@ def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
     Returns:
         list: List of pressures
     """
-    import re
-
     if not isinstance(inlet_heights, list):
         inlet_heights = [inlet_heights]
 
@@ -19,7 +18,7 @@ def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
     for h in inlet_heights:
         try:
             # Extract the number from the inlet height str using regex
-            inlet = float(re.findall(r"\d+(?:\.\d+)?", h)[0])
+            inlet = extract_inlet_value(h)
             measurement_height = inlet + float(site_height)
             # Calculate the pressure
             pressure = float(1000 * np.exp((-1 * measurement_height) / 7640))
