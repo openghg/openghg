@@ -1,5 +1,6 @@
 from typing import Any
 from openghg.util import load_json
+from openghg.util._inlet import format_inlet
 from openghg.types import pathType
 
 __all__ = ["get_site_info", "sites_in_network", "_get_site_data"]
@@ -47,6 +48,8 @@ def _get_site_data(site: str, network: str) -> tuple[float, float, float, list]:
         inlet_heights = site_data["height_name"]
     except KeyError as e:
         raise KeyError(f"Incorrect site or network : {e}")
+
+    inlet_heights = [format_inlet(inlet, units="m") for inlet in inlet_heights]
 
     return latitude, longitute, site_height, inlet_heights
 
