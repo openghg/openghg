@@ -302,7 +302,7 @@ def get_obs_column(
     Returns:
         ObsColumnData: ObsColumnData object
     """
-    obs_data = _get_generic(
+    column_keywords = dict(
         species=species,
         satellite=satellite,
         domain=domain,
@@ -314,8 +314,14 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
-        **kwargs,
     )
+    column_keywords.update(kwargs)
+
+    obs_data = _get_generic(**column_keywords)
+
+    # check if data set is empty
+    if obs_data.data.sizes["time"] == 0:
+        raise SearchError(f"Dataset is empty for obs. with {column_keywords}.")
 
     if return_mf:
         if max_level > max(obs_data.data.lev.values) + 1:
