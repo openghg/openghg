@@ -16,20 +16,21 @@ logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_cams_data_units(ds:xr.DataArray):
+def get_cams_data_units(ds: xr.DataArray):
     """Get unit of CAMS dataset.
     Args:
         ds: dataset from raw cams data from which extract the units
     Returns:
         unit
     """
-    if "CH4" in ds and ds.CH4.units=="1e-9":
+    if "CH4" in ds and ds.CH4.units == "1e-9":
         return "ppb"
-    elif "N2O" in ds and ds.N2O.units=="1e-9 mol mol-1":
+    elif "N2O" in ds and ds.N2O.units == "1e-9 mol mol-1":
         return "ppb"
     else:
         raise ValueError("Units not found.")
-    
+
+
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
     # np.interp returns a scalar if `xi` is a scalar, but we know `xi` is an array
     return cast(np.ndarray, np.interp(xi, x, data, **kwargs))
@@ -281,7 +282,7 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
     return metadata
 
 
-def set_units(ds:xr.Dataset, units:str):
+def set_units(ds: xr.Dataset, units: str):
     """Set units of variables vmr_x
     Args:
         ds: dataset with variable vmr_n/s/w/e
@@ -289,6 +290,7 @@ def set_units(ds:xr.Dataset, units:str):
     """
     for c in ["n", "s", "e", "w"]:
         ds[f"vmr_{c}"].attrs["units"] = units
+
 
 def parse_cams(
     bc_input: str,
