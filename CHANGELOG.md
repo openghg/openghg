@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.17.0...HEAD)
 
+### Updated
+- `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
+
 ## [0.17.0] - 2025-11-15
 
 ### Added
