@@ -16,7 +16,7 @@ logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_cams_data_units(ds: xr.DataArray):
+def get_cams_data_units(ds: xr.DataArray) -> str:
     """Get unit of CAMS dataset.
     Args:
         ds: dataset from raw cams data from which extract the units
@@ -282,7 +282,7 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
     return metadata
 
 
-def set_units(ds: xr.Dataset, units: str):
+def set_units(ds: xr.Dataset, units: str) -> None:
     """Set units of variables vmr_x
     Args:
         ds: dataset with variable vmr_n/s/w/e
