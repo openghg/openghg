@@ -2,6 +2,7 @@ from collections import defaultdict
 import io
 import re
 from zipfile import ZipFile
+from typing import cast, Any
 
 from icoscp_core.icos import data, meta
 import numpy as np
@@ -19,6 +20,9 @@ def camel_to_snake(s: str) -> str:
 
 
 def get_data_attrs(dobj_uri, species) -> dict[str, dict]:
+
+    from icoscp_core.sparql import BoundLiteral, BoundUri
+
     res = meta.sparql_select(attrs_query(dobj_uri))
 
     # TODO mypy fixes... basically anything ending with
@@ -26,17 +30,22 @@ def get_data_attrs(dobj_uri, species) -> dict[str, dict]:
     # is due to our particular query...
     attrs = defaultdict(dict)
     for b in res.bindings:
-        data_var = b["col_label"].value
-        key = b["p_label"].value.replace(" ", "_")
+        col_label = cast(BoundLiteral, b["col_label"])
+        p_label = cast(BoundLiteral, b["p_label"])
+
+        data_var = col_label.value
+        key = p_label.value.replace(" ", "_")
 
         # the query might get flag columns from other species, so skip these
-        if key.startswith("is_a_quality_flag") and species not in b["o_label"].value:
+        o_label = cast(BoundLiteral, b["o_label"])
+        o = cast(BoundUri, b["o"])
+        if key.startswith("is_a_quality_flag") and species not in o_label.value:
             continue
         elif key == "value_format":
             key = "dtype"
-            val = b["o"].uri.split("/")[-1]
+            val = o.uri.split("/")[-1]
         else:
-            val = b["o_label"].value
+            val = o_label.value
 
         if key == "value_type":
             key = "long_name"
@@ -44,7 +53,8 @@ def get_data_attrs(dobj_uri, species) -> dict[str, dict]:
         attrs[data_var][key] = val
 
         if "unit" in b:
-            attrs[data_var]["units"] = b["unit"].value
+            unit = cast(BoundLiteral, b["unit"])
+            attrs[data_var]["units"] = unit.value
 
     return attrs
 
