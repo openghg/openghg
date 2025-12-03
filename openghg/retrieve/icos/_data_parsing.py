@@ -305,7 +305,7 @@ def make_icos_dataset(
     attrs = attrs or {}
     attrs = {camel_to_snake(k): v for k, v in attrs.items()}
     icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
-    ds = icos_df.to_xarray()
+    ds: xr.Dataset = icos_df.to_xarray()
     for dv in ds.data_vars:
         ds[dv].attrs = attrs.get(dv, {})
     if global_attrs is not None:
