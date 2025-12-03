@@ -114,7 +114,7 @@ def get_icos_text_header(icos_text: str) -> dict:
         if line.startswith("#")
     ]
     header_lines = [line for line in header_lines if line]
-    metadata = {}
+    metadata: dict[str, Any] = {}
     comment_line = -1
     for i, line in enumerate(header_lines):
         if "COMMENT" in line:
