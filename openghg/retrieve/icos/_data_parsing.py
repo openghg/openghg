@@ -19,7 +19,7 @@ def camel_to_snake(s: str) -> str:
     return s2.lower()
 
 
-def get_data_attrs(dobj_uri, species) -> dict[str, dict]:
+def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
 
     from icoscp_core.sparql import BoundLiteral, BoundUri
 
