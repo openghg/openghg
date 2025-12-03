@@ -25,9 +25,10 @@ def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
 
     res = meta.sparql_select(attrs_query(dobj_uri))
 
-    # TODO mypy fixes... basically anything ending with
+    # mypy casting: basically anything ending with
     # _label has .value and otherwise it has .uri, but this
-    # is due to our particular query...
+    # is due to our particular query.
+    # As we know this we can cast to each type as appropriate
     attrs: dict = defaultdict(dict)
     for b in res.bindings:
         col_label = cast(BoundLiteral, b["col_label"])
@@ -305,7 +306,7 @@ def make_icos_dataset(
     attrs = attrs or {}
     attrs = {camel_to_snake(k): v for k, v in attrs.items()}
     icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
-    ds = icos_df.to_xarray()
+    ds: xr.Dataset = icos_df.to_xarray()
     for dv in ds.data_vars:
         ds[dv].attrs = attrs.get(dv, {})
     if global_attrs is not None:
