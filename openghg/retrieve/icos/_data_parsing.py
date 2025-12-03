@@ -28,7 +28,7 @@ def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
     # TODO mypy fixes... basically anything ending with
     # _label has .value and otherwise it has .uri, but this
     # is due to our particular query...
-    attrs = defaultdict(dict)
+    attrs: dict = defaultdict(dict)
     for b in res.bindings:
         col_label = cast(BoundLiteral, b["col_label"])
         p_label = cast(BoundLiteral, b["p_label"])
@@ -103,7 +103,7 @@ def get_icos_nc_file(dobj_uri: str) -> xr.Dataset:
 
 # TODO: convert columns/keys to snake case since some of the names in the
 # data file and the header comments are inconsistent
-def get_icos_text_header(icos_text):
+def get_icos_text_header(icos_text: str) -> dict:
     """Parse header from ICOS text file.
 
     This applies to data parsed using `get_icos_text_file`.
