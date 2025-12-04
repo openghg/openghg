@@ -12,9 +12,10 @@ from openghg.storage import (
     get_versioned_zarr_directory_store,
     get_versioned_zarr_memory_store,
 )
+from openghg.storage._store import VersionedStore
 from openghg.storage._zarr_store import ZarrStore, VersionedZarrStore
 from openghg.types import DataOverlapError
-from openghg.util._versioning import VersionError
+from openghg.util._versioning import SimpleVersioning, VersionError
 
 
 # idx1 = pd.date_range("2020-01-01", "2020-01-02", freq="h", inclusive="left")
@@ -338,7 +339,7 @@ def test_zarr_encoding(store_name, request, ds1):
     encoding = {dv: {"compressor": compressor} for dv in ds1.data_vars}
 
     # set `to_zarr_kwargs` here since it wasn't passed to init
-    store.to_zarr_kwargs = {"encoding": encoding}
+    store.encoding = encoding
 
     if isinstance(store, VersionedZarrStore):
         store.create_version("v1", checkout=True)
@@ -379,6 +380,47 @@ def test_add_data_to_new_version(store_name, request, ds1, ds5):
 
 
 @pytest.mark.parametrize("store_name", versioned_store_names)
+def test_nbytes_stored(store_name, request, ds1):
+    """Check that for subclasses of VersionedStore, `bytes_stored` sums over versions."""
+    store = request.getfixturevalue(store_name)
+
+    # create a version and add some data
+    store.create_version("v1", checkout=True)
+    store.insert(ds1)
+
+    nbytes1 = store.bytes_stored()
+
+    # create a version and add same data
+    store.create_version("v2", checkout=True)
+    store.insert(ds1)
+
+    nbytes2 = store.bytes_stored()
+
+    assert nbytes2 == 2 * nbytes1
+
+
+@pytest.mark.parametrize("store_name", versioned_store_names)
+def test_bool(store_name, request, ds1):
+    """Check that for subclasses of VersionedStore, ``bool`` looks to see if any version is non-empty."""
+    store = request.getfixturevalue(store_name)
+
+    # create a version and add some data
+    store.create_version("v1", checkout=True)
+    store.insert(ds1)
+
+    # create another (empty) version
+    store.create_version("v2", checkout=True)
+
+    # check that current version evaluates to False
+    # this uses internals of SimpleVersioning
+    if isinstance(store, SimpleVersioning):
+        assert not store._versions["v2"]
+
+    # check that versioned store evaluates to True
+    assert store
+
+
+@pytest.mark.parametrize("store_name", versioned_store_names)
 def test_clear_data_from_old_version(store_name, request, ds1):
     """Check that data can be cleared from an old version without affecting a new version."""
     store = request.getfixturevalue(store_name)
@@ -393,11 +435,12 @@ def test_clear_data_from_old_version(store_name, request, ds1):
     # checkout v1 and clear it
     store.checkout_version("v1")
     store.clear()
-    assert not store
+    assert not store.has_data("v1")
 
     # check out v2 and test that it is not empty
     store.checkout_version("v2")
-    assert store
+    assert store.has_data("v2")
+    assert store  # since at least one version has data, store evaluates to True
 
 
 @pytest.mark.parametrize("store_name", versioned_store_names)

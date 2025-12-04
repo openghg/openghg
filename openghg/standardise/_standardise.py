@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+import xarray as xr
 from pandas import Timedelta
 import warnings
 
@@ -14,7 +15,8 @@ logger = logging.getLogger("openghg.standardise")
 
 def standardise(
     data_type: str,
-    filepath: str | Path | list[str] | list[Path],
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    data: xr.Dataset | None = None,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -30,6 +32,13 @@ def standardise(
         dict: Dictionary of result data.
     """
     from openghg.store import get_data_class
+
+    filepath_missing = filepath is None or (
+        isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
+    )
+
+    if (filepath_missing and data is None) or (not filepath_missing and data is not None):
+        raise ValueError("Please specify exactly one of `filepath` or `data`.")
 
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
@@ -52,8 +61,7 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(filepath=filepath, **kwargs)
-
+        result = dc.standardise_and_store(data=data, filepath=filepath, **kwargs)
     return result
 
 
@@ -61,7 +69,8 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: multiPathType,
+    data: xr.Dataset | None = None,
+    filepath: multiPathType | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
@@ -165,19 +174,21 @@ def standardise_surface(
     from openghg.standardise.surface import check_gcwerks_input
     from openghg.util import check_filepath
 
-    if source_format.lower() == "gcwerks":
-        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
-    else:
-        filepath = check_filepath(filepath, source_format)
+    if filepath is not None:
+        if source_format.lower() == "gcwerks":
+            filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+        else:
+            filepath = check_filepath(filepath, source_format)
 
-    if sort_files:
-        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
-        if source_format.lower() != "gcwerks":
-            filepath = sort_by_filenames(filepath=filepath)
+        if sort_files:
+            # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
+            if source_format.lower() != "gcwerks":
+                filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
         store=store,
         data_type="surface",
+        data=data,
         filepath=filepath,
         precision_filepath=precision_filepath,
         source_format=source_format,
@@ -786,7 +797,7 @@ def standardise_from_binary_data(
     bucket = get_writable_bucket(name=store)
 
     with dclass(bucket) as dc:
-        result = dc.read_data(
+        result = dc.read_raw_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
     return result

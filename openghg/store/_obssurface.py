@@ -23,7 +23,7 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(
+    def read_raw_data(
         self,
         binary_data: bytes,
         metadata: dict,
@@ -87,14 +87,14 @@ class ObsSurface(BaseStore):
                 raise ValueError("No valid metadata arguments passed, please check documentation.")
 
             if precision_data is None:
-                result = self.read_file(filepath=filepath, **meta_kwargs)
+                result = self.standardise_and_store(filepath=filepath, **meta_kwargs)
             else:
                 # We'll assume that if we have precision data it's GCWERKS
                 # We don't read anything from the precision filepath so it's name doesn't matter
                 precision_filepath = tmpdir_path.joinpath("precision_data.C")
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
-                result = self.read_file(
+                result = self.standardise_and_store(
                     filepath=filepath,
                     precision_filepath=[precision_filepath],
                     site_filepath=site_filepath,
