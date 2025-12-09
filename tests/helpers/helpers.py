@@ -94,7 +94,7 @@ def get_datapath_base(data_type: str, filename: str) -> Path:
     return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
-def get_retrieval_datapath(filename: str, archive = str | None) -> Path:
+def get_retrieval_datapath(filename: str, archive: str | None = None) -> Path:
     """Return the path to the retrieve data file.
     Args:
         filename: Name of the file
