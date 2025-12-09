@@ -78,7 +78,7 @@ def indexes():
     idx4 = idx1 + pd.Timedelta("4h")  # shift by 4 hours
     idx5 = pd.date_range("2020-01-02", "2020-01-03", freq="h", inclusive="left")  # index starting after idx1
 
-    return [idx1, idx2, idx3, idx4, idx4, idx5]
+    return [idx1, idx2, idx3, idx4, idx5]
 
 
 # TODO: parametrize this test

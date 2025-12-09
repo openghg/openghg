@@ -94,6 +94,11 @@ class ZarrStore(Store, Generic[ZST]):
 
     @property
     def index(self) -> pd.Index:
+        """Index of append dimension of data.
+
+        This index is in the order of the data as it is stored on disk,
+        which is needed for proper alignment during updates.
+        """
         return self._get(sort=False).get_index(self.append_dim)
 
     @property
@@ -199,9 +204,9 @@ class ZarrStore(Store, Generic[ZST]):
 
                 try:
                     source_regions, target_regions, _ = contiguous_regions(
-                        data.get_index(self.append_dim), self.index, **self.index_options
+                        data.get_index(self.append_dim), self.index, **kwargs
                     )
-                except pd.errors.DuplicateLabelError as e:
+                except ValueError as e:
                     raise UpdateError(
                         f"Multiple input values map to the same stored value with index options {self.index_options}."
                     ) from e

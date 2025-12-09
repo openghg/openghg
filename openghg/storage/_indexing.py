@@ -70,15 +70,15 @@ class OverlapDeterminer:
 # ----------------------------------------
 
 
-# TODO: this can probably be generic in source and target, bound to "array like"
-def sort_by_target(source: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _sort_by_target(source: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Sort `target` array and apply the same permutation to `source`."""
     shuf = np.argsort(target)
     return source[shuf], target[shuf]
 
 
 def is_monotonic(idx: pd.Index) -> bool:
-    # explictly convert to bool for mypy...
+    """Return True if index is increasing or decreasing."""
+    # explicitly convert to bool for mypy...
     return bool(idx.is_monotonic_increasing or idx.is_monotonic_decreasing)
 
 
@@ -100,8 +100,8 @@ def _alignment_indexers(
 
     if (align_idxer == -1).any():
         if not ignore_missing:
-            raise pd.errors.DuplicateLabelError(
-                "Can only find contiguous regions for a subset of the target index if `ignore_missing==False`."
+            raise ValueError(
+                "If `ignore_missing==False`, the source index must be a subset of the target index "
             )
         source_idxer = source_idxer[align_idxer != -1]
         align_idxer = align_idxer[align_idxer != -1]
@@ -119,7 +119,7 @@ def _alignment_indexers_with_tolerances(
 
     To align with tolerances, the target index must be monotonic (increasing or decreasing). To align
     with a target that might not be monotonic, we sort the target index, align to the sorted target index,
-    the undo the sorting.
+    then undo the sorting.
 
     If working with data in memory, there isn't really any reason to do this, since you could just sort the
     target data. However, we cannot sort Zarr data stored on disk, so we must align as if we have sorted the
@@ -147,14 +147,14 @@ def _alignment_indexers_with_tolerances(
     source_idxer = np.arange(len(source))
 
     target_sort_idxer = np.argsort(target)
-    targed_sorted = target[target_sort_idxer]
+    target_sorted = target[target_sort_idxer]
 
-    align_idxer = targed_sorted.get_indexer(source, **kwargs)
+    align_idxer = target_sorted.get_indexer(source, **kwargs)
 
     if (align_idxer == -1).any():
         if not ignore_missing:
-            raise pd.errors.DuplicateLabelError(
-                "Can only find contiguous regions for a subset of the target index if `ignore_missing==False`."
+            raise ValueError(
+                "If `ignore_missing==False`, the source index must be a subset of the target index "
             )
         source_idxer = source_idxer[align_idxer != -1]
         align_idxer = align_idxer[align_idxer != -1]
@@ -181,7 +181,7 @@ def contiguous_regions(
     increasing_target_regions: bool = True,
     **kwargs: Any,  # TODO: I think we have a type for this...
 ) -> tuple[list[np.ndarray], list[np.ndarray], np.ndarray]:
-    """Get indicies partitioning `source` and `target` into matching contiguous regions.
+    """Get indices partitioning `source` and `target` into matching contiguous regions.
 
     For example, if
 
@@ -201,14 +201,14 @@ def contiguous_regions(
 
     Keyword args can be used to add tolerances to the alignment. For instance, if we modify each date of the
     source index by adding a random timedelta of less than one day, then we will get the same partition using
-    `method="ffill"` and `tolerance=pd.Timdelta("1d")`.
+    `method="ffill"` and `tolerance=pd.Timedelta("1d")`.
 
     Args:
         source: index (or index values) from source data
         target: index from target data
         ignore_missing: if True, ignore indices in `source` that do not correspond to any index in `target`.
         increasing_target_regions: if True, sort the target indexer after aligning. This avoids gaps due to
-            the target index being out of order. The requires shuffling the source data, but the source and
+            the target index being out of order. This requires shuffling the source data, but the source and
             target regions need to be sorted later if we're updating a Zarr store, so generally this should be
             set to `True`.
         **kwargs: keyword args to pass to `pd.Index.get_indexer`, namely: `method`, `tolerance`, `limit`.
@@ -220,7 +220,7 @@ def contiguous_regions(
     source_idx, idxer = alignment_indexers(source, target, ignore_missing, **kwargs)
 
     if increasing_target_regions:
-        source_idx, idxer = sort_by_target(source_idx, idxer)
+        source_idx, idxer = _sort_by_target(source_idx, idxer)
 
     # split target regions into contiguous blocks by looking for sequences in `idxer` of the form
     # m, m + 1, m + 2, ...
