@@ -133,7 +133,6 @@ store_names = [
     "versioned_zarr_memory_store",
     "versioned_zarr_directory_store",
 ]
-store_names_is_versioned = [(name, "versioned" in name) for name in store_names]
 
 
 #------------------------------
@@ -143,11 +142,11 @@ store_names_is_versioned = [(name, "versioned" in name) for name in store_names]
 
 # To use fixtures in parametrize, use the "request" fixture, as detailed here:
 # https://stackoverflow.com/questions/42014484/pytest-using-fixtures-as-arguments-in-parametrize
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_insert_creates(store_name, is_versioned, request, ds1):
+@pytest.mark.parametrize("store_name", store_names)
+def test_insert_creates(store_name, request, ds1):
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     assert not store
@@ -159,11 +158,11 @@ def test_insert_creates(store_name, is_versioned, request, ds1):
     xr.testing.assert_equal(store.get(), ds1)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_clear(store_name, is_versioned, request, ds1):
+@pytest.mark.parametrize("store_name", store_names)
+def test_clear(store_name, request, ds1):
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     assert not store
@@ -178,11 +177,11 @@ def test_clear(store_name, is_versioned, request, ds1):
     xr.testing.assert_identical(store.get(), xr.Dataset())
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_insert_twice(store_name, is_versioned, request, ds1, ds5):
+@pytest.mark.parametrize("store_name", store_names)
+def test_insert_twice(store_name, request, ds1, ds5):
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -193,12 +192,12 @@ def test_insert_twice(store_name, is_versioned, request, ds1, ds5):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_error_on_insert_overlap(store_name, is_versioned, request, ds1):
+@pytest.mark.parametrize("store_name", store_names)
+def test_error_on_insert_overlap(store_name, request, ds1):
     """Test an error is raised on overlap."""
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -207,12 +206,12 @@ def test_error_on_insert_overlap(store_name, is_versioned, request, ds1):
         store.insert(ds1)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_insert_ignore_overlap(store_name, is_versioned, request, ds1, ds4):
+@pytest.mark.parametrize("store_name", store_names)
+def test_insert_ignore_overlap(store_name, request, ds1, ds4):
     """Test that insert with `on_overlap = 'ignore'` inserts non-overlaping values."""
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -229,11 +228,11 @@ def test_insert_ignore_overlap(store_name, is_versioned, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_update(store_name, is_versioned, request, ds1, twice_ds1):
+@pytest.mark.parametrize("store_name", store_names)
+def test_update(store_name, request, ds1, twice_ds1):
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -246,12 +245,12 @@ def test_update(store_name, is_versioned, request, ds1, twice_ds1):
     xr.testing.assert_equal(store.get(), twice_ds1)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_update_ignore_nonoverlaps(store_name, is_versioned, request, ds1, ds4):
+@pytest.mark.parametrize("store_name", store_names)
+def test_update_ignore_nonoverlaps(store_name, request, ds1, ds4):
     """Test `update` with non-overlaps ignored."""
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -266,9 +265,9 @@ def test_update_ignore_nonoverlaps(store_name, is_versioned, request, ds1, ds4):
 
 
 @pytest.mark.parametrize(
-    "store_name, is_versioned", [(name, "versioned" in name) for name in store_names]
+    "store_name", store_names
 )
-def test_non_contiguous_update(store_name, is_versioned, request, ds1, twice_ds2):
+def test_non_contiguous_update(store_name, request, ds1, twice_ds2):
     """Test `update` when only some of the values are updated.
 
     This raises an error with Zarr stores because the region to update is non-contiguous.
@@ -276,7 +275,7 @@ def test_non_contiguous_update(store_name, is_versioned, request, ds1, twice_ds2
     """
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
@@ -291,12 +290,12 @@ def test_non_contiguous_update(store_name, is_versioned, request, ds1, twice_ds2
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name, is_versioned", store_names_is_versioned)
-def test_contiguous_update(store_name, is_versioned, request, ds1, twice_ds1, ds5):
+@pytest.mark.parametrize("store_name", store_names)
+def test_contiguous_update(store_name, request, ds1, twice_ds1, ds5):
     """Test `update` on contiguous region of times."""
     store = request.getfixturevalue(store_name)
 
-    if is_versioned:
+    if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
 
     store.insert(ds1)
