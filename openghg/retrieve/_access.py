@@ -354,7 +354,8 @@ def get_obs_column(
         )
         obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
+        for var in ["mf", "mf_prior_factor", "mf_prior_upper_level_factor", "mf_repeatability"]:
+            obs_data.data[var].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             f"x{species}",
