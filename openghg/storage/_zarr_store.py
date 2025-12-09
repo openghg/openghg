@@ -13,7 +13,7 @@ from zarr._storage.store import Store as AbstractZarrStore
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
 from ._encoding import get_zarr_encoding
-from ._indexing import contiguous_regions, OverlapDeterminer
+from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
 
 
@@ -200,13 +200,14 @@ class ZarrStore(Store, Generic[ZST]):
 
                 # only allow one source value to align to a given target value; if multiple source values
                 # align to the same target value, an error will be raised by `contiguous_regions` if `limit=1`.
-                kwargs["limit"] = 1
+                if "method" in kwargs:
+                    kwargs["limit"] = 1
 
                 try:
                     source_regions, target_regions, _ = contiguous_regions(
                         data.get_index(self.append_dim), self.index, **kwargs
                     )
-                except ValueError as e:
+                except IndexingError as e:
                     raise UpdateError(
                         f"Multiple input values map to the same stored value with index options {self.index_options}."
                     ) from e

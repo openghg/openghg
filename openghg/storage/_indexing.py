@@ -82,6 +82,12 @@ def is_monotonic(idx: pd.Index) -> bool:
     return bool(idx.is_monotonic_increasing or idx.is_monotonic_decreasing)
 
 
+class IndexingError(Exception):
+    """Error raised by indexing methods."""
+
+    pass
+
+
 def _alignment_indexers(
     source: pd.Index | np.ndarray,
     target: pd.Index,
@@ -100,7 +106,7 @@ def _alignment_indexers(
 
     if (align_idxer == -1).any():
         if not ignore_missing:
-            raise ValueError(
+            raise IndexingError(
                 "If `ignore_missing==False`, the source index must be a subset of the target index "
             )
         source_idxer = source_idxer[align_idxer != -1]
@@ -153,7 +159,7 @@ def _alignment_indexers_with_tolerances(
 
     if (align_idxer == -1).any():
         if not ignore_missing:
-            raise ValueError(
+            raise IndexingError(
                 "If `ignore_missing==False`, the source index must be a subset of the target index "
             )
         source_idxer = source_idxer[align_idxer != -1]
