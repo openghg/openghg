@@ -1,3 +1,5 @@
+""" """
+
 from collections import defaultdict
 import io
 import re
@@ -20,6 +22,21 @@ def camel_to_snake(s: str) -> str:
 
 
 def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
+    """
+    Get the attributes associated with a data URI (Uniform Resource Identifier).
+    See openghg.retrieve.icos._queries.attrs_query for details of
+    how this query is constructed and what is returned.
+    This creates the "dtype", "long_name" and (where applicable)
+    "units" attributes for individual variables.
+
+    Args:
+        dobj_uri: Data object URI details
+        species: Particular species of interest. This will be used
+            to select details just related to that species if the data
+            is related to more than one species.
+    Returns:
+        dict: Dictionary for the variables and associated attributes
+    """
 
     from icoscp_core.sparql import BoundLiteral, BoundUri
 
@@ -74,7 +91,9 @@ icos_formats = [
 
 
 def get_icos_text_file(dobj_uri: str) -> str:
-    """Get zipped data from ICOS CP.
+    """
+    Files on ICOS Carbon Portal can sometimes be stored as netcdf or zipped text file format.
+    This function is to retrieve zipped text data.
 
     This works for the formats:
     - ICOS ATC time series
@@ -105,7 +124,8 @@ def get_icos_nc_file(dobj_uri: str) -> xr.Dataset:
 # TODO: convert columns/keys to snake case since some of the names in the
 # data file and the header comments are inconsistent
 def get_icos_text_header(icos_text: str) -> dict:
-    """Parse header from ICOS text file.
+    """
+    Parse header from ICOS text file.
 
     This applies to data parsed using `get_icos_text_file`.
     """
@@ -133,6 +153,19 @@ def get_icos_text_header(icos_text: str) -> dict:
 
 
 def get_attrs_from_header(header: dict) -> dict:
+    """
+    This function is to allow the header lines at the top of the text file format
+    to be parsed and details extracted.
+
+    This zipped text file data data can be retrieved using `get_icos_text_file()`
+    and parsed into a dictionary using `get_icos_text_header()` function.
+
+    Args:
+        header: Header details in dictionary format from ICOS text file.
+            Matches to output from `get_icos_text_header()` function.
+    Returns:
+        dict: Variable attributes based on the header
+    """
     attrs = defaultdict(list)
     for comment in header["comment"]:
         if (col := comment.split(":")[0]) in header["columns"]:
@@ -151,6 +184,7 @@ def get_attrs_from_header(header: dict) -> dict:
 
 
 def get_full_attrs(dobj_uri: str, species: str, header: dict) -> dict:
+    """ """
     attrs = get_data_attrs(dobj_uri, species)
     for k, v in get_attrs_from_header(header).items():
         attrs[k]["description"] = v
@@ -172,6 +206,7 @@ def parse_date_columns(df: pd.DataFrame) -> tuple[list[str], pd.Series]:
 
 
 def icos_format_to_dtype(value_format: str) -> np.dtype | None:
+    """ """
     # adapted from icoscp_core.cpb._type_post_process
     icos_format_to_dtype_dict = {
         "bmpChar": np.dtype("U1"),
@@ -303,6 +338,7 @@ def parse_icos_atc_flask_time_series_text(
 def make_icos_dataset(
     icos_df: pd.DataFrame, attrs: dict | None = None, global_attrs: dict | None = None
 ) -> xr.Dataset:
+    """ """
     attrs = attrs or {}
     attrs = {camel_to_snake(k): v for k, v in attrs.items()}
     icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
@@ -315,6 +351,7 @@ def make_icos_dataset(
 
 
 def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
+    """ """
     # find format
     fmt = icos_format_info().loc[data_info["spec_label"]].fmt
     dobj_uri = data_info["dobj_uri"]

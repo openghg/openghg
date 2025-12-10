@@ -51,12 +51,14 @@ def sparql_header() -> str:
 
 
 def make_spec_filter(spec_label: str | None = None) -> str:
+    """ """
     if spec_label is None:
         return ""
     return f'FILTER REGEX (?specLabel, {spec_label}, "i")'
 
 
 def make_site_filter(site: str | list[str] | None) -> str:
+    """ """
     if site is None:
         return ""
 
@@ -68,12 +70,14 @@ def make_site_filter(site: str | list[str] | None) -> str:
 
 
 def make_data_level_filter(data_level: int | None) -> str:
+    """ """
     if data_level is None:
         return ""
     return f"FILTER(?data_level = {data_level})"
 
 
 def make_species_filter(species: str | list[str] | None) -> str:
+    """ """
     if species is None:
         return ""
 
@@ -91,6 +95,7 @@ def make_species_filter(species: str | list[str] | None) -> str:
 
 
 def make_project_filter(project: str | list[str] | None) -> str:
+    """ """
     if project is None:
         return ""
 
@@ -110,6 +115,7 @@ def make_project_filter(project: str | list[str] | None) -> str:
 
 
 def make_inlet_filter(inlet: str | list[str] | None) -> str:
+    """ """
     if inlet is None:
         return ""
 
@@ -261,6 +267,20 @@ def data_query(
 
 
 def attrs_query(dobj_uri: str) -> str:
+    """
+    This creates a query to extract the following columns:
+    - col_label - details of column name e.g. "NbPoints"
+    - p_label - "value_format", "value_type", "is a quality flag for"
+    - o_label - description of the type or variable e.g. "32-bit integer value", "number of points"
+    - o - uri to variable details
+    - unit - unit details (when present)
+    These can be used to create attributes for variables.
+
+    Args:
+        dobj_uri: data URI (Uniform Resource Identifier)
+    Returns:
+        str: full sparql query as a string
+    """
     query = sparql_header()
     query += f"""
     SELECT ?col_label ?p_label ?o_label ?o ?unit
@@ -283,6 +303,7 @@ def attrs_query(dobj_uri: str) -> str:
 
 
 def format_query() -> str:
+    """ """
     query = sparql_header()
     query += """
     SELECT DISTINCT ?format_label ?spec_label ?encoding ?format ?spec ?format_comment ?spec_comment
@@ -330,12 +351,14 @@ def parse_binding(b: dict) -> dict:
 
 
 def make_query_df(query: str) -> pd.DataFrame:
+    """ """
     res = meta.sparql_select(query=query)
     return pd.DataFrame([parse_binding(b) for b in res.bindings])
 
 
 @lru_cache
 def icos_format_info() -> pd.DataFrame:
+    """ """
     format_df = make_query_df(format_query()).drop_duplicates(subset="spec_label")
     format_df = format_df.set_index("spec_label")
     format_df["fmt"] = format_df.format.str.split("/").str[-1]
@@ -350,6 +373,7 @@ def dobj_info(
     spec_label: str | None = None,
     format_info: bool = False,
 ) -> pd.DataFrame:
+    """ """
     query = data_query(site, data_level, species, inlet, spec_label)
     dobj_df = make_query_df(query)
 
