@@ -232,6 +232,29 @@ def get_obs_surface(
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
+    else:
+        # temporary fix for nan values 1) set negative uncertainties to NaN
+        # 2) drop variables that are entirely NaN
+
+        uncertainty_data_vars = [
+            dv
+            for dv in data.data_vars
+            if str(dv).endswith("repeatability") or str(dv).endswith("variability")
+        ]
+        for dv in uncertainty_data_vars:
+            # works with dask or in-memory xarray
+            data[dv] = data[dv].where(data[dv] >= 0.0)
+
+        var_to_delete = []
+        for var in data:
+            if data[var].isnull().all():
+                var_to_delete.append(var)
+        if var_to_delete:
+            logger.info(
+                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
+            )
+            data = data.drop_vars(var_to_delete)
+
 
     # Rename variables
     if rename_vars:
