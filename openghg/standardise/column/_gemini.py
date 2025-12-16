@@ -44,7 +44,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
         dataset resampled and filtered (if asked)
     """
     if quality_filt:
-        logger.info(f"Applying filter based on variable 'qual_flag'.")
+        logger.info("Applying filter based on variable 'qual_flag'.")
         ds = ds.where(ds.qual_flag == 1, drop=True)
     ds = ds.dropna("time").sortby("time")
 
