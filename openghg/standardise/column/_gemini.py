@@ -1,12 +1,9 @@
-from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
-from datetime import datetime
 import numpy as np
 import xarray as xr
 import pandas as pd
 
-from openghg.util import load_internal_json
 from openghg.types import pathType
 
 import logging
@@ -58,9 +55,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
         return ds
 
     output = ds.resample(time="h").mean(dim="time")
-    output[f"x{species}_uncertainty"] = ds[f"X{species.upper()}"].resample(time="h").max(dim="time") - ds[
-        f"X{species.upper()}"
-    ].resample(time="h").min(dim="time")
+    output[f"x{species}_uncertainty"] = ds[f"sigma_X{species.upper()}"].resample(time="h").max(dim="time")
 
     logger.warning(
         "Not sure that we should resample at this stage (and also resample the uncertainty like that)."
@@ -104,6 +99,7 @@ def parse_gemini(
 
     var_to_read = [
         f"X{species.upper()}",
+        f"sigma_X{species.upper()}",
         f"X{species.upper()}_AK",
         f"{species}_apriori",
         "h2o_apriori",
@@ -157,7 +153,7 @@ def parse_gemini(
 
     # Prepare data #
     # Align units
-    for var in [f"X{species.upper()}", f"{species}_apriori"]:
+    for var in [f"X{species.upper()}", f"sigma_X{species.upper()}", f"{species}_apriori"]:
         if species == "ch4":
             if "ppm" in data[var].attrs["units"]:
                 data[var] *= 1e3
@@ -165,9 +161,11 @@ def parse_gemini(
             elif "ppb" not in data[var].attrs["units"]:
                 raise ValueError("The units are not those expected.")
         else:
-            if data[f"X{species.upper()}"].units != data[f"{species}_apriori"].units:
+            var_unit_check = [f"X{species.upper()}", f"{species}_apriori", f"sigma_X{species.upper()}"]
+            unit_check = {data[v].units for v in var_unit_check}
+            if len(unit_check) != 1:
                 raise ValueError(
-                    f"'X{species.upper()}' and '{species}_apriori' have different units, please update this part of code to correct that."
+                    f"'X{species.upper()}', '{species}_apriori' and 'sigma_X{species.upper()}' have different units, please update this part of code to correct that."
                 )
             logging.warning(f"No unit conversion is implemented for {species}.")
 
@@ -221,7 +219,7 @@ def parse_gemini(
         }
     )
 
-    data = data.drop_vars(["longitude", "latitude", "h2o_apriori", "obs_height"])
+    data = data.drop_vars(["longitude", "latitude", "h2o_apriori", "obs_height", f"sigma_X{species.upper()}"])
 
     # Altitude
     data = data.rename({"height_grid": "altitude"})
