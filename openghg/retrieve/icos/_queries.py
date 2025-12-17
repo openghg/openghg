@@ -436,7 +436,7 @@ def dobj_info(
     data_level: int | None = None,
     species: str | list[str] | None = None,
     inlet: str | list[str] | None = None,
-    spec_label: str | None = None,
+    spec_label: str | list[str] | None = None,
     spec_label_include: bool | list[bool] = True,
     format_info: bool = False,
 ) -> pd.DataFrame:
