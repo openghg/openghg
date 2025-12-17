@@ -54,7 +54,7 @@ def make_spec_filter(spec_label: str | None = None) -> str:
     """ """
     if spec_label is None:
         return ""
-    return f'FILTER REGEX (?specLabel, {spec_label}, "i")'
+    return rf'FILTER REGEX (?specLabel, "{spec_label}", "i")'
 
 
 def make_site_filter(site: str | list[str] | None) -> str:
