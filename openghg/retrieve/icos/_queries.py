@@ -97,7 +97,7 @@ def make_spec_filter(spec_label: list[str] | str | None = None, include: list[bo
     filter_str = r"FILTER("
     for i, label in enumerate(spec_label):
         # Include NOT (!) condition to exclude entries which match to this value
-        if include[i] == False:
+        if include[i] is False:
             filter_str += "!"
 
         filter_str += rf'REGEX(?specLabel, "{label}", "i")'
