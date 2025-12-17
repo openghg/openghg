@@ -50,8 +50,7 @@ def sparql_header() -> str:
     """
 
 
-def make_spec_filter(spec_label: list[str] | str | None = None,
-                     include: list[bool] | bool = True) -> str:
+def make_spec_filter(spec_label: list[str] | str | None = None, include: list[bool] | bool = True) -> str:
     """
     Create the filter for the spec_label field. For ICOS queries this is often
     searched for more complex or multiple details.
@@ -87,15 +86,15 @@ def make_spec_filter(spec_label: list[str] | str | None = None,
             'FILTER(REGEX(?specLabel, "CO2", "i") && !REGEX(?specLabel, "ObsPack", "i"))'
     """
     if spec_label is None:
-        return ''
-    
+        return ""
+
     if isinstance(spec_label, str):
         spec_label = [spec_label]
-    
+
     if isinstance(include, bool):
         include = [include] * len(spec_label)
 
-    filter_str = r'FILTER('
+    filter_str = r"FILTER("
     for i, label in enumerate(spec_label):
         # Include NOT (!) condition to exclude entries which match to this value
         if include[i] == False:
@@ -104,9 +103,9 @@ def make_spec_filter(spec_label: list[str] | str | None = None,
         filter_str += rf'REGEX(?specLabel, "{label}", "i")'
 
         # If there are still more conditions, include an AND (&&) condition
-        if i+1 < len(spec_label):
-            filter_str += ' && '
-    filter_str += ')'
+        if i + 1 < len(spec_label):
+            filter_str += " && "
+    filter_str += ")"
 
     return filter_str
 
