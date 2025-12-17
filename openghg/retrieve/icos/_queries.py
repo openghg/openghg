@@ -50,11 +50,65 @@ def sparql_header() -> str:
     """
 
 
-def make_spec_filter(spec_label: str | None = None) -> str:
-    """ """
+def make_spec_filter(spec_label: list[str] | str | None = None,
+                     include: list[bool] | bool = True) -> str:
+    """
+    Create the filter for the spec_label field. For ICOS queries this is often
+    searched for more complex or multiple details.
+
+    Args:
+        spec_label: regex or regexes to filter the "spec label" by. If an ordinary string
+            is passed, only spec labels that contain that string as a substring will
+            be matched.
+        include: For spec_label this includes a regex/string search.
+            The include input specifies whether the spec_label value or values
+            should be included or excluded in the search.
+            Examples:
+            - spec_label = "CO2", spec_label_include = True
+                - search for spec_label which includes "CO2"
+            - spec_label = ["CO2", "time"], spec_label_include = True
+                - search for spec_label which includes "CO2" AND "time"
+            - spec_label = ["CO2", "Obspack"], spec_label_include = [True, False]
+                - search for spec_label which includes "CO2" AND excludes "Obspack"
+            Default = True
+            Only used if spec_label is specified (not None).
+    Returns:
+        str: case-insensitive SPARQL query filter related to the spec_label field.
+    Examples:
+        >>> make_spec_filter("CO2")
+            'FILTER(REGEX(?specLabel, "CO2", "i"))'
+        >>> make_spec_filter(r"\\b(?:CO2|CH4|CO)\\b")
+            'FILTER(REGEX(?specLabel, "\\\\b(?:CO2|CH4|CO)\\\\b", "i"))'
+        >>> make_spec_filter(["CO2", "Obspack"])
+            'FILTER(REGEX(?specLabel, "CO2", "i") && REGEX(?specLabel, "ObsPack", "i"))'
+        >>> make_spec_filter(["CO2", "ObsPack"], include=False)
+            'FILTER(!REGEX(?specLabel, "CO2", "i") && !REGEX(?specLabel, "ObsPack", "i"))'
+        >>> make_spec_filter(["CO2", "ObsPack"], include=[True, False])
+            'FILTER(REGEX(?specLabel, "CO2", "i") && !REGEX(?specLabel, "ObsPack", "i"))'
+    """
     if spec_label is None:
-        return ""
-    return rf'FILTER REGEX (?specLabel, "{spec_label}", "i")'
+        return ''
+    
+    if isinstance(spec_label, str):
+        spec_label = [spec_label]
+    
+    if isinstance(include, bool):
+        include = [include] * len(spec_label)
+
+    filter_str = r'FILTER('
+    for i, label in enumerate(spec_label):
+        # Include NOT (!) condition to exclude entries which match to this value
+        if include[i] == False:
+            filter_str += "!"
+
+        filter_str += rf'REGEX(?specLabel, "{label}", "i")'
+
+        # If there are still more conditions, include an AND (&&) condition
+        if i+1 < len(spec_label):
+            filter_str += ' && '
+    filter_str += ')'
+
+    return filter_str
 
 
 def make_site_filter(site: str | list[str] | None) -> str:
@@ -138,7 +192,8 @@ def data_query(
     data_level: int | None = None,
     species: str | list[str] | None = None,
     inlet: str | list[str] | None = None,
-    spec_label: str | None = None,
+    spec_label: str | list[str] | None = None,
+    spec_label_include: bool | list[bool] = True,
     project: str | list[str] | None = ["icos", "euroObspack"],
     custom_filter: str = "",
     strict: bool = True,
@@ -153,9 +208,21 @@ def data_query(
         inlet: inlet or list of inlets. Only exact matches are found. The inlets
           should be strings, since this is OpenGHG convention, but "100", "100.0",
           "100m" will all work.
-        spec_label: regex to filter the "spec label" by. If an ordinary string
+        spec_label: regex or regexes to filter the "spec label" by. If an ordinary string
           is passed, only spec labels that contain that string as a substring will
           be matched.
+        spec_label_include: For spec_label this includes a regex/string search.
+            The spec_label_include input specifies whether the spec_label value or values
+            should be included or excluded in the search.
+            Examples:
+            - spec_label = "CO2", spec_label_include = True
+                - search for spec_label which includes "CO2"
+            - spec_label = ["CO2", "time"], spec_label_include = True
+                - search for spec_label which includes "CO2" AND "time"
+            - spec_label = ["CO2", "Obspack"], spec_label_include = [True, False]
+                - search for spec_label which includes "CO2" AND excludes "Obspack"
+            Default = True
+            Only used if spec_label is specified (not None).
         project: list of case-sensitive project names as defined here:
           https://meta.icos-cp.eu/ontologies/cpmeta/Project
         custom_filter: text added directly to the end of the SPARQL query string
@@ -171,7 +238,7 @@ def data_query(
     data_level_filt = make_data_level_filter(data_level)
     species_filt = make_species_filter(species)
     inlet_filt = make_inlet_filter(inlet)
-    spec_filt = make_spec_filter(spec_label)
+    spec_filt = make_spec_filter(spec_label, spec_label_include)
     project_filt = make_project_filter(project)
 
     if strict:
@@ -371,10 +438,11 @@ def dobj_info(
     species: str | list[str] | None = None,
     inlet: str | list[str] | None = None,
     spec_label: str | None = None,
+    spec_label_include: bool | list[bool] = True,
     format_info: bool = False,
 ) -> pd.DataFrame:
     """ """
-    query = data_query(site, data_level, species, inlet, spec_label)
+    query = data_query(site, data_level, species, inlet, spec_label, spec_label_include)
     dobj_df = make_query_df(query)
 
     if format_info:
