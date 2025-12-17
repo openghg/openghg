@@ -255,7 +255,6 @@ def get_obs_surface(
             )
             data = data.drop_vars(var_to_delete)
 
-
     # Rename variables
     if rename_vars:
         rename_dict = {str(dv): str(dv).lower().replace(species, "mf") for dv in data.data_vars}
