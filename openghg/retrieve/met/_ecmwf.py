@@ -2,7 +2,6 @@ import os
 import cdsapi  # type: ignore
 import numpy as np
 from openghg.util import _get_site_data, _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure  
-from openghg.util import _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
 import pathlib
 import xarray as xr
 
