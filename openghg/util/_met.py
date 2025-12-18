@@ -11,6 +11,9 @@ def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
     Returns:
         list: List of pressures
     """
+
+    scale_height = 7640  # scale height of atmosphere in metres
+
     if not isinstance(inlet_heights, list):
         inlet_heights = [inlet_heights]
 
@@ -21,7 +24,7 @@ def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
             inlet = extract_inlet_value(h)
             measurement_height = inlet + float(site_height)
             # Calculate the pressure
-            pressure = float(1000 * np.exp((-1 * measurement_height) / 7640))
+            pressure = float(1000 * np.exp((-1 * measurement_height) / scale_height))
             measured_pressure.append(pressure)
         except IndexError:
             pass
