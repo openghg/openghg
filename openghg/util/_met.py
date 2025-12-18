@@ -3,7 +3,7 @@ from openghg.util._inlet import extract_inlet_value
 
 
 def _get_site_pressure(inlet_heights: list, site_height: float) -> list[float]:
-    """Calculate the pressure levels required
+    """Calculate the pressure levels required, in hPa, for the given inlet heights and site height.
 
     Args:
         inlet_height: Height(s) of inlets
