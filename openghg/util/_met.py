@@ -87,11 +87,14 @@ def _get_ecmwf_area(site_lat: float, site_long: float) -> list:
     """Find out the area required from ERA5.
 
     Args:
-        site_lat: Latitude of site
-        site_long: Site longitude
+        site_lat: Latitude of site. expected in format -90 to 90
+        site_long: Site longitude. expected in format -180 to 180
     Returns:
         list: List of min/max lat long values
     """
+    assert -90 <= site_lat <= 90, "Latitude must be between -90 and 90"
+    assert -180 <= site_long <= 180, "Longitude must be between -180 and 180"
+
     ecwmf_lat = np.arange(-90, 90.25, 0.25)
     ecwmf_lon = np.arange(-180, 180.25, 0.25)
 
