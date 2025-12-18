@@ -54,12 +54,15 @@ def retrieve_site_met(
     variables: list[str] | None = None,
     local_save_path: str | None = None,
     store: str | None = None,
+    delete_local_files: bool = True,
 ) -> None:
     """
     Retrieve and store Met data from Copernicus Climate Data Store.
+    Saves the files to local_save_path (default is $HOME/met_data), and standardises to selected store.
+    Deletes local files after standardisation by default.
 
     See `pull_site_met` function for more details on the data.
-    ...
+
     """
     from openghg.standardise import standardise_site_met
 
@@ -81,7 +84,8 @@ def retrieve_site_met(
 
     for filepath in filepaths:
         standardise_site_met(filepath, site=site, network=network, met_source=met_source, store=store)
-        os.remove(filepath)  # remove the file after standardisation
+        if delete_local_files:
+            os.remove(filepath)  # remove the file after standardisation
 
 
 def pull_site_met(
