@@ -3,6 +3,7 @@ import cdsapi  # type: ignore
 import numpy as np
 from openghg.util import _get_site_data, _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
 import pathlib
+from pathlib import Path
 
 import logging
 
@@ -182,14 +183,8 @@ def pull_site_met(
     else:
         years = sorted(years)
 
-    default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
-    save_path = default_save_path if save_path is None else save_path
-    assert os.path.isdir(
-        save_path
-    ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
-
-    dataset_savepaths: list[str] = []
     default_save_path = os.path.join(pathlib.Path.home(), "met_data")
+
     if save_path is None:
         save_path = default_save_path
         os.makedirs(save_path, exist_ok=True)
@@ -198,7 +193,7 @@ def pull_site_met(
             save_path
         ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
 
-    dataset_savepaths = []
+    dataset_savepaths: list[str] = []
 
     # TODO - we might need to customise this further in the future to
     # request other types of weather data
@@ -233,11 +228,8 @@ def pull_site_met(
             # Retrieve metadata from Copernicus about the dataset, this includes
             # the location of the data netCDF file.
 
-            dataset_savepath = os.path.join(
-                save_path,
-                f"Met_{site}_{network}_{year}{month}.nc",
-            )
-            dataset_savepaths.append(dataset_savepath)
+            dataset_savepath = Path(save_path) / f"Met_{site}_{network}_{year}{month}.nc"
+            dataset_savepaths.append(str(dataset_savepath))
 
             logger.info(f"Retrieving data for {site} and {month}/{year} to {dataset_savepath}")
             if print_requests:
