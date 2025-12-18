@@ -39,7 +39,7 @@ from ._file import (
 )
 from ._function_inputs import split_function_inputs
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
-from ._inlet import format_inlet, extract_height_name
+from ._inlet import format_inlet, extract_inlet_value, extract_height_name
 from ._metadata_util import (
     null_metadata_values,
     not_set_metadata_values,
@@ -55,7 +55,7 @@ from ._metadata_util import (
 from ._platform import define_platform, format_platform, get_platform_from_info
 from ._registry import get_parameters, AutoRegistry, Registry
 from ._scale import update_scale
-from ._site import get_site_info, sites_in_network
+from ._site import get_site_info, sites_in_network, _get_site_data
 from ._species import (
     get_species_info,
     synonyms,
@@ -131,3 +131,5 @@ from ._util import (
 
 from ._units import assign_units, cf_ureg
 from ._versions import show_versions, check_if_need_new_version
+
+from ._met import _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
