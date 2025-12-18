@@ -33,6 +33,10 @@ Match might mean exact equality, or equality up to some tolerance.
 - ``Store.upsert`` does an update followed by an insert (similar to updating a dictionary)
 - ``Store.overwrite`` clears the store then inserts data
 
+
+The ``VersionedStore`` ABC defines extra methods for subclasses of ``Store`` that also
+implement the ``Versioning`` interface.
+
 """
 
 from __future__ import annotations
@@ -43,20 +47,19 @@ import pandas as pd
 import xarray as xr
 
 from openghg.types import DataOverlapError, UpdateError
-from openghg.util._versioning import SimpleVersioning
+from openghg.util._versioning import SimpleVersioning, Versioning
 from ._indexing import OverlapDeterminer
 
 
 class Store(ABC):
     """Interface for means of storing a single dataset."""
 
-    @abstractmethod
     def __bool__(self) -> bool:
-        """Return True is Store is not empty."""
-        ...
+        """Return True if Store is not empty."""
+        raise NotImplementedError
 
     def __repr__(self) -> str:
-        return "Store()"
+        return f"{type(self).__name__}()"
 
     @abstractmethod
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
@@ -147,6 +150,55 @@ class Store(ABC):
         raise NotImplementedError
 
 
+class VersionedStore(Store, Versioning):
+    """Store with versioning methods.
+
+    This class functions mostly like a mixin class to update
+    methods from Store to make sense with multiple versions.
+    """
+
+    def __bool__(self) -> bool:
+        """Return True if any version has data."""
+        bools = []
+        with self.remember_current_version():
+            for version in self.versions:
+                self.checkout_version(version)
+                bools.append(super().__bool__())  # check if version non-empty via Store.__bool__
+
+        return any(bools)
+
+    def has_data(self, version: str) -> bool:
+        """Check if a particular version has data.
+
+        Since the __bool__ method for a versioned store only
+        checks if there exists a non-empty version, we need
+        a separate method to check if a particular version is non-empty.
+
+        Args:
+            version: version to check.
+
+        Returns:
+            True if given version has data.
+        """
+        with self.remember_current_version():
+            self.checkout_version(version)
+            return super().__bool__()
+
+    def bytes_stored(self) -> int:
+        """Bytes stored in Store across all versions.
+
+        Returns:
+            Number of bytes stored across all versions.
+        """
+        total_bytes = 0
+        with self.remember_current_version():
+            for version in self.versions:
+                self.checkout_version(version)
+                total_bytes += super().bytes_stored()  # get number of bytes from Store.bytes_stored
+
+        return total_bytes
+
+
 class MemoryStore(Store):
     """Simple in-memory implementation of Store interface."""
 
@@ -159,7 +211,7 @@ class MemoryStore(Store):
         self.index_options = index_options or {}
 
     def __repr__(self) -> str:
-        return f"MemoryStore({self.data!r}, append_dim={self.append_dim})"
+        return f"{type(self).__name__}({self.data!r}, append_dim={self.append_dim})"
 
     def __bool__(self) -> bool:
         return self.data is not None
@@ -179,7 +231,7 @@ class MemoryStore(Store):
         else:
             if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
                 if on_overlap == "error":
-                    raise DataOverlapError("Cannot insert data with conflicts if `on_conflict` == 'error'")
+                    raise DataOverlapError("Cannot insert data with overlaps if `on_overlap` == 'error'")
 
                 # otherwise, select non-overlaps
                 data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)
@@ -214,7 +266,7 @@ class MemoryStore(Store):
         return self.data.nbytes if self.data is not None else 0  # type: ignore
 
 
-class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
+class VersionedMemoryStore(VersionedStore, SimpleVersioning[xr.Dataset | None], MemoryStore):
     """Versioned in-memory storage of Xarray Datasets."""
 
     def __init__(
@@ -230,9 +282,10 @@ class VersionedMemoryStore(SimpleVersioning[xr.Dataset | None], MemoryStore):
         super().__init__(
             factory=lambda _: None,  # empty MemoryStore initialised with data = None
             versions=versions,
+            data=data,
+            append_dim=append_dim,
+            index_options=index_options,
         )
-        self.append_dim = append_dim
-        self.index_options = index_options or {}
 
     # make .data an alias for ._current
     @property

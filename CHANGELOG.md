@@ -5,11 +5,14 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.17.0...HEAD)
+
+## [0.17.0] - 2025-11-15
 
 ### Added
-
+- Added transform function for boundary conditions along with parser to standardise CAMS N2O and CH4 boundary conditions.[PR #1496](https://github.com/openghg/openghg/pull/1496)
 - Added new submodule `openghg.storage` with classes for storing xr.Datasets. These classes will be used to reimplement `LocalZarrStore`. [PR #1391](https://github.com/openghg/openghg/pull/1391)
+- Check for negative uncertainty values (these are converted to NaN). [PR #1480](https://github.com/openghg/openghg/pull/1480)
 
 ### Updated
 
@@ -17,17 +20,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. Note this also required explicit inclusion of `numpy>=2.0` otherwise this get downgraded to `numpy<2.0` based on `icoscp` current stated requirements. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
+- Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. Upper bounds use `<=` with latest stable versions rather than `<` with next major version. Also added explicit pin for h5py < 3.15 to resolve Python 3.10 test failures. [PR #1493](https://github.com/openghg/openghg/pull/1493)
+- Refactored `parse_agage` function to integrate instrument metadata validation and species label definition logic within the get_dataset implementation in agage.py. [PR #1510](https://github.com/openghg/openghg/pull/1510)
+- Updated `parse_openghg` for column data to recognise "data_owner" and "data_owner_email" from the file. [PR #1519](https://github.com/openghg/openghg/pull/1519)
+- Refactored `LocalZarrStore` to use new `VersionedZarrStore` class from `openghg.storage` submodule. [PR #1468](https://github.com/openghg/openghg/pull/1468)
 
-## Fixed
+### Fixed
 
 - Bug causing regrid_uniform_cc to fail for data arrays with time dimension. [PR #1482](https://github.com/openghg/openghg/pull/1482)
 - Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
 - Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 - Fixed bug in `merge_and_extend_dict` to make sure repeated values in `left` and `right` produce unique values in output and to ensure `left` and `right` are not modified in place. [PR #1477](https://github.com/openghg/openghg/pull/1477)
+- Fixed retrieve_all() function where the value to fetch latest version was overridden in the loop. [PR #1522](https://github.com/openghg/openghg/pull/1522)
 
-## Added
-
-- Check for negative uncertainty values (these are converted to NaN). [PR #1480](https://github.com/openghg/openghg/pull/1480)
 
 ## [0.16.0] - 2025-08-29
 
@@ -56,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
 - Issue with importlib.resources.files and editable installs. [PR #1429](https://github.com/opengh/openghg/pull/1429)
 - Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package) and `flox` dependency. [PR #1440](https://github.com/openghg/openghg/pull/1440)
+- Added section on standardising column satellite data in the tutorials. Added references to missing standardise_column and parse_tccon api in doc. [PR#1516](https://github.com/openghg/openghg/pull/1516)
 
 ## [0.15.0] - 2025-07-02
 

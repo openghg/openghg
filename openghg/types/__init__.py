@@ -34,6 +34,7 @@ from ._errors import (
     KeyExistsError,
     MetadataMissingError,
     StandardiseError,
+    TransformError,
     ValidationError,
     construct_xesmf_import_error,
     StorageError,

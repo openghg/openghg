@@ -4,6 +4,7 @@ from helpers import get_bc_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
+from openghg.transform import transform_bc_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
@@ -318,3 +319,31 @@ def test_info_metadata():
 
     assert "project" in metadata
     assert "tag" in metadata
+
+
+def test_transform_cams_n2o_bc():
+    "Test CAMS parser for transform_boundary_conditions"
+    bc_input = "cams_test"
+    cams_version = "v22r1"
+    domain = "europe"
+    species = "n2o"
+    period = "daily"
+    filename = "cams73_v22r1_n2o_test_202201.nc"
+    data_path = get_bc_datapath(filename=filename)
+
+    results = transform_bc_data(
+        datapath=data_path,
+        database="CAMS",
+        species=species,
+        bc_input=bc_input,
+        period=period,
+        cams_version=cams_version,
+        domain=domain,
+        source_format="cams",
+        store="user",
+    )
+
+    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input}
+
+    for k, v in expected_metadata.items():
+        assert results[0][k].lower() == v.lower()

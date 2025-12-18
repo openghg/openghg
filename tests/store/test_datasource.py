@@ -329,10 +329,10 @@ def test_incorrect_datatype_raises(data, bucket):
         d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="CRDS")
 
 
-def test_update_daterange_replacement(data, bucket):
+def test_update_daterange_replacement(datasource, data):
     metadata = {"foo": "bar"}
 
-    d = Datasource(uuid="abc123", bucket=bucket)
+    d = datasource
 
     ch4_data = data["ch4"]["data"]
 
@@ -351,8 +351,8 @@ def test_update_daterange_replacement(data, bucket):
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
 
 
-def test_integrity_check(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_integrity_check(data, bucket, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -375,8 +375,8 @@ def test_integrity_check(data, bucket):
         d.integrity_check()
 
 
-def test_data_version_deletion(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_data_version_deletion(data, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
