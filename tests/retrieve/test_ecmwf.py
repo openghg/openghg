@@ -1,9 +1,22 @@
 import pytest
 import os
+import cdsapi
+import xarray as xr
 from openghg.retrieve.met import (
     retrieve_site_met,
     _create_dummy_dataset
 )
+
+def _create_dummy_dataset(request: dict, tmpdir: str) -> xr.Dataset:
+    """
+    retrieve a dataset from the cds api based on the request provided and save in tmpdir
+    """
+    cds_client = cdsapi.Client()
+    dataset_name = "reanalysis-era5-pressure-levels"
+    _ = cds_client.retrieve(name=dataset_name, request=request, target=tmpdir)
+    dataset = xr.open_dataset(tmpdir)
+    return dataset
+
 
 @pytest.mark.skip(reason="Currently tests are not connected to the ECMWF CDS API")
 def test_create_dummy_dataset(tmpdir):
