@@ -1,9 +1,8 @@
 import os
 import cdsapi  # type: ignore
 import numpy as np
-from openghg.util import _get_site_data, _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure  
+from openghg.util import _get_site_data, _get_ecmwf_area, _altitude_to_ecmwf_pressure, _get_site_pressure
 import pathlib
-import xarray as xr
 
 import logging
 
@@ -20,7 +19,7 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-__all__ = ["pull_site_met", "check_cds_access", "_create_dummy_dataset", "retrieve_site_met"]
+__all__ = ["pull_site_met", "check_cds_access", "retrieve_site_met"]
 
 
 def check_cds_access() -> None:
@@ -264,11 +263,3 @@ def pull_site_met(
     # }
 
     # return METData(data=dataset, metadata=metadata)
-
-
-def _create_dummy_dataset(request: dict, tmpdir: str) -> xr.Dataset:
-    cds_client = cdsapi.Client()
-    dataset_name = "reanalysis-era5-pressure-levels"
-    _ = cds_client.retrieve(name=dataset_name, request=request, target=tmpdir)
-    dataset = xr.open_dataset(tmpdir)
-    return dataset

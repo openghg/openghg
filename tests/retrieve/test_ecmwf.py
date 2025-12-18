@@ -3,8 +3,7 @@ import os
 import cdsapi
 import xarray as xr
 from openghg.retrieve.met import (
-    retrieve_site_met,
-    _create_dummy_dataset
+    retrieve_site_met
 )
 
 def _create_dummy_dataset(request: dict, tmpdir: str) -> xr.Dataset:
