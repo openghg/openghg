@@ -37,7 +37,7 @@ def test_create_dummy_dataset(tmpdir):
     dataset_savepath = os.path.join(
         tmpdir, f'Met_{"THD"}_{"AGAGE"}_{"2014"}{"5"}_temp.nc',
     )
-    dataset = _create_dummy_dataset(request, tmpdir)
+    dataset = _create_dummy_dataset(request, dataset_savepath)
 
     ## add here dataset checks
     assert dataset is not None
