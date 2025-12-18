@@ -96,8 +96,8 @@ def _get_ecmwf_area(site_lat: float, site_long: float) -> list:
     ecwmf_lon_indices = _two_closest_values(ecwmf_lon - site_long)
 
     return [
-        np.max(ecwmf_lat[ecwmf_lat_indices]),
-        np.min(ecwmf_lon[ecwmf_lon_indices]),
-        np.min(ecwmf_lat[ecwmf_lat_indices]),
-        np.max(ecwmf_lon[ecwmf_lon_indices]),
+        float(np.max(ecwmf_lat[ecwmf_lat_indices])),
+        float(np.min(ecwmf_lon[ecwmf_lon_indices])),
+        float(np.min(ecwmf_lat[ecwmf_lat_indices])),
+        float(np.max(ecwmf_lon[ecwmf_lon_indices])),
     ]

@@ -45,6 +45,7 @@ def parse_ecmwf(
 
         _, _, site_height, inlet_heights = _get_site_data(site, network)
         inlet_pressures = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
+        inlet_pressures = [float(round(p, 1)) for p in inlet_pressures]
         # ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
         data = data.assign_coords(
