@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added feature to allow meteorological data in relation to a site to be retrieved from the Copernicus Climate Data Store (CDS) and stored in an object store (data_type="site_met"). [PR #1421](https://github.com/openghg/openghg/pull/1421)
-- Update method for Zarr storage. [PR #1532](https://github.com/openghg/openghg/pull/1532)
+- Implemented `update` method for Zarr storage, which will be used by `Datasource` to allow updating existing data in the object store. Also added methods for aligning a dataset to data stored by Zarr. [PR #1532](https://github.com/openghg/openghg/pull/1532)
 
 
 ## [0.17.0] - 2025-11-15

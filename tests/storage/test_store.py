@@ -144,6 +144,10 @@ store_names = [
 # https://stackoverflow.com/questions/42014484/pytest-using-fixtures-as-arguments-in-parametrize
 @pytest.mark.parametrize("store_name", store_names)
 def test_insert_creates(store_name, request, ds1):
+    """Test that a store registers as False until data is added.
+
+    After data is added, we check that we can retrieve the data added.
+    """
     store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
@@ -160,6 +164,7 @@ def test_insert_creates(store_name, request, ds1):
 
 @pytest.mark.parametrize("store_name", store_names)
 def test_clear(store_name, request, ds1):
+    """Test clearing data from the store."""
     store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
@@ -179,6 +184,12 @@ def test_clear(store_name, request, ds1):
 
 @pytest.mark.parametrize("store_name", store_names)
 def test_insert_twice(store_name, request, ds1, ds5):
+    """Test inserting data twice.
+
+    The datasets `ds1` and `ds5` do not overlap, so after
+    inserting both datasets, the data stored should just be
+    a concatenation of the values of each dataset.
+    """
     store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):

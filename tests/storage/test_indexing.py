@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.storage._indexing import _alignment_indexers, _alignment_indexers_with_tolerances, contiguous_regions, is_monotonic, OverlapDeterminer
+from openghg.storage._indexing import _alignment_indexers, _alignment_indexers_non_monotonic_target, alignment_indexers, contiguous_regions, is_monotonic, OverlapDeterminer
 
 
 #------------------------------
@@ -81,8 +81,24 @@ def indexes():
     return [idx1, idx2, idx3, idx4, idx5]
 
 
-# TODO: parametrize this test
-def test_alignment_of_index_to_shuffle_of_itself(indexes):
+@pytest.mark.parametrize(
+        ("expect_error", "align_func", "align_kwargs"),
+        [
+            (True, _alignment_indexers, {}),
+            (True, _alignment_indexers, {"method": "nearest"}),
+            (True, _alignment_indexers, {"method": "ffill"}),
+            (True, _alignment_indexers, {"method": "bfill"}),
+            (False, _alignment_indexers_non_monotonic_target, {}),
+            (False, _alignment_indexers_non_monotonic_target, {"method": "nearest"}),
+            (False, _alignment_indexers_non_monotonic_target, {"method": "ffill"}),
+            (False, _alignment_indexers_non_monotonic_target, {"method": "bfill"}),
+            (False, alignment_indexers, {}),
+            (False, alignment_indexers, {"method": "nearest"}),
+            (False, alignment_indexers, {"method": "ffill"}),
+            (False, alignment_indexers, {"method": "bfill"}),
+        ]
+)
+def test_alignment_of_index_to_shuffle_of_itself(expect_error, align_func, align_kwargs, indexes):
     """Check if we can align an index to a shuffled version of itself.
 
     The most important case here is when we want to align with a method like "nearest".
@@ -95,31 +111,29 @@ def test_alignment_of_index_to_shuffle_of_itself(indexes):
     """
     rng = np.random.default_rng(seed=1234567)
 
-    for align_kwargs in [{}, {"method": "nearest"}]:
-        for err, align_func in [(True, _alignment_indexers), (False, _alignment_indexers_with_tolerances)]:
-            for idx in indexes:
-                for _ in range(5):
-                    shuf = rng.permutation(len(idx))
-                    idx_shuf = idx[shuf]
+    for idx in indexes:
+        for _ in range(5):
+            shuf = rng.permutation(len(idx))
+            idx_shuf = idx[shuf]
 
-                    try:
-                        # get alignment indexer
-                        _, idxer = align_func(idx, idx_shuf, **align_kwargs)
-                    except ValueError:
-                        # Expect errors for _alignment_indexers when kwargs passed since
-                        # target is not monotonic (increasing or decreasing).
-                        # The _alignment_indexers_with_tolerances function should handle this case.
-                        if not err:
-                            assert False, "error shouldn't have been raised"
-                        else:
-                            assert align_kwargs and not is_monotonic(idx_shuf)
-                    else:
-                        # check alignment worked
-                        pd.testing.assert_index_equal(idx, idx_shuf[idxer])
+            try:
+                # get alignment indexer
+                _, idxer = align_func(idx, idx_shuf, **align_kwargs)
+            except ValueError:
+                # Expect errors for _alignment_indexers when kwargs passed since
+                # target is not monotonic (increasing or decreasing).
+                # The _alignment_indexers_with_tolerances function should handle this case.
+                if not expect_error:
+                    assert False, "error shouldn't have been raised"
+                else:
+                    assert align_kwargs and not is_monotonic(idx_shuf)
+            else:
+                # check alignment worked
+                pd.testing.assert_index_equal(idx, idx_shuf[idxer])
 
-                        # check that alignment idxer is the inverse of the shuffle used to create the target (`idx_shuf`)
-                        inv_shuf = np.argsort(shuf)
-                        np.testing.assert_equal(idxer, inv_shuf)
+                # check that alignment idxer is the inverse of the shuffle used to create the target (`idx_shuf`)
+                inv_shuf = np.argsort(shuf)
+                np.testing.assert_equal(idxer, inv_shuf)
 
 
 # TODO: parametrize this test?
@@ -140,8 +154,8 @@ def test_alignment_with_tolerances(indexes):
             perturbation = pd.to_timedelta(0.5 * rng.random(len(idx)), unit="h")
             idx_perturb = idx.values + perturbation
 
-            _, idxer = _alignment_indexers_with_tolerances(idx, idx_shuf)
-            _, idxer_perturb = _alignment_indexers_with_tolerances(idx_perturb, idx_shuf, method="nearest", tolerance=pd.Timedelta("0.5h"), limit=1)
+            _, idxer = _alignment_indexers_non_monotonic_target(idx, idx_shuf)
+            _, idxer_perturb = _alignment_indexers_non_monotonic_target(idx_perturb, idx_shuf, method="nearest", tolerance=pd.Timedelta("0.5h"), limit=1)
 
             np.testing.assert_equal(idxer, idxer_perturb)
 

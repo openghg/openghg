@@ -168,6 +168,7 @@ class ZarrStore(Store, Generic[ZST]):
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
+
         if not self.store:
             raise UpdateError("Cannot update empty Store.")
         else:
@@ -213,9 +214,24 @@ class ZarrStore(Store, Generic[ZST]):
                     ) from e
 
                 # can only write to specified region if data vars have dimension in common with that region
-                # TODO: write other variables separately
-                vars_to_drop = [dv for dv in data.data_vars if self.append_dim not in data[dv].dims]
-                data = data.drop_vars(vars_to_drop)
+                # so we will first write the variables without the append dimension (since this is the dim
+                # where we specify regions), then we will write the variables that have the append dim as
+                # a dimension.
+                non_region_vars = [dv for dv in data.data_vars if self.append_dim not in data[dv].dims]
+
+                # don't catch any errors here, since these errors are unrelated to alignment
+                data[non_region_vars].to_zarr(
+                    store=self.store,
+                    mode="r+",
+                    region="auto",
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+
+                # now proceed with variables that contain the append dim
+                data = data.drop_vars(non_region_vars)
 
                 # create delayed tasks to write to each region
                 delayed = []

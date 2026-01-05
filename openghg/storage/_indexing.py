@@ -83,7 +83,11 @@ def is_monotonic(idx: pd.Index) -> bool:
 
 
 class IndexingError(Exception):
-    """Error raised by indexing methods."""
+    """Error raised by indexing methods.
+
+    This error is meant to be used within the `storage` submoduel, and should
+    be re-raised as a built-in exception, or as an exception defined in `openghg.types`.
+    """
 
     pass
 
@@ -104,10 +108,11 @@ def _alignment_indexers(
     source_idxer: np.typing.NDArray[np.integer] = np.arange(len(source))
     align_idxer: np.typing.NDArray[np.integer] = target.get_indexer(source, **kwargs)
 
-    if (align_idxer == -1).any():
+    if (align_idxer == -1).any():  # pd.Index.get_indexer returns -1 if index not found
         if not ignore_missing:
             raise IndexingError(
-                "If `ignore_missing==False`, the source index must be a subset of the target index "
+                "Missing indices. If `ignore_missing==False`, the source index must be "
+                "a subset of the target index."
             )
         source_idxer = source_idxer[align_idxer != -1]
         align_idxer = align_idxer[align_idxer != -1]
@@ -115,17 +120,17 @@ def _alignment_indexers(
     return source_idxer, align_idxer
 
 
-def _alignment_indexers_with_tolerances(
+def _alignment_indexers_non_monotonic_target(
     source: pd.Index | np.ndarray,
     target: pd.Index,
     ignore_missing: bool = False,
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Get indexers for aligning source and target with tolerances.
+    """Get indexers for aligning source and target with tolerances when target is non-monotonic.
 
-    To align with tolerances, the target index must be monotonic (increasing or decreasing). To align
-    with a target that might not be monotonic, we sort the target index, align to the sorted target index,
-    then undo the sorting.
+    In Pandas, to align with tolerances, the target index must be monotonic (increasing or decreasing).
+    To align with a target that might not be monotonic, we sort the target index, align to the sorted
+    target index, then undo the sorting.
 
     If working with data in memory, there isn't really any reason to do this, since you could just sort the
     target data. However, we cannot sort Zarr data stored on disk, so we must align as if we have sorted the
@@ -160,7 +165,8 @@ def _alignment_indexers_with_tolerances(
     if (align_idxer == -1).any():
         if not ignore_missing:
             raise IndexingError(
-                "If `ignore_missing==False`, the source index must be a subset of the target index "
+                "Missing indices. If `ignore_missing==False`, the source index must be "
+                "a subset of the target index."
             )
         source_idxer = source_idxer[align_idxer != -1]
         align_idxer = align_idxer[align_idxer != -1]
@@ -176,7 +182,7 @@ def alignment_indexers(
     **kwargs: Any,
 ) -> tuple[np.ndarray, np.ndarray]:
     if kwargs and not is_monotonic(target):
-        return _alignment_indexers_with_tolerances(source, target, ignore_missing, **kwargs)
+        return _alignment_indexers_non_monotonic_target(source, target, ignore_missing, **kwargs)
     return _alignment_indexers(source, target, ignore_missing, **kwargs)
 
 
