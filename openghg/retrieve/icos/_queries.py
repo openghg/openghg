@@ -438,10 +438,11 @@ def dobj_info(
     inlet: str | list[str] | None = None,
     spec_label: str | list[str] | None = None,
     spec_label_include: bool | list[bool] = True,
+    project: str | list[str] | None = ["icos", "euroObspack"],
     format_info: bool = False,
 ) -> pd.DataFrame:
     """ """
-    query = data_query(site, data_level, species, inlet, spec_label, spec_label_include)
+    query = data_query(site, data_level, species, inlet, spec_label, spec_label_include, project)
     dobj_df = make_query_df(query)
 
     if format_info:
