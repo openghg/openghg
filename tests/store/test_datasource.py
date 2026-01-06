@@ -197,9 +197,10 @@ def test_versioning(datasource):
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
 
-def test_replace_version(bucket):
-    """Test that new data can replace previous data. This involves deleting the previous version
-    data and copying across the new data.
+def test_replace_version(datasource):
+    """Test that new data can replace previous data.
+
+    This involves deleting the previous version data and copying across the new data.
     """
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     detailed_tac_filepath = get_surface_datapath(
@@ -211,7 +212,7 @@ def test_replace_version(bucket):
     min_ch4_data = min_data["ch4"]["data"]
     metadata = {"foo": "bar"}
 
-    d = Datasource(uuid="4b91f73e-3d57-47e4-aa13-cb28c35d3b3d", bucket=bucket)
+    d = datasource
 
     d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
@@ -242,9 +243,8 @@ def test_replace_version(bucket):
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
 
-def test_save(bucket):
+def test_save(bucket, datasource):
 
-    datasource = Datasource(uuid="abc123", bucket=bucket)
     datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save()
 
@@ -297,8 +297,8 @@ def test_add_metadata_lowercases_correctly(datasource):
     }
 
 
-def test_save_and_load(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_save_and_load(data, bucket, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -444,8 +444,7 @@ def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource)
         assert ds.time.size == 91
 
 
-@pytest.mark.xfail(reason="Combining datasets with overlap is not yet supported")
-def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overlap):
+def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_overlap):
     time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
     time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
     time_c = pd.date_range("2012-04-16T00:00:00", "2012-09-30T00:00:00", freq="1d")
@@ -462,26 +461,24 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
 
     attributes = create_attributes()
 
-    d = Datasource(uuid="abc123", bucket=bucket)
+    d = datasource
 
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
 
-    with d.get_data(version="v1") as ds:
-        ds = ds.compute()
+    with d.get_data(version="v1").compute() as ds:
         n_days_expected = pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
         assert ds.time.size == n_days_expected
-        combined = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time")
+        combined = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time", keep="last")
         assert ds.equals(combined)
 
 
-@pytest.mark.xfail(reason="Combining datasets with overlap is not yet supported")
-def test_add_data_out_of_order(bucket, datasets_with_gaps):
+def test_add_data_out_of_order(datasource, datasets_with_gaps):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
-    d = Datasource(uuid="abc123", bucket=bucket)
+    d = datasource
 
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
@@ -493,7 +490,7 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
         "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
     ]
 
-    expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time").sortby("time")
+    expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time", keep="last").sortby("time")
 
     ds = d.get_data(version="v1").compute()
 
@@ -501,12 +498,12 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
     assert ds.equals(expected)
 
 
-@pytest.mark.xfail(reason="Data is currently not sorted during standardisation")
-def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
+def test_add_data_out_of_order_no_combine(datasource, datasets_with_gaps):
+    """Check that data is retrieved in order, even if it is added out of order."""
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
-    d = Datasource(uuid="abc123", bucket=bucket)
+    d = datasource
 
     d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
