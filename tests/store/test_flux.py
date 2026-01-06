@@ -436,7 +436,7 @@ def test_transform_and_add_edgar_database(clear_stores):
         "domain": domain.lower(),
         "source": "anthro",
         "database": "edgar",
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
