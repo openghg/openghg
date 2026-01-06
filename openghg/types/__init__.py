@@ -9,6 +9,7 @@ from ._enum import (
     FootprintTypes,
     BoundaryConditions,
     EulerianModelTypes,
+    MetTypes,
     DataTypes,
 )
 from ._errors import (
@@ -33,8 +34,11 @@ from ._errors import (
     KeyExistsError,
     MetadataMissingError,
     StandardiseError,
+    TransformError,
     ValidationError,
     construct_xesmf_import_error,
+    StorageError,
+    UpdateError,
 )
 from ._types import (
     multiPathType,

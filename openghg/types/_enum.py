@@ -71,6 +71,12 @@ class EulerianModelTypes(Enum):
     OPENGHG = "OPENGHG"
 
 
+class MetTypes(Enum):
+    """For standardising meteorological data"""
+
+    ECMWF = "ECMWF"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
@@ -86,3 +92,4 @@ class DataTypes(Enum):
 
 class BoundaryConditions(Enum):
     OPENGHG = "OPENGHG"
+    CAMS = "CAMS"

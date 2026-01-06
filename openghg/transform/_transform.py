@@ -44,3 +44,35 @@ def transform_flux_data(
     with dclass(bucket) as dc:
         result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
     return result
+
+
+def transform_bc_data(
+    datapath: str | Path,
+    database: str,
+    overwrite: bool = False,
+    store: str | None = None,
+    **kwargs: Any,
+) -> list[dict]:
+    """Read and transform a boundary conditions cams. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
+
+    The underlying parser functions will be of the form:
+        - openghg.transform.boundary_conditions.parse_{database.lower()}
+        - e.g. openghg.transform.boundary_conditions.parse_cams()
+
+    Args:
+        datapath: Path to local copy of database archive (for now)
+        database: Name of database
+        overwrite: Should this data overwrite currently stored data
+            which matches.
+        store: name of object store to write data to.
+        **kwargs: Inputs for underlying parser function for the database.
+            Necessary inputs will depend on the database being parsed.
+
+    Returns:
+    """
+    bucket = get_writable_bucket(name=store)
+    dclass = get_data_class("boundary_conditions")
+
+    with dclass(bucket) as dc:
+        result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
+    return result
