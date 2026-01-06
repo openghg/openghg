@@ -141,12 +141,14 @@ def search_flux(
     if end_date is not None:
         end_date = str(end_date)
 
+    options_database_version = [database_version, database_version.replace(".", "")]
+
     return search(
         species=species,
         source=source,
         domain=domain,
         database=database,
-        database_version=database_version,
+        database_version=options_database_version,
         model=model,
         start_date=start_date,
         end_date=end_date,
