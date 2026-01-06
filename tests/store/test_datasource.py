@@ -145,9 +145,9 @@ def test_add_data(data, datasource):
         "latest_version": "v1",
     }
 
-    d.metadata()["versions"]["v1"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
+    d.metadata["versions"]["v1"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
-    assert d.metadata().items() >= expected_metadata.items()
+    assert d.metadata.items() >= expected_metadata.items()
 
 
 def test_versioning(datasource):
@@ -248,7 +248,7 @@ def test_save(bucket):
     datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save()
 
-    exists(bucket=bucket, key=datasource.key())
+    exists(bucket=bucket, key=datasource.key)
 
 
 def test_save_footprint(bucket, datasource):
@@ -289,7 +289,7 @@ def test_add_metadata_lowercases_correctly(datasource):
 
     datasource.add_metadata(metadata=metadata)
 
-    assert datasource.metadata() == {
+    assert datasource.metadata == {
         "aaa": {
             "inlets": {"inlet_a": "158m", "inlet_b": "12m"},
             "some_metadata": {"owner": "foo", "email": "this@that"},
@@ -306,16 +306,16 @@ def test_save_and_load(data, bucket):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
-    d_2 = Datasource.load(bucket=bucket, uuid=d.uuid())
+    d_2 = Datasource.load(bucket=bucket, uuid=d.uuid)
 
-    metadata = d_2.metadata()
+    metadata = d_2.metadata
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
 
     assert sorted(d_2.data_keys()) == sorted(d.data_keys())
-    assert d_2.metadata() == d.metadata()
+    assert d_2.metadata == d.metadata
 
 
 @pytest.mark.xfail(reason=".add_data no longer checks the data type")
@@ -329,10 +329,10 @@ def test_incorrect_datatype_raises(data, bucket):
         d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="CRDS")
 
 
-def test_update_daterange_replacement(data, bucket):
+def test_update_daterange_replacement(datasource, data):
     metadata = {"foo": "bar"}
 
-    d = Datasource(uuid="abc123", bucket=bucket)
+    d = datasource
 
     ch4_data = data["ch4"]["data"]
 
@@ -351,8 +351,8 @@ def test_update_daterange_replacement(data, bucket):
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
 
 
-def test_integrity_check(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_integrity_check(data, bucket, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -364,7 +364,7 @@ def test_integrity_check(data, bucket):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
-    uid = d.uuid()
+    uid = d.uuid
 
     d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
@@ -375,8 +375,8 @@ def test_integrity_check(data, bucket):
         d.integrity_check()
 
 
-def test_data_version_deletion(data, bucket):
-    d = Datasource(uuid="abc123", bucket=bucket)
+def test_data_version_deletion(data, datasource):
+    d = datasource
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -437,7 +437,7 @@ def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource)
         "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
     ]
 
-    assert d.latest_version() == "v1"
+    assert d.latest_version == "v1"
 
     with d.get_data(version="latest") as ds:
         assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
@@ -531,7 +531,7 @@ def test_bytes_stored(data, bucket, datasource):
     d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
     d.save()
 
-    bytes_stored = d.bytes_stored()
+    bytes_stored = d.nbytes
 
     # check that number of bytes is not larger than some value that was valid when the test was created
     # this value 9619 includes a bit of tolerance. We'll accept anything less than that.
@@ -539,4 +539,4 @@ def test_bytes_stored(data, bucket, datasource):
 
     d = Datasource(uuid="xyz456", bucket=bucket)
 
-    assert d.bytes_stored() == 0
+    assert d.nbytes == 0

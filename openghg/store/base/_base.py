@@ -1318,12 +1318,3 @@ class BaseStore:
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
-
-    def clear_datasources(self) -> None:
-        """Remove all Datasources from the object
-
-        Returns:
-            None
-        """
-        self._datasource_uuids.clear()
-        self._file_hashes.clear()
