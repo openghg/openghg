@@ -44,23 +44,14 @@ def clean_string(
     # From this point make sure to_clean is a string
     to_clean = str(to_clean)
 
-    if not isinstance(keep_special_characters, list):
-        keep_special_characters = [keep_special_characters]
+    if keep_special_characters is None:
+        special_characters = [""]
+    elif isinstance(keep_special_characters, str):
+        special_characters = [keep_special_characters]
+    else:
+        special_characters = keep_special_characters.copy()
 
-    # Special regex characters which still need escaping within regex character sets []
-    regex_characters = ["-", ".", "]", "\\"]
-
-    # Create suitable part of regex string to include for substitution
-    # e.g. "_\-\."
-    keep_regex = ""
-    for character in keep_special_characters:
-        if character is not None:
-            if len(character) != 1:
-                raise ValueError("keep_special_characters should include characters not strings (len != 1)")
-            if character in regex_characters:
-                keep_regex += rf"\{character}"
-            else:
-                keep_regex += character
+    keep_regex = re.escape("".join(special_characters))
 
     try:
         # Removes all whitespace
