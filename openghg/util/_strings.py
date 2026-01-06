@@ -8,19 +8,25 @@ __all__ = ["clean_string", "to_lowercase"]
 
 
 @overload
-def clean_string(to_clean: str) -> str: ...
+def clean_string(
+    to_clean: str | float | bool, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str: ...
 
 
 @overload
-def clean_string(to_clean: None) -> None: ...
+def clean_string(to_clean: None, keep_special_characters: str | list | None = ["_", "-", "."]) -> None: ...
 
 
-def clean_string(to_clean: str | None) -> str | None:
+def clean_string(
+    to_clean: str | float | bool | None, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str | None:
     """Returns a lowercase string with only alphanumeric
-    characters and underscores.
+    characters and any other characters specified by the keep_special_characters input.
 
     Args:
         to_clean: String to clean
+        keep_special_characters: Additional non-alphanumeric characters to keep.
+            Default = ["_", "-", "."] (underscores, dashes and full stops)
     Returns:
         str or None: Clean string
     """
@@ -32,16 +38,37 @@ def clean_string(to_clean: str | None) -> str | None:
     if isinstance(to_clean, bool):
         return str(to_clean).lower()
 
-    try:
-        # This might be used with numbers
-        if is_number(to_clean):
-            return str(to_clean)
+    if is_number(to_clean):
+        return str(to_clean)
 
+    # From this point make sure to_clean is a string
+    to_clean = str(to_clean)
+
+    if not isinstance(keep_special_characters, list):
+        keep_special_characters = [keep_special_characters]
+
+    # Special regex characters which still need escaping within regex character sets []
+    regex_characters = ["-", ".", "]", "\\"]
+
+    # Create suitable part of regex string to include for substitution
+    # e.g. "_\-\."
+    keep_regex = ""
+    for character in keep_special_characters:
+        if character is not None:
+            if len(character) != 1:
+                raise ValueError("keep_special_characters should include characters not strings (len != 1)")
+            if character in regex_characters:
+                keep_regex += rf"\{character}"
+            else:
+                keep_regex += character
+
+    try:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
-        # Removes non-alphanumeric characters but keep underscores
-        # cleanest = re.sub(r"\W+", "", cleaner)
-        cleanest = re.sub(r"[^\w-]+", "", cleaner)
+
+        # Removes non-alphanumeric characters except those specified
+        to_keep = rf"[^a-zA-Z0-9{keep_regex}]+"
+        cleanest = re.sub(to_keep, "", cleaner)
     except TypeError:
         return to_clean
 
