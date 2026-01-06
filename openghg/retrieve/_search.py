@@ -146,8 +146,9 @@ def search_flux(
     # with and without any "." characters are searched by default.
     options_database_version = [database_version]
     if database_version is not None:
-        database_version_previous = database_version.replace(".", "")
-        options_database_version.append(database_version_previous)
+        if "." in database_version:
+            database_version_previous = database_version.replace(".", "")
+            options_database_version.append(database_version_previous)
 
     return search(
         species=species,
