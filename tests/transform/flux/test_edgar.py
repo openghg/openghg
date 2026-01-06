@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
 from helpers import get_flux_datapath
+from openghg.transform import transform_flux_data
+from openghg.retrieve._search import search_flux
+
 from openghg.transform.flux import parse_edgar
 from openghg.transform.flux._edgar import _extract_file_info
 
@@ -82,6 +85,59 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     }
 
     metadata = data_values["metadata"]
+    assert metadata.items() >= expected_metadata.items()
+
+
+def test_transform_flux():
+    """
+    Test full pipeline for adding data to object store
+    """
+    datapath = get_flux_datapath(f"EDGAR/yearly/v6.0_CH4")
+
+    database = "edgar"
+    species = "ch4"
+    year = "2015"
+    source = "anthro"
+
+    transform_flux_data(datapath,
+                        database=database,
+                        store="user",
+                        date=year,
+                        species=species,
+                        source=source)
+
+    default_domain = "globaledgar"
+    database_version = "v6.0"
+
+    search_results = search_flux(database=database,
+                                 database_version=database_version,
+                                 source=source,
+                                 species=species)
+    
+    assert len(search_results) == 1
+
+    data = search_results.retrieve()
+
+    print(data)
+
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": source,
+        "database": database,
+        "database_version": database_version,
+        "author": "openghg cloud",
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -180.0,
+        "max_longitude": 174.85858,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    metadata = data.metadata
     assert metadata.items() >= expected_metadata.items()
 
 
