@@ -8,7 +8,8 @@ from ._obsmobile import ObsMobile
 from ._obscolumn import ObsColumn
 from ._obssurface import ObsSurface
 from ._populate import add_noaa_obspack
-from ._metstore import METStore
+from ._met import SiteMet
+
 from ._meta import data_class_info, get_data_class
 from ._flux_timeseries import FluxTimeseries
 from ._metakeys_config import (

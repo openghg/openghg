@@ -471,7 +471,7 @@ def query_store() -> dict:
     data = {}
 
     for d in datasources:
-        metadata = d.metadata()
+        metadata = d.metadata
         result = {
             "site": metadata["site"],
             "species": metadata["species"],
