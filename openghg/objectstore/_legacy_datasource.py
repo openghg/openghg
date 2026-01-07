@@ -333,7 +333,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             # if_exists == "auto" (or at least... not "new" or "combine"), but we already have data
             # and the new data overlaps
             raise DataOverlapError(
-                "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'."
+                "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
                 "To update current data in object store use `if_exists` input (see options in documentation)."
             )
 
