@@ -110,6 +110,26 @@ def make_spec_filter(spec_label: list[str] | str | None = None, include: list[bo
     return filter_str
 
 
+def make_filename_filter(filename_str: str | None = None) -> str:
+    """
+    Create a regex filter for the filename itself. This should not often be needed
+    as the other parameters should provide more granular filtering but
+    on occasion it may be necessary to use details within the filename as a filter.
+
+    Args:
+        filename_str: regex to filter the "file_name" by. If an ordinary string
+            is passed, only filenames that contain that string as a substring will
+            be matched.
+    Returns:
+        str: case-insensitive SPARQL query regex filter related to the file_name field.
+    """
+    if filename_str is None:
+        return ""
+
+    filter_str = rf'FILTER(REGEX(?file_name, "{filename_str}", "i"))'
+    return filter_str
+
+
 def make_site_filter(site: str | list[str] | None) -> str:
     """ """
     if site is None:
@@ -193,6 +213,7 @@ def data_query(
     inlet: str | list[str] | None = None,
     spec_label: str | list[str] | None = None,
     spec_label_include: bool | list[bool] = True,
+    filename_str: str | None = None,
     project: str | list[str] | None = ["icos", "euroObspack"],
     custom_filter: str = "",
     strict: bool = True,
@@ -222,6 +243,9 @@ def data_query(
                 - search for spec_label which includes "CO2" AND excludes "Obspack"
             Default = True
             Only used if spec_label is specified (not None).
+        filename_str: regex to filter the "file_name" by. If an ordinary string
+            is passed, only filenames that contain that string as a substring will
+            be matched.
         project: list of case-sensitive project names as defined here:
           https://meta.icos-cp.eu/ontologies/cpmeta/Project
         custom_filter: text added directly to the end of the SPARQL query string
@@ -238,6 +262,7 @@ def data_query(
     species_filt = make_species_filter(species)
     inlet_filt = make_inlet_filter(inlet)
     spec_filt = make_spec_filter(spec_label, spec_label_include)
+    filename_filt = make_filename_filter(filename_str)
     project_filt = make_project_filter(project)
 
     if strict:
@@ -309,6 +334,7 @@ def data_query(
 
         # get file name
         ?dobj cpmeta:hasName ?file_name .
+        {filename_filt}
 
         # define species name: this is either ?varName or
         # the first part of the filename if ?varName = "value"
@@ -438,10 +464,14 @@ def dobj_info(
     inlet: str | list[str] | None = None,
     spec_label: str | list[str] | None = None,
     spec_label_include: bool | list[bool] = True,
+    filename_str: str | None = None,
+    project: str | list[str] | None = ["icos", "euroObspack"],
     format_info: bool = False,
 ) -> pd.DataFrame:
     """ """
-    query = data_query(site, data_level, species, inlet, spec_label, spec_label_include)
+    query = data_query(
+        site, data_level, species, inlet, spec_label, spec_label_include, filename_str, project
+    )
     dobj_df = make_query_df(query)
 
     if format_info:
