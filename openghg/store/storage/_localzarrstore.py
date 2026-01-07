@@ -161,20 +161,27 @@ class LocalZarrStore(Store):
         filters: Any | None = None,
         append_dim: str = "time",
     ) -> None:
-        """Add an xr.Dataset to existing data in the zarr store.
+        """Update existing data in the zarr store with an ``xr.Dataset``.
+
+        This method performs an *upsert*: data points in ``dataset`` that overlap
+        with existing coordinates along ``append_dim`` will overwrite the
+        existing values, while non-overlapping data will be added. When creating
+        a new version via this method, the current version is first copied and
+        then updated with the provided data. This differs from :meth:`add`,
+        which only appends new data.
 
         Args:
-            version: Data version
-            dataset: xr.Dataset to add
-            compressor: Compression for zarr encoding
-            filters: Filters for zarr encoding
-            append_dim: Dimension to append to
+            version: Data version to update.
+            dataset: ``xr.Dataset`` containing data to upsert into the store.
+            compressor: Compression for zarr encoding.
+            filters: Filters for zarr encoding.
+            append_dim: Dimension along which data are appended / matched.
 
         Returns:
             None
 
         Raises:
-            ValueError if store is empty
+            ValueError if store is empty.
 
         """
         if not self._vzds.versions:
@@ -197,10 +204,8 @@ class LocalZarrStore(Store):
         # Append new data to the zarr store for the current version
         if self.version_exists(version):
             self._vzds.checkout_version(version)
-        # Otherwise we create a new zarr Store for the version
+        # Otherwise we create a new zarr Store for the version based on the current data
         else:
-            if not self._vzds.versions and version != "v1":
-                raise ValueError("First version must be v1")
             self._vzds.create_version(version, checkout=True, copy_current=True)
 
         self._vzds.upsert(dataset)
