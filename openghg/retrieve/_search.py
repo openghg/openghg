@@ -141,12 +141,21 @@ def search_flux(
     if end_date is not None:
         end_date = str(end_date)
 
+    # The clean_string function previously removed '.' characters which impacted
+    # database_version. This optionality is included to ensure both database_version
+    # with and without any "." characters are searched by default.
+    options_database_version = [database_version]
+    if database_version is not None:
+        if "." in database_version:
+            database_version_previous = database_version.replace(".", "")
+            options_database_version.append(database_version_previous)
+
     return search(
         species=species,
         source=source,
         domain=domain,
         database=database,
-        database_version=database_version,
+        database_version=options_database_version,
         model=model,
         start_date=start_date,
         end_date=end_date,
