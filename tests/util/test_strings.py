@@ -16,6 +16,7 @@ from openghg.util import clean_string, extract_float, is_number
         (60.0, "60.0"),                              # float
         (-90.0, "-90.0"),                            # negative float
         (True, "true"),                              # bool
+        ("На берегу пустынных волн", "Наберегупустынныхволн")  # unicode
     ],
 )
 def test_clean_string(input_string, cleaned_string):
@@ -29,6 +30,7 @@ def test_clean_string(input_string, cleaned_string):
      - Can handle decimal and character combinations in a string
      - Can handle floats
      - Can handle booleans as expected (lowercase and string)
+     - Can handle unicode characters (not just ascii)
     """
     assert clean_string(input_string) == cleaned_string
 

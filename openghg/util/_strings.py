@@ -51,15 +51,29 @@ def clean_string(
     else:
         special_characters = keep_special_characters.copy()
 
+    # Check if "_" is included in the list of `keep_special_characters`
+    # This needs a special case because `\w` being used in our main
+    # regex substitution already includes an underscore - "A-Za-z0-9_"
+    underscore = "_"
+    if underscore in special_characters:
+        keep_underscore = True
+        special_characters.remove(underscore)
+    else:
+        keep_underscore = False
+
     keep_regex = re.escape("".join(special_characters))
 
     try:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
 
-        # Removes non-alphanumeric characters except those specified
-        to_keep = rf"[^a-zA-Z0-9{keep_regex}]+"
+        # Keep unicode alphanumeric, _, and keep additional special chars
+        to_keep = rf"[^\w{keep_regex}]+"
         cleanest = re.sub(to_keep, "", cleaner)
+
+        # Explicitly remove underscores if not keeping
+        if not keep_underscore:
+            cleanest = cleanest.replace(underscore, "")
     except TypeError:
         return to_clean
 
