@@ -12,10 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added feature to allow meteorological data in relation to a site to be retrieved from the Copernicus Climate Data Store (CDS) and stored in an object store (data_type="site_met"). [PR #1421](https://github.com/openghg/openghg/pull/1421)
 - Implemented `update` method for Zarr storage, which will be used by `Datasource` to allow updating existing data in the object store. Also added methods for aligning a dataset to data stored by Zarr. [PR #1532](https://github.com/openghg/openghg/pull/1532)
 
-
 ### Updated
 - `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
 - Tidied `Datasource` by moving date range methods to `util` and reorganising methods. [PR #1545](https://github.com/openghg/openghg/pull/1545)
+- Updated `clean_string` function to retain "." characters by default [PR #1546](https://github.com/openghg/openghg/issues/1546)
 
 ## [0.17.0] - 2025-11-15
 
