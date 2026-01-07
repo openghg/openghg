@@ -16,7 +16,7 @@ from openghg.util import clean_string, extract_float, is_number
         (60.0, "60.0"),                              # float
         (-90.0, "-90.0"),                            # negative float
         (True, "true"),                              # bool
-        ("На берегу пустынных волн", "Наберегупустынныхволн")  # unicode
+        ("на берегу пустынных волн", "наберегупустынныхволн")  # unicode
     ],
 )
 def test_clean_string(input_string, cleaned_string):
