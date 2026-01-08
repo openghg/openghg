@@ -459,6 +459,11 @@ def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_ov
     with d.get_data(version="v1").compute() as ds:
         n_days_expected = pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
         assert ds.time.size == n_days_expected
+
+        # The datasets_with_overlap fixture creates datasets with constant values (via constant=True),
+        # so we can detect which dataset "wins" where time ranges overlap. Here we mimic the expected
+        # upsert behaviour of if_exists="combine", where newer data replaces older data on overlap,
+        # by keeping the last occurrence for each timestamp.
         combined = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time", keep="last")
         assert ds.equals(combined)
 
@@ -478,6 +483,7 @@ def test_error_if_overlap_and_not_combine(datasource, datasets_with_overlap):
 
 
 # TODO: fix attribute handling so this doesn't happen!
+# this is tracked in Issue #923
 def test_attributes_overwritten_on_combine(datasource, datasets_with_overlap):
     """Test that shows attributes are overwritten when writing to zarr.
 

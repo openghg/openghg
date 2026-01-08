@@ -165,9 +165,11 @@ class LocalZarrStore(Store):
 
         This method performs an *upsert*: data points in ``dataset`` that overlap
         with existing coordinates along ``append_dim`` will overwrite the
-        existing values, while non-overlapping data will be added. When creating
+        existing values, while non-overlapping data will be added. In case of
+        overlaps, the values from the provided ``dataset`` take precedence over
+        any existing values (i.e. "last write wins" semantics). When creating
         a new version via this method, the current version is first copied and
-        then updated with the provided data. This differs from :meth:`add`,
+        then updated with the provided data. This differs from `add`,
         which only appends new data.
 
         Args:
