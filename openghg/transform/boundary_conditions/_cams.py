@@ -8,7 +8,14 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 
-from openghg.util import find_domain, normalise_to_filepath_list, open_time_nc_fn, timestamp_now
+from openghg.util import (
+    find_domain,
+    normalise_to_filepath_list,
+    open_time_nc_fn,
+    timestamp_now,
+    cf_ureg,
+    unit_mapping,
+)
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
 
@@ -16,17 +23,18 @@ logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_cams_data_units(ds: xr.DataArray) -> str:
+def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
     """Get unit of CAMS dataset.
     Args:
         ds: dataset from raw cams data from which extract the units
+        species: species of the data
     Returns:
         unit
     """
-    if "CH4" in ds and ds.CH4.units == "1e-9":
-        return "ppb"
-    elif "N2O" in ds and ds.N2O.units == "1e-9 mol mol-1":
-        return "ppb"
+    species = species.upper()
+    units = getattr(ds[species], "units", None)
+    if units is not None:
+        return str(units)
     else:
         raise ValueError("Units not found.")
 
@@ -337,9 +345,23 @@ def parse_cams(
 
     with xr_open_fn(filepath).chunk(chunks) as ds:
 
-        units = get_cams_data_units(ds)
+        units_from_data = get_cams_data_units(ds, species=species)
 
-        # Be sure that data are sorted in ascending order (not the case for n2o latitude)
+        try:
+            cf_units = cf_ureg.parse_expression(units_from_data)
+        except Exception as e:
+            raise ValueError(f"Could not parse units: {units_from_data}") from e
+
+        if cf_units is None:
+            raise ValueError(f"Parsed units are None for: {units_from_data}")
+
+        if getattr(cf_units, "dimensionless", False):
+            units = unit_mapping.get(str(cf_units.magnitude))
+            if units is None:
+                raise ValueError(f"Unit mapping not found for: {cf_units.magnitude}")
+        else:
+            units = str(cf_units)
+
         ds = ds.sortby(list(ds.dims))
 
         # Resample data
@@ -376,8 +398,11 @@ def parse_cams(
 
     bc_data.attrs.update(add_attrs)
 
-    # set_unit
-    set_units(bc_data, units)
+    if units is None:
+        raise ValueError("Units could not be determined from data.")
+    else:
+        # set_unit
+        set_units(bc_data, units)
 
     # create metadata
     metadata = make_metadata(
