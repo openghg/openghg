@@ -376,7 +376,24 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             # Only save the current daterange string for this version
             date_keys = [new_daterange_str]
         elif if_exists == "combine":
-            raise NotImplementedError("Combining data not yet implemented.")
+            # Combine new data with existing data (upsert operation)
+            logger.info("Updating store by combining new data with existing.")
+
+            if not self._vzds.versions:
+                raise ValueError("Cannot update empty Zarr store.")
+
+            # Append new data to the zarr store for the current version
+            if version_str_lower in self._vzds.versions:
+                self._vzds.checkout_version(version_str_lower)
+            else:
+                # Create a new version based on the current data
+                self._vzds.create_version(version_str_lower, checkout=True, copy_current=True)
+
+            # Upsert: update overlapping values and insert non-overlapping ones
+            self._vzds.upsert(data)
+
+            # Get the daterange of the combined data
+            date_keys = [get_representative_daterange_str(self.get_data())]
         # If we don't know what (i.e. we've got "auto") to do we'll raise an error
         else:
             date_chunk_str = f"Current: {date_keys}; new: {overlapping}\n"
