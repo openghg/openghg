@@ -265,7 +265,7 @@ def test_convert_units_get_obs():
     )
 
     sliced_co2_data = timeslice_data.data
-    assert "1e-9" in sliced_co2_data["mf"].attrs["units"]
+    assert "1e-09" in sliced_co2_data["mf"].attrs["units"]
     assert "parts_per_billion" in sliced_co2_data["mf"].attrs["units_definition"]
     np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-6)
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
@@ -340,7 +340,7 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
-    assert "1e-9" in obscolumn["mf"].attrs["units"]
+    assert "1e-09" in obscolumn["mf"].attrs["units"]
 
 
 def test_unit_conversion_get_obs_column():

@@ -569,7 +569,7 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
     for dv in ("mf_mod", "bc_mod"):
-        assert combined_dataset[dv].attrs["units"] == "1e-9"
+        assert combined_dataset[dv].attrs["units"] == "1e-09"
 
     error_in_mod_obs = np.mean(
         np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)
