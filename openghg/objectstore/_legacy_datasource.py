@@ -57,7 +57,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self._mode = mode
         self._bucket = bucket
-        
+
         # Setup versioned zarr store directly
         self._root_store_key = f"data/{uuid}/zarr"
         self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
