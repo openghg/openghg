@@ -306,7 +306,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         # We'll only need to sort the new dataset if the data we add comes before the current data
 
         # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
-        if (not self._store or not overlapping) and if_exists != "new":
+        if not self._store or not overlapping:
             self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
             date_keys.append(new_daterange_str)
         # Otherwise if we have data already stored in the Datasource
