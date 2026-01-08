@@ -23,11 +23,12 @@ from openghg.standardise import standardise_surface
 def setup_versioned_data():
     """Set up test data with multiple versions for testing version parameter.
 
-    This creates two versions of the same data to test version selection.
+    This creates two versions with different CO2 values to test version selection.
+    Version v1 has CO2 values around 410 ppm, version v2 has values of 9999.99 ppm.
     """
     clear_test_stores()
 
-    # Add test data for BSD site - this creates version v1
+    # Add test data for BSD site - this creates version v1 with original CO2 values (~410)
     bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     standardise_surface(
         store="user",
@@ -37,15 +38,17 @@ def setup_versioned_data():
         network="DECC",
     )
 
-    # Add the same data again with if_exists="new" to create version v2
+    # Add modified data with different CO2 values to create version v2 (CO2 = 9999.99)
+    bsd_248_mod_path = get_surface_datapath(
+        filename="bsd.picarro.1minute.248m.co2_mod.dat", source_format="CRDS"
+    )
     standardise_surface(
         store="user",
-        filepath=bsd_248_path,
+        filepath=bsd_248_mod_path,
         source_format="CRDS",
         site="bsd",
         network="DECC",
         if_exists="new",
-        force=True,
     )
 
     # Add test data for TAC site
@@ -109,9 +112,14 @@ def test_get_obs_surface_invalid_version():
         get_obs_surface(site="bsd", species="co2", inlet="248m", version="v999")
 
 
-@pytest.mark.parametrize("version", ["latest", "v1", "v2"])
-def test_get_obs_surface_multiple_versions(version):
-    """Test that get_obs_surface can retrieve different versions."""
+@pytest.mark.parametrize(
+    "version,expected_co2_range", [("latest", (9000, 10000)), ("v1", (400, 425)), ("v2", (9000, 10000))]
+)
+def test_get_obs_surface_multiple_versions(version, expected_co2_range):
+    """Test that get_obs_surface can retrieve different versions and returns the correct data.
+
+    v1 has CO2 values around 410 ppm, v2 has values of 9999.99 ppm.
+    """
     # Get data with specified version
     obs_data = get_obs_surface(site="bsd", species="co2", inlet="248m", version=version)
 
@@ -120,6 +128,21 @@ def test_get_obs_surface_multiple_versions(version):
     assert obs_data.data is not None
     assert "time" in obs_data.data.dims
     assert "latest_version" in obs_data.metadata
+
+    # Verify the correct version is returned by checking CO2 values
+    # Get the mf (mole fraction) data variable which contains CO2 measurements
+    co2_values = obs_data.data["mf"].values
+    # Filter out NaN values
+    co2_valid = co2_values[~obs_data.data["mf"].isnull()]
+
+    if len(co2_valid) > 0:
+        # Check that the values are in the expected range for this version
+        min_co2 = float(co2_valid.min())
+        max_co2 = float(co2_valid.max())
+        expected_min, expected_max = expected_co2_range
+
+        assert min_co2 >= expected_min, f"Version {version}: min CO2 {min_co2} below expected {expected_min}"
+        assert max_co2 <= expected_max, f"Version {version}: max CO2 {max_co2} above expected {expected_max}"
 
 
 def test_version_parameter_backwards_compatibility():
@@ -156,9 +179,12 @@ def test_version_parameter_backwards_compatibility():
         pass
 
 
-@pytest.mark.parametrize("version", ["latest", "v1"])
-def test_version_parameter_in_search_results(version):
-    """Test that version parameter is properly used in SearchResults.retrieve_all()."""
+@pytest.mark.parametrize("version,expected_co2_range", [("latest", (9000, 10000)), ("v1", (400, 425))])
+def test_version_parameter_in_search_results(version, expected_co2_range):
+    """Test that version parameter is properly used in SearchResults.retrieve_all().
+
+    Also verifies the correct version is returned by checking CO2 values.
+    """
     # Search for data
     results = search(site="bsd", species="co2", inlet="248m")
 
@@ -177,6 +203,22 @@ def test_version_parameter_in_search_results(version):
     assert data is not None
     if isinstance(data, list):
         assert len(data) > 0
-        assert data[0].data is not None
+        obs_data = data[0]
     else:
-        assert data.data is not None
+        obs_data = data
+
+    assert obs_data.data is not None
+
+    # Verify the correct version is returned by checking CO2 values
+    # The variable might be 'mf' or 'co2' depending on rename_vars setting
+    co2_var = "mf" if "mf" in obs_data.data else "co2"
+    co2_values = obs_data.data[co2_var].values
+    co2_valid = co2_values[~obs_data.data[co2_var].isnull()]
+
+    if len(co2_valid) > 0:
+        min_co2 = float(co2_valid.min())
+        max_co2 = float(co2_valid.max())
+        expected_min, expected_max = expected_co2_range
+
+        assert min_co2 >= expected_min, f"Version {version}: min CO2 {min_co2} below expected {expected_min}"
+        assert max_co2 <= expected_max, f"Version {version}: max CO2 {max_co2} above expected {expected_max}"
