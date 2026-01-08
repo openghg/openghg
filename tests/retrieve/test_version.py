@@ -21,13 +21,14 @@ from openghg.standardise import standardise_surface
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_versioned_data():
-    """Set up test data with multiple versions for testing version parameter."""
+    """Set up test data for testing version parameter.
+    
+    Note: The actual version creation happens in the conftest.py fixture.
+    This just ensures test data is loaded so we can test the version parameter.
+    """
     clear_test_stores()
 
-    # Create test data with multiple versions by adding non-overlapping data
-    # This will automatically create version v1 and v2
-
-    # Add first version of data
+    # Add test data for BSD site
     bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     standardise_surface(
         store="user",
@@ -37,8 +38,7 @@ def setup_versioned_data():
         network="DECC",
     )
 
-    # To create a second version, we need to add new data with new_version flag
-    # We'll use the TAC data which has a different time range
+    # Add test data for TAC site
     tac_path = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     standardise_surface(
         store="user",
