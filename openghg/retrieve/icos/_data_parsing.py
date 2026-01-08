@@ -7,6 +7,7 @@ from zipfile import ZipFile
 from typing import cast, Any
 
 from icoscp_core.icos import data, meta
+from icoscp_core.metacore import References
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -19,6 +20,44 @@ def camel_to_snake(s: str) -> str:
     s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", s)
     s2 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1)
     return s2.lower()
+
+
+def retrieve_references_object(dobj_uri: str) -> References:
+    """
+    Retrieve the References object from ICOS CP for a data object (Dobj).
+    Args:
+        dobj_uri: Data object URI details
+    Returns:
+        icoscp_core.metacore.References: Object related to ICOS Dobj
+    """
+    dobj_meta = meta.get_dobj_meta(dobj_uri)
+    return dobj_meta.references
+
+
+def retrieve_dobj_references(dobj_uri: str) -> dict:
+    """
+    Retrieve key reference details for an ICOS data object as a dictionary.
+
+    Currently includes keys:
+        - citation - Citation string
+        - licence_name - Name of the licence associated with the data
+        - licence_info - URL for the licence itself
+
+    Args:
+        dobj_uri: Data object URI details
+    Returns:
+        dict: Dictionary of key reference details for the ICOS data object
+    """
+
+    references = retrieve_references_object(dobj_uri)
+
+    references_dict = {
+        "citation": references.citationString,
+        "licence_name": references.licence.name,
+        "licence_info": references.licence.url,
+    }
+
+    return references_dict
 
 
 def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
