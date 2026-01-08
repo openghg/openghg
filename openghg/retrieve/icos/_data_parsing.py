@@ -1,5 +1,6 @@
 """ """
 
+import logging
 from collections import defaultdict
 import io
 import re
@@ -13,6 +14,9 @@ import pandas as pd
 import xarray as xr
 
 from ._queries import attrs_query, icos_format_info
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def camel_to_snake(s: str) -> str:
@@ -40,8 +44,8 @@ def retrieve_dobj_references(dobj_uri: str) -> dict:
 
     Currently includes keys:
         - citation - Citation string
-        - licence_name - Name of the licence associated with the data
-        - licence_info - URL for the licence itself
+        - licence_name - Name of the licence associated with the data (when available)
+        - licence_info - URL for the licence itself (when available)
 
     Args:
         dobj_uri: Data object URI details
@@ -51,11 +55,15 @@ def retrieve_dobj_references(dobj_uri: str) -> dict:
 
     references = retrieve_references_object(dobj_uri)
 
-    references_dict = {
-        "citation": references.citationString,
-        "licence_name": references.licence.name,
-        "licence_info": references.licence.url,
-    }
+    references_dict = {}
+    references_dict["citation"] = references.citationString
+
+    licence = references.licence
+    if licence is not None:
+        references_dict["licence_name"] = licence.name
+        references_dict["licence_info"] = licence.url
+    else:
+        logger.warning("No licence details available from references for ICOS data object")
 
     return references_dict
 
