@@ -9,6 +9,8 @@ import xarray as xr
 
 from openghg.objectstore import exists, get_object_from_json
 from openghg.objectstore._local_store import delete_object
+from openghg.storage import get_versioned_zarr_directory_store
+from openghg.types import DataOverlapError, ObjectStoreError, ZarrStoreError
 from openghg.util import (
     create_daterange_str,
     daterange_overlap,
@@ -17,7 +19,6 @@ from openghg.util import (
     timestamp_now,
     timestamp_tzaware,
 )
-from openghg.types import DataOverlapError, ObjectStoreError
 
 from ._datasource import AbstractDatasource, DatasourceFactory
 
@@ -37,7 +38,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     _datasource_root = "datasource"
 
     def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
-        from openghg.store.storage import LocalZarrStore
+        from pathlib import Path
 
         self._uuid = uuid
         self._creation_datetime = str(timestamp_now())
@@ -55,10 +56,12 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             raise ValueError("Invalid mode. Please select r or rw.")
 
         self._mode = mode
-        # TODO - add in selection of other store types, this could NetCDF, sparse, whatever
-        self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid, mode=mode)
-        # So we know where to write out to
         self._bucket = bucket
+        
+        # Setup versioned zarr store directly
+        self._root_store_key = f"data/{uuid}/zarr"
+        self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
+        self._vzds = get_versioned_zarr_directory_store(path=self._stores_path)
 
         self.update_daterange()
 
@@ -89,7 +92,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         from openghg.objectstore import set_object_from_json
 
         DO_NOT_STORE = {
-            "_store",
+            "_vzds",
+            "_root_store_key",
+            "_stores_path",
             "_bucket",
             "_status",
             "_start_date",
@@ -98,7 +103,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key, data=internal_metadata)
-        self._store.close()
+        # Zarr directory stores do not need to be closed
 
     def add(self, data: xr.Dataset, **kwargs) -> None:
         if (period := kwargs.pop("period", None)) is not None:
@@ -112,12 +117,17 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Args:
             version: Version string, e.g. v1, v2
         Returns:
-            None
+            xr.Dataset: Dataset from the store
         """
         if version == "latest":
             version = self._latest_version
 
-        return self._store.get(version=version)
+        try:
+            self._vzds.checkout_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
+
+        return self._vzds.get()
 
     def delete(self) -> None:
         self.delete_all_data()
@@ -190,7 +200,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     @property
     def nbytes(self) -> int:
         """Size of data stored in bytes."""
-        return self._store.bytes_stored()
+        return self._vzds.bytes_stored()
 
     # Methods related storing, getting, deleting data
     def add_data(
@@ -277,6 +287,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        # Check write permissions
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+
         # Ensure data is in time order
         time_coord = "time"
         new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
@@ -300,18 +314,39 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             data = data.drop_duplicates(time_coord, keep="first")
 
         # We'll only do a concat if we actually have overlapping data
-        # Othwerwise we'll just add the new data
+        # Otherwise we'll just add the new data
         overlapping = [
             new_daterange_str
             for existing in date_keys
             if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
         ]
 
-        # We'll only need to sort the new dataset if the data we add comes before the current data
+        # Update append_dim if necessary
+        if self._vzds.append_dim != time_coord:
+            logger.warning(f"Updating VersionedZarrStore append dim. to {time_coord}.")
+            self._vzds.append_dim = time_coord
+
+        # Update encoding; this will only apply to new variables; existing variables
+        # will have their encoding set to match what was previously used by xarray.
+        if compressor:
+            self._vzds.compressor = compressor
+        if filters:
+            self._vzds.filters = filters
+
+        version_str_lower = version_str.lower()
 
         # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
-        if not self._store or not overlapping:
-            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
+        if not self._vzds or not overlapping:
+            # Append new data to the zarr store for the current version
+            if version_str_lower in self._vzds.versions:
+                self._vzds.checkout_version(version_str_lower)
+            else:
+                # Create a new zarr Store for the version
+                if not self._vzds.versions and version_str_lower != "v1":
+                    raise ValueError("First version must be v1")
+                self._vzds.create_version(version_str_lower, checkout=True)
+
+            self._vzds.insert(data)
             date_keys.append(new_daterange_str)
         # Otherwise if we have data already stored in the Datasource
         elif if_exists == "new":
@@ -321,11 +356,23 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             logger.info("Updating store to include new added data only.")
 
             if new_version:
-                self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
+                # Create new version with just this data
+                if version_str_lower in self._vzds.versions:
+                    self._vzds.checkout_version(version_str_lower)
+                else:
+                    if not self._vzds.versions and version_str_lower != "v1":
+                        raise ValueError("First version must be v1")
+                    self._vzds.create_version(version_str_lower, checkout=True)
+
+                self._vzds.insert(data)
             else:
-                self._store.overwrite(
-                    version=version_str, dataset=data, compressor=compressor, filters=filters
-                )
+                # Overwrite existing version with just this data
+                try:
+                    self._vzds.checkout_version(version_str_lower)
+                except ValueError as e:
+                    raise ZarrStoreError(f"Invalid version: {version_str}") from e
+
+                self._vzds.overwrite(data)
             # Only save the current daterange string for this version
             date_keys = [new_daterange_str]
         elif if_exists == "combine":
@@ -374,8 +421,14 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        self._store.delete_all()
-        self._store.close()
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+
+        self._vzds.delete_all_versions()
+
+        if self._stores_path.exists():
+            self._stores_path.rmdir()
+
         self._data_keys.clear()
         self._metadata.clear()
         self._timestamps.clear()
@@ -384,18 +437,23 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         """Delete a specific version of data.
 
         Args:
-            bucket: Bucket containing data
             version: Version string
         Returns:
             None
         """
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+
         if version == "latest":
             raise ValueError("Specific version required for deletion.")
 
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        self._store.delete_version(version=version)
+        try:
+            self._vzds.delete_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
         del self._data_keys[version]
         del self._timestamps[version]
 
@@ -538,11 +596,11 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-            if version not in self._store._vzds.versions:
+            if version not in self._vzds.versions:
                 raise ObjectStoreError(f"{version} not found in object store.")
 
-            self._store._vzds.checkout_version(version)
-            with xr.open_zarr(self._store._vzds.store, consolidated=True) as ds:
+            self._vzds.checkout_version(version)
+            with xr.open_zarr(self._vzds.store, consolidated=True) as ds:
                 if ds.time.size == 1:
                     start_keys = timestamp_tzaware(start_date)
                     start_data = timestamp_tzaware(ds.time[0].values)

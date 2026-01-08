@@ -1,5 +1,6 @@
 """Storage for Xarray Datasets."""
 
+from ._chunking import ChunkingSchema, chunk_size_in_megabytes
 from ._store import Store, MemoryStore, VersionedMemoryStore
 from ._zarr_store import (
     get_zarr_directory_store,
@@ -9,6 +10,8 @@ from ._zarr_store import (
 )
 
 __all__ = (
+    "ChunkingSchema",
+    "chunk_size_in_megabytes",
     "MemoryStore",
     "Store",
     "VersionedMemoryStore",
