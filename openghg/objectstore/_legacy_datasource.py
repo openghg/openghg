@@ -13,12 +13,12 @@ from openghg.storage import get_versioned_zarr_directory_store
 from openghg.types import DataOverlapError, ObjectStoreError, ZarrStoreError
 from openghg.util import (
     create_daterange_str,
-    daterange_overlap,
     get_representative_daterange_str,
     split_daterange_str,
     timestamp_now,
     timestamp_tzaware,
 )
+from openghg.util._versioning import next_version
 
 from ._datasource import AbstractDatasource, DatasourceFactory
 
@@ -49,7 +49,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         self._data_keys = defaultdict(list)  # dict mapping version to lists of daterange strings
         self._data_type = data_type
         # Hold information regarding the versions of the data
-        self._latest_version: str = ""
         self._timestamps: dict[str, str] = {}
 
         if mode not in ("r", "rw"):
@@ -120,7 +119,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             xr.Dataset: Dataset from the store
         """
         if version == "latest":
-            version = self._latest_version
+            version = self.latest_version
 
         try:
             self._vzds.checkout_version(version.lower())
@@ -182,7 +181,11 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     @property
     def latest_version(self) -> str:
         """String of the latest version."""
-        return self._latest_version
+        if not self._vzds.versions:
+            return ""
+
+        # versions have form v1, v2, ..., so order them by digit after 'v' to find latest
+        return max(self._vzds.versions, key=lambda x: int(x[1:]))
 
     @property
     def period(self) -> str | None:
@@ -291,20 +294,18 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if self._mode == "r":
             raise PermissionError("Cannot modify a read-only datasource")
 
+        if if_exists not in ("auto", "new", "combine"):
+            raise ValueError(f"'if_exists' must be 'auto', 'new', or 'combine'; received '{if_exists}'.")
+
         # Ensure data is in time order
         time_coord = "time"
         new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
-
-        if self._latest_version and not new_version:
-            version_str = self._latest_version
-        else:
-            version_str = f"v{len(self._data_keys) + 1!s}"
 
         # Save details of current Datasource status
         self._status = {}
 
         # We'll use this to store the dates covered by this version of the data
-        date_keys = self._data_keys[self._latest_version] if self._data_keys else []
+        date_keys = self._data_keys[self.latest_version] if self._data_keys else []
 
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
@@ -312,14 +313,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             data = data.sortby(time_coord)
         elif drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first")
-
-        # We'll only do a concat if we actually have overlapping data
-        # Otherwise we'll just add the new data
-        overlapping = [
-            new_daterange_str
-            for existing in date_keys
-            if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
-        ]
 
         # Update append_dim if necessary
         if self._vzds.append_dim != time_coord:
@@ -333,87 +326,69 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if filters:
             self._vzds.filters = filters
 
-        version_str_lower = version_str.lower()
-
-        # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
-        if not self._vzds or not overlapping:
-            # Append new data to the zarr store for the current version
-            if version_str_lower in self._vzds.versions:
-                self._vzds.checkout_version(version_str_lower)
-            else:
-                # Create a new zarr Store for the version
-                if not self._vzds.versions and version_str_lower != "v1":
-                    raise ValueError("First version must be v1")
-                self._vzds.create_version(version_str_lower, checkout=True)
-
+        # no data stored, so create initial version and insert data
+        if not self.latest_version:
+            self._vzds.create_version("v1", checkout=True)
             self._vzds.insert(data)
             date_keys.append(new_daterange_str)
-        # Otherwise if we have data already stored in the Datasource
-        elif if_exists == "new":
-            # If we have existing data we'll just keep the new data
-            # If new_version is True then we create a new version containing just this data
-            # If new_version is False then we delete the current data and replace it with just the new data
-            logger.info("Updating store to include new added data only.")
+
+        else:
+            overlapping = self._vzds.overlaps(data)
+
+            self._vzds.checkout_version(self.latest_version)  # all updates relative to latest version
 
             if new_version:
-                # Create new version with just this data
-                if version_str_lower in self._vzds.versions:
-                    self._vzds.checkout_version(version_str_lower)
-                else:
-                    if not self._vzds.versions and version_str_lower != "v1":
-                        raise ValueError("First version must be v1")
-                    self._vzds.create_version(version_str_lower, checkout=True)
+                # create new version; copy data if using "combine" and data is overlapping
+                version_str = next_version(self.latest_version)
+                copy_current = (if_exists == "combine") and overlapping
+                self._vzds.create_version(version_str, checkout=True, copy_current=copy_current)
 
+            if not overlapping:
+                # NOTE: if a new version was created, the current behaviour is to not copy over data
+                # from the current version
                 self._vzds.insert(data)
+                date_keys.append(new_daterange_str)
+
+            elif if_exists == "new":
+                # If we have existing data we'll just keep the new data
+                # If new_version is True then we create a new version containing just this data
+                # If new_version is False then we delete the current data and replace it with just the new data
+                logger.info("Updating store to include new added data only.")
+
+                if new_version:
+                    self._vzds.insert(data)
+                else:
+                    self._vzds.overwrite(data)
+
+                # only save daterange of new data
+                date_keys = [new_daterange_str]
+
+            elif if_exists == "combine":
+                # Combine new data with existing data (upsert operation)
+                logger.info("Updating store by combining new data with existing.")
+
+                self._vzds.upsert(data)
+
+                # Get the daterange of the combined data
+                date_keys = [get_representative_daterange_str(self.get_data())]
+
             else:
-                # Overwrite existing version with just this data
-                try:
-                    self._vzds.checkout_version(version_str_lower)
-                except ValueError as e:
-                    raise ZarrStoreError(f"Invalid version: {version_str}") from e
-
-                self._vzds.overwrite(data)
-            # Only save the current daterange string for this version
-            date_keys = [new_daterange_str]
-        elif if_exists == "combine":
-            # Combine new data with existing data (upsert operation)
-            logger.info("Updating store by combining new data with existing.")
-
-            if not self._vzds.versions:
-                raise ValueError("Cannot update empty Zarr store.")
-
-            # Append new data to the zarr store for the current version
-            if version_str_lower in self._vzds.versions:
-                self._vzds.checkout_version(version_str_lower)
-            else:
-                # Create a new version based on the current data
-                self._vzds.create_version(version_str_lower, checkout=True, copy_current=True)
-
-            # Upsert: update overlapping values and insert non-overlapping ones
-            self._vzds.upsert(data)
-
-            # Get the daterange of the combined data
-            date_keys = [get_representative_daterange_str(self.get_data())]
-        # If we don't know what (i.e. we've got "auto") to do we'll raise an error
-        else:
-            date_chunk_str = f"Current: {date_keys}; new: {overlapping}\n"
-            raise DataOverlapError(
-                f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
-                f"To update current data in object store use `if_exists` input (see options in documentation)"
-            )
+                raise DataOverlapError(
+                    "Unable to add new data. Time overlaps with current data, but 'if_exists' is 'auto'. "
+                    "To update current data in object store use `if_exists` input (see options in documentation)"
+                )
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
 
         self._status["updates"] = True
         self._status["if_exists"] = if_exists
-        self._latest_version = version_str
 
         # We'll store the daterange for this version of the data and update the latest to the current version
         timestamp_str_now = str(timestamp_now())
-        self._data_keys[version_str] = sorted(date_keys)
-        self._timestamps[version_str] = timestamp_str_now
-        self.add_metadata_key(key="latest_version", value=version_str)
+        self._data_keys[self.latest_version] = sorted(date_keys)
+        self._timestamps[self.latest_version] = timestamp_str_now
+        self.add_metadata_key(key="latest_version", value=self.latest_version)
         self.add_metadata_key(key="timestamp", value=timestamp_str_now)
 
         self.update_daterange()
@@ -544,7 +519,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             list: List of data keys
         """
         if version == "latest":
-            version = self._latest_version
+            version = self.latest_version
 
         try:
             keys = self._data_keys[version]
@@ -571,7 +546,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if not self._data_keys:
             return
 
-        date_keys = sorted(self._data_keys[self._latest_version])
+        date_keys = sorted(self._data_keys[self.latest_version])
 
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])

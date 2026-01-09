@@ -383,8 +383,8 @@ def test_obs_data_read_data_diff():
     d_sf6 = get_datasource(uuid=uuid_sf6, bucket=bucket)
     d_n2o = get_datasource(uuid=uuid_n2o, bucket=bucket)
 
-    assert d_sf6._latest_version == "v2"
-    assert d_n2o._latest_version == "v2"
+    assert d_sf6.latest_version == "v2"
+    assert d_n2o.latest_version == "v2"
 
     # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
@@ -472,8 +472,8 @@ def test_obs_data_read_data_overwrite_version():
     d_sf6 = get_datasource(bucket=bucket, uuid=uuid_sf6)
     d_n2o = get_datasource(bucket=bucket, uuid=uuid_n2o)
 
-    assert d_sf6._latest_version == "v1"
-    assert d_n2o._latest_version == "v1"
+    assert d_sf6.latest_version == "v1"
+    assert d_n2o.latest_version == "v1"
 
     # Compare against data from files
     gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
@@ -608,8 +608,8 @@ def test_obs_data_read_two_frequencies():
     d_co_hourly = get_datasource(uuid=uuid_co_hourly, bucket=bucket)
     d_co_minutely = get_datasource(uuid=uuid_co_minutely, bucket=bucket)
 
-    assert d_co_hourly._latest_version == "v1"
-    assert d_co_minutely._latest_version == "v1"
+    assert d_co_hourly.latest_version == "v1"
+    assert d_co_minutely.latest_version == "v1"
 
 
 #  Look at replacing data with different / overlapping internal time stamps
