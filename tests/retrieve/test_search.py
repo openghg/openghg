@@ -83,7 +83,7 @@ def test_search_surface_range():
     res = search_surface(
         site="TAC",
         species="co2",
-        inlet="185",
+        inlet="185.0m",
         start_date="2013-02-01",
         end_date="2013-03-01",
     )
