@@ -369,7 +369,7 @@ def test_integrity_check(data, bucket, datasource):
     d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    d.delete_all_data()
+    d._vzds.delete_all_versions()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
