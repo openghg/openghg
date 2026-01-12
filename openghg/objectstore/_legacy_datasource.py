@@ -333,9 +333,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             date_keys.append(new_daterange_str)
 
         else:
-            overlapping = self._vzds.overlaps(data)
-
             self._vzds.checkout_version(self.latest_version)  # all updates relative to latest version
+
+            overlapping = self._vzds.overlaps(data)
 
             if new_version:
                 # create new version; copy data if using "combine" and data is overlapping
@@ -347,7 +347,12 @@ class Datasource(AbstractDatasource[xr.Dataset]):
                 # NOTE: if a new version was created, the current behaviour is to not copy over data
                 # from the current version
                 self._vzds.insert(data)
-                date_keys.append(new_daterange_str)
+
+                if new_version:
+                    # start fresh list of keys
+                    date_keys = [new_daterange_str]
+                else:
+                    date_keys.append(new_daterange_str)
 
             elif if_exists == "new":
                 # If we have existing data we'll just keep the new data

@@ -107,6 +107,10 @@ class ZarrStore(Store, Generic[ZST]):
 
     def overlaps(self, other: xr.Dataset) -> bool:
         """Return True if other dataset overlaps stored data."""
+        # avoid accessing self.index if store is empty
+        if not bool(self):
+            return False
+
         try:
             other_index = other.get_index(self.append_dim)
         except KeyError:
