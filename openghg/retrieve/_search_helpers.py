@@ -216,7 +216,13 @@ def convert_to_slice(input: str | float | int | slice, rel_tolerance: float = 1e
 def convert_to_slice(input: None, rel_tolerance: float = 1e-6) -> None: ...
 
 
-def convert_to_slice(input: int | float | str | slice | None, rel_tolerance: float = 1e-6) -> slice | None:
+@overload
+def convert_to_slice(input: list[str | slice | None], rel_tolerance: float = 1e-6) -> list[slice | None]: ...
+
+
+def convert_to_slice(
+    input: int | float | str | slice | None | list[str | slice | None], rel_tolerance: float = 1e-6
+) -> slice | None | list[slice | None]:
     """
     Convert input into a slice with within the centre of a relative tolerance.
 
@@ -236,6 +242,9 @@ def convert_to_slice(input: int | float | str | slice | None, rel_tolerance: flo
 
     if isinstance(input, slice):
         return input
+
+    if isinstance(input, list):
+        return [convert_to_slice(x) for x in input]
 
     if isinstance(input, str):
         input = extract_float(input)

@@ -486,10 +486,7 @@ def search(**kwargs: Any) -> SearchResults:
             v = format_inlet(v)
             # Convert all inlet searches to slice so this completes a value search
             rel_tolerance = 1e-6
-            if isinstance(v, list):
-                v = [convert_to_slice(value, rel_tolerance) for value in v]
-            else:
-                v = convert_to_slice(v, rel_tolerance)
+            v = convert_to_slice(v, rel_tolerance)
         elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list
