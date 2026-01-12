@@ -337,6 +337,12 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
             overlapping = self._vzds.overlaps(data)
 
+            if overlapping and if_exists == "auto":
+                raise DataOverlapError(
+                    "Unable to add new data. Time overlaps with current data, but 'if_exists' is 'auto'. "
+                    "To update current data in object store use `if_exists` input (see options in documentation)"
+                )
+
             if new_version:
                 # create new version; copy data if using "combine" and data is overlapping
                 version_str = next_version(self.latest_version)
@@ -368,7 +374,9 @@ class Datasource(AbstractDatasource[xr.Dataset]):
                 # only save daterange of new data
                 date_keys = [new_daterange_str]
 
-            elif if_exists == "combine":
+            else:
+                # We have: if_exists == "combine", since overlapping is true, and if_exists == "auto", "new"
+                # already covered by previous elif and guard clause above.
                 # Combine new data with existing data (upsert operation)
                 logger.info("Updating store by combining new data with existing.")
 
@@ -376,12 +384,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
                 # Get the daterange of the combined data
                 date_keys = [get_representative_daterange_str(self.get_data())]
-
-            else:
-                raise DataOverlapError(
-                    "Unable to add new data. Time overlaps with current data, but 'if_exists' is 'auto'. "
-                    "To update current data in object store use `if_exists` input (see options in documentation)"
-                )
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
