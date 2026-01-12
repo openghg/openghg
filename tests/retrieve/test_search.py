@@ -83,7 +83,7 @@ def test_search_surface_range():
     res = search_surface(
         site="TAC",
         species="co2",
-        inlet="185",
+        inlet="185.0m",
         start_date="2013-02-01",
         end_date="2013-03-01",
     )
@@ -96,11 +96,44 @@ def test_search_surface_range():
         "site": "tac",
         "instrument": "picarro",
         "sampling_period": "3600.0",
-        "inlet": "185m",
+        "inlet": "185.0m",
         "network": "decc",
         "species": "co2",
         "data_type": "surface",
-        "inlet_height_magl": "185",
+        "inlet_height_magl": "185.0",
+    }
+
+    assert res.metadata[key].items() >= partial_metdata.items()
+
+
+def test_search_surface_inlet_format():
+    """
+    Test that the numerical value for inlet is used in search rather than
+    the string match to numerical value.
+    In this case we're checking we can search using inlet="185m" and find
+    data where metadata includes {"inlet": "185.0m"}
+    """
+    res = search_surface(
+        site="TAC",
+        species="co2",
+        inlet="185m",  # No decimal
+        start_date="2013-02-01",
+        end_date="2013-03-01",
+    )
+
+    assert res is not None
+
+    key = next(iter(res.metadata))
+
+    partial_metdata = {
+        "site": "tac",
+        "instrument": "picarro",
+        "sampling_period": "3600.0",
+        "inlet": "185.0m",  # Inlet *value* in string is same but stored to 1 decimal place
+        "network": "decc",
+        "species": "co2",
+        "data_type": "surface",
+        "inlet_height_magl": "185.0",
     }
 
     assert res.metadata[key].items() >= partial_metdata.items()
@@ -286,7 +319,7 @@ def test_search_by_tag(tag):
     res = search_surface(tag=tag)
     assert len(res.metadata) == 1
 
-    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185m", "species": "co2"}
+    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185.0m", "species": "co2"}
 
     key = next(iter(res.metadata))
 
