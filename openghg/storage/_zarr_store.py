@@ -98,8 +98,13 @@ class ZarrStore(Store, Generic[ZST]):
 
         This index is in the order of the data as it is stored on disk,
         which is needed for proper alignment during updates.
+
+        If the append dimension is not found, return an empty Pandas Index.
         """
-        return self._get(sort=False).get_index(self.append_dim)
+        try:
+            return self._get(sort=False).get_index(self.append_dim)
+        except KeyError:
+            return pd.Index([])
 
     @property
     def _overlap_determiner(self) -> OverlapDeterminer:
@@ -107,10 +112,6 @@ class ZarrStore(Store, Generic[ZST]):
 
     def overlaps(self, other: xr.Dataset) -> bool:
         """Return True if other dataset overlaps stored data."""
-        # avoid accessing self.index if store is empty
-        if not bool(self):
-            return False
-
         try:
             other_index = other.get_index(self.append_dim)
         except KeyError:
@@ -134,13 +135,15 @@ class ZarrStore(Store, Generic[ZST]):
         return nbytes
 
     def _get(self, sort: bool = True) -> xr.Dataset:
-        if not bool(self):
-            return xr.Dataset()
+        try:
+            result = xr.open_zarr(self.store, consolidated=True)
+        except KeyError:
+            # if self.store is empty, xarray might raise a KeyError since
+            # metadata like `.zgroup` could be missing
+            result = xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self.store, consolidated=True)
-
-        if sort:
+        if sort and self.append_dim in result.dims:
             result = result.sortby(self.append_dim)
 
         return cast(xr.Dataset, result)
