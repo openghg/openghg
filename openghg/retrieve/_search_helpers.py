@@ -229,8 +229,8 @@ def convert_to_slice(
     Args:
         input : Input value to convert to a slice.
         rel_tolerance: Relative tolerance to allow for the slice. This will be set as
-            - lower = input - rel_tolerance/2
-            - upper = input + rel_tolerance/2
+            - lower = input - input * rel_tolerance / 2
+            - upper = input + input * rel_tolerance / 2
             The rules of slice means lower is inclusive and upper is exclusive.
     Returns:
         slice: Slice object representing the range described
