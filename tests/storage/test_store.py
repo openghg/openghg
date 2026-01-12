@@ -553,3 +553,12 @@ def test_for_missing_data_from_appending_in_loop():
         vzds.delete_all_versions()
         if stores_path.exists():
             stores_path.rmdir()
+
+
+def test_get_from_empty_zarr_store(zarr_memory_store):
+    """Test that an empty dataset is returned by ZarrStore._get if store is empty.
+
+    This relies on the try/except block in `ZarrStore._get`; without this a KeyError
+    is raised by this test instead.
+    """
+    xr.testing.assert_equal(zarr_memory_store._get(), xr.Dataset())
