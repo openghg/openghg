@@ -12,10 +12,7 @@ from typing import cast, Any
 from dataclasses import asdict
 
 from icoscp_core.icos import data, meta
-from icoscp_core.metacore import References
-import numpy as np
-import pandas as pd
-import xarray as xr
+from icoscp_core.metacore import DataObject, References, StationTimeSeriesMeta
 from icoscp_core.metaclient import Station
 
 from ._queries import attrs_query, icos_format_info
@@ -32,37 +29,76 @@ def camel_to_snake(s: str) -> str:
     return s2.lower()
 
 
-def retrieve_references_object(dobj_uri: str) -> References:
+def _retrieve_dobj_meta(dobj_uri: str) -> DataObject:
+    """
+    Retrieve the Data Object metadata. This is a thin wrapper for the `icoscp_core.meta.get_dobj_meta`
+    function.
+    Args:
+        dobj_uri: Data object URI details.
+    Returns:
+        icoscp_core.metacore.DataObject : Data Object metadata from ICOS CP
+    """
+    dobj_meta = meta.get_dobj_meta(dobj_uri)
+    return dobj_meta
+
+
+def _check_and_get_dobj_meta(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> DataObject:
+    """
+    Check if we have already downloaded the dobj_meta DataObject and retrieve this otherwise.
+    This is to allow dobj_meta to be downloaded and used multiple times without
+    needing to make numerous calls to ICOS CP.
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        icoscp_core.metacore.DataObject : Data Object metadata
+    """
+    if dobj_meta is None and dobj_uri is not None:
+        dobj_meta = _retrieve_dobj_meta(dobj_uri)
+
+    if dobj_meta is None:
+        msg = "Either dobj_uri or dobj_meta DataObject must be specified to retrieve Data Object details (e.g. references, instrument, measurement details)."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    return dobj_meta
+
+
+def _retrieve_references_object(
+    dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> References:
     """
     Retrieve the References object from ICOS CP for a data object (Dobj).
     Args:
-        dobj_uri: Data object URI details
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
     Returns:
         icoscp_core.metacore.References: Object related to ICOS Dobj
     """
-    dobj_meta = meta.get_dobj_meta(dobj_uri)
+    dobj_meta = _check_and_get_dobj_meta(dobj_uri, dobj_meta)
     return dobj_meta.references
 
 
-def retrieve_dobj_references(dobj_uri: str) -> dict:
+def retrieve_dobj_references(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> dict:
     """
     Retrieve key reference details for an ICOS data object as a dictionary.
 
     Currently includes keys:
-        - citation - Citation string
-        - licence_name - Name of the licence associated with the data (when available)
-        - licence_info - URL for the licence itself (when available)
+        - citation_string - Citation string
+        - licence_name - Name of the licence associated with the data
+        - licence_info - URL for the licence itself
 
     Args:
-        dobj_uri: Data object URI details
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
     Returns:
         dict: Dictionary of key reference details for the ICOS data object
     """
 
-    references = retrieve_references_object(dobj_uri)
+    references = _retrieve_references_object(dobj_uri, dobj_meta)
 
     references_dict = {}
-    references_dict["citation"] = references.citationString
+    references_dict["citation_string"] = references.citationString
 
     licence = references.licence
     if licence is not None:
