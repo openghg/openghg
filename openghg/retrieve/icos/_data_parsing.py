@@ -110,6 +110,97 @@ def retrieve_dobj_references(dobj_uri: str | None = None, dobj_meta: DataObject 
     return references_dict
 
 
+def _retrieve_specific_info_object(
+    dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> StationTimeSeriesMeta:
+    """
+    Retrieve the specific info details (StationTimeSeriesMeta) from ICOS CP for a data object (Dobj).
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        icoscp_core.metacore.StationTimeSeriesMeta: Object related to specific info stored for the ICOS CP data object
+    """
+    dobj_meta = _check_and_get_dobj_meta(dobj_uri, dobj_meta)
+    return dobj_meta.specificInfo
+
+
+def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> dict:
+    """
+    Retrieve key instrument details for an ICOS data object as a dictionary.
+
+    Currently includes keys:
+        - If multiple instruments, the included keys take the form "instrument1", "instrument2" etc.
+        - Otherwise, this included key is "instrument"
+
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        dict: Dictionary of instrument details for the ICOS data object
+    """
+    specific_info_meta = _retrieve_specific_info_object(dobj_uri, dobj_meta)
+    acquisition_meta = specific_info_meta.acquisition
+    instrument = acquisition_meta.instrument
+
+    instrument_dict = {}
+
+    if instrument is None:
+        logger.warning(f"Unable to determine instrument for {dobj_uri}")
+        instrument_dict["instrument"] = "NA"
+        instrument_dict["instrument_data"] = "NA"
+    elif isinstance(instrument, list):
+        instrument_dict["instrument"] = "multiple"
+
+        instrument_name_details = []
+        for item in instrument:
+            label = item.label
+            uri = item.uri
+            instrument_name_details.extend([label, uri])
+        instrument_dict["instrument_data"] = instrument_name_details
+    else:
+        instrument_dict["instrument"] = instrument.label
+        instrument_dict["instrument_data"] = [instrument.label, instrument.uri]
+
+    return instrument_dict
+
+
+def retrieve_dobj_measurement_type(
+    species_label: str, dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> dict:
+    """
+    Retrieve key measurement type details for an ICOS data object as a dictionary.
+
+    Currently includes keys:
+        - "measurement_type"
+          - contains the measurement details based on the species label within the columns
+          - if the species label is not found for the columns this inclues an empyty string
+
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        dict: Dictionary of measurement type details for the ICOS data object
+    """
+    specific_info_meta = _retrieve_specific_info_object(dobj_uri, dobj_meta)
+    columns_data = specific_info_meta.columns
+    column_labels = [column.label for column in columns_data]
+
+    measurement_dict = {}
+
+    try:
+        index = column_labels.index(species_label)
+    except ValueError:
+        logger.warning(f"Unable to find measurement type in ICOS data for {species_label}")
+        measurement_dict["measurement_type"] = ""
+        return measurement_dict
+
+    species_column = columns_data[index]
+    measurement_dict["measurement_type"] = species_column.valueType.self.label
+
+    return measurement_dict
+
+
 def _check_and_get_station_meta(
     site: str | None = None, station_meta: Station | None = None, atmospheric: bool = True
 ) -> Station:
