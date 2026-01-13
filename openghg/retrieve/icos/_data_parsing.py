@@ -122,7 +122,13 @@ def _retrieve_specific_info_object(
         icoscp_core.metacore.StationTimeSeriesMeta: Object related to specific info stored for the ICOS CP data object
     """
     dobj_meta = _check_and_get_dobj_meta(dobj_uri, dobj_meta)
-    return dobj_meta.specificInfo
+
+    specific_info = dobj_meta.specificInfo
+
+    if not isinstance(specific_info, StationTimeSeriesMeta):
+        raise ValueError("Unable to parse specific_info metadata (wrong type)")
+
+    return specific_info
 
 
 def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> dict:
@@ -143,7 +149,7 @@ def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject 
     acquisition_meta = specific_info_meta.acquisition
     instrument = acquisition_meta.instrument
 
-    instrument_dict = {}
+    instrument_dict: dict[str, str | list] = {}
 
     if instrument is None:
         logger.warning(f"Unable to determine instrument for {dobj_uri}")
@@ -159,8 +165,12 @@ def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject 
             instrument_name_details.extend([label, uri])
         instrument_dict["instrument_data"] = instrument_name_details
     else:
-        instrument_dict["instrument"] = instrument.label
-        instrument_dict["instrument_data"] = [instrument.label, instrument.uri]
+        if instrument.label is not None:
+            instrument_dict["instrument"] = instrument.label
+            instrument_dict["instrument"] = [instrument.label, instrument.uri]
+        else:
+            instrument_dict["instrument"] = "NA"
+            instrument_dict["instrument_data"] = "NA"
 
     return instrument_dict
 
@@ -174,7 +184,7 @@ def retrieve_dobj_measurement_type(
     Currently includes keys:
         - "measurement_type"
           - contains the measurement details based on the species label within the columns
-          - if the species label is not found for the columns this inclues an empyty string
+          - if the species label is not found for the columns this includes "NA"
 
     Args:
         dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
@@ -184,19 +194,33 @@ def retrieve_dobj_measurement_type(
     """
     specific_info_meta = _retrieve_specific_info_object(dobj_uri, dobj_meta)
     columns_data = specific_info_meta.columns
-    column_labels = [column.label for column in columns_data]
 
     measurement_dict = {}
 
+    if isinstance(columns_data, list):
+        column_labels = [column.label for column in columns_data]
+    else:
+        logger.warning(
+            "Unable to find measurement type in ICOS data. No columns data available specific_info_meta."
+        )
+        measurement_dict["measurement_type"] = "NA"
+        return measurement_dict
+
     try:
         index = column_labels.index(species_label)
-    except ValueError:
+    except (TypeError, ValueError):
         logger.warning(f"Unable to find measurement type in ICOS data for {species_label}")
-        measurement_dict["measurement_type"] = ""
+        measurement_dict["measurement_type"] = "NA"
         return measurement_dict
 
     species_column = columns_data[index]
-    measurement_dict["measurement_type"] = species_column.valueType.self.label
+    label = species_column.valueType.self.label
+
+    if label is not None:
+        measurement_dict["measurement_type"] = label
+    else:
+        logger.warning(f"Unable to find measurement type in ICOS data for {species_label}")
+        measurement_dict["measurement_type"] = "NA"
 
     return measurement_dict
 
