@@ -11,7 +11,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 # convert scientific notation to volume ratios
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
-unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb"}
+unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq"}
 cf_ureg: pint.UnitRegistry = UnitRegistry(
     preprocessors=[
         lambda x: next((v for k, v in unit_mapping.items() if k in x), x),
