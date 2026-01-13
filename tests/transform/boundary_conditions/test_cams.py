@@ -60,7 +60,7 @@ def test_parse_cams():
     assert bc_data.time.size == 3
     assert bc_data.time.values[0] == np.datetime64("2022-01-01T00:00")
 
-    assert bc_data["vmr_n"].attrs["units"] == "ppb"
-    assert bc_data["vmr_s"].attrs["units"] == "ppb"
-    assert bc_data["vmr_e"].attrs["units"] == "ppb"
-    assert bc_data["vmr_w"].attrs["units"] == "ppb"
+    assert bc_data["vmr_n"].attrs["units"] == "1e-09"
+    assert bc_data["vmr_s"].attrs["units"] == "1e-09"
+    assert bc_data["vmr_e"].attrs["units"] == "1e-09"
+    assert bc_data["vmr_w"].attrs["units"] == "1e-09"
