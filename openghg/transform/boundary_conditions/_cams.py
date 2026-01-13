@@ -31,7 +31,9 @@ def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
         unit
     """
     species = species.upper()
-    units = getattr(ds[species], "units", None)
+    if species not in ds:
+        raise KeyError(f"Species '{species}' not found in dataset.")
+    units = ds[species].attrs.get("units")
     if units is not None:
         return str(units)
     else:
