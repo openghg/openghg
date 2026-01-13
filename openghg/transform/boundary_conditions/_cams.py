@@ -34,14 +34,11 @@ def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
     if species not in ds:
         raise KeyError(f"Species '{species}' not found in dataset.")
     try:
-        units_from_data = ds[species].attrs.get("units", None)
+        units_from_data = ds[species].attrs["units"]
         units = str(cf_ureg.parse_expression(units_from_data).units)
     except Exception as e:
         raise ValueError(f"Could not parse units: {units_from_data}") from e
-    if units is not None:
-        return str(units)
-    else:
-        raise ValueError("Units not found.")
+    return units
 
 
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
