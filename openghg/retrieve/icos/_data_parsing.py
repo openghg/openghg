@@ -4,8 +4,12 @@ import logging
 from collections import defaultdict
 import io
 import re
+import numpy as np
+import pandas as pd
+import xarray as xr
 from zipfile import ZipFile
 from typing import cast, Any
+from dataclasses import asdict
 
 from icoscp_core.icos import data, meta
 from icoscp_core.metacore import References
@@ -135,6 +139,33 @@ icos_formats = [
     "netcdfTimeSeries",
     "asciiAtcFlaskTimeSer",
 ]
+
+
+def _retrieve_dobj_format(data_info: dict | pd.Series | None = None, spec_label: str | None = None) -> Any:
+    """
+    Retrieve the format for an ICOS data object. For this we will need to retrieve the overall
+    ICOS format information and use the spec_label to identify the format.
+    Either the full data_info (best extracted using the `openghg.retrieve.icos._queries.dobj_info()` function)
+    or the spec_label string will need to be specified for this.
+
+    Args:
+        data_info: ICOS data object information returned from _queries.dobj_info()
+        spec_label: Specific label for the data object
+    Returns:
+        str: Format value for the data object
+    """
+    if spec_label is None and data_info is not None:
+        spec_label = data_info["spec_label"]
+
+    if spec_label is None:
+        msg = "Unable to retrieve format for ICOS data object. Please specify either data_info or spec_label directly."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    format_info_row = icos_format_info().loc[spec_label]
+    dobj_format = format_info_row["fmt"]
+
+    return dobj_format
 
 
 def get_icos_text_file(dobj_uri: str) -> str:
@@ -400,7 +431,8 @@ def make_icos_dataset(
 def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
     """ """
     # find format
-    fmt = icos_format_info().loc[data_info["spec_label"]].fmt
+    fmt = _retrieve_dobj_format(data_info)
+
     dobj_uri = data_info["dobj_uri"]
     species = data_info["species"]
 
