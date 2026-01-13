@@ -4,18 +4,21 @@ import logging
 from collections import defaultdict
 import io
 import re
-from zipfile import ZipFile
-from typing import cast, Any
-
-from icoscp_core.icos import data, meta
-from icoscp_core.metacore import References
 import numpy as np
 import pandas as pd
 import xarray as xr
+from zipfile import ZipFile
+from typing import cast, Any
+from dataclasses import asdict
+
+from icoscp_core.icos import data, meta
+from icoscp_core.metacore import DataObject, References, StationTimeSeriesMeta
+from icoscp_core.metaclient import Station
 
 from ._queries import attrs_query, icos_format_info
 
-logger = logging.getLogger("openghg.retrieve")
+
+logger = logging.getLogger("openghg.retrieve.icos")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
@@ -26,37 +29,76 @@ def camel_to_snake(s: str) -> str:
     return s2.lower()
 
 
-def retrieve_references_object(dobj_uri: str) -> References:
+def _retrieve_dobj_meta(dobj_uri: str) -> DataObject:
+    """
+    Retrieve the Data Object metadata. This is a thin wrapper for the `icoscp_core.meta.get_dobj_meta`
+    function.
+    Args:
+        dobj_uri: Data object URI details.
+    Returns:
+        icoscp_core.metacore.DataObject : Data Object metadata from ICOS CP
+    """
+    dobj_meta = meta.get_dobj_meta(dobj_uri)
+    return dobj_meta
+
+
+def _check_and_get_dobj_meta(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> DataObject:
+    """
+    Check if we have already downloaded the dobj_meta DataObject and retrieve this otherwise.
+    This is to allow dobj_meta to be downloaded and used multiple times without
+    needing to make numerous calls to ICOS CP.
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        icoscp_core.metacore.DataObject : Data Object metadata
+    """
+    if dobj_meta is None and dobj_uri is not None:
+        dobj_meta = _retrieve_dobj_meta(dobj_uri)
+
+    if dobj_meta is None:
+        msg = "Either dobj_uri or dobj_meta DataObject must be specified to retrieve Data Object details (e.g. references, instrument, measurement details)."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    return dobj_meta
+
+
+def _retrieve_references_object(
+    dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> References:
     """
     Retrieve the References object from ICOS CP for a data object (Dobj).
     Args:
-        dobj_uri: Data object URI details
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
     Returns:
         icoscp_core.metacore.References: Object related to ICOS Dobj
     """
-    dobj_meta = meta.get_dobj_meta(dobj_uri)
+    dobj_meta = _check_and_get_dobj_meta(dobj_uri, dobj_meta)
     return dobj_meta.references
 
 
-def retrieve_dobj_references(dobj_uri: str) -> dict:
+def retrieve_dobj_references(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> dict:
     """
     Retrieve key reference details for an ICOS data object as a dictionary.
 
     Currently includes keys:
-        - citation - Citation string
-        - licence_name - Name of the licence associated with the data (when available)
-        - licence_info - URL for the licence itself (when available)
+        - citation_string - Citation string
+        - licence_name - Name of the licence associated with the data
+        - licence_info - URL for the licence itself
 
     Args:
-        dobj_uri: Data object URI details
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
     Returns:
         dict: Dictionary of key reference details for the ICOS data object
     """
 
-    references = retrieve_references_object(dobj_uri)
+    references = _retrieve_references_object(dobj_uri, dobj_meta)
 
     references_dict = {}
-    references_dict["citation"] = references.citationString
+    references_dict["citation_string"] = references.citationString
 
     licence = references.licence
     if licence is not None:
@@ -66,6 +108,184 @@ def retrieve_dobj_references(dobj_uri: str) -> dict:
         logger.warning("No licence details available from references for ICOS data object")
 
     return references_dict
+
+
+def _retrieve_specific_info_object(
+    dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> StationTimeSeriesMeta:
+    """
+    Retrieve the specific info details (StationTimeSeriesMeta) from ICOS CP for a data object (Dobj).
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        icoscp_core.metacore.StationTimeSeriesMeta: Object related to specific info stored for the ICOS CP data object
+    """
+    dobj_meta = _check_and_get_dobj_meta(dobj_uri, dobj_meta)
+    return dobj_meta.specificInfo
+
+
+def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject | None = None) -> dict:
+    """
+    Retrieve key instrument details for an ICOS data object as a dictionary.
+
+    Currently includes keys:
+        - If multiple instruments, the included keys take the form "instrument1", "instrument2" etc.
+        - Otherwise, this included key is "instrument"
+
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        dict: Dictionary of instrument details for the ICOS data object
+    """
+    specific_info_meta = _retrieve_specific_info_object(dobj_uri, dobj_meta)
+    acquisition_meta = specific_info_meta.acquisition
+    instrument = acquisition_meta.instrument
+
+    instrument_dict = {}
+
+    if instrument is None:
+        logger.warning(f"Unable to determine instrument for {dobj_uri}")
+        instrument_dict["instrument"] = "NA"
+        instrument_dict["instrument_data"] = "NA"
+    elif isinstance(instrument, list):
+        instrument_dict["instrument"] = "multiple"
+
+        instrument_name_details = []
+        for item in instrument:
+            label = item.label
+            uri = item.uri
+            instrument_name_details.extend([label, uri])
+        instrument_dict["instrument_data"] = instrument_name_details
+    else:
+        instrument_dict["instrument"] = instrument.label
+        instrument_dict["instrument_data"] = [instrument.label, instrument.uri]
+
+    return instrument_dict
+
+
+def retrieve_dobj_measurement_type(
+    species_label: str, dobj_uri: str | None = None, dobj_meta: DataObject | None = None
+) -> dict:
+    """
+    Retrieve key measurement type details for an ICOS data object as a dictionary.
+
+    Currently includes keys:
+        - "measurement_type"
+          - contains the measurement details based on the species label within the columns
+          - if the species label is not found for the columns this inclues an empyty string
+
+    Args:
+        dobj_uri: Data object URI details. Either this of dobj_meta must be specified.
+        dobj_meta: Retrieved DataObject for Dobj metadata
+    Returns:
+        dict: Dictionary of measurement type details for the ICOS data object
+    """
+    specific_info_meta = _retrieve_specific_info_object(dobj_uri, dobj_meta)
+    columns_data = specific_info_meta.columns
+    column_labels = [column.label for column in columns_data]
+
+    measurement_dict = {}
+
+    try:
+        index = column_labels.index(species_label)
+    except ValueError:
+        logger.warning(f"Unable to find measurement type in ICOS data for {species_label}")
+        measurement_dict["measurement_type"] = ""
+        return measurement_dict
+
+    species_column = columns_data[index]
+    measurement_dict["measurement_type"] = species_column.valueType.self.label
+
+    return measurement_dict
+
+
+def _check_and_get_station_meta(
+    site: str | None = None, station_meta: Station | None = None, atmospheric: bool = True
+) -> Station:
+    """
+    Check if we have already downloaded the station_meta Station object and retrieve this otherwise
+    using site and atmospheric.
+    This is to allow station_meta to be downloaded and used multiple times without
+    needing to make numerous calls to ICOS CP.
+    Args:
+        site: ICOS site ID e.g. "BIK". Either this is station_meta must be specified.
+        station_meta: Station object (typically from retrieve_station_meta).
+        atmospheric: Whether to initially filter station list to only include atmospheric stations.
+    Returns:
+        icoscp_core.metaclient.Station : Station metadata
+    """
+
+    from openghg.retrieve.icos._stations import retrieve_station_meta
+
+    if site and station_meta is None:
+        station_meta = retrieve_station_meta(site, atmospheric)
+
+    if station_meta is None:
+        msg = "Either site or station_meta must be specified to retrieve staff details."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    return station_meta
+
+
+def retrieve_station_staff(
+    site: str | None = None,
+    station_meta: Station | None = None,
+    role: str | None = None,
+    atmospheric: bool = True,
+) -> pd.DataFrame:
+    """
+    Find details of staff associated with a particular station. This can be filtered by the role.
+    Option to search by site or to supply the station meta (Station object) directly
+    One of site or station_meta must be specified.
+
+    Args:
+        site: ICOS site ID e.g. "BIK". Either this is station_meta must be specified.
+        station_meta: Station object (typically from retrieve_station_meta).
+        role: Name of staff role to filter by. This (non-exhaustively) includes:
+         - "Principal Investigator" (can use "PI" for short)
+         - "Administrator"
+         - "Engineer"
+        atmospheric: Whether to initially filter station list to only include atmospheric stations.
+    Returns:
+        pandas.DataFrame: Summarised details for staff members associated with the site
+            (extracted from meta.get_station_meta(uri))
+    """
+
+    station_meta = _check_and_get_station_meta(site, station_meta, atmospheric)
+
+    station_staff = station_meta.staff
+
+    staff_list = []
+    for staff in station_staff:
+        # Want to combine details for both individual person and role for the site
+        overall_dict = {}
+        person_dict = asdict(staff.person)
+        role_dict = asdict(staff.role.role)
+
+        # Two 'uri' details (one for person and one for role) so ensure these are distinct
+        role_dict["role_uri"] = role_dict.pop("uri")
+
+        # Include just the 'uri' from the `staff.person.self` entry
+        person_dict["staff_uri"] = staff.person.self.uri
+        person_dict.pop("self")
+
+        overall_dict.update(person_dict)
+        overall_dict.update(role_dict)
+        staff_list.append(overall_dict)
+
+    staff_df = pd.DataFrame(staff_list)
+
+    if role is not None:
+        if role == "PI":
+            role = "Principal Investigator"
+
+        role_filter = staff_df["label"] == role
+        staff_df = staff_df[role_filter]
+
+    return staff_df
 
 
 def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
@@ -135,6 +355,33 @@ icos_formats = [
     "netcdfTimeSeries",
     "asciiAtcFlaskTimeSer",
 ]
+
+
+def _retrieve_dobj_format(data_info: dict | pd.Series | None = None, spec_label: str | None = None) -> Any:
+    """
+    Retrieve the format for an ICOS data object. For this we will need to retrieve the overall
+    ICOS format information and use the spec_label to identify the format.
+    Either the full data_info (best extracted using the `openghg.retrieve.icos._queries.dobj_info()` function)
+    or the spec_label string will need to be specified for this.
+
+    Args:
+        data_info: ICOS data object information returned from _queries.dobj_info()
+        spec_label: Specific label for the data object
+    Returns:
+        str: Format value for the data object
+    """
+    if spec_label is None and data_info is not None:
+        spec_label = data_info["spec_label"]
+
+    if spec_label is None:
+        msg = "Unable to retrieve format for ICOS data object. Please specify either data_info or spec_label directly."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    format_info_row = icos_format_info().loc[spec_label]
+    dobj_format = format_info_row["fmt"]
+
+    return dobj_format
 
 
 def get_icos_text_file(dobj_uri: str) -> str:
@@ -400,7 +647,8 @@ def make_icos_dataset(
 def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
     """ """
     # find format
-    fmt = icos_format_info().loc[data_info["spec_label"]].fmt
+    fmt = _retrieve_dobj_format(data_info)
+
     dobj_uri = data_info["dobj_uri"]
     species = data_info["species"]
 
