@@ -4,7 +4,11 @@ nbsphinx
 pydata-sphinx-theme
 sphinx
 sphinx-issues >= 3.0.1
+<<<<<<< HEAD
 sphinx_rtd_theme
+=======
+sphinx_rtd_theme < 3.1.0
+>>>>>>> devel
 sphinxcontrib-programoutput
 sphinx-autodoc-typehints
 sphinx_togglebutton

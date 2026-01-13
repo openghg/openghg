@@ -11,12 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added feature to allow meteorological data in relation to a site to be retrieved from the Copernicus Climate Data Store (CDS) and stored in an object store (data_type="site_met"). [PR #1421](https://github.com/openghg/openghg/pull/1421)
 - Implemented `update` method for Zarr storage, which will be used by `Datasource` to allow updating existing data in the object store. Also added methods for aligning a dataset to data stored by Zarr. [PR #1532](https://github.com/openghg/openghg/pull/1532)
+<<<<<<< HEAD
 - Implemented `if_exists = "combine"` option for adding data to `Datasource`. This option will now be available when standardising data, so data can be updated. [PR #1548](https://github.com/openghg/openghg/pull/1548)
+=======
+- Added `version` parameter to all `get_*` retrieve functions (`get_obs_surface`, `get_obs_column`, `get_flux`, `get_bc`, `get_footprint`) to enable retrieval of specific data versions instead of always defaulting to the latest version. [PR #1549](https://github.com/openghg/openghg/pull/1549)
+>>>>>>> devel
 
 ### Updated
 - `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
 - Tidied `Datasource` by moving date range methods to `util` and reorganising methods. [PR #1545](https://github.com/openghg/openghg/pull/1545)
 - Updated `clean_string` function to retain "." characters by default [PR #1546](https://github.com/openghg/openghg/issues/1546)
+<<<<<<< HEAD
+=======
+- Search for "inlet" (and other related keys) is updated to always look for a slice even when single values are specified. This is to make sure the numerical value, rather than the string equivalent of the value, is matched and for this reason the default tolerance for the slice is set to be small (1e-6 relative to the value itself). This allows a search of e.g. inlet="10m" to be matched to stored metadata={"inlet": "10.0m", ...}. [PR #1558](https://github.com/openghg/openghg/pull/1558)
+>>>>>>> devel
 
 ## [0.17.0] - 2025-11-15
 

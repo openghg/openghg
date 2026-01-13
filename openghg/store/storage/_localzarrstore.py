@@ -153,6 +153,7 @@ class LocalZarrStore(Store):
 
         self._vzds.insert(dataset)
 
+<<<<<<< HEAD
     def update(
         self,
         version: str,
@@ -212,6 +213,8 @@ class LocalZarrStore(Store):
 
         self._vzds.upsert(dataset)
 
+=======
+>>>>>>> devel
     def get(self, version: str) -> xr.Dataset:
         """Get the version of the dataset stored in the zarr store.
 

@@ -11,6 +11,10 @@ from openghg.objectstore import exists, get_object_from_json
 from openghg.objectstore._local_store import delete_object
 from openghg.util import (
     create_daterange_str,
+<<<<<<< HEAD
+=======
+    daterange_overlap,
+>>>>>>> devel
     get_representative_daterange_str,
     split_daterange_str,
     timestamp_now,
@@ -298,11 +302,22 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         elif drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first")
 
+<<<<<<< HEAD
         overlapping = self._store and self._store._vzds._overlap_determiner.has_overlaps(
             data.get_index(self._store._vzds.append_dim)
         )
 
         # TODO: what does the following comment mean? (BM Jan 2026)
+=======
+        # We'll only do a concat if we actually have overlapping data
+        # Othwerwise we'll just add the new data
+        overlapping = [
+            new_daterange_str
+            for existing in date_keys
+            if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
+        ]
+
+>>>>>>> devel
         # We'll only need to sort the new dataset if the data we add comes before the current data
 
         # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
@@ -325,6 +340,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             # Only save the current daterange string for this version
             date_keys = [new_daterange_str]
         elif if_exists == "combine":
+<<<<<<< HEAD
             logger.info("Updating store by combining new data with existing.")
             self._store.update(version=version_str, dataset=data, compressor=compressor, filters=filters)
             date_keys = [get_representative_daterange_str(self.get_data())]
@@ -335,6 +351,15 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             raise DataOverlapError(
                 "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
                 "To update current data in object store use `if_exists` input (see options in documentation)."
+=======
+            raise NotImplementedError("Combining data not yet implemented.")
+        # If we don't know what (i.e. we've got "auto") to do we'll raise an error
+        else:
+            date_chunk_str = f"Current: {date_keys}; new: {overlapping}\n"
+            raise DataOverlapError(
+                f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
+                f"To update current data in object store use `if_exists` input (see options in documentation)"
+>>>>>>> devel
             )
 
         self._data_type = data_type
