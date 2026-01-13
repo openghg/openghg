@@ -473,10 +473,6 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_now,
         timestamp_tzaware,
     )
-<<<<<<< HEAD
-=======
-    from openghg.retrieve._search_helpers import convert_to_slice
->>>>>>> devel
     from pandas import Timedelta as pd_Timedelta
     from openghg.util import handle_direct_store_path
 
@@ -487,12 +483,6 @@ def search(**kwargs: Any) -> SearchResults:
     for k, v in kwargs.items():
         if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
             v = format_inlet(v)
-<<<<<<< HEAD
-=======
-            # Convert all inlet searches to slice so this completes a value search
-            rel_tolerance = 1e-6
-            v = convert_to_slice(v, rel_tolerance)
->>>>>>> devel
         elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list

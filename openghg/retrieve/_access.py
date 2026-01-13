@@ -27,10 +27,6 @@ multDataTypes = Union[
 def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: list | None = None,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -40,10 +36,6 @@ def _get_generic(
         combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
             to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
         kwargs: Additional search terms
 
     Returns:
@@ -60,11 +52,7 @@ def _get_generic(
         raise SearchError(err_msg)
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-<<<<<<< HEAD
     retrieved_data = results.retrieve_all()
-=======
-    retrieved_data = results.retrieve_all(version=version)
->>>>>>> devel
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -116,10 +104,6 @@ def get_obs_surface(
     keep_variables: list | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -150,10 +134,6 @@ def get_obs_surface(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
         kwargs: Additional search terms
 
     Returns:
@@ -199,10 +179,6 @@ def get_obs_surface(
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
-<<<<<<< HEAD
-=======
-        version=version,
->>>>>>> devel
         **surface_keywords,  # type: ignore
     )
 
@@ -295,10 +271,6 @@ def get_obs_column(
     average: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -326,10 +298,6 @@ def get_obs_column(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -346,10 +314,6 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
-<<<<<<< HEAD
-=======
-        version=version,
->>>>>>> devel
         **kwargs,
     )
 
@@ -451,10 +415,6 @@ def get_flux(
     time_resolution: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -475,10 +435,6 @@ def get_flux(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
         kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
@@ -494,10 +450,6 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="flux",
-<<<<<<< HEAD
-=======
-        version=version,
->>>>>>> devel
         **kwargs,
     )
 
@@ -522,10 +474,6 @@ def get_bc(
     end_date: str | Timestamp | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -545,10 +493,6 @@ def get_bc(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
@@ -559,10 +503,6 @@ def get_bc(
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
-<<<<<<< HEAD
-=======
-        version=version,
->>>>>>> devel
         **kwargs,
     )
 
@@ -583,10 +523,6 @@ def get_footprint(
     species: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
-<<<<<<< HEAD
-=======
-    version: str = "latest",
->>>>>>> devel
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -616,10 +552,6 @@ def get_footprint(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
-<<<<<<< HEAD
-=======
-        version: Version of data to retrieve. Default = "latest".
->>>>>>> devel
         kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
@@ -647,10 +579,6 @@ def get_footprint(
         end_date=end_date,
         species=species,
         data_type="footprints",
-<<<<<<< HEAD
-=======
-        version=version,
->>>>>>> devel
         **kwargs,
     )
 

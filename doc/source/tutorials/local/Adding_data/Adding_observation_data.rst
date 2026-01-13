@@ -547,30 +547,6 @@ the ``ObsData`` object.
 You can also pass any of ``title``, ``xlabel``, ``ylabel`` and ``units``
 to the ``plot_timeseries`` function to modify the labels.
 
-<<<<<<< HEAD
-=======
-Retrieving specific data versions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-As mentioned in the :ref:`note-on-datasources` section, Datasources can handle multiple versions of data.
-By default, ``get_obs_surface`` and other ``get_*`` functions retrieve the latest version of the data.
-You can check which version is being retrieved by looking at the metadata:
-
-.. jupyter-execute::
-
-    co2_data.metadata["latest_version"]
-
-If you want to retrieve a specific version instead of the latest, you can use the ``version`` parameter.
-For example, to retrieve version 1 of the data:
-
-.. jupyter-execute::
-
-    co2_data_v1 = get_obs_surface(site="tac", species="co2", inlet="185m", tag="project1", version="v1")
-    co2_data_v1.metadata["latest_version"]
-
-This allows you to compare different versions of data or analyze how data has changed over time.
-
->>>>>>> devel
 Unit conversion
 ^^^^^^^^^^^^^^^^
 
