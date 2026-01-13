@@ -1,6 +1,4 @@
 import logging
-import pandas as pd
-from dataclasses import asdict
 from icoscp_core.icos import meta, ATMO_STATION
 from icoscp_core.queries.stationlist import StationLite
 from icoscp_core.metaclient import Station
@@ -76,67 +74,3 @@ def retrieve_station_meta(site: str, atmospheric: bool = True) -> Station:
     station_meta = meta.get_station_meta(uri)
 
     return station_meta
-
-
-def retrieve_station_staff(
-    site: str | None = None,
-    station_meta: Station | None = None,
-    role: str | None = None,
-    atmospheric: bool = True,
-) -> pd.DataFrame:
-    """
-    Find details of staff associated with a particular station. This can be filtered by the role.
-    Option to search by site or to supply the station meta (Station object) directly
-    One of site or station_meta must be specified.
-
-    Args:
-        site: ICOS site ID e.g. "BIK". Either this is station_meta must be specified.
-        station_meta: Station object (typically from retrieve_station_meta).
-        role: Name of staff role to filter by. This (non-exhaustively) includes:
-         - "Principal Investigator" (can use "PI" for short)
-         - "Administrator"
-         - "Engineer"
-        atmospheric: Whether to initially filter station list to only include atmospheric stations.
-    Returns:
-        pandas.DataFrame: Summarised details for staff members associated with the site
-            (extracted from meta.get_station_meta(uri))
-    """
-
-    if site and station_meta is None:
-        station_meta = retrieve_station_meta(site, atmospheric)
-
-    if station_meta is None:
-        msg = "Either site or station_meta must be specified to retrieve staff details."
-        logger.exception(msg)
-        raise ValueError(msg)
-
-    station_staff = station_meta.staff
-
-    staff_list = []
-    for staff in station_staff:
-        # Want to combine details for both individual person and role for the site
-        overall_dict = {}
-        person_dict = asdict(staff.person)
-        role_dict = asdict(staff.role.role)
-
-        # Two 'uri' details (one for person and one for role) so ensure these are distinct
-        role_dict["role_uri"] = role_dict.pop("uri")
-
-        # Include just the 'uri' from the `staff.person.self` entry
-        person_dict["staff_uri"] = staff.person.self.uri
-        person_dict.pop("self")
-
-        overall_dict.update(person_dict)
-        overall_dict.update(role_dict)
-        staff_list.append(overall_dict)
-
-    staff_df = pd.DataFrame(staff_list)
-
-    if role is not None:
-        if role == "PI":
-            role = "Principal Investigator"
-
-        role_filter = staff_df["label"] == role
-        staff_df = staff_df[role_filter]
-
-    return staff_df

@@ -16,10 +16,12 @@ from icoscp_core.metacore import References
 import numpy as np
 import pandas as pd
 import xarray as xr
+from icoscp_core.metaclient import Station
 
 from ._queries import attrs_query, icos_format_info
 
-logger = logging.getLogger("openghg.retrieve")
+
+logger = logging.getLogger("openghg.retrieve.icos")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
@@ -70,6 +72,93 @@ def retrieve_dobj_references(dobj_uri: str) -> dict:
         logger.warning("No licence details available from references for ICOS data object")
 
     return references_dict
+
+
+def _check_and_get_station_meta(
+    site: str | None = None, station_meta: Station | None = None, atmospheric: bool = True
+) -> Station:
+    """
+    Check if we have already downloaded the station_meta Station object and retrieve this otherwise
+    using site and atmospheric.
+    This is to allow station_meta to be downloaded and used multiple times without
+    needing to make numerous calls to ICOS CP.
+    Args:
+        site: ICOS site ID e.g. "BIK". Either this is station_meta must be specified.
+        station_meta: Station object (typically from retrieve_station_meta).
+        atmospheric: Whether to initially filter station list to only include atmospheric stations.
+    Returns:
+        icoscp_core.metaclient.Station : Station metadata
+    """
+
+    from openghg.retrieve.icos._stations import retrieve_station_meta
+
+    if site and station_meta is None:
+        station_meta = retrieve_station_meta(site, atmospheric)
+
+    if station_meta is None:
+        msg = "Either site or station_meta must be specified to retrieve staff details."
+        logger.exception(msg)
+        raise ValueError(msg)
+
+    return station_meta
+
+
+def retrieve_station_staff(
+    site: str | None = None,
+    station_meta: Station | None = None,
+    role: str | None = None,
+    atmospheric: bool = True,
+) -> pd.DataFrame:
+    """
+    Find details of staff associated with a particular station. This can be filtered by the role.
+    Option to search by site or to supply the station meta (Station object) directly
+    One of site or station_meta must be specified.
+
+    Args:
+        site: ICOS site ID e.g. "BIK". Either this is station_meta must be specified.
+        station_meta: Station object (typically from retrieve_station_meta).
+        role: Name of staff role to filter by. This (non-exhaustively) includes:
+         - "Principal Investigator" (can use "PI" for short)
+         - "Administrator"
+         - "Engineer"
+        atmospheric: Whether to initially filter station list to only include atmospheric stations.
+    Returns:
+        pandas.DataFrame: Summarised details for staff members associated with the site
+            (extracted from meta.get_station_meta(uri))
+    """
+
+    station_meta = _check_and_get_station_meta(site, station_meta, atmospheric)
+
+    station_staff = station_meta.staff
+
+    staff_list = []
+    for staff in station_staff:
+        # Want to combine details for both individual person and role for the site
+        overall_dict = {}
+        person_dict = asdict(staff.person)
+        role_dict = asdict(staff.role.role)
+
+        # Two 'uri' details (one for person and one for role) so ensure these are distinct
+        role_dict["role_uri"] = role_dict.pop("uri")
+
+        # Include just the 'uri' from the `staff.person.self` entry
+        person_dict["staff_uri"] = staff.person.self.uri
+        person_dict.pop("self")
+
+        overall_dict.update(person_dict)
+        overall_dict.update(role_dict)
+        staff_list.append(overall_dict)
+
+    staff_df = pd.DataFrame(staff_list)
+
+    if role is not None:
+        if role == "PI":
+            role = "Principal Investigator"
+
+        role_filter = staff_df["label"] == role
+        staff_df = staff_df[role_filter]
+
+    return staff_df
 
 
 def get_data_attrs(dobj_uri: str, species: str) -> dict[str, dict]:
