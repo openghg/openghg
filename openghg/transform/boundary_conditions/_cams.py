@@ -348,12 +348,9 @@ def parse_cams(
         units_from_data = get_cams_data_units(ds, species=species)
 
         try:
-            cf_units = cf_ureg.parse_expression(units_from_data)
+            units = str(cf_ureg.parse_expression(units_from_data).units)
         except Exception as e:
             raise ValueError(f"Could not parse units: {units_from_data}") from e
-
-        if cf_units is None:
-            raise ValueError(f"Parsed units are None for: {units_from_data}")
 
         ds = ds.sortby(list(ds.dims))
 
