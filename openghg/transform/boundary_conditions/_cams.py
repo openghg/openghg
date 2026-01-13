@@ -14,7 +14,6 @@ from openghg.util import (
     open_time_nc_fn,
     timestamp_now,
     cf_ureg,
-    unit_mapping,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
@@ -32,7 +31,13 @@ def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
         unit
     """
     species = species.upper()
-    units = getattr(ds[species], "units", None)
+    if species not in ds:
+        raise KeyError(f"Species '{species}' not found in dataset.")
+    try:
+        units_from_data = ds[species].attrs.get("units", None)
+        units = str(cf_ureg.parse_expression(units_from_data).units)
+    except Exception as e:
+        raise ValueError(f"Could not parse units: {units_from_data}") from e
     if units is not None:
         return str(units)
     else:
@@ -343,25 +348,10 @@ def parse_cams(
         filepath_list, cams_version, species, input_observations
     )
 
+    units = None
     with xr_open_fn(filepath).chunk(chunks) as ds:
 
-        units_from_data = get_cams_data_units(ds, species=species)
-
-        try:
-            cf_units = cf_ureg.parse_expression(units_from_data)
-        except Exception as e:
-            raise ValueError(f"Could not parse units: {units_from_data}") from e
-
-        if cf_units is None:
-            raise ValueError(f"Parsed units are None for: {units_from_data}")
-
-        if getattr(cf_units, "dimensionless", False):
-            units = unit_mapping.get(str(cf_units.magnitude))
-            if units is None:
-                raise ValueError(f"Unit mapping not found for: {cf_units.magnitude}")
-        else:
-            units = str(cf_units)
-
+        units = get_cams_data_units(ds, species)
         ds = ds.sortby(list(ds.dims))
 
         # Resample data
