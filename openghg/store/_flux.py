@@ -10,6 +10,7 @@ from xarray import DataArray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from openghg.store.storage import ChunkingSchema
 from openghg.types import pathType
 from openghg.util import synonyms
 
@@ -34,7 +35,7 @@ class Flux(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(
+    def read_raw_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, source_format: str = "openghg"
     ) -> list[dict] | None:
         """Ready a footprint from binary data
@@ -57,7 +58,7 @@ class Flux(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """
@@ -179,8 +180,18 @@ class Flux(BaseStore):
 
         flux_data = parser_fn(**param)
 
+        chunks = self.check_chunks(
+            ds=flux_data[0].data,
+            chunks=None,
+            auto_scale_to_fit_max_chunk_size=True,
+        )
+        if chunks:
+            logger.info(f"Rechunking with chunks={chunks}")
+
         # Checking against expected format for Flux
         for mdd in flux_data:
+            if chunks:
+                mdd.data = mdd.data.chunk(chunks)
             Flux.validate_data(mdd.data)
 
         required_keys = ("species", "source", "domain")
@@ -232,3 +243,16 @@ class Flux(BaseStore):
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
+
+    def chunking_schema(self) -> ChunkingSchema:
+        """
+        Get chunking schema for footprint data.
+
+        Returns:
+            dict: Chunking schema for footprint data.
+        """
+        var = "flux"
+        time_chunk_size = 336  # 336 = 14 * 24 so high res. fp chunks fit evenly
+        secondary_vars = ["lat", "lon"]
+
+        return ChunkingSchema(variable=var, chunks={"time": time_chunk_size}, secondary_dims=secondary_vars)

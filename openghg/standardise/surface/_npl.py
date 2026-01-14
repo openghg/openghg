@@ -50,7 +50,8 @@ def parse_npl(
     site_data = get_site_info()
     site_info = site_data[site_upper][network_upper]
 
-    data = read_csv(filepath, parse_dates={"time": [0]}, index_col=0, date_format="%d/%m/%Y %H:%M")
+    data = read_csv(filepath, parse_dates=True, index_col=0, date_format="%d/%m/%Y %H:%M")
+    data.index.name = "time"
 
     # Drop the NaT/NaNs
     data = data.loc[data.index.dropna()]
