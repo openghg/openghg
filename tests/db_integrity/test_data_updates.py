@@ -820,6 +820,241 @@ def test_metadata_update():
 # TODO: Add test to check data deletion and then adding the same data back
 
 
+# Tests for if_exists="combine" and if_exists="new" with overlapping data
+def test_obs_data_combine_overlapping():
+    """
+    Test adding overlapping BSD CRDS data with if_exists="combine".
+    Steps:
+     - BSD CRDS minutely data added (original time range)
+     - BSD CRDS data with 4-hour time shift added using if_exists="combine"
+    Expect that data is combined with overlapping values replaced by new data.
+    Expect new version (v2) is created (since save_current defaults to "auto").
+    """
+    clear_test_stores()
+
+    site = "bsd"
+    network = "DECC"
+    source_format = "CRDS"
+
+    # Add initial BSD data
+    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    result_original = standardise_surface(
+        store="user",
+        filepath=bsd_path_original,
+        source_format=source_format,
+        site=site,
+        network=network,
+    )
+
+    # Get the UUID from the first result (for CO2)
+    uuid_co2 = result_original[0]["uuid"]
+
+    # Add shifted BSD data with if_exists="combine"
+    # With save_current="auto" (default), this creates a new version
+    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    result_shifted = standardise_surface(
+        store="user",
+        filepath=bsd_path_shifted,
+        source_format=source_format,
+        site=site,
+        network=network,
+        if_exists="combine",
+    )
+
+    # Verify the data was added to existing datasource (not a new datasource)
+    assert result_shifted[0]["new"] is False
+    assert result_shifted[0]["uuid"] == uuid_co2
+
+    # Search for CO2 data
+    search_co2 = search(site="bsd", species="co2")
+    assert search_co2
+
+    # Retrieve the data
+    obs_data_co2 = search_co2.retrieve()
+    data_co2 = obs_data_co2.data
+    metadata_co2 = obs_data_co2.metadata
+
+    # Check version is v2 (new version created by default with if_exists="combine")
+    assert metadata_co2["latest_version"] == "v2"
+
+    # Read original and shifted file data for comparison
+    crds_file_data_original = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+    # The combined data should have more time points than the original file
+    # due to the 4-hour shift creating some non-overlapping time points
+    assert data_co2.time.size >= crds_file_data_original["date_time"].nunique()
+
+    # Verify both versions exist
+    bucket = get_writable_bucket(name="user")
+    d_co2 = get_datasource(uuid=uuid_co2, bucket=bucket)
+    assert d_co2._latest_version == "v2"
+
+    # Retrieve v1 data (original)
+    obs_data_co2_v1 = search_co2.retrieve(version="v1")
+    data_co2_v1 = obs_data_co2_v1.data
+
+    # v1 should match the original file
+    expected_co2_v1 = crds_file_data_original["co2"].values
+    co2_v1 = data_co2_v1["co2"].values
+    np.testing.assert_allclose(co2_v1, expected_co2_v1)
+
+
+def test_obs_data_new_version_overlapping():
+    """
+    Test adding overlapping BSD CRDS data with if_exists="new".
+    Steps:
+     - BSD CRDS minutely data added (original time range)
+     - BSD CRDS data with 4-hour time shift added using if_exists="new"
+    Expect that a new version (v2) is created.
+    Expect v1 contains original data, v2 contains ONLY the new (shifted) data, not combined.
+    """
+    clear_test_stores()
+
+    site = "bsd"
+    network = "DECC"
+    source_format = "CRDS"
+
+    # Add initial BSD data
+    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    result_original = standardise_surface(
+        store="user",
+        filepath=bsd_path_original,
+        source_format=source_format,
+        site=site,
+        network=network,
+    )
+
+    # Get the UUID from the first result
+    uuid_co2 = result_original[0]["uuid"]
+
+    # Add shifted BSD data with if_exists="new"
+    # This creates a new version containing ONLY the new data (not combined with v1)
+    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    result_shifted = standardise_surface(
+        store="user",
+        filepath=bsd_path_shifted,
+        source_format=source_format,
+        site=site,
+        network=network,
+        if_exists="new",
+    )
+
+    # Verify a new version was created (not a new datasource)
+    assert result_shifted[0]["new"] is False
+
+    # Search for CO2 data
+    search_co2 = search(site="bsd", species="co2")
+    assert search_co2
+
+    # Retrieve the latest data (should be v2)
+    obs_data_co2_latest = search_co2.retrieve()
+    metadata_co2_latest = obs_data_co2_latest.metadata
+
+    # Check version is now v2
+    assert metadata_co2_latest["latest_version"] == "v2"
+
+    # Get the datasource to check both versions exist
+    bucket = get_writable_bucket(name="user")
+    d_co2 = get_datasource(uuid=uuid_co2, bucket=bucket)
+
+    assert d_co2._latest_version == "v2"
+
+    # Retrieve v1 data (original)
+    obs_data_co2_v1 = search_co2.retrieve(version="v1")
+    data_co2_v1 = obs_data_co2_v1.data
+
+    # Retrieve v2 data (new data only, not combined)
+    obs_data_co2_v2 = search_co2.retrieve(version="v2")
+    data_co2_v2 = obs_data_co2_v2.data
+
+    # Read original and shifted file data for comparison
+    crds_file_data_original = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+    crds_file_data_shifted = read_crds_file_pd(filename="bsd.picarro.1minute.108m.shifted-4h.dat")
+
+    # v1 should match the original file
+    expected_co2_v1 = crds_file_data_original["co2"].values
+    co2_v1 = data_co2_v1["co2"].values
+    np.testing.assert_allclose(co2_v1, expected_co2_v1)
+
+    # v2 should contain only the shifted data (same number of points as shifted file)
+    # The "new" option replaces rather than combines
+    assert data_co2_v2.time.size == crds_file_data_shifted["date_time"].nunique()
+
+    # v2 should match the shifted file
+    expected_co2_v2 = crds_file_data_shifted["co2"].values
+    co2_v2 = data_co2_v2["co2"].values
+    np.testing.assert_allclose(co2_v2, expected_co2_v2)
+
+
+def test_obs_data_combine_no_new_version():
+    """
+    Test adding overlapping BSD CRDS data with if_exists="combine" and save_current="n".
+    Steps:
+     - BSD CRDS minutely data added (original time range)
+     - BSD CRDS data with 4-hour time shift added using if_exists="combine", save_current="n"
+    Expect that data is combined within the same version (v1), replacing the existing data.
+    """
+    clear_test_stores()
+
+    site = "bsd"
+    network = "DECC"
+    source_format = "CRDS"
+
+    # Add initial BSD data
+    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    result_original = standardise_surface(
+        store="user",
+        filepath=bsd_path_original,
+        source_format=source_format,
+        site=site,
+        network=network,
+    )
+
+    # Get the UUID from the first result
+    uuid_co2 = result_original[0]["uuid"]
+
+    # Add shifted BSD data with if_exists="combine" and save_current="n"
+    # This updates v1 without creating a new version
+    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    result_shifted = standardise_surface(
+        store="user",
+        filepath=bsd_path_shifted,
+        source_format=source_format,
+        site=site,
+        network=network,
+        if_exists="combine",
+        save_current="n",
+    )
+
+    # Verify the data was added to existing datasource (not a new datasource)
+    assert result_shifted[0]["new"] is False
+    assert result_shifted[0]["uuid"] == uuid_co2
+
+    # Search for CO2 data
+    search_co2 = search(site="bsd", species="co2")
+    assert search_co2
+
+    # Retrieve the data
+    obs_data_co2 = search_co2.retrieve()
+    data_co2 = obs_data_co2.data
+    metadata_co2 = obs_data_co2.metadata
+
+    # Check version is still v1 (no new version created)
+    assert metadata_co2["latest_version"] == "v1"
+
+    # Get the datasource to verify only v1 exists
+    bucket = get_writable_bucket(name="user")
+    d_co2 = get_datasource(uuid=uuid_co2, bucket=bucket)
+    assert d_co2._latest_version == "v1"
+
+    # Read original file data for comparison
+    crds_file_data_original = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+    # The combined data should have more time points than the original file
+    # due to the 4-hour shift creating some non-overlapping time points
+    assert data_co2.time.size >= crds_file_data_original["date_time"].nunique()
+
+
 @pytest.mark.parametrize(
     "standard_filename,special_filename,site,domain,model,met_model,inlet,species",
     [
