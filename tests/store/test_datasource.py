@@ -122,7 +122,7 @@ def test_add_data(data, datasource):
 
     d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
-    assert d._store
+    assert d._vzds
 
     ds = d.get_data(version="v1")
 
@@ -369,7 +369,7 @@ def test_integrity_check(data, bucket, datasource):
     d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    d._store.delete_all()
+    d._vzds.delete_all_versions()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
@@ -383,7 +383,8 @@ def test_data_version_deletion(data, datasource):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._store.keys(version="v1"))
+    d._vzds.checkout_version("v1")
+    zarr_keys = set(d._vzds.store.keys())
 
     partial_expected_keys = {
         "ch4/.zarray",
@@ -398,8 +399,8 @@ def test_data_version_deletion(data, datasource):
 
     assert "v1" not in d._data_keys
 
-    with pytest.raises(ZarrStoreError):
-        d._store.keys(version="v1")
+    with pytest.raises(ValueError):
+        d._vzds.checkout_version("v1")
 
 
 def test_surface_data_stored_and_dated_correctly(data, datasource):

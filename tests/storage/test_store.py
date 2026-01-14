@@ -458,3 +458,107 @@ def test_delete_data_from_old_version(store_name, request, ds1):
     # check out v2 and test that it is not empty
     store.checkout_version("v2")
     assert store
+
+
+# Tests moved from test_localzarrstore.py
+def test_bytes_stored_compression(tmp_path):
+    """Test bytes stored with different compression settings."""
+    from helpers import get_footprint_datapath
+    from openghg.storage import get_versioned_zarr_directory_store
+    import numcodecs
+
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    original_size = datapath.stat().st_size
+
+    store = get_versioned_zarr_directory_store(path=tmp_path)
+
+    with xr.open_dataset(datapath) as ds:
+        store.create_version("v1", checkout=True)
+        store.insert(ds)
+        uncompressed_bytes = store.bytes_stored()
+        expected_uncompressed_bytes = 444382
+        np.testing.assert_allclose(uncompressed_bytes, expected_uncompressed_bytes, rtol=0.01)
+
+    store.delete_version("v1")
+
+    compressor = numcodecs.Blosc(cname="zstd", clevel=5, shuffle=numcodecs.Blosc.SHUFFLE)
+    store.compressor = compressor
+    with xr.open_dataset(datapath) as ds:
+        store.create_version("v1", checkout=True)
+        store.insert(ds)
+        compressed_bytes = store.bytes_stored()
+        expected_compressed_bytes = 292896
+        np.testing.assert_allclose(compressed_bytes, expected_compressed_bytes, rtol=0.01)
+        assert compressed_bytes < original_size
+        assert compressed_bytes < uncompressed_bytes
+
+
+def test_for_missing_data_from_appending_in_loop():
+    """If multiple "source" chunks (e.g. from chunked data we wish to store) need to write
+    to the same "target" chunks (in the zarr store), then it is possible that the data will be
+    corrupted if multiple writes are set off in a loop.
+
+    This test tries to simulate this situation. Note that it isn't possible to write a deterministic
+    test for this, because it depends on how workers for writing the chunks are scheduled.
+
+    For adding 6 inert footprints in a loop, data loss was observed about 40% of the time for at least one
+    data variable in the footprint; however, that test is fairly slow, so we will try to recreate it with
+    artificial data here.
+
+    See GH Issue #1031 for more details.
+
+    """
+    from openghg.objectstore import get_writable_bucket
+    from openghg.storage import get_versioned_zarr_directory_store
+    from pathlib import Path
+
+    bucket = get_writable_bucket(name="user")
+
+    # make 6 datasets that will have "ragged" start/end chunks
+    duration = 820
+    chunk_size = 403
+
+    rng = np.random.default_rng(seed=2**32 - 1)
+
+    datasets = []
+    for i in range(3):
+        ds = xr.Dataset(
+            {
+                "x": (["time"], rng.normal(0, 1, duration)),
+                "y": (["time"], rng.normal(0, 1, duration)),
+            },
+            coords={
+                "time": duration * i + np.arange(duration),
+            },
+            attrs={},
+        )
+        datasets.append(ds.chunk({"time": chunk_size}))
+
+    # add data repeatedly, testing for missing values
+    for i in range(10):
+        stores_path = Path(bucket, f"data/test-store-{i}/zarr").expanduser().resolve()
+        vzds = get_versioned_zarr_directory_store(path=stores_path)
+
+        vzds.create_version("v1", checkout=True)
+        for ds in datasets:
+            vzds.insert(ds)
+
+        retrieved = vzds.get()
+
+        missing = retrieved.isnull().sum().compute()
+        total_missing = sum(dict(missing).values())
+
+        assert total_missing == 0.0
+
+        vzds.delete_all_versions()
+        if stores_path.exists():
+            stores_path.rmdir()
+
+
+def test_get_from_empty_zarr_store(zarr_memory_store):
+    """Test that an empty dataset is returned by ZarrStore._get if store is empty.
+
+    This relies on the try/except block in `ZarrStore._get`; without this a KeyError
+    is raised by this test instead.
+    """
+    xr.testing.assert_equal(zarr_memory_store._get(), xr.Dataset())

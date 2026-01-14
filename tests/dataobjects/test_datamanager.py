@@ -138,9 +138,9 @@ def test_delete_footprint_data(footprint_read):
     assert datasource_path[0].exists()
 
     # Assert there are files in the zarr store
-    assert ds._store
+    assert ds._vzds
 
-    zarr_store_path = ds._store.store_path("v1")
+    zarr_store_path = ds._stores_path / "v1"
 
     assert zarr_store_path.exists()
 
@@ -366,9 +366,9 @@ def test_delete_data():
     key = d.key
 
     assert d._data_keys
-    assert d._store
+    assert d._vzds
 
-    zarr_store_path = d._store.store_path(version="v1")
+    zarr_store_path = d._stores_path / "v1"
 
     res.delete_datasource(uuid=uid)
 

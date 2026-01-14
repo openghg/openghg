@@ -10,7 +10,7 @@ from xarray import DataArray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.store.storage import ChunkingSchema
+from openghg.storage import ChunkingSchema
 from openghg.types import pathType
 from openghg.util import synonyms
 

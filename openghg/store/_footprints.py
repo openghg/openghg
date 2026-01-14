@@ -6,7 +6,7 @@ import numpy as np
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.store.storage import ChunkingSchema
+from openghg.storage import ChunkingSchema
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 
 __all__ = ["Footprints"]

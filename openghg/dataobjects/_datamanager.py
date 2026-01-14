@@ -282,10 +282,10 @@ class DataManager:
             d = get_datasource(bucket=self._bucket, uuid=u)
 
             if v == "latest":
-                v = d._latest_version
+                v = d.latest_version
 
-            d._store._vzds.checkout_version(v)
-            zs = d._store._vzds.store  # zarr store for specified version
+            d._vzds.checkout_version(v)
+            zs = d._vzds.store  # zarr store for specified version
             group = zarr.open_group(zs)
 
             # update global

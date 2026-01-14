@@ -15,7 +15,7 @@ def compare_compression(filepath: Path) -> dict:
     """This compresses the given dataset to a temporary zarr ZipStore
     to test the compression ratio. A dictionary containing the final size of
     the data, the compression ratio and the time taken for the compression
-    is returned"
+    is returned.
 
     Args:
         filepath: Path to NetCDF file
