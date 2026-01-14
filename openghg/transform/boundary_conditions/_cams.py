@@ -8,12 +8,40 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 
-from openghg.util import find_domain, normalise_to_filepath_list, open_time_nc_fn, timestamp_now
+from openghg.util import (
+    find_domain,
+    normalise_to_filepath_list,
+    open_time_nc_fn,
+    timestamp_now,
+    cf_ureg,
+)
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
 
 logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
+    """Get unit of CAMS dataset.
+    Args:
+        ds: dataset from raw cams data from which extract the units
+        species: species of the data
+    Returns:
+        unit
+    """
+    species = species.upper()
+    if species not in ds:
+        raise ValueError(f"Species '{species}' not found in dataset.")
+    try:
+        units_from_data = ds[species].attrs["units"]
+        parsed_units = cf_ureg.parse_expression(units_from_data)
+        if not parsed_units.dimensionless:
+            raise ValueError(f"Invalid units for '{species}'.  Not dimensionless: {units_from_data}")
+        units = str(parsed_units.magnitude)
+    except Exception as e:
+        raise ValueError(f"Could not parse units: {units_from_data}") from e
+    return units
 
 
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
@@ -267,6 +295,16 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
     return metadata
 
 
+def set_units(ds: xr.Dataset, units: str) -> None:
+    """Set units of variables vmr_x
+    Args:
+        ds: dataset with variable vmr_n/s/w/e
+        units: units of the variables
+    """
+    for c in ["n", "s", "e", "w"]:
+        ds[f"vmr_{c}"].attrs["units"] = units
+
+
 def parse_cams(
     bc_input: str,
     domain: str,
@@ -310,8 +348,10 @@ def parse_cams(
         filepath_list, cams_version, species, input_observations
     )
 
+    units = None
     with xr_open_fn(filepath).chunk(chunks) as ds:
-        # Be sure that data are sorted in ascending order (not the case for n2o latitude)
+
+        units = get_cams_data_units(ds, species)
         ds = ds.sortby(list(ds.dims))
 
         # Resample data
@@ -347,6 +387,12 @@ def parse_cams(
     )
 
     bc_data.attrs.update(add_attrs)
+
+    if units is None:
+        raise ValueError("Units could not be determined from data.")
+    else:
+        # set_unit
+        set_units(bc_data, units)
 
     # create metadata
     metadata = make_metadata(
