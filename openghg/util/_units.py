@@ -13,8 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
-cf_ureg.preprocessors.append(lambda x: next((v for k, v in unit_mapping.items() if k in x), x))
-
+cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
 cf_ureg.preprocessors.append(lambda x: x.replace("per m", "per_m"))
