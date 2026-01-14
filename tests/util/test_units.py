@@ -28,8 +28,8 @@ from openghg.util import cf_ureg
 @pytest.mark.parametrize(
     "format, expected_units",
     [
-        (None, "1e-9"),  # cf_ureg's default format, which is "openghg"
-        ("openghg", "1e-9"),
+        (None, "1e-09"),  # cf_ureg's default format, which is "openghg"
+        ("openghg", "1e-09"),
         ("cf", "parts_per_billion"),  # cf format defined by cf_xarray
         ("D", "ppb"),  # pint's default format,
     ],
@@ -37,7 +37,7 @@ from openghg.util import cf_ureg
 def test_formatting(format, expected_units):
     """Test that we can specify the format of units when a DataArray is dequantified."""
     da = xr.DataArray(list(range(10)))
-    da.attrs["units"] = "1e-9"
+    da.attrs["units"] = "1e-09"
     da = da.pint.quantify()
 
     # normally you would use e.g. f"{da.pint.units:cf}" to get "cf" style formatting,
