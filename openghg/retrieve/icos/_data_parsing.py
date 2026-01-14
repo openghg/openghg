@@ -167,7 +167,7 @@ def retrieve_dobj_instrument(dobj_uri: str | None = None, dobj_meta: DataObject 
     else:
         if instrument.label is not None:
             instrument_dict["instrument"] = instrument.label
-            instrument_dict["instrument"] = [instrument.label, instrument.uri]
+            instrument_dict["instrument_data"] = [instrument.label, instrument.uri]
         else:
             instrument_dict["instrument"] = "NA"
             instrument_dict["instrument_data"] = "NA"
