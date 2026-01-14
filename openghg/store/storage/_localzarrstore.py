@@ -153,6 +153,65 @@ class LocalZarrStore(Store):
 
         self._vzds.insert(dataset)
 
+    def update(
+        self,
+        version: str,
+        dataset: xr.Dataset,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        append_dim: str = "time",
+    ) -> None:
+        """Update existing data in the zarr store with an ``xr.Dataset``.
+
+        This method performs an *upsert*: data points in ``dataset`` that overlap
+        with existing coordinates along ``append_dim`` will overwrite the
+        existing values, while non-overlapping data will be added. In case of
+        overlaps, the values from the provided ``dataset`` take precedence over
+        any existing values (i.e. "last write wins" semantics). When creating
+        a new version via this method, the current version is first copied and
+        then updated with the provided data. This differs from `add`,
+        which only appends new data.
+
+        Args:
+            version: Data version to update.
+            dataset: ``xr.Dataset`` containing data to upsert into the store.
+            compressor: Compression for zarr encoding.
+            filters: Filters for zarr encoding.
+            append_dim: Dimension along which data are appended / matched.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError if store is empty.
+
+        """
+        if not self._vzds.versions:
+            raise ValueError("Cannot update empty Zarr store.")
+
+        if self._vzds.append_dim != append_dim:
+            logger.warning(f"Updating LocalZarrStore append dim. to {append_dim}.")
+            self._vzds.append_dim = append_dim
+
+        self._check_writable()
+        version = version.lower()
+
+        # Update encoding; this will only apply to new variables; existing variables
+        # will have their encoding set to match what was previously used by xarray.
+        if compressor:
+            self._vzds.compressor = compressor
+        if filters:
+            self._vzds.filters = filters
+
+        # Append new data to the zarr store for the current version
+        if self.version_exists(version):
+            self._vzds.checkout_version(version)
+        # Otherwise we create a new zarr Store for the version based on the current data
+        else:
+            self._vzds.create_version(version, checkout=True, copy_current=True)
+
+        self._vzds.upsert(dataset)
+
     def get(self, version: str) -> xr.Dataset:
         """Get the version of the dataset stored in the zarr store.
 
