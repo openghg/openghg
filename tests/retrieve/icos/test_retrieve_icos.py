@@ -1,6 +1,8 @@
 import datetime
 import pandas as pd
+import xarray as xr
 import pytest
+
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
 from openghg.retrieve import search_surface
@@ -8,10 +10,15 @@ from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
 
-@pytest.mark.icos
+# @pytest.mark.icos
 def test_icos_retrieve_skips_datalevel_1_csv_files():
     retrieved_data = retrieve_atmospheric(
-        site="BIR", species="co2", store="user", data_level=1, update_mismatch="metadata"
+        site="BIR",
+        species="co2",
+        store="user",
+        data_level=1,
+        update_mismatch="metadata",
+        retrieve_method="icoscp_core",
     )
 
     assert len(retrieved_data) == 3
@@ -26,8 +33,8 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
         "source_format": "icos",
         "data_level": "1",
         "site": "bir",
-        "inlet": "10m",
-        "inlet_height_magl": "10",
+        "inlet": "10.0m",  # UPDATED
+        "inlet_height_magl": "10.0",  # UPDATED
         "instrument": "co2-ch4-co-h2o picarro analyzer",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
@@ -37,7 +44,7 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
         "station_latitude": 58.3886,
         "station_long_name": "birkenes observatory, norway",
         "station_height_masl": 219.0,
-        "dataset_source": "ICOS",
+        "dataset_source": "icos",  # UPDATED
     }
 
     assert expected_metadata.items() <= first_obs.metadata.items()
@@ -235,10 +242,205 @@ def test_retrieve_sac_data_update_attrs_with_bool():
 
 
 @pytest.mark.icos
-def test_icos_obspack():
+def test_retrieve_icos_obspack():
     """Test the combined obspack data retrieval"""
     retrieved_data = retrieve_atmospheric(
         site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
     )
 
     assert "icos_smr" in retrieved_data.data
+
+
+@pytest.mark.icos
+def test_retrieve_icos_fast_track():
+    """
+    Test retrieving ICOS FastTrack data
+    e.g. data from https://meta.icos-cp.eu/objects/8Z63_p2hCt_hkvoDrB2l62v7
+    """
+    retrieved_data = retrieve_atmospheric(
+        site="ZEP",
+        species="co",
+        data_level=1,
+        dataset_source="ICOS FastTrack",
+        update_mismatch="from_source",
+        store="user",
+    )
+
+    print(retrieved_data)
+
+    # TODO: Add checks
+
+
+@pytest.mark.icos
+def test_retrieve_icos_eye_ave_par():
+    """
+    Test retrieving "EYE-AVE-PAR" corner case data
+    e.g. data from https://meta.icos-cp.eu/objects/UPjrc-zEsT-Uvwaj61thPSbA
+    """
+    retrieved_data = retrieve_atmospheric(
+        site="RGL",
+        species="n2o",
+        data_level=2,
+        dataset_source="EYE-AVE-PAR",
+        update_mismatch="from_source",
+        store="user",
+        retrieve_method="icoscp_core",
+    )
+
+    print(retrieved_data)
+
+    # TODO: Add checks
+
+
+# %% Compare retrieve_method="icoscp_core" which makes use of icoscp_core and
+# previous retrieve_method="dobj" method which made use of the previous icoscp framework
+# including Dobj interface.
+# The "dobj"  method is deprecated in favour of "icoscp_core" but has been kept to
+# allow comparison between the outputs and is still supported for the moment.
+# These tests can be removed if this option is fully deprecated and no longer supported.
+
+
+# @pytest.mark.icos
+def test_retrieve_icos_standard_compare():
+    """
+    Compare icoscp_core and previous dobj method for standard text file download.
+    """
+
+    params = {
+        "site": "BIR",
+        "species": "co2",
+        "data_level": 1,
+        "update_mismatch": "metadata",
+        "store": "user",
+    }
+
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", force_retrieval=True, **params)
+
+    assert len(retrieved_data_dobj) == len(retrieved_data)
+
+    for obs_dobj, obs in zip(retrieved_data_dobj, retrieved_data):
+
+        data_dobj = obs_dobj.data
+        data = obs.data
+
+        # Check time values match
+        time_org = data_dobj.time
+        time_new = data.time
+        xr.testing.assert_allclose(time_org, time_new)
+
+        # Check data variables from dobj method match against new data
+        # This allows for new data to contain more variables if needed
+        for dv in data_dobj.data_vars:
+            xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # TODO: Add more checks - metadata, attrs
+
+
+# @pytest.mark.icos
+def test_retrieve_icos_obspack_compare():
+    """
+    Compare icoscp_core and previous dobj method for ICOS Combined (ObsPack) retrieval
+    e.g. Data from https://meta.icos-cp.eu/objects/HeGkMd290bKSTN-WMdNGYNl0
+    """
+
+    params = {
+        "site": "ZEP",
+        "species": "co2",
+        "dataset_source": "ICOS Combined",
+        "update_mismatch": "from_source",
+        "store": "user",
+    }
+
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", force_retrieval=True, **params)
+
+    data_dobj = retrieved_data_dobj.data
+    data = retrieved_data.data
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # TODO: Add more checks - metadata, attrs
+
+
+# @pytest.mark.icos
+def test_retrieve_fast_track_compare():
+    """
+    Compare icoscp_core and previous dobj method for ICOS FastTrack data
+    e.g. data from https://meta.icos-cp.eu/objects/8Z63_p2hCt_hkvoDrB2l62v7
+    """
+
+    params = {
+        "site": "ZEP",
+        "species": "co",
+        "data_level": 1,
+        "dataset_source": "ICOS FastTrack",
+        "update_mismatch": "from_source",
+        "store": "user",
+    }
+
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", force_retrieval=True, **params)
+
+    # Bug in current _retrieve_remote_dobj where this returns ["ch4", "co", "co2"] species
+    # even if species is set at input. So for this we need to retrieve the 1st entry
+    # as this should contain the "co" data
+    retrieved_data_dobj_co = retrieved_data_dobj[1]
+
+    data_dobj = retrieved_data_dobj_co.data
+    data = retrieved_data.data
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # TODO: Add more checks - metadata, attrs
+
+
+# @pytest.mark.icos
+def test_retrieve_eye_ave_par_compare():
+    """
+    Compare icoscp_core and previous dobj method for "EYE-AVE-PAR" corner case
+    e.g. data from https://meta.icos-cp.eu/objects/UPjrc-zEsT-Uvwaj61thPSbA
+    """
+
+    params = {
+        "site": "RGL",
+        "species": "n2o",
+        "data_level": 2,
+        "dataset_source": "EYE-AVE-PAR",
+        "update_mismatch": "from_source",
+        "store": "user",
+    }
+
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", force_retrieval=True, **params)
+
+    data_dobj = retrieved_data_dobj.data
+    data = retrieved_data.data
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # TODO: Add more checks - metadata, attrs
