@@ -120,6 +120,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         """
         if version == "latest":
             version = self.latest_version
+            if not version:
+                raise ZarrStoreError("No data versions available")
 
         try:
             self._vzds.checkout_version(version.lower())
@@ -305,7 +307,19 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         self._status = {}
 
         # We'll use this to store the dates covered by this version of the data
-        date_keys = self._data_keys[self.latest_version] if self._data_keys else []
+        latest_version = self.latest_version
+        if self._data_keys and latest_version and latest_version in self._data_keys:
+            date_keys = self._data_keys[latest_version]
+        else:
+            if self._data_keys and latest_version and latest_version not in self._data_keys:
+                logger.warning(
+                    "Datasource metadata and zarr store versions appear inconsistent: "
+                    "latest_version=%r not found in _data_keys keys=%r. "
+                    "Proceeding with empty date_keys.",
+                    latest_version,
+                    list(self._data_keys.keys()),
+                )
+            date_keys = []
 
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
