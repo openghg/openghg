@@ -66,13 +66,7 @@ def test_format_inlet_special():
 
 @pytest.mark.parametrize(
     "test_input,expected",
-    [
-        ("10m", 10.0),
-        ("12.2m", 12.2),
-        ("123magl", 123.0),
-        ("13.3magl", 13.3),
-        ("123", 123)
-    ],
+    [("10m", 10.0), ("12.2m", 12.2), ("123magl", 123.0), ("13.3magl", 13.3), ("123", 123)],
 )
 def test_extract_inlet_value(test_input, expected):
     """
