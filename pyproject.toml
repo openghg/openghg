@@ -147,6 +147,3 @@ timeout = 300
 markers = [
     "xesmf: marks tests as requiring xesmf (deselect with '-m \"not xesmf\"')"
 ]
-
-[tool.uv.sources]
-cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
