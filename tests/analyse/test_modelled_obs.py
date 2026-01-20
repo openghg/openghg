@@ -335,8 +335,13 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
 def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_dummy):
     """Test footprints_data_merge with multisector return options"""
     model_scenario_co2_dummy.add_flux(species="co2", flux={"TESTSOURCE2": flux_co2_dummy})
-    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(calc_fp_x_flux=True, split_by_sectors=True)
+    combined_dataset = model_scenario_co2_dummy.footprints_data_merge(
+        calc_fp_x_flux=True, split_by_sectors=True
+    )
 
-    assert all(dv in combined_dataset for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"])
+    assert all(
+        dv in combined_dataset
+        for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"]
+    )
 
     assert all(combined_dataset.source.values == ["TESTSOURCE", "TESTSOURCE2"])

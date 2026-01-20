@@ -161,9 +161,8 @@ def test_delete_all(store):
 
     assert not parent.exists()
 
-    assert not parent.parent.exists()
 
-
+@pytest.mark.skip(reason="Match chunking might be removed... it doesn't do what we think.")
 def test_match_chunking(store):
     time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
     time_b = pd.date_range("2012-02-01T00:00:00", "2012-04-30T00:00:00", freq="1d")

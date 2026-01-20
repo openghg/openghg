@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath
 from openghg.standardise.surface import parse_agage
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -91,11 +91,14 @@ def test_read_invalid_instrument_raises():
             network="agage",
         )
 
+
 def test_read_variabilities():
     """
     Check that if an AGAGE file has a mf_variability variable, it is read in
     """
-    cgo_path = get_surface_datapath(filename='agage_cgo_cfc-11_20250704-test-variabilities.nc', source_format="GC_nc")
+    cgo_path = get_surface_datapath(
+        filename="agage_cgo_cfc-11_20250704-test-variabilities.nc", source_format="GC_nc"
+    )
 
     data = parse_agage(
         filepath=cgo_path,
@@ -104,9 +107,7 @@ def test_read_variabilities():
         network="agage",
     )
 
-    assert "cfc11_variability" in data['cfc11_70m']['data'].variables
-
-
+    assert "cfc11_variability" in data["cfc11_70m"]["data"].variables
 
 
 def test_expected_metadata_thd_cfc11():

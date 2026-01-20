@@ -93,6 +93,7 @@ def data_read():
         site="tac",
         network="DECC",
         instrument="picarro",
+        inlet="185.0m",
         sampling_period="1h",
         update_mismatch="metadata",
     )
@@ -109,6 +110,7 @@ def data_read():
         site="tac",
         network="DECC",
         instrument="picarro",
+        inlet="185.0m",
         sampling_period="1h",
         tag=["ceda_v1", "gemma_v1"],
         update_mismatch="metadata",

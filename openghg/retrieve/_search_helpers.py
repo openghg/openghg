@@ -1,7 +1,7 @@
 """Helper functions for processing search input into form accepted by `Metastore.search`."""
 
 import itertools
-from typing import Any, cast, TypeVar
+from typing import Any, cast, TypeVar, overload
 from collections.abc import Callable
 
 import numpy as np
@@ -49,7 +49,7 @@ def _convert_slice_to_test(s: slice, key: str | None = None) -> Callable:
 
     def formatter(x: Any) -> Any:
         """Formatting if key == 'inlet': try to extract float from strings."""
-        if key == "inlet":
+        if key in ("inlet", "height", "inlet_height_magl", "station_height_masl"):
             if isinstance(x, (int, float)):
                 return x
             if isinstance(x, str):
@@ -60,7 +60,7 @@ def _convert_slice_to_test(s: slice, key: str | None = None) -> Callable:
                 else:
                     return result
             return None
-        return x  # key != "inlet"
+        return x  # 'inlet' type of key not matched
 
     def test_func(x: Any) -> bool:
         """Return True if start <= formatter(x) <= stop."""
@@ -206,3 +206,52 @@ def define_list_search() -> list:
 
     list_search = find_info_list_metakeys()
     return list_search
+
+
+@overload
+def convert_to_slice(input: str | float | int | slice, rel_tolerance: float = 1e-6) -> slice: ...
+
+
+@overload
+def convert_to_slice(input: None, rel_tolerance: float = 1e-6) -> None: ...
+
+
+@overload
+def convert_to_slice(input: list[str | slice | None], rel_tolerance: float = 1e-6) -> list[slice | None]: ...
+
+
+def convert_to_slice(
+    input: int | float | str | slice | None | list[str | slice | None], rel_tolerance: float = 1e-6
+) -> slice | None | list[slice | None]:
+    """
+    Convert input into a slice with within the centre of a relative tolerance.
+
+    Args:
+        input : Input value to convert to a slice.
+        rel_tolerance: Relative tolerance to allow for the slice. This will be set as
+            - lower = input - input * rel_tolerance / 2
+            - upper = input + input * rel_tolerance / 2
+            The rules of slice means lower is inclusive and upper is exclusive.
+    Returns:
+        slice: Slice object representing the range described
+        None: if None is passed this will return a None
+    """
+
+    if input is None:
+        return None
+
+    if isinstance(input, slice):
+        return input
+
+    if isinstance(input, list):
+        return [convert_to_slice(x) for x in input]
+
+    if isinstance(input, str):
+        input = extract_float(input)
+
+    lower = input - input * rel_tolerance / 2
+    upper = input + input * rel_tolerance / 2
+
+    s = slice(lower, upper)
+
+    return s

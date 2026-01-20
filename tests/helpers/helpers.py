@@ -88,6 +88,10 @@ def get_footprint_datapath(filename: str) -> Path:
     """Return the path to the footprints test data file"""
     return get_datapath_base(data_type="footprints", filename=filename)
 
+def get_met_datapath(filename: str) -> Path:
+    """Return the path to the met test data file"""
+    return get_datapath_base(data_type="met", filename=filename)
+
 
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
