@@ -41,13 +41,13 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Format code with black
-        run: uv run black --check openghg/
+        run: black --check openghg/
 
       - name: Lint with flake8
-        run: uv run flake8 openghg/ --count --statistics
+        run: flake8 openghg/ --count --statistics
 
       - name: Run mypy
-        run: uv run mypy --python-version ${{ matrix.python-version }} openghg/
+        run: mypy --python-version ${{ matrix.python-version }} openghg/
 
       - name: Create mock cdsapi config file
         run: |
