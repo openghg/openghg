@@ -23,13 +23,11 @@ maintainers = [
 
 dependencies = [
     "addict>=2.4.0",
-    "black",
     "cdsapi>=0.7.7",
     "cf-xarray>=0.10.6",
     "cfchecker",
     "dask<2025.10",
     "filelock>=3.20.0",
-    "flake8>=7.3.0",
     "flox>=0.10.4",
     "h5netcdf>=1.6.4",
     "icoscp>=0.2.2",
@@ -84,6 +82,9 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS"]
 [project.optional-dependencies]
+    dev = [
+        "black",
+        "flake8>=7.3.0",
     doc = [
         "sphinx>=7.2.6",
         "sphinx_rtd_theme>=2.0.0",
