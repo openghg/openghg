@@ -23,6 +23,7 @@ maintainers = [
 
 dependencies = [
     "addict>=2.4.0",
+    "black",
     "cdsapi>=0.7.7",
     "cf-xarray>=0.10.6",
     "cfchecker",
