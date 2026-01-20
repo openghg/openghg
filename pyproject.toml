@@ -84,7 +84,7 @@ classifiers = [
 [project.optional-dependencies]
     dev = [
         "black",
-        "flake8>=7.3.0",
+        "flake8>=7.3.0",]
     doc = [
         "sphinx>=7.2.6",
         "sphinx_rtd_theme>=2.0.0",
