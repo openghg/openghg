@@ -61,7 +61,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev=[cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
+dev=[cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker],
 "flake8",
 "pre-commit",
 "pytest >= 6.2.5",
