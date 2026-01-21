@@ -42,7 +42,7 @@ jobs:
 
       - name: Format code with black
         run: |
-          uv pip install black
+          uv pip install black==25.12.0
           uv run black --check openghg/
 
       - name: Lint with flake8
