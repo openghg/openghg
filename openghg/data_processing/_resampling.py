@@ -39,7 +39,6 @@ from typing_extensions import ParamSpec
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
 
-
 registry = Registry(suffix="resample")
 register = registry.register
 

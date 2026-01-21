@@ -10,7 +10,6 @@ import xarray as xr
 
 from openghg.objectstore import get_datasource
 
-
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 

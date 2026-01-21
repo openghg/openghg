@@ -16,7 +16,6 @@ from ._encoding import get_zarr_encoding
 from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
 
-
 logger = logging.getLogger("openghg.storage")
 logger.setLevel(logging.DEBUG)
 
