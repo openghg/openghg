@@ -722,14 +722,16 @@ def test_search_footprints_column_inlet(tmp_path):
 
     # Create metastore entry for satellite footprint with inlet="column"
     with open_metastore(bucket=bucket, data_type="footprints", mode="rw") as metastore:
-        metastore.insert({
-            "uuid": "sat123",
-            "inlet": "column",
-            "satellite": "GOSAT",
-            "domain": "SOUTHAMERICA",
-            "model": "NAME",
-            "data_type": "footprints",
-        })
+        metastore.insert(
+            {
+                "uuid": "sat123",
+                "inlet": "column",
+                "satellite": "GOSAT",
+                "domain": "SOUTHAMERICA",
+                "model": "NAME",
+                "data_type": "footprints",
+            }
+        )
 
     with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
         # This should not raise ValueError about extracting float from 'column'

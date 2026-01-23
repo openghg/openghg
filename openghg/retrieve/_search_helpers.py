@@ -9,7 +9,6 @@ import numpy as np
 from openghg.util import extract_float
 from openghg.types import Comparable
 
-
 T = TypeVar("T", bound=Comparable)  # types with <=
 
 
@@ -217,7 +216,9 @@ def convert_to_slice(input: None, rel_tolerance: float = 1e-6) -> None: ...
 
 
 @overload
-def convert_to_slice(input: list[str | slice | None], rel_tolerance: float = 1e-6) -> list[slice | str | None]: ...
+def convert_to_slice(
+    input: list[str | slice | None], rel_tolerance: float = 1e-6
+) -> list[slice | str | None]: ...
 
 
 def convert_to_slice(
@@ -252,7 +253,7 @@ def convert_to_slice(
         special_keywords = ["multiple", "column"]
         if input in special_keywords:
             return input
-        
+
         input = extract_float(input)
 
     lower = input - input * rel_tolerance / 2
