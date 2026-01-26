@@ -11,7 +11,6 @@ from openghg.storage import get_versioned_zarr_directory_store
 from openghg.store.storage._store import Store
 from openghg.types import ZarrStoreError
 
-
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
 

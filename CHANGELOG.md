@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `clean_string` function to retain "." characters by default [PR #1546](https://github.com/openghg/openghg/issues/1546)
 - Search for "inlet" (and other related keys) is updated to always look for a slice even when single values are specified. This is to make sure the numerical value, rather than the string equivalent of the value, is matched and for this reason the default tolerance for the slice is set to be small (1e-6 relative to the value itself). This allows a search of e.g. inlet="10m" to be matched to stored metadata={"inlet": "10.0m", ...}. [PR #1558](https://github.com/openghg/openghg/pull/1558)
 
+### Fixed
+- Updated the version of black formatter in pre-commit-config.yaml as well ran the formatter on the repo. [PR #1567](https://github.com/openghg/openghg/pull/1567)
+
 ### Added
 - Units in attributes of variables of cams bc data in transform function.[PR #1535](https://github.com/openghg/openghg/pull/1535)
 

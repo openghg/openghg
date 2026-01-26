@@ -17,7 +17,6 @@ from collections import defaultdict
 import numpy as np
 import xarray as xr
 
-
 pathType = Union[str, Path]
 multiPathType = Union[str, Path, tuple, list]
 resultsType = defaultdict[str, dict]

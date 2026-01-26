@@ -9,7 +9,6 @@ import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
 
-
 rlock = threading.RLock()
 
 __all__ = [

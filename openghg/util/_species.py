@@ -4,7 +4,6 @@ from typing import Optional, Any
 from openghg.util import load_json
 from openghg.types import pathType
 
-
 __all__ = [
     "get_species_info",
     "synonyms",

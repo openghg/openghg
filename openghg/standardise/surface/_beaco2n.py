@@ -3,7 +3,6 @@ from pandas import DataFrame
 
 from openghg.types import pathType
 
-
 __all__ = ["parse_beaco2n"]
 
 

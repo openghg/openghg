@@ -28,7 +28,6 @@ from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_fi
 
 from .._metakeys_config import get_metakeys
 
-
 T = TypeVar("T", bound="BaseStore")
 
 logger = logging.getLogger("openghg.store")
