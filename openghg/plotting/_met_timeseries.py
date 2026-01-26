@@ -7,7 +7,6 @@ import plotly.express as px
 
 from openghg.util import _get_site_data, format_inlet
 
-
 # from openghg.retrieve.met import get_site_pressure
 
 

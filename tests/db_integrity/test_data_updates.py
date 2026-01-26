@@ -220,7 +220,7 @@ def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
         columns.append(f"{species} N")
 
     file_data = pd.read_csv(
-        data_path, names=columns, sep=r'\s+', skiprows=3, dtype={"date": str, "time": str}
+        data_path, names=columns, sep=r"\s+", skiprows=3, dtype={"date": str, "time": str}
     )
     file_data["date_time"] = file_data["date"] + file_data["time"]
     file_data["date_time"] = pd.to_datetime(file_data["date_time"], format="%y%m%d%H%M%S")
@@ -237,7 +237,7 @@ def read_gcmd_file_pd(filename):
     data_path = get_surface_datapath(filename=filename, source_format="GC")
     gcwerks_file_data = pd.read_csv(
         data_path,
-        sep=r'\s+',
+        sep=r"\s+",
         skipinitialspace=True,
         skiprows=4,
         dtype={"yyyy": str, "mm": str, "dd": str, "hh": str, "mi": str},
@@ -837,7 +837,9 @@ def test_obs_data_combine_overlapping():
     source_format = "CRDS"
 
     # Add initial BSD data
-    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    bsd_path_original = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS"
+    )
     result_original = standardise_surface(
         store="user",
         filepath=bsd_path_original,
@@ -851,7 +853,9 @@ def test_obs_data_combine_overlapping():
 
     # Add shifted BSD data with if_exists="combine"
     # With save_current="auto" (default), this creates a new version
-    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    bsd_path_shifted = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS"
+    )
     result_shifted = standardise_surface(
         store="user",
         filepath=bsd_path_shifted,
@@ -915,7 +919,9 @@ def test_obs_data_new_version_overlapping():
     source_format = "CRDS"
 
     # Add initial BSD data
-    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    bsd_path_original = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS"
+    )
     result_original = standardise_surface(
         store="user",
         filepath=bsd_path_original,
@@ -929,7 +935,9 @@ def test_obs_data_new_version_overlapping():
 
     # Add shifted BSD data with if_exists="new"
     # This creates a new version containing ONLY the new data (not combined with v1)
-    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    bsd_path_shifted = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS"
+    )
     result_shifted = standardise_surface(
         store="user",
         filepath=bsd_path_shifted,
@@ -1001,7 +1009,9 @@ def test_obs_data_combine_no_new_version():
     source_format = "CRDS"
 
     # Add initial BSD data
-    bsd_path_original = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    bsd_path_original = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS"
+    )
     result_original = standardise_surface(
         store="user",
         filepath=bsd_path_original,
@@ -1015,7 +1025,9 @@ def test_obs_data_combine_no_new_version():
 
     # Add shifted BSD data with if_exists="combine" and save_current="n"
     # This updates v1 without creating a new version
-    bsd_path_shifted = get_surface_datapath(filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS")
+    bsd_path_shifted = get_surface_datapath(
+        filename="bsd.picarro.1minute.108m.shifted-4h.dat", source_format="CRDS"
+    )
     result_shifted = standardise_surface(
         store="user",
         filepath=bsd_path_shifted,

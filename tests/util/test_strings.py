@@ -7,16 +7,16 @@ from openghg.util import clean_string, extract_float, is_number
 @pytest.mark.parametrize(
     "input_string,cleaned_string",
     [
-        ("tacol?neston", "tacolneston"),             # non-alphanumeric characters
-        ("top_rated-parrot!!!", "top_rated-parrot"), # messy string
-        ("eulerian_model", "eulerian_model")  ,      # model name with underscore
-        ("10.0", "10.0"),                            # number with decimal
-        ("10.0magl", "10.0magl"),                    # number with decimal and characters
-        ("10.0 m agl", "10.0magl"),                  # number with decimal, characters and spaces
-        (60.0, "60.0"),                              # float
-        (-90.0, "-90.0"),                            # negative float
-        (True, "true"),                              # bool
-        ("на берегу пустынных волн", "наберегупустынныхволн")  # unicode
+        ("tacol?neston", "tacolneston"),  # non-alphanumeric characters
+        ("top_rated-parrot!!!", "top_rated-parrot"),  # messy string
+        ("eulerian_model", "eulerian_model"),  # model name with underscore
+        ("10.0", "10.0"),  # number with decimal
+        ("10.0magl", "10.0magl"),  # number with decimal and characters
+        ("10.0 m agl", "10.0magl"),  # number with decimal, characters and spaces
+        (60.0, "60.0"),  # float
+        (-90.0, "-90.0"),  # negative float
+        (True, "true"),  # bool
+        ("на берегу пустынных волн", "наберегупустынныхволн"),  # unicode
     ],
 )
 def test_clean_string(input_string, cleaned_string):

@@ -268,10 +268,8 @@ def read_local_config() -> dict:
     try:
         _ = config["object_store"]["user"]
     except KeyError:
-        raise ConfigFileError(
-            "Invalid config file detected, please please see the installation instructions \
-                or run openghg --quickstart"
-        )
+        raise ConfigFileError("Invalid config file detected, please please see the installation instructions \
+                or run openghg --quickstart")
 
     # Check see is the store uses the new zarr storage format
     # for OpenGHG >= 0.8.0

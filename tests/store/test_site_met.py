@@ -4,6 +4,7 @@ from openghg.standardise import standardise_site_met
 from openghg.retrieve import search_site_met
 from helpers import get_met_datapath
 
+
 @pytest.mark.parametrize(
     "site,network,filename",
     [
@@ -16,9 +17,9 @@ from helpers import get_met_datapath
             "tac",
             "agage",
             "Met_tac_agage_201608.nc",
-        )]
+        ),
+    ],
 )
-
 def test_ecmwf(site, network, filename):
     """
     Test that downloaded Met ECMWF data can be added and retrieved from an object store
@@ -27,25 +28,20 @@ def test_ecmwf(site, network, filename):
 
     met_filepath = get_met_datapath(filename)
 
-    standardise_site_met(met_filepath,
-                         site,
-                         network,
-                         source_format="ecmwf",
-                         store="user")
+    standardise_site_met(met_filepath, site, network, source_format="ecmwf", store="user")
 
     # Note if met_source is not specified by the user the formatted value of "ECMWF ERA5"
     # will be added by openghg.standardise.met.parse_ecmwf function
     met_source = "ECMWF ERA5"
 
     search_results = search_site_met(site=site, network=network, met_source=met_source)
-    
+
     met_data = search_results.retrieve()
     dataset = met_data.data
 
     # test dataset
 
     assert dataset is not None
-
 
     expected_dims = ["time", "lat", "lon", "pressure_level", "inlet"]
 

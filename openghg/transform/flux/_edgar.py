@@ -65,7 +65,6 @@ from openghg.util import (
     timestamp_now,
 )
 
-
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 

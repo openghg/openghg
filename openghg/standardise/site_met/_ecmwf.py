@@ -6,7 +6,6 @@ from openghg.types import MetadataAndData
 from openghg.util import timestamp_now, _get_site_data, clean_string
 from openghg.util import _get_site_pressure
 
-
 logger = logging.getLogger("openghg.standardise.met")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
