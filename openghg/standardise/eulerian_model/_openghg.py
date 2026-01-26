@@ -4,7 +4,6 @@ from pandas import Timestamp as pd_Timestamp
 
 from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_time_nc_fn
 
-
 logger = logging.getLogger("openghg.standardise.eulerian_model")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 

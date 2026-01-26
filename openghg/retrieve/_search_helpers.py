@@ -9,7 +9,6 @@ import numpy as np
 from openghg.util import extract_float
 from openghg.types import Comparable
 
-
 T = TypeVar("T", bound=Comparable)  # types with <=
 
 
