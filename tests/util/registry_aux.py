@@ -2,7 +2,6 @@
 
 from openghg.util._registry import AutoRegistry
 
-
 registry = AutoRegistry(suffix="filter", skip_private=False)
 registry2 = AutoRegistry(suffix="filter", skip_private=True)
 

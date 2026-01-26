@@ -11,7 +11,6 @@ from openghg.data_processing._resampling import (
     surface_obs_resampler,
 )
 
-
 rng = np.random.default_rng(seed=196883)
 
 

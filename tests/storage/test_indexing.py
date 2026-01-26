@@ -12,7 +12,6 @@ from openghg.storage._indexing import (
     OverlapDeterminer,
 )
 
-
 # ------------------------------
 # OverlapDeterminer tests
 # ------------------------------
