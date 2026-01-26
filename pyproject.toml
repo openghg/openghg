@@ -84,7 +84,7 @@ classifiers = [
     "Operating System :: MacOS"]
 [project.optional-dependencies]
     dev = [
-        "black",
+        "black==26.1.0",
         "flake8>=7.3.0",]
     doc = [
         "sphinx>=7.2.6",
@@ -106,8 +106,6 @@ classifiers = [
 
 [tool.uv.sources]
 cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
-
-
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
