@@ -42,12 +42,10 @@ jobs:
 
       - name: Format code with black
         run: |
-          uv pip install black==25.12.0
           uv run black --check openghg/
 
       - name: Lint with flake8
         run: |
-          uv pip install flake8
           uv run flake8 openghg/ --count --statistics
 
       - name: Run mypy
@@ -116,18 +114,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install build backend
-        run: python3 -m pip install build --user
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
 
-      - name: Build distributions
-        run: python3 -m build
+      - name: Build distributions with uv
+        run: uv pip install . && uv pip install build && uv run python -m build
 
       - name: Publish to TestPyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-
-
 
   release_pypi:
     name: Build and publish Python distributions 📦 to PyPI (PEP 621, Trusted Publishing)
@@ -149,11 +147,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install build backend
-        run: python3 -m pip install build --user
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
 
-      - name: Build distributions
-        run: python3 -m build
+      - name: Build distributions with uv
+        run: uv pip install build && uv run python -m build
 
       - name: Publish to PyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
