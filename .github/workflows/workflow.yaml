@@ -122,10 +122,8 @@ jobs:
       - name: Build distributions with uv
         run: uv build
 
-      - name: Publish to TestPyPI (via Trusted Publishing)
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
+      - name: Publish
+        run: uv publish
 
   release_pypi:
     name: Build and publish Python distributions 📦 to PyPI (PEP 621, Trusted Publishing)
@@ -155,8 +153,8 @@ jobs:
       - name: Build distributions with uv
         run: uv build
 
-      - name: Publish to PyPI (via Trusted Publishing)
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish
+        run: uv publish
 
   release_conda:
     name: Build and publish conda package
