@@ -120,7 +120,7 @@ jobs:
           version: "latest"
 
       - name: Build distributions with uv
-        run: uv pip install . && uv pip install build && uv run python -m build
+        run: uv build
 
       - name: Publish to TestPyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -153,7 +153,7 @@ jobs:
           version: "latest"
 
       - name: Build distributions with uv
-        run: uv pip install build && uv run python -m build
+        run: uv build
 
       - name: Publish to PyPI (via Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
