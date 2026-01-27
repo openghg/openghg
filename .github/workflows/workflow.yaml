@@ -76,7 +76,7 @@ jobs:
         uses: astral-sh/setup-uv@v2
 
       - name: Install project with doc extras
-        run: uv sync --extra docs
+        run: uv sync --extra doc
 
       - name: Setup default config
         run: uv run openghg --default-config
