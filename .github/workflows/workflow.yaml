@@ -123,7 +123,7 @@ jobs:
         run: uv build
 
       - name: Publish
-        run: uv publish
+        run: uv publish --repository testpypi --dry-run
 
   release_pypi:
     name: Build and publish Python distributions 📦 to PyPI (PEP 621, Trusted Publishing)
@@ -154,7 +154,7 @@ jobs:
         run: uv build
 
       - name: Publish
-        run: uv publish
+        run: uv publish --repository pypi --dry-run
 
   release_conda:
     name: Build and publish conda package
