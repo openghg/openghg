@@ -88,6 +88,7 @@ classifiers = [
         "flake8>=7.3.0",]
     doc = [
         "sphinx>=7.2.6",
+        "sphinx-togglebutton",
         "sphinx_rtd_theme>=2.0.0",
         "sphinx-autodoc-typehints>=2.0.0",
         "myst-parser>=2.0.0",
