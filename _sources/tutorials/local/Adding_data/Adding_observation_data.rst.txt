@@ -333,7 +333,7 @@ The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 The input formats supported for standardise_column are:
 
     - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
-    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>`_ to learn about schema for different data types.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>` to learn about schema for different data types.
 
 The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
 
@@ -546,6 +546,27 @@ the ``ObsData`` object.
 
 You can also pass any of ``title``, ``xlabel``, ``ylabel`` and ``units``
 to the ``plot_timeseries`` function to modify the labels.
+
+Retrieving specific data versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As mentioned in the :ref:`note-on-datasources` section, Datasources can handle multiple versions of data.
+By default, ``get_obs_surface`` and other ``get_*`` functions retrieve the latest version of the data.
+You can check which version is being retrieved by looking at the metadata:
+
+.. jupyter-execute::
+
+    co2_data.metadata["latest_version"]
+
+If you want to retrieve a specific version instead of the latest, you can use the ``version`` parameter.
+For example, to retrieve version 1 of the data:
+
+.. jupyter-execute::
+
+    co2_data_v1 = get_obs_surface(site="tac", species="co2", inlet="185m", tag="project1", version="v1")
+    co2_data_v1.metadata["latest_version"]
+
+This allows you to compare different versions of data or analyze how data has changed over time.
 
 Unit conversion
 ^^^^^^^^^^^^^^^^

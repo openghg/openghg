@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Store &#8212; OpenGHG 0.17.0 documentation</title>
+    <title>Store &#8212; OpenGHG 0.18.0+0.g56b010b.dirty documentation</title>
   
   
   
@@ -31,7 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
@@ -42,18 +42,17 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../_static/documentation_options.js?v=d2f501f7"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/togglebutton.js?v=1ae7504c"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/devapi_store';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -62,8 +61,8 @@
     <link rel="prev" title="Standardise - metadata" href="devapi_metadata.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
-    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
+  <meta name="docsearch:version" content="0.18.0" />
+    <meta name="docbuild:last-update" content="Jan 28, 2026"/>
   </head>
   
   
@@ -129,8 +128,8 @@
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
   
   
 </a></div>
@@ -386,7 +385,7 @@ the format of the data file, collect metadata and then store the data and metada
 <p>The <code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code> class is used to standardise and store boundary conditions data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.BoundaryConditions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">BoundaryConditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">BoundaryConditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process boundary condition data</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.BoundaryConditions.format_inputs">
@@ -436,7 +435,7 @@ appropriately formatted.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.BoundaryConditions.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for boundary conditions Dataset.</p>
 <dl class="simple">
 <dt>Includes volume mole fractions for each time and ordinal, vertical boundary at the edge of the defined domain:</dt><dd><ul class="simple">
@@ -507,7 +506,7 @@ The underlying parser functions will be of the form:</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code> class is used to process Eulerian model data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">EulerianModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">EulerianModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process Eulerian model data</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel.format_inputs">
@@ -531,7 +530,7 @@ appropriately formatted.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for Eulerian model Dataset.</p>
 <p>At present, this doesn’t check the variables but does check that
 “lat”, “lon”, “time” are included as appropriate types.</p>
@@ -557,7 +556,7 @@ appropriately formatted.</p>
 Some data may be cached locally for quicker access.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.Footprints">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">Footprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">Footprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process footprints model output</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Footprints.chunking_schema">
@@ -628,7 +627,7 @@ appropriately formatted.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Footprints.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_spatial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_lifetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_spatial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_lifetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for footprint Dataset.</p>
 <p>The returned schema depends on what the footprint represents,
 indicated using the keywords.
@@ -678,7 +677,7 @@ footprint internal formats consistent with this.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ObsColumn</span></code> class is used to process column / satellite observation data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.ObsColumn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process emissions / flux data</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsColumn.format_inputs">
@@ -710,7 +709,7 @@ appropriately formatted.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsColumn.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lev'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lev'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for a column Dataset.</p>
 <dl class="simple">
 <dt>Includes column data for each time point:</dt><dd><ul class="simple">
@@ -756,7 +755,7 @@ Default = “lev”</p></li>
 <p>The <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class is used to process surface observation data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process surface observation data</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface.align_metadata_attributes">
@@ -881,7 +880,7 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for surface observations Dataset.</p>
 <dl class="simple">
 <dt>Only includes mandatory variables</dt><dd><ul class="simple">
@@ -960,7 +959,7 @@ See <a class="reference external" href="https://zarr.readthedocs.io/en/stable/ap
 <p>The <code class="docutils literal notranslate"><span class="pre">FluxTimeseries</span></code> class is used to process UK inventory data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.FluxTimeseries">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">FluxTimeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">FluxTimeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries" title="Link to this definition">#</a></dt>
 <dd><p>This class is used to process ond dimension timeseries data</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="openghg.store.FluxTimeseries._data_type">
@@ -1013,7 +1012,7 @@ appropriately formatted.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.FluxTimeseries.schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.schema" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_flux_timeseries.html#FluxTimeseries.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.FluxTimeseries.schema" title="Link to this definition">#</a></dt>
 <dd><p>Define schema for one dimensional timeseries(FluxTimeseries) Dataset.</p>
 <dl class="simple">
 <dt>Includes observation for each time of the defined domain:</dt><dd><ul class="simple">

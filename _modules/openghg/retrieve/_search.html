@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0.17.0 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0.18.0+0.g56b010b.dirty documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
@@ -41,26 +41,25 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../../../_static/documentation_options.js?v=d2f501f7"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../../../_static/togglebutton.js?v=1ae7504c"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/retrieve/_search';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
-    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
+  <meta name="docsearch:version" content="0.18.0" />
+    <meta name="docbuild:last-update" content="Jan 28, 2026"/>
   </head>
   
   
@@ -126,8 +125,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
   
   
 </a></div>
@@ -486,12 +485,21 @@
     <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">end_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
 
+    <span class="c1"># The clean_string function previously removed &#39;.&#39; characters which impacted</span>
+    <span class="c1"># database_version. This optionality is included to ensure both database_version</span>
+    <span class="c1"># with and without any &quot;.&quot; characters are searched by default.</span>
+    <span class="n">options_database_version</span> <span class="o">=</span> <span class="p">[</span><span class="n">database_version</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">database_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">database_version</span><span class="p">:</span>
+            <span class="n">database_version_previous</span> <span class="o">=</span> <span class="n">database_version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">options_database_version</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">database_version_previous</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">search</span><span class="p">(</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-        <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
+        <span class="n">database_version</span><span class="o">=</span><span class="n">options_database_version</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
@@ -763,6 +771,21 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">search_site_met</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">met_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">search</span><span class="p">(</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+        <span class="n">met_source</span><span class="o">=</span><span class="n">met_source</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;site_met&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="search">
 <a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
@@ -806,6 +829,7 @@
         <span class="n">timestamp_now</span><span class="p">,</span>
         <span class="n">timestamp_tzaware</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve._search_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_slice</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">handle_direct_store_path</span>
 
@@ -816,6 +840,9 @@
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">,</span> <span class="s2">&quot;station_height_masl&quot;</span><span class="p">}:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="c1"># Convert all inlet searches to slice so this completes a value search</span>
+            <span class="n">rel_tolerance</span> <span class="o">=</span> <span class="mf">1e-6</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">convert_to_slice</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">rel_tolerance</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">clean_string</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>  <span class="c1"># Check empty list</span>

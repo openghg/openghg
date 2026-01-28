@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0.17.0 documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0.18.0+0.g56b010b.dirty documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
@@ -41,26 +41,25 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="../../../_static/documentation_options.js?v=d2f501f7"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../../../_static/togglebutton.js?v=1ae7504c"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_time';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
-    <meta name="docbuild:last-update" content="Nov 15, 2025"/>
+  <meta name="docsearch:version" content="0.18.0" />
+    <meta name="docbuild:last-update" content="Jan 28, 2026"/>
   </head>
   
   
@@ -126,8 +125,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.17.0 documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.17.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.18.0+0.g56b010b.dirty documentation - Home"/>
   
   
 </a></div>
@@ -337,14 +336,16 @@
   <h1>Source code for openghg.util._time</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">isnan</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">DateOffset</span><span class="p">,</span> <span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">,</span> <span class="n">Timestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimePeriod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._util</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairwise</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;timestamp_tzaware&quot;</span><span class="p">,</span>
@@ -375,6 +376,8 @@
     <span class="s2">&quot;find_duplicate_timestamps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;in_daterange&quot;</span><span class="p">,</span>
     <span class="s2">&quot;evaluate_sampling_period&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_representative_daterange_str&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_dataset_daterange&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="c1"># TupleTimeType = Tuple[Union[int, float], str]</span>
@@ -390,8 +393,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list: A list of duplicates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">unique</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">time_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span>
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -400,7 +401,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read time data&quot;</span><span class="p">)</span>
 
-    <span class="n">uniq</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">uniq</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">dupes</span> <span class="o">=</span> <span class="n">uniq</span><span class="p">[</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">dupes</span><span class="p">)</span></div>
@@ -437,8 +438,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.Timestamp: Timestamp at current time</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
-
     <span class="k">return</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">now</span><span class="p">())</span></div>
 
 
@@ -452,8 +451,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.Timestamp: Timestamp object at epoch</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
-
     <span class="k">return</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">Timestamp</span><span class="p">(</span><span class="s2">&quot;1970-1-1 00:00:00&quot;</span><span class="p">))</span></div>
 
 
@@ -470,8 +467,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if daterange included</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
-
     <span class="n">split_a</span> <span class="o">=</span> <span class="n">daterange_a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
     <span class="n">split_b</span> <span class="o">=</span> <span class="n">daterange_b</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
@@ -498,15 +493,13 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.DatetimeIndex</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">date_range</span>
-
     <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start date is after end date&quot;</span><span class="p">)</span>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span></div>
 
 
 
@@ -547,15 +540,13 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.DatetimeIndex: DatetimeIndex covering daterange</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">date_range</span>
-
     <span class="n">split</span> <span class="o">=</span> <span class="n">daterange_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
     <span class="c1"># Align the seconds</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span></div>
 
 
 
@@ -661,14 +652,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if valid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_daterange_str</span>
-
     <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="kc">True</span></div>
+    <span class="k">return</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span></div>
 
 
 
@@ -683,9 +668,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Daterange from dateranges that&#39;s the closest in time to to_compare</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_daterange_str</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
-
     <span class="n">min_start</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;3650days&quot;</span><span class="p">)</span>
     <span class="n">min_end</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;3650days&quot;</span><span class="p">)</span>
 
@@ -749,9 +731,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list: List of dateranges</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairwise</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dateranges</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
 
@@ -840,8 +819,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Trimmed daterange</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">to_trim</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">overlapping</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dateranges </span><span class="si">{</span><span class="n">to_trim</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">overlapping</span><span class="si">}</span><span class="s2"> do not overlap&quot;</span><span class="p">)</span>
 
@@ -968,11 +945,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Returns NA if not a date, otherwise date string</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">isnull</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">isnull</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">&quot;NA&quot;</span>
 
         <span class="k">return</span> <span class="n">date</span>
@@ -993,8 +968,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str, float, int: Returns NA if not a number else number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">isnan</span>
-
     <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;NA&quot;</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1094,8 +1067,6 @@
 <span class="sd">        &gt;&gt;&gt; parse_period((1, &quot;minute&quot;))</span>
 <span class="sd">            TimePeriod(1, &quot;minutes&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">period</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -1347,8 +1318,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if overlap</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">timestamp_tzaware</span>
-
     <span class="n">start_a</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_a</span><span class="p">)</span>
     <span class="n">end_a</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_a</span><span class="p">)</span>
 
@@ -1373,8 +1342,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if overlap</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">timestamp_tzaware</span>
-
     <span class="n">start_a</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_a</span><span class="p">)</span>
     <span class="n">end_a</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_a</span><span class="p">)</span>
 
@@ -1452,6 +1419,63 @@
         <span class="c1"># TODO: May want to add check for NaT or NaN</span>
 
     <span class="k">return</span> <span class="n">sampling_period</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_dataset_daterange</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the daterange for the passed Dataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (xarray.DataSet): Dataset to parse</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple (Timestamp, Timestamp): Start and end datetimes for DataSet</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This dataset does not have a time attribute, unable to read date range&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_representative_daterange_str</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get representative daterange which incorporates any period the data covers.</span>
+
+<span class="sd">    A representative daterange covers the start - end time + any additional period that is covered</span>
+<span class="sd">    by each time point. The start and end times can be extracted from the input dataset and</span>
+<span class="sd">    any supplied period used to extend the end of the date range to cover the representative period.</span>
+
+<span class="sd">    If there is only one time point (i.e. start and end datetimes are the same) and no period is</span>
+<span class="sd">    supplied 1 additional second will be added to ensure these values are not identical.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.</span>
+<span class="sd">        period: Value representing a time period e.g. &quot;12H&quot;, &quot;1AS&quot; &quot;3MS&quot;. Should be suitable for</span>
+<span class="sd">            creation of a pandas Timedelta or DataOffset object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : Date string covering representative date range e.g. &quot;YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extract start and end dates from grouped data</span>
+    <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span> <span class="o">=</span> <span class="n">get_dataset_daterange</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+    <span class="c1"># If period is defined add this to the end date</span>
+    <span class="c1"># This ensure start-end range includes time period covered by data</span>
+    <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">period_td</span> <span class="o">=</span> <span class="n">relative_time_offset</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">end_date</span> <span class="o">+</span> <span class="n">period_td</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># Subtract 1 second to make this exclusive end.</span>
+
+    <span class="c1"># If start and end times are identical add 1 second to ensure the range duration is &gt; 0 seconds</span>
+    <span class="k">if</span> <span class="n">start_date</span> <span class="o">==</span> <span class="n">end_date</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">+=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">daterange_str</span>
 </pre></div>
 
                 </article>
