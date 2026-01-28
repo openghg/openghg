@@ -36,6 +36,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
+          enable-cache: true
 
       - name: Install project (including dev dependencies)
         run: uv sync --all-extras --dev
