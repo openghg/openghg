@@ -88,6 +88,9 @@ classifiers = [
         "flake8>=7.3.0",]
     doc = [
         "sphinx>=7.2.6",
+        "Jinja2",
+        "notebook",
+        "sphinxcontrib-programoutput",
         "sphinx-togglebutton",
         "sphinx_rtd_theme>=2.0.0",
         "sphinx-autodoc-typehints>=2.0.0",
@@ -100,8 +103,10 @@ classifiers = [
         "ipython>=8.24.0",
         "jupyter_client>=8.6.1",
         "jupyter_core>=5.7.2",
+        "jupyter-sphinx",
         "nbconvert>=7.16.4",
         "docutils>=0.20.1",
+        "sphinx-issues >= 3.0.1,
         "pydata-sphinx-theme>=0.15.2"
     ]
 
