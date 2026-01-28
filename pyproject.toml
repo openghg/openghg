@@ -92,7 +92,7 @@ classifiers = [
         "notebook",
         "sphinxcontrib-programoutput",
         "sphinx-togglebutton",
-        "sphinx_rtd_theme>=2.0.0",
+        "sphinx_rtd_theme<3.1.0",
         "sphinx-autodoc-typehints>=2.0.0",
         "myst-parser>=2.0.0",
         "sphinx-copybutton>=0.5.2",
