@@ -106,7 +106,7 @@ classifiers = [
         "jupyter-sphinx",
         "nbconvert>=7.16.4",
         "docutils>=0.20.1",
-        "sphinx-issues >= 3.0.1,
+        "sphinx-issues >= 3.0.1",
         "pydata-sphinx-theme>=0.15.2"
     ]
 
