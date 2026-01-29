@@ -96,40 +96,43 @@ jobs:
           folder: "doc/build/html"
           clean: true
 
-  release_testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    needs: ["test", "docs"]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/openghg
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+  # release_testpypi:
+  #   name: Publish Python 🐍 distribution 📦 to TestPyPI
+  #   needs: ["test", "docs"]
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+  #   environment:
+  #     name: testpypi
+  #     url: https://test.pypi.org/p/openghg
+  #   permissions:
+  #     id-token: write  # IMPORTANT: mandatory for trusted publishing
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v6
+  #       with:
+  #         python-version: "3.12"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v2
-        with:
-          version: "latest"
+  #     - name: Install uv
+  #       uses: astral-sh/setup-uv@v2
+  #       with:
+  #         version: "latest"
 
-      - name: Build distributions with uv
-        run: uv build
+  #     - name: Build distributions with uv
+  #       run: uv build
 
-      - name: Publish
-        run: uv publish --repository testpypi --dry-run
+  #     - name: Publish to TestPyPI
+  #       # This action handles the OIDC exchange that uv cannot yet do for TestPyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
 
   release_pypi:
     name: Build and publish Python distributions 📦 to PyPI (PEP 621, Trusted Publishing)
     runs-on: ubuntu-latest
-    needs: ["test", "docs", "release_testpypi"]
+    needs: ["test", "docs"]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     environment:
       name: pypi
@@ -154,7 +157,7 @@ jobs:
         run: uv build
 
       - name: Publish
-        run: uv publish --repository pypi --dry-run
+        run: uv publish --trusted-publishing always --dry-run
 
   # release_conda:
   #   name: Build and publish conda package
