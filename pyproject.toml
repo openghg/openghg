@@ -127,6 +127,7 @@ Code = "https://github.com/openghg/openghg"
 Issue-Tracker = "https://github.com/openghg/openghg/issues"
 
 [tool.uv-dynamic-versioning]
+pattern = "default-unprefixed"
 fallback-version = "0.0.0"
 
 [project.scripts]
