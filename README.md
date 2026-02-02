@@ -36,12 +36,7 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
    ```bash
    source openghg_env/bin/activate
    ```
-
-  > If using HPC network it is recommended to use work directory.
-    ```bash
-    uv venv ${WORK}/openghg_env
-    ```
-
+   
 3. **Install OpenGHG:**
    ```bash
    uv pip install openghg
@@ -114,15 +109,10 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    source openghg_env/bin/activate
    ```
-
-  > If using HPC network it is recommended to use work directory.
-    ```bash
-    uv venv ${WORK}/openghg_env
-    ```
-
+   
 3. **Install development dependencies and the package in editable mode:**
    ```bash
-   uv install .[dev]
+   uv pip install .[dev]
    ```
    This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected.
 
