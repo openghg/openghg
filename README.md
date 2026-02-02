@@ -1,238 +1,190 @@
 ![OpenGHG logo](https://github.com/openghg/logo/raw/main/OpenGHG_Logo_Landscape.png)
 
-## OpenGHG - a cloud platform for greenhouse gas data analysis and collaboration
+## OpenGHG - a Cloud Platform for Greenhouse Gas Data Analysis and Collaboration
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![OpenGHG tests](https://github.com/openghg/openghg/workflows/OpenGHG%20tests/badge.svg?branch=master)
 
-OpenGHG is a project based on the prototype [HUGS platform](https://github.com/hugs-cloud/hugs) which aims to be a platform for collaboration and analysis
-of greenhouse gas (GHG) data.
+OpenGHG is a platform for collaboration and analysis of greenhouse gas (GHG) data, inspired by the [HUGS platform](https://github.com/hugs-cloud/hugs). It allows researchers to analyze and collaborate on large datasets using the scalability of the cloud.
 
-The platform will be built on open-source technologies and will allow researchers to collaborate on large datasets by harnessing the
-power and scalability of the cloud.
+For more information, please visit [our documentation](https://docs.openghg.org/).
 
-For more information please see [our documentation](https://docs.openghg.org/).
+---
 
-## Install locally
+## Install OpenGHG
 
-To run OpenGHG locally you'll need Python 3.8 or later on Linux or MacOS, we don't currently support Windows.
+OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
 
-You can install OpenGHG using `pip` or `conda`, though `conda` allows the complete functionality to be accessed at once.
+### Installing with `uv`
 
-## Using `pip`
+`uv` simplifies environment creation and dependency management, making it easy to manage your setup. To install OpenGHG using `uv`:
 
-To use `pip`, first create a virtual environment
+1. **Install `uv`:**
+   ```bash
+   pip install uv
+   ```
 
+2. **Create and activate an environment for OpenGHG:**
+   ```bash
+   uv venv openghg-env
+   ```
+   Additionally, a specific python version can be specified while creating the
+   environment as follows.
+   ```bash
+   uv venv openghg-env --python 3.11
+   ```
+   To activate:
+   ```bash
+   source openghg_env/bin/activate
+   ```
+
+  > If using HPC network it is recommended to use work directory.
+    ```bash
+    uv venv ${WORK}/openghg_env
+    ```
+
+3. **Install OpenGHG:**
+   ```bash
+   uv pip install openghg
+   ```
+
+This installs OpenGHG and all optional dependencies for full functionality.
+
+### Installing with `conda`
+
+To get OpenGHG installed using `conda`, follow these steps:
+
+1. **Create and activate a `conda` environment:**
+   ```bash
+   conda create --name openghg_env
+   conda activate openghg_env
+   ```
+
+2. **Install OpenGHG and its dependencies using the `conda-forge` and `openghg` channels:**
+   ```bash
+   conda install --channel conda-forge --channel openghg openghg
+   ```
+
+Note: The optional `xesmf` library is pre-installed when using `conda`. No additional steps are required for regridding functionality.
+
+---
+
+## Quickstart Configuration
+
+Once OpenGHG is installed, you need to configure the object store and user data. OpenGHG stores its configuration file by default at:
+`~/.config/openghg/openghg.conf`.
+
+### Configure via CLI:
 ```bash
-python -m venv openghg_env
-```
-
-Then activate the environment
-
-```bash
-source openghg_env/bin/activate
-```
-
-It's best to make sure you have the most up to date versions of the packages that `pip` will use behind the scenes when installing OpenGHG.
-
-```bash
-pip install --upgrade pip wheel setuptools
-```
-
-Then we can install OpenGHG itself
-
-```bash
-pip install openghg
-```
-
-Each time you use OpenGHG please make sure to activate the environment using the `source` step above.
-
-
-> **_NOTE:_**  Some functionality is not completely accessible when OpenGHG is installed with `pip`. This only affects some map regridding functionality. See the Additional Functionality section below for more information.
-
-## Using `conda`
-
-To get OpenGHG installed using `conda` we'll first create a new environment
-
-```bash
-conda create --name openghg_env
-```
-
-Then activate the environment
-
-```bash
-conda activate openghg_env
-```
-
-Then install OpenGHG and its dependencies from our [conda channel](https://anaconda.org/openghg/openghg)
-and conda-forge.
-
-```bash
-conda install --channel conda-forge --channel openghg openghg
-```
-
-Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
-
-## Create the configuration file
-
-OpenGHG stores object store and user data in a configuration file in the user's home directory at `~/.config/openghg/openghg.conf`. As this sets the path of the object store, the user must
-create this file in one of two ways
-
-### Command line
-
-Using the `openghg` command line tool
-
-```
 openghg --quickstart
-
-OpenGHG configuration
----------------------
-
-Enter path for object store (default /home/gareth/openghg_store):
-INFO:openghg.util:Creating config at /home/gareth/.config/openghg/openghg.conf
-
-INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
 ```
 
-### Python
-
-Using the `create_config` function from the `openghg.util` submodule.
-
-```
+### Configure via Python:
+```python
 from openghg.util import create_config
 
 create_config()
-
-OpenGHG configuration
----------------------
-
-Enter path for object store (default /home/gareth/openghg_store):
-INFO:openghg.util:Creating config at /home/gareth/.config/openghg/openghg.conf
-
-INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
 ```
 
-You will be prompted to enter the path to the object store, leaving the prompt empty tells OpenGHG to use the default path in the user's home directory at `~/openghg_store`.
+When prompted, you can specify the path to the object store. Leave the field blank to use the default directory at `~/openghg_store`.
 
-## Additional functionality
-
-Some optional functionality is available within OpenGHG to allow for multi-dimensional regridding of map data (`openghg.tranform` sub-module). This makes use of the [`xesmf` package](https://xesmf.readthedocs.io/en/latest/). This Python library is built upon underlying FORTRAN and C libraries (ESMF) which cannot be installed directly within a Python virtual environment.
-
-To use this functionality these libraries must be installed separately. One suggestion for how to do this is as follows.
-
-If still within the created virtual environment, exit this using
-```bash
-deactivate
-```
-
-We will need to create a `conda` environment to contain just the additional C and FORTRAN libraries necessary for the `xesmf` module (and dependencies) to run. This can be done by installing the `esmf` package using `conda`
-```bash
-conda create --name openghg_add esmf -c conda-forge
-```
-
-Then activate the Python virtual environment in the same way as above:
-```bash
-source openghg_env/bin/activate
-```
-
-Run the following lines to link the Python virtual environment to the installed dependencies, doing so by installing the `esmpy` Python wrapper (a dependency of `xesmf`):
-```bash
-ESMFVERSION='v'$(conda list -n openghg_add esmf | tail -n1 | awk '{print $2}')
-$ export ESMFMKFILE="$(conda env list | grep openghg_add | awk '{print $2}')/lib/esmf.mk"
-$ pip install "git+https://github.com/esmf-org/esmf.git@${ESMFVERSION}#subdirectory=src/addon/ESMPy/"
-```
-
-**Note**: The pip install command above for `esmf` module may produce an AttributeError. At present (19/07/2022) an error of this type is expected and may not mean the `xesmf` module cannot be installed. This error will be fixed if [PR #49](https://github.com/esmf-org/esmf/pull/49) is merged.
-
-Now the dependencies have all been installed, the `xesmf` library can be installed within the virtual environment
-
-```bash
-pip install xesmf
-```
+---
 
 ## Developers
 
-If you'd like to contribute to OpenGHG please see the contributing section of our documentation. If you'd like to take a look at the source and run the tests follow the steps below.
+If you'd like to contribute to OpenGHG, here are the steps to set up a development environment. You can use either `uv` or `conda`.
 
-### Clone
+### Using `uv` for Development
 
-```bash
-git clone https://github.com/openghg/openghg.git
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/openghg/openghg.git
+   cd openghg
+   ```
 
-### Install dependencies
+2. **Create and activate an environment for OpenGHG:**
+   ```bash
+   uv venv openghg-env
+   ```
+   Additionally, a specific python version can be specified while creating the
+   environment as follows.
+   ```bash
+   uv venv openghg-env --python 3.11
+   ```
+   To activate:
+   ```bash
+   source openghg_env/bin/activate
+   ```
 
-We recommend you create a virtual environment first
+  > If using HPC network it is recommended to use work directory.
+    ```bash
+    uv venv ${WORK}/openghg_env
+    ```
 
-```bash
-python -m venv openghg_env
-```
+3. **Install development dependencies and the package in editable mode:**
+   ```bash
+   uv install .[dev]
+   ```
+   This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected.
 
-Then activate the environment
+### Using `conda` for Development
 
-```bash
-source openghg_env/bin/activate
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/openghg/openghg.git
+   cd openghg
+   ```
 
-Then install the dependencies
+2. **Create and activate a `conda` environment:**
+   ```bash
+   conda create --name openghg-dev python=3.12
+   conda activate openghg-dev
+   ```
 
-```bash
-cd openghg
-pip install --upgrade pip wheel setuptools
-pip install -r requirements.txt -r requirements-dev.txt
-```
+3. **Install development dependencies:**
+   ```bash
+   pip install --upgrade pip wheel setuptools
+   pip install -e ".[dev]"
+   ```
 
-Next you can install OpenGHG in editable mode using the `-e` flag. This installs the package from
-the local path and means any changes you make to the code will be immediately available when
-using the package.
+---
 
-```bash
-pip install -e .
-```
+### Running Tests
 
-OpenGHG should now be installed in your virtual environment.
-
-See above for additional steps to install the `xesmf` library as required.
-
-### Run the tests
-
-To run the tests
-
+OpenGHG uses `pytest` for testing. After setting up the development environment, you can run tests as follows:
 ```bash
 pytest -v tests/
 ```
 
-> **_NOTE:_**  Some of the tests require the [udunits2](https://www.unidata.ucar.edu/software/udunits/) library to be installed.
+#### Additional Testing:
 
-The `udunits` package is not `pip` installable so we've added a separate flag to specifically run these tests. If you're on Debian / Ubuntu you can do
+- **CF Checker Tests:** Install the `udunits2` library for certain tests:
+   ```bash
+   sudo apt-get install libudunits2-0
+   pytest -v --run-cfchecks tests/
+   ```
 
-```bash
-sudo apt-get install libudunits2-0
-```
+- **ICOS Tests:** These tests access the ICOS Carbon Portal and should be run sparingly:
+   ```bash
+   pytest -v --run-icos tests/
+   ```
 
-#### Running CF Checker tests
+If you encounter issues, please [open a GitHub issue](https://github.com/openghg/openghg/issues/new).
 
-You can then run the `cfchecks` marked tests using
+---
 
-```bash
-pytest -v --run-cfchecks tests/
-```
+## Additional Functionality
 
-#### Running ICOS tests
+OpenGHG's optional functionality includes the `xesmf` module for map regridding.
 
-Some of our tests retrieve data from the ICOS Carbon Portal and so to avoid load on the ICOS severs these should not be run frequently. They should only be run when working on this functionality or before a release. These tests are marked `icos` with `pytest.mark`.
+- When using `uv`, these dependencies are installed automatically with the extras.
+- When using `conda`, the `xesmf` library is included in the installation.
 
-```bash
-pytest -v --run-icos tests/
-```
+For further details, refer to [our documentation](https://docs.openghg.org/).
 
-If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us
-know some details about your setup.
+---
 
-## Documentation
+## Community and Contributions
 
-For further documentation and tutorials please visit [our documentation](https://docs.openghg.org/).
+We encourage contributions and are happy to assist where needed. Join our community on [Gitter](https://gitter.im/openghg/lobby) or raise issues and pull requests in [our repository](https://github.com/openghg/openghg).
 
-## Community
-
-If you'd like further help or would like to talk to one of the developers of this project, please join
-our Gitter at gitter.im/openghg/lobby.
+For further information, check out [our documentation](https://docs.openghg.org/).
