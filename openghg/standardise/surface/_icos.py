@@ -129,10 +129,8 @@ def _read_data_large_header(
         site_fname = filepath.name.split("_")[-3]
         inlet_height_fname = filepath.name.split("_")[-2]
     except IndexError:
-        raise ValueError(
-            "Unable to read metadata from filename. We expect a filename such as \
-            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"
-        )
+        raise ValueError("Unable to read metadata from filename. We expect a filename such as \
+            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")
 
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")

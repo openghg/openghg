@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 from typing import Any, cast, Generic, Literal, TypeVar
 
+import pandas as pd
 import xarray as xr
 import zarr
 import zarr.convenience
@@ -12,9 +13,8 @@ from zarr._storage.store import Store as AbstractZarrStore
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
 from ._encoding import get_zarr_encoding
-from ._indexing import OverlapDeterminer
+from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
-
 
 logger = logging.getLogger("openghg.storage")
 logger.setLevel(logging.DEBUG)
@@ -92,9 +92,17 @@ class ZarrStore(Store, Generic[ZST]):
         return self._store
 
     @property
+    def index(self) -> pd.Index:
+        """Index of append dimension of data.
+
+        This index is in the order of the data as it is stored on disk,
+        which is needed for proper alignment during updates.
+        """
+        return self._get(sort=False).get_index(self.append_dim)
+
+    @property
     def _overlap_determiner(self) -> OverlapDeterminer:
-        index = self.get().get_index(self.append_dim)
-        return OverlapDeterminer(index=index, **self.index_options)
+        return OverlapDeterminer(index=self.index, **self.index_options)
 
     def __bool__(self) -> bool:
         return bool(self.store)
@@ -111,13 +119,20 @@ class ZarrStore(Store, Generic[ZST]):
             nbytes += self.store.getsize(key)  # type: ignore
         return nbytes
 
-    def get(self) -> xr.Dataset:
+    def _get(self, sort: bool = True) -> xr.Dataset:
         if not bool(self):
             return xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self.store, consolidated=True).sortby(self.append_dim)
+        result = xr.open_zarr(self.store, consolidated=True)
+
+        if sort:
+            result = result.sortby(self.append_dim)
+
         return cast(xr.Dataset, result)
+
+    def get(self) -> xr.Dataset:
+        return self._get(sort=True)
 
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
         if not self.store:
@@ -152,6 +167,7 @@ class ZarrStore(Store, Generic[ZST]):
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
+
         if not self.store:
             raise UpdateError("Cannot update empty Store.")
         else:
@@ -177,12 +193,68 @@ class ZarrStore(Store, Generic[ZST]):
                     synchronizer=zarr.ThreadSynchronizer(),
                     safe_chunks=False,
                 )
-            except (ValueError, IndexError) as e:
-                # possible issue with non-contiguous data
-                raise NotImplementedError(
-                    "Cannot update Zarr store, possibly due to non-contiguous data. "
-                    "Updating with non-contiguous data is currently not supported."
-                ) from e
+            except (ValueError, IndexError):
+                import dask
+
+                kwargs = self.index_options.copy()
+
+                # only allow one source value to align to a given target value; if multiple source values
+                # align to the same target value, an error will be raised by `contiguous_regions` if `limit=1`.
+                if "method" in kwargs:
+                    kwargs["limit"] = 1
+
+                try:
+                    source_regions, target_regions, _ = contiguous_regions(
+                        data.get_index(self.append_dim), self.index, **kwargs
+                    )
+                except IndexingError as e:
+                    raise UpdateError(
+                        f"Multiple input values map to the same stored value with index options {self.index_options}."
+                    ) from e
+
+                # can only write to specified region if data vars have dimension in common with that region
+                # so we will first write the variables without the append dimension (since this is the dim
+                # where we specify regions), then we will write the variables that have the append dim as
+                # a dimension.
+                non_region_vars = [dv for dv in data.data_vars if self.append_dim not in data[dv].dims]
+
+                # don't catch any errors here, since these errors are unrelated to alignment
+                data[non_region_vars].to_zarr(
+                    store=self.store,
+                    mode="r+",
+                    region="auto",
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+
+                # now proceed with variables that contain the append dim
+                data = data.drop_vars(non_region_vars)
+
+                # create delayed tasks to write to each region
+                delayed = []
+
+                # We will execute multiple writes with dask, so these writes need to share the
+                # same ThreadSynchronizer, which keeps a lock for each chunk. A chunk can
+                # only be written to while the writer holds this lock. If we create the synchronizers
+                # inside the loop (e.g. inside the call to `to_zarr`, as above) then each chunk would have
+                # multiple locks, and we could have data corruption from competing writes.
+                synchronizer = zarr.ThreadSynchronizer()
+                for sregion, tregion in zip(source_regions, target_regions):
+                    region = {self.append_dim: slice(tregion[0], tregion[-1] + 1)}
+                    res = data.isel({self.append_dim: sregion}).to_zarr(
+                        store=self.store,
+                        mode="r+",
+                        region=region,
+                        consolidated=True,
+                        compute=False,
+                        synchronizer=synchronizer,
+                        safe_chunks=False,
+                    )
+                    delayed.append(res)
+
+                dask.compute(*delayed)  # type: ignore
 
 
 def get_zarr_directory_store(

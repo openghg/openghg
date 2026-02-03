@@ -191,7 +191,7 @@ def test_scenario_infer_inputs_co2():
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 396.99)
     assert np.isclose(obs_mf[-1], 388.51)
-    assert "1e-6" in obs_mf.attrs["units"]
+    assert "1e-06" in obs_mf.attrs["units"]
 
     # Footprint data - species
     assert model_scenario.footprint.metadata["species"] == "co2"
@@ -569,7 +569,7 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
     for dv in ("mf_mod", "bc_mod"):
-        assert combined_dataset[dv].attrs["units"] == "1e-9"
+        assert combined_dataset[dv].attrs["units"] == "1e-09"
 
     error_in_mod_obs = np.mean(
         np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)
