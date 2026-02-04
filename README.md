@@ -22,13 +22,13 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
 
    The `uv` tool from Astral streamlines Python management, virtual environments, and package installation. Follow the recommended steps from the official `uv` docs:
 
-   1. Install from link`uv` (Recommended (robust, Python-independent):):
+   1. Install from link`uv` (Recommended "robust, Python-independent"):
    - macOS/Linux:
      ```bash
      curl -LsSf https://astral.sh/uv/install.sh | sh
      ```
 
-   2. Install from pip (Alternative (requires existing Python + pip):)
+   2. Install from pip (Alternative "requires existing Python + pip"):
    ```bash
    pip install uv
    ```
