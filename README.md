@@ -108,16 +108,17 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
-   uv venv openghg-env
+   uv venv
    ```
+   A python environment with name can also be created, as showed in non-developer instance previously.
    Additionally, a specific python version can be specified while creating the
    environment as follows.
    ```bash
-   uv venv openghg-env --python 3.11
+   uv venv --python 3.11
    ```
    To activate:
    ```bash
-   source openghg_env/bin/activate
+   source .venv/bin/activate
    ```
 
 3. **Install development dependencies and the package in editable mode:**
