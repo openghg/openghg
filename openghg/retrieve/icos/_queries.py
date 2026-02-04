@@ -41,6 +41,10 @@ from openghg.util import extract_float
 
 
 def sparql_header() -> str:
+    """
+    Defines the namespace prefixes used in SPARQL queries e.g instead of writing the full
+    URI http://meta.icos-cp.eu/ontologies/cpmeta/ you can write cpmeta instead.
+    """ 
     return """
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
@@ -131,7 +135,15 @@ def make_filename_filter(filename_str: str | None = None) -> str:
 
 
 def make_site_filter(site: str | list[str] | None) -> str:
-    """ """
+    """
+    Create the SPARQL filter for the site field.
+
+    Args:
+        site:  site or list of sites to search (e.g. "MHD" or ["JFJ", "CMN"]); if
+        None, search all sites. 
+    Returns:
+        str: case-insensitive SPARQL values filter related to the site field.
+    """
     if site is None:
         return ""
 
@@ -143,14 +155,38 @@ def make_site_filter(site: str | list[str] | None) -> str:
 
 
 def make_data_level_filter(data_level: int | None) -> str:
-    """ """
+    """
+    Create a SPARQL filter for the data_level field. 
+
+    Args:
+        data_level:  data level 1 or 2 (e.g. 1 would select data level 1; if
+        None, select both data levels. 
+    Returns:
+        str: case-insensitive SPARQL filter related to the data_level field.
+    Raises:
+        TypeError: if data_level is a string of not an integer
+    """
     if data_level is None:
         return ""
+
+    try:
+        res = int(data_level) 
+    except ValueError:
+        raise ValueError(f"data_level must be an int, not a string. Received: '{data_level}'")
+
     return f"FILTER(?data_level = {data_level})"
 
 
 def make_species_filter(species: str | list[str] | None) -> str:
-    """ """
+    """
+    Create a SPARQL filter for the species field. 
+
+    Args:
+        species:  species or list of species to search (e.g. "CO2" or ["CO2", "CH4"]); if
+        None, search all species. 
+    Returns:
+        str:  case-insensitive SPARQL filter related to the species field.
+    """
     if species is None:
         return ""
 
@@ -168,7 +204,15 @@ def make_species_filter(species: str | list[str] | None) -> str:
 
 
 def make_project_filter(project: str | list[str] | None) -> str:
-    """ """
+    """
+    Create a SPARQL filter for the project field. 
+
+    Args:
+        project:  project or list of projects to search (e.g. "icos" or ["icos", "euroObspack"]); if
+        None, search all projects. 
+    Returns:
+        str:  case-insensitive SPARQL filter related to the project field.
+    """
     if project is None:
         return ""
 
@@ -188,7 +232,15 @@ def make_project_filter(project: str | list[str] | None) -> str:
 
 
 def make_inlet_filter(inlet: str | list[str] | None) -> str:
-    """ """
+    """
+    Create a SPARQL filter for inlet field. 
+
+    Args:
+        inlet:  inlet or list of inlets to search (e.g. "100" or ["100", "50"], can handle
+         100, 100.00 and 100m); if None, search all inlets. 
+    Returns:
+        str:  case-insensitive SPARQL filter related to the inlet field.
+    """
     if inlet is None:
         return ""
 
@@ -395,7 +447,9 @@ def attrs_query(dobj_uri: str) -> str:
 
 
 def format_query() -> str:
-    """ """
+    """
+    sparql query to retrieve information about available data formats and their associated specifications
+    """
     query = sparql_header()
     query += """
     SELECT DISTINCT ?format_label ?spec_label ?encoding ?format ?spec ?format_comment ?spec_comment
@@ -422,7 +476,14 @@ def format_query() -> str:
 
 
 def parse_binding(b: dict) -> dict:
-    """Parse `BindingsList` returned to meta.sparql_select."""
+    """
+    Parse `BindingsList` (b) returned to meta.sparql_select. Converts a binding object from the sparql query result
+    into a python dictionary with properly formatted values.
+    Args:
+        b:  Bindingslist returned to meta.sparql_select. 
+    Returns:
+        dict: python dictionary for the binding list.
+    """
     res = {}
     for k, v in b.items():
         if hasattr(v, "uri"):
@@ -443,14 +504,24 @@ def parse_binding(b: dict) -> dict:
 
 
 def make_query_df(query: str) -> pd.DataFrame:
-    """ """
+    """
+    Executes a sparql query and converts the python dictionary derived from the resulting binding list
+    to a pandas dataframe.
+    Args:
+        query: meta.sparql_select query. 
+    Returns:
+        pandas.Dataframe: pandas dataframe of the binding list dictionary.
+    """
     res = meta.sparql_select(query=query)
     return pd.DataFrame([parse_binding(b) for b in res.bindings])
 
 
 @lru_cache
 def icos_format_info() -> pd.DataFrame:
-    """ """
+    """
+    Retrieve information about available data formats and their specifications from the ICOS
+    Carbon Portal, returning a panda DataFrame indexed by spec label.
+    """
     format_df = make_query_df(format_query()).drop_duplicates(subset="spec_label")
     format_df = format_df.set_index("spec_label")
     format_df["fmt"] = format_df.format.str.split("/").str[-1]
@@ -468,7 +539,45 @@ def dobj_info(
     project: str | list[str] | None = ["icos", "euroObspack"],
     format_info: bool = False,
 ) -> pd.DataFrame:
-    """ """
+    """
+     Search ICOS CP for data by the following arguments, then transform result into a pandas dataframe
+     and optionally left hand join it with additional meta data from icos_format_info().
+
+    Args:
+        site: site or list of sites to search (e.g. "MHD" or ["JFJ", "CMN"]); if
+        None, search all sites.
+        data_level: ICOS data level: 1, 2 or None for both.
+        species: species or list of species to search for.
+        inlet: inlet or list of inlets. Only exact matches are found. The inlets
+          should be strings, since this is OpenGHG convention, but "100", "100.0",
+          "100m" will all work.
+        spec_label: regex or regexes to filter the "spec label" by. If an ordinary string
+          is passed, only spec labels that contain that string as a substring will
+          be matched.
+        spec_label_include: For spec_label this includes a regex/string search.
+            The spec_label_include input specifies whether the spec_label value or values
+            should be included or excluded in the search.
+            Examples:
+            - spec_label = "CO2", spec_label_include = True
+                - search for spec_label which includes "CO2"
+            - spec_label = ["CO2", "time"], spec_label_include = True
+                - search for spec_label which includes "CO2" AND "time"
+            - spec_label = ["CO2", "Obspack"], spec_label_include = [True, False]
+                - search for spec_label which includes "CO2" AND excludes "Obspack"
+            Default = True
+            Only used if spec_label is specified (not None).
+        filename_str: regex to filter the "file_name" by. If an ordinary string
+            is passed, only filenames that contain that string as a substring will
+            be matched.
+        project: list of case-sensitive project names as defined here:
+          https://meta.icos-cp.eu/ontologies/cpmeta/Project
+        format info: option to left-join format meta data from icos_format_info() e.g 
+            format_label, encoding, format, format_comment, spec_comment, fmt fields
+
+    Returns:
+        pandas data frame of sparkl query result
+
+    """
     query = data_query(
         site, data_level, species, inlet, spec_label, spec_label_include, filename_str, project
     )
