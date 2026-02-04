@@ -19,6 +19,16 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
 `uv` simplifies environment creation and dependency management, making it easy to manage your setup. To install OpenGHG using `uv`:
 
 1. **Install `uv`:**
+
+   The `uv` tool from Astral streamlines Python management, virtual environments, and package installation. Follow the recommended steps from the official `uv` docs:
+
+   1. Install from link`uv` (Recommended (robust, Python-independent):):
+   - macOS/Linux:
+     ```bash
+     curl -LsSf https://astral.sh/uv/install.sh | sh
+     ```
+
+   2. Install from pip (Alternative (requires existing Python + pip):)
    ```bash
    pip install uv
    ```
@@ -36,7 +46,7 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
    ```bash
    source openghg_env/bin/activate
    ```
-   
+
 3. **Install OpenGHG:**
    ```bash
    uv pip install openghg
@@ -109,10 +119,10 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    source openghg_env/bin/activate
    ```
-   
+
 3. **Install development dependencies and the package in editable mode:**
    ```bash
-   uv pip install .[dev]
+   uv sync --all-extras
    ```
    This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected.
 
@@ -175,6 +185,6 @@ For further details, refer to [our documentation](https://docs.openghg.org/).
 
 ## Community and Contributions
 
-We encourage contributions and are happy to assist where needed. Join our community on [Gitter](https://gitter.im/openghg/lobby) or raise issues and pull requests in [our repository](https://github.com/openghg/openghg).
+We encourage contributions and are happy to assist where needed. Raise issues and pull requests in [our repository](https://github.com/openghg/openghg).
 
 For further information, check out [our documentation](https://docs.openghg.org/).
