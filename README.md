@@ -116,6 +116,9 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    uv venv --python 3.11
    ```
+> **Note:**
+> If the virtual environment is not named, the .venv folder is  created at the directory level, and using commands like "uv add" or "uv pip install" will automatically detect the environment and install the packages.
+
    To activate:
    ```bash
    source .venv/bin/activate
@@ -125,7 +128,9 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    uv sync --all-extras
    ```
-   This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected.
+   This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected. It will also ensure that all the dev and documentation dependencies are installed in the environment.
+
+   For more details, please refer to the [UV Documentation (sync)](https://docs.astral.sh/uv/concepts/projects/sync/#syncing-the-environment).
 
 ### Using `conda` for Development
 
