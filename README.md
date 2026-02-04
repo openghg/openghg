@@ -44,7 +44,7 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
    ```
    To activate:
    ```bash
-   source openghg_env/bin/activate
+   source openghg-env/bin/activate
    ```
 
 3. **Install OpenGHG:**
