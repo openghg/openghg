@@ -154,7 +154,7 @@ jobs:
         run: uv build
 
       - name: Publish
-        run: uv publish --trusted-publishing always --dry-run
+        run: uv publish --trusted-publishing always
 
   release_conda:
     name: Build and publish conda package
