@@ -29,9 +29,9 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
      ```
 
    2. Install from pip (Alternative "requires existing Python + pip"):
-   ```bash
-   pip install uv
-   ```
+      ```bash
+      pip install uv
+      ```
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
@@ -116,13 +116,13 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    uv venv --python 3.11
    ```
-> **Note:**
-> If the virtual environment is not named, the .venv folder is  created at the directory level, and using commands like "uv add" or "uv pip install" will automatically detect the environment and install the packages.
+   > **Note:**
+   > If the virtual environment is not named, the .venv folder is  created at the directory level, and using commands like "uv add" or "uv pip install" will automatically detect the environment and install the packages.
 
-   To activate:
-   ```bash
-   source .venv/bin/activate
-   ```
+      To activate:
+      ```bash
+      source .venv/bin/activate
+      ```
 
 3. **Install development dependencies and the package in editable mode:**
    ```bash
