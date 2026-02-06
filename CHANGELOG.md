@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
 
+## [0.17.0] - 2025-02-06
+
+-Adds search methods to create Sparql queries to search the ICOS Carbin Portal and returns results as Pandas dataframes.
+-Adds methods for directly downloading ICOS text files for ATV time series and ATC flask time series as well as downloading netCDT time series.
+
 ## Updated
 
 - Refactored individual `read_file` methods on data_type classes in `openghg.store` to use a central `read_file` method on `BaseStore` parent class (`openghg.store.base`). This centralises the `read_file` functionality and ensures the steps for each subclass are consistent. Each data_type class now requires a `format_inputs` method to apply the formatting steps to the input kwargs when standardising. [PR #1415](https://github.com/openghg/openghg/pull/1415)
