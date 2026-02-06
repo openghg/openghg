@@ -71,8 +71,8 @@ dependencies = [
     "types-pyyaml<=6.0.12.20250915",
     "types-requests<=2.32.4.20250913",
     "types-toml<=0.10.8.20240310",
-    "types-urllib3<=1.26.25.14",
-    "urllib3<=1.26.3",
+    "types-urllib3",
+    "urllib3<1.26.3",
     "xarray>=2025.4.0, <=2025.9.1",
     "zarr==2.18.3",
 ]
