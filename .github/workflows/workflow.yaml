@@ -39,7 +39,7 @@ jobs:
           enable-cache: true
 
       - name: Install project (including dev dependencies)
-        run: uv sync --all-extras --dev
+        run: uv sync --extra --dev
 
       - name: Format code with black
         run: |
@@ -124,7 +124,7 @@ jobs:
         run: uv build
 
       - name: Publish to TestPyPI
-        run: uv publish --publish-url https://test.pypi.org/legacy/ --trusted-publishing always --dry-run
+        run: uv publish --publish-url https://test.pypi.org/legacy/ --trusted-publishing always
 
   release_pypi:
     name: PyPI Build and publish Python distributions (PEP 621, Trusted Publishing)
