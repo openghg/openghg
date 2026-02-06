@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.17.0] - 2025-02-06
 
+-Progress towards [PR #1447]
 -Adds search methods to create Sparql queries to search the ICOS Carbin Portal and returns results as Pandas dataframes.
 -Adds methods for directly downloading ICOS text files for ATV time series and ATC flask time series as well as downloading netCDT time series.
 
