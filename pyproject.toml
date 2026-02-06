@@ -88,13 +88,13 @@ classifiers = [
         "black==26.1.0",
         "flake8<=7.3.0",]
     doc = [
-        "sphinx<=7.2.6",
+        "sphinx",
         "Jinja2",
         "notebook",
         "sphinxcontrib-programoutput",
         "sphinx-togglebutton",
         "sphinx_rtd_theme<3.1.0",
-        "sphinx-autodoc-typehints<=2.0.0",
+        "sphinx-autodoc-typehints",
         "myst-parser<=2.0.0",
         "sphinx-copybutton<=0.5.2",
         "sphinxcontrib-bibtex<=2.6.2",
@@ -107,7 +107,7 @@ classifiers = [
         "jupyter-sphinx",
         "nbconvert<=7.16.4",
         "docutils<=0.20.1",
-        "sphinx-issues <= 3.0.1",
+        "sphinx-issues<=3.0.1",
         "pydata-sphinx-theme<=0.15.2"
     ]
 
