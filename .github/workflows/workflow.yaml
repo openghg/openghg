@@ -39,7 +39,7 @@ jobs:
           enable-cache: true
 
       - name: Install project (including dev dependencies)
-        run: uv sync --extra --dev
+        run: uv sync --extra dev
 
       - name: Format code with black
         run: |
