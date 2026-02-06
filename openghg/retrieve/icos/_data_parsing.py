@@ -231,7 +231,7 @@ def get_attrs_from_header(header: dict) -> dict:
 
 
 def get_full_attrs(dobj_uri: str, species: str, header: dict) -> dict:
-     """
+    """
     Combines the variable attributes from the sparql query with the variable attributes from the text file header.
     
     Args:

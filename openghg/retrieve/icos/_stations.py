@@ -47,7 +47,7 @@ def retrieve_station(site: str, atmospheric: bool = True) -> StationLite:
     """
 
     stations = retrieve_list_stations(atmospheric=atmospheric)
-
+    print(stations)
     site_id = site.upper()
     for station in stations:
         if station.id == site_id:
