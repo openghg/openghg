@@ -46,5 +46,6 @@ dependencies:
   - pip:
     - icoscp
     - numpy>=2.0,<=2.3.3
+    - pandas>=2.0,<=2.3.3
 # numpy >= 2.0 is included in pip requirements because icoscp will try and downgrade numpy to <2.0
 # - can remove and use definition above again when https://github.com/ICOS-Carbon-Portal/data/issues/391 is resolved.
