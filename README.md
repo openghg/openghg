@@ -182,8 +182,10 @@ If you encounter issues, please [open a GitHub issue](https://github.com/openghg
 
 OpenGHG's optional functionality includes the `xesmf` module for map regridding.
 
-- When using `uv`, these dependencies are installed automatically with the extras.
-- When using `conda`, the `xesmf` library is included in the installation.
+Note that `xesmf` is **not** installed by default with the core OpenGHG package.
+- When using `uv`, install it explicitly, for example:
+  ```bash
+  uv add xesmf
 
 For further details, refer to [our documentation](https://docs.openghg.org/).
 
