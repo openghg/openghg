@@ -12,7 +12,7 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
+OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
 
 ### Installing with `uv`
 
