@@ -36,10 +36,10 @@ if _sys.version_info < (3, 10):
 
 # Use importlib.metadata for version information at runtime
 try:
-    from importlib.metadata import version as _version
+    from importlib.metadata import version as _version, PackageNotFoundError as _PackageNotFoundError
 
     __version__ = _version("openghg")
-except Exception:
+except _PackageNotFoundError:
     # Fallback version if package metadata is not available
     __version__ = "unknown"
 
