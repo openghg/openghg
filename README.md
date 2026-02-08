@@ -187,6 +187,10 @@ Note that `xesmf` is **not** installed by default with the core OpenGHG package.
   ```bash
   uv add xesmf
 
+- For conda install of xesmf
+  ```bash
+  conda install -c conda-forge xesmf
+
 For further details, refer to [our documentation](https://docs.openghg.org/).
 
 ---
