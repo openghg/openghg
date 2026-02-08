@@ -52,7 +52,7 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
    uv pip install openghg
    ```
 
-This installs OpenGHG and all optional dependencies for full functionality.
+This installs OpenGHG and its core dependencies.
 
 ### Installing with `conda`
 
