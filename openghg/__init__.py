@@ -16,7 +16,6 @@ from . import (
     tutorial,
     util,
 )
-from ._version import get_versions  # type: ignore
 
 __all__ = [
     "analyse",
@@ -35,14 +34,20 @@ __all__ = [
 if _sys.version_info < (3, 10):
     raise ImportError("openghg requires Python >= 3.10")
 
-v = get_versions()
+# Use importlib.metadata for version information at runtime
+try:
+    from importlib.metadata import version as _version
 
-__version__ = v.get("version")
-__branch__ = v.get("branch")
-__repository__ = v.get("repository")
-__revisionid__ = v.get("full-revisionid")
+    __version__ = _version("openghg")
+except Exception:
+    # Fallback version if package metadata is not available
+    __version__ = "unknown"
 
-del v, get_versions
+# These attributes are no longer available with the new versioning approach
+# Set to None for backward compatibility
+__branch__ = None
+__repository__ = None
+__revisionid__ = None
 
 # Start module level logging
 logger = logging.getLogger("openghg")
