@@ -14,7 +14,7 @@ dependencies:
   - git
   - flake8
   - pre-commit
-  - mypy==1.7.1
+  - mypy==1.10.0
   - tox>=4.24
 
   # Testing dependencies
