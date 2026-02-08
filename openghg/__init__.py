@@ -35,9 +35,9 @@ if _sys.version_info < (3, 10):
     raise ImportError("openghg requires Python >= 3.10")
 
 # Use importlib.metadata for version information at runtime
-try:
-    from importlib.metadata import version as _version, PackageNotFoundError
+from importlib.metadata import version as _version, PackageNotFoundError
 
+try:
     __version__ = _version("openghg")
 except PackageNotFoundError:
     # Fallback version if package metadata is not available
