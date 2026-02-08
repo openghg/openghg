@@ -7,7 +7,6 @@ from openghg.objectstore import get_readable_buckets
 from openghg.objectstore._objectstore import open_object_store
 from openghg.types import ObjectStoreError
 
-
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(level=logging.DEBUG)
 

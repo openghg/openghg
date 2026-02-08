@@ -140,7 +140,7 @@ def test_standardise_obs_openghg_dataset():
         force=True,
         store="user",
         update_mismatch="metadata",
-        tag=["direct_dataset"]
+        tag=["direct_dataset"],
     )
 
     results = filt(results)
@@ -356,6 +356,36 @@ def test_standardise_column():
 
     assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection"] == "land"
+
+
+def test_standardise_oco2_satellite_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for OCO2 satellite column data.
+    """
+    oco2_datapath = get_column_datapath(filename="oco2-spectrometer_oco2_20150131-336_co2-column.nc")
+
+    oco2_datapath_attrs = xr.open_dataset(oco2_datapath).attrs
+
+    results = standardise_column(
+        filepath=oco2_datapath,
+        species="co2",
+        platform="satellite",
+        obs_region="china",
+        satellite="oco2",
+        network="oco2",
+        instrument="oco2-spectrometer",
+        store="user",
+        tag="test_oco2_dataset",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    data = get_obs_column(species="co2", max_level=3, satellite="oco2")
+
+    assert data.metadata["obs_region"] == "china"
+    assert data.metadata["data_owner"] in oco2_datapath_attrs.get("contact", "").lower()
+    assert data.metadata["data_owner_email"] in oco2_datapath_attrs.get("contact", "").lower()
 
 
 def test_standardise_tccon_obs():
@@ -1052,7 +1082,9 @@ def test_standardise_agage_using_dataset():
     """
     Test standardisation of AGAGE data using dataset input.
     """
-    thd_dataset = xr.open_dataset(get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc"))
+    thd_dataset = xr.open_dataset(
+        get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    )
 
     results = standardise_surface(
         data=thd_dataset,
@@ -1096,7 +1128,9 @@ def test_standardise_co2_games_using_filepath():
 
     assert "co2" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN")
+    retrieved_data = get_obs_surface(
+        site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN"
+    )
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "surface-insitu"
@@ -1109,9 +1143,11 @@ def test_standardise_co2_games_using_dataset():
     Test standardisation of CO2-GAMES data using dataset input.
     """
     clear_test_stores()
-    co2_games_data = xr.open_dataset(get_surface_datapath(
-        filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
-    ))
+    co2_games_data = xr.open_dataset(
+        get_surface_datapath(
+            filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+        )
+    )
 
     results = standardise_surface(
         data=co2_games_data,
@@ -1124,7 +1160,9 @@ def test_standardise_co2_games_using_dataset():
 
     assert "co2" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN")
+    retrieved_data = get_obs_surface(
+        site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN"
+    )
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "surface-insitu"

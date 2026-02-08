@@ -1,3 +1,5 @@
+"""Utilities for managing encodings of Xarray Datasets."""
+
 from typing import Any
 from collections.abc import Iterable
 
@@ -10,12 +12,15 @@ def get_zarr_encoding(data_vars: Iterable, compressor: Any | None = None, filter
         compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
         filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
     Returns:
-        Dict: Dictionary of encoding settings for zarr store
+        dict: Dictionary of encoding settings for zarr store
     """
     if compressor is None:
         return {}
 
-    encoding = {"compressor": compressor}
+    encoding = {
+        "compressor": compressor,
+        "compressors": [compressor],
+    }  # Zarr v3 expects iterable of compressors
     if filters is not None:
         encoding["filters"] = filters
 

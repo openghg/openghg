@@ -45,7 +45,10 @@ won't affect your use of OpenGHG outside of this tutorial.
     use_tutorial_store()
 
 1. Adding and standardising data
---------------------------------
+----------------------------------------
+
+Adding and standardising surface data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
     Outside of this tutorial, if you have write access to multiple object stores you
@@ -53,7 +56,7 @@ won't affect your use of OpenGHG outside of this tutorial.
     the ``store`` argument of the standardise functions.
 
 Source formats
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 OpenGHG can process and store several source formats in the object store,
 including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
@@ -99,7 +102,7 @@ Now we'll find all data with source format ``"CRDS"``.
     summary[summary["Source format"] == "CRDS"]
 
 DECC network
-~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 We will start by adding data to the object store from Tacolneston, which is a *surface site*
 in the DECC network. (Data at surface sites is measured in-situ.)
@@ -145,7 +148,7 @@ any errors have been encountered when trying to access and standardise
 this data.
 
 AGAGE data
-~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 OpenGHG can also process data from the `AGAGE network <https://agage.mit.edu/>`_.
 
@@ -231,7 +234,7 @@ site, so if scales or other factors change multiple versions may be
 stored for easy future comparison.
 
 Other keywords
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 When adding data in this way there are other keywords which can be used to
 distinguish between different data sets as required including:
@@ -246,7 +249,7 @@ See the `standardise_surface` documentation for a full list of inputs.
 
 
 Informational keywords
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to the keywords demonstrated for adding data and described above which are used to distinguish
 between different data sets being stored, the following informational details can also be added to help describe the data.
@@ -305,7 +308,7 @@ Note that for both `info_metadata` and `tag` that these options are available fo
 observations).
 
 Multiple stores
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 If you have write access to more than one object store you'll need to pass in the name of that store
 to the ``store`` argument.
@@ -320,6 +323,49 @@ created when we run ``openghg --quickstart``.
 
 The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
 to more than one store.
+
+Adding and standardising column data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similar to the surface data, we can also add column data to the object store.
+The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+
+The input formats supported for standardise_column are:
+
+    - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
+    - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>` to learn about schema for different data types.
+
+The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
+
+To demonstrate this we will retrieve some example data (pre-processed methane column data from the GOSAT satellite)
+
+.. jupyter-execute::
+
+    satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
+
+    satellite_data = retrieve_example_data(url=satellite_data_url)
+
+Now we add this data to the object store using ``standardise_column``, passing the below arguments:
+
+.. note::
+    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
+    (Inversions check the platform value to determine whether the data is satellite or site-column data)
+
+.. jupyter-execute::
+
+    from openghg.standardise import standardise_column
+
+    standardise_column(
+                    filepath=satellite_data[-1],
+                    species="ch4",
+                    platform="satellite",
+                    satellite="gosat",
+                    obs_region="brazil",
+                    network="gosat",
+                )
+
+.. note::
+    For this GOSAT data we have selected measurements points over Brazil only. To describe this we have used the keyword obs_region="brazil". For our ancillary data (:ref:`Adding ancillary spatial data <Adding_ancillary_data>`) we show how the domain keyword is used to describe a specific area covered by our 2D lat-lon maps. If the observation region we've selected from our satellite data corresponds exactly to a known domain we can also use this term instead of obs_region when adding the data.
 
 Adding In-memory dataset to the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -349,14 +395,20 @@ This will standardise the data and add it to the object store just as if we had 
     from openghg.standardise import standardise_surface
 
     decc_results = standardise_surface(
-        dataset=data,
+        data=data,
         source_format="openghg",
         site="TAC",
         network="DECC",
         instrument="picarro",
-        sampling_period="1h"
+        sampling_period="1h",
+        tag="in-memory-dataset",
     )
 
+The details of the added can be viewed in the returned results dictionary.
+
+.. jupyter-execute::
+
+    decc_results
 
 2. Searching for data
 ---------------------
@@ -454,13 +506,13 @@ To access the surface data we have added so far we can use the
 species and inlet height to retrieve our data. Using `get_*` functions will only allow one set of data to be returned and will give details if this is not the case.
 
 In this case we want to extract the carbon dioxide (“co2”) data from the
-Tacolneston data (“TAC”) site measured at the “185m” inlet:
+Tacolneston data (“TAC”) site measured at the “185m” inlet with tag as "project1":
 
 .. jupyter-execute::
 
     from openghg.retrieve import get_obs_surface
 
-    co2_data = get_obs_surface(site="tac", species="co2", inlet="185m")
+    co2_data = get_obs_surface(site="tac", species="co2", inlet="185m", tag="project1")
 
 If we view our returned ``obs_data`` variable this will contain:
 
@@ -495,6 +547,27 @@ the ``ObsData`` object.
 You can also pass any of ``title``, ``xlabel``, ``ylabel`` and ``units``
 to the ``plot_timeseries`` function to modify the labels.
 
+Retrieving specific data versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As mentioned in the :ref:`note-on-datasources` section, Datasources can handle multiple versions of data.
+By default, ``get_obs_surface`` and other ``get_*`` functions retrieve the latest version of the data.
+You can check which version is being retrieved by looking at the metadata:
+
+.. jupyter-execute::
+
+    co2_data.metadata["latest_version"]
+
+If you want to retrieve a specific version instead of the latest, you can use the ``version`` parameter.
+For example, to retrieve version 1 of the data:
+
+.. jupyter-execute::
+
+    co2_data_v1 = get_obs_surface(site="tac", species="co2", inlet="185m", tag="project1", version="v1")
+    co2_data_v1.metadata["latest_version"]
+
+This allows you to compare different versions of data or analyze how data has changed over time.
+
 Unit conversion
 ^^^^^^^^^^^^^^^^
 
@@ -507,7 +580,7 @@ For example, to convert the mole fraction from the default unit
 .. jupyter-execute::
 
     co2_ppb = get_obs_surface(
-        site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}
+        site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, tag="project1"
     )
 
 .. jupyter-execute::
@@ -538,7 +611,7 @@ If you prefer to keep the data **quantified** (i.e., retaining the Pint unit obj
 
 .. jupyter-execute::
 
-    co2_ppb_quantified = get_obs_surface(site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, is_dequantified=False)
+    co2_ppb_quantified = get_obs_surface(site="tac", species="co2", inlet="185m", target_units={"mf": "ppb"}, is_dequantified=False, tag="project1")
 
 You can then access the Pint units directly:
 

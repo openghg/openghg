@@ -1,0 +1,42 @@
+name: Build Documentation
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install openghg
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install .
+
+      - name: Setup default config
+        run: openghg --default-config
+
+      - name: Install pandoc and requirements
+        run: |
+          sudo apt-get install -yq pandoc
+          pip install -r requirements-doc.txt
+
+      - name: Build documentation
+        run: |
+          cd doc
+          make
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: documentation-html
+          path: doc/build/html

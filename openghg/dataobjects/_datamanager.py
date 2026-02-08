@@ -284,7 +284,8 @@ class DataManager:
             if v == "latest":
                 v = d._latest_version
 
-            zs = d._store._stores[v]  # zarr store for specified version
+            d._store._vzds.checkout_version(v)
+            zs = d._store._vzds.store  # zarr store for specified version
             group = zarr.open_group(zs)
 
             # update global

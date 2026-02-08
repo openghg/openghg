@@ -1,3 +1,5 @@
+.. _Adding_ancillary_data:
+
 Adding ancillary spatial data
 =============================
 
@@ -5,9 +7,9 @@ This tutorial demonstrates how to add ancillary spatial data to the
 OpenGHG store. These are split into several data types which currently
 include:
 
--  “footprints”: regional outputs from an LPDM model [#f3]_ (e.g. NAME).
+-  “footprints”: regional outputs from an LPDM model [#f4]_ (e.g. NAME).
    The LPDM set up for these outputs is based on e.g. `Lunt et al. 2016 <https://gmd.copernicus.org/articles/9/3213/2016/>`
--  “flux”: estimates of species flux/emissions [#f2]_ within a region
+-  “flux”: estimates of species flux/emissions [#f3]_ within a region
 -  “boundary_conditions”: vertical curtains at the boundary of a
    regional domain
 -  “eulerian_model”: Global CTM output (e.g. GEOSChem) [#f1]_
@@ -53,6 +55,7 @@ the ``openghg.standardise`` sub module. This includes:
 -  ``standardise_flux``
 -  ``standardise_bc``
 -  ``standardise_eulerian`` [#f1]_
+-  ``standardise_site_met`` [#f2]_
 
 For all data types, a set of keywords should be supplied in addition
 to the path to the data file.
@@ -105,7 +108,7 @@ You can also add new domain labels and definitions as needed.
 Footprints
 ^^^^^^^^^^
 
-To standardise [#f4]_ footprint data, we pass the following arguments to
+To standardise [#f5]_ footprint data, we pass the following arguments to
 ``standardise_footprint``:
 
 - ``filepath``: path to footprint file (this is the first positional argument)
@@ -244,7 +247,7 @@ Flux / Emissions
 Flux/emissions data typically describes "prior guesses" for emissions
 of substances, often broken down by region and source of emission.
 
-To  standardise flux/emissions data [#f2]_ we pass the following arguments
+To  standardise flux/emissions data [#f3]_ we pass the following arguments
 to ``standardise_flux``:
 
 - ``filepath``: path to footprint file (this is the first positional argument)
@@ -291,7 +294,7 @@ to ``standardise_bc``:
 - ``bc_input``: a keyword descriptor for the boundary conditions inputs used
 
 For the example below, the boundary conditions are for methane (“ch4”)
-at the edges of the “EUROPE” domain. They were created using the `CAMS climatology product <https://www.ecmwf.int/en/newsletter/163/news/ecmwf-helps-users-drive-regional-chemistry-model-cams-data>`_ [#f5]_
+at the edges of the “EUROPE” domain. They were created using the `CAMS climatology product <https://www.ecmwf.int/en/newsletter/163/news/ecmwf-helps-users-drive-regional-chemistry-model-cams-data>`_ [#f6]_
 
 .. code:: ipython3
 
@@ -590,7 +593,7 @@ For each of the data types seen above, there is an associated object from the
 -  ``BoundaryConditions``
 -  ``EulerianModel`` [#f1]_
 
-To get information about the expected format [#f6]_ for a data type,
+To get information about the expected format [#f7]_ for a data type,
 use the ``.schema()`` method for the associated object.
 
 Input format for flux data
@@ -736,16 +739,20 @@ tutorial object store using the ``clear_tutorial_store`` function.
 
 .. rubric:: Footnotes
 
-.. [#f3] LPDM means *Lagrangrian Particle Dispersion Model*.
+.. [#f4] LPDM means *Lagrangrian Particle Dispersion Model*.
 
-.. [#f2] "Flux" includes emissions (and depositions) of substances from (and to) a surface.
+.. [#f3] "Flux" includes emissions (and depositions) of substances from (and to) a surface.
          However, we use "flux" and "emissions" interchangeably.
 
 .. [#f1] ``eulerian_model`` isn't available yet.
 
-.. [#f4] Recall, *standardising* is the process that adds data and metadata from
+.. [#f2] Rather than using ``standardise_site_met`` directly, ``site_met`` data is usually added
+         through the `openghg.retrieve.met.retrieve_site_met` function which downloads the meteorlogical data
+         for a given site position from the Copernicus Climate Data Store and saves this via the ``standardise_site_met`` function.
+
+.. [#f5] Recall, *standardising* is the process that adds data and metadata from
          raw data files to the object store.
 
-.. [#f5] CAMS means *Copernicus Atmosphere Monitoring Service*
+.. [#f6] CAMS means *Copernicus Atmosphere Monitoring Service*
 
-.. [#f6] "Expected format" and "OpenGHG format" are both used in the docs.
+.. [#f7] "Expected format" and "OpenGHG format" are both used in the docs.

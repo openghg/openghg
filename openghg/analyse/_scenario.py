@@ -72,7 +72,6 @@ from ._alignment import combine_datasets, resample_obs_and_other
 from ._modelled_baseline import baseline_sensitivities
 from ._utils import match_dataset_dims, stack_datasets
 
-
 __all__ = ["ModelScenario"]
 
 
@@ -316,7 +315,7 @@ class ModelScenario:
         num_checks = len(keywords)
         for i, keyword_set in enumerate(keywords):
             try:
-                data = get_fn(**keyword_set)  # type:ignore
+                data = get_fn(**keyword_set)  # type: ignore
             except (SearchError, AttributeError):
                 num = i + 1
                 if num == num_checks:
@@ -325,7 +324,7 @@ class ModelScenario:
                     for key, value in keyword_set.items():
                         logger.info(f" {key}: {value}")
                     if search_fn is not None:
-                        data_search = search_fn(**keyword_set)  # type:ignore
+                        data_search = search_fn(**keyword_set)  # type: ignore
                         logger.info("---- Search results ---")
                         logger.info(f"Number of results returned: {len(data_search)}")
                         logger.info(data_search.results)

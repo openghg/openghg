@@ -1,13 +1,15 @@
 from datetime import date
 import logging
+from math import isnan
+import re
+
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
 
-import re
-
 from openghg.types import TimePeriod
+from ._util import pairwise
 
 __all__ = [
     "timestamp_tzaware",
@@ -38,6 +40,8 @@ __all__ = [
     "find_duplicate_timestamps",
     "in_daterange",
     "evaluate_sampling_period",
+    "get_representative_daterange_str",
+    "get_dataset_daterange",
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
@@ -51,8 +55,6 @@ def find_duplicate_timestamps(data: Dataset | DataFrame) -> list:
     Returns:
         list: A list of duplicates
     """
-    from numpy import unique
-
     try:
         time_data = data.time
     except AttributeError:
@@ -61,7 +63,7 @@ def find_duplicate_timestamps(data: Dataset | DataFrame) -> list:
         except AttributeError:
             raise ValueError("Unable to read time data")
 
-    uniq, count = unique(time_data, return_counts=True)
+    uniq, count = np.unique(time_data, return_counts=True)
     dupes = uniq[count > 1]
 
     return list(dupes)
@@ -92,8 +94,6 @@ def timestamp_now() -> Timestamp:
     Returns:
         pandas.Timestamp: Timestamp at current time
     """
-    from pandas import Timestamp
-
     return timestamp_tzaware(Timestamp.now())
 
 
@@ -104,8 +104,6 @@ def timestamp_epoch() -> Timestamp:
     Returns:
         pandas.Timestamp: Timestamp object at epoch
     """
-    from pandas import Timestamp
-
     return timestamp_tzaware(Timestamp("1970-1-1 00:00:00"))
 
 
@@ -119,8 +117,6 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     Returns:
         bool: True if daterange included
     """
-    from pandas import Timestamp
-
     split_a = daterange_a.split("_")
     split_b = daterange_b.split("_")
 
@@ -144,15 +140,13 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: str | None = "D") -
     Returns:
         pandas.DatetimeIndex
     """
-    from pandas import date_range
-
     if start > end:
         raise ValueError("Start date is after end date")
 
     start = timestamp_tzaware(start)
     end = timestamp_tzaware(end)
 
-    return date_range(start=start, end=end, freq=freq)
+    return pd.date_range(start=start, end=end, freq=freq)
 
 
 def create_daterange_str(start: str | Timestamp, end: str | Timestamp) -> str:
@@ -187,15 +181,13 @@ def daterange_from_str(daterange_str: str, freq: str | None = "D") -> DatetimeIn
     Returns:
         pandas.DatetimeIndex: DatetimeIndex covering daterange
     """
-    from pandas import date_range
-
     split = daterange_str.split("_")
 
     # Align the seconds
     start = timestamp_tzaware(split[0])
     end = timestamp_tzaware(split[1])
 
-    return date_range(start=start, end=end, freq=freq)
+    return pd.date_range(start=start, end=end, freq=freq)
 
 
 def daterange_to_str(daterange: DatetimeIndex) -> str:
@@ -289,14 +281,8 @@ def valid_daterange(daterange: str) -> bool:
     Returns:
         bool: True if valid
     """
-    from openghg.util import split_daterange_str
-
     start, end = split_daterange_str(daterange)
-
-    if start >= end:
-        return False
-
-    return True
+    return start < end
 
 
 def closest_daterange(to_compare: str, dateranges: str | list[str]) -> str:
@@ -308,9 +294,6 @@ def closest_daterange(to_compare: str, dateranges: str | list[str]) -> str:
     Returns:
         str: Daterange from dateranges that's the closest in time to to_compare
     """
-    from openghg.util import split_daterange_str
-    from pandas import Timedelta
-
     min_start = Timedelta("3650days")
     min_end = Timedelta("3650days")
 
@@ -371,9 +354,6 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     Returns:
         list: List of dateranges
     """
-    from openghg.util import pairwise
-    from pandas import Timedelta
-
     if not dateranges:
         return []
 
@@ -456,8 +436,6 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
     Returns:
         str: Trimmed daterange
     """
-    from pandas import Timedelta
-
     if not daterange_overlap(daterange_a=to_trim, daterange_b=overlapping):
         raise ValueError(f"Dateranges {to_trim} and {overlapping} do not overlap")
 
@@ -575,11 +553,9 @@ def check_date(date: str) -> str:
     Returns:
         str: Returns NA if not a date, otherwise date string
     """
-    from pandas import Timestamp, isnull
-
     try:
         d = Timestamp(date)
-        if isnull(d):
+        if pd.isna(d):
             return "NA"
 
         return date
@@ -597,8 +573,6 @@ def check_nan(data: int | float) -> str | float | int:
     Returns:
         str, float, int: Returns NA if not a number else number
     """
-    from math import isnan
-
     if isnan(data):
         return "NA"
     else:
@@ -689,8 +663,6 @@ def parse_period(period: str | tuple) -> TimePeriod:
         >>> parse_period((1, "minute"))
             TimePeriod(1, "minutes")
     """
-    import re
-
     if isinstance(period, tuple):
         if len(period) != 2:
             raise ValueError(
@@ -930,8 +902,6 @@ def in_daterange(
     Returns:
         bool: True if overlap
     """
-    from openghg.util import timestamp_tzaware
-
     start_a = timestamp_tzaware(start_a)
     end_a = timestamp_tzaware(end_a)
 
@@ -955,8 +925,6 @@ def dates_overlap(
     Returns:
         bool: True if overlap
     """
-    from openghg.util import timestamp_tzaware
-
     start_a = timestamp_tzaware(start_a)
     end_a = timestamp_tzaware(end_a)
 
@@ -1034,3 +1002,60 @@ def evaluate_sampling_period(sampling_period: Timedelta | str | None) -> str | N
         # TODO: May want to add check for NaT or NaN
 
     return sampling_period
+
+
+def get_dataset_daterange(dataset: Dataset) -> tuple[Timestamp, Timestamp]:
+    """Get the daterange for the passed Dataset
+
+    Args:
+        dataset (xarray.DataSet): Dataset to parse
+    Returns:
+        tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
+
+    """
+    try:
+        start = timestamp_tzaware(dataset.time.min().values)
+        end = timestamp_tzaware(dataset.time.max().values)
+
+        return start, end
+    except AttributeError:
+        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+
+
+def get_representative_daterange_str(dataset: Dataset, period: str | None = None) -> str:
+    """Get representative daterange which incorporates any period the data covers.
+
+    A representative daterange covers the start - end time + any additional period that is covered
+    by each time point. The start and end times can be extracted from the input dataset and
+    any supplied period used to extend the end of the date range to cover the representative period.
+
+    If there is only one time point (i.e. start and end datetimes are the same) and no period is
+    supplied 1 additional second will be added to ensure these values are not identical.
+
+    Args:
+        dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+        period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+            creation of a pandas Timedelta or DataOffset object.
+
+    Returns:
+        str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+    """
+
+    # Extract start and end dates from grouped data
+    start_date, end_date = get_dataset_daterange(dataset)
+
+    # If period is defined add this to the end date
+    # This ensure start-end range includes time period covered by data
+    if period is not None:
+        period_td = relative_time_offset(period=period)
+        end_date = (
+            end_date + period_td - Timedelta(seconds=1)
+        )  # Subtract 1 second to make this exclusive end.
+
+    # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+    if start_date == end_date:
+        end_date += Timedelta(seconds=1)
+
+    daterange_str = create_daterange_str(start=start_date, end=end_date)
+
+    return daterange_str

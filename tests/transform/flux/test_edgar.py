@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from helpers import get_flux_datapath
+
 from openghg.transform.flux import parse_edgar
 from openghg.transform.flux._edgar import _extract_file_info
 
@@ -67,7 +68,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
         "domain": default_domain,
         "source": source,
         "database": "EDGAR",
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -125,7 +126,7 @@ def test_parse_edgar_domain():
         "domain": domain,
         "source": "anthro",
         "database": "EDGAR",
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",

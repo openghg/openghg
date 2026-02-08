@@ -1,5 +1,7 @@
 import pytest
-from openghg.util import extract_height_name, format_inlet
+import numpy as np
+
+from openghg.util import extract_height_name, format_inlet, extract_inlet_value
 
 
 @pytest.mark.parametrize(
@@ -60,6 +62,19 @@ def test_format_inlet_special():
 
     output = format_inlet(special_keyword, special_keywords=[special_keyword])
     assert output == special_keyword
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [("10m", 10.0), ("12.2m", 12.2), ("123magl", 123.0), ("13.3magl", 13.3), ("123", 123)],
+)
+def test_extract_inlet_value(test_input, expected):
+    """
+    Test extract_inlet_value to make sure the numerical value of a valid inlet can be
+    extracted.
+    """
+    output = extract_inlet_value(test_input)
+    np.testing.assert_allclose(output, expected)
 
 
 @pytest.mark.parametrize(

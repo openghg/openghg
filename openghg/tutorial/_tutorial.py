@@ -263,7 +263,6 @@ def populate_satellite_footprint() -> None:
     satellite_data_url = "https://github.com/openghg/example_data/raw/main/footprint/GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc.tar.gz"
 
     satellite_data = retrieve_example_data(url=satellite_data_url)
-    print(satellite_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
@@ -293,7 +292,7 @@ def populate_column_data() -> None:
     satellite_data_url = "https://github.com/openghg/example_data/raw/main/column/gosat-fts_gosat_20160101_ch4-column.nc.tar.gz"
 
     satellite_data = retrieve_example_data(url=satellite_data_url)
-    print(satellite_data)
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
