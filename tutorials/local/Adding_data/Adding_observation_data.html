@@ -8,27 +8,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.18.0+0.gbf94eb6.dirty documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.18.0 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
@@ -36,14 +34,13 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=2f4454f0"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -53,6 +50,8 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Adding_observation_data';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -61,8 +60,7 @@
     <link rel="prev" title="Tutorials" href="../../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
-    <meta name="docbuild:last-update" content="Jan 30, 2026"/>
+    <meta name="docbuild:last-update" content="Feb 09, 2026"/>
   </head>
   
   
@@ -70,16 +68,31 @@
 
   
   
-  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -87,6 +100,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -94,27 +108,20 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
-
-  <div class="pst-async-banner-revealer d-none">
-  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
-</div>
-
+</form></div>
+  </div>
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
     <span class="fa-solid fa-bars"></span>
-  </button>
+  </label>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
-  
-    
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -128,8 +135,8 @@
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0+0.gbf94eb6.dirty documentation - Home"/>
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.18.0+0.gbf94eb6.dirty documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.18.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -141,43 +148,43 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav>
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../install.html">
-    Installation
-  </a>
-</li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
 
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../index.html">
-    Tutorials
-  </a>
-</li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
 
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/index.html">
-    User API
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-    Development
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-    Developer API
-  </a>
-</li>
-
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
       
@@ -189,9 +196,13 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
         </div>
       
       
@@ -202,16 +213,20 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
     </div>
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
-    </button>
+    </label>
   
 </div>
 
@@ -223,8 +238,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -233,49 +247,46 @@
     
       <div class="sidebar-header-items__center">
         
-          
-          
-            <div class="navbar-item">
-<nav>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../install.html">
-    Installation
-  </a>
-</li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
 
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../index.html">
-    Tutorials
-  </a>
-</li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
 
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/index.html">
-    User API
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-    Development
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-    Developer API
-  </a>
-</li>
-
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
-          
         
       </div>
     
@@ -324,32 +335,29 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main" role="main">
+      <main id="main-content" class="bd-main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article d-print-none">
+              <div class="bd-header-article">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-<nav aria-label="Breadcrumb" class="d-print-none">
+
+
+<nav aria-label="Breadcrumb">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -360,7 +368,7 @@
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Adding observation data</span></li>
+    <li class="breadcrumb-item active" aria-current="page">Adding...</li>
   </ul>
 </nav>
 </div>
@@ -827,7 +835,7 @@ in the DECC network. (Data at surface sites is measured in-situ.)</p>
 </div>
 <div class="cell_output docutils container">
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "657c01c68c5d48e0aafcb9648617298e"}
+{"version_major": 2, "version_minor": 0, "model_id": "9128def6582746258154427d936315c6"}
 </script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
 </div></div>
 </div>
@@ -850,18 +858,7 @@ following arguments:</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;703255d9-207b-436d-804f-eb6cbf5ddc16&#39;,
-  &#39;new&#39;: True,
-  &#39;site&#39;: &#39;tac&#39;,
-  &#39;instrument&#39;: &#39;picarro&#39;,
-  &#39;sampling_period&#39;: &#39;3600.0&#39;,
-  &#39;inlet&#39;: &#39;54m&#39;,
-  &#39;network&#39;: &#39;decc&#39;,
-  &#39;species&#39;: &#39;ch4&#39;,
-  &#39;data_source&#39;: &#39;internal&#39;,
-  &#39;source_format&#39;: &#39;CRDS&#39;,
-  &#39;file&#39;: &#39;tac.picarro.hourly.54m.dat&#39;},
- {&#39;uuid&#39;: &#39;f2330eac-e4aa-440a-8854-4377d6dfa067&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;b45f328a-7d2d-4cd7-b79c-49dd04351fda&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -872,18 +869,18 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.54m.dat&#39;},
- {&#39;uuid&#39;: &#39;a2816505-d958-4c0d-96f6-e58068193316&#39;,
+ {&#39;uuid&#39;: &#39;f5f4ac25-2ed8-4b32-ada5-f4ca0df065c6&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
   &#39;sampling_period&#39;: &#39;3600.0&#39;,
-  &#39;inlet&#39;: &#39;100m&#39;,
+  &#39;inlet&#39;: &#39;54m&#39;,
   &#39;network&#39;: &#39;decc&#39;,
   &#39;species&#39;: &#39;ch4&#39;,
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
-  &#39;file&#39;: &#39;tac.picarro.hourly.100m.dat&#39;},
- {&#39;uuid&#39;: &#39;fe88143a-2b84-4dce-b4c2-da66025d5fed&#39;,
+  &#39;file&#39;: &#39;tac.picarro.hourly.54m.dat&#39;},
+ {&#39;uuid&#39;: &#39;0c30320c-48bf-426c-9bdf-cb14625cd2c0&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -894,25 +891,36 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.100m.dat&#39;},
- {&#39;uuid&#39;: &#39;5f7444e4-69c1-416b-b389-6a744eaa11c6&#39;,
+ {&#39;uuid&#39;: &#39;344157d2-f4a3-43bf-b2b2-5ff5a56c7c0d&#39;,
+  &#39;new&#39;: True,
+  &#39;site&#39;: &#39;tac&#39;,
+  &#39;instrument&#39;: &#39;picarro&#39;,
+  &#39;sampling_period&#39;: &#39;3600.0&#39;,
+  &#39;inlet&#39;: &#39;100m&#39;,
+  &#39;network&#39;: &#39;decc&#39;,
+  &#39;species&#39;: &#39;ch4&#39;,
+  &#39;data_source&#39;: &#39;internal&#39;,
+  &#39;source_format&#39;: &#39;CRDS&#39;,
+  &#39;file&#39;: &#39;tac.picarro.hourly.100m.dat&#39;},
+ {&#39;uuid&#39;: &#39;f2880934-7c80-4a26-9f9f-b97e0d83b55c&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
   &#39;sampling_period&#39;: &#39;3600.0&#39;,
   &#39;inlet&#39;: &#39;185m&#39;,
   &#39;network&#39;: &#39;decc&#39;,
-  &#39;species&#39;: &#39;ch4&#39;,
+  &#39;species&#39;: &#39;co2&#39;,
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.185m.dat&#39;},
- {&#39;uuid&#39;: &#39;947374ee-05aa-4a7c-af8f-57acce6ae553&#39;,
+ {&#39;uuid&#39;: &#39;c5333283-a4b8-49c5-8a20-f2249496f677&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
   &#39;sampling_period&#39;: &#39;3600.0&#39;,
   &#39;inlet&#39;: &#39;185m&#39;,
   &#39;network&#39;: &#39;decc&#39;,
-  &#39;species&#39;: &#39;co2&#39;,
+  &#39;species&#39;: &#39;ch4&#39;,
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.185m.dat&#39;}]
@@ -947,7 +955,7 @@ to use this form of input file, we create a tuple with the data filename and the
 </div>
 <div class="cell_output docutils container">
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "abd52e1efa14486eaa8a02a99e2f2ef4"}
+{"version_major": 2, "version_minor": 0, "model_id": "333a6aba71394440abf6bedb2839c3d1"}
 </script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
 </div></div>
 </div>
@@ -989,7 +997,7 @@ data by including the right arguments:</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;e9d2d8de-9e59-4c3c-8a49-c585dd7f6cf2&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;56293543-6a64-48ee-a984-890249616fde&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1000,7 +1008,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;fbe6bc5f-304c-43b8-871a-01308c4f4d54&#39;,
+ {&#39;uuid&#39;: &#39;19576234-8790-40ec-85fa-c4672edcdf02&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1011,7 +1019,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;438457d7-8f43-4f64-a914-9ebf29bd8725&#39;,
+ {&#39;uuid&#39;: &#39;a662fe30-bd1d-4aab-bef3-4f534de5e50a&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1022,7 +1030,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;3e1ccd62-ab4d-4490-8793-2c65a36bd550&#39;,
+ {&#39;uuid&#39;: &#39;5119ddeb-3669-4d59-94a1-c2599491c1f6&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1033,7 +1041,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;5584bda8-94b4-4253-92d2-17627849a0a2&#39;,
+ {&#39;uuid&#39;: &#39;3686b8a5-9e4e-4b79-b6bd-ccf77b92df86&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1044,7 +1052,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;6179476c-ca2d-4050-a379-8af153edd425&#39;,
+ {&#39;uuid&#39;: &#39;59f1a866-5170-408d-aec1-f9088d2ecc17&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1055,7 +1063,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;0687789a-fcf9-4ff4-9844-1226d0b3abb0&#39;,
+ {&#39;uuid&#39;: &#39;210f3185-5f5d-43ac-a894-5ea4b9ca08a9&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1066,7 +1074,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;d5d032fa-a043-469f-8cf1-318395b9f82d&#39;,
+ {&#39;uuid&#39;: &#39;cc010443-39d2-4508-aeb2-4effc0902f4e&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1077,7 +1085,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;0d4f1cb1-9b9a-4861-bc22-6c2adf2c1ab7&#39;,
+ {&#39;uuid&#39;: &#39;e400b344-475f-4b0e-8cff-e2754ef436e5&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1088,7 +1096,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;a43738b4-23b7-4046-b1e5-59e26a3d965f&#39;,
+ {&#39;uuid&#39;: &#39;f4f3d06c-6f34-48bb-b76d-498f2c6251bd&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1099,7 +1107,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;4ac27238-4e49-453d-b3c3-72929744e0ee&#39;,
+ {&#39;uuid&#39;: &#39;1b0e2006-7ce3-4445-b98a-4bd80383c893&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1252,7 +1260,7 @@ The column data can comprise of 2 platforms - “site-colum” and “satellite�
 </div>
 <div class="cell_output docutils container">
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "0606a383a6874384a7451d9e6a67c224"}
+{"version_major": 2, "version_minor": 0, "model_id": "303a329515494a1cb17606a897fe395c"}
 </script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
 </div></div>
 </div>
@@ -1278,7 +1286,7 @@ The column data can comprise of 2 platforms - “site-colum” and “satellite�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;51bff1d1-2e1f-4928-a105-2683d0c529dd&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;bbaa2425-3bbb-4387-9412-35feb0f6b73b&#39;,
   &#39;new&#39;: True,
   &#39;satellite&#39;: &#39;gosat&#39;,
   &#39;species&#39;: &#39;ch4&#39;,
@@ -1315,7 +1323,7 @@ For the appropriate <em class="xref py py-obj">source_format</em> inputs, the <c
 </div>
 <div class="cell_output docutils container">
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "539dcf7a78864f95a8bb60d12b4a9801"}
+{"version_major": 2, "version_minor": 0, "model_id": "493d3c5afa9740c58b5318c3401347b4"}
 </script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
 </div></div>
 </div>
@@ -1348,7 +1356,7 @@ This will standardise the data and add it to the object store just as if we had 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;a5d8f4b7-fe3f-4e6f-bd84-9a82a561bea5&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;ba98ee99-4634-48e3-b3e0-79206d2b3f2f&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;species&#39;: &#39;co2&#39;,
@@ -1438,11 +1446,11 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>cfc-11</td>
       <td>...</td>
       <td>gcwerks</td>
-      <td>3e1ccd62-ab4d-4490-8793-2c65a36bd550</td>
+      <td>5119ddeb-3669-4d59-94a1-c2599491c1f6</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.461399+00:00</td>
+      <td>2026-02-09 22:37:21.941505+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -1514,16 +1522,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>8</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>703255d9-207b-436d-804f-eb6cbf5ddc16</td>
+      <td>b45f328a-7d2d-4cd7-b79c-49dd04351fda</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.530946+00:00</td>
+      <td>2026-02-09 22:37:21.016156+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
@@ -1538,16 +1546,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>8</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>f2330eac-e4aa-440a-8854-4377d6dfa067</td>
+      <td>f5f4ac25-2ed8-4b32-ada5-f4ca0df065c6</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.558299+00:00</td>
+      <td>2026-02-09 22:37:21.045710+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
@@ -1562,16 +1570,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>9</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>a2816505-d958-4c0d-96f6-e58068193316</td>
+      <td>0c30320c-48bf-426c-9bdf-cb14625cd2c0</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.789830+00:00</td>
+      <td>2026-02-09 22:37:21.277420+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
@@ -1586,16 +1594,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>9</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>fe88143a-2b84-4dce-b4c2-da66025d5fed</td>
+      <td>344157d2-f4a3-43bf-b2b2-5ff5a56c7c0d</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.816693+00:00</td>
+      <td>2026-02-09 22:37:21.304432+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
@@ -1610,16 +1618,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>10</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>5f7444e4-69c1-416b-b389-6a744eaa11c6</td>
+      <td>f2880934-7c80-4a26-9f9f-b97e0d83b55c</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.031477+00:00</td>
+      <td>2026-02-09 22:37:21.511701+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
@@ -1634,16 +1642,16 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>air</td>
       <td>10</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>947374ee-05aa-4a7c-af8f-57acce6ae553</td>
+      <td>c5333283-a4b8-49c5-8a20-f2249496f677</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.056617+00:00</td>
+      <td>2026-02-09 22:37:21.540172+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
@@ -1663,11 +1671,11 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>NaN</td>
       <td>...</td>
       <td>openghg</td>
-      <td>a5d8f4b7-fe3f-4e6f-bd84-9a82a561bea5</td>
+      <td>ba98ee99-4634-48e3-b3e0-79206d2b3f2f</td>
       <td>[in-memory-dataset]</td>
       <td>3600s</td>
       <td>v1</td>
-      <td>2026-01-30 12:56:16.477348+00:00</td>
+      <td>2026-02-09 22:37:23.200116+00:00</td>
       <td>2013-01-31 00:05:00+00:00</td>
       <td>2022-09-29 12:44:59+00:00</td>
       <td>{'v1': ['2013-01-31-00:05:00+00:00_2022-09-29-...</td>
@@ -1747,14 +1755,14 @@ using this keyword:</p>
       <td>air</td>
       <td>8</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.530946+00:00</td>
+      <td>2026-02-09 22:37:21.016156+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
@@ -1771,14 +1779,14 @@ using this keyword:</p>
       <td>air</td>
       <td>8</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.558299+00:00</td>
+      <td>2026-02-09 22:37:21.045710+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
@@ -1795,14 +1803,14 @@ using this keyword:</p>
       <td>air</td>
       <td>9</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.789830+00:00</td>
+      <td>2026-02-09 22:37:21.277420+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
@@ -1819,14 +1827,14 @@ using this keyword:</p>
       <td>air</td>
       <td>9</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.816693+00:00</td>
+      <td>2026-02-09 22:37:21.304432+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
@@ -1843,14 +1851,14 @@ using this keyword:</p>
       <td>air</td>
       <td>10</td>
       <td>decc</td>
-      <td>ch4</td>
-      <td>wmo-x2004a</td>
+      <td>co2</td>
+      <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.031477+00:00</td>
+      <td>2026-02-09 22:37:21.511701+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
@@ -1867,14 +1875,14 @@ using this keyword:</p>
       <td>air</td>
       <td>10</td>
       <td>decc</td>
-      <td>co2</td>
-      <td>wmo-x2019</td>
+      <td>ch4</td>
+      <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.056617+00:00</td>
+      <td>2026-02-09 22:37:21.540172+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
@@ -1898,7 +1906,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.411247+00:00</td>
+      <td>2026-02-09 22:37:21.892480+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -1922,7 +1930,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.428227+00:00</td>
+      <td>2026-02-09 22:37:21.909067+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -1946,7 +1954,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.444980+00:00</td>
+      <td>2026-02-09 22:37:21.925189+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -1970,7 +1978,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.461399+00:00</td>
+      <td>2026-02-09 22:37:21.941505+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -1994,7 +2002,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.477822+00:00</td>
+      <td>2026-02-09 22:37:21.957580+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2018,7 +2026,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.494233+00:00</td>
+      <td>2026-02-09 22:37:21.973783+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2042,7 +2050,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.510872+00:00</td>
+      <td>2026-02-09 22:37:21.992381+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2066,7 +2074,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.527197+00:00</td>
+      <td>2026-02-09 22:37:22.008713+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2090,7 +2098,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.543258+00:00</td>
+      <td>2026-02-09 22:37:22.024495+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-27 00:02:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-27-...</td>
@@ -2114,7 +2122,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.559634+00:00</td>
+      <td>2026-02-09 22:37:22.040612+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2138,7 +2146,7 @@ using this keyword:</p>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.575449+00:00</td>
+      <td>2026-02-09 22:37:22.056231+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-11-19 10:54:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-11-19-...</td>
@@ -2216,11 +2224,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>e9d2d8de-9e59-4c3c-8a49-c585dd7f6cf2</td>
+      <td>56293543-6a64-48ee-a984-890249616fde</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.411247+00:00</td>
+      <td>2026-02-09 22:37:21.892480+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2240,11 +2248,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>fbe6bc5f-304c-43b8-871a-01308c4f4d54</td>
+      <td>19576234-8790-40ec-85fa-c4672edcdf02</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.428227+00:00</td>
+      <td>2026-02-09 22:37:21.909067+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2264,11 +2272,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>438457d7-8f43-4f64-a914-9ebf29bd8725</td>
+      <td>a662fe30-bd1d-4aab-bef3-4f534de5e50a</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.444980+00:00</td>
+      <td>2026-02-09 22:37:21.925189+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2288,11 +2296,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>3e1ccd62-ab4d-4490-8793-2c65a36bd550</td>
+      <td>5119ddeb-3669-4d59-94a1-c2599491c1f6</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.461399+00:00</td>
+      <td>2026-02-09 22:37:21.941505+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2312,11 +2320,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>5584bda8-94b4-4253-92d2-17627849a0a2</td>
+      <td>3686b8a5-9e4e-4b79-b6bd-ccf77b92df86</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.477822+00:00</td>
+      <td>2026-02-09 22:37:21.957580+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2336,11 +2344,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>6179476c-ca2d-4050-a379-8af153edd425</td>
+      <td>59f1a866-5170-408d-aec1-f9088d2ecc17</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.494233+00:00</td>
+      <td>2026-02-09 22:37:21.973783+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2360,11 +2368,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>0687789a-fcf9-4ff4-9844-1226d0b3abb0</td>
+      <td>210f3185-5f5d-43ac-a894-5ea4b9ca08a9</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.510872+00:00</td>
+      <td>2026-02-09 22:37:21.992381+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2384,11 +2392,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>d5d032fa-a043-469f-8cf1-318395b9f82d</td>
+      <td>cc010443-39d2-4508-aeb2-4effc0902f4e</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.527197+00:00</td>
+      <td>2026-02-09 22:37:22.008713+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2408,11 +2416,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>0d4f1cb1-9b9a-4861-bc22-6c2adf2c1ab7</td>
+      <td>e400b344-475f-4b0e-8cff-e2754ef436e5</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.543258+00:00</td>
+      <td>2026-02-09 22:37:22.024495+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-27 00:02:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-27-...</td>
@@ -2432,11 +2440,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>a43738b4-23b7-4046-b1e5-59e26a3d965f</td>
+      <td>f4f3d06c-6f34-48bb-b76d-498f2c6251bd</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.559634+00:00</td>
+      <td>2026-02-09 22:37:22.040612+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
@@ -2456,11 +2464,11 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>4ac27238-4e49-453d-b3c3-72929744e0ee</td>
+      <td>1b0e2006-7ce3-4445-b98a-4bd80383c893</td>
       <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.575449+00:00</td>
+      <td>2026-02-09 22:37:22.056231+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-11-19 10:54:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-11-19-...</td>
@@ -2542,11 +2550,11 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>f2330eac-e4aa-440a-8854-4377d6dfa067</td>
+      <td>b45f328a-7d2d-4cd7-b79c-49dd04351fda</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.558299+00:00</td>
+      <td>2026-02-09 22:37:21.016156+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
@@ -2566,11 +2574,11 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>fe88143a-2b84-4dce-b4c2-da66025d5fed</td>
+      <td>0c30320c-48bf-426c-9bdf-cb14625cd2c0</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:14.816693+00:00</td>
+      <td>2026-02-09 22:37:21.277420+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
@@ -2590,11 +2598,11 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>947374ee-05aa-4a7c-af8f-57acce6ae553</td>
+      <td>f2880934-7c80-4a26-9f9f-b97e0d83b55c</td>
       <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-01-30 12:56:15.056617+00:00</td>
+      <td>2026-02-09 22:37:21.511701+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
@@ -2614,11 +2622,11 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>NaN</td>
       <td>...</td>
       <td>openghg</td>
-      <td>a5d8f4b7-fe3f-4e6f-bd84-9a82a561bea5</td>
+      <td>ba98ee99-4634-48e3-b3e0-79206d2b3f2f</td>
       <td>[in-memory-dataset]</td>
       <td>3600s</td>
       <td>v1</td>
-      <td>2026-01-30 12:56:16.477348+00:00</td>
+      <td>2026-02-09 22:37:23.200116+00:00</td>
       <td>2013-01-31 00:05:00+00:00</td>
       <td>2022-09-29 12:44:59+00:00</td>
       <td>{'v1': ['2013-01-31-00:05:00+00:00_2022-09-29-...</td>
@@ -2639,7 +2647,7 @@ object to be returned. If no results are found <code class="docutils literal not
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=f2330eac-e4aa-440a-8854-4377d6dfa067)
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=b45f328a-7d2d-4cd7-b79c-49dd04351fda)
 </pre></div>
 </div>
 </div>
@@ -2654,10 +2662,10 @@ objects.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=f2330eac-e4aa-440a-8854-4377d6dfa067),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;100m&#39;, ...}, uuid=fe88143a-2b84-4dce-b4c2-da66025d5fed),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=947374ee-05aa-4a7c-af8f-57acce6ae553),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;species&#39;: &#39;co2&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;instrument&#39;: &#39;picarro&#39;, ...}, uuid=a5d8f4b7-fe3f-4e6f-bd84-9a82a561bea5)]
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=b45f328a-7d2d-4cd7-b79c-49dd04351fda),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;100m&#39;, ...}, uuid=0c30320c-48bf-426c-9bdf-cb14625cd2c0),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=f2880934-7c80-4a26-9f9f-b97e0d83b55c),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;species&#39;: &#39;co2&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;instrument&#39;: &#39;picarro&#39;, ...}, uuid=ba98ee99-4634-48e3-b3e0-79206d2b3f2f)]
 </pre></div>
 </div>
 </div>
@@ -2700,7 +2708,7 @@ e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.metad
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=947374ee-05aa-4a7c-af8f-57acce6ae553)
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=f2880934-7c80-4a26-9f9f-b97e0d83b55c)
 </pre></div>
 </div>
 </div>
@@ -3176,10 +3184,10 @@ Attributes: (12/28)
     station_longitude:     1.1387
     tag:                   project1
     type:                  air
-    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-acda8936-50af-44d7-b5c2-4f6859612fc0' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-acda8936-50af-44d7-b5c2-4f6859612fc0' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-1cfe32d7-7736-4066-bf26-f1f5707b0631' class='xr-section-summary-in' type='checkbox'  checked><label for='section-1cfe32d7-7736-4066-bf26-f1f5707b0631' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-e7423cb1-304f-40d7-98e3-4d522b3095bd' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e7423cb1-304f-40d7-98e3-4d522b3095bd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3ce803c2-c055-4263-a792-f6d7c55f1760' class='xr-var-data-in' type='checkbox'><label for='data-3ce803c2-c055-4263-a792-f6d7c55f1760' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
+    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-fb4920f5-7075-4ffc-990a-3fcdf434bab2' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-fb4920f5-7075-4ffc-990a-3fcdf434bab2' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-211e9732-5353-40b5-bcbd-1817fce7173a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-211e9732-5353-40b5-bcbd-1817fce7173a' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-73d04b6c-04ed-41a2-b3a4-941745429a40' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-73d04b6c-04ed-41a2-b3a4-941745429a40' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5aa802a3-bda3-4845-a7a7-a1355ac165e0' class='xr-var-data-in' type='checkbox'><label for='data-5aa802a3-bda3-4845-a7a7-a1355ac165e0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
        &#x27;2013-01-31T02:13:51.000000000&#x27;, ..., &#x27;2017-12-31T21:53:07.000000000&#x27;,
        &#x27;2017-12-31T22:53:06.000000000&#x27;, &#x27;2017-12-31T23:53:07.000000000&#x27;],
-      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ff1992da-267d-4d76-a1b6-f46146c61c76' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ff1992da-267d-4d76-a1b6-f46146c61c76' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-feb38897-9c86-4233-85d0-065678517af1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-feb38897-9c86-4233-85d0-065678517af1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-263c4655-4671-4a11-bbd8-2e001ac76314' class='xr-var-data-in' type='checkbox'><label for='data-263c4655-4671-4a11-bbd8-2e001ac76314' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-c71d383f-161c-47d7-8d64-3793b9f45fc1' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c71d383f-161c-47d7-8d64-3793b9f45fc1' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-1e70015f-00f2-4f51-9ab0-71940690c167' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1e70015f-00f2-4f51-9ab0-71940690c167' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0394393f-d9c7-4461-a00f-da23cf17b283' class='xr-var-data-in' type='checkbox'><label for='data-0394393f-d9c7-4461-a00f-da23cf17b283' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3235,7 +3243,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-0388e7f6-bcf7-4f82-afb0-6e7dc8ae187d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0388e7f6-bcf7-4f82-afb0-6e7dc8ae187d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-975f7a45-dfc6-4c7d-a54b-5e46d7a695ae' class='xr-var-data-in' type='checkbox'><label for='data-975f7a45-dfc6-4c7d-a54b-5e46d7a695ae' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-4596c6b8-628d-467b-ba3b-29d41aae064c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4596c6b8-628d-467b-ba3b-29d41aae064c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-23d22ebc-f9b5-4906-b50f-ff8c28e0439c' class='xr-var-data-in' type='checkbox'><label for='data-23d22ebc-f9b5-4906-b50f-ff8c28e0439c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3291,7 +3299,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-d567b2f3-e685-4ffa-a2b0-181457c34bda' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d567b2f3-e685-4ffa-a2b0-181457c34bda' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c41cc7cf-e6d4-4642-9e73-60328aba8775' class='xr-var-data-in' type='checkbox'><label for='data-c41cc7cf-e6d4-4642-9e73-60328aba8775' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-b3ce9a89-7fdd-42d2-b462-981b40b85bf4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b3ce9a89-7fdd-42d2-b462-981b40b85bf4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6ee47561-529d-48fa-80df-4f60b2ca1d84' class='xr-var-data-in' type='checkbox'><label for='data-6ee47561-529d-48fa-80df-4f60b2ca1d84' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3347,7 +3355,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-09d93e77-89e2-4b7f-816b-c0990a52f8c3' class='xr-section-summary-in' type='checkbox'  ><label for='section-09d93e77-89e2-4b7f-816b-c0990a52f8c3' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-1355f141-4196-41ff-a13f-7f6467b4c46a' class='xr-index-data-in' type='checkbox'/><label for='index-1355f141-4196-41ff-a13f-7f6467b4c46a' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2013-01-31 00:13:28&#x27;, &#x27;2013-01-31 01:13:36&#x27;,
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-27d51b43-2907-4a67-ae57-aed8d13d2950' class='xr-section-summary-in' type='checkbox'  ><label for='section-27d51b43-2907-4a67-ae57-aed8d13d2950' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-004ac232-9e38-4529-8ce6-f777428f247a' class='xr-index-data-in' type='checkbox'/><label for='index-004ac232-9e38-4529-8ce6-f777428f247a' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2013-01-31 00:13:28&#x27;, &#x27;2013-01-31 01:13:36&#x27;,
                &#x27;2013-01-31 02:13:51&#x27;, &#x27;2013-01-31 03:13:33&#x27;,
                &#x27;2013-01-31 04:13:47&#x27;, &#x27;2013-01-31 05:13:34&#x27;,
                &#x27;2013-01-31 06:13:41&#x27;, &#x27;2013-01-31 07:13:38&#x27;,
@@ -3358,7 +3366,7 @@ Attributes: (12/28)
                &#x27;2017-12-31 18:53:03&#x27;, &#x27;2017-12-31 19:53:04&#x27;,
                &#x27;2017-12-31 20:53:04&#x27;, &#x27;2017-12-31 21:53:07&#x27;,
                &#x27;2017-12-31 22:53:06&#x27;, &#x27;2017-12-31 23:53:07&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=39114, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-b2fffb49-c358-4d0e-866a-537097d6c921' class='xr-section-summary-in' type='checkbox'  ><label for='section-b2fffb49-c358-4d0e-866a-537097d6c921' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-01-30 12:56:15.001167+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
+              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=39114, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-d23938cd-13b4-4137-a941-cd190bc316ed' class='xr-section-summary-in' type='checkbox'  ><label for='section-d23938cd-13b4-4137-a941-cd190bc316ed' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-02-09 22:37:21.481253+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -3391,11 +3399,11 @@ Attributes: (12/28)
  &#39;platform&#39;: &#39;not_set&#39;,
  &#39;data_source&#39;: &#39;internal&#39;,
  &#39;source_format&#39;: &#39;CRDS&#39;,
- &#39;uuid&#39;: &#39;947374ee-05aa-4a7c-af8f-57acce6ae553&#39;,
+ &#39;uuid&#39;: &#39;f2880934-7c80-4a26-9f9f-b97e0d83b55c&#39;,
  &#39;tag&#39;: &#39;project1&#39;,
  &#39;period&#39;: &#39;3600s&#39;,
  &#39;latest_version&#39;: &#39;v2&#39;,
- &#39;timestamp&#39;: &#39;2026-01-30 12:56:15.056617+00:00&#39;,
+ &#39;timestamp&#39;: &#39;2026-02-09 22:37:21.511701+00:00&#39;,
  &#39;start_date&#39;: &#39;2013-01-31 00:13:28+00:00&#39;,
  &#39;end_date&#39;: &#39;2018-01-01 00:53:06+00:00&#39;,
  &#39;versions&#39;: {&#39;v1&#39;: [&#39;2013-01-31-00:13:28+00:00_2018-01-01-00:53:06+00:00&#39;],
@@ -3404,7 +3412,7 @@ Attributes: (12/28)
  &#39;Conventions&#39;: &#39;CF-1.8&#39;,
  &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;,
  &#39;conditions_of_use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;,
- &#39;file_created&#39;: &#39;2026-01-30 12:56:15.001167+00:00&#39;,
+ &#39;file_created&#39;: &#39;2026-02-09 22:37:21.481253+00:00&#39;,
  &#39;processed_by&#39;: &#39;OpenGHG_Cloud&#39;,
  &#39;sampling_period_unit&#39;: &#39;s&#39;,
  &#39;source&#39;: &#39;In situ measurements of air&#39;,
@@ -3949,10 +3957,10 @@ Attributes: (12/28)
     station_longitude:     1.1387
     tag:                   project1
     type:                  air
-    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-24e82622-2aa3-4a21-95f5-c17586410568' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-24e82622-2aa3-4a21-95f5-c17586410568' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-7457cd73-6124-4672-a952-2537eb8f9f8a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7457cd73-6124-4672-a952-2537eb8f9f8a' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-e7d35587-98b1-4cf9-9678-a2f0613d1168' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e7d35587-98b1-4cf9-9678-a2f0613d1168' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4173f35e-0757-434d-b81e-3a14d0764fbb' class='xr-var-data-in' type='checkbox'><label for='data-4173f35e-0757-434d-b81e-3a14d0764fbb' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
+    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-a97ecb3e-9daa-4aab-a6bb-942405acc7c3' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-a97ecb3e-9daa-4aab-a6bb-942405acc7c3' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-6098e697-504e-488d-80e6-514fff7c68d0' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6098e697-504e-488d-80e6-514fff7c68d0' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-459eba4d-d2a0-4dcc-8fcf-9bc2354ac231' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-459eba4d-d2a0-4dcc-8fcf-9bc2354ac231' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3abe211b-2296-4aa0-8cee-c38e2f856478' class='xr-var-data-in' type='checkbox'><label for='data-3abe211b-2296-4aa0-8cee-c38e2f856478' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
        &#x27;2013-01-31T02:13:51.000000000&#x27;, ..., &#x27;2017-12-31T21:53:07.000000000&#x27;,
        &#x27;2017-12-31T22:53:06.000000000&#x27;, &#x27;2017-12-31T23:53:07.000000000&#x27;],
-      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-401bd743-c856-4860-83f7-70b8c6612731' class='xr-section-summary-in' type='checkbox'  checked><label for='section-401bd743-c856-4860-83f7-70b8c6612731' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-4a0cb012-604b-41dd-baf4-466cde8252ad' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4a0cb012-604b-41dd-baf4-466cde8252ad' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dda7e132-cf68-49fe-ba74-69aea1db6e1b' class='xr-var-data-in' type='checkbox'><label for='data-dda7e132-cf68-49fe-ba74-69aea1db6e1b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units_definition :</span></dt><dd>parts_per_billion</dd><dt><span>units :</span></dt><dd>1e-09</dd></dl></div><div class='xr-var-data'><table>
+      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9dcb8086-09f3-420c-a32b-b3db00f039ae' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9dcb8086-09f3-420c-a32b-b3db00f039ae' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-10169747-5a86-48c8-9ec3-da197d99091d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-10169747-5a86-48c8-9ec3-da197d99091d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-63f33dab-d2bc-402f-8582-bfe543c0bb91' class='xr-var-data-in' type='checkbox'><label for='data-63f33dab-d2bc-402f-8582-bfe543c0bb91' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units_definition :</span></dt><dd>parts_per_billion</dd><dt><span>units :</span></dt><dd>1e-09</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4008,7 +4016,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-b55aad07-6b9b-4521-91ac-f35449935497' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b55aad07-6b9b-4521-91ac-f35449935497' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-688ba3c2-2c91-459b-9c41-a92932f6e580' class='xr-var-data-in' type='checkbox'><label for='data-688ba3c2-2c91-459b-9c41-a92932f6e580' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-515872fb-6930-4425-a1c2-f43e4cadf193' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-515872fb-6930-4425-a1c2-f43e4cadf193' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-405abdf4-f6b3-4431-887e-f4a41f307983' class='xr-var-data-in' type='checkbox'><label for='data-405abdf4-f6b3-4431-887e-f4a41f307983' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4064,7 +4072,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-3bd46d53-8b30-4493-b5f7-0570d131d5cd' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3bd46d53-8b30-4493-b5f7-0570d131d5cd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-376017c2-601d-4a63-909f-3f875e3511e7' class='xr-var-data-in' type='checkbox'><label for='data-376017c2-601d-4a63-909f-3f875e3511e7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-309a19f0-4d3f-4751-a594-89ee6cb48e5d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-309a19f0-4d3f-4751-a594-89ee6cb48e5d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-943edf86-fc85-460c-a8ea-0bcf465cbaaf' class='xr-var-data-in' type='checkbox'><label for='data-943edf86-fc85-460c-a8ea-0bcf465cbaaf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4120,7 +4128,7 @@ Attributes: (12/28)
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-0825b1ee-8231-4179-b83c-f8dbe0ad5624' class='xr-section-summary-in' type='checkbox'  ><label for='section-0825b1ee-8231-4179-b83c-f8dbe0ad5624' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-11b27242-b503-4536-88d7-ec06646cc022' class='xr-index-data-in' type='checkbox'/><label for='index-11b27242-b503-4536-88d7-ec06646cc022' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2013-01-31 00:13:28&#x27;, &#x27;2013-01-31 01:13:36&#x27;,
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-78117b6e-fdaf-4984-86b4-a89f9db4a142' class='xr-section-summary-in' type='checkbox'  ><label for='section-78117b6e-fdaf-4984-86b4-a89f9db4a142' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-01db90be-0189-4604-9d32-bc113c5a5f21' class='xr-index-data-in' type='checkbox'/><label for='index-01db90be-0189-4604-9d32-bc113c5a5f21' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2013-01-31 00:13:28&#x27;, &#x27;2013-01-31 01:13:36&#x27;,
                &#x27;2013-01-31 02:13:51&#x27;, &#x27;2013-01-31 03:13:33&#x27;,
                &#x27;2013-01-31 04:13:47&#x27;, &#x27;2013-01-31 05:13:34&#x27;,
                &#x27;2013-01-31 06:13:41&#x27;, &#x27;2013-01-31 07:13:38&#x27;,
@@ -4131,7 +4139,7 @@ Attributes: (12/28)
                &#x27;2017-12-31 18:53:03&#x27;, &#x27;2017-12-31 19:53:04&#x27;,
                &#x27;2017-12-31 20:53:04&#x27;, &#x27;2017-12-31 21:53:07&#x27;,
                &#x27;2017-12-31 22:53:06&#x27;, &#x27;2017-12-31 23:53:07&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=39114, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-58535bde-7815-4791-abe9-7cf51adbd3e7' class='xr-section-summary-in' type='checkbox'  ><label for='section-58535bde-7815-4791-abe9-7cf51adbd3e7' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-01-30 12:56:15.001167+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
+              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=39114, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-73dfee1b-233e-4e6e-a7b5-ea656332805a' class='xr-section-summary-in' type='checkbox'  ><label for='section-73dfee1b-233e-4e6e-a7b5-ea656332805a' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-02-09 22:37:21.481253+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <p>By default, the returned data is dequantified, so you can confirm the unit conversion using:</p>
 <div class="jupyter_cell jupyter_container docutils container">
@@ -4220,7 +4228,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 
 
 <script type="application/vnd.jupyter.widget-state+json">
-{"state": {"283d327f2fb24c2691857cdbea7fbef2": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "657c01c68c5d48e0aafcb9648617298e": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_283d327f2fb24c2691857cdbea7fbef2", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading tac_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/2.4 MB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading tac_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/2.4 MB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "488a8fe161264c6ca756549d67ce2f4c": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "abd52e1efa14486eaa8a02a99e2f2ef4": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_488a8fe161264c6ca756549d67ce2f4c", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading capegrim_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/557.9 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading capegrim_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/557.9 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "21fa7c8c053e4d45a53f678beffdb408": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0606a383a6874384a7451d9e6a67c224": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_21fa7c8c053e4d45a53f678beffdb408", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/21.5 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/21.5 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "106a6c10a44b411e9e859d3df037e5a5": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "539dcf7a78864f95a8bb60d12b4a9801": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_106a6c10a44b411e9e859d3df037e5a5", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading decc-picarro_co2.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/30.7 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading decc-picarro_co2.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/30.7 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
+{"state": {"4393e2be10da464ebc43f8f0e05f4a36": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "9128def6582746258154427d936315c6": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_4393e2be10da464ebc43f8f0e05f4a36", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading tac_example.tar.gz \u001b[38;2;249;38;114m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m\u001b[38;5;237m\u257a\u001b[0m\u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m1.4/2.4 MB\u001b[0m \u001b[36m0:00:01\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading tac_example.tar.gz <span style=\"color: #f92672; text-decoration-color: #f92672\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span><span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u257a\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">1.4/2.4 MB</span> <span style=\"color: #008080; text-decoration-color: #008080\">0:00:01</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "35f290b62ba64d3dbf1ccbf367c615d2": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "333a6aba71394440abf6bedb2839c3d1": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_35f290b62ba64d3dbf1ccbf367c615d2", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading capegrim_example.tar.gz \u001b[38;2;249;38;114m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m\u001b[38;5;237m\u257a\u001b[0m\u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m393.2/557.9 kB\u001b[0m \u001b[36m0:00:01\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading capegrim_example.tar.gz <span style=\"color: #f92672; text-decoration-color: #f92672\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span><span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u257a\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">393.2/557.9 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">0:00:01</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "8c74f54f37b14df4b7d8907aaf7003cc": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "303a329515494a1cb17606a897fe395c": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_8c74f54f37b14df4b7d8907aaf7003cc", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/21.5 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/21.5 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "eadf4915f9a345f49cfecb900ea59306": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "493d3c5afa9740c58b5318c3401347b4": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_eadf4915f9a345f49cfecb900ea59306", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading decc-picarro_co2.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/30.7 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading decc-picarro_co2.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/30.7 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
 </script>
 
 
@@ -4231,7 +4239,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
               
               
               
-                <footer class="prev-next-footer d-print-none">
+                <footer class="prev-next-footer">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -4259,8 +4267,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -4314,8 +4321,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -4340,8 +4347,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>
