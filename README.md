@@ -12,7 +12,7 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
+OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
 
 ### Installing with `uv`
 
@@ -52,7 +52,7 @@ OpenGHG supports Python 3.8 and later on Linux or MacOS. To install the package,
    uv pip install openghg
    ```
 
-This installs OpenGHG and all optional dependencies for full functionality.
+This installs OpenGHG and its core dependencies.
 
 ### Installing with `conda`
 
@@ -182,8 +182,14 @@ If you encounter issues, please [open a GitHub issue](https://github.com/openghg
 
 OpenGHG's optional functionality includes the `xesmf` module for map regridding.
 
-- When using `uv`, these dependencies are installed automatically with the extras.
-- When using `conda`, the `xesmf` library is included in the installation.
+Note that `xesmf` is **not** installed by default with the core OpenGHG package.
+- When using `uv`, install it explicitly, for example:
+  ```bash
+  uv add xesmf
+
+- For conda install of xesmf
+  ```bash
+  conda install -c conda-forge xesmf
 
 For further details, refer to [our documentation](https://docs.openghg.org/).
 
