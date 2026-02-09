@@ -73,7 +73,7 @@ def parse_gemini(
     resample: bool = True,
 ) -> dict:
     """
-    Parse and extract data from netcdf provided by Neil Humpage and downlodable on JASMIN in /gws/nopw/j04/geminiuk/ (soon to be migrated..).
+    Parse and extract data from netcdf provided by Neil Humpage and downloadable on JASMIN in /gws/nopw/j04/geminiuk/ (soon to be migrated..).
     NOTE: when this parser was written, data and network were new and no documentation was available.
     The data are so standardise on the same way than the TCCON data (see parser_tccon in _tccon.py and info therein).
     Assumed variables equivalencies with TCCON data (for ch4) are assumed as follow:
