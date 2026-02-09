@@ -25,7 +25,6 @@ dependencies = [
     "addict<=2.4.0",
     "cdsapi>=0.7.7",
     "cf-xarray<=0.10.6",
-    "cfchecker",
     "dask<2025.10",
     "filelock<=3.20.0",
     "flox<=0.10.4",
@@ -72,6 +71,7 @@ classifiers = [
 [project.optional-dependencies]
     dev = [
         "black==26.1.0",
+        "cfchecker",
         "flake8<=7.3.0",
         "mypy==1.10.0",
         "pre-commit<=4.3.0",
