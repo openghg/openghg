@@ -544,6 +544,8 @@ class BaseStore:
             validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
 
             try:
+                if "inner_domain" in fn_input_parameters and fn_input_parameters["inner_domain"] is not None:
+                    validate_kwargs["particle_locations"] = False
                 self.validate_data(datasource.data, **validate_kwargs)
             except ValidationError as err:
                 if isinstance(filepaths, list):
