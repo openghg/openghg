@@ -1201,9 +1201,9 @@ def test_standardise_6km_footprints():
     retrieved_data = get_footprint(site=site, model=model, network=network, height=height, domain="EUROPE6KM", store=store)
 
     assert retrieved_data is not None
-    assert retrieved_data.metadata["model"] == "NAME"
-    assert retrieved_data.metadata["network"] == "UKV"
-    assert retrieved_data.metadata["site"] == "IMP"
+    assert retrieved_data.metadata["model"] == "name"
+    assert retrieved_data.metadata["network"] == "ukv"
+    assert retrieved_data.metadata["site"] == "imp"
     assert retrieved_data.metadata["height"] == "26magl"
     assert retrieved_data.metadata["domain"] == "europe6km"
     assert retrieved_data.metadata["inner_domain"] == "6km"
