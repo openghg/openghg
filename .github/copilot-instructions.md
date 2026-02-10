@@ -17,8 +17,7 @@ micromamba create --name openghg_dev python=3.12 -y
 micromamba activate openghg_dev
 
 # Install development dependencies (preferred approach)
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -e .
+uv sync --all-extras
 ```
 
 ### Alternative Setup (Minimal Environment)
@@ -62,8 +61,8 @@ conda env create -f environment-dev.yaml
 # Alternative conda-based setup
 conda create --name openghg_dev python=3.12 -y
 conda activate openghg_dev
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -e .
+pip install --upgrade pip wheel setuptools
+pip install -e ".[dev]"
 ```
 
 ### Testing and Package Functionality
@@ -115,7 +114,7 @@ pytest -v --run-icos tests/
 ### Documentation Build
 ```bash
 # Install additional documentation dependencies
-pip install -r requirements-doc.txt
+pip install -e ".[doc]"
 
 # Build docs (requires full OpenGHG installation)
 # Note: This is quite slow as the docs use the sphinx jupyter directive,
@@ -145,9 +144,8 @@ For minimal environment setup:
 Key directories and files:
 - `openghg/` - Main Python package (17 submodules)
 - `tests/` - Comprehensive test suite (17 test directories)
-- `requirements*.txt` - Pip dependency specifications
+- `pyproject.toml` - Modern Python project configuration with dependencies
 - `environment*.yaml` - Conda/micromamba environment specifications  
-- `pyproject.toml` - Modern Python project configuration
 - `tox.ini` - Testing automation configuration (mainly for CI - avoid for local development)
 - `.github/workflows/` - CI/CD pipeline definitions
 - `doc/` - Sphinx documentation source
@@ -303,7 +301,7 @@ pytest --timeout=300 tests/specific_module/
 - **Project config**: `pyproject.toml` (modern Python packaging)
 - **Legacy setup**: `setup.cfg` (minor configuration)
 - **Micromamba/Conda environments**: `environment.yaml`, `environment-dev.yaml`
-- **Dependencies**: `requirements*.txt` files
+- **Dependencies**: Defined in `pyproject.toml` under `[project.dependencies]` and `[project.optional-dependencies]`
 - **CI/CD**: `.github/workflows/workflow.yaml`
 - **Quality tools**: `.pre-commit-config.yaml`, `tox.ini` (CI only - avoid for local dev), `mypy.ini`
 
@@ -334,8 +332,8 @@ Since automated testing often fails due to network constraints, use these manual
 **PREFERRED approach**: Use pip-based development environment with micromamba for environment management.
 
 **Use these commands for standard development:**
-- Environment: `micromamba create --name openghg_dev python=3.12` + pip installs
-- Full development: `pip install -r requirements.txt -r requirements-dev.txt && pip install -e .`
+- Environment: `uv venv` or `micromamba create --name openghg_dev python=3.12`
+- Full development: `uv sync --all-extras` (with uv) or `pip install -e ".[dev]"` (with pip/conda)
 - Code quality: black, flake8, mypy  
 - Testing: `pytest tests/module/` or `pytest tests/test_file.py` (prefer individual tests over full suite)
 
