@@ -454,6 +454,7 @@ def standardise_footprint(
     info_metadata: dict | None = None,
     sort_files: bool = False,
     concat_nc_files: bool | None = None,
+    inner_domain: str | None = None,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -513,6 +514,7 @@ def standardise_footprint(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+        inner_domain: For nested domains, specify the inner domain (e.g. "6km") to pull out the relevant metadata and assign this as the domain for the footprint data.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -567,6 +569,7 @@ def standardise_footprint(
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
         concat_nc_files=concat_nc_files,
+        inner_domain=inner_domain,
     )
 
 
