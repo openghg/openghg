@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented `update` method for Zarr storage, which will be used by `Datasource` to allow updating existing data in the object store. Also added methods for aligning a dataset to data stored by Zarr. [PR #1532](https://github.com/openghg/openghg/pull/1532)
 - Added `version` parameter to all `get_*` retrieve functions (`get_obs_surface`, `get_obs_column`, `get_flux`, `get_bc`, `get_footprint`) to enable retrieval of specific data versions instead of always defaulting to the latest version. [PR #1549](https://github.com/openghg/openghg/pull/1549)
 - Implemented `if_exists = "combine"` option for adding data to `Datasource`. This option will now be available when standardising data, so data can be updated. [PR #1548](https://github.com/openghg/openghg/pull/1548)
+- Added the ability to standardise and retrieve 6km footprint data with ability to pass `inner_domain`.[PR #1580](https://github.com/openghg/openghg/pull/1580)
 
 ### Updated
 - `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
@@ -23,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed `ValueError` when searching for footprints with special inlet keywords like "column" (for satellite data) or "multiple" (for aggregated data). The `convert_to_slice` function now passes through these special keywords unchanged instead of attempting to extract float values.
 - Updated the version of black formatter in pre-commit-config.yaml as well ran the formatter on the repo. [PR #1567](https://github.com/openghg/openghg/pull/1567)
-
-### Added
 - Units in attributes of variables of cams bc data in transform function.[PR #1535](https://github.com/openghg/openghg/pull/1535)
 
 ## [0.17.0] - 2025-11-15
