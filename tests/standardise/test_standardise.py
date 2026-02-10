@@ -1189,8 +1189,21 @@ def test_standardise_6km_footprints():
                                     network=network,
                                     height=height,
                                     domain=domain,
+                                    species="co2",
                                     inner_domain=inner_domain,
                                     source_format=source_format,
-                                    store=store)
-
+                                    store=store,
+                                    chunks={"time": 200, "lat": 200, "lon": 200})
     
+    assert "co2" == results[0].get("species")
+    assert "europe6km" in results[0].get("domain")
+
+    retrieved_data = get_footprint(site=site, model=model, network=network, height=height, domain="EUROPE6KM", store=store)
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["model"] == "NAME"
+    assert retrieved_data.metadata["network"] == "UKV"
+    assert retrieved_data.metadata["site"] == "IMP"
+    assert retrieved_data.metadata["height"] == "26magl"
+    assert retrieved_data.metadata["domain"] == "europe6km"
+    assert retrieved_data.metadata["inner_domain"] == "6km"
