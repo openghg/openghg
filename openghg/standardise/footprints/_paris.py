@@ -92,7 +92,7 @@ def parse_paris(
     dim_rename = {"latitude": "lat", "longitude": "lon"}
 
     if inner_domain:
-        dim_reorder = ("time", "lat", "lon")
+        dim_reorder: tuple[str, ...] = ("time", "lat", "lon")
     else:
         dim_reorder = ("time", "height", "lat", "lon")
 
@@ -138,6 +138,7 @@ def parse_paris(
         "inlet": inlet,
         "height": inlet,
         "species": species,
+        "inner_domain": inner_domain,
     }
 
     metadata = {key: value for key, value in default_metadata.items() if value is not None}
@@ -201,7 +202,6 @@ def parse_paris(
         metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
     metadata["variables"] = list(fp_data.data_vars)
-    metadata["inner_domain"] = inner_domain if inner_domain else None
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params
 
