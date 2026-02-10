@@ -1168,3 +1168,29 @@ def test_standardise_co2_games_using_dataset():
     assert retrieved_data.metadata["instrument"] == "surface-insitu"
     assert retrieved_data.metadata["network"] == "co2_games"
     assert retrieved_data.metadata["dataset_source"] == "PTEN"
+
+
+def test_standardise_6km_footprints():
+    """Test standardisation of 6km resolution footprints with associated metadata keys.
+    """
+
+    filepath = get_footprint_datapath("IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc")
+    site="IMP"
+    model="NAME"
+    network="UKV"
+    height="26magl"
+    domain="EUROPE"
+    inner_domain="6km"
+    source_format="paris"
+    store="user"
+    results = standardise_footprint(filepath=filepath,
+                                    site=site,
+                                    model=model,
+                                    network=network,
+                                    height=height,
+                                    domain=domain,
+                                    inner_domain=inner_domain,
+                                    source_format=source_format,
+                                    store=store)
+
+    
