@@ -4,7 +4,8 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
-
+from openghg.types import pathType, TransformError
+from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
 import numpy as np
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(
+    def read_raw_data(
         self,
         binary_data: bytes,
         metadata: dict,
@@ -55,7 +56,7 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, source_format=source_format, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
     def format_inputs(self, **kwargs: Any) -> dict:
         """
@@ -127,3 +128,92 @@ class BoundaryConditions(BaseStore):
         data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
+
+    def transform_data(
+        self,
+        datapath: pathType,
+        database: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        info_metadata: dict | None = None,
+        **kwargs: dict,
+    ) -> list[dict]:
+        """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
+        The underlying parser functions will be of the form:
+            - openghg.transform.boundary_conditions.parse_{database.lower()}
+                - e.g. openghg.transform.boundary_conditions.parse_cams()"""
+
+        from openghg.store.spec import define_transform_parsers
+
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        fn_input_parameters["datapath"] = Path(datapath)
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+
+        try:
+            transform_parsers[database.upper()].value
+        except KeyError:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
+
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
+
+        # Call appropriate standardisation function with input parameters
+        try:
+            bc_data = parser_fn(**parser_input_parameters)
+        except (TypeError, ValueError) as err:
+            msg = f"Error during transformation of data(s): {datapath}. Error: {err}"
+            logger.exception(msg)
+            raise TransformError(msg)
+
+        # Checking against expected format for Flux
+        for mdd in bc_data:
+            BoundaryConditions.validate_data(mdd.data)
+
+        required_keys = ("species", "bc_input", "domain")
+
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for parsed_data in bc_data:
+                    parsed_data.metadata.update(info_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        bc_data = self.update_metadata(
+            bc_data, additional_input_parameters, additional_metadata=info_metadata
+        )
+
+        datasource_uuids = self.assign_data(
+            data=bc_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
+        )
+
+        return datasource_uuids

@@ -191,7 +191,7 @@ def test_scenario_infer_inputs_co2():
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 396.99)
     assert np.isclose(obs_mf[-1], 388.51)
-    assert "1e-6" in obs_mf.attrs["units"]
+    assert "1e-06" in obs_mf.attrs["units"]
 
     # Footprint data - species
     assert model_scenario.footprint.metadata["species"] == "co2"
@@ -569,10 +569,14 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
     for dv in ("mf_mod", "bc_mod"):
-        assert combined_dataset[dv].attrs["units"] == "1e-9"
+        assert combined_dataset[dv].attrs["units"] == "1e-09"
 
-    error_in_mod_obs = np.mean(np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)).values
-    error_threshold = 0.1 * np.mean(combined_dataset.mf).values  # somewhat arbitrary, but fails if bc mod units wrong
+    error_in_mod_obs = np.mean(
+        np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)
+    ).values
+    error_threshold = (
+        0.1 * np.mean(combined_dataset.mf).values
+    )  # somewhat arbitrary, but fails if bc mod units wrong
 
     assert error_in_mod_obs < error_threshold
 
@@ -626,7 +630,7 @@ def obs_ch4_dummy():
      - "mf" values are from 1, 48
     """
 
-    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="H")
+    time = pd.date_range("2012-01-01T00:00:00", "2012-01-02T23:00:00", freq="h")
 
     ntime = len(time)
     values = np.arange(0, ntime, 1)
@@ -735,7 +739,7 @@ def flux_ch4_dummy():
     """
     from openghg.dataobjects import FluxData
 
-    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="YS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
 
@@ -777,7 +781,7 @@ def bc_ch4_dummy():
     """
     from openghg.dataobjects import BoundaryConditionsData
 
-    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="YS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
     height = [500, 1500]
@@ -894,7 +898,7 @@ def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dum
     """Tests if disjoint timeseries are existing in obs and footprint data
     It raises error"""
 
-    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="H")
+    time = pd.date_range("2011-11-04T00:00:00", "2011-11-07T23:00:00", freq="h")
 
     ntime = len(time)
     values = np.arange(0, ntime, 1)
@@ -926,7 +930,9 @@ def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dum
         model_scenario.combine_obs_footprint()
 
 
-def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None, obs_units: float = 1.0):
+def calc_expected_baseline(
+    footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None, obs_units: float = 1.0
+):
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
@@ -989,6 +995,7 @@ def test_bc_sensitivity_ch4(model_scenario_ch4_dummy):
 
     for d in "nesw":
         assert f"bc_{d}" in bc_sensitivity
+
 
 # %% Test alignment when using platform keyword with dummy data (CH4)
 #  - flask data
@@ -1189,7 +1196,9 @@ def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dum
     lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
     lifetime_rn_hrs = lifetime_rn_days * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs, obs_units=1e-9)
+    expected_modelled_baseline = calc_expected_baseline(
+        footprint, bc, lifetime_hrs=lifetime_rn_hrs, obs_units=1e-9
+    )
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
@@ -1264,7 +1273,9 @@ def test_modelled_baseline_short_life(
     lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
     lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan * 24.0
 
-    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs, obs_units=1e-9)
+    expected_modelled_baseline = calc_expected_baseline(
+        footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs, obs_units=1e-9
+    )
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 

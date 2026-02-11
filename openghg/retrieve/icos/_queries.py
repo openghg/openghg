@@ -41,6 +41,7 @@ from openghg.util import extract_float
 
 
 def sparql_header() -> str:
+    """Define header for SPARQL query"""
     """
     Defines the namespace prefixes used in SPARQL queries e.g instead of writing the full
     URI http://meta.icos-cp.eu/ontologies/cpmeta/ you can write cpmeta instead.
@@ -63,7 +64,7 @@ def make_spec_filter(spec_label: list[str] | str | None = None, include: list[bo
         spec_label: regex or regexes to filter the "spec label" by. If an ordinary string
             is passed, only spec labels that contain that string as a substring will
             be matched.
-        include: For spec_label this includes a regex/string search.
+        include: for spec_label this includes a regex/string search.
             The include input specifies whether the spec_label value or values
             should be included or excluded in the search.
             Examples:
@@ -136,13 +137,12 @@ def make_filename_filter(filename_str: str | None = None) -> str:
 
 def make_site_filter(site: str | list[str] | None) -> str:
     """
-    Create the SPARQL filter for the site field.
+    Create direct values query for the site code or list of site codes.
 
     Args:
-        site:  site or list of sites to search (e.g. "MHD" or ["JFJ", "CMN"]); if
-        None, search all sites. 
+        site: ICOS site code or codes as a list
     Returns:
-        str: case-insensitive SPARQL values filter related to the site field.
+        str: SPARQL query for site filter
     """
     if site is None:
         return ""
@@ -156,15 +156,17 @@ def make_site_filter(site: str | list[str] | None) -> str:
 
 def make_data_level_filter(data_level: int | None) -> str:
     """
-    Create a SPARQL filter for the data_level field. 
+    Create filter for the data_level value. For more details see
+    see https://www.icos-cp.eu/data-services/data-collection/data-levels-quality
 
     Args:
-        data_level:  data level 1 or 2 (e.g. 1 would select data level 1; if
-        None, select both data levels. 
+        data_level: data level value as an integer. This should usually be:
+            - 1: intermediate observational data
+            - 2: final quality controlled observational data
+            In principle this can also be 0 (raw data) or 3 (elaborated product)
+            but these are not typically used for this kind of observation data.
     Returns:
-        str: case-insensitive SPARQL filter related to the data_level field.
-    Raises:
-        TypeError: if data_level is a string of not an integer
+        str: SPARQL filter query for the data_level value
     """
     if data_level is None:
         return ""
@@ -179,13 +181,13 @@ def make_data_level_filter(data_level: int | None) -> str:
 
 def make_species_filter(species: str | list[str] | None) -> str:
     """
-    Create a SPARQL filter for the species field. 
+    Create filter for species or list of species values. Note: this applies lowercase to the species
+    column before comparing against the supplied species values.
 
     Args:
-        species:  species or list of species to search (e.g. "CO2" or ["CO2", "CH4"]); if
-        None, search all species. 
+        species: species value or values
     Returns:
-        str:  case-insensitive SPARQL filter related to the species field.
+        str: SPARQL query for species filter
     """
     if species is None:
         return ""
@@ -205,13 +207,14 @@ def make_species_filter(species: str | list[str] | None) -> str:
 
 def make_project_filter(project: str | list[str] | None) -> str:
     """
-    Create a SPARQL filter for the project field. 
+    Create filter for project name or list of project names.
+    This label distiguishes official "icos" project data from other projects which are also hosted on the ICOS CP.
+    See https://meta.icos-cp.eu/ontologies/cpmeta/Project for list of case-sensitive project names.
 
     Args:
-        project:  project or list of projects to search (e.g. "icos" or ["icos", "euroObspack"]); if
-        None, search all projects. 
+        project: project name or list of project names to include in the search
     Returns:
-        str:  case-insensitive SPARQL filter related to the project field.
+        str: SPARQL query for project filter
     """
     if project is None:
         return ""
@@ -233,13 +236,13 @@ def make_project_filter(project: str | list[str] | None) -> str:
 
 def make_inlet_filter(inlet: str | list[str] | None) -> str:
     """
-    Create a SPARQL filter for inlet field. 
+    Create filter for inlet or list of inlet values. This will extract the numerical value(s) from
+    the inlet and use to search the "sampling_height" column.
 
     Args:
-        inlet:  inlet or list of inlets to search (e.g. "100" or ["100", "50"], can handle
-         100, 100.00 and 100m); if None, search all inlets. 
+        inlet: inlet as a string (e.g. "10m") or list of strings.
     Returns:
-        str:  case-insensitive SPARQL filter related to the inlet field.
+        str: SPARQL query for inlet value filter
     """
     if inlet is None:
         return ""
@@ -306,8 +309,7 @@ def data_query(
           is present in some other type of metadata.
 
     Returns:
-        SPARQL query string.
-
+        str: SPARQL query string.
     """
     site_filt = make_site_filter(site)
     data_level_filt = make_data_level_filter(data_level)
@@ -412,7 +414,7 @@ def data_query(
 
 def attrs_query(dobj_uri: str) -> str:
     """
-    This creates a query to extract the following columns:
+    This creates a query to extract the following columns for a data object:
     - col_label - details of column name e.g. "NbPoints"
     - p_label - "value_format", "value_type", "is a quality flag for"
     - o_label - description of the type or variable e.g. "32-bit integer value", "number of points"
@@ -448,7 +450,9 @@ def attrs_query(dobj_uri: str) -> str:
 
 def format_query() -> str:
     """
-    sparql query to retrieve information about available data formats and their associated specifications
+    This creates a query to extract the details of the ICOS formats.
+    Returns:
+        str: full sparql query as a string
     """
     query = sparql_header()
     query += """
@@ -477,12 +481,18 @@ def format_query() -> str:
 
 def parse_binding(b: dict) -> dict:
     """
-    Parse `BindingsList` (b) returned to meta.sparql_select. Converts a binding object from the sparql query result
-    into a python dictionary with properly formatted values.
+    Parse the bindings returned when running meta.sparql_select e.g.
+
+    res = meta.sparql_select(query=query)
+
+    The sparql_select search will return a SparqlResults object which contains
+    both variable_names (list) and bindings (list of dicts).
+    This function expects each `res.bindings` value (dict) so these can be parsed.
+
     Args:
-        b:  Bindingslist returned to meta.sparql_select. 
+        b: dictionary containing the binding details from a sparql query.
     Returns:
-        dict: python dictionary for the binding list.
+        dict: Formatted dictionary extracting the column names, values and (where possible) dtypes.
     """
     res = {}
     for k, v in b.items():
@@ -505,12 +515,12 @@ def parse_binding(b: dict) -> dict:
 
 def make_query_df(query: str) -> pd.DataFrame:
     """
-    Executes a sparql query and converts the python dictionary derived from the resulting binding list
-    to a pandas dataframe.
+    Helper function to create a DataFrame from the data returned from the SPARQL search.
     Args:
-        query: meta.sparql_select query. 
+        query: SPARQL query to use to retrieve data. Full data queries can be created
+            using data_query() function.
     Returns:
-        pandas.Dataframe: pandas dataframe of the binding list dictionary.
+        pandas.DataFrame: Output from SPARQL query parsed into a DataFrame
     """
     res = meta.sparql_select(query=query)
     return pd.DataFrame([parse_binding(b) for b in res.bindings])
@@ -519,8 +529,11 @@ def make_query_df(query: str) -> pd.DataFrame:
 @lru_cache
 def icos_format_info() -> pd.DataFrame:
     """
-    Retrieve information about available data formats and their specifications from the ICOS
-    Carbon Portal, returning a panda DataFrame indexed by spec label.
+    Extract (and cache) the general ICOS format info, creating a DataFrame for
+    unique entries associated with each spec_label.
+
+    Returns:
+        pandas.DataFrame: Reference DataFrame for ICOS format info
     """
     format_df = make_query_df(format_query()).drop_duplicates(subset="spec_label")
     format_df = format_df.set_index("spec_label")
@@ -540,8 +553,7 @@ def dobj_info(
     format_info: bool = False,
 ) -> pd.DataFrame:
     """
-     Search ICOS CP for data by the following arguments, then transform result into a pandas dataframe
-     and optionally left hand join it with additional meta data from icos_format_info().
+    Retrieve data object information based on ICOS CP SPARQL search.
 
     Args:
         site: site or list of sites to search (e.g. "MHD" or ["JFJ", "CMN"]); if
@@ -570,13 +582,11 @@ def dobj_info(
             is passed, only filenames that contain that string as a substring will
             be matched.
         project: list of case-sensitive project names as defined here:
-          https://meta.icos-cp.eu/ontologies/cpmeta/Project
-        format info: option to left-join format meta data from icos_format_info() e.g 
-            format_label, encoding, format, format_comment, spec_comment, fmt fields
-
+            https://meta.icos-cp.eu/ontologies/cpmeta/Project
+        format_info: whether to include additional format information (based on icos_format_info()) for
+            the data object entrues.
     Returns:
-        pandas data frame of sparkl query result
-
+        pandas.DataFrame: SPARQL query search details
     """
     query = data_query(
         site, data_level, species, inlet, spec_label, spec_label_include, filename_str, project

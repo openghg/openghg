@@ -48,7 +48,8 @@ def test_read_binary_data(mocker, clear_stores):
     assert filt(results, species="co2", source="gpp-cardamom", domain="europe")[0]["new"] is True
 
 
-def test_read_file():
+def test_read_file(caplog):
+    clear_test_stores()
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
@@ -62,6 +63,9 @@ def test_read_file():
     )
 
     assert len(proc_results) == 1
+
+    assert "Rechunking with chunks" in caplog.text
+    assert "'time': 336" in caplog.text
 
     expected_info = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
     assert expected_info.items() <= proc_results[0].items()
@@ -298,7 +302,7 @@ def test_add_edgar_database(clear_stores):
         "domain": default_domain,
         "source": default_source,
         "database": database.lower(),
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -354,7 +358,7 @@ def test_add_edgar_v8_database(clear_stores, source):
         "domain": default_domain,
         "source": expected_source,
         "database": database.lower(),
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "openghg cloud",
         "start_date": "1970-01-01 00:00:00+00:00",
         "end_date": "1970-12-31 23:59:59+00:00",
@@ -432,7 +436,7 @@ def test_transform_and_add_edgar_database(clear_stores):
         "domain": domain.lower(),
         "source": "anthro",
         "database": "edgar",
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",

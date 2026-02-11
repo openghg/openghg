@@ -220,7 +220,7 @@ def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
         columns.append(f"{species} N")
 
     file_data = pd.read_csv(
-        data_path, names=columns, delim_whitespace=True, skiprows=3, dtype={"date": str, "time": str}
+        data_path, names=columns, sep=r'\s+', skiprows=3, dtype={"date": str, "time": str}
     )
     file_data["date_time"] = file_data["date"] + file_data["time"]
     file_data["date_time"] = pd.to_datetime(file_data["date_time"], format="%y%m%d%H%M%S")
@@ -237,7 +237,7 @@ def read_gcmd_file_pd(filename):
     data_path = get_surface_datapath(filename=filename, source_format="GC")
     gcwerks_file_data = pd.read_csv(
         data_path,
-        delim_whitespace=True,
+        sep=r'\s+',
         skipinitialspace=True,
         skiprows=4,
         dtype={"yyyy": str, "mm": str, "dd": str, "hh": str, "mi": str},

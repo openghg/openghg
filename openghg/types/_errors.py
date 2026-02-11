@@ -66,6 +66,14 @@ class MetastoreError(OpenGHGError):
     """Raised for errors with the metadata store"""
 
 
+class StorageError(OpenGHGError):
+    """Raised for errors with data storage (e.g. ZarrStore)."""
+
+
+class UpdateError(StorageError):
+    """Raised for errors updating data."""
+
+
 class ZarrStoreError(OpenGHGError):
     """Raised for errors with the zarr store"""
 
@@ -80,6 +88,10 @@ class MetadataMissingError(OpenGHGError):
 
 class StandardiseError(OpenGHGError):
     """Raised if there is a problem during standardisation within the parse function"""
+
+
+class TransformError(OpenGHGError):
+    """Raised if there is a problem during transformation within the parse function"""
 
 
 class ValidationError(OpenGHGError):

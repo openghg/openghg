@@ -84,8 +84,7 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
             species = result["species"]
             datasource = objstore.retrieve(uuid=result["uuid"])[0]
 
-            assert metadata_checker_obssurface(datasource.metadata(), species=species)
-
+            assert metadata_checker_obssurface(datasource.metadata, species=species)
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
@@ -499,39 +498,6 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
         ch4_data["ch4_number_of_observations"][0] == 2.0
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
-
-
-@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
-def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(
-        filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG"
-    )
-
-    standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        update_mismatch="attributes",
-        if_exists="new",
-        sort_files=True,
-    )
-
-    with open_object_store(data_type="surface", bucket=bucket) as objstore:
-        uuid = objstore.uuids[0]
-        datasource = objstore.get_datasource(uuid=uuid)
-        data_keys = datasource.data_keys()
-        key = data_keys[0]
-
-        assert exists(bucket=bucket, key=key)
-
-        objstore.delete(uuid)
-
-        assert uuid not in objstore.uuids
-        assert not exists(bucket=bucket, key=key)
 
 
 def test_add_new_data_correct_datasource():
@@ -1152,7 +1118,7 @@ def test_sync_surface_metadata_store_level(
 
     for res in standardised_data:
         datasource = get_datasource(bucket=bucket, uuid=res["uuid"], data_type="surface")
-        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
+        assert metadata_checker_obssurface(datasource.metadata, species=res["species"])
 
         with datasource.get_data(version="latest") as data:
             assert attributes_checker_obssurface(data.attrs, species=res["species"])

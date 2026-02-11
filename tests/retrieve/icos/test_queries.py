@@ -47,4 +47,5 @@ def mock_sparql_query_attrs(mocker):
 def test_make_query_df(mock_sparql_query_attrs):
     results = make_query_df(query="")
     print(results)
-    # TODO: Add actual check!
+    # TODO: Add actual check! ASSERT FALSE and print pytest , check some things which are currently true so if update them at some point
+    #can see if something changed

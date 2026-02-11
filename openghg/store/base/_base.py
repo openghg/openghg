@@ -4,11 +4,11 @@ modules inherit.
 
 from __future__ import annotations
 import logging
-import math
 from pathlib import Path
 from types import TracebackType
 from typing import Any, TypeVar
 from collections.abc import MutableSequence, Sequence, Callable
+import warnings
 
 from pandas import Timestamp
 import xarray as xr
@@ -17,7 +17,7 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema
+from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,
@@ -111,15 +111,16 @@ class BaseStore:
         DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(
+    def read_raw_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
     ) -> list[dict] | None:
         raise NotImplementedError
 
-    def _standardise_from_file(
+    def _standardise_and_store(
         self,
-        filepath: Path | list[Path],
         fn_input_parameters: dict,
+        data: xr.Dataset | None = None,
+        filepath: Path | list[Path] | None = None,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
         update_mismatch: str = "never",
@@ -183,16 +184,19 @@ class BaseStore:
             logger.exception(msg)
             raise ValueError(msg)
 
-        fn_input_parameters["filepath"] = filepath
+        if data is None:
+            fn_input_parameters["filepath"] = filepath
+        else:
+            fn_input_parameters["data"] = data
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
+            parameters=fn_input_parameters, fn=parser_fn
         )
 
         # Call appropriate standardisation function with input parameters
         try:
-            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+            parsed_data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
         except (TypeError, ValueError) as err:
             msg = f"Error during standardisation of file(s): {filepath}. Error: {err}"
             logger.exception(msg)
@@ -202,18 +206,18 @@ class BaseStore:
         # - currently checking the first MetadataAndData object returned only
         # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
         if chunks != {}:
-            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+            chunks = self._check_chunks_datasource(parsed_data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
-        self._validate_datasources(data, fn_input_parameters, filepath=filepath)
+        self._validate_datasources(parsed_data, fn_input_parameters, filepath=filepath)
 
-        # Ensure the data is chunked
+        # Ensure the parsed_data is chunked
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
-            for datasource in data:
+            for datasource in parsed_data:
                 datasource.data = datasource.data.chunk(chunks)
 
-        self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+        self.align_metadata_attributes(data=parsed_data, update_mismatch=update_mismatch)
 
         # Check to ensure no required keys are being passed through info_metadata dict
         # before adding details
@@ -222,37 +226,45 @@ class BaseStore:
             info_metadata = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
+        updated_data = self.update_metadata(
+            parsed_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = self.assign_data(
-            data=data,
+            data=updated_data,
             if_exists=if_exists,
             new_version=new_version,
             compressor=compressor,
             filters=filters,
         )
 
-        for x in datasource_uuids:
-            if isinstance(filepath, list) and len(filepath) == 1:
-                filepath = filepath[0]
-
-            if isinstance(filepath, Path):
-                x.update({"file": filepath.name})
-                logger.info(f"Completed processing: {filepath.name}.")
-            elif isinstance(filepath, list):
-                filepath_str = ", ".join([fp.name for fp in filepath])
-                x.update({"files": filepath_str})
-                logger.info(f"Completed processing files: {filepath_str}.")
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
+        else:
+            filepaths = []
+        if not filepaths:
+            logger.info("Filepath not provided, cannot log completed processing of files.")
+        else:
+            for x in datasource_uuids:
+                if len(filepaths) == 1:
+                    fp = filepaths[0]
+                    x.update({"file": fp.name})
+                    logger.info(f"Completed processing: {fp.name}.")
+                else:
+                    filepath_str = ", ".join(fp.name for fp in filepaths)
+                    x.update({"files": filepath_str})
+                    logger.info(f"Completed processing files: {filepath_str}.")
 
         return datasource_uuids
 
-    def read_file(
+    def standardise_and_store(
         self,
-        filepath: str | Path | list[str] | list[Path],
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
+        filepath: str | Path | list[str] | list[Path] | None = None,
+        data: xr.Dataset | None = None,
         overwrite: bool = False,
         force: bool = False,
         compressor: Any | None = None,
@@ -340,96 +352,113 @@ class BaseStore:
 
         fn_input_parameters["source_format"] = source_format
 
+        if data is not None:
+            try:
+                results = self._standardise_and_store(
+                    data=data,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                )
+            except StandardiseError as err:
+                logger.error(f"Unable to standardise dataset. Error: {err}")
+                return [{}]
+            return results
+
         # Make sure filepaths contains Path objects
-        filepaths = normalise_to_filepath_list(filepath)
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
 
-        # Check hashes of previous files (included after any filepath(s) formatting)
-        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
+            # Check hashes of previous files (included after any filepath(s) formatting)
+            _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
 
-        if not unseen_hashes:
-            return [{}]
+            if not unseen_hashes:
+                return [{}]
 
-        filepaths = list(unseen_hashes.values())
+            filepaths = list(unseen_hashes.values())
 
-        if not filepaths:
-            return [{}]
-
-        # Check if filepaths are all netcdf files
-        file_extensions = [fp.suffix for fp in filepaths]
-        nc_extensions = [".nc", ".nc4"]
-        if all([ext in nc_extensions for ext in file_extensions]):
-            if concat_nc_files is None:
-                concat_nc_files = True
-        else:
-            if concat_nc_files is True:
-                logger.warning(
-                    f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
-                )
-            concat_nc_files = False
-
-        # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
-        if concat_nc_files:
-            try:
-                results = self._standardise_from_file(
-                    filepath=filepaths,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except StandardiseError:
-                logger.warning(
-                    "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
-                )
+            # Check if filepaths are all netcdf files
+            file_extensions = [fp.suffix for fp in filepaths]
+            nc_extensions = [".nc", ".nc4"]
+            if all([ext in nc_extensions for ext in file_extensions]):
+                if concat_nc_files is None:
+                    concat_nc_files = True
             else:
-                self.store_hashes(unseen_hashes)
-                return results
+                if concat_nc_files is True:
+                    logger.warning(
+                        f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
+                    )
+                concat_nc_files = False
 
-        # If not, loop over multiple filepaths when present
-        loop_params = self.define_loop_params()
+            # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
+            if concat_nc_files:
+                try:
+                    results = self._standardise_and_store(
+                        filepath=filepaths,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except StandardiseError:
+                    logger.warning(
+                        "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
+                    )
+                else:
+                    self.store_hashes(unseen_hashes)
+                    return results
 
-        results = []
+            # If not, loop over multiple filepaths when present
+            loop_params = self.define_loop_params()
 
-        for i, fp in enumerate(filepaths):
+            results = []
 
-            # fn_input_parameters["filepath"] = fp
-            if loop_params:
-                for key1, key2 in loop_params.items():
-                    if fn_input_parameters.get(key2) is not None:
-                        fn_input_parameters[key1] = fn_input_parameters[key2][i]
+            for i, fp in enumerate(filepaths):
 
-            try:
-                datasource_uuids = self._standardise_from_file(
-                    filepath=fp,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except ValidationError as err:
-                msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
-                logger.error(msg)
-                validated = False
-                break
-            else:
-                validated = True
+                # fn_input_parameters["filepath"] = fp
+                if loop_params:
+                    for key1, key2 in loop_params.items():
+                        if fn_input_parameters.get(key2) is not None:
+                            fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
-            if not validated:
-                continue
+                try:
+                    datasource_uuids = self._standardise_and_store(
+                        filepath=fp,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except ValidationError as err:
+                    msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
+                    logger.error(msg)
+                    validated = False
+                    break
+                else:
+                    validated = True
 
-            results.extend(datasource_uuids)
+                if not validated:
+                    continue
 
-        self.store_hashes(unseen_hashes)
+                results.extend(datasource_uuids)
+
+            self.store_hashes(unseen_hashes)
 
         return results
 
@@ -509,6 +538,8 @@ class BaseStore:
         """
         validate_params = self.find_data_schema_inputs()
 
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
             validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
@@ -516,9 +547,9 @@ class BaseStore:
             try:
                 self.validate_data(datasource.data, **validate_kwargs)
             except ValidationError as err:
-                if isinstance(filepath, list):
-                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
-                elif isinstance(filepath, Path):
+                if isinstance(filepaths, list):
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepaths])}. Error: {err}"
+                elif isinstance(filepaths, Path):
                     msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
                 else:
                     msg = f"Unable to validate and store supplied data. Error: {err}"
@@ -575,6 +606,7 @@ class BaseStore:
         fn_input_parameters: dict,
         chunks: dict[str, int] | None = None,
         max_chunk_size: int = 300,
+        auto_scale_to_fit_max_chunk_size: bool = True,
     ) -> dict[str, int]:
         """
         Check chunks for a datasource.
@@ -586,6 +618,8 @@ class BaseStore:
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+            auto_scale_to_fit_max_chunk_size: Whether to apply automatic chunk rescaling
+                based on the maximum chunk size.
         Returns:
             dict:  Dictionary of chunk sizes
         """
@@ -594,7 +628,11 @@ class BaseStore:
         # Check any specified chunks / default chunks for the data_type are not too large
         chunking_kwargs = self.create_schema_kwargs(chunking_params, fn_input_parameters, datasource)
         chunks = self.check_chunks(
-            ds=datasource.data, chunks=chunks, max_chunk_size=max_chunk_size, **chunking_kwargs
+            ds=datasource.data,
+            chunks=chunks,
+            max_chunk_size=max_chunk_size,
+            auto_scale_to_fit_max_chunk_size=auto_scale_to_fit_max_chunk_size,
+            **chunking_kwargs,
         )
 
         return chunks
@@ -605,6 +643,7 @@ class BaseStore:
         ds: xr.Dataset,
         chunks: dict[str, int] | None = None,
         max_chunk_size: int = 300,
+        auto_scale_to_fit_max_chunk_size: bool = False,
         **chunking_kwargs: Any,
     ) -> dict[str, int]:
         """Check the chunk size of a variable in a dataset and return the chunk size
@@ -612,9 +651,11 @@ class BaseStore:
         Args:
             ds: dataset to check
             chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
+                    for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
+                    See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             max_chunk_size: Maximum chunk size in megabytes, defaults to 300 MB
+            auto_scale_to_fit_max_chunk_size: Whether to apply automatic chunk rescaling
+                based on the maximum chunk size.
         Returns:
             Dict: Dictionary of chunk sizes
         """
@@ -628,7 +669,7 @@ class BaseStore:
         default_chunks = default_schema.chunks
         secondary_dimensions = default_schema.secondary_dims
 
-        dim_sizes = dict(ds[variable].sizes)
+        dim_sizes = {str(k): v for k, v in ds[variable].sizes.items()}
         var_dtype_bytes = ds[variable].dtype.itemsize
 
         if secondary_dimensions is not None:
@@ -638,38 +679,32 @@ class BaseStore:
 
         # Make the 'chunks' dict, using dim_sizes for any unspecified dims
         specified_chunks = default_chunks if chunks is None else chunks
-        # TODO - revisit this type hinting
-        chunks = dict(dim_sizes, **specified_chunks)  # type: ignore
+
+        chunks = dim_sizes
+        chunks.update(specified_chunks)
 
         # So now we want to check the size of the chunks
         # We need to add in the sizes of the other dimensions so we calculate
         # the chunk size correctly
         # TODO - should we check if the specified chunk size is greater than the dimension size?
-        MB_to_bytes = 1024 * 1024
-        bytes_to_MB = 1 / MB_to_bytes
+        current_chunksize = chunk_size_in_megabytes(var_dtype_bytes, chunks)  # type: ignore
 
-        current_chunksize = int(var_dtype_bytes * math.prod(chunks.values()))  # bytes
-        max_chunk_size_bytes = max_chunk_size * MB_to_bytes
+        if current_chunksize > max_chunk_size:
+            if not auto_scale_to_fit_max_chunk_size:
+                raise ValueError(
+                    f"Chunk size {current_chunksize}MB is greater than the maximum chunk size {max_chunk_size}MB."
+                )
+            new_chunk_size = int(chunks["time"] * max_chunk_size / current_chunksize)
 
-        if current_chunksize > max_chunk_size_bytes:
-            # Do we want to check the secondary dimensions really?
-            # if secondary_dimensions is not None:
-            # raise NotImplementedError("Secondary dimensions scaling not yet implemented")
-            # ratio = np.power(max_chunk_size / current_chunksize, 1 / len(secondary_dimensions))
-            # for dim in secondary_dimensions:
-            #     # Rescale chunks, but don't allow chunks smaller than 10
-            #     chunks[dim] = max(int(ratio * chunks[dim]), 10)
-            # else:
-            raise ValueError(
-                f"Chunk size {current_chunksize * bytes_to_MB} is greater than the maximum chunk size {max_chunk_size}"
-            )
+            if new_chunk_size == 0:
+                other_chunks = {k: v for k, v in chunks.items() if k != "time"}
+                warnings.warn(
+                    f"Cannot satisfy maximum chunksize {max_chunk_size} with chunks {other_chunks}."
+                )
+                new_chunk_size = 1
 
-        # Do we need to supply the chunks of the other dimensions?
-        # rechunk = {k: v for k, v in chunks.items() if v < dim_sizes[k]}
-        # rechunk = {}
-        # for k in dim_sizes:
-        #     if chunks[k] < dim_sizes[k]:
-        #         rechunk[k] = chunks.pop(k)
+            chunks["time"] = new_chunk_size
+
         return chunks
 
     def store_hashes(self, hashes: dict[str, Path]) -> None:
@@ -1283,12 +1318,3 @@ class BaseStore:
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
-
-    def clear_datasources(self) -> None:
-        """Remove all Datasources from the object
-
-        Returns:
-            None
-        """
-        self._datasource_uuids.clear()
-        self._file_hashes.clear()
