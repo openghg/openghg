@@ -17,7 +17,6 @@ from icoscp_core.metaclient import Station
 
 from ._queries import attrs_query, icos_format_info
 
-
 logger = logging.getLogger("openghg.retrieve.icos")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 

@@ -4,7 +4,6 @@ from icoscp_core.icos import meta, ATMO_STATION
 from icoscp_core.queries.stationlist import StationLite
 from icoscp_core.metaclient import Station
 
-
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
