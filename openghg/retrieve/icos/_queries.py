@@ -45,7 +45,7 @@ def sparql_header() -> str:
     """
     Defines the namespace prefixes used in SPARQL queries e.g instead of writing the full
     URI http://meta.icos-cp.eu/ontologies/cpmeta/ you can write cpmeta instead.
-    """ 
+    """
     return """
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
@@ -172,7 +172,7 @@ def make_data_level_filter(data_level: int | None) -> str:
         return ""
 
     try:
-        res = int(data_level) 
+        int(data_level)
     except ValueError:
         raise ValueError(f"data_level must be an int, not a string. Received: '{data_level}'")
 

@@ -504,7 +504,7 @@ def get_attrs_from_header(header: dict) -> dict:
 def get_full_attrs(dobj_uri: str, species: str, header: dict) -> dict:
     """
     Combines the variable attributes from the sparql query with the variable attributes from the text file header.
-    
+
     Args:
         dobj_uri: Data object URI details
         species: Particular species of interest. This will be used
@@ -673,7 +673,7 @@ def make_icos_dataset(
     """
     Converts the parsed timeseries data from a pandas DataFrame into an xarray Dataset and adds
     the attribute information for variables and global variables and attributes about the whole dataset.
-    
+
     Args:
         icos_df: parsed timeseries data.
         attrs: full variables and associated attribute details.
@@ -694,11 +694,11 @@ def make_icos_dataset(
 
 def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
     """
-    get_icos_data takes a dict or row from the "data query" DataFrame and produces 
-    a lightly formated xr.Dataset with attributes. Only works for ATC Product/Flask 
-    time series and netCDF time series formats. Data vars are all "snake case" 
+    get_icos_data takes a dict or row from the "data query" DataFrame and produces
+    a lightly formated xr.Dataset with attributes. Only works for ATC Product/Flask
+    time series and netCDF time series formats. Data vars are all "snake case"
     (e.g. "nb_points" instead of "NbPoints").
-    
+
     Args:
         data_info: takes a dict or row from the "data query" DataFrame.
     Returns:
