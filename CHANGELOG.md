@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.17.0...HEAD)
 
+## [0.17.0] - 2025-02-06
+
+- Progress towards [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds search methods to create Sparql queries to search the ICOS Carbon Portal and returns results as Pandas dataframes. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds methods for directly downloading ICOS text files for ATC time series and ATC flask time series as well as downloading netCDT time series. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+
 ### Added
 
 - Added feature to allow meteorological data in relation to a site to be retrieved from the Copernicus Climate Data Store (CDS) and stored in an object store (data_type="site_met"). [PR #1421](https://github.com/openghg/openghg/pull/1421)
