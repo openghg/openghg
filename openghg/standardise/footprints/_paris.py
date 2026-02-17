@@ -93,8 +93,10 @@ def parse_paris(
 
     if inner_domain:
         dim_reorder: tuple[str, ...] = ("time", "lat", "lon")
+        metadata_domain = f"{domain}-{inner_domain}"
     else:
         dim_reorder = ("time", "height", "lat", "lon")
+        metadata_domain = domain
 
     if time_resolved is True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
@@ -132,7 +134,7 @@ def parse_paris(
         "data_type": "footprints",
         "site": site,
         "satellite": satellite,
-        "domain": domain,
+        "domain": metadata_domain,
         "model": model,
         "obs_region": obs_region,
         "inlet": inlet,

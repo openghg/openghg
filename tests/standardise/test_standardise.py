@@ -1205,5 +1205,5 @@ def test_standardise_6km_footprints():
     assert retrieved_data.metadata["network"] == "ukv"
     assert retrieved_data.metadata["site"] == "imp"
     assert retrieved_data.metadata["height"] == "26m"
-    assert retrieved_data.metadata["domain"] == "europe6km"
+    assert retrieved_data.metadata["domain"] == "europe-6km"
     assert retrieved_data.metadata["inner_domain"] == "6km"
