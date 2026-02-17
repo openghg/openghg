@@ -96,14 +96,15 @@ def test_lock_is_advisory(tmp_path, mocker):
     ms3.close()
 
 
-def test_lock_permissions(get_metastores):
+def test_lock_permissions(tmp_path, get_metastores):
     ms1, ms2 = get_metastores
 
     with ms1:
         ms1.insert({"key": "val"})
 
-    # Getting the bucket from ms1's storage instead of referring to tmp path
-    bucket = ms1._db.storage.storage._bucket
-    permissions = os.stat(get_object_lock_path(bucket, ms1.key)).st_mode
+    bucket = str(tmp_path)
+    
+    # The key is mocked to return "key" in the fixture
+    permissions = os.stat(get_object_lock_path(bucket, "key")).st_mode
 
     assert stat.filemode(permissions) == "-rw-rw-r--"
