@@ -31,7 +31,7 @@ jobs:
         with:
           environment-file: environment.yaml
           cache-environment: true
-          post-cleanup: "none"
+          post-cleanup: "all"
           init-shell: bash
           create-args: >-
             -f environment-dev.yaml
