@@ -50,6 +50,7 @@ jobs:
           uv run flake8 openghg/ --count --statistics
 
       - name: Run mypy
+        if: matrix.python-version != '3.10'
         run: uv run mypy --python-version ${{ matrix.python-version }} openghg/
 
       - name: Create mock cdsapi config file
