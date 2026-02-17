@@ -102,6 +102,7 @@ def test_lock_permissions(tmp_path, get_metastores):
     with ms1:
         ms1.insert({"key": "val"})
 
-    permissions = os.stat(get_object_lock_path(tmp_path, "key")).st_mode
+    lock_path = get_object_lock_path(str(tmp_path), ms1.key)
+    permissions = os.stat(lock_path).st_mode
 
     assert stat.filemode(permissions) == "-rw-rw-r--"
