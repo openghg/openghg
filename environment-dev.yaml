@@ -18,7 +18,7 @@ dependencies:
   - tox>=4.24
 
   # Testing dependencies
-  - pytest>=8.4.2
+  - pytest
   - pytest-cov
   - pytest-mock
   - requests-mock
