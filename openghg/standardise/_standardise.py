@@ -514,7 +514,8 @@ def standardise_footprint(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
-        inner_domain: For nested domains, specify the inner domain (e.g. "6km") to pull out the relevant metadata and assign this as the domain for the footprint data.
+        inner_domain: For nested domains, specify the inner part of the domain (e.g. "6km").
+            When both ``domain`` and ``inner_domain`` are provided, they are combined as ``"{domain}{inner_domain}"`` (e.g. "EUROPE6km") to form the full domain identifier used for the footprint metadata.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
