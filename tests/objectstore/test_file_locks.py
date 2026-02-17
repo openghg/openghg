@@ -99,10 +99,12 @@ def test_lock_is_advisory(tmp_path, mocker):
 def test_lock_permissions(tmp_path, get_metastores):
     ms1, ms2 = get_metastores
 
-    with ms1:
-        ms1.insert({"key": "val"})
-
-    lock_path = get_object_lock_path(str(tmp_path), ms1.key)
-    permissions = os.stat(lock_path).st_mode
-
-    assert stat.filemode(permissions) == "-rw-rw-r--"
+    # Acquire lock to ensure lock file is created and maintained
+    ms1.lock.acquire()
+    try:
+        lock_path = get_object_lock_path(str(tmp_path), ms1.key)
+        assert lock_path.exists(), f"Lock file {lock_path} does not exist"
+        permissions = os.stat(lock_path).st_mode
+        assert stat.filemode(permissions) == "-rw-rw-r--"
+    finally:
+        ms1.lock.release()
