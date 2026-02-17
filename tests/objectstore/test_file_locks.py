@@ -102,9 +102,8 @@ def test_lock_permissions(tmp_path, get_metastores):
     with ms1:
         ms1.insert({"key": "val"})
 
-    bucket = str(tmp_path)
-    
-    # The key is mocked to return "key" in the fixture
-    permissions = os.stat(get_object_lock_path(bucket, "key")).st_mode
+    lock_base = get_object_lock_path(tmp_path, "key")
+    lock_file = lock_base.with_name(lock_base.name + ".lock")  # filelock
+    permissions = os.stat(lock_file).st_mode
 
     assert stat.filemode(permissions) == "-rw-rw-r--"
