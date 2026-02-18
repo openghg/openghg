@@ -6,7 +6,7 @@
 
 package:
   name: "openghg"
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: {{ GIT_TAG }}
 
 source:
   git_url: https://github.com/openghg/openghg.git
@@ -23,6 +23,8 @@ requirements:
   host:
     - pip
     - python
+    - hatchling
+    - uv-dynamic-versioning
     - setuptools
   # These differ slightly from requirements as some
   # packages such as icoscp aren't available on conda
