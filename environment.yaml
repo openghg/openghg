@@ -18,7 +18,7 @@ dependencies:
   - numexpr
   - numpy  # Note numpy >= 2.0 is currently included as a pip requirement below
   - nc-time-axis
-  - openghg_defs==0.0.10
+  - openghg_defs>=0.0.10
   - openpyxl
   - pandas>=2.0,<=2.3.3
   - pip
