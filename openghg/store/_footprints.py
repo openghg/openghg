@@ -282,6 +282,7 @@ class Footprints(BaseStore):
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
         source_format: str | None = None,
+        inner_domain: str | None = None,
     ) -> DataSchema:
         """
         Define schema for footprint Dataset.
@@ -328,6 +329,10 @@ class Footprints(BaseStore):
             "lon": np.floating,
             "time": np.datetime64,
         }
+
+        # Disable particle_locations validation when inner_domain is present
+        if inner_domain:
+            particle_locations = False
 
         if high_time_resolution:
             warnings.warn(

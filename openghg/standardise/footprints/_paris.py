@@ -72,9 +72,9 @@ def parse_paris(
         time_resolved = high_time_resolution
 
     if inner_domain:
-        domain = f"{domain}{inner_domain}"
-
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        alignment_domain = f"{domain}{inner_domain}"
+        domain=f"{domain}-{inner_domain}"
+    xr_open_fn, filepath = open_time_nc_fn(filepath, alignment_domain)
 
     fp_data = xr_open_fn(filepath)
 
@@ -93,10 +93,8 @@ def parse_paris(
 
     if inner_domain:
         dim_reorder: tuple[str, ...] = ("time", "lat", "lon")
-        metadata_domain = f"{domain}-{inner_domain}"
     else:
         dim_reorder = ("time", "height", "lat", "lon")
-        metadata_domain = domain
 
     if time_resolved is True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
@@ -134,7 +132,7 @@ def parse_paris(
         "data_type": "footprints",
         "site": site,
         "satellite": satellite,
-        "domain": metadata_domain,
+        "domain": domain,
         "model": model,
         "obs_region": obs_region,
         "inlet": inlet,
