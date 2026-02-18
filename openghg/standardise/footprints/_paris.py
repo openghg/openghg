@@ -71,11 +71,9 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
-    alignment_domain = domain
     if inner_domain:
-        alignment_domain = f"{domain}{inner_domain}"
         domain = f"{domain}-{inner_domain}"
-    xr_open_fn, filepath = open_time_nc_fn(filepath, alignment_domain)
+    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
 
     fp_data = xr_open_fn(filepath)
 
