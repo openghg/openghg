@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 09, 2026"/>
+    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
   </head>
   
   
@@ -635,6 +635,7 @@ document.write(`
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inner_domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for footprint Dataset.</span>
@@ -681,6 +682,10 @@ document.write(`
             <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
             <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">,</span>
         <span class="p">}</span>
+
+        <span class="c1"># Disable particle_locations validation when inner_domain is present</span>
+        <span class="k">if</span> <span class="n">inner_domain</span><span class="p">:</span>
+            <span class="n">particle_locations</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>

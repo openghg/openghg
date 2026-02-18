@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 09, 2026"/>
+    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
   </head>
   
   
@@ -808,6 +808,7 @@ document.write(`
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inner_domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
 <span class="sd">    the processed data has been assigned to</span>
@@ -867,6 +868,8 @@ document.write(`
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+<span class="sd">        inner_domain: For nested domains, specify the inner part of the domain (e.g. &quot;6km&quot;).</span>
+<span class="sd">            When both ``domain`` and ``inner_domain`` are provided, they are combined as ``&quot;{domain}{inner_domain}&quot;`` (e.g. &quot;EUROPE6km&quot;) to form the full domain identifier used for the footprint metadata. However it is written as {domain}-{inner_domain} in the metadata.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict / None: Dictionary containing confirmation of standardisation process. None</span>
 <span class="sd">        if file already processed.</span>
@@ -921,6 +924,7 @@ document.write(`
         <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
         <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
+        <span class="n">inner_domain</span><span class="o">=</span><span class="n">inner_domain</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
