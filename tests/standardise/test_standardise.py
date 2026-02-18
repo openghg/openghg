@@ -1196,9 +1196,9 @@ def test_standardise_6km_footprints():
                                     chunks={"time": 200, "lat": 200, "lon": 200})
     
     assert "co2" == results[0].get("species")
-    assert "europe6km" in results[0].get("domain")
+    assert "europe-6km" in results[0].get("domain")
 
-    retrieved_data = get_footprint(site=site, model=model, network=network, height=height, domain="EUROPE6KM", store=store)
+    retrieved_data = get_footprint(site=site, model=model, network=network, height=height, domain="EUROPE-6KM", store=store)
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["model"] == "name"
