@@ -32,7 +32,6 @@ from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore,
 from openghg.types import ObjectStoreError
 from openghg.util import split_function_inputs
 
-
 MetaData = dict[str, Any]
 QueryResults = list[MetaData]
 UUID = str
@@ -283,11 +282,11 @@ def _update_one(
     """
     if hasattr(d, "add_metadata") and hasattr(d, "metadata"):
         # update datasource by adding missing metadata
-        d_keys = list(d.metadata().keys())  # type: ignore
+        d_keys = list(d.metadata.keys())  # type: ignore
         to_add = {k: v for k, v in r.items() if k not in d_keys}
         d.add_metadata(metadata=to_add, skip_keys=skip_keys, extend_keys=extend_keys)  # type: ignore
 
-        r.update(d.metadata())  # type: ignore
+        r.update(d.metadata)  # type: ignore
     return r, d
 
 

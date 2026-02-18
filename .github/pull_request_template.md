@@ -10,6 +10,6 @@
 - [ ] Tutorials updated/added
 - [ ] Wiki updated
 - [ ] Added an entry in the latest `CHANGELOG.md` file if fixing a bug or adding a new feature
-- [ ] Added any new requirements to `requirements.txt` and `recipes/meta.yaml`
+- [ ] Added any new package requirements to `pyproject.toml` [dependencies section] and `recipes/meta.yaml`
 
 *Note: if any of the above are not needed for a PR please separate to below and remove the checkbox.*

@@ -5,7 +5,6 @@ from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_me
 from openghg.standardise.meta import attributes_default_keys
 from openghg.standardise.surface import parse_openghg
 
-
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 

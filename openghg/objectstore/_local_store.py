@@ -9,7 +9,6 @@ import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
 
-
 rlock = threading.RLock()
 
 __all__ = [
@@ -471,7 +470,7 @@ def query_store() -> dict:
     data = {}
 
     for d in datasources:
-        metadata = d.metadata()
+        metadata = d.metadata
         result = {
             "site": metadata["site"],
             "species": metadata["species"],
