@@ -36,6 +36,9 @@ jobs:
           create-args: >-
             -f environment-dev.yaml
             python=${{ matrix.python-version }}
+      - name: List installed packages
+        run: micromamba list
+        shell: micromamba-shell {0}
       - name: Install OpenGHG
         run: conda develop .
         shell: micromamba-shell {0}
