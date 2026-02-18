@@ -5,13 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.17.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
 
-## [0.17.0] - 2025-02-06
-
-- Progress towards [PR #1447](https://github.com/openghg/openghg/pull/1447)
-- Adds search methods to create Sparql queries to search the ICOS Carbon Portal and returns results as Pandas dataframes. [PR #1447](https://github.com/openghg/openghg/pull/1447)
-- Adds methods for directly downloading ICOS text files for ATC time series and ATC flask time series as well as downloading netCDT time series. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+## [0.18.0] - 2026-02-18
 
 ### Added
 
@@ -20,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `version` parameter to all `get_*` retrieve functions (`get_obs_surface`, `get_obs_column`, `get_flux`, `get_bc`, `get_footprint`) to enable retrieval of specific data versions instead of always defaulting to the latest version. [PR #1549](https://github.com/openghg/openghg/pull/1549)
 - Implemented `if_exists = "combine"` option for adding data to `Datasource`. This option will now be available when standardising data, so data can be updated. [PR #1548](https://github.com/openghg/openghg/pull/1548)
 - Added the ability to standardise and retrieve 6km footprint data with ability to pass `inner_domain`. [PR #1580](https://github.com/openghg/openghg/pull/1580)
+- Progress towards [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds search methods to create Sparql queries to search the ICOS Carbon Portal and returns results as Pandas dataframes. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds methods for directly downloading ICOS text files for ATC time series and ATC flask time series as well as downloading netCDT time series. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 
 ### Updated
 - `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
