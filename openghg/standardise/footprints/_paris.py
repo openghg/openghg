@@ -71,6 +71,7 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
+    alignment_domain = domain
     if inner_domain:
         alignment_domain = f"{domain}{inner_domain}"
         domain = f"{domain}-{inner_domain}"
