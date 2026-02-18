@@ -537,10 +537,6 @@ class BaseStore:
         """
         validate_params = self.find_data_schema_inputs()
 
-        # Disable particle_locations validation when inner_domain is present
-        if fn_input_parameters.get("inner_domain"):
-            fn_input_parameters["particle_locations"] = False
-
         if filepath is not None:
             filepaths = normalise_to_filepath_list(filepath)
         # Current workflow: if any datasource fails validation, whole filepath fails
