@@ -73,7 +73,7 @@ def parse_paris(
 
     if inner_domain:
         alignment_domain = f"{domain}{inner_domain}"
-        domain=f"{domain}-{inner_domain}"
+        domain = f"{domain}-{inner_domain}"
     xr_open_fn, filepath = open_time_nc_fn(filepath, alignment_domain)
 
     fp_data = xr_open_fn(filepath)
