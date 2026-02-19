@@ -5,7 +5,6 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
-
 __all__ = ["SiteMet"]
 
 logger = logging.getLogger("openghg.store")

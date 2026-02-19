@@ -11,7 +11,6 @@ from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactor
 from openghg.objectstore._objectstore import ObjectStore
 from openghg.types import ObjectStoreError
 
-
 MetaData = dict[str, Any]
 QueryResults = list[Any]
 UUID = str

@@ -135,9 +135,9 @@ store_names = [
 ]
 
 
-#------------------------------
+# ------------------------------
 # TESTS
-#------------------------------
+# ------------------------------
 
 
 # To use fixtures in parametrize, use the "request" fixture, as detailed here:
@@ -275,9 +275,7 @@ def test_update_ignore_nonoverlaps(store_name, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize(
-    "store_name", store_names
-)
+@pytest.mark.parametrize("store_name", store_names)
 def test_non_contiguous_update(store_name, request, ds1, twice_ds2):
     """Test `update` when only some of the values are updated.
 

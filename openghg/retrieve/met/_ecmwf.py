@@ -28,15 +28,13 @@ def check_cds_access() -> None:
     Print instructions to access the Copernicus Data Store API and check that the user has access.
     (could be moved to utils._met.py?)
     """
-    print(
-        """To access data through the Copernicus API:
+    print("""To access data through the Copernicus API:
           (instructions: Follow the instructions here https://cds.climate.copernicus.eu/how-to-api)
           1. Register/log-in to Copernicus
           2. from your profile, copy the url and key
           3. copy them into a file on /user/home/ab12345/.cdsapi
           4. ensure the cdsapi library is installed
-          """
-    )
+          """)
     try:
         _ = cdsapi.Client()
     except Exception as e:

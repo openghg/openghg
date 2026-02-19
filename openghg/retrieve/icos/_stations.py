@@ -1,13 +1,14 @@
 import logging
+from functools import lru_cache
 from icoscp_core.icos import meta, ATMO_STATION
 from icoscp_core.queries.stationlist import StationLite
 from icoscp_core.metaclient import Station
-
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+@lru_cache
 def retrieve_list_stations(atmospheric: bool = True, country_code: str | None = None) -> list[StationLite]:
     """
     Return list of Station objects available from ICOS.

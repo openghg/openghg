@@ -123,7 +123,7 @@ def retrieve(
         # open_dataset - https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html
         # 27/07/2022: file-like (including BytesIO) isn't included in the accepted types
         #  - Union[str, PathLike[Any], AbstractDataStore]
-        dataset = xr.open_dataset(buf).load()  # type:ignore
+        dataset = xr.open_dataset(buf).load()  # type: ignore
 
     # We expect to be dealing with timeseries data here
     # We'll take the attributes as metadata

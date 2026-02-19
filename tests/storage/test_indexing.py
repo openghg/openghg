@@ -3,12 +3,18 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.storage._indexing import _alignment_indexers, _alignment_indexers_non_monotonic_target, alignment_indexers, contiguous_regions, is_monotonic, OverlapDeterminer
+from openghg.storage._indexing import (
+    _alignment_indexers,
+    _alignment_indexers_non_monotonic_target,
+    alignment_indexers,
+    contiguous_regions,
+    is_monotonic,
+    OverlapDeterminer,
+)
 
-
-#------------------------------
+# ------------------------------
 # OverlapDeterminer tests
-#------------------------------
+# ------------------------------
 
 
 @pytest.fixture()
@@ -64,9 +70,9 @@ def test_select_overlaps_nonoverlaps(cd_datetime_nearest_1min):
     xr.testing.assert_equal(ds.isel(time=[2, 4]), cd_datetime_nearest_1min.select_nonoverlaps(ds, "time"))
 
 
-#----------------------------------------
+# ----------------------------------------
 # Alignment and contiguous regions tests
-#----------------------------------------
+# ----------------------------------------
 
 
 # TODO: make a more diverse set of test indexes
@@ -82,21 +88,21 @@ def indexes():
 
 
 @pytest.mark.parametrize(
-        ("expect_error", "align_func", "align_kwargs"),
-        [
-            (True, _alignment_indexers, {}),
-            (True, _alignment_indexers, {"method": "nearest"}),
-            (True, _alignment_indexers, {"method": "ffill"}),
-            (True, _alignment_indexers, {"method": "bfill"}),
-            (False, _alignment_indexers_non_monotonic_target, {}),
-            (False, _alignment_indexers_non_monotonic_target, {"method": "nearest"}),
-            (False, _alignment_indexers_non_monotonic_target, {"method": "ffill"}),
-            (False, _alignment_indexers_non_monotonic_target, {"method": "bfill"}),
-            (False, alignment_indexers, {}),
-            (False, alignment_indexers, {"method": "nearest"}),
-            (False, alignment_indexers, {"method": "ffill"}),
-            (False, alignment_indexers, {"method": "bfill"}),
-        ]
+    ("expect_error", "align_func", "align_kwargs"),
+    [
+        (True, _alignment_indexers, {}),
+        (True, _alignment_indexers, {"method": "nearest"}),
+        (True, _alignment_indexers, {"method": "ffill"}),
+        (True, _alignment_indexers, {"method": "bfill"}),
+        (False, _alignment_indexers_non_monotonic_target, {}),
+        (False, _alignment_indexers_non_monotonic_target, {"method": "nearest"}),
+        (False, _alignment_indexers_non_monotonic_target, {"method": "ffill"}),
+        (False, _alignment_indexers_non_monotonic_target, {"method": "bfill"}),
+        (False, alignment_indexers, {}),
+        (False, alignment_indexers, {"method": "nearest"}),
+        (False, alignment_indexers, {"method": "ffill"}),
+        (False, alignment_indexers, {"method": "bfill"}),
+    ],
 )
 def test_alignment_of_index_to_shuffle_of_itself(expect_error, align_func, align_kwargs, indexes):
     """Check if we can align an index to a shuffled version of itself.
@@ -155,7 +161,9 @@ def test_alignment_with_tolerances(indexes):
             idx_perturb = idx.values + perturbation
 
             _, idxer = _alignment_indexers_non_monotonic_target(idx, idx_shuf)
-            _, idxer_perturb = _alignment_indexers_non_monotonic_target(idx_perturb, idx_shuf, method="nearest", tolerance=pd.Timedelta("0.5h"), limit=1)
+            _, idxer_perturb = _alignment_indexers_non_monotonic_target(
+                idx_perturb, idx_shuf, method="nearest", tolerance=pd.Timedelta("0.5h"), limit=1
+            )
 
             np.testing.assert_equal(idxer, idxer_perturb)
 

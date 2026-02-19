@@ -17,26 +17,26 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install openghg
-        run: |
-          pip install --upgrade pip wheel setuptools
-          pip install .
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install project with doc extras
+        run: uv sync --extra doc
+
 
       - name: Setup default config
-        run: openghg --default-config
+        run: uv run openghg --default-config
 
-      - name: Install pandoc and requirements
-        run: |
-          sudo apt-get install -yq pandoc
-          pip install -r requirements-doc.txt
+      - name: Install pandoc
+        run: sudo apt-get install -y pandoc
 
       - name: Build documentation
         run: |
           cd doc
-          make
+          uv run make html
 
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: documentation-html
           path: doc/build/html

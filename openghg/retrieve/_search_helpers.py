@@ -9,7 +9,6 @@ import numpy as np
 from openghg.util import extract_float
 from openghg.types import Comparable
 
-
 T = TypeVar("T", bound=Comparable)  # types with <=
 
 
@@ -209,7 +208,7 @@ def define_list_search() -> list:
 
 
 @overload
-def convert_to_slice(input: str | float | int | slice, rel_tolerance: float = 1e-6) -> slice: ...
+def convert_to_slice(input: str | float | int | slice, rel_tolerance: float = 1e-6) -> slice | str: ...
 
 
 @overload
@@ -217,12 +216,14 @@ def convert_to_slice(input: None, rel_tolerance: float = 1e-6) -> None: ...
 
 
 @overload
-def convert_to_slice(input: list[str | slice | None], rel_tolerance: float = 1e-6) -> list[slice | None]: ...
+def convert_to_slice(
+    input: list[str | slice | None], rel_tolerance: float = 1e-6
+) -> list[slice | str | None]: ...
 
 
 def convert_to_slice(
     input: int | float | str | slice | None | list[str | slice | None], rel_tolerance: float = 1e-6
-) -> slice | None | list[slice | None]:
+) -> slice | str | None | list[slice | str | None]:
     """
     Convert input into a slice with within the centre of a relative tolerance.
 
@@ -247,6 +248,12 @@ def convert_to_slice(
         return [convert_to_slice(x) for x in input]
 
     if isinstance(input, str):
+        # Check if this is a special keyword that should not be converted to a slice
+        # These are special inlet values like "column" (for satellite data) or "multiple"
+        special_keywords = ["multiple", "column"]
+        if input in special_keywords:
+            return input
+
         input = extract_float(input)
 
     lower = input - input * rel_tolerance / 2

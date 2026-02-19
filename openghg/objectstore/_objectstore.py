@@ -32,7 +32,6 @@ from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore,
 from openghg.types import ObjectStoreError
 from openghg.util import split_function_inputs
 
-
 MetaData = dict[str, Any]
 QueryResults = list[MetaData]
 UUID = str

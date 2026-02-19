@@ -17,7 +17,6 @@ from icoscp_core.metaclient import Station
 
 from ._queries import attrs_query, icos_format_info
 
-
 logger = logging.getLogger("openghg.retrieve.icos")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -502,7 +501,18 @@ def get_attrs_from_header(header: dict) -> dict:
 
 
 def get_full_attrs(dobj_uri: str, species: str, header: dict) -> dict:
-    """ """
+    """
+    Combines the variable attributes from the sparql query with the variable attributes from the text file header.
+
+    Args:
+        dobj_uri: Data object URI details
+        species: Particular species of interest. This will be used
+            to select details just related to that species if the data
+            is related to more than one species.
+        header: Dictionary for variable attributes based on the header
+    Returns:
+        dict: Dictionary for the variables and associated attributes
+    """
     attrs = get_data_attrs(dobj_uri, species)
     for k, v in get_attrs_from_header(header).items():
         attrs[k]["description"] = v
@@ -524,7 +534,10 @@ def parse_date_columns(df: pd.DataFrame) -> tuple[list[str], pd.Series]:
 
 
 def icos_format_to_dtype(value_format: str) -> np.dtype | None:
-    """ """
+    """Convert ICOS-specific format strings into NumPy data types.
+
+    Returns NumPy data types of ICOS-specific format strings.
+    """
     # adapted from icoscp_core.cpb._type_post_process
     icos_format_to_dtype_dict = {
         "bmpChar": np.dtype("U1"),
@@ -656,7 +669,17 @@ def parse_icos_atc_flask_time_series_text(
 def make_icos_dataset(
     icos_df: pd.DataFrame, attrs: dict | None = None, global_attrs: dict | None = None
 ) -> xr.Dataset:
-    """ """
+    """
+    Converts the parsed timeseries data from a pandas DataFrame into an xarray Dataset and adds
+    the attribute information for variables and global variables and attributes about the whole dataset.
+
+    Args:
+        icos_df: parsed timeseries data.
+        attrs: full variables and associated attribute details.
+        global_attrs: global variables and associated attributes.
+    Returns:
+        xr.Dataset: x array dataset of parsed timeseries data with associated attribute information.
+    """
     attrs = attrs or {}
     attrs = {camel_to_snake(k): v for k, v in attrs.items()}
     icos_df.columns = [camel_to_snake(col) for col in icos_df.columns]
@@ -669,7 +692,17 @@ def make_icos_dataset(
 
 
 def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
-    """ """
+    """
+    get_icos_data takes a dict or row from the "data query" DataFrame and produces
+    a lightly formated xr.Dataset with attributes. Only works for ATC Product/Flask
+    time series and netCDF time series formats. Data vars are all "snake case"
+    (e.g. "nb_points" instead of "NbPoints").
+
+    Args:
+        data_info: takes a dict or row from the "data query" DataFrame.
+    Returns:
+        xr.Dataset: x array dataset of parsed timeseries data with associated attribute information.
+    """
     # find format
     fmt = _retrieve_dobj_format(data_info)
 

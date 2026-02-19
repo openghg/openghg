@@ -110,7 +110,7 @@ def regrid_uniform_cc(
         ndarray / DataArray : Regridded data using specified method
     """
     try:
-        import xesmf  # type:ignore
+        import xesmf  # type: ignore
     except ImportError as e:
         raise ImportError(construct_xesmf_import_error(e))
 
