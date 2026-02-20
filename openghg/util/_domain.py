@@ -321,7 +321,7 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
     if len(coords_in) != len(true_coords):
         raise ValueError(f"length of {coord} coordinates does not match those in openghg {domain} domain")
 
-    if not np.allclose(coords_in, true_coords, atol=0, rtol=0.05):
+    if not np.allclose(coords_in, true_coords, atol=1e-5, rtol=0.05):
         raise ValueError(
             f"input {coord} coordinates vary significantly from openghg {domain} domain. Please check correct domain and coordinates selected"
         )
