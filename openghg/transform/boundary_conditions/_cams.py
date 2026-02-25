@@ -102,7 +102,7 @@ def cams_to_domain(
         lon = fp["lon"].values
         height = fp["height"].values
     else:
-        lat, lon = find_domain(domain)
+        lat, lon = find_domain(domain)[:2]
         height = np.linspace(500.0, 19500.0, 20, endpoint=True)
 
     lat_n = ds.lat.where(ds.lat > lat.max()).min()
