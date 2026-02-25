@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Updated the value of `atol` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
+- Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
 ## [0.18.0] - 2026-02-18
 
 ### Added
