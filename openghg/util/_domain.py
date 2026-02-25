@@ -33,7 +33,9 @@ def get_domain_info(domain_filepath: pathType | None = None) -> dict[str, Any]:
     return domain_info_json
 
 
-def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[ndarray, ndarray, float, float]:
+def find_domain(
+    domain: str, domain_filepath: pathType | None = None
+) -> tuple[ndarray, ndarray, float, float]:
     """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
@@ -325,7 +327,7 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
     if len(coords_in) != len(true_coords):
         raise ValueError(f"length of {coord} coordinates does not match those in openghg {domain} domain")
 
-    if not np.allclose(coords_in, true_coords, atol=0.4*true_increment, rtol=0):
+    if not np.allclose(coords_in, true_coords, atol=0.4 * true_increment, rtol=0):
         raise ValueError(
             f"input {coord} coordinates vary significantly from openghg {domain} domain. Please check correct domain and coordinates selected"
         )
