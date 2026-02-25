@@ -528,7 +528,7 @@ def test_standardise_align_footprint():
 
     data = get_footprint(site=site, network=network, height=height, domain=domain, model=model)
 
-    true_lats, true_lons = find_domain(domain=domain)
+    true_lats, true_lons = find_domain(domain=domain)[:2]
 
     assert np.array_equal(data.data.lat.values, true_lats)
     assert np.array_equal(data.data.lon.values, true_lons)

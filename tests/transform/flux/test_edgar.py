@@ -114,7 +114,7 @@ def test_parse_edgar_domain():
 
     from openghg.util import find_domain
 
-    domain_lat, domain_lon = find_domain(domain)
+    domain_lat, domain_lon = find_domain(domain)[:2]
 
     np.testing.assert_array_equal(data["lat"].values, domain_lat)
     np.testing.assert_array_equal(data["lon"].values, domain_lon)
