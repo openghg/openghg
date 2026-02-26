@@ -466,7 +466,7 @@ def _check_lat_lon(
         # If domain is specified, attempt to extract lat/lon values from
         # pre-defined definitions.
         try:
-            lat_domain, lon_domain = find_domain(domain)
+            lat_domain, lon_domain = find_domain(domain)[:2]
         except ValueError:
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
