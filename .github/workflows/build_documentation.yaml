@@ -36,7 +36,7 @@ jobs:
           uv run make html
 
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: documentation-html
           path: doc/build/html
