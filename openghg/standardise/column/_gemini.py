@@ -142,7 +142,7 @@ def parse_gemini(
     attributes["network"] = "GEMINI"
     attributes["platform"] = "site"
     attributes["inlet"] = "column"
-    attributes["calibration_scale"] = "unkown"
+    attributes["calibration_scale"] = "unknown"
 
     attributes["data_owner"] = "Neil Humpage"
     attributes["data_owner_email"] = "nh58@leicester.ac.uk"
