@@ -321,6 +321,7 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
+        version=version,
         **kwargs,
     )
     # column_keywords.update(kwargs)
