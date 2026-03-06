@@ -324,6 +324,13 @@ def get_obs_column(
         version=version,
         **kwargs,
     )
+    # column_keywords.update(kwargs)
+
+    # obs_data = _get_generic(**column_keywords)
+
+    # check if data set is empty
+    if obs_data.data.sizes["time"] == 0:
+        raise SearchError("Dataset is empty for obs. Please check the supplied args.")
 
     if return_mf:
         if max_level > max(obs_data.data.lev.values) + 1:
@@ -356,7 +363,8 @@ def get_obs_column(
         )
         obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
+        for var in ["mf", "mf_prior_factor", "mf_prior_upper_level_factor", "mf_repeatability"]:
+            obs_data.data[var].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             f"x{species}",
