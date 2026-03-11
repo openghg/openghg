@@ -256,6 +256,11 @@ def get_obs_surface(
 
     obs_data = ObsData(data=data, metadata=metadata)
 
+    if obs_data.data["time"].size == 0:
+        err_msg = "After retrieval and filtering, data has no entries on the time axis."
+        logger.exception(err_msg)
+        raise SearchError(err_msg)
+
     return obs_data
 
 
