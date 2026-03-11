@@ -86,6 +86,7 @@ def test_read_file_monthly():
         domain="EUROPE",
         period="monthly",
         force=True,
+        if_exists="new",
     )
 
     assert len(proc_results) == 1
