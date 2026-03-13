@@ -122,14 +122,14 @@ def regrid_uniform_cc(
         lon_in_extracted = data[latlon[1]].values
 
         if lat_in is not None:
-            if not np.isclose(lat_in, lat_in_extracted):
+            if not np.isclose(lat_in, lat_in_extracted).all():
                 raise ValueError(
                     "Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lat_out' have been supplied correctly as well."
                 )
 
         if lon_in is not None:
-            if not np.isclose(lon_in, lon_in_extracted):
+            if not np.isclose(lon_in, lon_in_extracted).all():
                 raise ValueError(
                     "Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
                     "Please check 'lon_out' has been supplied correctly as well."
@@ -158,6 +158,18 @@ def regrid_uniform_cc(
     output_grid = _create_uniform_coords(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
+
+    # xesmf sparse matrix multiplication warns if the input array is not C-contiguous.
+    # This can happen after xarray slicing operations (e.g. .sel()) which produce views,
+    # or when the data uses Fortran memory ordering. Ensure C-contiguous layout to avoid
+    # the performance warning.
+    if isinstance(data, xr.DataArray):
+        values = data.values
+        if not values.flags["C_CONTIGUOUS"]:
+            data = data.copy(data=np.ascontiguousarray(values))
+    elif isinstance(data, np.ndarray):
+        data = np.ascontiguousarray(data)
+
     regridded: ArrayLikeMatch = regridder(data)
 
     # # 09/03/2023: Don't need this for uniform grid anymore due to changes above
