@@ -365,6 +365,83 @@ def open_object_store(
         yield object_store
 
 
+@contextmanager
+def open_multi_object_store(
+    buckets: str | list[str] | None = None,
+    data_types: str | list[str] | None = None,
+    bucket_data_type_pairs: tuple[str, str] | list[tuple[str, str]] | None = None,
+    suppress_object_store_errors: bool = False,
+) -> Generator[ObjectStore[Datasource, xr.Dataset], None, None]:
+    """Open a read-only ObjectStore spanning multiple object stores and data types.
+
+    Equivalent to calling `open_object_store` for each (bucket, data_type) pair and
+    combining the results, but more efficient as it reads all metastores simultaneously.
+
+    Search results include ``object_store``, ``data_type``, ``object_store_name``, and
+    ``multi_uuid`` fields to identify the provenance of each record.  Datasource access
+    via ``get_datasource`` is routed to the appropriate per-store factory based on those
+    fields.
+
+    Args:
+        buckets: bucket name or list of bucket names to open.  If ``None``, all readable
+            buckets from the user configuration are used.
+        data_types: data type or list of data types to open.  If ``None``, all registered
+            data types are used.
+        bucket_data_type_pairs: explicit list of ``(bucket, data_type)`` pairs.  When
+            provided, ``buckets`` and ``data_types`` are ignored.
+        suppress_object_store_errors: if ``True``, errors raised while opening individual
+            metastores (e.g. because a data type has no data in a particular bucket) are
+            silently suppressed.
+
+    Yields:
+        Read-only :class:`ObjectStore` wrapping the combined multi-store metastore.
+    """
+    from openghg.objectstore.metastore._classic_metastore import open_multi_metastore
+
+    with open_multi_metastore(
+        buckets=buckets,
+        data_types=data_types,
+        bucket_data_type_pairs=bucket_data_type_pairs,
+        suppress_object_store_errors=suppress_object_store_errors,
+    ) as ms:
+        # Cache uuid -> (object_store, data_type) to avoid repeated metastore lookups.
+        uuid_to_store: dict[UUID, tuple[str, str]] = {}
+
+        class _RoutingDatasourceFactory(DatasourceFactory[Datasource]):
+            """DatasourceFactory that routes to the correct per-store factory.
+
+            The target store is determined by looking up the ``object_store`` and
+            ``data_type`` fields that ``open_multi_metastore`` adds to every record.
+            """
+
+            def load(self, uuid: UUID) -> Datasource:
+                if uuid not in uuid_to_store:
+                    results = ms.search({"uuid": uuid})
+                    if not results:
+                        raise ObjectStoreError(f"UUID {uuid} not found in any store.")
+                    result = results[0]
+                    object_store = result.get("object_store", "")
+                    data_type = result.get("data_type", "")
+                    if not object_store:
+                        raise ObjectStoreError(
+                            f"Cannot determine store for UUID {uuid}: 'object_store' field missing."
+                        )
+                    uuid_to_store[uuid] = (object_store, data_type)
+                object_store, data_type = uuid_to_store[uuid]
+                factory = get_legacy_datasource_factory(
+                    bucket=object_store, data_type=data_type or "", mode="r"
+                )
+                return factory.load(uuid)
+
+            def new(self, uuid: UUID) -> Datasource:
+                raise ObjectStoreError(
+                    "Cannot create a new Datasource via open_multi_object_store: store is read-only."
+                )
+
+        routing_factory = _RoutingDatasourceFactory(datasource_class=Datasource)
+        yield ObjectStore[Datasource, xr.Dataset](metastore=ms, datasource_factory=routing_factory)
+
+
 def get_datasource(bucket: str, uuid: str, data_type: str | None = None) -> Datasource:
     """Open Datasource with given bucket and uuid.
 
