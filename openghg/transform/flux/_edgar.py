@@ -338,7 +338,23 @@ def parse_edgar(
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+    if em_time.size > 1:
+        # For multi-timestep EDGAR data, pd.infer_freq may not detect the frequency
+        # from irregular monthly timestamps (e.g. mid-month values like the 15th of each month).
+        # Use continuous=False so infer_date_range does not raise an error in this case.
+        # Detect monthly data by checking that all consecutive time differences fall within
+        # the valid range for calendar months (28-31 days).
+        if period is None:
+            time_ns = em_time.values.astype("datetime64[ns]")
+            delta_ns = np.diff(time_ns.view("int64"))
+            delta_days = delta_ns / 1e9 / 86400  # nanoseconds to days
+            if len(delta_days) > 0 and all(28 <= d <= 31 for d in delta_days):
+                period = "monthly"
+        start_date, end_date, period_str = infer_date_range(
+            em_time, filepath=edgar_file.name, period=period, continuous=False
+        )
+    else:
+        start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
 
     prior_info_dict = {
         "EDGAR": {
