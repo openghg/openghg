@@ -1,6 +1,8 @@
 import datetime
 import pandas as pd
+import xarray as xr
 import pytest
+
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
 from openghg.retrieve import search_surface
@@ -8,16 +10,26 @@ from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
 
-@pytest.mark.icos
+# @pytest.mark.icos
 def test_icos_retrieve_skips_datalevel_1_csv_files():
+    '''Check level 1 data retrieved data using icoscp_core as expected'''
+    clear_test_stores()
+
     retrieved_data = retrieve_atmospheric(
-        site="BIR", species="co2", store="user", data_level=1, update_mismatch="metadata"
+        site="BIR",
+        species="co2",
+        store="user",
+        data_level=1,
+        update_mismatch="metadata",
+        retrieve_method="icoscp_core",
     )
 
+    # not sure why did has changed from 3 to 6
     assert len(retrieved_data) == 3
 
     first_obs = retrieved_data[0]
 
+    #expected data with icoscp_core
     expected_metadata = {
         "species": "co2",
         "network": "icos",
@@ -26,8 +38,8 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
         "source_format": "icos",
         "data_level": "1",
         "site": "bir",
-        "inlet": "10m",
-        "inlet_height_magl": "10",
+        "inlet": "10.0m",  # UPDATED
+        "inlet_height_magl": "10.0",  # UPDATED
         "instrument": "co2-ch4-co-h2o picarro analyzer",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
@@ -37,7 +49,7 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
         "station_latitude": 58.3886,
         "station_long_name": "birkenes observatory, norway",
         "station_height_masl": 219.0,
-        "dataset_source": "ICOS",
+        "dataset_source": "icos",  # UPDATED
     }
 
     assert expected_metadata.items() <= first_obs.metadata.items()
@@ -47,6 +59,8 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
 @pytest.mark.icos
 def test_icos_retrieve_stores_by_data_level():
     """Check that retrieving data with different levels creates different datasources."""
+    clear_test_stores()
+
     retrieve_atmospheric(
         site="BIR",
         species=["CH4"],
@@ -94,8 +108,9 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #     "station_height_masl": 31.0,
 
     # Results from ICOS on 07/08/2024
+    #updated from results on 12/03/2026, (as default not retrieving using icsoscp_core now)
     expected_metadata = {
-        # "station_long_name": "weybourne observatory, uk",
+
         "station_long_name": "wao",
         "station_latitude": 52.9504,
         "station_longitude": 1.1219,
@@ -106,20 +121,27 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "source_format": "icos",
         "data_level": "2",
         "site": "wao",
-        "inlet": "10m",
-        "inlet_height_magl": "10",
+        "inlet": "10.0m", # UPDATED 12/03/2026
+        "inlet_height_magl": "10.0", # UPDATED 12/03/2026
         "instrument": "multiple",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
         # "data_owner": "andrew manning",
         # "data_owner_email": "a.manning@uea.ac.uk",
         "station_height_masl": 17.0,
-        "dataset_source": "ICOS",
+        "dataset_source": "icos",# UPDATED 12/03/2026
     }
 
     all_keys = set(expected_metadata.keys()).union(set(meta1.keys()))
     for key in all_keys:
         print(f"{key:<20}{expected_metadata.get(key, 'None'):<20}{meta1.get(key, 'None'):<20}")
+
+    for md in expected_metadata:
+        print(md)
+        print(expected_metadata[md])
+        print(meta1[md])
+        print(" ")
+
 
     assert expected_metadata.items() <= meta1.items()
     assert "data_owner" in meta1 and "data_owner_email" in meta1
@@ -158,6 +180,8 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
 @pytest.fixture
 def mock_retrieve_remote(mocker):
+    clear_test_stores()
+
     mock_metadata = {
         "species": "ch4",
         "site": "tac",
@@ -235,10 +259,423 @@ def test_retrieve_sac_data_update_attrs_with_bool():
 
 
 @pytest.mark.icos
-def test_icos_obspack():
+def test_retrieve_icos_obspack():
     """Test the combined obspack data retrieval"""
+    clear_test_stores()
+
     retrieved_data = retrieve_atmospheric(
         site="ZEP", species="co2", dataset_source="ICOS Combined", update_mismatch="from_source", store="user"
     )
 
     assert "icos_smr" in retrieved_data.data
+
+
+@pytest.mark.icos
+def test_retrieve_icos_fast_track():
+    """
+    Test retrieving ICOS FastTrack data
+    e.g. data from https://meta.icos-cp.eu/objects/8Z63_p2hCt_hkvoDrB2l62v7
+    """
+    clear_test_stores()
+
+    retrieved_data = retrieve_atmospheric(
+        site="ZEP",
+        species="co",
+        data_level=1,
+        dataset_source="ICOS FastTrack",
+        update_mismatch="from_source",
+        store="user",
+    )
+
+    assert len(retrieved_data) == 1
+
+    expected_metadata = {
+        'station_long_name': 'zeppelin',
+        'station_latitude': '78.9072 n',
+        'station_longitude': '11.8867 e',
+        'site': 'zep',
+        'species': 'co',
+        'network': 'icos',
+        'data_type': 'surface',
+        'data_source': 'icoscp',
+        'source_format': 'icos',
+        'data_level': '1',
+        'inlet': '15.0m',
+        'inlet_height_magl': '15.0',
+        'instrument': 'co2-ch4-co-h2o picarro analyzer',
+        'sampling_period': 'not_set',
+        'calibration_scale': 'unknown',
+      #  'data_owner': 'chris lunder; ove hermansen',
+     #   'data_owner_email': 'crl@nilu.no; oh@nilu.no',
+        'station_height_masl': 474.0,
+        'dataset_source': 'ICOS FastTrack'
+        }
+
+    assert expected_metadata.items() <= retrieved_data.metadata.items()
+    assert "data_owner" in retrieved_data.metadata and "data_owner_email" in retrieved_data.metadata
+
+
+
+
+@pytest.mark.icos
+def test_retrieve_icos_eye_ave_par():
+    """
+    Test retrieving "EYE-AVE-PAR" corner case data
+    e.g. data from https://meta.icos-cp.eu/objects/UPjrc-zEsT-Uvwaj61thPSbA
+    """
+    clear_test_stores()
+
+#got to be careful here as if already loaded data it looks at other retrieved data
+    retrieved_data = retrieve_atmospheric(
+        site="RGL",
+        species="n2o",
+        data_level=2,
+        dataset_source="EYE-AVE-PAR",
+        update_mismatch="from_source",
+        store="user",
+        retrieve_method="icoscp_core",
+    )
+
+    assert len(retrieved_data) == 1
+
+    expected_metadata = {
+        'station_long_name': 'ridge hill',
+        'station_latitude': 51.99747,
+        'station_longitude': -2.53992,
+        'site': 'rgl',
+        'species': 'n2o',
+        'network': 'icos',
+        'data_type': 'surface',
+        'data_source': 'icoscp',
+        'source_format': 'icos',
+        'data_level': '2',
+        'inlet': '90m',
+        'inlet_height_magl': '90',
+        'instrument': 'na',
+        'sampling_period': 'not_set',
+        'calibration_scale': 'unknown',
+        #'data_owner': "joseph pitt; kieran stanley; simon o'doherty; kieran stanley",
+        #'data_owner_email': 'joseph.pitt@bristol.ac.uk; k.m.stanley@bristol.ac.uk; s.odoherty@bristol.ac.uk; k.m.stanley@bristol.ac.uk',
+        'station_height_masl': 207.0,
+        'dataset_source': 'EYE-AVE-PAR'
+        }
+
+    assert expected_metadata.items() <= retrieved_data.metadata.items()
+    assert "data_owner" in retrieved_data.metadata and "data_owner_email" in retrieved_data.metadata
+
+
+# %% Compare retrieve_method="icoscp_core" which makes use of icoscp_core and
+# previous retrieve_method="dobj" method which made use of the previous icoscp framework
+# including Dobj interface.
+# The "dobj"  method is deprecated in favour of "icoscp_core" but has been kept to
+# allow comparison between the outputs and is still supported for the moment.
+# These tests can be removed if this option is fully deprecated and no longer supported.
+
+
+# @pytest.mark.icos
+def test_retrieve_icos_standard_compare():
+    """
+    Compare icoscp_core and previous dobj method for standard text file download.
+    """
+
+    clear_test_stores()
+
+    params = {
+        "site": "BIR",
+        "species": "co2",
+        "data_level": 1,
+        "update_mismatch": "metadata",
+       # "store": "user",
+    }
+
+   # retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", store="dobj", **params)
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj", store="group", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", store="user", force_retrieval=True, **params)
+
+    assert len(retrieved_data_dobj) == len(retrieved_data)
+
+    for obs_dobj, obs in zip(retrieved_data_dobj, retrieved_data):
+
+        data_dobj = obs_dobj.data
+        data = obs.data
+
+        # Check time values match
+        time_org = data_dobj.time
+        time_new = data.time
+        xr.testing.assert_allclose(time_org, time_new)
+
+        # Check data variables from dobj method match against new data
+        # This allows for new data to contain more variables if needed
+
+        for dv in data_dobj.data_vars:
+            xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+        # Check attribute variables from dobj method match against new data
+        # This allows for new data to contain more variables if needed
+        assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
+        for at in data_dobj.attrs:
+            if at not in ['data_owner','data_owner_email','units','sampling_height','inlet','inlet_height_magl','station_latitude','station_longitude','dataset_source','file_created']:
+                assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+        #ask Joe about file_created as seems to be file_created when using openghg
+
+            if at in ['units']:
+                print(data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹'))
+                assert data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹')} != {data.attrs[at]}"
+
+
+            if at in ['sampling_height']:
+                assert data_dobj.attrs[at].replace('m','.0m') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m','.0m')} != {data.attrs[at]}"
+
+            if at in ['inlet']:
+                assert data_dobj.attrs[at].replace('m','.0m') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m','.0m')} != {data.attrs[at]}"
+
+            if at in ['inlet_height_magl']:
+                assert data_dobj.attrs[at] + ".0" == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at] + '.0' } != {data.attrs[at]}"
+
+
+            if at in ['station_latitude']:
+                assert float(data_dobj.attrs[at]) == data.attrs[at], f"Attribute {at} mismatch: {float(data_dobj.attrs[at])} != {data.attrs[at]}"
+
+            if at in ['station_longitude']:
+                assert float(data_dobj.attrs[at]) == data.attrs[at], f"Attribute {at} mismatch: {float(data_dobj.attrs[at])} != {data.attrs[at]}"
+
+            if at in ['dataset_source']:
+                assert data_dobj.attrs[at].lower() == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].lower()} != {data.attrs[at]}"
+
+        # Check metadata variables from dobj method match against new data
+        # This allows for new data to contain more variables if needed
+
+        metadata_dobj = obs_dobj.metadata
+        metadata = obs.metadata
+        assert "data_owner" in metadata_dobj and "data_owner_email" in metadata_dobj
+        for md in metadata_dobj:
+
+            if md not in ['data_owner','data_owner_email','inlet','inlet_height_magl','dataset_source']:
+                assert metadata_dobj[md] == metadata[md], f"Metadata {md} mismatch: {metadata_dobj[md]} != {metadata[md]}"
+
+            if md in ['inlet']:
+                assert metadata_dobj[md].replace('m','.0m') == metadata[md], f"Metadata {md} mismatch: {metadata_dobj[md].replace('m','.0m')} != {metadata[md]}"
+
+            if md in ['inlet_height_magl']:
+                assert metadata_dobj[md] + ".0" == metadata[md], f"Metadata {md} mismatch: {metadata_dobj[md] + '.0' } != {metadata[md]}"
+
+            if md in ['dataset_source']:
+                assert metadata_dobj[md].lower() == metadata[md], f"Metadata {md} mismatch: {metadata_dobj[md].lower()} != {metadata[md]}"
+
+
+# @pytest.mark.icos
+def test_retrieve_icos_obspack_compare():
+    """
+    Compare icoscp_core and previous dobj method for ICOS Combined (ObsPack) retrieval
+    e.g. Data from https://meta.icos-cp.eu/objects/HeGkMd290bKSTN-WMdNGYNl0
+    """
+
+    clear_test_stores()
+
+    params = {
+        "site": "ZEP",
+        "species": "co2",
+        "dataset_source": "ICOS Combined",
+        "update_mismatch": "from_source",
+       # "store": "user",
+    }
+
+   # retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="dobj", **params)
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="group", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", store="user", force_retrieval=True, **params)
+
+    assert len(retrieved_data_dobj) == len(retrieved_data)
+
+    data_dobj = retrieved_data_dobj.data
+    data = retrieved_data.data
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # Check attribute variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
+    for at in data_dobj.attrs:
+        if at not in ['data_owner','data_owner_email','station_long_name','measurement_type','file_created']:
+            assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+
+    #the measurement type might be problematic, check with Joe???
+
+    # Check metadata variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in retrieved_data_dobj.metadata and "data_owner_email" in retrieved_data_dobj.metadata and "station_long_name" in retrieved_data_dobj.metadata
+    for md in retrieved_data_dobj.metadata:
+        if md not in ['data_owner','data_owner_email','station_long_name']:
+            assert retrieved_data_dobj.metadata[md] == retrieved_data.metadata[md], f"Metadata {md} mismatch: {retrieved_data_dobj.metadata[md]} != {retrieved_data.metadata[md]}"
+
+
+    # again similar to attribites the metadata dobj station_long_name is short and now long
+
+# @pytest.mark.icos
+def test_retrieve_fast_track_compare():
+    """
+    Compare icoscp_core and previous dobj method for ICOS FastTrack data
+    e.g. data from https://meta.icos-cp.eu/objects/8Z63_p2hCt_hkvoDrB2l62v7
+    """
+
+    clear_test_stores()
+
+    params = {
+        "site": "ZEP",
+        "species": "co",
+        "data_level": 1,
+        "dataset_source": "ICOS FastTrack",
+        "update_mismatch": "from_source",
+      #  "store": "user",
+    }
+
+
+   # retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="dobj", **params)
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="group", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core", store="user", force_retrieval=True, **params)
+
+    assert len(retrieved_data_dobj[1]) == len(retrieved_data)
+
+
+    # Bug in current _retrieve_remote_dobj where this returns ["ch4", "co", "co2"] species
+    # even if species is set at input. So for this we need to retrieve the 1st entry
+    # as this should contain the "co" data
+    retrieved_data_dobj_co = retrieved_data_dobj[1]
+
+    data_dobj = retrieved_data_dobj_co.data
+    data = retrieved_data.data
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # Check attribute variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
+    for at in data_dobj.attrs:
+
+        if at not in ['data_owner','data_owner_email','station_long_name','units','sampling_height','inlet','inlet_height_magl','station_latitude','station_longitude','file_created']:
+            assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+
+        if at in ['units']:
+            assert data_dobj.attrs[at].replace(' mol-1','.mol-¹') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace(' mol-1','.mol-¹')} != {data.attrs[at]}"
+
+        if at in ['sampling_height']:
+            assert data_dobj.attrs[at].replace('m','.0m') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m','.0m')} != {data.attrs[at]}"
+
+        if at in ['inlet']:
+            assert data_dobj.attrs[at].replace('m','.0m') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m','.0m')} != {data.attrs[at]}"
+
+        if at in ['inlet_height_magl']:
+            assert data_dobj.attrs[at] + ".0" == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at] + '.0' } != {data.attrs[at]}"
+
+        if at in ['station_latitude']:
+            assert data_dobj.attrs[at] + " N" == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at] + ' N' } != {data.attrs[at]}"
+
+        if at in ['station_longitude']:
+            assert data_dobj.attrs[at] + " E" == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at] + ' E' } != {data.attrs[at]}"
+
+    # Check metadata variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in retrieved_data_dobj_co.metadata and "data_owner_email" in retrieved_data_dobj_co.metadata
+    for md in retrieved_data_dobj_co.metadata:
+
+        if md not in ['data_owner','data_owner_email','station_long_name','inlet','inlet_height_magl','station_latitude','station_longitude']:
+                assert retrieved_data_dobj_co.metadata[md] == retrieved_data.metadata[md], f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md]} != {retrieved_data.metadata[md]}"
+
+        if md in ['inlet']:
+            assert retrieved_data_dobj_co.metadata[md].replace('m','.0m') == retrieved_data.metadata[md], f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md].replace('m','.0m')} != {retrieved_data.metadata[md]}"
+
+        if md in ['inlet_height_magl']:
+            assert retrieved_data_dobj_co.metadata[md] + ".0" == retrieved_data.metadata[md], f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md] + '.0' } != {retrieved_data.metadata[md]}"
+
+        if md in ['station_latitude']:
+            assert str(retrieved_data_dobj_co.metadata[md]) + " n" == retrieved_data.metadata[md], f"Attribute {md} mismatch: {str(retrieved_data_dobj_co.metadata[md]) + ' n' } != {retrieved_data.metadata[md]}"
+
+        if md in ['station_longitude']:
+            assert str(retrieved_data_dobj_co.metadata[md]) + " e" == retrieved_data.metadata[md], f"Attribute {md} mismatch: {str(retrieved_data_dobj_co.metadata[md]) + ' e' } != {retrieved_data.metadata[md]}"
+
+
+# @pytest.mark.icos
+def test_retrieve_eye_ave_par_compare():
+    """
+    Compare icoscp_core and previous dobj method for "EYE-AVE-PAR" corner case
+    e.g. data from https://meta.icos-cp.eu/objects/UPjrc-zEsT-Uvwaj61thPSbA
+    """
+
+    clear_test_stores()
+
+    params = {
+        "site": "RGL",
+        "species": "n2o",
+        "data_level": 2,
+        "dataset_source": "EYE-AVE-PAR",
+        "update_mismatch": "from_source",
+       # "store": "user",
+    }
+
+    #if I move the store from params above into the below will it not be a problem if they don't have a obobspack in their config?
+    #retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="dobj", **params)
+    retrieved_data_dobj = retrieve_atmospheric(retrieve_method="dobj",store="group", **params)
+    retrieved_data = retrieve_atmospheric(retrieve_method="icoscp_core",store="user",  force_retrieval=True, **params)
+
+    assert len(retrieved_data_dobj) == len(retrieved_data)
+
+    data_dobj = retrieved_data_dobj.data
+    data = retrieved_data.data
+
+
+    # Check time values match
+    time_org = data_dobj.time
+    time_new = data.time
+    xr.testing.assert_allclose(time_org, time_new)
+
+    # Check data variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    for dv in data_dobj.data_vars:
+        xr.testing.assert_allclose(data_dobj[dv], data[dv])
+
+    # Check attribute variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
+    for at in data_dobj.attrs:
+        if at not in ['data_owner','data_owner_email','station_long_name','station_latitude','station_longitude','file_created']:
+            assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+
+        if at in ['station_latitude']:
+            split_on_decimal_dobj = data_dobj.attrs[at].split('.')
+            split_on_decimal = data.attrs[at].split('.')
+
+            data_dobj_3dp = split_on_decimal_dobj[0] + "." + split_on_decimal_dobj[1][:3]
+            data_3dp = split_on_decimal[0]  + "." +  split_on_decimal[1][:3]
+
+            assert data_dobj_3dp == data_3dp, f"Attribute {at} mismatch: {data_dobj_3dp} != {data_3dp}"
+
+        if at in ['station_longitude']:
+            split_on_decimal_dobj = data_dobj.attrs[at].split('.')
+            split_on_decimal = data.attrs[at].split('.')
+
+            data_dobj_3dp = split_on_decimal_dobj[0] + "." + split_on_decimal_dobj[1][:3]
+            data_3dp = split_on_decimal[0]  + "." +  split_on_decimal[1][:3]
+
+            assert data_dobj_3dp == data_3dp, f"Attribute {at} mismatch: {data_dobj_3dp} != {data_3dp}"
+
+    # Check metadata variables from dobj method match against new data
+    # This allows for new data to contain more variables if needed
+    assert "data_owner" in retrieved_data_dobj.metadata and "data_owner_email" in retrieved_data_dobj.metadata and "station_long_name" in retrieved_data_dobj.metadata
+    for md in retrieved_data_dobj.metadata:
+        if md not in ['data_owner','data_owner_email','station_long_name']:
+            assert retrieved_data_dobj.metadata[md] == retrieved_data.metadata[md], f"Metadata {md} midmatch: {retrieved_data_dobj.metadata[md]} != {retrieved_data.metadata[md]}"
